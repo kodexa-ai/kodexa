@@ -1,0 +1,12 @@
+.idea
+build
+dist
+*.pyc
+tests/junit.xml
+html
+_build
+.DS_Store
+.pytest_cache
+/.eggs/
+.vscode
+junit.xml

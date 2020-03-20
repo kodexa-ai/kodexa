@@ -1,0 +1,18 @@
+name: kodexa
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.6
+  - pip
+  - pytest=4.0.2
+  - pytest-runner
+  - setuptools=40.5.0
+  - conda-build
+  - twine=1.10.0
+  - attrdict=2.0.1
+  - pip:
+      - sphinx
+      - sphinx_rtd_theme
+      - requests
+      - msgpack
