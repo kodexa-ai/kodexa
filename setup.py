@@ -23,7 +23,8 @@ setup(name='kodexa',
                 'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.kodexa'],
       install_requires=[
           'attrdict',
-          'requests'
+          'requests',
+          'msgpack'
       ],
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])
