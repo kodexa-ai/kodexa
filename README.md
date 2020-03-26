@@ -4,13 +4,13 @@
 
 ![https://docs.readthedocs.io/en/latest/?badge=latest](https://readthedocs.org/projects/docs/badge/?version=latest) 
 
-The Kodexa Content Framework framework is designed to allow you to work with a wide range of unstructured and semi-structured content and enables you to work with the Kodexa Cloud (https://kodexa.com).
+The Kodexa Content Framework framework is designed to allow you to work with a wide range of unstructured and semi-structured content and enables you to work with the Kodexa Cloud (https://cloud.kodexa.com).
 
 ## Documentation & Examples
 
 Documentation is available at [ReadTheDocs](https://kodexa-kodexa.readthedocs-hosted.com/en/latest/)
 
-For more information on how to use Mango see https://developer.kodexa.com/
+For more information on how to use Kodexa see https://developer.kodexa.com/developers/clients/python
 
 ## Set-up
 
