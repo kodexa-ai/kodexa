@@ -456,12 +456,12 @@ class Document(object):
         """
         return DocumentRender(self).to_text()
 
-    def to_mdoc(self, file_path):
+    def to_kdxa(self, file_path):
         """
-        Write the document to the mdoc format (msgpack) which can be
+        Write the document to the kdxa format (msgpack) which can be
         used with the Kodexa platform
 
-            >>> document.to_mdoc('my-document.mdoc')
+            >>> document.to_mdoc('my-document.kdxa')
 
         :param file_path: the path to the mdoc you wish to create
         """
@@ -469,11 +469,11 @@ class Document(object):
             msgpack.pack(self.to_dict(), outfile, use_bin_type=True)
 
     @staticmethod
-    def from_mdoc(file_path):
+    def from_kdxa(file_path):
         """
-        Read an mdoc file from the given file_path and
+        Read an .kdxa file from the given file_path and
 
-            >>> document = Document.from_mdoc('my-document.mdoc')
+            >>> document = Document.from_kdxa('my-document.kdxa')
 
         :param file_path: the path to the mdoc file
         """

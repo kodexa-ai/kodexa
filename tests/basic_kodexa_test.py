@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaService
+from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaCloudService
 
 
 def get_test_directory():
@@ -16,10 +16,7 @@ def test_kodexa_example():
     document_sink = InMemoryDocumentSink()
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='*.pdf'))
-
-    pipeline.add_step(KodexaService(organization='kodexa', service='pdf-parse', attach_source=True,
-                                    cloud_url='http://localhost:8080'))
-    pipeline.add_step(KodexaService(organization='kodexa', service='analyze', cloud_url='http://localhost:8080'))
+    pipeline.add_step(KodexaCloudService(slug='kodexa/pdf-parse', attach_source=True))
     pipeline.set_sink(document_sink)
     pipeline.run()
 

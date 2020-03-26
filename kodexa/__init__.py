@@ -7,7 +7,7 @@
 
 from .connectors import *
 from .extractors import *
-from .kodexa import *
+from .cloud import *
 from .mixins import *
 from .model import *
 from .pipeline import *

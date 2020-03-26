@@ -139,11 +139,13 @@ class TableDataStore:
     This is a good store when you are capturing nested or tabular data.
 
     :param columns: a list of the column names (default to dynamic)
+    :param rows: initial set of rows (default to empty)
+
     """
 
-    def __init__(self, columns=[]):
+    def __init__(self, columns=[], rows=[]):
         self.columns = columns
-        self.rows = []
+        self.rows = rows
 
     """
     Return the store as a dict for serialization
