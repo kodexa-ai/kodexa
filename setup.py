@@ -20,7 +20,7 @@ setup(name='kodexa',
       long_description_content_type="text/markdown",
       url='https://www.github.com/kodexa-ai/kodexa',
       packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.sinks', 'kodexa.pipeline',
-                'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.kodexa'],
+                'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.cloud'],
       install_requires=[
           'attrdict',
           'requests',
