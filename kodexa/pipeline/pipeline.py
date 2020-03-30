@@ -20,6 +20,7 @@ class PipelineContext:
         self.transaction_id = str(uuid4())
         self.stores = {}
         self.statistics = PipelineStatistics()
+        self.output_document = None
 
     def add_store(self, name, store):
         """
@@ -37,6 +38,15 @@ class PipelineContext:
         :return: the list of store names
         """
         return list(self.stores.keys())
+
+    def set_output_document(self, output_document):
+        """
+        Set the output document from the pipeline
+
+        :param output_document: the final output document from the pipeline
+        :return: the final output document
+        """
+        self.output_document = output_document
 
     def get_store(self, name, default=None):
         """

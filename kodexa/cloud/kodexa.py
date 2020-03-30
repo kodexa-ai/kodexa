@@ -5,7 +5,8 @@ import time
 import requests
 from attrdict import AttrDict
 
-from kodexa import get_source, Document
+from kodexa import get_source, Document, FileHandleConnector
+from kodexa.pipeline import PipelineContext
 from kodexa.stores import TableDataStore
 
 
@@ -88,6 +89,38 @@ class KodexaCloudSession:
     def merge_stores(self, execution, context):
         for store in execution.stores:
             context.add_store(store.name, self.get_store(execution, store))
+
+
+class KodexaCloudPipeline:
+    """
+    Allow you to interact with a pipeline that has been deployed in the Kodexa Cloud
+    """
+
+    def __init__(self, slug, version=None, attach_source=True, options={}, auth=[],
+                 cloud_url='https://cloud.kodexa.com', access_token=None):
+        self.slug = slug
+        self.version = version
+        self.attach_source = attach_source
+        self.options = options
+        self.auth = auth
+        self.cloud_url = cloud_url
+        self.access_token = access_token
+
+    def execute(self, input):
+        cloud_session = KodexaCloudSession("pipeline", self.slug, self.access_token, self.cloud_url)
+        cloud_session.start()
+
+        connector = FileHandleConnector(input)
+        document = connector.__next__()
+        context = PipelineContext()
+        execution = cloud_session.execute_service(document, self.options, self.attach_source)
+        execution = cloud_session.wait_for_execution(execution)
+
+        result_document = cloud_session.get_output_document(execution)
+        context.set_output_document(result_document)
+        cloud_session.merge_stores(execution, context)
+
+        return context
 
 
 class KodexaCloudService:
