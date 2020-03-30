@@ -44,6 +44,33 @@ class FolderConnector:
                 fnmatch.fnmatch(f, self.file_filter)]
 
 
+class FileHandleConnector:
+
+    @staticmethod
+    def get_name():
+        return "file-handle"
+
+    def __init__(self, file):
+        self.file = file
+        self.index = 0
+        self.completed = False
+
+    def get_source(self, document):
+        return open(join(self.file, document.metadata.source_path), 'rb')
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.completed:
+            raise StopIteration
+        else:
+            return Document(DocumentMetadata(
+                {"source_path": self.file, "connector": self.get_name(),
+                 "mime_type": mimetypes.guess_type(self.file),
+                 "connector_options": {"file": self.file}}))
+
+
 registered_connectors = {}
 
 
@@ -70,3 +97,4 @@ def get_source(document):
 
 
 add_connector(FolderConnector)
+add_connector(FileHandleConnector)

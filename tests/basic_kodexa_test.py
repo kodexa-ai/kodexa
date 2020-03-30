@@ -1,8 +1,9 @@
 import os
 
 import pytest
+from texttable import Texttable
 
-from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaCloudService
+from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaCloudService, KodexaCloudPipeline
 
 
 def get_test_directory():
@@ -12,7 +13,7 @@ def get_test_directory():
 # Commented out while we work on test credentials
 
 @pytest.mark.skip(reason="not part of core tests")
-def test_kodexa_example():
+def test_kodexa_service():
     document_sink = InMemoryDocumentSink()
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='*.pdf'))
@@ -26,3 +27,19 @@ def test_kodexa_example():
     assert document
 
     print(document.to_json())
+
+
+@pytest.mark.skip(reason="not part of core tests")
+def test_kodexa_pipeline():
+    context = KodexaCloudPipeline("kodexa/news-reader-demo", cloud_url="https://qa.kodexa.com").execute(
+        get_test_directory() + "/news.html")
+
+    print(context.get_store_names())
+    print_store(context.get_store("tag_pairs"))
+
+
+def print_store(store):
+    table = Texttable()
+    table.header(store.columns)
+    table.add_rows(store.rows)
+    print(table.draw() + "\n")
