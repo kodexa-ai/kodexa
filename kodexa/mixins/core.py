@@ -292,7 +292,7 @@ def find(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDREN, 
     Search for a node that matches on the value and or type using regular expressions
 
         >>> document.content_node.find(content_re='.*Cheese.*',instance=2)
-        <mango.model.model.ContentNode object at 0x7f80605e53c8>
+        <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
 
     :param content_re: the regular expression to match the nodes content (default '.*')
     :param type_re: the regular expression to match the nodes type (default '.*')
@@ -316,7 +316,7 @@ def find_with_feature_value(self, feature_type, feature, value, direction=FindDi
     Search for a node with a specific feature type, name and value
 
         >>> document.content_node.find_with_feature_value(feature_type='tag',feature='is_cheese',value=[1,10,'The Cheese has moved'])
-        <mango.model.model.ContentNode object at 0x7f80605e53c8>
+        <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
 
     :param feature_type: the feature type
     :param feature: the feature name
@@ -336,7 +336,7 @@ def findall_with_feature_value(self, feature_type, feature_name, value, directio
     Search for all nodes with a specific feature type, name and value
 
         >>> document.content_node.findall_with_feature_value(feature_type='tag',feature='is_cheese', value=[1,10,'The Cheese has moved'])
-        [<mango.model.model.ContentNode object at 0x7f80605e53c8>]
+        [<kodexa.model.model.ContentNode object at 0x7f80605e53c8>]
 
     :param feature_type: the feature type
     :param feature_name: the feature name
@@ -535,8 +535,8 @@ def findall(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDRE
     Search for nodes that matches on the value and or type using regular expressions
 
         >>> document.content_node.findall(content_re='.*Cheese.*')
-        [<mango.model.model.ContentNode object at 0x7f80605e53c8>,
-        <mango.model.model.ContentNode object at 0x7f80605e53c8>]
+        [<kodexa.model.model.ContentNode object at 0x7f80605e53c8>,
+        <kodexa.model.model.ContentNode object at 0x7f80605e53c8>]
 
     :param content_re: the regular expression to match the nodes content (default '.*')
     :param type_re: the regular expression to match the nodes type (default '.*')

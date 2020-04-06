@@ -37,6 +37,10 @@ class TextParser:
     text
     """
 
+    def __init__(self, decode=False, encoding="utf-8"):
+        self.decode = decode
+        self.encoding = encoding
+
     @staticmethod
     def get_name():
         return "Text Parser"
@@ -44,7 +48,7 @@ class TextParser:
     def process(self, document):
         with get_source(document) as fh:
             data = fh.read()
-            text_node = document.create_node(type='text', content=data.decode())
+            text_node = document.create_node(type='text', content=data.decode(self.encoding) if self.decode else data)
             document.content_node = text_node
 
         return document
@@ -162,7 +166,7 @@ class ExtractTagsToKeyValuePair:
 
 class JsonParser:
     """
-    Parse JSON file into Mango Document
+    Parse JSON file into kodexa Document
     """
 
     def __init__(self):

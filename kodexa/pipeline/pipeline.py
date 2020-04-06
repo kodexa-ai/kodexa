@@ -66,7 +66,7 @@ class PipelineContext:
 
 class Pipeline:
     """
-    A pipeline represents a way to bring together parts of the Mango framework to solve a specific problem.
+    A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
 
     When you create a Pipeline you must provide the connector that will be used to source the documents.
 

@@ -1,12 +1,11 @@
 import logging
-from datetime import datetime
+import os
 from pathlib import Path
 
-from kodexa.pipeline import Pipeline
-from kodexa.stores import JsonDocumentStore, TableDataStore, DictDataStore
-
 from kodexa.model import DocumentMetadata, Document
-import os
+from kodexa.pipeline import Pipeline
+from kodexa.steps.common import TextParser
+from kodexa.stores import JsonDocumentStore, TableDataStore, DictDataStore
 
 
 def create_document():
@@ -145,6 +144,22 @@ def test_fluent_pipeline():
     assert new_document_store.get_document(0).metadata.cheese == 'fishstick'
 
     print(new_document_store.get_document(0).log)
+
+
+def test_url_pipeline():
+    document = Document(DocumentMetadata({"connector": "url", "connector_options": {"url": "http://www.google.com"}}))
+    new_document_store = JsonDocumentStore("/tmp/test-json-store", force_initialize=True)
+
+    stats = Pipeline(document).add_step(TextParser()).set_sink(new_document_store).run().statistics
+
+    assert stats.documents_processed == 1
+    assert stats.document_exceptions == 0
+    assert new_document_store.count() == 1
+
+    new_doc = new_document_store.get_document(0)
+    new_doc.add_mixin('core')
+    print(new_doc.content_node.get_all_content())
+
 
 
 def test_function_step_with_exception():
