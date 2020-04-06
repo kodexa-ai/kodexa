@@ -39,13 +39,13 @@ class ContentNode(object):
     ensure that the correct mixins are applied.
 
         >>> new_page = document.create_node(type='page')
-        <mango.model.model.ContentNode object at 0x7f80605e53c8>
+        <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         >>> current_content_node.add_child(new_page)
 
     or
 
         >>> new_page = document.create_node(type='page', content='This is page 1')
-        <mango.model.model.ContentNode object at 0x7f80605e53c8>
+        <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         >>> current_content_node.add_child(new_page)
     """
 
@@ -99,7 +99,7 @@ class ContentNode(object):
         Convert the ContentNode, and all its children into a simple dictionary
 
             >>> new_page = document.create_node(type='page')
-            <mango.model.model.ContentNode object at 0x7f80605e53c8>
+            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.to_dict()
         """
         new_dict = {'type': self.type, 'content': self.content, 'content_parts': self.content_parts, 'features': [],
@@ -132,7 +132,7 @@ class ContentNode(object):
         Add a ContentNode as a child of this ContentNode
 
             >>> new_page = document.create_node(type='page')
-            <mango.model.model.ContentNode object at 0x7f80605e53c8>
+            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.add_child(new_page)
         """
         if not index:
@@ -147,7 +147,7 @@ class ContentNode(object):
         Returns a list of the children of this node
 
            >>> new_page = document.create_node(type='page')
-           <mango.model.model.ContentNode object at 0x7f80605e53c8>
+           <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
            >>> new_page.get_children()
            []
         """
@@ -163,7 +163,7 @@ class ContentNode(object):
         Note this will replace any matching feature (i.e. with the same type and name)
 
            >>> new_page = document.create_node(type='page')
-           <mango.model.model.ContentNode object at 0x7f80605e53c8>
+           <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
            >>> new_page.add_feature('pagination','pageNum',1)
         """
         self.remove_feature(feature_type, name)
@@ -180,7 +180,7 @@ class ContentNode(object):
         the feature value might switch to being a list
 
            >>> new_page = document.create_node(type='page')
-           <mango.model.model.ContentNode object at 0x7f80605e53c8>
+           <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
            >>> new_page.add_feature('pagination','pageNum',1)
         """
         if self.has_feature(feature_type, name):
@@ -412,7 +412,7 @@ class DefaultDocumentRender:
     def prepare_mimetype_data(self, data_type, data_list):
         render_data = {'data_type': data_type, 'data': tuple(data_list)}
         bundle = {}
-        bundle['application/vnd.mango.document+json'] = render_data
+        bundle['application/vnd.kodexa.document+json'] = render_data
         return bundle
 
 
@@ -588,7 +588,7 @@ class Document(object):
         available on the new node
 
             >>> document.create_node(type='page')
-            <mango.model.model.ContentNode object at 0x7f80605e53c8>
+            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         """
         content_node = ContentNode(document=self, type=type, content=content)
         content_node.parent = parent

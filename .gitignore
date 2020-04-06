@@ -10,3 +10,7 @@ _build
 /.eggs/
 .vscode
 junit.xml
+
+default.profraw
+
+kodexa.egg-info/

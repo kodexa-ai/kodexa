@@ -21,7 +21,7 @@ def get_statistics(self):
     Get the spatial statistics for this node
 
         >>> document.content_node.find(type_re='page').get_statistics()
-        <mango.spatial.NodeStatistics object at 0x7f80605e53c8>
+        <kodexa.spatial.NodeStatistics object at 0x7f80605e53c8>
 
     :return: the statistics object (or None if not set)
 
@@ -364,5 +364,5 @@ require(["jq","jfabric"], function(d3) {
 
         render_data = {'node_data': node.to_json(), 'tag_colors': tag_colors, }
         bundle = {}
-        bundle['application/vnd.mango.spatial+json'] = render_data
+        bundle['application/vnd.kodexa.spatial+json'] = render_data
         return bundle

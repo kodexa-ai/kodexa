@@ -1,6 +1,8 @@
 import fnmatch
 import logging
 import mimetypes
+import tempfile
+import urllib
 from os import listdir
 from os.path import join
 
@@ -71,6 +73,35 @@ class FileHandleConnector:
                  "connector_options": {"file": self.file}}))
 
 
+class UrlConnector:
+
+    @staticmethod
+    def get_name():
+        return "url"
+
+    def __init__(self, url, headers={}):
+        self.url = url
+        self.headers = headers
+        self.index = 0
+        self.completed = False
+
+    def get_source(self, document):
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            urllib.request.urlretrieve(document.metadata.connector_options['url'], tmp_file.name)
+            return open(tmp_file.name, encoding='ISO-8859-1')
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.completed:
+            raise StopIteration
+        else:
+            return Document(DocumentMetadata(
+                {"connector": self.get_name(),
+                 "connector_options": {"url": self.url, "headers": self.headers}}))
+
+
 registered_connectors = {}
 
 
@@ -92,9 +123,11 @@ def add_connector(connector):
 
 
 def get_source(document):
-    connector = get_connector(document.metadata.connector, document.metadata.connector_options)
+    connector = get_connector(document.metadata.connector,
+                              document.metadata.connector_options if "connector_options" in document.metadata else {})
     return connector.get_source(document)
 
 
 add_connector(FolderConnector)
 add_connector(FileHandleConnector)
+add_connector(UrlConnector)

@@ -7,11 +7,12 @@ from kodexa.steps.common import TextParser
 def get_test_directory():
     return os.path.dirname(os.path.abspath(__file__)) + "/../test_documents/"
 
-def get_text_layout_analysis(filename):
+
+def get_test_pipeline(filename):
     document_sink = InMemoryDocumentSink()
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter=filename + '.txt'))
-    pipeline.add_step(TextParser())
+    pipeline.add_step(TextParser(decode=True))
     pipeline.set_sink(document_sink)
     pipeline.run()
 
@@ -23,7 +24,7 @@ def get_text_layout_analysis(filename):
 
 def test_hello_txt():
     filename = 'hello'
-    document = get_text_layout_analysis(filename)
+    document = get_test_pipeline(filename)
 
     assert document.content_node.type == 'text'
     assert document.content_node.content == 'Hello World'
