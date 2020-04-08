@@ -97,6 +97,7 @@ class UrlConnector:
         if self.completed:
             raise StopIteration
         else:
+            self.completed = True
             return Document(DocumentMetadata(
                 {"connector": self.get_name(),
                  "connector_options": {"url": self.url, "headers": self.headers}}))
