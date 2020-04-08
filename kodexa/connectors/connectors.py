@@ -79,12 +79,11 @@ class UrlConnector:
     def get_name():
         return "url"
 
-    def __init__(self, url, headers={}, encoding=None):
+    def __init__(self, url, headers={}):
         self.url = url
         self.headers = headers
         self.index = 0
         self.completed = False
-        self.encoding = encoding
 
     def get_source(self, document):
         if 'headers' in document.metadata.connector_options:
@@ -94,10 +93,8 @@ class UrlConnector:
             urllib.request.install_opener(opener)
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             urllib.request.urlretrieve(document.metadata.connector_options['url'], tmp_file.name)
-            if self.encoding:
-                return open(tmp_file.name, encoding=self.encoding)
-            else:
-                return open(tmp_file.name)
+
+            return open(tmp_file.name, 'rb')
 
     def __iter__(self):
         return self

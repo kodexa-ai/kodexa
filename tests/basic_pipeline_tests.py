@@ -150,7 +150,7 @@ def test_url_pipeline():
     document = Document(DocumentMetadata({"connector": "url", "connector_options": {"url": "http://www.google.com"}}))
     new_document_store = JsonDocumentStore("/tmp/test-json-store", force_initialize=True)
 
-    stats = Pipeline(document).add_step(TextParser()).set_sink(new_document_store).run().statistics
+    stats = Pipeline(document).add_step(TextParser(encoding='ISO-8859-1')).set_sink(new_document_store).run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
