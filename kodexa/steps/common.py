@@ -48,7 +48,13 @@ class TextParser:
     def process(self, document):
         with get_source(document) as fh:
             data = fh.read()
-            text_node = document.create_node(type='text', content=data.decode(self.encoding) if self.decode else data)
+
+            try:
+                data = data.decode(self.encoding)
+            except (UnicodeDecodeError, AttributeError):
+                pass
+
+            text_node = document.create_node(type='text', content=data if self.decode else data)
             document.content_node = text_node
 
         return document
