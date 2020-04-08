@@ -6,8 +6,20 @@ API Documentation
 .. automodule:: kodexa.cloud
    :members:
 
+   .. autoclass:: KodexaCloudPipeline
+      :members:
+
+   .. autoclass:: KodexaCloudService
+      :members:
+
 .. automodule:: kodexa.connectors
    :members:
+
+   .. autoclass:: FolderConnector
+      :members:
+
+   .. autoclass:: UrlConnector
+      :members:
 
 .. automodule:: kodexa.model
    :members:
