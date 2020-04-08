@@ -3,6 +3,12 @@ API Documentation
 .. automodule:: kodexa
    :members:
 
+.. automodule:: kodexa.cloud
+   :members:
+
+.. automodule:: kodexa.connectors
+   :members:
+
 .. automodule:: kodexa.model
    :members:
 
