@@ -28,4 +28,4 @@ def test_hello_txt():
 
     assert document.content_node.type == 'text'
     assert document.content_node.content == 'Hello World'
-    DocumentRender(document).to_text()
+    print(f"\n\n{DocumentRender(document).to_text()}")

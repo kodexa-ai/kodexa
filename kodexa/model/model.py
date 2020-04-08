@@ -370,10 +370,8 @@ class DefaultDocumentRender:
         out_list.append("{}[type:{}]{}".format(" " * (4 * level), node.type, self.mixins_to_text(node)))
 
         if node.content_parts:
-            print("Content Parts:")
             out_list.append("{}{}".format(" " * (4 * level), self.get_content_parts(node)))
 
-        print("Content:")
         out_list.append("{}{}".format(" " * (4 * level), node.content))
 
         for child in node.get_children():
