@@ -63,7 +63,8 @@ add_mixin(NavigationMixin())
 def get_renderers(document):
     renderers = {}
     for mixin in document.get_mixins():
-        r = registered_mixins[mixin].get_renderer(document)
-        if r:
-            renderers[mixin] = r
+        if mixin in registered_mixins:
+            r = registered_mixins[mixin].get_renderer(document)
+            if r:
+                renderers[mixin] = r
     return renderers
