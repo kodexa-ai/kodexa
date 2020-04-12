@@ -3,7 +3,6 @@ import os
 import uuid
 
 import msgpack
-from attrdict import AttrDict
 
 from kodexa.mixins import registry
 from kodexa.mixins.registry import get_mixin
@@ -548,7 +547,7 @@ class Document(object):
 
             >>> document.from_json()
         """
-        return Document.from_dict(json.loads(json_string, object_hook=AttrDict))
+        return Document.from_dict(json.loads(json_string))
 
     @staticmethod
     def from_msgpack(bytes):

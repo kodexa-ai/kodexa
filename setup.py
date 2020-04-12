@@ -20,11 +20,16 @@ setup(name='kodexa',
       long_description_content_type="text/markdown",
       url='https://www.github.com/kodexa-ai/kodexa',
       packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.sinks', 'kodexa.pipeline',
-                'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.cloud'],
+                'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.cloud', 'kodexa_cloud',
+                'kodexa_cloud.api', 'kodexa_cloud.models'],
       install_requires=[
-          'attrdict',
+          'addict',
           'requests',
-          'msgpack'
+          'msgpack',
+          'urllib3',
+          'python_dateutil',
+          'certifi',
+          'six'
       ],
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])

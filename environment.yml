@@ -10,10 +10,12 @@ dependencies:
   - setuptools=40.5.0
   - conda-build
   - twine=1.10.0
-  - attrdict=2.0.1
   - pip:
-      - sphinx
-      - sphinx_rtd_theme
       - requests
       - msgpack
       - texttable
+      - addict
+      - certifi >= 14.05.14
+      - six >= 1.10
+      - python_dateutil >= 2.5.3
+      - urllib3 >= 1.15.1
