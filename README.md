@@ -1,6 +1,7 @@
 # Kodexa
 
 ![Build and Publish](https://github.com/kodexa-ai/kodexa/workflows/Build%20and%20Publish/badge.svg)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkodexa-ai%2Fkodexa.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkodexa-ai%2Fkodexa?ref=badge_shield)
 
 ![https://docs.readthedocs.io/en/latest/?badge=latest](https://readthedocs.org/projects/docs/badge/?version=latest) 
 
@@ -24,3 +25,7 @@ Activate the conda environment with the command:
     
 
     
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkodexa-ai%2Fkodexa.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkodexa-ai%2Fkodexa?ref=badge_large)
