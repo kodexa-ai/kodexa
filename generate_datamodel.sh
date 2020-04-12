@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-datamodel-codegen --input cloudSchema.json --input-file-type=jsonschema --output kodexa_cloud/model.py
+
+conda activate kodexa
+datamodel-codegen --input kodexa-swagger.json --input-file-type=jsonschema --output kodexa_cloud/model.py

@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "${git.build.version}",
+    "version": "2.0.133",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -15,7 +15,7 @@
       "url": "https://developer.kodexa.com/licensing"
     }
   },
-  "host": "localhost:8080",
+  "host": "quantum.kodexa.com",
   "basePath": "/",
   "tags": [
     {
@@ -2656,32 +2656,6 @@
         "deprecated": false
       }
     },
-    "/api/platform/schema": {
-      "get": {
-        "tags": [
-          "platform-controller"
-        ],
-        "summary": "getSchema",
-        "operationId": "getSchemaUsingGET",
-        "produces": [
-          "*/*"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/JsonNode"
-            }
-          }
-        },
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "deprecated": false
-      }
-    },
     "/api/processing/services/{organizationSlug}/{serviceSlug}/latest": {
       "get": {
         "tags": [
@@ -3547,8 +3521,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createServiceSessionBySlug",
-        "operationId": "createServiceSessionBySlugUsingPOST",
+        "summary": "createServiceSession",
+        "operationId": "createServiceSessionUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3557,9 +3531,9 @@
         ],
         "parameters": [
           {
-            "name": "service",
+            "name": "serviceId",
             "in": "query",
-            "description": "service",
+            "description": "serviceId",
             "required": true,
             "type": "string"
           },
@@ -3702,6 +3676,160 @@
         "deprecated": false
       }
     },
+    "/api/sessions/{sessionId}/events": {
+      "get": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "getStoreContent",
+        "operationId": "getStoreContentUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Page number (default 1)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "Page size (default 20)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "Simple filter to apply",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "Sorts to apply",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filters[0].columnName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filters[0].value",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "queryComplexFilter.dataType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "queryComplexFilter.field",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "queryComplexFilter.ignoreCase",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "queryComplexFilter.logic",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "and",
+              "or"
+            ]
+          },
+          {
+            "name": "queryComplexFilter.operator",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "contains",
+              "doesnotcontain",
+              "endswith",
+              "startswith",
+              "eq",
+              "neq",
+              "gte",
+              "gt",
+              "lte",
+              "lt",
+              "gte_date",
+              "lte_date",
+              "isnull",
+              "isnotnull",
+              "in",
+              "isempty"
+            ]
+          },
+          {
+            "name": "queryComplexFilter.value",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "description": "sessionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sorts[0].columnName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sorts[0].direction",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageOfCloudEvent"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
     "/api/sessions/{sessionId}/executions/{executionId}/documents/{documentId}": {
       "get": {
         "tags": [
@@ -3820,7 +3948,7 @@
           "cloud-session-controller"
         ],
         "summary": "getStoreContent",
-        "operationId": "getStoreContentUsingGET",
+        "operationId": "getStoreContentUsingGET_1",
         "produces": [
           "application/json"
         ],
@@ -4200,19 +4328,16 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingGET",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingGET",
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4222,22 +4347,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingHEAD",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingHEAD",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4247,22 +4369,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPOST",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPOST",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4272,22 +4391,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPUT",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPUT",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4297,19 +4413,16 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingDELETE",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingDELETE",
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4319,22 +4432,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingOPTIONS",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingOPTIONS",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4344,22 +4454,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPATCH",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPATCH",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4686,6 +4793,56 @@
         }
       },
       "title": "CloudDocumentReference"
+    },
+    "CloudEvent": {
+      "type": "object",
+      "required": [
+        "executionId",
+        "id",
+        "sessionId",
+        "type"
+      ],
+      "properties": {
+        "documentReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocumentReference"
+          }
+        },
+        "executionId": {
+          "type": "string"
+        },
+        "fileReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFileReference"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "source": {
+          "type": "object"
+        },
+        "subType": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "START_EXECUTION",
+            "STEP_UPDATE",
+            "BOT_NOTIFICATION"
+          ]
+        }
+      },
+      "title": "CloudEvent"
     },
     "CloudExecution": {
       "type": "object",
@@ -5370,89 +5527,6 @@
       "type": "object",
       "title": "InputStream"
     },
-    "JsonNode": {
-      "type": "object",
-      "properties": {
-        "array": {
-          "type": "boolean"
-        },
-        "bigDecimal": {
-          "type": "boolean"
-        },
-        "bigInteger": {
-          "type": "boolean"
-        },
-        "binary": {
-          "type": "boolean"
-        },
-        "boolean": {
-          "type": "boolean"
-        },
-        "containerNode": {
-          "type": "boolean"
-        },
-        "double": {
-          "type": "boolean"
-        },
-        "empty": {
-          "type": "boolean"
-        },
-        "float": {
-          "type": "boolean"
-        },
-        "floatingPointNumber": {
-          "type": "boolean"
-        },
-        "int": {
-          "type": "boolean"
-        },
-        "integralNumber": {
-          "type": "boolean"
-        },
-        "long": {
-          "type": "boolean"
-        },
-        "missingNode": {
-          "type": "boolean"
-        },
-        "nodeType": {
-          "type": "string",
-          "enum": [
-            "ARRAY",
-            "BINARY",
-            "BOOLEAN",
-            "MISSING",
-            "NULL",
-            "NUMBER",
-            "OBJECT",
-            "POJO",
-            "STRING"
-          ]
-        },
-        "null": {
-          "type": "boolean"
-        },
-        "number": {
-          "type": "boolean"
-        },
-        "object": {
-          "type": "boolean"
-        },
-        "pojo": {
-          "type": "boolean"
-        },
-        "short": {
-          "type": "boolean"
-        },
-        "textual": {
-          "type": "boolean"
-        },
-        "valueNode": {
-          "type": "boolean"
-        }
-      },
-      "title": "JsonNode"
-    },
     "LoginRequest": {
       "type": "object",
       "properties": {
@@ -5654,6 +5728,53 @@
         }
       },
       "title": "PageOfBot"
+    },
+    "PageOfCloudEvent": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudEvent"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfCloudEvent"
     },
     "PageOfContentService": {
       "type": "object",
