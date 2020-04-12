@@ -1,0 +1,6504 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Content Intelligence",
+    "version": "${git.build.version}",
+    "title": "Kodexa",
+    "termsOfService": "https://kodexa.com/tos",
+    "contact": {
+      "name": "Developer Portal",
+      "url": "https://developer.kodexa.com",
+      "email": "suppot@kodexa.com"
+    },
+    "license": {
+      "name": "Kodexa End User License",
+      "url": "https://developer.kodexa.com/licensing"
+    }
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "access-token-controller",
+      "description": "Access Token Controller"
+    },
+    {
+      "name": "account-controller",
+      "description": "Account Controller"
+    },
+    {
+      "name": "basic-error-controller",
+      "description": "Basic Error Controller"
+    },
+    {
+      "name": "bot-controller",
+      "description": "Bot Controller"
+    },
+    {
+      "name": "cloud-session-controller",
+      "description": "Cloud Session Controller"
+    },
+    {
+      "name": "content-service-controller",
+      "description": "Content Service Controller"
+    },
+    {
+      "name": "content-service-version-controller",
+      "description": "Content Service Version Controller"
+    },
+    {
+      "name": "content-services-endpoint-controller",
+      "description": "Content Services Endpoint Controller"
+    },
+    {
+      "name": "deployment-controller",
+      "description": "Deployment Controller"
+    },
+    {
+      "name": "email-subscriber-controller",
+      "description": "Email Subscriber Controller"
+    },
+    {
+      "name": "feedback-controller",
+      "description": "Feedback Controller"
+    },
+    {
+      "name": "membership-controller",
+      "description": "Membership Controller"
+    },
+    {
+      "name": "organization-controller",
+      "description": "Organization Controller"
+    },
+    {
+      "name": "pipeline-controller",
+      "description": "Pipeline Controller"
+    },
+    {
+      "name": "platform-controller",
+      "description": "Platform Controller"
+    },
+    {
+      "name": "platform-user-controller",
+      "description": "Platform User Controller"
+    },
+    {
+      "name": "service-request-controller",
+      "description": "Service Request Controller"
+    }
+  ],
+  "paths": {
+    "/api/accessTokens": {
+      "get": {
+        "tags": [
+          "access-token-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfAccessToken"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "access-token-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AccessToken"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/AccessToken"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/accessTokens/{id}": {
+      "get": {
+        "tags": [
+          "access-token-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/AccessToken"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "access-token-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AccessToken"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/AccessToken"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "access-token-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/account/activation/{activationToken}": {
+      "get": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "activateUser",
+        "operationId": "activateUserUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "activationToken",
+            "in": "path",
+            "description": "activationToken",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UserActivation"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "activateUser",
+        "operationId": "activateUserUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "activationToken",
+            "in": "path",
+            "description": "activationToken",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "userActivation",
+            "description": "userActivation",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserActivation"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/UserActivation"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/account/lookup": {
+      "get": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "lookup",
+        "operationId": "lookupUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "email",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/EmailLookup"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/account/me": {
+      "get": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "getMe",
+        "operationId": "getMeUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "updateMe",
+        "operationId": "updateMeUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "updatedUser",
+            "description": "updatedUser",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/account/memberships": {
+      "get": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "getMemberships",
+        "operationId": "getMembershipsUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Membership"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/account/passwordChange": {
+      "get": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "passwordChange",
+        "operationId": "passwordChangeUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "passwordChange",
+            "description": "passwordChange",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordChange"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "head": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "passwordChange",
+        "operationId": "passwordChangeUsingHEAD",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "passwordChange",
+            "description": "passwordChange",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordChange"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "passwordChange",
+        "operationId": "passwordChangeUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "passwordChange",
+            "description": "passwordChange",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordChange"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "passwordChange",
+        "operationId": "passwordChangeUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "passwordChange",
+            "description": "passwordChange",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordChange"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "passwordChange",
+        "operationId": "passwordChangeUsingDELETE",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "passwordChange",
+            "description": "passwordChange",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordChange"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "options": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "passwordChange",
+        "operationId": "passwordChangeUsingOPTIONS",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "passwordChange",
+            "description": "passwordChange",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordChange"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "passwordChange",
+        "operationId": "passwordChangeUsingPATCH",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "passwordChange",
+            "description": "passwordChange",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PasswordChange"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/account/register": {
+      "get": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "registerUser",
+        "operationId": "registerUserUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "registerUser",
+            "description": "registerUser",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "head": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "registerUser",
+        "operationId": "registerUserUsingHEAD",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "registerUser",
+            "description": "registerUser",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "registerUser",
+        "operationId": "registerUserUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "registerUser",
+            "description": "registerUser",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "registerUser",
+        "operationId": "registerUserUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "registerUser",
+            "description": "registerUser",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "registerUser",
+        "operationId": "registerUserUsingDELETE",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "registerUser",
+            "description": "registerUser",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "options": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "registerUser",
+        "operationId": "registerUserUsingOPTIONS",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "registerUser",
+            "description": "registerUser",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "registerUser",
+        "operationId": "registerUserUsingPATCH",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "registerUser",
+            "description": "registerUser",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/account/signin": {
+      "post": {
+        "tags": [
+          "account-controller"
+        ],
+        "summary": "authenticateUser",
+        "operationId": "authenticateUserUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "loginRequest",
+            "description": "loginRequest",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/bots": {
+      "get": {
+        "tags": [
+          "bot-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_1",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfBot"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "bot-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_1",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Bot"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/Bot"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/bots/{id}": {
+      "get": {
+        "tags": [
+          "bot-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_1",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/Bot"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "bot-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_1",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Bot"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/Bot"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "bot-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_1",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/deployments": {
+      "get": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_4",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfDeployment"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_4",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/deployments/{id}": {
+      "get": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_4",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_4",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/Deployment"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_4",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/emailSubscriber": {
+      "post": {
+        "tags": [
+          "email-subscriber-controller"
+        ],
+        "summary": "add",
+        "operationId": "addUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "createdBy",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "createdOn.date",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "createdOn.day",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "createdOn.hours",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "createdOn.minutes",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "createdOn.month",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "createdOn.nanos",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "createdOn.seconds",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "createdOn.time",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "createdOn.timezoneOffset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "createdOn.year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "updatedBy",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "updatedOn.date",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "updatedOn.day",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "updatedOn.hours",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "updatedOn.minutes",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "updatedOn.month",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "updatedOn.nanos",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "updatedOn.seconds",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "updatedOn.time",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "updatedOn.timezoneOffset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "updatedOn.year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "uuid",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SubscriptionResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/feedback": {
+      "post": {
+        "tags": [
+          "feedback-controller"
+        ],
+        "summary": "addFeedback",
+        "operationId": "addFeedbackUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "feedback",
+            "description": "feedback",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Feedback"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/memberships": {
+      "get": {
+        "tags": [
+          "membership-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_5",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfMembership"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "membership-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_5",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Membership"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/Membership"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/memberships/{id}": {
+      "get": {
+        "tags": [
+          "membership-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_5",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/Membership"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "membership-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_5",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Membership"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/Membership"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "membership-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_5",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/organizations": {
+      "get": {
+        "tags": [
+          "organization-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_6",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfOrganization"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "organization-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_6",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Organization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/Organization"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/organizations/{id}": {
+      "get": {
+        "tags": [
+          "organization-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_6",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/Organization"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "organization-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_6",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Organization"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/Organization"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "organization-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_6",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/organizations/{organizationId}/dashboard": {
+      "get": {
+        "tags": [
+          "organization-controller"
+        ],
+        "summary": "getOrganizationDashBoard",
+        "operationId": "getOrganizationDashBoardUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "description": "organizationId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/OrganizationDashboard"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/pipelines": {
+      "get": {
+        "tags": [
+          "pipeline-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_7",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfPipeline"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "pipeline-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_7",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Pipeline"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/Pipeline"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/pipelines/{id}": {
+      "get": {
+        "tags": [
+          "pipeline-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_7",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/Pipeline"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "pipeline-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_7",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Pipeline"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/Pipeline"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "pipeline-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_7",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/platform": {
+      "get": {
+        "tags": [
+          "platform-controller"
+        ],
+        "summary": "getOverview",
+        "operationId": "getOverviewUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformOverview"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/platform/schema": {
+      "get": {
+        "tags": [
+          "platform-controller"
+        ],
+        "summary": "getSchema",
+        "operationId": "getSchemaUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/JsonNode"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/processing/services/{organizationSlug}/{serviceSlug}/latest": {
+      "get": {
+        "tags": [
+          "content-services-endpoint-controller"
+        ],
+        "summary": "process",
+        "operationId": "processUsingGET_1",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "organizationSlug",
+            "in": "path",
+            "description": "organizationSlug",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "serviceSlug",
+            "in": "path",
+            "description": "serviceSlug",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ContentServiceVersion"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/requests": {
+      "get": {
+        "tags": [
+          "service-request-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_9",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfServiceRequest"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "service-request-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_9",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/ServiceRequest"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/requests/{id}": {
+      "get": {
+        "tags": [
+          "service-request-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_9",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/ServiceRequest"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "service-request-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_9",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceRequest"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/ServiceRequest"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "service-request-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_9",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/serviceVersions": {
+      "get": {
+        "tags": [
+          "content-service-version-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_3",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfContentServiceVersion"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "content-service-version-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_3",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ContentServiceVersion"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/ContentServiceVersion"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/serviceVersions/{id}": {
+      "get": {
+        "tags": [
+          "content-service-version-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_3",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/ContentServiceVersion"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "content-service-version-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_3",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ContentServiceVersion"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/ContentServiceVersion"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "content-service-version-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_3",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/services": {
+      "get": {
+        "tags": [
+          "content-service-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_2",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfContentService"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "content-service-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ContentService"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/ContentService"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/services/{id}": {
+      "get": {
+        "tags": [
+          "content-service-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_2",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/ContentService"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "content-service-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ContentService"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/ContentService"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "content-service-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_2",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/services/{id}/latest": {
+      "get": {
+        "tags": [
+          "content-service-controller"
+        ],
+        "summary": "process",
+        "operationId": "processUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ContentServiceVersion"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/sessions": {
+      "get": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "listSessions",
+        "operationId": "listSessionsUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudSession"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "createServiceSessionBySlug",
+        "operationId": "createServiceSessionBySlugUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "service",
+            "in": "query",
+            "description": "service",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CloudSession"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/sessions/{id}/execute": {
+      "post": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "startExecution",
+        "operationId": "startExecutionUsingPOST",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "document",
+            "in": "formData",
+            "description": "document",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "options",
+            "in": "query",
+            "description": "options",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CloudExecution"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/sessions/{id}/executions/{executionId}": {
+      "get": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "getExecution",
+        "operationId": "getExecutionUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "executionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CloudExecution"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/sessions/{sessionId}/executions/{executionId}/documents/{documentId}": {
+      "get": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "getExecutionDocument",
+        "operationId": "getExecutionDocumentUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "description": "documentId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "executionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "description": "sessionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ByteArrayResource"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/sessions/{sessionId}/executions/{executionId}/files/{fileId}": {
+      "get": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "getExecutionFile",
+        "operationId": "getExecutionFileUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "executionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "description": "fileId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "description": "sessionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ByteArrayResource"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/sessions/{sessionId}/executions/{executionId}/stores/{storeId}": {
+      "get": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "getStoreContent",
+        "operationId": "getStoreContentUsingGET",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "executionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "sessionId",
+            "in": "path",
+            "description": "sessionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "storeId",
+            "in": "path",
+            "description": "storeId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "platform-user-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_8",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfPlatformUser"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "platform-user-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_8",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "platform-user-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_8",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "platform-user-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_8",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "platform-user-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_8",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/users/{id}/activate": {
+      "put": {
+        "tags": [
+          "platform-user-controller"
+        ],
+        "summary": "activate",
+        "operationId": "activateUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/users/{id}/deactivate": {
+      "put": {
+        "tags": [
+          "platform-user-controller"
+        ],
+        "summary": "deactivate",
+        "operationId": "deactivateUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlatformUser"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/error": {
+      "get": {
+        "tags": [
+          "basic-error-controller"
+        ],
+        "summary": "error",
+        "operationId": "errorUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "head": {
+        "tags": [
+          "basic-error-controller"
+        ],
+        "summary": "error",
+        "operationId": "errorUsingHEAD",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "basic-error-controller"
+        ],
+        "summary": "error",
+        "operationId": "errorUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "basic-error-controller"
+        ],
+        "summary": "error",
+        "operationId": "errorUsingPUT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "basic-error-controller"
+        ],
+        "summary": "error",
+        "operationId": "errorUsingDELETE",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "options": {
+        "tags": [
+          "basic-error-controller"
+        ],
+        "summary": "error",
+        "operationId": "errorUsingOPTIONS",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "patch": {
+        "tags": [
+          "basic-error-controller"
+        ],
+        "summary": "error",
+        "operationId": "errorUsingPATCH",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "securityDefinitions": {
+    "accessToken": {
+      "type": "apiKey",
+      "name": "x_access_token",
+      "in": "header"
+    },
+    "basicAuth": {
+      "type": "basic"
+    }
+  },
+  "definitions": {
+    "AccessToken": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "token": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "AccessToken"
+    },
+    "Bot": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/BotMetadata"
+        },
+        "name": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "Bot"
+    },
+    "BotEventTrigger": {
+      "type": "object",
+      "properties": {
+        "cellId": {
+          "type": "string"
+        },
+        "event": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "BotEventTrigger"
+    },
+    "BotMetadata": {
+      "type": "object",
+      "properties": {
+        "createSession": {
+          "type": "boolean"
+        },
+        "graphCells": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GraphCell"
+          }
+        },
+        "triggers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BotEventTrigger"
+          }
+        }
+      },
+      "title": "BotMetadata"
+    },
+    "ByteArrayResource": {
+      "type": "object",
+      "properties": {
+        "byteArray": {
+          "type": "string",
+          "format": "byte"
+        },
+        "description": {
+          "type": "string"
+        },
+        "file": {
+          "$ref": "#/definitions/File"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "inputStream": {
+          "$ref": "#/definitions/InputStream"
+        },
+        "open": {
+          "type": "boolean"
+        },
+        "readable": {
+          "type": "boolean"
+        },
+        "uri": {
+          "$ref": "#/definitions/URI"
+        },
+        "url": {
+          "$ref": "#/definitions/URL"
+        }
+      },
+      "title": "ByteArrayResource"
+    },
+    "CellProcessor": {
+      "type": "object",
+      "properties": {
+        "condition": {
+          "type": "string"
+        },
+        "configuration": {
+          "type": "object"
+        },
+        "targetCellId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "CellProcessor"
+    },
+    "CloudBotSession": {
+      "title": "CloudBotSession",
+      "allOf": [
+        {
+          "$ref": "#/definitions/CloudSession"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "sessionState",
+            "type"
+          ],
+          "properties": {
+            "bot": {
+              "$ref": "#/definitions/Bot"
+            },
+            "botState": {
+              "type": "object"
+            },
+            "documents": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudDocument"
+              }
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudFile"
+              }
+            },
+            "id": {
+              "type": "string"
+            },
+            "lastAccessed": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "pipelineTemplates": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudPipeline"
+              }
+            },
+            "sessionState": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "CLOSED"
+              ]
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "title": "CloudBotSession"
+        }
+      ]
+    },
+    "CloudContentServiceSession": {
+      "title": "CloudContentServiceSession",
+      "allOf": [
+        {
+          "$ref": "#/definitions/CloudSession"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "sessionState",
+            "type"
+          ],
+          "properties": {
+            "contentService": {
+              "$ref": "#/definitions/ContentService"
+            },
+            "documents": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudDocument"
+              }
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudFile"
+              }
+            },
+            "id": {
+              "type": "string"
+            },
+            "lastAccessed": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "pipelineTemplates": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudPipeline"
+              }
+            },
+            "sessionState": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "CLOSED"
+              ]
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "title": "CloudContentServiceSession"
+        }
+      ]
+    },
+    "CloudDocument": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "title": "CloudDocument"
+    },
+    "CloudDocumentReference": {
+      "type": "object",
+      "properties": {
+        "cloudDocument": {
+          "$ref": "#/definitions/CloudDocument"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "referenceType": {
+          "type": "string",
+          "enum": [
+            "INPUT",
+            "OUTPUT"
+          ]
+        }
+      },
+      "title": "CloudDocumentReference"
+    },
+    "CloudExecution": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "object"
+        },
+        "customOptions": {
+          "type": "object"
+        },
+        "documentReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocumentReference"
+          }
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exceptionDetails": {
+          "$ref": "#/definitions/ExceptionDetails"
+        },
+        "fileReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFileReference"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "numberOfSteps": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pipelineTemplateId": {
+          "type": "string"
+        },
+        "processingTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED",
+            "REQUESTED"
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudExecutionStep"
+          }
+        },
+        "stepsCompleted": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "stores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudStore"
+          }
+        }
+      },
+      "title": "CloudExecution"
+    },
+    "CloudExecutionStep": {
+      "type": "object",
+      "properties": {
+        "contentServiceReference": {
+          "$ref": "#/definitions/ContentServiceReference"
+        },
+        "context": {
+          "type": "object"
+        },
+        "documentReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocumentReference"
+          }
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exceptionDetails": {
+          "$ref": "#/definitions/ExceptionDetails"
+        },
+        "fileReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFileReference"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "options": {
+          "type": "object"
+        },
+        "processingTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED",
+            "REQUESTED"
+          ]
+        },
+        "stores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudStore"
+          }
+        }
+      },
+      "title": "CloudExecutionStep"
+    },
+    "CloudFile": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "CloudFile"
+    },
+    "CloudFileReference": {
+      "type": "object",
+      "properties": {
+        "cloudFile": {
+          "$ref": "#/definitions/CloudFile"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "referenceType": {
+          "type": "string",
+          "enum": [
+            "SOURCE"
+          ]
+        }
+      },
+      "title": "CloudFileReference"
+    },
+    "CloudPipeline": {
+      "type": "object",
+      "properties": {
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExceptionDetails"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudExecutionStep"
+          }
+        },
+        "valid": {
+          "type": "boolean"
+        }
+      },
+      "title": "CloudPipeline"
+    },
+    "CloudPipelineSession": {
+      "title": "CloudPipelineSession",
+      "allOf": [
+        {
+          "$ref": "#/definitions/CloudSession"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "sessionState",
+            "type"
+          ],
+          "properties": {
+            "documents": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudDocument"
+              }
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudFile"
+              }
+            },
+            "id": {
+              "type": "string"
+            },
+            "lastAccessed": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "pipeline": {
+              "$ref": "#/definitions/Pipeline"
+            },
+            "pipelineTemplates": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CloudPipeline"
+              }
+            },
+            "sessionState": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "CLOSED"
+              ]
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "title": "CloudPipelineSession"
+        }
+      ]
+    },
+    "CloudSession": {
+      "type": "object",
+      "required": [
+        "id",
+        "sessionState",
+        "type"
+      ],
+      "discriminator": "type",
+      "properties": {
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocument"
+          }
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFile"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "lastAccessed": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "pipelineTemplates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudPipeline"
+          }
+        },
+        "sessionState": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "CLOSED"
+          ]
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "CloudSession"
+    },
+    "CloudStore": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "CloudStore"
+    },
+    "ContentService": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "name": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "publicAccess": {
+          "type": "boolean"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "ContentService"
+    },
+    "ContentServiceReference": {
+      "type": "object",
+      "properties": {
+        "attachSource": {
+          "type": "boolean"
+        },
+        "contentServiceId": {
+          "type": "string"
+        },
+        "contentServiceVersionId": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        }
+      },
+      "title": "ContentServiceReference"
+    },
+    "ContentServiceVersion": {
+      "type": "object",
+      "properties": {
+        "contentService": {
+          "$ref": "#/definitions/ContentService"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "id": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "position": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "publicAccess": {
+          "type": "boolean"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "title": "ContentServiceVersion"
+    },
+    "Deployment": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/DeploymentMetadata"
+        },
+        "name": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "Deployment"
+    },
+    "DeploymentMetadata": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "discriminator": "type",
+      "properties": {
+        "accessToken": {
+          "type": "string"
+        },
+        "botId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "DeploymentMetadata"
+    },
+    "EmailDeployment": {
+      "title": "EmailDeployment",
+      "allOf": [
+        {
+          "$ref": "#/definitions/DeploymentMetadata"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "accessToken": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "botId": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "title": "EmailDeployment"
+        }
+      ]
+    },
+    "EmailLookup": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "title": "EmailLookup"
+    },
+    "ExceptionDetails": {
+      "type": "object",
+      "properties": {
+        "errorMessage": {
+          "type": "string"
+        },
+        "errorType": {
+          "type": "string"
+        },
+        "executedVersion": {
+          "type": "string"
+        },
+        "help": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "stackTrace": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "statusCode": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "ExceptionDetails"
+    },
+    "ExceptionReport": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "exceptionUuid": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string"
+        }
+      },
+      "title": "ExceptionReport"
+    },
+    "Feedback": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "feedback": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "Feedback"
+    },
+    "File": {
+      "type": "object",
+      "properties": {
+        "absolute": {
+          "type": "boolean"
+        },
+        "absoluteFile": {
+          "$ref": "#/definitions/File"
+        },
+        "absolutePath": {
+          "type": "string"
+        },
+        "canonicalFile": {
+          "$ref": "#/definitions/File"
+        },
+        "canonicalPath": {
+          "type": "string"
+        },
+        "directory": {
+          "type": "boolean"
+        },
+        "file": {
+          "type": "boolean"
+        },
+        "freeSpace": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "parent": {
+          "type": "string"
+        },
+        "parentFile": {
+          "$ref": "#/definitions/File"
+        },
+        "path": {
+          "type": "string"
+        },
+        "totalSpace": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "usableSpace": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "File"
+    },
+    "GraphCell": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "options": {
+          "type": "object"
+        },
+        "post": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CellProcessor"
+          }
+        },
+        "pre": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CellProcessor"
+          }
+        },
+        "ref": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "PIPELINE",
+            "ACTION",
+            "DECISION"
+          ]
+        }
+      },
+      "title": "GraphCell"
+    },
+    "InputStream": {
+      "type": "object",
+      "title": "InputStream"
+    },
+    "JsonNode": {
+      "type": "object",
+      "properties": {
+        "array": {
+          "type": "boolean"
+        },
+        "bigDecimal": {
+          "type": "boolean"
+        },
+        "bigInteger": {
+          "type": "boolean"
+        },
+        "binary": {
+          "type": "boolean"
+        },
+        "boolean": {
+          "type": "boolean"
+        },
+        "containerNode": {
+          "type": "boolean"
+        },
+        "double": {
+          "type": "boolean"
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "float": {
+          "type": "boolean"
+        },
+        "floatingPointNumber": {
+          "type": "boolean"
+        },
+        "int": {
+          "type": "boolean"
+        },
+        "integralNumber": {
+          "type": "boolean"
+        },
+        "long": {
+          "type": "boolean"
+        },
+        "missingNode": {
+          "type": "boolean"
+        },
+        "nodeType": {
+          "type": "string",
+          "enum": [
+            "ARRAY",
+            "BINARY",
+            "BOOLEAN",
+            "MISSING",
+            "NULL",
+            "NUMBER",
+            "OBJECT",
+            "POJO",
+            "STRING"
+          ]
+        },
+        "null": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "boolean"
+        },
+        "object": {
+          "type": "boolean"
+        },
+        "pojo": {
+          "type": "boolean"
+        },
+        "short": {
+          "type": "boolean"
+        },
+        "textual": {
+          "type": "boolean"
+        },
+        "valueNode": {
+          "type": "boolean"
+        }
+      },
+      "title": "JsonNode"
+    },
+    "LoginRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "LoginRequest"
+    },
+    "Membership": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "id": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "OWNER",
+            "READ",
+            "WRITE"
+          ]
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "user": {
+          "$ref": "#/definitions/PlatformUser"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "Membership"
+    },
+    "Organization": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "publicAccess": {
+          "type": "boolean"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "Organization"
+    },
+    "OrganizationDashboard": {
+      "type": "object",
+      "properties": {
+        "pipelineCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "requestCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "serviceCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "userCount": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "OrganizationDashboard"
+    },
+    "PageOfAccessToken": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AccessToken"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfAccessToken"
+    },
+    "PageOfBot": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Bot"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfBot"
+    },
+    "PageOfContentService": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentService"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfContentService"
+    },
+    "PageOfContentServiceVersion": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentServiceVersion"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfContentServiceVersion"
+    },
+    "PageOfDeployment": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Deployment"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfDeployment"
+    },
+    "PageOfMembership": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Membership"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfMembership"
+    },
+    "PageOfOrganization": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Organization"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfOrganization"
+    },
+    "PageOfPipeline": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Pipeline"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfPipeline"
+    },
+    "PageOfPlatformUser": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PlatformUser"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfPlatformUser"
+    },
+    "PageOfServiceRequest": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ServiceRequest"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfServiceRequest"
+    },
+    "Pageable": {
+      "type": "object",
+      "properties": {
+        "offset": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "pageNumber": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "paged": {
+          "type": "boolean"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "unpaged": {
+          "type": "boolean"
+        }
+      },
+      "title": "Pageable"
+    },
+    "PasswordChange": {
+      "type": "object",
+      "properties": {
+        "newPassword": {
+          "type": "string"
+        },
+        "oldPassword": {
+          "type": "string"
+        }
+      },
+      "title": "PasswordChange"
+    },
+    "Pipeline": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/PipelineMetadata"
+        },
+        "name": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "publicAccess": {
+          "type": "boolean"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "Pipeline"
+    },
+    "PipelineMetadata": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PipelineStepMetadata"
+          }
+        }
+      },
+      "title": "PipelineMetadata"
+    },
+    "PipelineStepMetadata": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "options": {
+          "type": "object"
+        },
+        "organizationSlug": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "title": "PipelineStepMetadata"
+    },
+    "PlatformOverview": {
+      "type": "object",
+      "properties": {
+        "buildTime": {
+          "type": "string"
+        },
+        "commitId": {
+          "type": "string"
+        },
+        "dsn": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "hostName": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "release": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "title": "PlatformOverview"
+    },
+    "PlatformUser": {
+      "type": "object",
+      "properties": {
+        "activated": {
+          "type": "boolean"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "passwordResetDate": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "platformAdmin": {
+          "type": "boolean"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "PlatformUser"
+    },
+    "RegisterUser": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "title": "RegisterUser"
+    },
+    "ServiceRequest": {
+      "type": "object",
+      "properties": {
+        "contentService": {
+          "$ref": "#/definitions/ContentService"
+        },
+        "contentServiceVersion": {
+          "$ref": "#/definitions/ContentServiceVersion"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "elapsedTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "id": {
+          "type": "string"
+        },
+        "internalRequestId": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "pipeline": {
+          "$ref": "#/definitions/Pipeline"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "$ref": "#/definitions/Timestamp"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "ServiceRequest"
+    },
+    "SlackDeployment": {
+      "title": "SlackDeployment",
+      "allOf": [
+        {
+          "$ref": "#/definitions/DeploymentMetadata"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "accessToken": {
+              "type": "string"
+            },
+            "botId": {
+              "type": "string"
+            },
+            "channelId": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "title": "SlackDeployment"
+        }
+      ]
+    },
+    "Sort": {
+      "type": "object",
+      "properties": {
+        "empty": {
+          "type": "boolean"
+        },
+        "sorted": {
+          "type": "boolean"
+        },
+        "unsorted": {
+          "type": "boolean"
+        }
+      },
+      "title": "Sort"
+    },
+    "SubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "alert": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "title": "SubscriptionResponse"
+    },
+    "Timestamp": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "day": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "hours": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "minutes": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "month": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "nanos": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "seconds": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "time": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "timezoneOffset": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "year": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "Timestamp"
+    },
+    "URI": {
+      "type": "object",
+      "properties": {
+        "absolute": {
+          "type": "boolean"
+        },
+        "authority": {
+          "type": "string"
+        },
+        "fragment": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "opaque": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "query": {
+          "type": "string"
+        },
+        "rawAuthority": {
+          "type": "string"
+        },
+        "rawFragment": {
+          "type": "string"
+        },
+        "rawPath": {
+          "type": "string"
+        },
+        "rawQuery": {
+          "type": "string"
+        },
+        "rawSchemeSpecificPart": {
+          "type": "string"
+        },
+        "rawUserInfo": {
+          "type": "string"
+        },
+        "scheme": {
+          "type": "string"
+        },
+        "schemeSpecificPart": {
+          "type": "string"
+        },
+        "userInfo": {
+          "type": "string"
+        }
+      },
+      "title": "URI"
+    },
+    "URL": {
+      "type": "object",
+      "properties": {
+        "authority": {
+          "type": "string"
+        },
+        "content": {
+          "type": "object"
+        },
+        "defaultPort": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "file": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "query": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "userInfo": {
+          "type": "string"
+        }
+      },
+      "title": "URL"
+    },
+    "UserActivation": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "UserActivation"
+    },
+    "View": {
+      "type": "object",
+      "properties": {
+        "contentType": {
+          "type": "string"
+        }
+      },
+      "title": "View"
+    }
+  }
+}

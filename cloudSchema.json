@@ -1,0 +1,822 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Cloud Domain",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "cloudExecution": {
+      "$ref": "#/definitions/CloudExecution"
+    },
+    "cloudSession": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/CloudBotSession"
+        },
+        {
+          "$ref": "#/definitions/CloudPipelineSession"
+        },
+        {
+          "$ref": "#/definitions/CloudContentServiceSession"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "CloudExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "pipelineTemplateId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED",
+            "REQUESTED"
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudExecutionStep"
+          }
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "processingTime": {
+          "type": "integer"
+        },
+        "customOptions": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "documentReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocumentReference"
+          }
+        },
+        "fileReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFileReference"
+          }
+        },
+        "stores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudStore"
+          }
+        },
+        "exceptionDetails": {
+          "$ref": "#/definitions/ExceptionDetails"
+        },
+        "numberOfSteps": {
+          "type": "integer"
+        },
+        "stepsCompleted": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "numberOfSteps",
+        "stepsCompleted"
+      ]
+    },
+    "CloudExecutionStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED",
+            "REQUESTED"
+          ]
+        },
+        "exceptionDetails": {
+          "$ref": "#/definitions/ExceptionDetails"
+        },
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "processingTime": {
+          "type": "integer"
+        },
+        "documentReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocumentReference"
+          }
+        },
+        "fileReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFileReference"
+          }
+        },
+        "stores": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudStore"
+          }
+        },
+        "contentServiceReference": {
+          "$ref": "#/definitions/ContentServiceReference"
+        }
+      }
+    },
+    "ExceptionDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "statusCode": {
+          "type": "integer"
+        },
+        "errorMessage": {
+          "type": "string"
+        },
+        "errorType": {
+          "type": "string"
+        },
+        "executedVersion": {
+          "type": "string"
+        },
+        "stackTrace": {
+          "type": "array",
+          "items": {}
+        },
+        "help": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "statusCode"
+      ]
+    },
+    "CloudDocumentReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "referenceType": {
+          "type": "string",
+          "enum": [
+            "INPUT",
+            "OUTPUT"
+          ]
+        },
+        "cloudDocument": {
+          "$ref": "#/definitions/CloudDocument"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "CloudDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "CloudFileReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "referenceType": {
+          "type": "string",
+          "enum": [
+            "SOURCE"
+          ]
+        },
+        "cloudFile": {
+          "$ref": "#/definitions/CloudFile"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "CloudFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "CloudStore": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "ContentServiceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "contentServiceVersionId": {
+          "type": "string"
+        },
+        "contentServiceId": {
+          "type": "string"
+        },
+        "attachSource": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "attachSource"
+      ]
+    },
+    "CloudBotSession": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "bot"
+          ],
+          "default": "bot"
+        },
+        "sessionState": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "CLOSED"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "lastAccessed": {
+          "type": "integer"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFile"
+          }
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocument"
+          }
+        },
+        "pipelineTemplates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudPipeline"
+          }
+        },
+        "bot": {
+          "$ref": "#/definitions/Bot"
+        },
+        "botState": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "title": "bot",
+      "required": [
+        "type",
+        "lastAccessed"
+      ]
+    },
+    "CloudPipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "valid": {
+          "type": "boolean"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ExceptionDetails"
+          }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudExecutionStep"
+          }
+        }
+      },
+      "required": [
+        "valid"
+      ]
+    },
+    "Bot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "createdOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^.*\\S+.*$",
+          "minLength": 1
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "description": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/BotMetadata"
+        }
+      },
+      "required": [
+        "name",
+        "organization"
+      ]
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "createdOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^.*\\S+.*$",
+          "minLength": 1
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9\\-_]{0,40}$",
+          "minLength": 1
+        },
+        "publicAccess": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "slug",
+        "publicAccess"
+      ]
+    },
+    "BotMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "createSession": {
+          "type": "boolean"
+        },
+        "triggers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BotEventTrigger"
+          }
+        },
+        "graphCells": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GraphCell"
+          }
+        }
+      },
+      "required": [
+        "createSession"
+      ]
+    },
+    "BotEventTrigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "cellId": {
+          "type": "string"
+        }
+      }
+    },
+    "GraphCell": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "PIPELINE",
+            "ACTION",
+            "DECISION"
+          ]
+        },
+        "ref": {
+          "type": "string"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "pre": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CellProcessor"
+          }
+        },
+        "post": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CellProcessor"
+          }
+        }
+      }
+    },
+    "CellProcessor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "condition": {
+          "type": "string"
+        },
+        "configuration": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "targetCellId": {
+          "type": "string"
+        }
+      }
+    },
+    "CloudPipelineSession": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "pipeline"
+          ],
+          "default": "pipeline"
+        },
+        "sessionState": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "CLOSED"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "lastAccessed": {
+          "type": "integer"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFile"
+          }
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocument"
+          }
+        },
+        "pipelineTemplates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudPipeline"
+          }
+        },
+        "pipeline": {
+          "$ref": "#/definitions/Pipeline"
+        }
+      },
+      "title": "pipeline",
+      "required": [
+        "type",
+        "lastAccessed"
+      ]
+    },
+    "Pipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "createdOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^.*\\S+.*$",
+          "minLength": 1
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9\\-_]{0,40}$",
+          "minLength": 1
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "publicAccess": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/PipelineMetadata"
+        },
+        "ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "slug",
+        "organization",
+        "publicAccess"
+      ]
+    },
+    "PipelineMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PipelineStepMetadata"
+          }
+        }
+      }
+    },
+    "PipelineStepMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "organizationSlug": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "CloudContentServiceSession": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "service"
+          ],
+          "default": "service"
+        },
+        "sessionState": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "CLOSED"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "lastAccessed": {
+          "type": "integer"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudFile"
+          }
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudDocument"
+          }
+        },
+        "pipelineTemplates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudPipeline"
+          }
+        },
+        "contentService": {
+          "$ref": "#/definitions/ContentService"
+        }
+      },
+      "title": "service",
+      "required": [
+        "type",
+        "lastAccessed"
+      ]
+    },
+    "ContentService": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "createdOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedOn": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^.*\\S+.*$",
+          "minLength": 1
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9\\-_]{0,40}$",
+          "minLength": 1
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "publicAccess": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "slug",
+        "organization",
+        "publicAccess"
+      ]
+    }
+  }
+}
