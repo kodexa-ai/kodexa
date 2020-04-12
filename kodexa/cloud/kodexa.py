@@ -3,7 +3,7 @@ import os
 import time
 
 import requests
-from attrdict import AttrDict
+from addict import Dict
 
 from kodexa import get_source, Document, FileHandleConnector
 from kodexa.pipeline import PipelineContext
@@ -28,7 +28,7 @@ class KodexaCloudSession:
 
         if r.status_code != 200:
             raise Exception("Unable to create a session, check your URL and access token")
-        self.cloud_session = json.loads(r.text, object_hook=AttrDict)
+        self.cloud_session = Dict(json.loads(r.text))
 
     def execute_service(self, document, options, attach_source):
         files = {}
@@ -43,7 +43,7 @@ class KodexaCloudSession:
                           params={self.session_type: self.slug},
                           data=data,
                           headers={"x-access-token": self.access_token}, files=files)
-        execution = json.loads(r.text, object_hook=AttrDict)
+        execution = Dict(json.loads(r.text))
         print(execution)
         return execution
 
@@ -53,7 +53,7 @@ class KodexaCloudSession:
         while execution.status == "PENDING" or execution.status == "RUNNING":
             r = requests.get(f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}",
                              headers={"x-access-token": self.access_token})
-            execution = json.loads(r.text, object_hook=AttrDict)
+            execution = Dict(json.loads(r.text))
             if status != execution.status:
                 print(f"Status changed from {status} -> {execution.status}")
                 status = execution.status
@@ -83,7 +83,7 @@ class KodexaCloudSession:
         response = requests.get(
             f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}",
             headers={"x-access-token": self.access_token})
-        raw_store = json.loads(response.text, object_hook=AttrDict)
+        raw_store = Dict(json.loads(response.text))
         return TableDataStore(raw_store.columns, raw_store.rows)
 
     def merge_stores(self, execution, context):

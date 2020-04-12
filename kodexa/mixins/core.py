@@ -2,7 +2,7 @@ import itertools
 import re
 from enum import Enum
 
-from attrdict import AttrDict
+from addict import Dict
 
 from kodexa.mixins.util import add_method_to_node
 
@@ -639,7 +639,7 @@ class CoreMixin:
         add_method_to_node(is_last_child, node)
 
 
-class Tag(AttrDict):
+class Tag(Dict):
 
     def __init__(self, start=None, end=None, value=None):
         self.start = start
