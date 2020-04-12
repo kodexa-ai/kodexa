@@ -28,7 +28,8 @@ setup(name='kodexa',
           'urllib3',
           'python_dateutil',
           'certifi',
-          'six'
+          'six',
+          'pydantic[email]'
       ],
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])
