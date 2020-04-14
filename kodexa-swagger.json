@@ -3521,8 +3521,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createServiceSessionBySlug",
-        "operationId": "createServiceSessionBySlugUsingPOST",
+        "summary": "createPipelineSession",
+        "operationId": "createPipelineSessionUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3531,9 +3531,9 @@
         ],
         "parameters": [
           {
-            "name": "service",
+            "name": "pipelineId",
             "in": "query",
-            "description": "service",
+            "description": "pipelineId",
             "required": true,
             "type": "string"
           },
@@ -4328,16 +4328,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingGET",
+        "summary": "error",
+        "operationId": "errorUsingGET",
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4347,19 +4350,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingHEAD",
+        "summary": "error",
+        "operationId": "errorUsingHEAD",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4369,19 +4375,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPOST",
+        "summary": "error",
+        "operationId": "errorUsingPOST",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4391,19 +4400,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPUT",
+        "summary": "error",
+        "operationId": "errorUsingPUT",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4413,16 +4425,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingDELETE",
+        "summary": "error",
+        "operationId": "errorUsingDELETE",
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4432,19 +4447,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingOPTIONS",
+        "summary": "error",
+        "operationId": "errorUsingOPTIONS",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4454,19 +4472,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPATCH",
+        "summary": "error",
+        "operationId": "errorUsingPATCH",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4492,7 +4513,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "id": {
           "type": "string"
@@ -4510,7 +4532,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -4525,7 +4548,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "description": {
           "type": "string"
@@ -4546,7 +4570,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -5168,7 +5193,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "description": {
           "type": "string"
@@ -5198,7 +5224,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -5234,7 +5261,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "id": {
           "type": "string"
@@ -5253,7 +5281,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -5271,7 +5300,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "description": {
           "type": "string"
@@ -5292,7 +5322,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -5416,7 +5447,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "feedback": {
           "type": "string"
@@ -5428,7 +5460,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -5548,7 +5581,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "id": {
           "type": "string"
@@ -5568,7 +5602,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "user": {
           "$ref": "#/definitions/PlatformUser"
@@ -5586,7 +5621,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "description": {
           "type": "string"
@@ -5607,7 +5643,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -6200,7 +6237,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "description": {
           "type": "string"
@@ -6230,7 +6268,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -6308,7 +6347,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "email": {
           "type": "string"
@@ -6332,7 +6372,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
@@ -6368,7 +6409,8 @@
           "type": "string"
         },
         "createdOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "elapsedTime": {
           "type": "integer",
@@ -6390,7 +6432,8 @@
           "type": "string"
         },
         "updatedOn": {
-          "$ref": "#/definitions/Timestamp"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "uuid": {
           "type": "string"
