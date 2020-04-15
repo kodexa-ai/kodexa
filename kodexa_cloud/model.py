@@ -9,9 +9,6 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
 
-class Model(BaseModel):
-    __root__: 'Any'
-
 
 class BotEventTrigger(BaseModel):
     cellId: Optional[str] = None
