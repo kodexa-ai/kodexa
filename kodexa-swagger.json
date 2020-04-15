@@ -3521,8 +3521,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createPipelineSessionBySlug",
-        "operationId": "createPipelineSessionBySlugUsingPOST",
+        "summary": "createServiceSessionBySlug",
+        "operationId": "createServiceSessionBySlugUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3531,9 +3531,9 @@
         ],
         "parameters": [
           {
-            "name": "pipeline",
+            "name": "service",
             "in": "query",
-            "description": "pipeline",
+            "description": "service",
             "required": true,
             "type": "string"
           },
@@ -4844,13 +4844,13 @@
         "id": {
           "type": "string"
         },
-        "inputDocumentId": {
+        "inputId": {
           "type": "string"
         },
         "options": {
           "type": "object"
         },
-        "outputDocumentId": {
+        "outputId": {
           "type": "string"
         },
         "processingTime": {
