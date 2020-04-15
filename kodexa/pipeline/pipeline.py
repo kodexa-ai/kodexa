@@ -1,6 +1,7 @@
 import logging
 import sys
 import traceback
+import uuid
 from inspect import signature
 from io import StringIO
 from typing import List
@@ -9,6 +10,9 @@ from uuid import uuid4
 from kodexa import Document
 from kodexa_cloud import ContentObject
 
+
+def new_id():
+    return str(uuid.uuid4())
 
 class InMemoryContentProvider:
     """
