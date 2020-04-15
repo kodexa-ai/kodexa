@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.144",
+    "version": "${git.build.version}",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -15,7 +15,7 @@
       "url": "https://developer.kodexa.com/licensing"
     }
   },
-  "host": "quantum.kodexa.com",
+  "host": "localhost:8080",
   "basePath": "/",
   "tags": [
     {
@@ -3521,8 +3521,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createServiceSession",
-        "operationId": "createServiceSessionUsingPOST",
+        "summary": "createServiceSessionBySlug",
+        "operationId": "createServiceSessionBySlugUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3531,9 +3531,9 @@
         ],
         "parameters": [
           {
-            "name": "serviceId",
+            "name": "service",
             "in": "query",
-            "description": "serviceId",
+            "description": "service",
             "required": true,
             "type": "string"
           },
@@ -3830,69 +3830,13 @@
         "deprecated": false
       }
     },
-    "/api/sessions/{sessionId}/executions/{executionId}/documents/{documentId}": {
+    "/api/sessions/{sessionId}/executions/{executionId}/objects/{objectId}": {
       "get": {
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "getExecutionDocument",
-        "operationId": "getExecutionDocumentUsingGET",
-        "produces": [
-          "*/*"
-        ],
-        "parameters": [
-          {
-            "name": "documentId",
-            "in": "path",
-            "description": "documentId",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "executionId",
-            "in": "path",
-            "description": "executionId",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "sessionId",
-            "in": "path",
-            "description": "sessionId",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "x-access-token",
-            "in": "header",
-            "description": "x-access-token",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/ByteArrayResource"
-            }
-          }
-        },
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "deprecated": false
-      }
-    },
-    "/api/sessions/{sessionId}/executions/{executionId}/files/{fileId}": {
-      "get": {
-        "tags": [
-          "cloud-session-controller"
-        ],
-        "summary": "getExecutionFile",
-        "operationId": "getExecutionFileUsingGET",
+        "summary": "getContentObject",
+        "operationId": "getContentObjectUsingGET",
         "produces": [
           "*/*"
         ],
@@ -3905,9 +3849,9 @@
             "type": "string"
           },
           {
-            "name": "fileId",
+            "name": "objectId",
             "in": "path",
-            "description": "fileId",
+            "description": "objectId",
             "required": true,
             "type": "string"
           },
@@ -4328,16 +4272,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingGET",
+        "summary": "error",
+        "operationId": "errorUsingGET",
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4347,19 +4294,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingHEAD",
+        "summary": "error",
+        "operationId": "errorUsingHEAD",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4369,19 +4319,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPOST",
+        "summary": "error",
+        "operationId": "errorUsingPOST",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4391,19 +4344,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPUT",
+        "summary": "error",
+        "operationId": "errorUsingPUT",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4413,16 +4369,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingDELETE",
+        "summary": "error",
+        "operationId": "errorUsingDELETE",
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4432,19 +4391,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingOPTIONS",
+        "summary": "error",
+        "operationId": "errorUsingOPTIONS",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4454,19 +4416,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPATCH",
+        "summary": "error",
+        "operationId": "errorUsingPATCH",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4666,16 +4631,10 @@
             "botState": {
               "type": "object"
             },
-            "documents": {
+            "contentObjects": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/CloudDocument"
-              }
-            },
-            "files": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CloudFile"
+                "type": "object"
               }
             },
             "id": {
@@ -4720,20 +4679,14 @@
             "type"
           ],
           "properties": {
+            "contentObjects": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
             "contentService": {
               "$ref": "#/definitions/ContentService"
-            },
-            "documents": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CloudDocument"
-              }
-            },
-            "files": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CloudFile"
-              }
             },
             "id": {
               "type": "string"
@@ -4763,42 +4716,6 @@
         }
       ]
     },
-    "CloudDocument": {
-      "type": "object",
-      "properties": {
-        "created": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "id": {
-          "type": "string"
-        }
-      },
-      "title": "CloudDocument"
-    },
-    "CloudDocumentReference": {
-      "type": "object",
-      "properties": {
-        "cloudDocument": {
-          "$ref": "#/definitions/CloudDocument"
-        },
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "referenceType": {
-          "type": "string",
-          "enum": [
-            "INPUT",
-            "OUTPUT",
-            "ASSOCIATED"
-          ]
-        }
-      },
-      "title": "CloudDocumentReference"
-    },
     "CloudEvent": {
       "type": "object",
       "required": [
@@ -4807,20 +4724,14 @@
         "type"
       ],
       "properties": {
-        "documentReferences": {
+        "contentObjects": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/CloudDocumentReference"
+            "$ref": "#/definitions/ContentObject"
           }
         },
         "executionId": {
           "type": "string"
-        },
-        "fileReferences": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CloudFileReference"
-          }
         },
         "id": {
           "type": "string"
@@ -4854,17 +4765,17 @@
     "CloudExecution": {
       "type": "object",
       "properties": {
+        "contentObjects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ContentObject"
+          }
+        },
         "context": {
           "type": "object"
         },
         "customOptions": {
           "type": "object"
-        },
-        "documentReferences": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CloudDocumentReference"
-          }
         },
         "end": {
           "type": "string",
@@ -4872,12 +4783,6 @@
         },
         "exceptionDetails": {
           "$ref": "#/definitions/ExceptionDetails"
-        },
-        "fileReferences": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CloudFileReference"
-          }
         },
         "id": {
           "type": "string"
@@ -4932,17 +4837,17 @@
     "CloudExecutionStep": {
       "type": "object",
       "properties": {
+        "contentObjects": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
         "contentServiceReference": {
           "$ref": "#/definitions/ContentServiceReference"
         },
         "context": {
           "type": "object"
-        },
-        "documentReferences": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CloudDocumentReference"
-          }
         },
         "end": {
           "type": "string",
@@ -4950,12 +4855,6 @@
         },
         "exceptionDetails": {
           "$ref": "#/definitions/ExceptionDetails"
-        },
-        "fileReferences": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CloudFileReference"
-          }
         },
         "id": {
           "type": "string"
@@ -4989,42 +4888,6 @@
         }
       },
       "title": "CloudExecutionStep"
-    },
-    "CloudFile": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "title": "CloudFile"
-    },
-    "CloudFileReference": {
-      "type": "object",
-      "properties": {
-        "cloudFile": {
-          "$ref": "#/definitions/CloudFile"
-        },
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "referenceType": {
-          "type": "string",
-          "enum": [
-            "SOURCE",
-            "ATTACHMENT",
-            "DOWNLOADED",
-            "OUTPUT"
-          ]
-        }
-      },
-      "title": "CloudFileReference"
     },
     "CloudPipeline": {
       "type": "object",
@@ -5067,16 +4930,10 @@
             "type"
           ],
           "properties": {
-            "documents": {
+            "contentObjects": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/CloudDocument"
-              }
-            },
-            "files": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CloudFile"
+                "type": "object"
               }
             },
             "id": {
@@ -5119,16 +4976,10 @@
       ],
       "discriminator": "type",
       "properties": {
-        "documents": {
+        "contentObjects": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/CloudDocument"
-          }
-        },
-        "files": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CloudFile"
+            "type": "object"
           }
         },
         "id": {
@@ -5168,6 +5019,37 @@
         }
       },
       "title": "CloudStore"
+    },
+    "ContentObject": {
+      "type": "object",
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "enum": [
+            "DOCUMENT",
+            "NATIVE"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "ContentObject"
     },
     "ContentService": {
       "type": "object",

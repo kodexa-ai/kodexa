@@ -3,9 +3,27 @@ import sys
 import traceback
 from inspect import signature
 from io import StringIO
+from typing import List
 from uuid import uuid4
 
 from kodexa import Document
+from kodexa_cloud import ContentObject
+
+
+class InMemoryContentProvider:
+    """
+    A content provider is used to support getting content (documents or native) to
+    and from the pipeline
+    """
+
+    def __init__(self):
+        self.content_objects = {}
+
+    def get_content(self, content_object: ContentObject):
+        return self.content_objects[content_object.id]
+
+    def put_content(self, content_object: ContentObject, content):
+        self.content_objects[content_object.id] = content
 
 
 class PipelineContext:
@@ -16,11 +34,22 @@ class PipelineContext:
     It also provides access to the 'stores' that have been added to the pipeline
     """
 
-    def __init__(self):
+    def __init__(self, content_provider=InMemoryContentProvider(), existing_content_objects: List[ContentObject] = []):
         self.transaction_id = str(uuid4())
         self.stores = {}
         self.statistics = PipelineStatistics()
         self.output_document = None
+        self.content_objects: List[ContentObject] = existing_content_objects
+        self.content_provider = content_provider
+
+    def get_content_objects(self) -> List[ContentObject]:
+        return self.content_objects
+
+    def get_content(self, content_object: ContentObject):
+        self.content_provider.get_content(content_object)
+
+    def put_content(self, content_object: ContentObject, content):
+        self.content_provider.put_content(content_object, content)
 
     def add_store(self, name, store):
         """
