@@ -4766,14 +4766,14 @@
         "id": {
           "type": "string"
         },
-        "inputDocumentId": {
+        "inputId": {
           "type": "string"
         },
         "numberOfSteps": {
           "type": "integer",
           "format": "int32"
         },
-        "outputDocumentId": {
+        "outputId": {
           "type": "string"
         },
         "pipelineTemplateId": {
