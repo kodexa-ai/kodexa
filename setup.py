@@ -29,7 +29,7 @@ setup(name='kodexa',
           'python_dateutil',
           'certifi',
           'six',
-          'pydantic[email]'
+          'pydantic[email]==1.4'
       ],
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])
