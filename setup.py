@@ -22,14 +22,11 @@ setup(name='kodexa',
       packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.sinks', 'kodexa.pipeline',
                 'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.cloud', 'kodexa_cloud'],
       install_requires=[
-          'addict',
-          'requests',
-          'msgpack',
-          'urllib3',
-          'python_dateutil',
-          'certifi',
-          'six',
-          'pydantic[email]==1.4'
+          'addict==2.2.1',
+          'requests=2.23.0',
+          'msgpack==1.0.0',
+          'urllib3==1.25.8',
+          'pydantic==1.4'
       ],
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])
