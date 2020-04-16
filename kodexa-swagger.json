@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.160",
+    "version": "${git.build.version}",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -15,7 +15,7 @@
       "url": "https://developer.kodexa.com/licensing"
     }
   },
-  "host": "quantum.kodexa.com",
+  "host": "localhost:8080",
   "basePath": "/",
   "tags": [
     {
@@ -3521,8 +3521,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createPipelineSessionBySlug",
-        "operationId": "createPipelineSessionBySlugUsingPOST",
+        "summary": "createPipelineSession",
+        "operationId": "createPipelineSessionUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3531,9 +3531,9 @@
         ],
         "parameters": [
           {
-            "name": "pipeline",
+            "name": "pipelineId",
             "in": "query",
-            "description": "pipeline",
+            "description": "pipelineId",
             "required": true,
             "type": "string"
           },
@@ -4272,19 +4272,16 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingGET",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingGET",
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4294,22 +4291,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingHEAD",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingHEAD",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4319,22 +4313,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPOST",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPOST",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4344,22 +4335,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPUT",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPUT",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4369,19 +4357,16 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingDELETE",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingDELETE",
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4391,22 +4376,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingOPTIONS",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingOPTIONS",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4416,22 +4398,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPATCH",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPATCH",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4734,6 +4713,9 @@
           "type": "string"
         },
         "id": {
+          "type": "string"
+        },
+        "inputId": {
           "type": "string"
         },
         "payload": {
