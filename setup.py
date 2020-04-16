@@ -23,7 +23,7 @@ setup(name='kodexa',
                 'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.cloud', 'kodexa_cloud'],
       install_requires=[
           'addict==2.2.1',
-          'requests=2.23.0',
+          'requests==2.23.0',
           'msgpack==1.0.0',
           'urllib3==1.25.8',
           'pydantic==1.4'
