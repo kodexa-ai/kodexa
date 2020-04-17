@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.166",
+    "version": "2.0.169",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -3521,8 +3521,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createPipelineSession",
-        "operationId": "createPipelineSessionUsingPOST",
+        "summary": "createServiceSessionBySlug",
+        "operationId": "createServiceSessionBySlugUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3531,9 +3531,9 @@
         ],
         "parameters": [
           {
-            "name": "pipelineId",
+            "name": "service",
             "in": "query",
-            "description": "pipelineId",
+            "description": "service",
             "required": true,
             "type": "string"
           },
@@ -3681,130 +3681,18 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "getStoreContent",
-        "operationId": "getStoreContentUsingGET",
+        "summary": "getEvents",
+        "operationId": "getEventsUsingGET",
         "produces": [
           "application/json"
         ],
         "parameters": [
-          {
-            "name": "Page number (default 1)",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "Page size (default 20)",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "Simple filter to apply",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "Sorts to apply",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "filters[0].columnName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "filters[0].value",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "queryComplexFilter.dataType",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "queryComplexFilter.field",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "queryComplexFilter.ignoreCase",
-            "in": "query",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "name": "queryComplexFilter.logic",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "and",
-              "or"
-            ]
-          },
-          {
-            "name": "queryComplexFilter.operator",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "contains",
-              "doesnotcontain",
-              "endswith",
-              "startswith",
-              "eq",
-              "neq",
-              "gte",
-              "gt",
-              "lte",
-              "lt",
-              "gte_date",
-              "lte_date",
-              "isnull",
-              "isnotnull",
-              "in",
-              "isempty"
-            ]
-          },
-          {
-            "name": "queryComplexFilter.value",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
           {
             "name": "sessionId",
             "in": "path",
             "description": "sessionId",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "sorts[0].columnName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "sorts[0].direction",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "asc",
-              "desc"
-            ]
           },
           {
             "name": "x-access-token",
@@ -3892,7 +3780,7 @@
           "cloud-session-controller"
         ],
         "summary": "getStoreContent",
-        "operationId": "getStoreContentUsingGET_1",
+        "operationId": "getStoreContentUsingGET",
         "produces": [
           "application/json"
         ],
@@ -4636,6 +4524,9 @@
                 "CLOSED"
               ]
             },
+            "token": {
+              "type": "string"
+            },
             "type": {
               "type": "string"
             }
@@ -4686,6 +4577,9 @@
                 "OPEN",
                 "CLOSED"
               ]
+            },
+            "token": {
+              "type": "string"
             },
             "type": {
               "type": "string"
@@ -4738,6 +4632,8 @@
           "enum": [
             "START_EXECUTION",
             "STEP_UPDATE",
+            "NEW_SESSION",
+            "CLOSE_SESSION",
             "BOT_NOTIFICATION"
           ]
         }
@@ -4953,6 +4849,9 @@
                 "CLOSED"
               ]
             },
+            "token": {
+              "type": "string"
+            },
             "type": {
               "type": "string"
             }
@@ -4995,6 +4894,9 @@
             "OPEN",
             "CLOSED"
           ]
+        },
+        "token": {
+          "type": "string"
         },
         "type": {
           "type": "string"
