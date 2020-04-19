@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.175",
+    "version": "2.0.176",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -4642,6 +4642,7 @@
       "required": [
         "id",
         "sessionId",
+        "token",
         "type"
       ],
       "properties": {
@@ -4673,6 +4674,9 @@
           "$ref": "#/definitions/CloudExecutionStep"
         },
         "subType": {
+          "type": "string"
+        },
+        "token": {
           "type": "string"
         },
         "type": {
