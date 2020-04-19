@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.169",
+    "version": "2.0.175",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -85,6 +85,10 @@
     {
       "name": "service-request-controller",
       "description": "Service Request Controller"
+    },
+    {
+      "name": "web-hook-controller",
+      "description": "Web Hook Controller"
     }
   ],
   "paths": {
@@ -3521,8 +3525,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createServiceSessionBySlug",
-        "operationId": "createServiceSessionBySlugUsingPOST",
+        "summary": "createPipelineSession",
+        "operationId": "createPipelineSessionUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3531,9 +3535,9 @@
         ],
         "parameters": [
           {
-            "name": "service",
+            "name": "pipelineId",
             "in": "query",
-            "description": "service",
+            "description": "pipelineId",
             "required": true,
             "type": "string"
           },
@@ -4145,6 +4149,50 @@
             "schema": {
               "$ref": "#/definitions/PlatformUser"
             }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/webhooks/{id}": {
+      "post": {
+        "tags": [
+          "web-hook-controller"
+        ],
+        "summary": "processWebHook",
+        "operationId": "processWebHookUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "payload",
+            "description": "payload",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         },
         "security": [
@@ -6450,6 +6498,35 @@
         }
       },
       "title": "View"
+    },
+    "WebHookDeployment": {
+      "title": "WebHookDeployment",
+      "allOf": [
+        {
+          "$ref": "#/definitions/DeploymentMetadata"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "accessToken": {
+              "type": "string"
+            },
+            "botId": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "title": "WebHookDeployment"
+        }
+      ]
     }
   }
 }
