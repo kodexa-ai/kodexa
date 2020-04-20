@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.176",
+    "version": "2.0.183",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -3507,10 +3507,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/CloudSession"
-              }
+              "$ref": "#/definitions/PageOfCloudSession"
             }
           }
         },
@@ -3525,8 +3522,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createPipelineSession",
-        "operationId": "createPipelineSessionUsingPOST",
+        "summary": "createPipelineSessionBySlug",
+        "operationId": "createPipelineSessionBySlugUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3535,9 +3532,9 @@
         ],
         "parameters": [
           {
-            "name": "pipelineId",
+            "name": "pipeline",
             "in": "query",
-            "description": "pipelineId",
+            "description": "pipeline",
             "required": true,
             "type": "string"
           },
@@ -3631,6 +3628,48 @@
         "deprecated": false
       }
     },
+    "/api/sessions/{id}/executions": {
+      "get": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "listExecutions",
+        "operationId": "listExecutionsUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageOfCloudExecution"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
     "/api/sessions/{id}/executions/{executionId}": {
       "get": {
         "tags": [
@@ -3669,6 +3708,48 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/CloudExecution"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/sessions/{sessionId}": {
+      "get": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "getSession",
+        "operationId": "getSessionUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "description": "sessionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CloudSession"
             }
           }
         },
@@ -4556,8 +4637,8 @@
               "type": "string"
             },
             "lastAccessed": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "example": "yyyy-MM-dd HH:mm:ss.SSS"
             },
             "pipelineTemplates": {
               "type": "array",
@@ -4610,8 +4691,8 @@
               "type": "string"
             },
             "lastAccessed": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "example": "yyyy-MM-dd HH:mm:ss.SSS"
             },
             "pipelineTemplates": {
               "type": "array",
@@ -4652,6 +4733,10 @@
             "$ref": "#/definitions/ContentObject"
           }
         },
+        "created": {
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
+        },
         "executionId": {
           "type": "string"
         },
@@ -4674,6 +4759,9 @@
           "$ref": "#/definitions/CloudExecutionStep"
         },
         "subType": {
+          "type": "string"
+        },
+        "target": {
           "type": "string"
         },
         "token": {
@@ -4709,7 +4797,7 @@
         },
         "end": {
           "type": "string",
-          "format": "date-time"
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "exceptionDetails": {
           "$ref": "#/definitions/ExceptionDetails"
@@ -4739,7 +4827,7 @@
         },
         "start": {
           "type": "string",
-          "format": "date-time"
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "status": {
           "type": "string",
@@ -4882,8 +4970,8 @@
               "type": "string"
             },
             "lastAccessed": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "example": "yyyy-MM-dd HH:mm:ss.SSS"
             },
             "pipeline": {
               "$ref": "#/definitions/Pipeline"
@@ -4931,8 +5019,8 @@
           "type": "string"
         },
         "lastAccessed": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
         },
         "pipelineTemplates": {
           "type": "array",
@@ -5633,6 +5721,100 @@
         }
       },
       "title": "PageOfCloudEvent"
+    },
+    "PageOfCloudExecution": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudExecution"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfCloudExecution"
+    },
+    "PageOfCloudSession": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CloudSession"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfCloudSession"
     },
     "PageOfContentService": {
       "type": "object",
