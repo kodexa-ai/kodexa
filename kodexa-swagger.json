@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.183",
+    "version": "${git.build.version}",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -15,7 +15,7 @@
       "url": "https://developer.kodexa.com/licensing"
     }
   },
-  "host": "quantum.kodexa.com",
+  "host": "localhost:8080",
   "basePath": "/",
   "tags": [
     {
@@ -3864,8 +3864,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "getStoreContent",
-        "operationId": "getStoreContentUsingGET",
+        "summary": "getStore",
+        "operationId": "getStoreUsingGET",
         "produces": [
           "application/json"
         ],
@@ -3903,7 +3903,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/CloudStore"
             }
           }
         },
@@ -4289,16 +4289,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingGET",
+        "summary": "error",
+        "operationId": "errorUsingGET",
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4308,19 +4311,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingHEAD",
+        "summary": "error",
+        "operationId": "errorUsingHEAD",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4330,19 +4336,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPOST",
+        "summary": "error",
+        "operationId": "errorUsingPOST",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4352,19 +4361,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPUT",
+        "summary": "error",
+        "operationId": "errorUsingPUT",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4374,16 +4386,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingDELETE",
+        "summary": "error",
+        "operationId": "errorUsingDELETE",
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4393,19 +4408,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingOPTIONS",
+        "summary": "error",
+        "operationId": "errorUsingOPTIONS",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4415,19 +4433,22 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "errorHtml",
-        "operationId": "errorHtmlUsingPATCH",
+        "summary": "error",
+        "operationId": "errorUsingPATCH",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "text/html"
+          "*/*"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/ModelAndView"
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
             }
           }
         },
@@ -4638,7 +4659,7 @@
             },
             "lastAccessed": {
               "type": "string",
-              "example": "yyyy-MM-dd HH:mm:ss.SSS"
+              "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
             },
             "pipelineTemplates": {
               "type": "array",
@@ -4692,7 +4713,7 @@
             },
             "lastAccessed": {
               "type": "string",
-              "example": "yyyy-MM-dd HH:mm:ss.SSS"
+              "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
             },
             "pipelineTemplates": {
               "type": "array",
@@ -4735,7 +4756,7 @@
         },
         "created": {
           "type": "string",
-          "example": "yyyy-MM-dd HH:mm:ss.SSS"
+          "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         },
         "executionId": {
           "type": "string"
@@ -4797,7 +4818,7 @@
         },
         "end": {
           "type": "string",
-          "example": "yyyy-MM-dd HH:mm:ss.SSS"
+          "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         },
         "exceptionDetails": {
           "$ref": "#/definitions/ExceptionDetails"
@@ -4827,7 +4848,7 @@
         },
         "start": {
           "type": "string",
-          "example": "yyyy-MM-dd HH:mm:ss.SSS"
+          "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         },
         "status": {
           "type": "string",
@@ -4875,7 +4896,7 @@
         },
         "end": {
           "type": "string",
-          "format": "date-time"
+          "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         },
         "exceptionDetails": {
           "$ref": "#/definitions/ExceptionDetails"
@@ -4898,7 +4919,7 @@
         },
         "start": {
           "type": "string",
-          "format": "date-time"
+          "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         },
         "status": {
           "type": "string",
@@ -4971,7 +4992,7 @@
             },
             "lastAccessed": {
               "type": "string",
-              "example": "yyyy-MM-dd HH:mm:ss.SSS"
+              "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
             },
             "pipeline": {
               "$ref": "#/definitions/Pipeline"
@@ -5020,7 +5041,7 @@
         },
         "lastAccessed": {
           "type": "string",
-          "example": "yyyy-MM-dd HH:mm:ss.SSS"
+          "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
         },
         "pipelineTemplates": {
           "type": "array",
@@ -5047,10 +5068,16 @@
     "CloudStore": {
       "type": "object",
       "properties": {
+        "data": {
+          "type": "object"
+        },
         "id": {
           "type": "string"
         },
         "name": {
+          "type": "string"
+        },
+        "type": {
           "type": "string"
         }
       },
@@ -5520,6 +5547,10 @@
         }
       },
       "title": "Membership"
+    },
+    "Option": {
+      "type": "object",
+      "title": "Option"
     },
     "Organization": {
       "type": "object",
@@ -6281,6 +6312,12 @@
     "PipelineMetadata": {
       "type": "object",
       "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PipelineParameterMetadata"
+          }
+        },
         "steps": {
           "type": "array",
           "items": {
@@ -6290,9 +6327,27 @@
       },
       "title": "PipelineMetadata"
     },
+    "PipelineParameterMetadata": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "option": {
+          "$ref": "#/definitions/Option"
+        }
+      },
+      "title": "PipelineParameterMetadata"
+    },
     "PipelineStepMetadata": {
       "type": "object",
       "properties": {
+        "condition": {
+          "type": "string"
+        },
+        "conditional": {
+          "type": "boolean"
+        },
         "name": {
           "type": "string"
         },
@@ -6461,6 +6516,9 @@
               "type": "string"
             },
             "channelId": {
+              "type": "string"
+            },
+            "teamId": {
               "type": "string"
             },
             "type": {
