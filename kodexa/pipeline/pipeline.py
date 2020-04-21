@@ -43,7 +43,7 @@ class InMemoryStoreProvider:
         self.stores[name] = store
 
     def get_store(self, name):
-        return
+        return self.stores[name] if name in self.stores else None
 
     def get_store_names(self):
         return self.stores.keys()
