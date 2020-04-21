@@ -31,6 +31,24 @@ class InMemoryContentProvider:
         self.content_objects[content_object.id] = content
 
 
+class InMemoryStoreProvider:
+    """
+    A store provider is used to support getting stores from the pipeline
+    """
+
+    def __init__(self):
+        self.stores = {}
+
+    def put_store(self, name: str, store):
+        self.stores[name] = store
+
+    def get_store(self, name):
+        return
+
+    def get_store_names(self):
+        return self.stores.keys()
+
+
 class PipelineContext:
     """
     Pipeline context is created when you create a pipeline and it provides a way to access information about the
@@ -39,19 +57,20 @@ class PipelineContext:
     It also provides access to the 'stores' that have been added to the pipeline
     """
 
-    def __init__(self, content_provider=InMemoryContentProvider(), existing_content_objects=None,
+    def __init__(self, content_provider=InMemoryContentProvider(), store_provider=InMemoryStoreProvider(),
+                 existing_content_objects=None,
                  context=None):
         if context is None:
             context = {}
         if existing_content_objects is None:
             existing_content_objects = []
         self.transaction_id = str(uuid4())
-        self.stores = {}
         self.statistics = PipelineStatistics()
         self.output_document = None
         self.content_objects: List[ContentObject] = existing_content_objects
         self.content_provider = content_provider
         self.context = context
+        self.store_provider = store_provider
 
     def get_context(self):
         return self.context
@@ -72,7 +91,7 @@ class PipelineContext:
         :param name: the name to refer to the store with
         :param store: the instance of the store
         """
-        self.stores[name] = store
+        self.store_provider.put_store(name, store)
 
     def get_store_names(self):
         """
@@ -80,7 +99,7 @@ class PipelineContext:
 
         :return: the list of store names
         """
-        return list(self.stores.keys())
+        return self.store_provider.get_store_names()
 
     def set_output_document(self, output_document):
         """
@@ -99,12 +118,12 @@ class PipelineContext:
         :param default: optionally the default to create the store as if it isn't there
         :return: the store, or None is not available
         """
-        store = self.stores[name] if name in self.stores else None
+        store = self.store_provider.get_store(name) if name in self.get_store_names() else None
 
         if not store and default:
-            self.stores[name] = default
+            self.store_provider.put_store(name,default)
 
-        return self.stores[name]
+        return self.store_provider.get_store(name)
 
 
 class Pipeline:
