@@ -5,6 +5,8 @@ from pathlib import Path
 
 from kodexa.model import Document
 
+logger = logging.getLogger('kodexa-stores')
+
 
 class JsonDocumentStore:
     """
@@ -143,7 +145,11 @@ class TableDataStore:
 
     """
 
-    def __init__(self, columns=[], rows=[]):
+    def __init__(self, columns=None, rows=None):
+        if rows is None:
+            rows = []
+        if columns is None:
+            columns = []
         self.columns = columns
         self.rows = rows
 
@@ -187,8 +193,10 @@ class DictDataStore:
     This is a good store when you are capturing nested or semi-structured data
     """
 
-    def __init__(self):
-        self.dicts = []
+    def __init__(self, dicts=None):
+        if dicts is None:
+            dicts = []
+        self.dicts = dicts
 
     """
     Return the store as a dict for serialization
@@ -217,3 +225,25 @@ class DictDataStore:
         :return: number of dictionaries
         """
         return len(self.dicts)
+
+
+class DataStoreHelper:
+    """
+    A small helper that can convert a dictionary back into a store
+    type
+    """
+
+    @staticmethod
+    def from_dict(dict):
+        if 'type' in dict:
+            if 'table' == dict['type']:
+                columns = dict['data']['columns'] if 'columns' in dict['data'] else None
+                rows = dict['data']['rows'] if 'rows' in dict['data'] else None
+                return TableDataStore(columns=columns, rows=rows)
+            elif 'dictionary' == dict['type']:
+                return DictDataStore(dict['data']['dicts'])
+            else:
+                return None
+        else:
+            logger.info(f"Unknown store")
+            return None
