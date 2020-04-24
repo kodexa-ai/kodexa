@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "${git.build.version}",
+    "version": "2.0.206",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -15,7 +15,7 @@
       "url": "https://developer.kodexa.com/licensing"
     }
   },
-  "host": "localhost:8080",
+  "host": "quantum.kodexa.com",
   "basePath": "/",
   "tags": [
     {
@@ -3605,6 +3605,13 @@
             "type": "string"
           },
           {
+            "name": "parameters",
+            "in": "query",
+            "description": "parameters",
+            "required": false,
+            "type": "string"
+          },
+          {
             "name": "x-access-token",
             "in": "header",
             "description": "x-access-token",
@@ -4289,19 +4296,16 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingGET",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingGET",
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4311,22 +4315,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingHEAD",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingHEAD",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4336,22 +4337,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPOST",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPOST",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4361,22 +4359,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPUT",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPUT",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4386,19 +4381,16 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingDELETE",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingDELETE",
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4408,22 +4400,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingOPTIONS",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingOPTIONS",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4433,22 +4422,19 @@
         "tags": [
           "basic-error-controller"
         ],
-        "summary": "error",
-        "operationId": "errorUsingPATCH",
+        "summary": "errorHtml",
+        "operationId": "errorHtmlUsingPATCH",
         "consumes": [
           "application/json"
         ],
         "produces": [
-          "*/*"
+          "text/html"
         ],
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "object"
-              }
+              "$ref": "#/definitions/ModelAndView"
             }
           }
         },
@@ -4551,6 +4537,14 @@
         },
         "type": {
           "type": "string"
+        },
+        "x": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "y": {
+          "type": "integer",
+          "format": "int32"
         }
       },
       "title": "BotEventTrigger"
@@ -4836,6 +4830,9 @@
         "outputId": {
           "type": "string"
         },
+        "parameters": {
+          "type": "object"
+        },
         "pipelineTemplateId": {
           "type": "string"
         },
@@ -5083,6 +5080,22 @@
       },
       "title": "CloudStore"
     },
+    "ConnectorMetadata": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "discriminator": "type",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "title": "ConnectorMetadata"
+    },
     "ContentObject": {
       "type": "object",
       "properties": {
@@ -5261,10 +5274,6 @@
     },
     "DeploymentMetadata": {
       "type": "object",
-      "required": [
-        "type"
-      ],
-      "discriminator": "type",
       "properties": {
         "accessToken": {
           "type": "string"
@@ -5272,17 +5281,20 @@
         "botId": {
           "type": "string"
         },
-        "type": {
-          "type": "string"
+        "connectors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ConnectorMetadata"
+          }
         }
       },
       "title": "DeploymentMetadata"
     },
-    "EmailDeployment": {
-      "title": "EmailDeployment",
+    "EmailConnector": {
+      "title": "EmailConnector",
       "allOf": [
         {
-          "$ref": "#/definitions/DeploymentMetadata"
+          "$ref": "#/definitions/ConnectorMetadata"
         },
         {
           "type": "object",
@@ -5290,20 +5302,17 @@
             "type"
           ],
           "properties": {
-            "accessToken": {
-              "type": "string"
-            },
             "address": {
               "type": "string"
             },
-            "botId": {
+            "name": {
               "type": "string"
             },
             "type": {
               "type": "string"
             }
           },
-          "title": "EmailDeployment"
+          "title": "EmailConnector"
         }
       ]
     },
@@ -5488,6 +5497,14 @@
             "ACTION",
             "DECISION"
           ]
+        },
+        "x": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "y": {
+          "type": "integer",
+          "format": "int32"
         }
       },
       "title": "GraphCell"
@@ -5550,6 +5567,26 @@
     },
     "Option": {
       "type": "object",
+      "properties": {
+        "advanced": {
+          "type": "boolean"
+        },
+        "default": {
+          "type": "object"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
       "title": "Option"
     },
     "Organization": {
@@ -6315,7 +6352,7 @@
         "parameters": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/PipelineParameterMetadata"
+            "$ref": "#/definitions/Option"
           }
         },
         "steps": {
@@ -6326,18 +6363,6 @@
         }
       },
       "title": "PipelineMetadata"
-    },
-    "PipelineParameterMetadata": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "option": {
-          "$ref": "#/definitions/Option"
-        }
-      },
-      "title": "PipelineParameterMetadata"
     },
     "PipelineStepMetadata": {
       "type": "object",
@@ -6355,6 +6380,12 @@
           "type": "object"
         },
         "organizationSlug": {
+          "type": "string"
+        },
+        "parameterized": {
+          "type": "boolean"
+        },
+        "ref": {
           "type": "string"
         },
         "slug": {
@@ -6497,11 +6528,11 @@
       },
       "title": "ServiceRequest"
     },
-    "SlackDeployment": {
-      "title": "SlackDeployment",
+    "SlackConnector": {
+      "title": "SlackConnector",
       "allOf": [
         {
-          "$ref": "#/definitions/DeploymentMetadata"
+          "$ref": "#/definitions/ConnectorMetadata"
         },
         {
           "type": "object",
@@ -6509,13 +6540,10 @@
             "type"
           ],
           "properties": {
-            "accessToken": {
-              "type": "string"
-            },
-            "botId": {
-              "type": "string"
-            },
             "channelId": {
+              "type": "string"
+            },
+            "name": {
               "type": "string"
             },
             "teamId": {
@@ -6525,7 +6553,7 @@
               "type": "string"
             }
           },
-          "title": "SlackDeployment"
+          "title": "SlackConnector"
         }
       ]
     },
@@ -6562,14 +6590,14 @@
         "configuration": {
           "type": "object"
         },
+        "synapseType": {
+          "type": "string"
+        },
         "targetCellIds": {
           "type": "array",
           "items": {
             "type": "string"
           }
-        },
-        "type": {
-          "type": "string"
         }
       },
       "title": "Synapse"
@@ -6743,11 +6771,11 @@
       },
       "title": "View"
     },
-    "WebHookDeployment": {
-      "title": "WebHookDeployment",
+    "WebhookConnector": {
+      "title": "WebhookConnector",
       "allOf": [
         {
-          "$ref": "#/definitions/DeploymentMetadata"
+          "$ref": "#/definitions/ConnectorMetadata"
         },
         {
           "type": "object",
@@ -6755,10 +6783,7 @@
             "type"
           ],
           "properties": {
-            "accessToken": {
-              "type": "string"
-            },
-            "botId": {
+            "name": {
               "type": "string"
             },
             "type": {
@@ -6768,7 +6793,7 @@
               "type": "string"
             }
           },
-          "title": "WebHookDeployment"
+          "title": "WebhookConnector"
         }
       ]
     }
