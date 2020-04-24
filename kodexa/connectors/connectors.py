@@ -130,8 +130,9 @@ def add_connector(connector):
 
 
 def get_source(document):
-    connector = get_connector(document.metadata.connector,
-                              document.metadata.connector_options if "connector_options" in document.metadata else {})
+    connector = get_connector(document.metadata['connector'],
+                              document.metadata[
+                                  'connector_options'] if 'connector_options' in document.metadata else {})
     return connector.get_source(document)
 
 
