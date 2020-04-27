@@ -12,7 +12,7 @@ from kodexa_cloud import ContentObject
 
 
 def new_id():
-    return str(uuid.uuid4())
+    return str(uuid.uuid4()).replace("-", "")
 
 
 class InMemoryContentProvider:
@@ -121,7 +121,7 @@ class PipelineContext:
         store = self.store_provider.get_store(name) if name in self.get_store_names() else None
 
         if not store and default:
-            self.store_provider.put_store(name,default)
+            self.store_provider.put_store(name, default)
 
         return self.store_provider.get_store(name)
 
