@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.206",
+    "version": "2.0.218",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -1586,6 +1586,56 @@
         "responses": {
           "200": {
             "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/deployments/{id}/status": {
+      "get": {
+        "tags": [
+          "deployment-controller"
+        ],
+        "summary": "Get the cloud status of a deployment",
+        "operationId": "getCloudDeploymentUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/CloudDeployment"
+            }
           },
           "401": {
             "description": "You are not authorized to view the resource"
@@ -3522,8 +3572,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createPipelineSessionBySlug",
-        "operationId": "createPipelineSessionBySlugUsingPOST",
+        "summary": "createPipelineSession",
+        "operationId": "createPipelineSessionUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3532,9 +3582,9 @@
         ],
         "parameters": [
           {
-            "name": "pipeline",
+            "name": "pipelineId",
             "in": "query",
-            "description": "pipeline",
+            "description": "pipelineId",
             "required": true,
             "type": "string"
           },
@@ -4733,6 +4783,29 @@
         }
       ]
     },
+    "CloudDeployment": {
+      "type": "object",
+      "properties": {
+        "cloudBotSession": {
+          "$ref": "#/definitions/CloudBotSession"
+        },
+        "deployed": {
+          "type": "string",
+          "example": "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+        },
+        "id": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "NOT_DEPLOYED",
+            "DEPLOYED"
+          ]
+        }
+      },
+      "title": "CloudDeployment"
+    },
     "CloudEvent": {
       "type": "object",
       "required": [
@@ -4879,6 +4952,12 @@
     "CloudExecutionStep": {
       "type": "object",
       "properties": {
+        "condition": {
+          "type": "string"
+        },
+        "conditional": {
+          "type": "boolean"
+        },
         "contentObjects": {
           "type": "array",
           "items": {
@@ -4909,6 +4988,9 @@
         },
         "outputId": {
           "type": "string"
+        },
+        "parameterized": {
+          "type": "boolean"
         },
         "processingTime": {
           "type": "integer",
@@ -6482,6 +6564,32 @@
         }
       },
       "title": "RegisterUser"
+    },
+    "ScheduleConnector": {
+      "title": "ScheduleConnector",
+      "allOf": [
+        {
+          "$ref": "#/definitions/ConnectorMetadata"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "schedule": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "title": "ScheduleConnector"
+        }
+      ]
     },
     "ServiceRequest": {
       "type": "object",
