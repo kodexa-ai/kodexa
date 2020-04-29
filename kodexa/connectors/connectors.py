@@ -88,13 +88,13 @@ class UrlConnector:
         self.completed = False
 
     def get_source(self, document):
-        if 'headers' in document.metadata.connector_options:
+        if 'headers' in document.metadata['connector_options']:
             opener = urllib.request.build_opener()
-            for header in document.metadata.connector_options['headers']:
-                opener.addheaders = [(header, document.metadata.connector_options['headers'][header])]
+            for header in document.metadata['connector_options']['headers']:
+                opener.addheaders = [(header, document.metadata['connector_options']['headers'][header])]
             urllib.request.install_opener(opener)
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            urllib.request.urlretrieve(document.metadata.connector_options['url'], tmp_file.name)
+            urllib.request.urlretrieve(document.metadata['connector_options']['url'], tmp_file.name)
 
             return open(tmp_file.name, 'rb')
 
