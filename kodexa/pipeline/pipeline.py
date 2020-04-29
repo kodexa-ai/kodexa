@@ -7,8 +7,9 @@ from io import StringIO
 from typing import List
 from uuid import uuid4
 
-from kodexa.model import Document
+from kodexa import DocumentMetadata
 from kodexa.connectors import FolderConnector
+from kodexa.model import Document
 from kodexa_cloud import ContentObject
 
 
@@ -276,7 +277,7 @@ class Pipeline:
         if headers is None:
             headers = {}
         url_document = Document()
-        url_document.metadata = {'connector': 'url', 'connector_options': {}}
+        url_document.metadata = DocumentMetadata({'connector': 'url', 'connector_options': {}})
         url_document.metadata['connector_options']['url'] = url
         url_document.metadata['connector_options']['headers'] = headers
         return Pipeline(url_document)
@@ -284,7 +285,7 @@ class Pipeline:
     @classmethod
     def from_file(cls, file):
         url_document = Document()
-        url_document.metadata = {'connector': 'file-handle', 'connector_options': {'file': file}}
+        url_document.metadata = DocumentMetadata({'connector': 'file-handle', 'connector_options': {'file': file}})
         return Pipeline(url_document)
 
 
