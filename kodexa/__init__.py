@@ -4,12 +4,11 @@
 
 
 """
-
+from .model import *
 from .connectors import *
 from .extractors import *
 from .cloud import *
 from .mixins import *
-from .model import *
 from .pipeline import *
 from .sinks import *
 from .steps import *

@@ -5,7 +5,8 @@ import time
 import requests
 from addict import Dict
 
-from kodexa import get_source, Document, FileHandleConnector
+from kodexa.connectors import get_source, FileHandleConnector
+from kodexa.model import Document
 from kodexa.pipeline import PipelineContext
 from kodexa.stores import TableDataStore
 

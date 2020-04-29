@@ -161,7 +161,6 @@ def test_url_pipeline():
     print(new_doc.content_node.get_all_content())
 
 
-
 def test_function_step_with_exception():
     document_store = JsonDocumentStore("/tmp/test-json-store", force_initialize=True)
     document_store.add(create_document())
@@ -231,3 +230,9 @@ def test_table_stores_with_extractor():
     context = pipeline.run()
 
     assert pipeline.context.get_store('output').count() == 1
+
+
+def test_basic_url_pipeline():
+
+    pipeline = Pipeline.from_url('http://www.google.com')
+    pipeline.run()
