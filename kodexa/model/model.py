@@ -3,28 +3,19 @@ import os
 import uuid
 
 import msgpack
+from addict import Dict
 
 from kodexa.mixins import registry
 from kodexa.mixins.registry import get_mixin
 
 
-class DocumentMetadata(dict):
+class DocumentMetadata(Dict):
     """
     A flexible dict based approach to capturing metadata for the document
-
-    Sub-classes dict, and further allows attribute-like access to dictionary items.
-
-        >>> d = DocumentMetadata({'a': 1})
-        >>> d.a, d['a'], d.get('a')
-        (1, 1, 1)
-        >>> d.b = 2
-        >>> d.b, d['b']
-        (2, 2)
     """
 
     def __init__(self, *args, **kwargs):
-        super(DocumentMetadata, self).__init__(*args, **kwargs)
-        self.__dict__ = self
+        super().__init__(*args, **kwargs)
 
 
 class ContentNode(object):
