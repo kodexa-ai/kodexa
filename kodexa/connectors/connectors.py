@@ -88,9 +88,9 @@ class UrlConnector:
         self.completed = False
 
     def get_source(self, document):
-        if 'headers' in document.metadata['connector_options']:
+        if 'headers' in document.metadata.connector_options:
             opener = urllib.request.build_opener()
-            for header in document.metadata['connector_options']['headers']:
+            for header in document.metadata.connector_options.headers:
                 opener.addheaders = [(header, document.metadata['connector_options']['headers'][header])]
             urllib.request.install_opener(opener)
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
