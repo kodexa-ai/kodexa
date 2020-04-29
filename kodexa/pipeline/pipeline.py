@@ -7,7 +7,7 @@ from io import StringIO
 from typing import List
 from uuid import uuid4
 
-from kodexa import Document
+from kodexa import Document, FolderConnector
 from kodexa_cloud import ContentObject
 
 
@@ -269,6 +269,22 @@ class Pipeline:
         logging.info(f"Completed pipeline {self.name}")
 
         return self.context
+
+    @classmethod
+    def from_url(cls, url, headers=None):
+        if headers is None:
+            headers = {}
+        url_document = Document()
+        url_document.metadata = {'connector': 'url', 'connector_options': {}}
+        url_document.metadata['connector_options']['url'] = url
+        url_document.metadata['connector_options']['headers'] = headers
+        return Pipeline(url_document)
+
+    @classmethod
+    def from_file(cls, file):
+        url_document = Document()
+        url_document.metadata = {'connector': 'file-handle', 'connector_options': {'file': file}}
+        return Pipeline(url_document)
 
 
 class PipelineStatistics:

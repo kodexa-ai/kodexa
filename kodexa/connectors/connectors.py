@@ -50,7 +50,7 @@ class FileHandleConnector:
 
     @staticmethod
     def get_name():
-        return "file-handle"
+        return 'file-handle'
 
     def __init__(self, file):
         self.file = file
@@ -58,7 +58,7 @@ class FileHandleConnector:
         self.completed = False
 
     def get_source(self, document):
-        return open(join(self.file, document.metadata.source_path), 'rb')
+        return open(join(self.file, document.metadata['connector_options']['file']), 'rb')
 
     def __iter__(self):
         return self
@@ -79,7 +79,9 @@ class UrlConnector:
     def get_name():
         return "url"
 
-    def __init__(self, url, headers={}):
+    def __init__(self, url, headers=None):
+        if headers is None:
+            headers = {}
         self.url = url
         self.headers = headers
         self.index = 0

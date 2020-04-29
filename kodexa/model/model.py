@@ -413,6 +413,11 @@ class DefaultDocumentRender:
         return bundle
 
 
+class SourceMetadata(object):
+
+    pass
+
+
 class Document(object):
     """
     A Document is a collection of metadata and a set of content nodes.
@@ -421,7 +426,9 @@ class Document(object):
     def __str__(self):
         return f"MDocument {self.uuid} {self.metadata}"
 
-    def __init__(self, metadata: DocumentMetadata, content_node: ContentNode = None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, connector=SourceMetadata()):
+        if metadata is None:
+            metadata = DocumentMetadata()
         self.metadata: DocumentMetadata = metadata
         self.content_node: ContentNode = content_node
         self.virtual: bool = False
