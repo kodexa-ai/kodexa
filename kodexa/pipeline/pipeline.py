@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from kodexa.model import Document
 from kodexa.connectors import FolderConnector
-from kodexa_cloud.cloud import ContentObject
+from kodexa_cloud import ContentObject
 
 
 def new_id():
