@@ -4,7 +4,7 @@ import pytest
 from texttable import Texttable
 
 from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaCloudService, KodexaCloudPipeline
-from kodexa_cloud import CloudSession
+from kodexa_cloud.cloud import CloudSession
 
 
 def get_test_directory():
