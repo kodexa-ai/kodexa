@@ -414,7 +414,6 @@ class DefaultDocumentRender:
 
 
 class SourceMetadata(object):
-
     pass
 
 

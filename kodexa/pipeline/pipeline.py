@@ -7,8 +7,9 @@ from io import StringIO
 from typing import List
 from uuid import uuid4
 
-from kodexa import Document, FolderConnector
-from kodexa_cloud import ContentObject
+from kodexa.model import Document
+from kodexa.connectors import FolderConnector
+from kodexa_cloud.cloud import ContentObject
 
 
 def new_id():

@@ -1,6 +1,7 @@
 import os
 
-from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, registry, DocumentRender
+from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, DocumentRender
+from kodexa.mixins import registry
 from kodexa.steps.common import TextParser
 
 
