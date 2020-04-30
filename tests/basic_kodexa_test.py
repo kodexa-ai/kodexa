@@ -13,7 +13,7 @@ def get_test_directory():
 
 # Commented out while we work on test credentials
 
-#@pytest.mark.skip(reason="not part of core tests")
+@pytest.mark.skip(reason="not part of core tests")
 def test_kodexa_service():
     document_sink = InMemoryDocumentSink()
 
