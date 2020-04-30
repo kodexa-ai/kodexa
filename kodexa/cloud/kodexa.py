@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import time
 
@@ -10,6 +11,7 @@ from kodexa.model import Document
 from kodexa.pipeline import PipelineContext
 from kodexa.stores import TableDataStore
 
+logger = logging.getLogger('kodexa.cloud')
 
 class KodexaCloudSession:
     """
@@ -45,7 +47,6 @@ class KodexaCloudSession:
                           data=data,
                           headers={"x-access-token": self.access_token}, files=files)
         execution = Dict(json.loads(r.text))
-        print(execution)
         return execution
 
     def wait_for_execution(self, execution):
@@ -56,12 +57,13 @@ class KodexaCloudSession:
                              headers={"x-access-token": self.access_token})
             execution = Dict(json.loads(r.text))
             if status != execution.status:
-                print(f"Status changed from {status} -> {execution.status}")
+                logger.info(f"Status changed from {status} -> {execution.status}")
                 status = execution.status
             time.sleep(1)
 
         if status == "FAILED":
-            print(execution)
+            logger.error("Failed to execution in session")
+            logger.exception(execution)
             raise Exception("Processing has failed")
 
         return execution
