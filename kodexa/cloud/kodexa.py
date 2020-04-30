@@ -13,6 +13,7 @@ from kodexa.stores import TableDataStore
 
 logger = logging.getLogger('kodexa.cloud')
 
+
 class KodexaCloudSession:
     """
     A Session on the Kodexa Cloud for leveraging pipelines and services
@@ -94,8 +95,12 @@ class KodexaCloudPipeline:
     Allow you to interact with a pipeline that has been deployed in the Kodexa Cloud
     """
 
-    def __init__(self, slug, version=None, attach_source=True, options={}, auth=[],
+    def __init__(self, slug, version=None, attach_source=True, options=None, auth=None,
                  cloud_url='https://cloud.kodexa.com', access_token=None):
+        if auth is None:
+            auth = []
+        if options is None:
+            options = {}
         self.slug = slug
         self.version = version
         self.attach_source = attach_source
