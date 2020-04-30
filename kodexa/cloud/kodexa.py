@@ -67,14 +67,9 @@ class KodexaCloudSession:
         return execution
 
     def get_output_document(self, execution):
-        final_reference = None
-        for document_reference in execution.documentReferences:
-            if document_reference.referenceType == 'OUTPUT':
-                final_reference = document_reference
-
-        if final_reference:
+        if execution.outputId:
             doc = requests.get(
-                f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/documents/{final_reference.cloudDocument.id}",
+                f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
                 headers={"x-access-token": self.access_token})
             return Document.from_msgpack(doc.content)
         else:

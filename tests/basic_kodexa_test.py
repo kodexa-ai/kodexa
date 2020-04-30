@@ -13,12 +13,12 @@ def get_test_directory():
 
 # Commented out while we work on test credentials
 
-@pytest.mark.skip(reason="not part of core tests")
+#@pytest.mark.skip(reason="not part of core tests")
 def test_kodexa_service():
     document_sink = InMemoryDocumentSink()
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='*.pdf'))
-    pipeline.add_step(KodexaCloudService(slug='kodexa/pdf-parse', attach_source=True))
+    pipeline.add_step(KodexaCloudService(slug='kodexa/pdf-parse', attach_source=True, cloud_url="https://quantum.kodexa.com"))
     pipeline.set_sink(document_sink)
     pipeline.run()
 
@@ -32,7 +32,7 @@ def test_kodexa_service():
 
 @pytest.mark.skip(reason="not part of core tests")
 def test_kodexa_pipeline():
-    context = KodexaCloudPipeline("kodexa/news-reader-demo", cloud_url="https://qa.kodexa.com").execute(
+    context = KodexaCloudPipeline("kodexa/news-reader-demo", cloud_url="https://quantum.kodexa.com").execute(
         get_test_directory() + "/news.html")
 
     print(context.get_store_names())
