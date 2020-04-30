@@ -58,7 +58,7 @@ class FileHandleConnector:
         self.completed = False
 
     def get_source(self, document):
-        return open(join(self.file, document.metadata['connector_options']['file']), 'rb')
+        return open(document.metadata['connector_options']['file'], 'rb')
 
     def __iter__(self):
         return self
