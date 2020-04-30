@@ -288,6 +288,10 @@ class Pipeline:
         url_document.metadata.connector_options.file = file
         return Pipeline(url_document)
 
+    @classmethod
+    def from_text(cls, text):
+        return Pipeline(Document.from_text(text))
+
 
 class PipelineStatistics:
     """

@@ -431,6 +431,12 @@ class Document(object):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
+    @classmethod
+    def from_text(cls, text):
+        new_document = Document()
+        new_document.content_node = new_document.create_node(type='text', content=text)
+        return new_document
+
     def get_root(self):
         """
         Get the root content node for the document (same as content_node)
@@ -575,7 +581,8 @@ class Document(object):
         """
         registry.add_mixin_to_document(mixin, self)
 
-    def create_node(self, type=type, content=None, virtual=False, parent=None, index=0):
+    def create_node(self, type: str = type, content: str = None, virtual: bool = False, parent: ContentNode = None,
+                    index: int = 0):
         """
         Creates a new node for the document, this doesn't add the node to the document however
         it does ensure that any mixins that have been applied to the document will also be
