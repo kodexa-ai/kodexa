@@ -62,3 +62,21 @@ API Documentation
 
    .. autoclass:: DictDataStore
       :members:
+
+.. automodule:: kodexa.steps.common
+   :members:
+
+   .. autoclass:: NodeTagger
+      :members:
+
+   .. autoclass:: TextParser
+      :members:
+
+   .. autoclass:: Rollup
+      :members:
+
+   .. autoclass:: ExtractTagsToKeyValuePair
+      :members:
+
+   .. autoclass:: JsonParser
+      :members:
