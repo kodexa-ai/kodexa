@@ -1,6 +1,6 @@
 import os
 
-from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, DocumentRender
+from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, DocumentRender, Document
 from kodexa.mixins import registry
 from kodexa.steps.common import TextParser
 
@@ -30,3 +30,15 @@ def test_hello_txt():
     assert document.content_node.type == 'text'
     assert document.content_node.content == 'Hello World'
     print(f"\n\n{DocumentRender(document).to_text()}")
+
+
+def test_text_find():
+    document = Document.from_text('Hello world')
+    nodes = document.content_node.findall(type_re='.*')
+
+    assert len(nodes) == 1
+
+    document = Document.from_text('Hello world')
+    nodes = document.content_node.findall(content_re='.*')
+
+    assert len(nodes) == 1
