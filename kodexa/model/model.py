@@ -414,9 +414,9 @@ class Document(object):
     """
 
     def __str__(self):
-        return f"MDocument {self.uuid} {self.metadata}"
+        return f"kdxa//{self.uuid}/{self.metadata}"
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, connector=SourceMetadata()):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=SourceMetadata()):
         if metadata is None:
             metadata = DocumentMetadata()
         self.metadata: DocumentMetadata = metadata
@@ -427,6 +427,8 @@ class Document(object):
         self.exceptions = []
         self.log = []
         self.version = "1.0.0"
+        self.add_mixin('core')
+        self.source: SourceMetadata = source
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
