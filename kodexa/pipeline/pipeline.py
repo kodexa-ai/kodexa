@@ -266,6 +266,7 @@ class Pipeline:
 
             document.log = log_stream.getvalue()
             self.context.statistics.processed_document(document)
+            self.context.output_document = document
 
         logging.info(f"Completed pipeline {self.name}")
 
