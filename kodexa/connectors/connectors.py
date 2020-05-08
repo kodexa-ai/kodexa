@@ -1,10 +1,13 @@
 import fnmatch
+import io
 import logging
 import mimetypes
 import tempfile
 import urllib
 from os import listdir
 from os.path import join
+
+import requests
 
 from kodexa.model import Document, DocumentMetadata
 
@@ -88,15 +91,23 @@ class UrlConnector:
         self.completed = False
 
     def get_source(self, document):
-        if 'headers' in document.metadata.connector_options:
-            opener = urllib.request.build_opener()
-            for header in document.metadata.connector_options.headers:
-                opener.addheaders = [(header, document.metadata['connector_options']['headers'][header])]
-            urllib.request.install_opener(opener)
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            urllib.request.urlretrieve(document.metadata['connector_options']['url'], tmp_file.name)
 
-            return open(tmp_file.name, 'rb')
+        # If we have an http URL then we should use requests, it is much
+        # cleaner
+        if document.metadata['connector_options']['url'].startswith('http'):
+            response = requests.get(document.metadata['connector_options']['url'],
+                                    headers=document.metadata['connector_options']['headers'])
+            return io.BytesIO(response.content)
+        else:
+            if 'headers' in document.metadata.connector_options:
+                opener = urllib.request.build_opener()
+                for header in document.metadata.connector_options.headers:
+                    opener.addheaders = [(header, document.metadata['connector_options']['headers'][header])]
+                urllib.request.install_opener(opener)
+            with tempfile.NamedTemporaryFile(delete=True) as tmp_file:
+                urllib.request.urlretrieve(document.metadata['connector_options']['url'], tmp_file.name)
+
+                return open(tmp_file.name, 'rb')
 
     def __iter__(self):
         return self
