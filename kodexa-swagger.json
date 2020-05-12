@@ -2,13 +2,13 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.218",
+    "version": "2.0.270",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
       "name": "Developer Portal",
       "url": "https://developer.kodexa.com",
-      "email": "suppot@kodexa.com"
+      "email": "support@kodexa.com"
     },
     "license": {
       "name": "Kodexa End User License",
@@ -53,14 +53,6 @@
     {
       "name": "deployment-controller",
       "description": "Deployment Controller"
-    },
-    {
-      "name": "email-subscriber-controller",
-      "description": "Email Subscriber Controller"
-    },
-    {
-      "name": "feedback-controller",
-      "description": "Feedback Controller"
     },
     {
       "name": "membership-controller",
@@ -1661,247 +1653,6 @@
         "deprecated": false
       }
     },
-    "/api/emailSubscriber": {
-      "post": {
-        "tags": [
-          "email-subscriber-controller"
-        ],
-        "summary": "add",
-        "operationId": "addUsingPOST",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "*/*"
-        ],
-        "parameters": [
-          {
-            "name": "createdBy",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "createdOn.date",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "createdOn.day",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "createdOn.hours",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "createdOn.minutes",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "createdOn.month",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "createdOn.nanos",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "createdOn.seconds",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "createdOn.time",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int64"
-          },
-          {
-            "name": "createdOn.timezoneOffset",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "createdOn.year",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "email",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "id",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "updatedBy",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "updatedOn.date",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "updatedOn.day",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "updatedOn.hours",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "updatedOn.minutes",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "updatedOn.month",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "updatedOn.nanos",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "updatedOn.seconds",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "updatedOn.time",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int64"
-          },
-          {
-            "name": "updatedOn.timezoneOffset",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "updatedOn.year",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "uuid",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/SubscriptionResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "deprecated": false
-      }
-    },
-    "/api/feedback": {
-      "post": {
-        "tags": [
-          "feedback-controller"
-        ],
-        "summary": "addFeedback",
-        "operationId": "addFeedbackUsingPOST",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "*/*"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "feedback",
-            "description": "feedback",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Feedback"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/Feedback"
-            }
-          }
-        },
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ],
-        "deprecated": false
-      }
-    },
     "/api/memberships": {
       "get": {
         "tags": [
@@ -2700,6 +2451,29 @@
             "schema": {
               "$ref": "#/definitions/PlatformOverview"
             }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/processing/services/sync": {
+      "get": {
+        "tags": [
+          "content-services-endpoint-controller"
+        ],
+        "summary": "sync",
+        "operationId": "syncUsingGET",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         },
         "security": [
@@ -3572,8 +3346,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createPipelineSession",
-        "operationId": "createPipelineSessionUsingPOST",
+        "summary": "createPipelineSessionBySlug",
+        "operationId": "createPipelineSessionBySlugUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3582,9 +3356,9 @@
         ],
         "parameters": [
           {
-            "name": "pipelineId",
+            "name": "pipeline",
             "in": "query",
-            "description": "pipelineId",
+            "description": "pipeline",
             "required": true,
             "type": "string"
           },
@@ -3658,6 +3432,27 @@
             "name": "parameters",
             "in": "query",
             "description": "parameters",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "payload",
+            "in": "query",
+            "description": "payload",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "text",
+            "in": "query",
+            "description": "text",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "description": "url",
             "required": false,
             "type": "string"
           },
@@ -3749,6 +3544,164 @@
             "name": "id",
             "in": "path",
             "description": "id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CloudExecution"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "run",
+        "operationId": "runUsingPOST",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "document",
+            "in": "formData",
+            "description": "document",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "executionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "options",
+            "in": "query",
+            "description": "options",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "parameters",
+            "in": "query",
+            "description": "parameters",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "payload",
+            "in": "query",
+            "description": "payload",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "text",
+            "in": "query",
+            "description": "text",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "description": "url",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "x-access-token",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CloudExecution"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/sessions/{id}/executions/{executionId}/steps/{stepId}/test": {
+      "post": {
+        "tags": [
+          "cloud-session-controller"
+        ],
+        "summary": "buildTestExecution",
+        "operationId": "buildTestExecutionUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "description": "executionId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "stepId",
+            "in": "path",
+            "description": "stepId",
             "required": true,
             "type": "string"
           },
@@ -4582,6 +4535,12 @@
         "cellId": {
           "type": "string"
         },
+        "condition": {
+          "type": "string"
+        },
+        "conditional": {
+          "type": "boolean"
+        },
         "event": {
           "type": "string"
         },
@@ -4981,6 +4940,9 @@
           "type": "string"
         },
         "inputId": {
+          "type": "string"
+        },
+        "name": {
           "type": "string"
         },
         "options": {
@@ -5459,35 +5421,6 @@
       },
       "title": "ExceptionReport"
     },
-    "Feedback": {
-      "type": "object",
-      "properties": {
-        "createdBy": {
-          "type": "string"
-        },
-        "createdOn": {
-          "type": "string",
-          "example": "yyyy-MM-dd HH:mm:ss.SSS"
-        },
-        "feedback": {
-          "type": "string"
-        },
-        "id": {
-          "type": "string"
-        },
-        "updatedBy": {
-          "type": "string"
-        },
-        "updatedOn": {
-          "type": "string",
-          "example": "yyyy-MM-dd HH:mm:ss.SSS"
-        },
-        "uuid": {
-          "type": "string"
-        }
-      },
-      "title": "Feedback"
-    },
     "File": {
       "type": "object",
       "properties": {
@@ -5712,6 +5645,14 @@
     "OrganizationDashboard": {
       "type": "object",
       "properties": {
+        "botCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "deploymentCount": {
+          "type": "integer",
+          "format": "int64"
+        },
         "pipelineCount": {
           "type": "integer",
           "format": "int64"
@@ -5721,6 +5662,18 @@
           "format": "int64"
         },
         "serviceCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sessionCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "storeCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "tokenCount": {
           "type": "integer",
           "format": "int64"
         },
@@ -6680,21 +6633,15 @@
       },
       "title": "Sort"
     },
-    "SubscriptionResponse": {
-      "type": "object",
-      "properties": {
-        "alert": {
-          "type": "string"
-        },
-        "message": {
-          "type": "string"
-        }
-      },
-      "title": "SubscriptionResponse"
-    },
     "Synapse": {
       "type": "object",
       "properties": {
+        "condition": {
+          "type": "string"
+        },
+        "conditional": {
+          "type": "boolean"
+        },
         "configuration": {
           "type": "object"
         },

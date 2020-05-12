@@ -21,7 +21,7 @@ def create_document():
 
 
 def test_basic_json_store():
-    JSON_STORE = "/tmp/test-json-store.json"
+    JSON_STORE = "/tmp/test-json-store.jsonkey"
     if Path(JSON_STORE).is_file():
         os.remove(JSON_STORE)
     document_store = JsonDocumentStore("/tmp/test-json-store.json")
