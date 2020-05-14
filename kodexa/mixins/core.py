@@ -154,7 +154,7 @@ def tag_range(self, start_content_re, end_content_re, tag_name, type_re='.*', us
 
 def tag(self, tag_name, type_re=None, content_re=None,
         use_all_content=False, node_only=False, include_children=False,
-        fixed_position=None):
+        fixed_position=None, data=None):
     """
     This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
@@ -167,6 +167,7 @@ def tag(self, tag_name, type_re=None, content_re=None,
     :param node_only: Ignore the matching groups and tag the whole node
     :param include_children: Include recurse into children and tag where matching
     :param fixed_position: use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
+    :param data: Attach the a dictionary of data for the given tag
     """
 
     type_match = True
@@ -195,11 +196,12 @@ def tag(self, tag_name, type_re=None, content_re=None,
                 match = pattern.match(content)
                 if match:
                     if node_only:
-                        self.add_feature('tag', tag_name, Tag())
+                        self.add_feature('tag', tag_name, Tag(data=data))
                     else:
                         for index, m in enumerate(match.groups()):
                             idx = index + 1
-                            self.add_feature('tag', tag_name, Tag(match.start(idx), match.end(idx), match.group(idx)))
+                            self.add_feature('tag', tag_name,
+                                             Tag(match.start(idx), match.end(idx), match.group(idx), data))
 
     if include_children:
         for child in self.children:
@@ -641,7 +643,8 @@ class CoreMixin:
 
 class Tag(Dict):
 
-    def __init__(self, start=None, end=None, value=None):
+    def __init__(self, start=None, end=None, value=None, data=None):
         self.start = start
         self.end = end
         self.value = value
+        self.data = None
