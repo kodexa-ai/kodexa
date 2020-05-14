@@ -3,7 +3,7 @@ import os
 import pytest
 from texttable import Texttable
 
-from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaCloudService, KodexaCloudPipeline
+from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaCloudService, KodexaCloudPipeline, Document
 from kodexa_cloud.cloud import CloudSession
 
 
@@ -18,14 +18,16 @@ def test_kodexa_service():
     document_sink = InMemoryDocumentSink()
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='*.pdf'))
-    pipeline.add_step(KodexaCloudService(slug='kodexa/pdf-parse', attach_source=True, cloud_url="https://quantum.kodexa.com"))
+    pipeline.add_step(
+        KodexaCloudService(slug='kodexa/pdf-parse', attach_source=True, cloud_url="https://quantum.kodexa.com"))
     pipeline.set_sink(document_sink)
     pipeline.run()
 
     # Make sure the finders are available
     document = document_sink.get_document(0)
 
-    assert document
+    assert document is not None
+    assert document.content_node is not None
 
     print(document.to_json())
 
@@ -49,3 +51,12 @@ def print_store(store):
 def test_model():
     session = CloudSession(**{"id": "cheese", "type": "pipeline", "sessionState": "OPEN"})
     print(session.json())
+
+    assert session.json() != ""
+
+
+def test_tag_selector():
+    new_document = Document.from_text("Hello World")
+    nodes = new_document.content_node.findall(tag_name_re=".*")
+
+    assert len(nodes) == 0

@@ -264,7 +264,9 @@ class Pipeline:
                     if self.stop_on_exception:
                         raise
 
-            document.log = log_stream.getvalue()
+            if document:
+                document.log = log_stream.getvalue()
+                
             self.context.statistics.processed_document(document)
             self.context.output_document = document
 
