@@ -174,7 +174,8 @@ def tag(self, tag_name, type_re=None, content_re=None,
 
     if fixed_position:
         self.add_feature('tag', tag_name,
-                         Tag(fixed_position[0], fixed_position[1], self.content[fixed_position[0]:fixed_position[1]]))
+                         Tag(fixed_position[0], fixed_position[1], self.content[fixed_position[0]:fixed_position[1]],
+                             data))
     else:
         if type_re:
             type_re_compiled = re.compile(type_re)
@@ -182,7 +183,7 @@ def tag(self, tag_name, type_re=None, content_re=None,
 
         if type_match:
             if not content_re:
-                self.add_feature('tag', tag_name, [])
+                self.add_feature('tag', tag_name, Tag(data=data))
             else:
                 pattern = re.compile(content_re)
                 if not use_all_content:
@@ -201,7 +202,7 @@ def tag(self, tag_name, type_re=None, content_re=None,
                         for index, m in enumerate(match.groups()):
                             idx = index + 1
                             self.add_feature('tag', tag_name,
-                                             Tag(match.start(idx), match.end(idx), match.group(idx), data))
+                                             Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
 
     if include_children:
         for child in self.children:
