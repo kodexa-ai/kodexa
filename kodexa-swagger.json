@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Content Intelligence",
-    "version": "2.0.270",
+    "version": "2.1.383",
     "title": "Kodexa",
     "termsOfService": "https://kodexa.com/tos",
     "contact": {
@@ -77,6 +77,10 @@
     {
       "name": "service-request-controller",
       "description": "Service Request Controller"
+    },
+    {
+      "name": "store-controller",
+      "description": "Store Controller"
     },
     {
       "name": "web-hook-controller",
@@ -3346,8 +3350,8 @@
         "tags": [
           "cloud-session-controller"
         ],
-        "summary": "createPipelineSessionBySlug",
-        "operationId": "createPipelineSessionBySlugUsingPOST",
+        "summary": "createPipelineSession",
+        "operationId": "createPipelineSessionUsingPOST",
         "consumes": [
           "application/json"
         ],
@@ -3356,9 +3360,9 @@
         ],
         "parameters": [
           {
-            "name": "pipeline",
+            "name": "pipelineId",
             "in": "query",
-            "description": "pipeline",
+            "description": "pipelineId",
             "required": true,
             "type": "string"
           },
@@ -3914,6 +3918,255 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/CloudStore"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/stores": {
+      "get": {
+        "tags": [
+          "store-controller"
+        ],
+        "summary": "List a page of the resources",
+        "operationId": "listUsingGET_10",
+        "produces": [
+          "*/*"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully listed a page the resources",
+            "schema": {
+              "$ref": "#/definitions/PageOfStore"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "post": {
+        "tags": [
+          "store-controller"
+        ],
+        "summary": "Create a new instance of the resource",
+        "operationId": "createUsingPOST_10",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Store"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully created the new resource",
+            "schema": {
+              "$ref": "#/definitions/Store"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      }
+    },
+    "/api/stores/{id}": {
+      "get": {
+        "tags": [
+          "store-controller"
+        ],
+        "summary": "Get a resource with the provided ID",
+        "operationId": "getUsingGET_10",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully got the resource",
+            "schema": {
+              "$ref": "#/definitions/Store"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "put": {
+        "tags": [
+          "store-controller"
+        ],
+        "summary": "Update the given instance",
+        "operationId": "updateUsingPUT_10",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "entity",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Store"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated the resource",
+            "schema": {
+              "$ref": "#/definitions/Store"
+            }
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "deprecated": false
+      },
+      "delete": {
+        "tags": [
+          "store-controller"
+        ],
+        "summary": "Delete the resource with the provided ID",
+        "operationId": "deleteUsingDELETE_10",
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted the resource"
+          },
+          "401": {
+            "description": "You are not authorized to view the resource"
+          },
+          "403": {
+            "description": "Accessing the resource you were trying to reach forbidden"
+          },
+          "404": {
+            "description": "The resource you were trying to reach not found"
+          },
+          "500": {
+            "description": "An internal exception has occurred, check the logs for more information",
+            "schema": {
+              "$ref": "#/definitions/ExceptionReport"
             }
           }
         },
@@ -5230,6 +5483,9 @@
         "contentServiceVersionId": {
           "type": "string"
         },
+        "function": {
+          "type": "string"
+        },
         "ref": {
           "type": "string"
         }
@@ -6295,6 +6551,53 @@
       },
       "title": "PageOfServiceRequest"
     },
+    "PageOfStore": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Store"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        },
+        "first": {
+          "type": "boolean"
+        },
+        "last": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "numberOfElements": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageable": {
+          "$ref": "#/definitions/Pageable"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort": {
+          "$ref": "#/definitions/Sort"
+        },
+        "totalElements": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "PageOfStore"
+    },
     "Pageable": {
       "type": "object",
       "properties": {
@@ -6632,6 +6935,60 @@
         }
       },
       "title": "Sort"
+    },
+    "Store": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string"
+        },
+        "createdOn": {
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/StoreMetadata"
+        },
+        "name": {
+          "type": "string"
+        },
+        "organization": {
+          "$ref": "#/definitions/Organization"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "updatedOn": {
+          "type": "string",
+          "example": "yyyy-MM-dd HH:mm:ss.SSS"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "title": "Store"
+    },
+    "StoreMetadata": {
+      "type": "object",
+      "properties": {
+        "storeType": {
+          "type": "string",
+          "enum": [
+            "DOCUMENT_OBJECT",
+            "TABLE"
+          ]
+        }
+      },
+      "title": "StoreMetadata"
     },
     "Synapse": {
       "type": "object",
