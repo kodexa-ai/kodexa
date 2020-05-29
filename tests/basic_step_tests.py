@@ -23,7 +23,6 @@ def test_html_rollup():
     # Collapse out all the <a> tags
     step = Rollup(collapse_type_res=["a"])
     result = step.process(document)
-    print(DocumentRender(result).to_text())
 
 
 def test_tag_key_value():

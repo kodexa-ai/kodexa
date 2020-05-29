@@ -1,12 +1,10 @@
 import json
-import os
 import uuid
 
 import msgpack
 from addict import Dict
 
 from kodexa.mixins import registry
-from kodexa.mixins.registry import get_mixin
 
 
 class DocumentMetadata(Dict):
@@ -64,7 +62,7 @@ class ContentNode(object):
 
             >>> node.to_text()
         """
-        return DefaultDocumentRender(self.document).node_to_text(self, 0)
+        return DocumentRender(self.document).node_to_text(self, 0)
 
     def _repr_html_(self):
         return self.to_html()
@@ -309,99 +307,16 @@ class DocumentRender:
 
     def __init__(self, document):
         self.document = document
-        self.default_renderer = DefaultDocumentRender(document)
+        self.kodexa_render = KodexaRender()
 
     def to_text(self):
         return self.default_renderer.node_to_text(self.document.content_node, 0)
 
     def to_html(self):
-        print(self.get_mixin_renderer())
-        return self.get_mixin_renderer().to_html()
-
-    def get_mixin_renderer(self):
-        renderer_dict = registry.get_renderers(self.document)
-        if renderer_dict:
-            return next(iter(renderer_dict.values()))
-        else:
-            return self.default_renderer
+        return self.kodexa_render.build_html(self.document, self.document.content_node)
 
     def render_node(self, node):
-        return self.get_mixin_renderer().render_node(node)
-
-    def to_mimetype(self):
-        return self.get_mixin_renderer().to_mimetype()
-
-    def render_node_mimetype(self, node):
-        return self.get_mixin_renderer().render_node_mimetype(node)
-
-
-class DefaultDocumentRender:
-
-    def __init__(self, document):
-        self.document = document
-
-    def to_text(self):
-        return self.node_to_text(self.document.content_node, 0)
-
-    def to_html(self):
-        return f"<h3>Document {self.document}</h3>"
-
-    def render_node(self, node):
-        out_list = []
-        self.get_node_text_format(node, 0, out_list)
-        return f"<h3>Content Node</h3><p>{self.node_to_text(node, 0)}"
-
-    def node_to_text(self, node, level):
-        out_list = []
-        self.get_node_text_format(node, level, out_list)
-        return os.linesep.join(out_list)
-
-    def get_node_text_format(self, node, level, out_list):
-        out_list.append("{}[type:{}]{}".format(" " * (4 * level), node.type, self.mixins_to_text(node)))
-
-        if node.content_parts:
-            out_list.append("{}{}".format(" " * (4 * level), self.get_content_parts(node)))
-
-        out_list.append("{}{}".format(" " * (4 * level), node.content))
-
-        for child in node.get_children():
-            self.get_node_text_format(child, level + 1, out_list)
-
-    def get_content_parts(self, node):
-        result = ""
-        for part in node.content_parts:
-            if isinstance(part, str):
-                result = result + part
-            # else:
-            #     result = result + "#c" + str(part)
-
-        return result
-
-    def mixins_to_text(self, node):
-        display = ""
-        for mixin in self.document.get_mixins():
-            if get_mixin(mixin):
-                text = get_mixin(mixin).to_text(node)
-                if text:
-                    display = display + get_mixin(mixin).to_text(node)
-
-        return display
-
-    def to_mimetype(self):
-        out_list = []
-        self.get_node_text_format(self.document.content_node, 0, out_list)
-        return self.prepare_mimetype_data('document', tuple(out_list))
-
-    def render_node_mimetype(self, node):
-        out_list = []
-        self.get_node_text_format(node, 0, out_list)
-        return self.prepare_mimetype_data('content_node', tuple(out_list))
-
-    def prepare_mimetype_data(self, data_type, data_list):
-        render_data = {'data_type': data_type, 'data': tuple(data_list)}
-        bundle = {}
-        bundle['application/vnd.kodexa.document+json'] = render_data
-        return bundle
+        return self.kodexa_render.build_html(self.document, node)
 
 
 class SourceMetadata(object):
@@ -486,7 +401,6 @@ class Document(object):
     def to_msgpack(self):
         """
         Convert this document object structure into a message pack
-
 
             >>> document.to_msgpack()
         """
@@ -605,3 +519,55 @@ class Document(object):
                 if callable(add_features_to_virtual_node):
                     add_features_to_virtual_node(content_node)
         return content_node
+
+    @classmethod
+    def from_file(cls, file):
+        file_document = Document()
+        file_document.metadata.connector = 'file-handle'
+        file_document.metadata.connector_options.file = file
+        return file_document
+
+    @classmethod
+    def from_url(cls, url, headers=None):
+        if headers is None:
+            headers = {}
+        url_document = Document()
+        url_document.metadata.connector = 'url'
+        url_document.metadata.connector_options.url = url
+        url_document.metadata.connector_options.headers = headers
+        return url_document
+
+
+class KodexaRender:
+    """
+    An implementation of a render that uses the KodexaJS
+    library to render the document
+
+    See https://github.com/kodexa-ai/kodexa.js
+    """
+
+    def build_node_html(self, node: ContentNode):
+        self.build_html(node.document, node)
+
+    def build_html(self, document: Document, node: ContentNode):
+        render_uuid = str(uuid.uuid4())
+        return """
+  <div id='kodexa-div-""" + render_uuid + """'></div> 
+  <script>
+
+require.config({
+    paths: {
+        'kodexa-lib-""" + render_uuid + """': 'https://unpkg.com/kodexajs@0.0.15/kodexa'
+    }
+});
+
+require(['kodexa-lib-""" + render_uuid + """'], function() {
+    kodexa.fromMap(""" + document.to_json() + """).then(kdxaDocument => {
+       let widget = kodexa.newDocumentWidget(kdxaDocument);
+       widget.attach($('#kodexa-div-""" + render_uuid + """'))
+       widget.render();
+    });
+    
+});
+</script>
+"""

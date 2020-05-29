@@ -93,7 +93,8 @@ def test_virtual_navigation():
     assert document.content_node.children[0].next_node().next_node().next_node().index is 3
     assert document.content_node.children[0].next_node().next_node().next_node().next_node().index is 4
     assert document.content_node.children[0].next_node().next_node().next_node().next_node().next_node().index is 5
-    assert document.content_node.children[0].next_node().next_node().next_node().next_node().next_node().next_node() is None
+    assert document.content_node.children[
+               0].next_node().next_node().next_node().next_node().next_node().next_node() is None
 
     assert document.content_node.children[0].next_node().next_node().content is 'cheeseburger'
 
@@ -131,11 +132,6 @@ def test_finder_and_tag():
     assert len(node.get_tags()) == 1
 
 
-def test_document_mimetype_output():
-    document = get_test_document()
-    print(document.to_mimetype())
-
-
 def test_basic_spatial_serialization():
     document = get_test_document()
     document.add_mixin('spatial')
@@ -148,15 +144,3 @@ def test_basic_spatial_serialization():
     print(document.content_node.get_bbox())
 
     assert document.content_node.get_bbox() == [1, 1, 1, 1]
-
-
-def test_content_node_html_output():
-    document = get_test_document()
-    document.add_mixin('spatial')
-    document.add_mixin('core')
-    # print(document.get_mixins())
-    # print(DocumentRender(document).get_mixin_renderer())
-    # print(DocumentRender(document).get_mixin_renderer().render_node(document.get_root()))
-    # print("repr_html")
-    print(document.get_root().to_mimetype())
-    assert document.get_root().to_mimetype() is not None

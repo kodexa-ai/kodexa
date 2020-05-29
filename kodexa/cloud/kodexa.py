@@ -113,8 +113,11 @@ class KodexaCloudPipeline:
         cloud_session = KodexaCloudSession("pipeline", self.slug, self.access_token, self.cloud_url)
         cloud_session.start()
 
-        connector = FileHandleConnector(input)
-        document = connector.__next__()
+        if isinstance(input, Document):
+            document = input
+        else:
+            connector = FileHandleConnector(input)
+            document = connector.__next__()
         context = PipelineContext()
         execution = cloud_session.execute_service(document, self.options, self.attach_source)
         execution = cloud_session.wait_for_execution(execution)
