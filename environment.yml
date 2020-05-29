@@ -4,16 +4,3 @@ channels:
   - defaults
 dependencies:
   - python=3.6
-  - pip=20.0.2
-  - pytest=4.0.2
-  - pytest-runner=5.2
-  - setuptools=40.5.0
-  - twine=1.10.0
-  - pip:
-      - texttable
-      - addict==2.2.1
-      - requests==2.23.0
-      - msgpack==1.0.0
-      - urllib3==1.25.8
-      - pydantic==1.4
-      - datamodel-code-generator==0.4.6
