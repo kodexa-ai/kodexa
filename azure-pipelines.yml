@@ -42,4 +42,4 @@ steps:
 - task: CmdLine@2
   displayName: 'publish build'
   inputs:
-    script: 'twine upload dist/* --config-file $(PYPIRC_PATH)'
+    script: 'twine upload -r kodexa dist/* --config-file $(PYPIRC_PATH)'
