@@ -10,8 +10,6 @@ pool:
   vmImage: 'ubuntu-latest'
 strategy:
   matrix:
-    Python36:
-      python.version: '3.6'
     Python37:
       python.version: '3.7'
 
@@ -20,8 +18,11 @@ steps:
   inputs:
     versionSpec: '$(python.version)'
   displayName: 'Use Python $(python.version)'
-
+- task: version-increment-task@0
+  inputs:
+    versionVariable: 'CURRENT_VERSION'
 - script: |
+    echo $VERSION > VERSION
     python -m pip install --upgrade pip
     pip install -r requirements.txt
   displayName: 'Install dependencies'
@@ -29,4 +30,8 @@ steps:
 - script: |
     pip install pytest pytest-azurepipelines
     pytest
+  displayName: 'pytest'
+
+- script: |
+    python setup.py bdist_wheel
   displayName: 'pytest'
