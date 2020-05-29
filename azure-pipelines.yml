@@ -1,4 +1,5 @@
 # Python package
+
 # Create and test a Python package on multiple Python versions.
 # Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
@@ -35,3 +36,10 @@ steps:
 - script: |
     python setup.py bdist_wheel
   displayName: 'pytest'
+- task: TwineAuthenticate@1
+  inputs:
+    pythonUploadServiceConnection: 'Kodexa PyPi'
+- task: CmdLine@2
+  displayName: 'publish build'
+  inputs:
+    script: 'twine upload dist/* -u __token__ -p ${{ secrets.PYPI_TOKEN }}'
