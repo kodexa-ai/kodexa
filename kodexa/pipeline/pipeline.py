@@ -276,20 +276,11 @@ class Pipeline:
 
     @classmethod
     def from_url(cls, url, headers=None):
-        if headers is None:
-            headers = {}
-        url_document = Document()
-        url_document.metadata.connector = 'url'
-        url_document.metadata.connector_options.url = url
-        url_document.metadata.connector_options.headers = headers
-        return Pipeline(url_document)
+        return Pipeline(Document.from_url(url, headers))
 
     @classmethod
     def from_file(cls, file):
-        url_document = Document()
-        url_document.metadata.connector = 'file-handle'
-        url_document.metadata.connector_options.file = file
-        return Pipeline(url_document)
+        return Pipeline(Document.from_file(file))
 
     @classmethod
     def from_text(cls, text):
