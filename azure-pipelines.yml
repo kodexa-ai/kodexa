@@ -38,8 +38,8 @@ steps:
   displayName: 'pytest'
 - task: TwineAuthenticate@1
   inputs:
-    pythonUploadServiceConnection: 'Kodexa PyPi'
+    pythonUploadServiceConnection: 'kodexa'
 - task: CmdLine@2
   displayName: 'publish build'
   inputs:
-    script: 'python -m twine upload --skip-existing --verbose --repository kodexa --config-file $(PYPIRC_PATH) dist/*.whl'
+    script: 'python -m twine upload --verbose --repository kodexa --config-file $(PYPIRC_PATH) dist/*.whl'
