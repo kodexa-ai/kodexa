@@ -562,7 +562,7 @@ require.config({
     }
 });
 
-require(['kodexa-lib-""" + render_uuid + """'], function() {
+require(['kodexa-lib-""" + render_uuid + """','jquery'], function() {
     kodexa.fromMap(""" + document.to_json() + """).then(kdxaDocument => {
        let widget = kodexa.newDocumentWidget(kdxaDocument);
        widget.attach($('#kodexa-div-""" + render_uuid + """'))
