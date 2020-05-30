@@ -34,9 +34,9 @@ steps:
   displayName: 'pytest'
 
 - script: |
-    python setup.py bdist_wheel
+    python setup.py bdist_wheel sdist
   displayName: 'pytest'
-- script: 'python -m twine upload --verbose --repository kodexa -p $PYPI_TOKEN -u __token__  dist/*.whl'
+- script: 'twine upload dist/* -u __token__ -p $PYPI_TOKEN'
   displayName: 'Publish'
   env:
     PYPI_TOKEN: $(PYPI_TOKEN)
