@@ -557,7 +557,8 @@ class KodexaRender:
 
 require.config({
     paths: {
-        'kodexa-lib-""" + render_uuid + """': 'https://unpkg.com/kodexajs@0.0.15/kodexa'
+        'kodexa-lib-""" + render_uuid + """': 'https://unpkg.com/kodexajs@0.0.15/kodexa',
+        'jquery': '//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min'
     }
 });
 
