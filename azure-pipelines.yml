@@ -36,9 +36,6 @@ steps:
 - script: |
     python setup.py bdist_wheel
   displayName: 'pytest'
-- task: TwineAuthenticate@1
-  inputs:
-    pythonUploadServiceConnection: 'kodexa'
 - script: 'python -m twine upload --verbose --repository kodexa -p $PYPI_TOKEN -u __token__  dist/*.whl'
   displayName: 'Publish'
   env:
