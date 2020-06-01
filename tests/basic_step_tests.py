@@ -9,14 +9,7 @@ def get_test_directory():
 
 
 def test_html_rollup():
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.mdoc'), 'rb').read())
-
-    # Collapse out all the <a> tags
-    step = Rollup(collapse_type_res=["a"])
-    result = step.process(document)
-
-def test_html_rollup():
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.mdoc'), 'rb').read())
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.kdxa'), 'rb').read())
 
     # Collapse out all the <a> tags
     step = Rollup(collapse_type_res=["a"])
@@ -24,7 +17,7 @@ def test_html_rollup():
 
 
 def test_tag_key_value():
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.mdoc'), 'rb').read())
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
 
     # Collapse out all the <a> tags
     step = ExtractTagsToKeyValuePair(store_name='test_store')
