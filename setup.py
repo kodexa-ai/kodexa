@@ -27,7 +27,8 @@ setup(name='kodexa',
           'requests==2.23.0',
           'msgpack==1.0.0',
           'urllib3==1.25.8',
-          'pydantic==1.4'
+          'pydantic==1.4',
+          'ply'
       ],
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])

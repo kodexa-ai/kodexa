@@ -8,3 +8,6 @@ urllib3==1.25.9
 pydantic==1.5.1
 datamodel-code-generator==0.4.6
 wheel
+ply
+pytest
+pytest-runner
