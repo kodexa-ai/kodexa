@@ -9,10 +9,6 @@ class NavigationMixin:
         return None
 
     @staticmethod
-    def to_text(self):
-        return None
-
-    @staticmethod
     def get_dependencies():
         return ['core']
 

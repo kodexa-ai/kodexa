@@ -609,10 +609,6 @@ class CoreMixin:
         return None
 
     @staticmethod
-    def to_text(self):
-        return "[tags:" + ",".join(self.get_tags()) + "]"
-
-    @staticmethod
     def apply_to(node):
         add_method_to_node(get_all_content, node)
         add_method_to_node(get_all_tags, node)
