@@ -7,5 +7,5 @@ class Selector:
         self.path = path
         self.parsed_path = selectors.parse(path)
 
-    def execute(self, content_node: ContentNode):
+    def execute(self, content_node):
         return self.parsed_path.resolve(content_node)

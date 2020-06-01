@@ -10,23 +10,21 @@ def get_test_directory():
 
 def test_selector_1():
     document = Document.from_text("Hello World")
-    selector = Selector('.')
-    results = selector.execute(document.content_node)
+    results = document.content_node.select('.')
     assert len(results) == 1
     assert results[0].content == "Hello World"
 
 
 def test_selector_2():
     document = Document.from_text("Hello World")
-    selector = Selector('*')
-    results = selector.execute(document.content_node)
+    results = document.content_node.select('*')
     assert len(results) == 1
     assert results[0].content == "Hello World"
 
 
 def test_selector_complex_doc_1():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.kdxa'), 'rb').read())
-    all_nodes = Selector('//*').execute(document.content_node)
+    all_nodes = document.content_node.select('//*')
     assert len(all_nodes) == 39
 
     all_ps = Selector('//p').execute(document.content_node)
@@ -35,5 +33,5 @@ def test_selector_complex_doc_1():
 
 def test_tagged_content():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
-    all_nodes = Selector('//*[tag:ORG]').execute(document.content_node)
+    all_nodes = document.content_node.select('//*[tag:ORG]')
     assert len(all_nodes) == 8
