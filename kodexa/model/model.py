@@ -270,6 +270,19 @@ class ContentNode(object):
         """
         return self.type
 
+    def select(self, selector):
+        """
+        Execute a selector on this node and then return a list of the matching nodes
+
+        >>> document.content_node.select('.')
+           [ContentNode]
+
+        :param selector: The selector (ie. //*)
+        :return: A list of the matching content nodes
+        """
+        from kodexa import selectors
+        return selectors.parse(selector).resolve(self)
+
 
 class ContentFeature(object):
     """
