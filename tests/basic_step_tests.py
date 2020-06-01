@@ -14,8 +14,6 @@ def test_html_rollup():
     # Collapse out all the <a> tags
     step = Rollup(collapse_type_res=["a"])
     result = step.process(document)
-    print(DocumentRender(result).to_text())
-
 
 def test_html_rollup():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.mdoc'), 'rb').read())

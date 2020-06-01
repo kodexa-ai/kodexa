@@ -197,10 +197,6 @@ class SpatialMixin:
         return ['core']
 
     @staticmethod
-    def to_text(node):
-        return f" spatial[x:{node.get_x()},y:{node.get_y()},w:{node.get_width()},h:{node.get_height()}] "
-
-    @staticmethod
     def apply_to(node):
         add_method_to_node(set_statistics, node)
         add_method_to_node(get_statistics, node)

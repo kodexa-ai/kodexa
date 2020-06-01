@@ -54,24 +54,11 @@ class ContentNode(object):
         return f"ContentNode [type:{self.type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
             self.content) + "]"
 
-    def to_text(self):
-        """
-        Convert this node  structure into a text representation,
-        which can be useful when trying to review the structure.
-
-
-            >>> node.to_text()
-        """
-        return DocumentRender(self.document).node_to_text(self, 0)
-
     def _repr_html_(self):
         return self.to_html()
 
     def to_html(self):
         return DocumentRender(self.document).render_node(self)
-
-    def to_mimetype(self):
-        return DocumentRender(self.document).render_node_mimetype(self)
 
     def to_json(self):
         """
@@ -309,9 +296,6 @@ class DocumentRender:
         self.document = document
         self.kodexa_render = KodexaRender()
 
-    def to_text(self):
-        return self.default_renderer.node_to_text(self.document.content_node, 0)
-
     def to_html(self):
         return self.kodexa_render.build_html(self.document, self.document.content_node)
 
@@ -362,16 +346,6 @@ class Document(object):
             >>> node = document.get_node()
         """
         return self.content_node
-
-    def to_text(self):
-        """
-        Convert this document object structure into a text representation,
-        which can be useful when trying to review the structure.
-
-
-            >>> document.to_text()
-        """
-        return DocumentRender(self).to_text()
 
     def to_kdxa(self, file_path):
         """
@@ -434,9 +408,6 @@ class Document(object):
                 'exceptions': self.exceptions,
                 'log': self.log,
                 'uuid': self.uuid}
-
-    def to_mimetype(self):
-        return DocumentRender(self).to_mimetype()
 
     @staticmethod
     def from_dict(doc_dict):
