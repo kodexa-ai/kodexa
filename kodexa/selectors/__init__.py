@@ -1,1 +1,1 @@
-from .core import parse, serialize
+from .core import parse
