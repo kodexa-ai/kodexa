@@ -21,6 +21,15 @@ def test_selector_2():
     assert results[0].content == "Hello World"
 
 
+def test_tag_regex():
+    document = Document.from_text("Hello World")
+    results = document.content_node.select('*[typeRegex("te.*")]')
+    assert len(results) == 1
+    assert results[0].content == "Hello World"
+    results2 = document.content_node.select('*[typeRegex("chee.*")]')
+    assert len(results2) == 0
+
+
 def test_selector_regex():
     document = Document.from_text("Hello World")
     results = document.content_node.select('*[contentRegex("Hello.*")]')
@@ -33,6 +42,7 @@ def test_selector_regex():
     results = document.content_node.select('*[content()="Hello World"]')
     assert len(results) == 1
     assert results[0].content == "Hello World"
+
 
 def test_selector_complex_doc_1():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.kdxa'), 'rb').read())
@@ -50,3 +60,9 @@ def test_tagged_content():
 
     union_nodes = document.content_node.select('//*[hasTag("ORG")] | //*[hasTag("ORG")]')
     assert len(union_nodes) == 18
+
+    node_match = all_nodes[0].select('*[tagRegex("O.*")]')
+    assert len(node_match) == 1
+
+    node_match2 = all_nodes[0].select('*[tagRegex("CHE.*")]')
+    assert len(node_match2) == 0

@@ -62,6 +62,8 @@ class BinaryExpression(object):
             return self.left.resolve(content_node) + self.right.resolve(content_node)
         if self.op == '=':
             return self.get_value(self.left, content_node) == self.get_value(self.right, content_node)
+        if self.op == '!=':
+            return self.get_value(self.left, content_node) != self.get_value(self.right, content_node)
 
     def get_value(self, side, content_node):
         if isinstance(side, FunctionCall):
@@ -202,6 +204,21 @@ class FunctionCall(object):
                 return content_node.content
             else:
                 return None
+
+        if self.name == 'typeRegex':
+            compiled_pattern = re.compile(self.args[0])
+            if compiled_pattern.match(content_node.type):
+                return content_node.type
+            else:
+                return None
+
+        if self.name == 'tagRegex':
+            compiled_pattern = re.compile(self.args[0])
+            for feature in content_node.get_features_of_type('tag'):
+                if compiled_pattern.match(feature.name):
+                    return True
+            else:
+                return False
 
         if self.name == 'hasTag':
             return content_node.has_feature('tag', self.args[0])
