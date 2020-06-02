@@ -48,5 +48,5 @@ def test_tagged_content():
     all_nodes = document.content_node.select('//*[hasTag("ORG")]')
     assert len(all_nodes) == 9
 
-    union_nodes = document.content_node.select('//*[hasTag("ORG")] | //*[hasTag("ORG")')
+    union_nodes = document.content_node.select('//*[hasTag("ORG")] | //*[hasTag("ORG")]')
     assert len(union_nodes) == 18
