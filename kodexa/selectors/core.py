@@ -10,9 +10,8 @@ import tempfile
 
 from kodexa.selectors import lexrules
 from kodexa.selectors import parserules
-from kodexa.selectors.ast import serialize
 
-__all__ = ['lexer', 'parser', 'parse', 'serialize']
+__all__ = ['lexer', 'parser', 'parse']
 
 OPERATOR_FORCERS = {'ABBREV_AXIS_AT', 'AXIS_SEP', 'OPEN_PAREN', 'OPEN_BRACKET', 'AND_OP', 'OR_OP', 'MOD_OP', 'DIV_OP',
                     'MULT_OP', 'PATH_SEP', 'ABBREV_PATH_SEP', 'UNION_OP', 'PLUS_OP', 'MINUS_OP', 'EQUAL_OP', 'REL_OP',
