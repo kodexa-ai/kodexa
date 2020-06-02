@@ -43,6 +43,26 @@ def test_selector_regex():
     assert len(results) == 1
     assert results[0].content == "Hello World"
 
+    # combining multiple attributes
+
+    # This should obviously return zero nodes, as 'Howdy' isn't in the document
+    assert len(document.content_node.select('//*[typeRegex("te.*")][contentRegex("Howdy")]')) ==  0
+
+    # What about this?  There's an H and a W...
+    document.content_node.select('//*[typeRegex("te.*")][contentRegex("H*W")]') == 0
+
+    # Try that again, but modify the contentRegex
+    assert len(document.content_node.select('//*[typeRegex("te.*")][contentRegex("H.*W")]')) == 1
+    # yea!
+
+    # Another variation - we expect success
+    document.content_node.select('//*[typeRegex("te.*")][contentRegex("H.*d")]') == 1
+    #...and we're rewarded
+
+    # Feeling crazy?
+    document.content_node.select('//*[typeRegex("te.*")][contentRegex("H.*D")]') == 0
+    # no dice - handle your capitalization correctly! :-)
+    
 
 def test_selector_complex_doc_1():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.kdxa'), 'rb').read())
