@@ -54,6 +54,7 @@ class TextParser:
 
             text_node = document.create_node(type='text', content=data if self.decode else data)
             document.content_node = text_node
+            document.add_mixin('text')
 
         return document
 

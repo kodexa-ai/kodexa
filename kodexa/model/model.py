@@ -604,6 +604,7 @@ class Document(object):
     def from_text(cls, text):
         new_document = Document()
         new_document.content_node = new_document.create_node(type='text', content=text)
+        new_document.add_mixin('text')
         return new_document
 
     def get_root(self):
