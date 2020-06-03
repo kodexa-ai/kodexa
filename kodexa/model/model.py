@@ -787,9 +787,10 @@ class Document(object):
         :param selector: The selector (ie. //*)
         :return: A list of the matching content nodes
         """
-        from kodexa.selectors import parse
-        parsed_selector = parse(selector)
-        return parsed_selector.resolve(self.content_node)
+        if self.content_node:
+            return self.content_node.select(selector)
+        else:
+            return []
 
 
 class KodexaRender:
