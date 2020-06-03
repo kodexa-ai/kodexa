@@ -88,6 +88,20 @@ class PredicatedExpression(object):
     def append_predicate(self, pred):
         self.predicates.append(pred)
 
+    def resolve(self, content_node):
+        nodes = self.base.resolve(content_node)
+        results = []
+        for idx, node in enumerate(nodes):
+            for predicate in self.predicates:
+                if isinstance(predicate, int) and predicate == idx:
+                    results.append(node)
+                    return results
+                else:
+                    if predicate.resolve(node):
+                        results.append(node)
+
+        return results
+
 
 class AbsolutePath(object):
     '''An absolute XPath path. /a/b/c; //a/ancestor:b/@c.'''

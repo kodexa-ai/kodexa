@@ -97,3 +97,9 @@ def test_tagged_content():
 
     node_match2 = all_nodes[0].select('*[tagRegex("CHE.*")]')
     assert len(node_match2) == 0
+
+
+def test_instance_indexes():
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    first_paragraph = document.select('(//p)[0]')
+    assert len(first_paragraph) == 1
