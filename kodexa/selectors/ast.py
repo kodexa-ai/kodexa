@@ -244,10 +244,16 @@ class FunctionCall(object):
                 return False
 
         if self.name == 'hasTag':
-            return content_node.has_feature('tag', self.args[0])
+            if len(self.args) == 0:
+                return len(content_node.get_tags()) > 0
+            else:
+                return content_node.has_feature('tag', self.args[0])
 
         if self.name == 'hasFeature':
-            return content_node.has_feature(self.args[0], self.args[1])
+            if len(self.args) == 0:
+                return len(content_node.get_features()) > 0
+            else:
+                return content_node.has_feature(self.args[0], self.args[1])
 
         if self.name == 'content':
             return content_node.content

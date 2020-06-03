@@ -86,6 +86,14 @@ def test_selector_complex_doc_1():
 
 def test_tagged_content():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+
+    # Has any tag to start
+    tagged_nodes = document.content_node.select('//*[hasTag()]')
+    assert len(tagged_nodes) == 22
+
+    feature_nodes = document.content_node.select('//*[hasFeature()]')
+    assert len(feature_nodes) == 32
+
     all_nodes = document.content_node.select('//*[hasTag("ORG")]')
     assert len(all_nodes) == 9
 
