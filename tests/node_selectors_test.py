@@ -103,3 +103,9 @@ def test_instance_indexes():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
     first_paragraph = document.select('(//p)[0]')
     assert len(first_paragraph) == 1
+
+    # Note this is important - the index here is not the position in the results
+    # but the index of the node itself
+    first_paragraph = document.select('//p[0]')
+    assert len(first_paragraph) == 18
+

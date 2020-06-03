@@ -144,7 +144,10 @@ class Step(object):
         if isinstance(obj, ContentNode):
             content_node = obj
             for predicate in self.predicates:
-                if not predicate.resolve(content_node):
+                if isinstance(predicate, int):
+                    if predicate == content_node.index:
+                        match = True
+                elif not predicate.resolve(content_node):
                     match = False
 
             match = match and self.node_test.test(content_node)
@@ -220,14 +223,14 @@ class FunctionCall(object):
     def resolve(self, content_node):
         if self.name == 'contentRegex':
             compiled_pattern = re.compile(self.args[0])
-            if compiled_pattern.match(content_node.content):
+            if content_node.content is not None and compiled_pattern.match(content_node.content):
                 return content_node.content
             else:
                 return None
 
         if self.name == 'typeRegex':
             compiled_pattern = re.compile(self.args[0])
-            if compiled_pattern.match(content_node.type):
+            if content_node.type is not None and compiled_pattern.match(content_node.type):
                 return content_node.type
             else:
                 return None
@@ -235,7 +238,7 @@ class FunctionCall(object):
         if self.name == 'tagRegex':
             compiled_pattern = re.compile(self.args[0])
             for feature in content_node.get_features_of_type('tag'):
-                if compiled_pattern.match(feature.name):
+                if feature.name is not None and compiled_pattern.match(feature.name):
                     return True
             else:
                 return False
