@@ -1,4 +1,5 @@
 import json
+import re
 import uuid
 
 import msgpack
@@ -14,6 +15,16 @@ class DocumentMetadata(Dict):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+
+class Tag(Dict):
+
+    def __init__(self, start=None, end=None, value=None, data=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.start = start
+        self.end = end
+        self.value = value
+        self.data = data
 
 
 class ContentNode(object):
@@ -281,7 +292,251 @@ class ContentNode(object):
         :return: A list of the matching content nodes
         """
         from kodexa import selectors
-        return selectors.parse(selector).resolve(self)
+        parsed_selector = selectors.parse(selector)
+        return parsed_selector.resolve(self)
+
+    def get_all_content(self, separator=" "):
+        """
+        This will build the complete content, including the content of children.
+
+            >>> document.content_node.get_all_content()
+            "This string is made up of multiple nodes"
+
+        :param separator: the separate to use to join the content together (default is " ")
+        """
+
+        s = ""
+        if self.get_content():
+            s += self.get_content()
+            s += separator
+        for child in self.children:
+            s += child.get_all_content(separator)
+            s += separator
+        return s.strip()
+
+    def move_child_to_parent(self, target_child, target_parent):
+        """
+        This will move the target_child, which must be a child of the node, to a new parent.
+
+        It will be added to the end of the parent
+
+            >>> document.content_root.move_child_to_parent(document.content_root.find(type_ref='line'), document.content_root)
+
+        :param target_child: the child node that needs to be moved
+        :param target_parent: the parent to attach this node to
+        """
+        self.children.remove(target_child)
+        target_parent.add_child(target_child)
+
+    def adopt_children(self, children, replace=False):
+        """
+        This will take a list of content nodes and adopt them under this node, ensuring they are
+        re-parented.
+
+        It will be added to the end of the parent
+
+            >>> document.content_root.adopt_children(document.content_root.find(type_ref='line'), replace=True)
+
+        :param children: a list of the children to adopt
+        :param replace: if True the node will remove all current children and replace them with the new list
+        """
+
+        if replace:
+            for child in self.children:
+                self.parent = None
+            self.children = []
+
+        for child in children:
+            self.add_child(child)
+
+    def remove_tag(self, tag_name):
+        """
+            This will remove a tag from the given node
+
+                 >>> document.content_node.remove_tag(tag_name='foo')
+
+            :param tag_name: The tag to be applied to the nodes in range
+            """
+        self.remove_feature('tag', tag_name)
+
+    def collect_nodes_to(self, end_node):
+        """
+        Return a list of the sibling nodes between the current node and the end node
+
+             >>> document.content_node.children[0].collect_nodes_to(end_node=document.content_node.children[5])
+
+        :param end_node: The node to end at
+        """
+        nodes = []
+        current_node = self
+        while current_node.uuid != end_node.uuid:
+            nodes.append(current_node)
+            if current_node.has_next_node():
+                current_node = current_node.next_node()
+            else:
+                break
+        return nodes
+
+    def tag_nodes_to(self, end_node, tag_name):
+        """
+        Tag all the nodes from this node to the end node with the given tag name
+
+              >>> document.content_node.children[0].tag_nodes_to(document.content_node.children[5], tag_name='foo')
+
+         :param end_node: The node to end with
+         :param tag_name: The tag name
+         """
+        [node.tag(tag_name) for node in self.collect_nodes_to(end_node)]
+
+    def tag_range(self, start_content_re, end_content_re, tag_name, type_re='.*', use_all_content=False):
+        """
+        This will tag all the child nodes between the start and end content regular expressions
+
+             >>> document.content_node.tag_range(start_content_re='.*Cheese.*', end_content_re='.*Fish.*', tag_name='foo')
+
+        :param start_content_re: The regular expression to match the starting child
+        :param end_content_re: The regular expression to match the ending child
+        :param tag_name: The tag to be applied to the nodes in range
+        :param type_re: The type to match (default is all)
+        :param use_all_content: Use full content (including child nodes, default is False)
+        """
+
+        # Could be line, word, or content-area
+        all_nodes = self.findall(type_re=type_re)
+
+        start_index_list = [n_idx for n_idx, node in enumerate(all_nodes)
+                            if re.compile(start_content_re).match(node.get_all_content()
+                                                                  if use_all_content else node.content)]
+        end_index_list = [n_idx for n_idx, node in enumerate(all_nodes)
+                          if re.compile(end_content_re).match(node.get_all_content()
+                                                              if use_all_content else node.content)]
+
+        start_index = 0 if start_content_re == '' else \
+            start_index_list[0] if len(start_index_list) > 0 else None
+        if start_index is not None:
+            end_index_list = [i for i in end_index_list if i >= start_index]
+
+        end_index = len(all_nodes) if end_content_re == '' else \
+            end_index_list[0] if len(end_index_list) > 0 else len(all_nodes)
+
+        if start_index is not None:
+            [node.tag(tag_name) for node in all_nodes[start_index:end_index]]
+
+    def tag(self, tag_name, selector=".", content_re=None,
+            use_all_content=False, node_only=False,
+            fixed_position=None, data=None):
+        """
+        This will tag (see Feature Tagging) the expression groups identified by the regular expression.
+
+            >>> document.content_node.tag('is_cheese')
+
+        :param tag_name: the name of the tag to apply
+        :param selector: The selector to identify the source nodes to work on (default . - the current node)
+        :param content_re: the regular expression that you wish to use to tag, note that we will create a tag for each matching group
+        :param use_all_content: apply the regular expression to the all_content (include content from child nodes)
+        :param node_only: Ignore the matching groups and tag the whole node
+        :param include_children: Include recurse into children and tag where matching
+        :param fixed_position: use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
+        :param data: Attach the a dictionary of data for the given tag
+        """
+
+        for node in self.select(selector):
+            if fixed_position:
+                self.add_feature('tag', tag_name,
+                                 Tag(fixed_position[0], fixed_position[1],
+                                     self.content[fixed_position[0]:fixed_position[1]],
+                                     data))
+            else:
+                if not content_re:
+                    self.add_feature('tag', tag_name, Tag(data=data))
+                else:
+                    pattern = re.compile(content_re)
+                    if not use_all_content:
+                        if self.content:
+                            content = self.content
+                        else:
+                            return
+                    else:
+                        content = self.get_all_content()
+
+                    match = pattern.match(content)
+                    if match:
+                        if node_only:
+                            self.add_feature('tag', tag_name, Tag(data=data))
+                        else:
+                            for index, m in enumerate(match.groups()):
+                                idx = index + 1
+                                self.add_feature('tag', tag_name,
+                                                 Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
+
+    def get_tags(self):
+        """
+        Returns a list of the names of the tags on the given node
+
+            >>> document.content_node.select('*').get_tags()
+            ['is_cheese']
+
+        :return: A list of the tag name
+        """
+        return [i.name for i in self.get_features_of_type("tag")]
+
+    def get_tag(self, tag_name):
+        """
+        Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
+        content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
+
+            >>> document.content_node.find(content_re='.*Cheese.*').get_tag('is_cheese')
+            [0,10,'The Cheese Moved']
+
+        :param tag_name: The name of the tag
+
+        :return: The tagged location and value (or a list if more than one)
+        """
+        return self.get_feature_value('tag', tag_name)
+
+    def get_all_tags(self):
+        """
+        Returns a list of the names of the tags on the given node and all its children
+
+            >>> document.content_node.find(content_re='.*Cheese.*').get_all_tags()
+            ['is_cheese']
+
+        :return: A list of the tag names
+        """
+        tags = []
+        tags.extend(self.get_tags())
+        for child in self.children:
+            tags.extend(child.get_all_tags())
+        return list(set(tags))
+
+    def has_tags(self):
+        """
+        Returns True if the node has any tags
+
+            >>> document.content_node.find(content_re='.*Cheese.*').has_tags()
+            True
+
+        :return: True if node has any tags else False
+        """
+        return len([i.value for i in self.get_features_of_type("tag")]) > 0
+
+    def has_tag(self, tag):
+        """
+        Returns True if the node has given tag
+
+            >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_cheese')
+            True
+            >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_fish')
+            False
+
+        :param tag: The tag name
+
+        :return: True if node has tag else False
+        """
+        for feature in self.get_features():
+            if feature.feature_type == 'tag' and feature.name == tag:
+                return True
+        return False
 
 
 class ContentFeature(object):

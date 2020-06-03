@@ -64,6 +64,10 @@ class BinaryExpression(object):
             return self.get_value(self.left, content_node) == self.get_value(self.right, content_node)
         if self.op == '!=':
             return self.get_value(self.left, content_node) != self.get_value(self.right, content_node)
+        if self.op == 'and':
+            return bool(self.get_value(self.left, content_node)) and bool(self.get_value(self.right, content_node))
+        if self.op == 'or':
+            return bool(self.get_value(self.left, content_node)) or bool(self.get_value(self.right, content_node))
 
     def get_value(self, side, content_node):
         if isinstance(side, FunctionCall):
@@ -175,6 +179,8 @@ class AbbreviatedStep(object):
     def resolve(self, content_node):
         if self.abbr == '.':
             return [content_node]
+        if self.abbr == '..':
+            return [content_node.parent] if content_node.parent else []
         raise Exception("Not implemented")
 
 
