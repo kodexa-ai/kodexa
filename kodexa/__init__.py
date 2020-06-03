@@ -14,4 +14,3 @@ from .pipeline import Pipeline, PipelineStatistics, PipelineContext
 from .sinks import InMemoryDocumentSink
 from .steps import NodeTagger, TextParser, Rollup, ExtractTagsToKeyValuePair, JsonParser
 from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreHelper
-from .selectors import parse
