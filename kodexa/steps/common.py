@@ -24,11 +24,9 @@ class NodeTagger:
         return f"Node Tagger [selector='{self.selector}' use_all_content='{self.use_all_content}']"
 
     def process(self, document):
-        for node in document.content_node.select(self.selector):
-            node.tag(tag_name=self.tag, content_re=self.content_re, use_all_content=self.use_all_content,
-                         node_only=self.node_only)
-
-        return document
+        document.content_node.tag(selector=self.selector, tag_name=self.tag, content_re=self.content_re,
+                                  use_all_content=self.use_all_content,
+                                  node_only=self.node_only)
 
 
 class TextParser:
