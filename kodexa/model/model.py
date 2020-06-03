@@ -291,8 +291,8 @@ class ContentNode(object):
         :param selector: The selector (ie. //*)
         :return: A list of the matching content nodes
         """
-        from kodexa import selectors
-        parsed_selector = selectors.parse(selector)
+        from kodexa.selectors import parse
+        parsed_selector = parse(selector)
         return parsed_selector.resolve(self)
 
     def get_all_content(self, separator=" "):
@@ -776,6 +776,20 @@ class Document(object):
         url_document.metadata.connector_options.url = url
         url_document.metadata.connector_options.headers = headers
         return url_document
+
+    def select(self, selector):
+        """
+        Execute a selector on the root node and then return a list of the matching nodes
+
+        >>> document.select('.')
+           [ContentNode]
+
+        :param selector: The selector (ie. //*)
+        :return: A list of the matching content nodes
+        """
+        from kodexa.selectors import parse
+        parsed_selector = parse(selector)
+        return parsed_selector.resolve(self.content_node)
 
 
 class KodexaRender:
