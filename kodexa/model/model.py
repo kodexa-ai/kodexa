@@ -812,7 +812,7 @@ class KodexaRender:
 
 require.config({
     paths: {
-        'kodexa-lib-""" + render_uuid + """': 'https://cdn.jsdelivr.net/npm/kodexajs/kodexa.js',
+        'kodexa-lib-""" + render_uuid + """': 'https://cdn.jsdelivr.net/npm/kodexajs/kodexa',
         'jquery': '//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min'
     }
 });
