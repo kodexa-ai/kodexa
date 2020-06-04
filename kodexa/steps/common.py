@@ -24,7 +24,7 @@ class NodeTagger:
         return f"Node Tagger [selector='{self.selector}' use_all_content='{self.use_all_content}']"
 
     def process(self, document):
-        document.content_node.tag(selector=self.selector, tag_name=self.tag_to_apply, content_re=self.content_re,
+        document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                                   use_all_content=self.use_all_content,
                                   node_only=self.node_only)
 
