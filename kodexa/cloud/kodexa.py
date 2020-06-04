@@ -84,7 +84,7 @@ class KodexaCloudSession:
             headers={"x-access-token": self.access_token})
         print(response.text)
         raw_store = Dict(json.loads(response.text))
-        return TableDataStore(raw_store.columns, raw_store.rows)
+        return TableDataStore(raw_store.data.columns, raw_store.data.rows)
 
     def merge_stores(self, execution, context):
         for store in execution.stores:
