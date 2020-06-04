@@ -82,6 +82,7 @@ class KodexaCloudSession:
         response = requests.get(
             f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}",
             headers={"x-access-token": self.access_token})
+        print(response.text)
         raw_store = Dict(json.loads(response.text))
         return TableDataStore(raw_store.columns, raw_store.rows)
 
