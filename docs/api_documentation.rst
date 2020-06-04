@@ -72,7 +72,7 @@ API Documentation
    .. autoclass:: TextParser
       :members:
 
-   .. autoclass:: Rollup
+   .. autoclass:: RollupTransformer
       :members:
 
    .. autoclass:: TagsToKeyValuePairExtractor

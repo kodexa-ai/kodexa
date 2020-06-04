@@ -1,7 +1,7 @@
 import os
 
 from kodexa import Document, DocumentRender, PipelineContext
-from kodexa.steps.common import Rollup, TagsToKeyValuePairExtractor
+from kodexa.steps.common import RollupTransformer, TagsToKeyValuePairExtractor
 
 
 def get_test_directory():
@@ -12,7 +12,7 @@ def test_html_rollup():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.kdxa'), 'rb').read())
 
     # Collapse out all the <a> tags
-    step = Rollup(collapse_type_res=["a"])
+    step = RollupTransformer(collapse_type_res=["a"])
     result = step.process(document)
 
 
