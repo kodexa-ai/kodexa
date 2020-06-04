@@ -794,6 +794,8 @@ class Document(object):
 
 
 class KodexaRender:
+    KODEXA_JS_URL = 'https://cdn.jsdelivr.net/npm/kodexajs/kodexa'
+
     """
     An implementation of a render that uses the KodexaJS
     library to render the document
@@ -812,7 +814,7 @@ class KodexaRender:
 
 require.config({
     paths: {
-        'kodexa-lib-""" + render_uuid + """': 'https://cdn.jsdelivr.net/npm/kodexajs/kodexa',
+        'kodexa-lib-""" + render_uuid + """': '""" + KodexaRender.KODEXA_JS_URL + """',
         'jquery': '//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min'
     }
 });
