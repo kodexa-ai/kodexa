@@ -59,7 +59,7 @@ class TextParser:
         return document
 
 
-class Rollup:
+class RollupTransformer:
     """
     The rollup step allows you to decide how you want to collapse content in a document by removing nodes
     while maintaining content and features as needed
@@ -70,7 +70,7 @@ class Rollup:
         self.reindex = reindex
 
     def get_name(self):
-        return "Rollup"
+        return "Rollup Transformer"
 
     def process(self, document):
 
