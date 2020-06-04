@@ -75,7 +75,7 @@ API Documentation
    .. autoclass:: Rollup
       :members:
 
-   .. autoclass:: ExtractTagsToKeyValuePair
+   .. autoclass:: TagsToKeyValuePairExtractor
       :members:
 
    .. autoclass:: JsonParser

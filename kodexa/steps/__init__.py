@@ -4,4 +4,4 @@ Steps
 
 Common and reusable steps
 """
-from .common import NodeTagger, TextParser, Rollup, ExtractTagsToKeyValuePair, JsonParser
+from .common import NodeTagger, TextParser, Rollup, TagsToKeyValuePairExtractor, JsonParser
