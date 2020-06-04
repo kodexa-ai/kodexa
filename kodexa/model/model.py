@@ -89,7 +89,7 @@ class ContentNode(object):
             >>> current_content_node.to_dict()
         """
         new_dict = {'type': self.type, 'content': self.content, 'content_parts': self.content_parts, 'features': [],
-                    'index': self.index, 'children': []}
+                    'index': self.index, 'children': [], 'uuid': self.uuid}
         for feature in self.get_features():
             new_dict['features'].append(feature.to_dict())
 
@@ -101,6 +101,8 @@ class ContentNode(object):
     def from_dict(document, content_node_dict):
         new_content_node = document.create_node(type=content_node_dict['type'], content=content_node_dict[
             'content'] if 'content' in content_node_dict else None)
+        if 'uuid' in content_node_dict:
+            new_content_node.uuid = content_node_dict['uuid']
 
         if 'content_parts' in content_node_dict:
             new_content_node.content_parts = content_node_dict['content_parts']
