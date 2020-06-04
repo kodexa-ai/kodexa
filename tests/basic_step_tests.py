@@ -1,7 +1,7 @@
 import os
 
 from kodexa import Document, DocumentRender, PipelineContext
-from kodexa.steps.common import Rollup, ExtractTagsToKeyValuePair
+from kodexa.steps.common import Rollup, TagsToKeyValuePairExtractor
 
 
 def get_test_directory():
@@ -20,7 +20,7 @@ def test_tag_key_value():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
 
     # Collapse out all the <a> tags
-    step = ExtractTagsToKeyValuePair(store_name='test_store')
+    step = TagsToKeyValuePairExtractor(store_name='test_store')
     context = PipelineContext()
     result = step.process(document, context)
     print(context.get_store('test_store').rows)

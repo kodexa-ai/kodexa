@@ -13,18 +13,18 @@ class NodeTagger:
     and also just tag the node (ignoring the matching groups)
     """
 
-    def __init__(self, selector, tag_name, content_re=".*", use_all_content=True, node_only=False):
+    def __init__(self, selector, tag_to_apply, content_re=".*", use_all_content=True, node_only=False):
         self.selector = selector
         self.content_re = content_re
         self.use_all_content = use_all_content
-        self.tag = tag_name
+        self.tag_to_apply = tag_to_apply
         self.node_only = node_only
 
     def get_name(self):
         return f"Node Tagger [selector='{self.selector}' use_all_content='{self.use_all_content}']"
 
     def process(self, document):
-        document.content_node.tag(selector=self.selector, tag_name=self.tag, content_re=self.content_re,
+        document.content_node.tag(selector=self.selector, tag_name=self.tag_to_apply, content_re=self.content_re,
                                   use_all_content=self.use_all_content,
                                   node_only=self.node_only)
 
@@ -124,7 +124,7 @@ class Rollup:
         return document
 
 
-class ExtractTagsToKeyValuePair:
+class TagsToKeyValuePairExtractor:
     """
     Extract all the tags from a document into a key/value pair table store
     """

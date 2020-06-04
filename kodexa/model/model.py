@@ -377,26 +377,26 @@ class ContentNode(object):
                 break
         return nodes
 
-    def tag_nodes_to(self, end_node, tag_name):
+    def tag_nodes_to(self, end_node, tag_to_apply):
         """
         Tag all the nodes from this node to the end node with the given tag name
 
               >>> document.content_node.children[0].tag_nodes_to(document.content_node.children[5], tag_name='foo')
 
          :param end_node: The node to end with
-         :param tag_name: The tag name
+         :param tag_to_apply: The tag name that will be applied to each node
          """
-        [node.tag(tag_name) for node in self.collect_nodes_to(end_node)]
+        [node.tag(tag_to_apply) for node in self.collect_nodes_to(end_node)]
 
-    def tag_range(self, start_content_re, end_content_re, tag_name, type_re='.*', use_all_content=False):
+    def tag_range(self, start_content_re, end_content_re, tag_to_apply, type_re='.*', use_all_content=False):
         """
         This will tag all the child nodes between the start and end content regular expressions
 
-             >>> document.content_node.tag_range(start_content_re='.*Cheese.*', end_content_re='.*Fish.*', tag_name='foo')
+             >>> document.content_node.tag_range(start_content_re='.*Cheese.*', end_content_re='.*Fish.*', tag_to_apply='foo')
 
         :param start_content_re: The regular expression to match the starting child
         :param end_content_re: The regular expression to match the ending child
-        :param tag_name: The tag to be applied to the nodes in range
+        :param tag_to_apply: The tag name that will be applied to the nodes in range
         :param type_re: The type to match (default is all)
         :param use_all_content: Use full content (including child nodes, default is False)
         """
@@ -420,9 +420,9 @@ class ContentNode(object):
             end_index_list[0] if len(end_index_list) > 0 else len(all_nodes)
 
         if start_index is not None:
-            [node.tag(tag_name) for node in all_nodes[start_index:end_index]]
+            [node.tag(tag_to_apply) for node in all_nodes[start_index:end_index]]
 
-    def tag(self, tag_name, selector=".", content_re=None,
+    def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=False,
             fixed_position=None, data=None):
         """
@@ -430,7 +430,7 @@ class ContentNode(object):
 
             >>> document.content_node.tag('is_cheese')
 
-        :param tag_name: the name of the tag to apply
+        :param tag_to_apply: the name of tag that will be applied to the node
         :param selector: The selector to identify the source nodes to work on (default . - the current node)
         :param content_re: the regular expression that you wish to use to tag, note that we will create a tag for each matching group
         :param use_all_content: apply the regular expression to the all_content (include content from child nodes)
@@ -442,13 +442,13 @@ class ContentNode(object):
 
         for node in self.select(selector):
             if fixed_position:
-                self.add_feature('tag', tag_name,
+                self.add_feature('tag', tag_to_apply,
                                  Tag(fixed_position[0], fixed_position[1],
                                      self.content[fixed_position[0]:fixed_position[1]],
                                      data))
             else:
                 if not content_re:
-                    self.add_feature('tag', tag_name, Tag(data=data))
+                    self.add_feature('tag', tag_to_apply, Tag(data=data))
                 else:
                     pattern = re.compile(content_re)
                     if not use_all_content:
@@ -462,11 +462,11 @@ class ContentNode(object):
                     match = pattern.match(content)
                     if match:
                         if node_only:
-                            self.add_feature('tag', tag_name, Tag(data=data))
+                            self.add_feature('tag', tag_to_apply, Tag(data=data))
                         else:
                             for index, m in enumerate(match.groups()):
                                 idx = index + 1
-                                self.add_feature('tag', tag_name,
+                                self.add_feature('tag', tag_to_apply,
                                                  Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
 
     def get_tags(self):
