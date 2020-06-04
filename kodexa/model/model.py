@@ -821,7 +821,7 @@ require(['kodexa-lib-""" + render_uuid + """','jquery'], function() {
     kodexa.fromMap(""" + document.to_json() + """).then(kdxaDocument => {
        let widget = kodexa.newDocumentWidget(kdxaDocument);
        widget.attach($('#kodexa-div-""" + render_uuid + """'))
-       widget.render();
+       widget.render(""" + ("'" + node.uuid + "'" if node else "") + """);
     });
     
 });
