@@ -28,6 +28,7 @@ class NodeTagger:
                                   use_all_content=self.use_all_content,
                                   node_only=self.node_only)
 
+        return document
 
 class TextParser:
     """
