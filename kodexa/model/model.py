@@ -442,33 +442,35 @@ class ContentNode(object):
         :param data: Attach the a dictionary of data for the given tag
         """
 
+        if content_re:
+            pattern = re.compile(content_re)
+
         for node in self.select(selector):
             if fixed_position:
-                self.add_feature('tag', tag_to_apply,
+                node.add_feature('tag', tag_to_apply,
                                  Tag(fixed_position[0], fixed_position[1],
-                                     self.content[fixed_position[0]:fixed_position[1]],
+                                     node.content[fixed_position[0]:fixed_position[1]],
                                      data))
             else:
                 if not content_re:
-                    self.add_feature('tag', tag_to_apply, Tag(data=data))
+                    node.add_feature('tag', tag_to_apply, Tag(data=data))
                 else:
-                    pattern = re.compile(content_re)
                     if not use_all_content:
-                        if self.content:
-                            content = self.content
+                        if node.content:
+                            content = node.content
                         else:
                             return
                     else:
-                        content = self.get_all_content()
+                        content = node.get_all_content()
 
                     match = pattern.match(content)
                     if match:
                         if node_only:
-                            self.add_feature('tag', tag_to_apply, Tag(data=data))
+                            node.add_feature('tag', tag_to_apply, Tag(data=data))
                         else:
                             for index, m in enumerate(match.groups()):
                                 idx = index + 1
-                                self.add_feature('tag', tag_to_apply,
+                                node.add_feature('tag', tag_to_apply,
                                                  Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
 
     def get_tags(self):

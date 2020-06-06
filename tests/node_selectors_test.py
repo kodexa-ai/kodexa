@@ -1,6 +1,6 @@
 import os
 
-from kodexa import selectors, Document
+from kodexa import selectors, Document, Pipeline, NodeTagger
 
 
 def get_test_directory():
@@ -119,3 +119,19 @@ def test_instance_indexes():
     # but the index of the node itself
     first_paragraph = document.select('//p[0]')
     assert len(first_paragraph) == 18
+
+
+def test_spatial_doc_sample():
+    # This test document and this portion of code is a snippet
+    # from a test in the spatial actions tests.  Adding this saved doc
+    # and this section to ensure NodeTagger is tested.
+    page_footer_re = r'Page \d+ of \d+$'
+    pipeline = Pipeline(Document.from_kdxa(get_test_directory() + 'before_fail.kdxa'))
+
+    pipeline.add_step(
+        NodeTagger(selector='//*[typeRegex("line.*")]', content_re=page_footer_re, tag_to_apply='page_footer'))
+    pipeline.run()
+
+    doc = pipeline.context.output_document
+
+    assert doc.get_root() is not None
