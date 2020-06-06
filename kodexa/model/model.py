@@ -283,7 +283,7 @@ class ContentNode(object):
         """
         return self.type
 
-    def select(self, selector):
+    def select(self, selector, variables=None):
         """
         Execute a selector on this node and then return a list of the matching nodes
 
@@ -291,11 +291,14 @@ class ContentNode(object):
            [ContentNode]
 
         :param selector: The selector (ie. //*)
+        :param variables: A dictionary of variable name/value to use in substituion
         :return: A list of the matching content nodes
         """
+        if variables is None:
+            variables = {}
         from kodexa.selectors import parse
         parsed_selector = parse(selector)
-        return parsed_selector.resolve(self)
+        return parsed_selector.resolve(self, variables)
 
     def get_all_content(self, separator=" "):
         """
