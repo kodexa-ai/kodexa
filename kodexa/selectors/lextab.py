@@ -1,6 +1,6 @@
 # lextab.py. This file automatically created by PLY (version 3.11). Don't edit!
 _tabversion   = '3.10'
-_lextokens    = set(('ABBREV_AXIS_AT', 'ABBREV_PATH_SEP', 'ABBREV_STEP_PARENT', 'ABBREV_STEP_SELF', 'AND_OP', 'AXISNAME', 'AXIS_SEP', 'CLOSE_BRACKET', 'CLOSE_PAREN', 'COLON', 'COMMA', 'DIV_OP', 'DOLLAR', 'EQUAL_OP', 'FLOAT', 'FUNCNAME', 'INTEGER', 'LITERAL', 'MINUS_OP', 'MOD_OP', 'MULT_OP', 'NCNAME', 'NODETYPE', 'OPEN_BRACKET', 'OPEN_PAREN', 'OR_OP', 'PATH_SEP', 'PLUS_OP', 'REL_OP', 'STAR_OP', 'UNION_OP'))
+_lextokens    = set(('ABBREV_AXIS_AT', 'ABBREV_PATH_SEP', 'ABBREV_STEP_PARENT', 'ABBREV_STEP_SELF', 'AND_OP', 'AXISNAME', 'AXIS_SEP', 'CLOSE_BRACKET', 'CLOSE_PAREN', 'COLON', 'COMMA', 'DIV_OP', 'DOLLAR', 'EQUAL_OP', 'FLOAT', 'FUNCNAME', 'INTEGER', 'INTERSECT_OP', 'LITERAL', 'MINUS_OP', 'MOD_OP', 'MULT_OP', 'NCNAME', 'NODETYPE', 'OPEN_BRACKET', 'OPEN_PAREN', 'OR_OP', 'PATH_SEP', 'PLUS_OP', 'REL_OP', 'STAR_OP', 'UNION_OP'))
 _lexreflags   = 32
 _lexliterals  = ''
 _lexstateinfo = {'INITIAL': 'inclusive'}

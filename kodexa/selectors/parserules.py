@@ -17,6 +17,7 @@ precedence = (
     ('left', 'MULT_OP', 'DIV_OP', 'MOD_OP'),
     ('right', 'UMINUS_OP'),
     ('left', 'UNION_OP'),
+    ('left', 'INTERSECT_OP'),
 )
 
 
@@ -36,6 +37,7 @@ def p_expr_boolean(p):
          | Expr DIV_OP Expr
          | Expr MOD_OP Expr
          | Expr UNION_OP Expr
+         | Expr INTERSECT_OP Expr
     """
     p[0] = ast.BinaryExpression(p[1], p[2], p[3])
 

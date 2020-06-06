@@ -64,6 +64,14 @@ class BinaryExpression(object):
             return self.get_value(self.left, content_node) == self.get_value(self.right, content_node)
         if self.op == '!=':
             return self.get_value(self.left, content_node) != self.get_value(self.right, content_node)
+        if self.op == 'intersect':
+            left_value = self.get_value(self.left, content_node)
+            right_value = self.get_value(self.right, content_node)
+            if isinstance(left_value, list) and isinstance(right_value, list):
+                intersection_list = [value for value in left_value if value in right_value]
+                return intersection_list
+            else:
+                return []
         if self.op == 'and':
             return bool(self.get_value(self.left, content_node)) and bool(self.get_value(self.right, content_node))
         if self.op == 'or':
@@ -71,6 +79,8 @@ class BinaryExpression(object):
 
     def get_value(self, side, content_node):
         if isinstance(side, FunctionCall):
+            return side.resolve(content_node)
+        if isinstance(side, AbsolutePath):
             return side.resolve(content_node)
         else:
             return side

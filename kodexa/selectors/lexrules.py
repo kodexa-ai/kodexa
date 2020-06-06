@@ -11,6 +11,7 @@ operator_names = {
     'and': 'AND_OP',
     'div': 'DIV_OP',
     'mod': 'MOD_OP',
+    'intersect': 'INTERSECT_OP'
 }
 
 tokens = [
@@ -27,6 +28,7 @@ tokens = [
              'UNION_OP',
              'EQUAL_OP',
              'REL_OP',
+             'INTERSECT_OP',
              'PLUS_OP',
              'MINUS_OP',
              'MULT_OP',

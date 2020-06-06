@@ -145,6 +145,10 @@ class KodexaCloudService:
         self.cloud_url = cloud_url
         self.access_token = access_token
 
+    def to_yaml(self):
+        config = {}
+
+
     def get_name(self):
         return f"Kodexa Service ({self.slug})"
 
