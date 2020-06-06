@@ -93,6 +93,9 @@ def test_selector_complex_doc_1():
 def test_tagged_content():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
 
+    all_nodes = document.content_node.select('//p stream *[hasTag("ORG")] stream *[hasTag("ORG")]')
+    assert len(all_nodes) == 7
+
     all_nodes = document.content_node.select('//p intersect //*[hasTag("ORG")]')
     assert len(all_nodes) == 7
 

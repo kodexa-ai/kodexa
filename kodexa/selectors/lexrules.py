@@ -11,7 +11,8 @@ operator_names = {
     'and': 'AND_OP',
     'div': 'DIV_OP',
     'mod': 'MOD_OP',
-    'intersect': 'INTERSECT_OP'
+    'intersect': 'INTERSECT_OP',
+    'stream': 'PIPELINE_OP'
 }
 
 tokens = [

@@ -23,6 +23,7 @@ __all__ = [
     'UnaryExpression',
     'BinaryExpression',
     'PredicatedExpression',
+    'PipelineExpression',
     'AbsolutePath',
     'Step',
     'NameTest',
@@ -31,6 +32,25 @@ __all__ = [
     'VariableReference',
     'FunctionCall',
 ]
+
+
+class PipelineExpression(object):
+    '''A pipeline XPath expression'''
+
+    def __init__(self, left, op, right):
+        self.left = left
+        '''the left side of the pipeline expression'''
+        self.op = op
+        '''the operator of the pipeline expression'''
+        self.right = right
+        '''the right side of the pipeline expression'''
+
+    def resolve(self, content_node: ContentNode):
+        left_nodes = self.left.resolve(content_node)
+        result_nodes = []
+        for node in left_nodes:
+            result_nodes = result_nodes + self.right.resolve(node)
+        return result_nodes
 
 
 class UnaryExpression(object):
