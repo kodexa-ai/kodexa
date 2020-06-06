@@ -49,6 +49,13 @@ def p_expr_unary(p):
     p[0] = ast.UnaryExpression(p[1], p[2])
 
 
+def p_expr_pipeline(p):
+    """
+    Expr : Expr PIPELINE_OP Expr
+    """
+    p[0] = ast.PipelineExpression(p[1], p[2], p[3])
+
+
 #
 # path expressions
 #
