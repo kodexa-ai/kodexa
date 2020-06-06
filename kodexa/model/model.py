@@ -792,7 +792,11 @@ class Document(object):
         :return: A list of the matching content nodes
         """
         if self.content_node:
-            return self.content_node.select(selector)
+            result = self.content_node.select(selector)
+            if isinstance(result, list):
+                return result
+            else:
+                return [self.content_node] if bool(result) else []
         else:
             return []
 

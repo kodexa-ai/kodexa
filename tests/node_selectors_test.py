@@ -33,6 +33,12 @@ def test_tag_regex():
 def test_selector_regex():
     document = Document.from_text("Hello World")
 
+    results = document.select('hasTag() = false()')
+    assert len(results) == 1
+
+    results = document.select('hasTag()')
+    assert len(results) == 0
+
     results = document.content_node.select('.')
     assert len(results) == 1
     assert results[0].content == "Hello World"
@@ -119,6 +125,12 @@ def test_instance_indexes():
     # but the index of the node itself
     first_paragraph = document.select('//p[0]')
     assert len(first_paragraph) == 18
+
+
+def test_spatial_doc_sample():
+    document = Document.from_kdxa(get_test_directory() + 'before_fail.kdxa')
+    nodes = document.select('//page[contentRegex("line.*",true)]')
+    assert len(nodes) == 18
 
 
 def test_spatial_doc_sample():
