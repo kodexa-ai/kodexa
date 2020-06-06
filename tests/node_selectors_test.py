@@ -87,6 +87,9 @@ def test_selector_complex_doc_1():
 def test_tagged_content():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
 
+    all_nodes = document.content_node.select('//p intersect //*[hasTag("ORG")]')
+    assert len(all_nodes) == 7
+
     # Has any tag to start
     tagged_nodes = document.content_node.select('//*[hasTag()]')
     assert len(tagged_nodes) == 22
@@ -116,4 +119,3 @@ def test_instance_indexes():
     # but the index of the node itself
     first_paragraph = document.select('//p[0]')
     assert len(first_paragraph) == 18
-
