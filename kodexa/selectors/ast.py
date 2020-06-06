@@ -45,11 +45,11 @@ class PipelineExpression(object):
         self.right = right
         '''the right side of the pipeline expression'''
 
-    def resolve(self, content_node: ContentNode):
-        left_nodes = self.left.resolve(content_node)
+    def resolve(self, content_node: ContentNode, variables):
+        left_nodes = self.left.resolve(content_node, variables)
         result_nodes = []
         for node in left_nodes:
-            result_nodes = result_nodes + self.right.resolve(node)
+            result_nodes = result_nodes + self.right.resolve(node, variables)
         return result_nodes
 
 
@@ -77,31 +77,35 @@ class BinaryExpression(object):
         self.right = right
         '''the right side of the binary expression'''
 
-    def resolve(self, content_node: ContentNode):
+    def resolve(self, content_node: ContentNode, variables):
         if self.op == '|':
-            return self.left.resolve(content_node) + self.right.resolve(content_node)
+            return self.left.resolve(content_node, variables) + self.right.resolve(content_node, variables)
         if self.op == '=':
-            return self.get_value(self.left, content_node) == self.get_value(self.right, content_node)
+            return self.get_value(self.left, content_node, variables) == self.get_value(self.right, content_node,
+                                                                                        variables)
         if self.op == '!=':
-            return self.get_value(self.left, content_node) != self.get_value(self.right, content_node)
+            return self.get_value(self.left, content_node, variables) != self.get_value(self.right, content_node,
+                                                                                        variables)
         if self.op == 'intersect':
-            left_value = self.get_value(self.left, content_node)
-            right_value = self.get_value(self.right, content_node)
+            left_value = self.get_value(self.left, content_node, variables)
+            right_value = self.get_value(self.right, content_node, variables)
             if isinstance(left_value, list) and isinstance(right_value, list):
                 intersection_list = [value for value in left_value if value in right_value]
                 return intersection_list
             else:
                 return []
         if self.op == 'and':
-            return bool(self.get_value(self.left, content_node)) and bool(self.get_value(self.right, content_node))
+            return bool(self.get_value(self.left, content_node, variables)) and bool(
+                self.get_value(self.right, content_node, variables))
         if self.op == 'or':
-            return bool(self.get_value(self.left, content_node)) or bool(self.get_value(self.right, content_node))
+            return bool(self.get_value(self.left, content_node, variables)) or bool(
+                self.get_value(self.right, content_node, variables))
 
-    def get_value(self, side, content_node):
+    def get_value(self, side, content_node, variables):
         if isinstance(side, FunctionCall):
-            return side.resolve(content_node)
+            return side.resolve(content_node, variables)
         if isinstance(side, AbsolutePath):
-            return side.resolve(content_node)
+            return side.resolve(content_node, variables)
         else:
             return side
 
@@ -118,8 +122,8 @@ class PredicatedExpression(object):
     def append_predicate(self, pred):
         self.predicates.append(pred)
 
-    def resolve(self, content_node):
-        nodes = self.base.resolve(content_node)
+    def resolve(self, content_node, variables):
+        nodes = self.base.resolve(content_node, variables)
         results = []
         for idx, node in enumerate(nodes):
             for predicate in self.predicates:
@@ -142,14 +146,14 @@ class AbsolutePath(object):
         self.relative = relative
         '''the relative path after the absolute root operator'''
 
-    def resolve(self, content_node):
+    def resolve(self, content_node, variables):
         if self.op == '/':
-            return self.relative.resolve(content_node)
+            return self.relative.resolve(content_node, variables)
         if self.op == '//':
             results = []
-            results = results + self.relative.resolve(content_node)
+            results = results + self.relative.resolve(content_node, variables)
             for child in content_node.children:
-                results = results + self.resolve(child)
+                results = results + self.resolve(child, variables)
             return results
         raise Exception("Not implemented")
 
@@ -165,7 +169,7 @@ class Step(object):
         self.predicates = predicates
         '''a list of predicates filtering the step'''
 
-    def resolve(self, obj):
+    def resolve(self, obj, variables):
         match = True
 
         if isinstance(obj, ContentFeature):
@@ -177,10 +181,10 @@ class Step(object):
                 if isinstance(predicate, int):
                     if predicate == content_node.index:
                         match = True
-                elif not predicate.resolve(content_node):
+                elif not predicate.resolve(content_node, variables):
                     match = False
 
-            match = match and self.node_test.test(content_node)
+            match = match and self.node_test.test(content_node, variables)
 
         if match:
             return [obj]
@@ -197,7 +201,7 @@ class NameTest(object):
         self.name = name
         '''the node name used for the test, or *'''
 
-    def test(self, obj):
+    def test(self, obj, variables):
         if isinstance(obj, ContentNode):
             return self.name == '*' or obj.type == self.name
         if isinstance(obj, ContentFeature):
@@ -223,7 +227,7 @@ class AbbreviatedStep(object):
         self.abbr = abbr
         '''the abbreviated step'''
 
-    def resolve(self, content_node):
+    def resolve(self, content_node, variables):
         if self.abbr == '.':
             return [content_node]
         if self.abbr == '..':
@@ -238,6 +242,12 @@ class VariableReference(object):
         self.name = name
         '''a tuple (prefix, localname) containing the variable name'''
 
+    def resolve(self, variables):
+        if self.name[1] in variables:
+            return variables[self.name[1]]
+        else:
+            return None
+
 
 class FunctionCall(object):
     '''An XPath function call. foo(); my:foo(1); foo(1, 'a', $var).'''
@@ -250,7 +260,14 @@ class FunctionCall(object):
         self.args = args
         '''a list of argument expressions'''
 
-    def resolve(self, content_node):
+    def resolve(self, content_node, variables):
+
+        args = []
+        for arg in self.args:
+            if isinstance(arg, VariableReference):
+                args.append(arg.resolve(variables))
+            else:
+                args.append(arg)
 
         if self.name == 'true':
             return True
@@ -259,12 +276,12 @@ class FunctionCall(object):
             return False
 
         if self.name == 'contentRegex':
-            compiled_pattern = re.compile(self.args[0])
+            compiled_pattern = re.compile(args[0])
 
             content_to_test = content_node.content
 
-            if len(self.args) > 1:
-                if bool(self.args[2]):
+            if len(args) > 1:
+                if bool(args[2]):
                     content_to_test = content_node.get_all_content()
 
             if content_to_test is not None and compiled_pattern.match(content_to_test):
@@ -273,14 +290,14 @@ class FunctionCall(object):
                 return None
 
         if self.name == 'typeRegex':
-            compiled_pattern = re.compile(self.args[0])
+            compiled_pattern = re.compile(args[0])
             if content_node.type is not None and compiled_pattern.match(content_node.type):
                 return content_node.type
             else:
                 return None
 
         if self.name == 'tagRegex':
-            compiled_pattern = re.compile(self.args[0])
+            compiled_pattern = re.compile(args[0])
             for feature in content_node.get_features_of_type('tag'):
                 if feature.name is not None and compiled_pattern.match(feature.name):
                     return True
@@ -291,13 +308,13 @@ class FunctionCall(object):
             if len(self.args) == 0:
                 return len(content_node.get_tags()) > 0
             else:
-                return content_node.has_feature('tag', self.args[0])
+                return content_node.has_feature('tag', args[0])
 
         if self.name == 'hasFeature':
-            if len(self.args) == 0:
+            if len(args) == 0:
                 return len(content_node.get_features()) > 0
             else:
-                return content_node.has_feature(self.args[0], self.args[1])
+                return content_node.has_feature(args[0], args[1])
 
         if self.name == 'content':
             return content_node.content
