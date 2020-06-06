@@ -231,10 +231,24 @@ class FunctionCall(object):
         '''a list of argument expressions'''
 
     def resolve(self, content_node):
+
+        if self.name == 'true':
+            return True
+
+        if self.name == 'false':
+            return False
+
         if self.name == 'contentRegex':
             compiled_pattern = re.compile(self.args[0])
-            if content_node.content is not None and compiled_pattern.match(content_node.content):
-                return content_node.content
+
+            content_to_test = content_node.content
+
+            if len(self.args) > 1:
+                if bool(self.args[2]):
+                    content_to_test = content_node.get_all_content()
+
+            if content_to_test is not None and compiled_pattern.match(content_to_test):
+                return content_to_test
             else:
                 return None
 
