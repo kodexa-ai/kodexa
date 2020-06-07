@@ -15,8 +15,22 @@ logger = logging.getLogger('kodexa.platform')
 
 
 class KodexaPlatform:
-    URL = "https://platform.kodexa.com"
-    ACCESS_TOKEN = os.getenv('KODEXA_ACCESS_TOKEN')
+
+    @staticmethod
+    def get_access_token():
+        return os.getenv('KODEXA_ACCESS_TOKEN')
+
+    @staticmethod
+    def get_url():
+        return os.getenv('KODEXA_URL', "https://platform.kodexa.com")
+
+    @staticmethod
+    def set_access_token(access_token):
+        os.putenv('KODEXA_ACCESS_TOKEN', access_token)
+
+    @staticmethod
+    def set_url(url):
+        os.putenv('KODEXA_URL', url)
 
 
 class KodexaSession:
@@ -24,18 +38,20 @@ class KodexaSession:
     A Session on the Kodexa platform for leveraging pipelines and services
     """
 
-    def __init__(self, session_type, slug, access_token=None, cloud_url=KodexaPlatform.URL):
-        self.access_token = access_token if access_token else KodexaPlatform.ACCESS_TOKEN
+    def __init__(self, session_type, slug, access_token=None, cloud_url=KodexaPlatform.get_url()):
+        self.access_token = access_token if access_token else KodexaPlatform.get_access_token()
         self.session_type = session_type
         self.cloud_url = cloud_url
         self.slug = slug
         self.cloud_session = None
 
     def start(self):
+        logger.info("Creating session")
         r = requests.post(f"{self.cloud_url}/api/sessions", params={self.session_type: self.slug},
                           headers={"x-access-token": self.access_token})
 
         if r.status_code != 200:
+            logger.error(r.text)
             raise Exception("Unable to create a session, check your URL and access token")
         self.cloud_session = Dict(json.loads(r.text))
 
@@ -102,7 +118,7 @@ class KodexaPipeline:
     """
 
     def __init__(self, slug, version=None, attach_source=True, options=None, auth=None,
-                 cloud_url=KodexaPlatform.URL, access_token=KodexaPlatform.ACCESS_TOKEN):
+                 cloud_url=KodexaPlatform.get_url(), access_token=KodexaPlatform.get_access_token()):
         if auth is None:
             auth = []
         if options is None:
@@ -141,7 +157,7 @@ class KodexaAction:
     """
 
     def __init__(self, slug, version=None, attach_source=False, options=None, auth=None,
-                 cloud_url=KodexaPlatform.URL, access_token=KodexaPlatform.ACCESS_TOKEN):
+                 cloud_url=KodexaPlatform.get_url(), access_token=KodexaPlatform.get_access_token()):
         if auth is None:
             auth = []
         if options is None:
