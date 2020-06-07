@@ -11,16 +11,21 @@ from kodexa.model import Document
 from kodexa.pipeline import PipelineContext
 from kodexa.stores import TableDataStore
 
-logger = logging.getLogger('kodexa.cloud')
+logger = logging.getLogger('kodexa.platform')
 
 
-class KodexaCloudSession:
+class KodexaPlatform:
+    URL = "https://platform.kodexa.com"
+    ACCESS_TOKEN = os.getenv('KODEXA_ACCESS_TOKEN')
+
+
+class KodexaSession:
     """
-    A Session on the Kodexa Cloud for leveraging pipelines and services
+    A Session on the Kodexa platform for leveraging pipelines and services
     """
 
-    def __init__(self, session_type, slug, access_token=None, cloud_url='https://cloud.kodexa.com'):
-        self.access_token = access_token if access_token else os.getenv('KODEXA_ACCESS_TOKEN')
+    def __init__(self, session_type, slug, access_token=None, cloud_url=KodexaPlatform.URL):
+        self.access_token = access_token if access_token else KodexaPlatform.ACCESS_TOKEN
         self.session_type = session_type
         self.cloud_url = cloud_url
         self.slug = slug
@@ -82,7 +87,7 @@ class KodexaCloudSession:
         response = requests.get(
             f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}",
             headers={"x-access-token": self.access_token})
-        print(response.text)
+        logger.debug(f"Response from server [{response.text}]")
         raw_store = Dict(json.loads(response.text))
         return TableDataStore(raw_store.data.columns, raw_store.data.rows)
 
@@ -91,13 +96,13 @@ class KodexaCloudSession:
             context.add_store(store.name, self.get_store(execution, store))
 
 
-class KodexaCloudPipeline:
+class KodexaPipeline:
     """
-    Allow you to interact with a pipeline that has been deployed in the Kodexa Cloud
+    Allow you to interact with a pipeline that has been deployed in the Kodexa platform
     """
 
     def __init__(self, slug, version=None, attach_source=True, options=None, auth=None,
-                 cloud_url='https://cloud.kodexa.com', access_token=None):
+                 cloud_url=KodexaPlatform.URL, access_token=KodexaPlatform.ACCESS_TOKEN):
         if auth is None:
             auth = []
         if options is None:
@@ -111,7 +116,7 @@ class KodexaCloudPipeline:
         self.access_token = access_token
 
     def execute(self, input):
-        cloud_session = KodexaCloudSession("pipeline", self.slug, self.access_token, self.cloud_url)
+        cloud_session = KodexaSession("pipeline", self.slug, self.access_token, self.cloud_url)
         cloud_session.start()
 
         if isinstance(input, Document):
@@ -130,13 +135,17 @@ class KodexaCloudPipeline:
         return context
 
 
-class KodexaCloudService:
+class KodexaService:
     """
-    Allows you to interact with a content service that has been deployed in the Kodexa cloud
+    Allows you to interact with a content service that has been deployed in the Kodexa platform
     """
 
-    def __init__(self, slug, version=None, attach_source=False, options={}, auth=[],
-                 cloud_url='https://cloud.kodexa.com', access_token=None):
+    def __init__(self, slug, version=None, attach_source=False, options=None, auth=None,
+                 cloud_url=KodexaPlatform.URL, access_token=KodexaPlatform.ACCESS_TOKEN):
+        if auth is None:
+            auth = []
+        if options is None:
+            options = {}
         self.slug = slug
         self.version = version
         self.attach_source = attach_source
@@ -146,14 +155,14 @@ class KodexaCloudService:
         self.access_token = access_token
 
     def to_yaml(self):
+        # TODO needs implementation
         config = {}
-
 
     def get_name(self):
         return f"Kodexa Service ({self.slug})"
 
     def process(self, document, context):
-        cloud_session = KodexaCloudSession("service", self.slug, self.access_token, self.cloud_url)
+        cloud_session = KodexaSession("service", self.slug, self.access_token, self.cloud_url)
         cloud_session.start()
         execution = cloud_session.execute_service(document, self.options, self.attach_source)
         execution = cloud_session.wait_for_execution(execution)
