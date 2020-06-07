@@ -26,11 +26,11 @@ class KodexaPlatform:
 
     @staticmethod
     def set_access_token(access_token):
-        os.putenv('KODEXA_ACCESS_TOKEN', access_token)
+        os.environ["KODEXA_ACCESS_TOKEN"] = access_token
 
     @staticmethod
     def set_url(url):
-        os.putenv('KODEXA_URL', url)
+        os.environ["KODEXA_URL"] = url
 
 
 class KodexaSession:
