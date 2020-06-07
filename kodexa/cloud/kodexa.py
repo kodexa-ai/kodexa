@@ -39,16 +39,14 @@ class KodexaSession:
     """
 
     def __init__(self, session_type, slug):
-        self.access_token = KodexaPlatform.get_access_token()
         self.session_type = session_type
-        self.cloud_url = KodexaPlatform.get_url()
         self.slug = slug
         self.cloud_session = None
 
     def start(self):
-        logger.info(f"Creating session {self.slug} ({self.cloud_url})")
-        r = requests.post(f"{self.cloud_url}/api/sessions", params={self.session_type: self.slug},
-                          headers={"x-access-token": self.access_token})
+        logger.info(f"Creating session {self.slug} ({KodexaPlatform.get_url()})")
+        r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions", params={self.session_type: self.slug},
+                          headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if r.status_code != 200:
             logger.error("Unable to create session")
@@ -65,10 +63,10 @@ class KodexaSession:
 
         data = {"options": json.dumps(options)}
 
-        r = requests.post(f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/execute",
+        r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
                           params={self.session_type: self.slug},
                           data=data,
-                          headers={"x-access-token": self.access_token}, files=files)
+                          headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)
         execution = Dict(json.loads(r.text))
         return execution
 
@@ -76,8 +74,9 @@ class KodexaSession:
 
         status = execution.status
         while execution.status == "PENDING" or execution.status == "RUNNING":
-            r = requests.get(f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}",
-                             headers={"x-access-token": self.access_token})
+            r = requests.get(
+                f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}",
+                headers={"x-access-token": KodexaPlatform.get_access_token()})
             execution = Dict(json.loads(r.text))
             if status != execution.status:
                 logger.info(f"Status changed from {status} -> {execution.status}")
@@ -94,16 +93,16 @@ class KodexaSession:
     def get_output_document(self, execution):
         if execution.outputId:
             doc = requests.get(
-                f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
-                headers={"x-access-token": self.access_token})
+                f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
+                headers={"x-access-token": KodexaPlatform.get_access_token()})
             return Document.from_msgpack(doc.content)
         else:
             return None
 
     def get_store(self, execution, store):
         response = requests.get(
-            f"{self.cloud_url}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}",
-            headers={"x-access-token": self.access_token})
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
         logger.debug(f"Response from server [{response.text}]")
         raw_store = Dict(json.loads(response.text))
         return TableDataStore(raw_store.data.columns, raw_store.data.rows)
