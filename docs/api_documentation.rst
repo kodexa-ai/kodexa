@@ -9,7 +9,7 @@ API Documentation
    .. autoclass:: KodexaPipeline
       :members:
 
-   .. autoclass:: KodexaService
+   .. autoclass:: KodexaAction
       :members:
 
 .. automodule:: kodexa.connectors

@@ -135,9 +135,9 @@ class KodexaPipeline:
         return context
 
 
-class KodexaService:
+class KodexaAction:
     """
-    Allows you to interact with a content service that has been deployed in the Kodexa platform
+    Allows you to interact with an action that has been deployed in the Kodexa platform
     """
 
     def __init__(self, slug, version=None, attach_source=False, options=None, auth=None,
