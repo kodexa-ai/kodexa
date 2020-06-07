@@ -38,19 +38,20 @@ class KodexaSession:
     A Session on the Kodexa platform for leveraging pipelines and services
     """
 
-    def __init__(self, session_type, slug, access_token=None, cloud_url=KodexaPlatform.get_url()):
-        self.access_token = access_token if access_token else KodexaPlatform.get_access_token()
+    def __init__(self, session_type, slug):
+        self.access_token = KodexaPlatform.get_access_token()
         self.session_type = session_type
-        self.cloud_url = cloud_url
+        self.cloud_url = KodexaPlatform.get_url()
         self.slug = slug
         self.cloud_session = None
 
     def start(self):
-        logger.info("Creating session")
+        logger.info(f"Creating session {self.slug} ({self.cloud_url})")
         r = requests.post(f"{self.cloud_url}/api/sessions", params={self.session_type: self.slug},
                           headers={"x-access-token": self.access_token})
 
         if r.status_code != 200:
+            logger.error("Unable to create session")
             logger.error(r.text)
             raise Exception("Unable to create a session, check your URL and access token")
         self.cloud_session = Dict(json.loads(r.text))
@@ -117,8 +118,7 @@ class KodexaPipeline:
     Allow you to interact with a pipeline that has been deployed in the Kodexa platform
     """
 
-    def __init__(self, slug, version=None, attach_source=True, options=None, auth=None,
-                 cloud_url=KodexaPlatform.get_url(), access_token=KodexaPlatform.get_access_token()):
+    def __init__(self, slug, version=None, attach_source=True, options=None, auth=None):
         if auth is None:
             auth = []
         if options is None:
@@ -128,11 +128,9 @@ class KodexaPipeline:
         self.attach_source = attach_source
         self.options = options
         self.auth = auth
-        self.cloud_url = cloud_url
-        self.access_token = access_token
 
     def execute(self, input):
-        cloud_session = KodexaSession("pipeline", self.slug, self.access_token, self.cloud_url)
+        cloud_session = KodexaSession("pipeline", self.slug)
         cloud_session.start()
 
         if isinstance(input, Document):
@@ -156,8 +154,7 @@ class KodexaAction:
     Allows you to interact with an action that has been deployed in the Kodexa platform
     """
 
-    def __init__(self, slug, version=None, attach_source=False, options=None, auth=None,
-                 cloud_url=KodexaPlatform.get_url(), access_token=KodexaPlatform.get_access_token()):
+    def __init__(self, slug, version=None, attach_source=False, options=None, auth=None):
         if auth is None:
             auth = []
         if options is None:
@@ -167,8 +164,6 @@ class KodexaAction:
         self.attach_source = attach_source
         self.options = options
         self.auth = auth
-        self.cloud_url = cloud_url
-        self.access_token = access_token
 
     def to_yaml(self):
         # TODO needs implementation
@@ -178,7 +173,7 @@ class KodexaAction:
         return f"Kodexa Service ({self.slug})"
 
     def process(self, document, context):
-        cloud_session = KodexaSession("service", self.slug, self.access_token, self.cloud_url)
+        cloud_session = KodexaSession("service", self.slug)
         cloud_session.start()
         execution = cloud_session.execute_service(document, self.options, self.attach_source)
         execution = cloud_session.wait_for_execution(execution)
