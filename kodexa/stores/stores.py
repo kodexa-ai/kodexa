@@ -173,9 +173,9 @@ class TableDataStore:
         import pandas as pd
 
         if not self.columns:
-            df = pd.DataFrame.from_dict(self.rows)
+            return pd.DataFrame(self.rows)
         else:
-            df = pd.DataFrame.from_dict(self.rows, columns=self.columns)
+            return pd.DataFrame(self.rows, columns=self.columns)
 
     def add(self, row):
         """
