@@ -133,13 +133,13 @@ def test_instance_indexes():
     assert len(first_paragraph) == 18
 
 
-def test_spatial_doc_sample():
+def test_spatial_doc_sample_one():
     document = Document.from_kdxa(get_test_directory() + 'before_fail.kdxa')
     nodes = document.select('//page[contentRegex("line.*",true)]')
     assert len(nodes) == 18
 
 
-def test_spatial_doc_sample():
+def test_spatial_doc_sample_two():
     # This test document and this portion of code is a snippet
     # from a test in the spatial actions tests.  Adding this saved doc
     # and this section to ensure NodeTagger is tested.
