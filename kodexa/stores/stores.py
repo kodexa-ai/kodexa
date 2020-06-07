@@ -169,6 +169,14 @@ class TableDataStore:
     def clear(self):
         self.rows = []
 
+    def to_df(self):
+        import pandas as pd
+
+        if not self.columns:
+            df = pd.DataFrame.from_dict(self.rows)
+        else:
+            df = pd.DataFrame.from_dict(self.rows, columns=self.columns)
+
     def add(self, row):
         """
         Writes a row to the Data Store
