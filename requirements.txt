@@ -11,3 +11,4 @@ wheel
 ply
 pytest
 pytest-runner
+pandas
