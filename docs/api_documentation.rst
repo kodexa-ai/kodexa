@@ -6,10 +6,10 @@ API Documentation
 .. automodule:: kodexa.cloud
    :members:
 
-   .. autoclass:: KodexaCloudPipeline
+   .. autoclass:: KodexaPipeline
       :members:
 
-   .. autoclass:: KodexaCloudService
+   .. autoclass:: KodexaService
       :members:
 
 .. automodule:: kodexa.connectors
