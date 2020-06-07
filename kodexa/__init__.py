@@ -4,7 +4,7 @@
 
 
 """
-from .cloud import KodexaSession, KodexaPipeline, KodexaService
+from .cloud import KodexaSession, KodexaPipeline, KodexaAction
 from .connectors import FolderConnector, FileHandleConnector, UrlConnector, registered_connectors, get_connectors, \
     get_connector, add_connector, get_source
 from .extractors import *

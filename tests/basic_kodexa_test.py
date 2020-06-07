@@ -3,7 +3,7 @@ import os
 import pytest
 from texttable import Texttable
 
-from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaService, KodexaPipeline, Document
+from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaAction, KodexaPipeline, Document
 from kodexa_cloud.cloud import CloudSession
 
 
@@ -19,7 +19,7 @@ def test_kodexa_service():
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='*.pdf'))
     pipeline.add_step(
-        KodexaService(slug='kodexa/pdf-parse', attach_source=True, cloud_url="https://quantum.kodexa.com"))
+        KodexaAction(slug='kodexa/pdf-parse', attach_source=True, cloud_url="https://quantum.kodexa.com"))
     pipeline.set_sink(document_sink)
     pipeline.run()
 
