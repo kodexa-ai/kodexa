@@ -4,7 +4,6 @@ import pytest
 from texttable import Texttable
 
 from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, KodexaAction, KodexaPipeline, Document
-from kodexa_cloud.cloud import CloudSession
 
 
 def get_test_directory():
@@ -46,13 +45,6 @@ def print_store(store):
     table.header(store.columns)
     table.add_rows(store.rows)
     print(table.draw() + "\n")
-
-
-def test_model():
-    session = CloudSession(**{"id": "cheese", "type": "pipeline", "sessionState": "OPEN"})
-    print(session.json())
-
-    assert session.json() != ""
 
 
 def test_tag_selector():
