@@ -5,7 +5,7 @@ import uuid
 from enum import Enum
 from inspect import signature
 from io import StringIO
-from typing import List, Optional, Dict, Any
+from typing import List
 from uuid import uuid4
 
 import yaml
@@ -14,21 +14,23 @@ from kodexa.connectors import FolderConnector
 from kodexa.model import Document
 
 
+def new_id():
+    return str(uuid.uuid4()).replace("-", "")
+
+
 class ContentType(Enum):
     DOCUMENT = 'DOCUMENT'
     NATIVE = 'NATIVE'
 
 
 class ContentObject:
-    contentType: Optional['ContentType'] = None
-    id: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
-    name: Optional[str] = None
-    tags: Optional[List[str]] = None
 
-
-def new_id():
-    return str(uuid.uuid4()).replace("-", "")
+    def __init__(self, name, id=new_id(), contentType=ContentType.DOCUMENT, tags=[], metadata={}):
+        self.id = id
+        self.name = name
+        self.contentType = contentType
+        self.tags = tags
+        self.metadata = metadata
 
 
 class InMemoryContentProvider:
