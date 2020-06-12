@@ -2,15 +2,29 @@ import logging
 import sys
 import traceback
 import uuid
+from enum import Enum
 from inspect import signature
 from io import StringIO
-from typing import List
+from typing import List, Optional, Dict, Any
 from uuid import uuid4
+
 import yaml
 
 from kodexa.connectors import FolderConnector
 from kodexa.model import Document
-from kodexa_cloud import ContentObject
+
+
+class ContentType(Enum):
+    DOCUMENT = 'DOCUMENT'
+    NATIVE = 'NATIVE'
+
+
+class ContentObject:
+    contentType: Optional['ContentType'] = None
+    id: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+    name: Optional[str] = None
+    tags: Optional[List[str]] = None
 
 
 def new_id():
