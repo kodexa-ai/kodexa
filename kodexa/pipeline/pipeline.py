@@ -25,7 +25,7 @@ class ContentType(Enum):
 
 class ContentObject:
 
-    def __init__(self, name, id=new_id(), contentType=ContentType.DOCUMENT, tags=[], metadata={}):
+    def __init__(self, name="untitled", id=new_id(), contentType=ContentType.DOCUMENT, tags=[], metadata={}):
         self.id = id
         self.name = name
         self.contentType = contentType
