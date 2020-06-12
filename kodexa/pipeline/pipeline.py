@@ -6,6 +6,7 @@ from inspect import signature
 from io import StringIO
 from typing import List
 from uuid import uuid4
+import yaml
 
 from kodexa.connectors import FolderConnector
 from kodexa.model import Document
@@ -209,6 +210,26 @@ class Pipeline:
         self.sink = sink
 
         return self
+
+    def to_yaml(self):
+        """
+        Will return the YAML representation of any actions that support conversion to YAML
+
+        The YAML representation for KodexaAction's can be used for metadata only pipelines in the Kodexa Platform
+
+        :return: YAML representation
+        """
+
+        configuration_steps = []
+
+        for step in self.steps:
+
+            try:
+                configuration_steps.append(step.to_configuration())
+            except:
+                pass
+
+        return yaml.dump(configuration_steps)
 
     def run(self):
         """

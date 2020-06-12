@@ -181,3 +181,14 @@ class KodexaAction:
         cloud_session.merge_stores(execution, context)
 
         return result_document if result_document else document
+
+    def to_configuration(self):
+        """
+        Returns a dictionary representing the configuration information for the step
+
+        :return: dictionary representing the configuration of the step
+        """
+        return {
+            "ref": self.slug,
+            "options": self.options
+        }
