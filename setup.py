@@ -26,6 +26,7 @@ setup(name='kodexa',
           'requests==2.23.0',
           'msgpack==1.0.0',
           'urllib3==1.25.8',
+          'pyyaml',
           'ply'
       ],
       setup_requires=["pytest-runner"],
