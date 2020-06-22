@@ -118,14 +118,15 @@ class JsonDocumentStore:
         """
         self.document_ids = []
         with open(os.path.join(self.store_path, 'index.json')) as f:
-            self.document_ids = f.readlines()
+            self.document_ids = f.read().splitlines()
 
     def save_index(self):
         """
         Method to write the JSON store index back to store path
         """
         with open(os.path.join(self.store_path, 'index.json'), 'w') as f:
-            f.writelines(self.document_ids)
+            #f.writelines(self.document_ids)
+            f.write('\n'.join(self.document_ids))
 
     def reset_connector(self):
         """
