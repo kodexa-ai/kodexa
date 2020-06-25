@@ -597,7 +597,7 @@ class Document(object):
         self.content_node: ContentNode = content_node
         self.virtual: bool = False
         self._mixins = []
-        self.uuid: str = str(uuid.uuid5(uuid.NAMESPACE_DNS, 'kodexa.com'))
+        self.uuid: str = str(uuid.uuid4())
         self.exceptions = []
         self.log = []
         self.version = "1.0.0"
@@ -670,6 +670,9 @@ class Document(object):
 
     def to_html(self):
         return DocumentRender(self).to_html()
+
+    def to_arrow(self):
+        pass
 
     def to_dict(self):
         """

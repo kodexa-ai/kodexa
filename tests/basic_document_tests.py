@@ -144,3 +144,9 @@ def test_basic_spatial_serialization():
     print(document.content_node.get_bbox())
 
     assert document.content_node.get_bbox() == [1, 1, 1, 1]
+
+
+def test_document_uuid():
+    doc_1 = Document.from_text('The sun is very bright today.')
+    doc_2 = Document.from_text('Fluffy clouds float through the sky.')
+    assert doc_1.uuid != doc_2.uuid
