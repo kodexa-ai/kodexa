@@ -1,7 +1,6 @@
 import os
-import pytest
 
-from kodexa import selectors, Document, Pipeline, NodeTagger
+from kodexa import Document, Pipeline, NodeTagger
 
 
 def get_test_directory():
@@ -54,6 +53,9 @@ def test_selector_regex():
     results = document.content_node.select('*[content()="Hello World"]')
     assert len(results) == 1
     assert results[0].content == "Hello World"
+
+    results2 = document.content_node.select('*[contentRegex("Cheese.*",true)]')
+    assert len(results2) == 0
 
 
 def test_selector_operators():
@@ -121,6 +123,14 @@ def test_tagged_content():
 
     node_match2 = all_nodes[0].select('*[tagRegex("CHE.*")]')
     assert len(node_match2) == 0
+
+
+def test_parent_axis():
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    first_paragraph = document.select('(//p)[0]')
+    assert len(first_paragraph) == 1
+    assert len(first_paragraph[0].select('parent::div')) == 1
+    assert first_paragraph[0].select('parent::div')[0].type == 'div'
 
 
 def test_instance_indexes():

@@ -294,10 +294,11 @@ class Pipeline:
                 try:
                     self.sink.sink(document)
                 except:
-                    document.exceptions.append({
-                        "step": self.sink.get_name(),
-                        "exception": sys.exc_info()[0]
-                    })
+                    if document:
+                        document.exceptions.append({
+                            "step": self.sink.get_name(),
+                            "exception": sys.exc_info()[0]
+                        })
                     if self.stop_on_exception:
                         raise
 
