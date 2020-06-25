@@ -15,11 +15,13 @@ def get_test_document():
 
 
 def test_basic_json_store():
-    document = get_test_document()
     store = JsonDocumentStore(store_path='/tmp/json-store', force_initialize=True)
 
     assert store.count() == 0
+    # need to add more than one document to the store to make sure indexes are written 
+    # to the index.json correctly
+    store.add(get_test_document())
     store.add(get_test_document())
 
     store2 = JsonDocumentStore(store_path='/tmp/json-store')
-    assert store2.count() == 1
+    assert store2.count() == 2
