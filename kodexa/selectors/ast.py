@@ -198,8 +198,9 @@ class Step(object):
             return [axis_node]
         else:
             if self.axis is not None:
-                self.resolve(axis_node, variables)
-            return []
+                return self.resolve(axis_node, variables)
+            else:
+                return []
 
 
 class NameTest(object):
