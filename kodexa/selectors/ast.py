@@ -12,7 +12,6 @@ This code was derived from https://github.com/emory-libraries/eulxml
 from __future__ import unicode_literals
 
 import re
-import sys
 
 # python2/3 string type logic borrowed from six
 # NOTE: not importing six here because setup.py needs to generate
@@ -170,25 +169,36 @@ class Step(object):
         '''a list of predicates filtering the step'''
 
     def resolve(self, obj, variables):
-        match = True
 
+        match = True
         if isinstance(obj, ContentFeature):
             match = self.node_test.test(obj)
 
+        if obj is None:
+            return []
+
         if isinstance(obj, ContentNode):
-            content_node = obj
+            axis_node = obj
+
+            if self.axis == 'parent':
+                axis_node = axis_node.parent
+                if axis_node is None:
+                    return []
+
             for predicate in self.predicates:
                 if isinstance(predicate, int):
-                    if predicate == content_node.index:
+                    if predicate == axis_node.index:
                         match = True
-                elif not predicate.resolve(content_node, variables):
+                elif not predicate.resolve(axis_node, variables):
                     match = False
 
-            match = match and self.node_test.test(content_node, variables)
+            match = match and self.node_test.test(axis_node, variables)
 
         if match:
-            return [obj]
+            return [axis_node]
         else:
+            if self.axis is not None:
+                self.resolve(axis_node, variables)
             return []
 
 
@@ -281,7 +291,7 @@ class FunctionCall(object):
             content_to_test = content_node.content
 
             if len(args) > 1:
-                if bool(args[2]):
+                if bool(args[1]):
                     content_to_test = content_node.get_all_content()
 
             if content_to_test is not None and compiled_pattern.match(content_to_test):
