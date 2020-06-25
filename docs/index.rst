@@ -13,7 +13,6 @@ This the documentation for |release|
    :caption: Contents:
 
    introduction
-   mixins
    api_documentation
 
 
