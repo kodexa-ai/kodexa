@@ -132,6 +132,9 @@ def test_parent_axis():
     assert len(first_paragraph[0].select('parent::div')) == 1
     assert first_paragraph[0].select('parent::div')[0].type == 'div'
 
+    link = document.select('//a')[0]
+    assert link.select('parent::div')[0].type == 'div'
+
 
 def test_instance_indexes():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
