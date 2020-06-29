@@ -19,7 +19,7 @@ def test_basic_json_store():
 
     assert store.count() == 0
     # need to add more than one document to the store to make sure indexes are written 
-    # to the index.json correctly
+    # to the index.idx correctly
     store.add(get_test_document())
     store.add(get_test_document())
 
