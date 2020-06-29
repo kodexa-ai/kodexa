@@ -11,7 +11,7 @@ logger = logging.getLogger('kodexa-stores')
 class JsonDocumentStore:
     """
     An implementation of a document store that uses JSON files to store the documents and
-    maintains an index.json containing some basics of the documents
+    maintains an index.idx containing some basics of the documents
     """
 
     def __init__(self, store_path: str, force_initialize: bool = False):
@@ -33,7 +33,7 @@ class JsonDocumentStore:
             path.mkdir(parents=True)
 
             # Create an empty index file
-            open(os.path.join(path, 'index.json'), 'a').close()
+            open(os.path.join(path, 'index.idx'), 'a').close()
         self.read_index()
 
         logging.info(f"Found {len(self.document_ids)} documents in {store_path}")
@@ -117,14 +117,14 @@ class JsonDocumentStore:
         Method to read the document index from the store path
         """
         self.document_ids = []
-        with open(os.path.join(self.store_path, 'index.json')) as f:
+        with open(os.path.join(self.store_path, 'index.idx')) as f:
             self.document_ids = f.read().splitlines()
 
     def save_index(self):
         """
         Method to write the JSON store index back to store path
         """
-        with open(os.path.join(self.store_path, 'index.json'), 'w') as f:
+        with open(os.path.join(self.store_path, 'index.idx'), 'w') as f:
             #f.writelines(self.document_ids)
             f.write('\n'.join(self.document_ids))
 
