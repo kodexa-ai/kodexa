@@ -42,7 +42,7 @@ def test_tag_nodes_between():
 
 def test_basic_document_with_content_node():
     document = get_test_document()
-    print(document.to_json());
+    print(document.to_json())
     assert document.to_json() is not None
 
 

@@ -170,27 +170,3 @@ class TagsToKeyValuePairExtractor:
         for child in node.children:
             self.process_node(table_store, child)
 
-
-class JsonParser:
-    """
-    Parse JSON file into kodexa Document
-    """
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def get_name():
-        return "JSON Parser"
-
-    def process(self, document):
-        with get_source(document) as fh:
-            json_document = json.load(fh)
-            root_node = document.create_node(type='container')
-            self.parse_dict(json_document, root_node)
-            document.content_node = root_node
-
-        return document
-
-    def parse_dict(self, json_document, root_node):
-        pass
