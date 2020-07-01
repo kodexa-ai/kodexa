@@ -147,7 +147,8 @@ class TagsToKeyValuePairExtractor:
             return TableDataStore(columns=['tag', 'tagged_content'])
 
     def process(self, document, context):
-        table_store = context.get_store(self.store_name, TableDataStore(columns=['tag', 'content']))
+
+        table_store = context.get_store(self.store_name, self.get_default_store())
 
         if document.content_node:
             self.process_node(table_store, document.content_node)
