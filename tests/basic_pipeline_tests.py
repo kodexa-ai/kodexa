@@ -36,9 +36,6 @@ def test_pipeline_example():
     document_store = JsonDocumentStore("/tmp/test-json-store", force_initialize=True)
     document_store.add(create_document())
 
-    if Path("/tmp/test-json-store2/index..json").is_file():
-        os.remove("/tmp/test-json-store2")
-
     new_document_store = JsonDocumentStore("/tmp/test-json-store2", force_initialize=True)
 
     assert new_document_store.count() == 0
