@@ -166,7 +166,6 @@ def test_function_step_with_exception():
     def my_function(doc):
         doc.metadata.cheese = "fishstick"
         raise Exception("hello world")
-        return doc
 
     assert new_document_store.count() == 0
     pipeline = Pipeline(document_store, stop_on_exception=False)
@@ -203,8 +202,6 @@ def test_dict_stores_with_extractor():
 
     pipeline.add_step(extractor)
 
-    stats = pipeline.run().statistics
-
     assert pipeline.context.get_store('output').count() == 1
 
 
@@ -226,7 +223,7 @@ def test_table_stores_with_extractor():
 
     context = pipeline.run()
 
-    assert pipeline.context.get_store('output').count() == 1
+    assert context.get_store('output').count() == 1
 
 
 def test_basic_url_pipeline():
