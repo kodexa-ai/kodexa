@@ -22,12 +22,10 @@ def create_document():
 
 def test_basic_json_store():
     JSON_STORE = "/tmp/test-json-store.jsonkey"
-    if Path(JSON_STORE).is_file():
-        os.remove(JSON_STORE)
-    document_store = JsonDocumentStore("/tmp/test-json-store.json")
+    document_store = JsonDocumentStore("/tmp/test-json-store.jsonkey", force_initialize=True)
     document_store.add(create_document())
 
-    new_document_store = JsonDocumentStore("/tmp/test-json-store.json")
+    new_document_store = JsonDocumentStore("/tmp/test-json-store.jsonkey")
 
     assert (new_document_store.count() == 1)
 
@@ -201,6 +199,7 @@ def test_dict_stores_with_extractor():
         return document
 
     pipeline.add_step(extractor)
+    pipeline.run()
 
     assert pipeline.context.get_store('output').count() == 1
 
