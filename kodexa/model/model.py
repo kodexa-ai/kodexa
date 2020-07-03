@@ -300,6 +300,25 @@ class ContentNode(object):
         parsed_selector = parse(selector)
         return parsed_selector.resolve(self, variables)
 
+    def select_as_node(self, selector, variables=None):
+        """
+        Execute a selector on this node and then return proxy node that has the hits
+        as children.
+
+        Note this doesn't impact the children, they are not adopted by this new node,
+        therefore their parents remain intact
+
+        >>> document.content_node.select_as_node('//line')
+           ContentNode
+
+        :param selector: The selector (ie. //*)
+        :param variables: A dictionary of variable name/value to use in substituion
+        :return: A new node that has the matching nodes as children
+        """
+        new_node = self.document.create_node(type='result')
+        new_node.children = self.select(selector, variables)
+        return new_node
+
     def get_all_content(self, separator=" "):
         """
         This will build the complete content, including the content of children.
@@ -787,7 +806,7 @@ class Document(object):
         url_document.metadata.connector_options.headers = headers
         return url_document
 
-    def select(self, selector):
+    def select(self, selector, variables={}):
         """
         Execute a selector on the root node and then return a list of the matching nodes
 
@@ -795,16 +814,34 @@ class Document(object):
            [ContentNode]
 
         :param selector: The selector (ie. //*)
+        :param variables: A dictionary of the variables (optional)
         :return: A list of the matching content nodes
         """
         if self.content_node:
-            result = self.content_node.select(selector)
+            result = self.content_node.select(selector, variables)
             if isinstance(result, list):
                 return result
             else:
                 return [self.content_node] if bool(result) else []
         else:
             return []
+
+    def select_as_node(self, selector, variables={}):
+        """
+        Execute a selector on the root node and then return new node representing the
+        results
+
+        >>> document.select('//line')
+           ContentNode
+
+        :param selector: The selector (ie. //*)
+        :param variables: A dictionary of the variables (optional)
+        :return: A list of the matching content nodes
+        """
+        if self.content_node:
+            return self.content_node.select_as_node(selector, variables)
+        else:
+            return self.create_node(type='results')
 
 
 class KodexaRender:
