@@ -22,10 +22,10 @@ def create_document():
 
 def test_basic_json_store():
     JSON_STORE = "/tmp/test-json-store.jsonkey"
-    document_store = JsonDocumentStore("/tmp/test-json-store.jsonkey", force_initialize=True)
+    document_store = JsonDocumentStore(JSON_STORE, force_initialize=True)
     document_store.add(create_document())
 
-    new_document_store = JsonDocumentStore("/tmp/test-json-store.jsonkey")
+    new_document_store = JsonDocumentStore(JSON_STORE)
 
     assert (new_document_store.count() == 1)
 
