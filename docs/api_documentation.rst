@@ -3,24 +3,6 @@ API Documentation
 .. automodule:: kodexa
    :members:
 
-.. automodule:: kodexa.cloud
-   :members:
-
-   .. autoclass:: KodexaPipeline
-      :members:
-
-   .. autoclass:: KodexaAction
-      :members:
-
-.. automodule:: kodexa.connectors
-   :members:
-
-   .. autoclass:: FolderConnector
-      :members:
-
-   .. autoclass:: UrlConnector
-      :members:
-
 .. automodule:: kodexa.model
    :members:
 
@@ -32,6 +14,35 @@ API Documentation
 
    .. autoclass:: ContentNode
       :members:
+
+   .. autoclass:: ContentFeature
+      :members:
+
+
+.. automodule:: kodexa.cloud
+   :members:
+
+   .. autoclass:: KodexaPlatform
+      :members:
+
+   .. autoclass:: KodexaPipeline
+      :members:
+
+   .. autoclass:: KodexaAction
+      :members:
+
+.. automodule:: kodexa.connectors
+   :members:
+
+   .. autoclass:: FileHandleConnector
+      :members:
+
+   .. autoclass:: FolderConnector
+      :members:
+
+   .. autoclass:: UrlConnector
+      :members:
+
 
 .. automodule:: kodexa.pipeline
    :members:
@@ -63,7 +74,11 @@ API Documentation
    .. autoclass:: DictDataStore
       :members:
 
-.. automodule:: kodexa.steps.common
+   .. autoclass:: DataStoreHelper
+      :members:
+      
+
+.. automodule:: kodexa.steps
    :members:
 
    .. autoclass:: NodeTagger
@@ -76,7 +91,4 @@ API Documentation
       :members:
 
    .. autoclass:: TagsToKeyValuePairExtractor
-      :members:
-
-   .. autoclass:: JsonParser
       :members:
