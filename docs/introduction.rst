@@ -1,9 +1,8 @@
 Kodexa
 -----
 
-Kodexa is a core python package for the Kodexa Cloud, and a surrounding set of extensions, that are built to allow
-developers to work with documents and unstructured data in a way that supports flexibility, extensibility and deployable
-in a range of platforms.
+Kodexa is a python package which provides capabilities for working with unstructured data (everything from PDF's and Excel documents to text and images).
 
+At the heart of Kodexa is its content model, the Kodexa Document, through which the management and structure of unstructured data is made possible.
 
-
+Additional information, documentation, and tutorials can be found at our `developer documentation site <https://developer.kodexa.com/>`_.
