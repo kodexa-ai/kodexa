@@ -30,11 +30,11 @@ class Tag(Dict):
 class ContentNode(object):
     """
     A Content Node identifies a section of the document containing logical
-    grouping of information
+    grouping of information.
 
-    The node will have content and can include n number of features.
+    The node will have content and can include any number of features.
 
-    You should always create a node using the Document create_node method to
+    You should always create a node using the Document's create_node method to
     ensure that the correct mixins are applied.
 
         >>> new_page = document.create_node(type='page')
@@ -73,21 +73,26 @@ class ContentNode(object):
 
     def to_json(self):
         """
-        Convert this node structure into a JSON object
-
+        Convert this node structure into a JSON object.
 
             >>> node.to_json()
+    
+        :return: The JSON formatted string representation of this ContentNode
+        :rtype: str
         """
+
         return json.dumps(self.to_dict())
 
     def to_dict(self):
         """
-        Convert the ContentNode, and all its children into a simple dictionary
+        Convert the ContentNode, and all its children into a simple dictionary.
 
-            >>> new_page = document.create_node(type='page')
-            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-            >>> current_content_node.to_dict()
+            >>> node.to_dict()
+
+        :return: The properties of this ContentNode and all of its children structured as a dictionary.
+        :rtype: dict
         """
+
         new_dict = {'type': self.type, 'content': self.content, 'content_parts': self.content_parts, 'features': [],
                     'index': self.index, 'children': [], 'uuid': self.uuid}
         for feature in self.get_features():
@@ -99,6 +104,18 @@ class ContentNode(object):
 
     @staticmethod
     def from_dict(document, content_node_dict):
+        """
+        Accepts a dictionary that contains data for a ContentNode, unpacks it, and adds it to the document.
+
+            >>> ContentNode.from_dict(document, content_node_dict)
+
+        :param Document document: The Kodexa document to which the unpacked dictionary should be added.
+        :param dict content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked and added to the document.
+
+        :return: A ContentNode containing the unpacked values from the content_node_dict parameter.
+        :rtype: ContentNode
+        """
+
         new_content_node = document.create_node(type=content_node_dict['type'], content=content_node_dict[
             'content'] if 'content' in content_node_dict else None)
         if 'uuid' in content_node_dict:
@@ -122,7 +139,12 @@ class ContentNode(object):
             >>> new_page = document.create_node(type='page')
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.add_child(new_page)
+
+        :param ContentNode child: The node that will be added as a child of this node
+        :param index: The index at which this child node should be added.  If None, index is set as the count of child node elements.
+        :type index: integer or None
         """
+
         if not index:
             child.index = len(self.children)
         else:
@@ -134,26 +156,32 @@ class ContentNode(object):
         """
         Returns a list of the children of this node
 
-           >>> new_page = document.create_node(type='page')
-           <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-           >>> new_page.get_children()
-           []
+           >>> node.get_children()
+        
+        :return: The list of child nodes for this ContentNode
+        :rtype: list
         """
+
         return self.children
 
     def set_feature(self, feature_type, name, value):
         """
         Sets a feature to this ContentNode, replacing the value
 
-        You will need to provide the feature type, the name of the feature
-        and then the value.
-
         Note this will replace any matching feature (i.e. with the same type and name)
 
            >>> new_page = document.create_node(type='page')
            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
            >>> new_page.add_feature('pagination','pageNum',1)
+
+        :param str feature_type: The type of feature to be added to the node.
+        :param str name: The name of the feature.
+        :param Any value: The value of the feature.
+
+        :return: The feature that was added to this ContentNode
+        :rtype: ContentFeature
         """
+
         self.remove_feature(feature_type, name)
         return self.add_feature(feature_type, name, value)
 
