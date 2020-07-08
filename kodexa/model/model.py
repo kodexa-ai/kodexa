@@ -104,7 +104,7 @@ class ContentNode(object):
         return new_dict
 
     @staticmethod
-    def from_dict(document: Document, content_node_dict: Dict) -> ContentNode:
+    def from_dict(document, content_node_dict: Dict):
         """
         Accepts a dictionary that contains data for a ContentNode, unpacks it, and adds it to the document.
 
