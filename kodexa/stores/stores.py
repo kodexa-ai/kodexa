@@ -160,6 +160,15 @@ class TableDataStore:
     """
 
     def to_dict(self):
+        """
+        Create a dictionary representing this TableDataStore's structure and content.
+
+            >>> table_data_store.to_dict()
+
+        :return: The properties of this TableDataStore structured as a dictionary.
+        :rtype: dict
+        """
+
         return {
             "type": "table",
             "data": {
@@ -213,12 +222,21 @@ class DictDataStore:
     """
 
     def to_dict(self):
+        """
+        Create a dictionary representing this DictDataStore's structure and content.
+
+            >>> this_dictionary.to_dict()
+
+        :return: The properties of this DictDataStore structured as a dictionary.
+        :rtype: dict
+        """
         return {
             "type": "dictionary",
             "data": {
                 "dicts": self.dicts
             }
         }
+
 
     def add(self, dict):
         """
@@ -245,6 +263,17 @@ class DataStoreHelper:
 
     @staticmethod
     def from_dict(dict):
+        """
+        Build a new TableDataStore or DictDataStore from a dictionary.
+
+            >>> Document.from_dict(doc_dict)
+
+        :param dict doc_dict: A dictionary representation of a Kodexa Document.
+        
+        :return: A TableDataStore or DictDataStore - driven from 'type' in doc_dict.  If 'type' is not present or does not align with one of these two types, None is returend.
+        :rtype: TableDataStore, DictDataStore, or None
+        """
+
         if 'type' in dict:
             if 'table' == dict['type']:
                 columns = dict['data']['columns'] if 'columns' in dict['data'] else None
