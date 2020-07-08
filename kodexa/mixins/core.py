@@ -222,7 +222,7 @@ def has_previous_node(self, node_type_re=".*", skip_virtual=False):
     return self.previous_node(node_type_re=node_type_re, skip_virtual=skip_virtual) is not None
 
 
-def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False):
+def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=True):
     """
     Returns the next sibling content node. 
     
@@ -234,7 +234,7 @@ def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False)
     :type node_type_re: str, optional
     :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
     :type skip_virtual: bool, optional
-    :param has_no_content: Allow a node that has no content to be returned; default is False.
+    :param has_no_content: Allow a node that has no content to be returned; default is True.
     :type has_no_content: bool, optional
 
     :return: The next node or None, if no node exists
@@ -250,10 +250,9 @@ def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False)
             return node
 
         if compiled_node_type_re.match(node.node_type) and (not skip_virtual or not node.virtual):
-            if (not has_no_content) or (has_no_content and not node.content):
+            if (not has_no_content and node.content) or (has_no_content):
                 return node
-        if not node:
-            return node
+
         search_index += 1
 
 
