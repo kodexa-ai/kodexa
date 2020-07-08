@@ -1,9 +1,9 @@
+import itertools
 import json
 import re
 import uuid
-from typing import List, Optional, Any
-import itertools
 from enum import Enum
+from typing import List, Optional, Any
 
 import msgpack
 from addict import Dict
@@ -40,7 +40,7 @@ class Traverse(Enum):
     CHILDREN = 2
     PARENT = 3
     ALL = 4
-    
+
 
 class ContentNode(object):
     """
@@ -92,7 +92,6 @@ class ContentNode(object):
         """
         return DocumentRender(self.document).render_node(self)
 
-
     def to_json(self):
         """
         Create a JSON string representation of this ContentNode.
@@ -104,7 +103,6 @@ class ContentNode(object):
         """
         return json.dumps(self.to_dict())
 
-
     def to_dict(self):
         """
         Create a dictionary representing this ContentNode's structure and content.
@@ -114,7 +112,8 @@ class ContentNode(object):
         :return: The properties of this ContentNode and all of its children structured as a dictionary.
         :rtype: dict
         """
-        new_dict = {'node_type': self.node_type, 'content': self.content, 'content_parts': self.content_parts, 'features': [],
+        new_dict = {'node_type': self.node_type, 'content': self.content, 'content_parts': self.content_parts,
+                    'features': [],
                     'index': self.index, 'children': [], 'uuid': self.uuid}
         for feature in self.get_features():
             new_dict['features'].append(feature.to_dict())
@@ -122,7 +121,6 @@ class ContentNode(object):
         for child in self.children:
             new_dict['children'].append(child.to_dict())
         return new_dict
-
 
     @staticmethod
     def from_dict(document, content_node_dict: Dict):
@@ -138,7 +136,8 @@ class ContentNode(object):
         :rtype: ContentNode
         """
 
-        node_type = content_node_dict['type'] if document.version == Document.PREVOUS_VERSION else content_node_dict['node_type']
+        node_type = content_node_dict['type'] if document.version == Document.PREVOUS_VERSION else content_node_dict[
+            'node_type']
 
         new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
             'content'] if 'content' in content_node_dict else None)
@@ -155,7 +154,6 @@ class ContentNode(object):
         for dict_child in content_node_dict['children']:
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
         return new_content_node
-
 
     def add_child(self, child, index=None):
         """
@@ -176,7 +174,6 @@ class ContentNode(object):
         self.children.append(child)
         child.parent = self
 
-
     def get_children(self):
         """
         Returns a list of the children of this node.
@@ -187,7 +184,6 @@ class ContentNode(object):
         :rtype: list[ContentNode]
         """
         return self.children
-
 
     def set_feature(self, feature_type, name, value):
         """
@@ -206,7 +202,6 @@ class ContentNode(object):
         """
         self.remove_feature(feature_type, name)
         return self.add_feature(feature_type, name, value)
-
 
     def add_feature(self, feature_type, name, value, single=True, serialized=False):
         """
@@ -231,7 +226,7 @@ class ContentNode(object):
         """
         if self.has_feature(feature_type, name):
             feature = self.get_feature(feature_type, name)
-            feature.single = False #always setting to false if we already have a feature of this type/name
+            feature.single = False  # always setting to false if we already have a feature of this type/name
             feature.value.append(value)
             return feature
         else:
@@ -240,7 +235,6 @@ class ContentNode(object):
                                          [value] if single and not serialized else value, single=single)
             self._feature_map[new_feature.feature_type + ":" + new_feature.name] = new_feature
             return new_feature
-
 
     def get_feature(self, feature_type, name):
         """
@@ -257,7 +251,6 @@ class ContentNode(object):
         """
         return self._feature_map[feature_type + ":" + name] if feature_type + ":" + name in self._feature_map else None
 
-
     def get_features_of_type(self, feature_type):
         """
         Get all features of a specific type.
@@ -271,7 +264,6 @@ class ContentNode(object):
         :rtype: list[ContentFeature]
         """
         return [i for i in self.get_features() if i.feature_type == feature_type]
-
 
     def has_feature(self, feature_type, name):
         """
@@ -288,7 +280,6 @@ class ContentNode(object):
         """
         return feature_type + ":" + name in self._feature_map
 
-
     def get_features(self):
         """
         Get all features on this ContentNode.
@@ -297,7 +288,6 @@ class ContentNode(object):
         :rtype: list[ContentFeature]
         """
         return list(self._feature_map.values())
-
 
     def remove_feature(self, feature_type, name):
         """
@@ -311,7 +301,6 @@ class ContentNode(object):
         results = self.get_feature(feature_type, name)
         if results:
             del self._feature_map[feature_type + ":" + name]
-
 
     def get_feature_value(self, feature_type, name):
         """
@@ -331,7 +320,6 @@ class ContentNode(object):
         # Need to make sure we handle the idea of a single value for a feature
         return None if feature is None else feature.value[0] if feature.single else feature.value
 
-
     def get_content(self):
         """
         Get the content of this node.
@@ -344,7 +332,6 @@ class ContentNode(object):
         """
         return self.content
 
-
     def get_node_type(self):
         """
         Get the type of this node.
@@ -356,7 +343,6 @@ class ContentNode(object):
         :rtype: str
         """
         return self.node_type
-
 
     def select(self, selector, variables=None):
         """
@@ -382,7 +368,6 @@ class ContentNode(object):
         from kodexa.selectors import parse
         parsed_selector = parse(selector)
         return parsed_selector.resolve(self, variables)
-
 
     def select_as_node(self, selector, variables=None):
         """
@@ -411,7 +396,6 @@ class ContentNode(object):
         new_node.children = self.select(selector, variables)
         return new_node
 
-
     def get_all_content(self, separator=" "):
         """
         Get this node's content, concatenated with all of its children's content.
@@ -434,7 +418,6 @@ class ContentNode(object):
             s += separator
         return s.strip()
 
-
     def move_child_to_parent(self, target_child, target_parent):
         """
         This will move the target_child, which must be a child of the node, to a new parent.
@@ -453,7 +436,6 @@ class ContentNode(object):
         """
         self.children.remove(target_child)
         target_parent.add_child(target_child)
-
 
     def adopt_children(self, children, replace=False):
         """
@@ -475,7 +457,6 @@ class ContentNode(object):
         for child in children:
             self.add_child(child)
 
-
     def remove_tag(self, tag_name):
         """
         Remove a tag from this content node.
@@ -485,7 +466,6 @@ class ContentNode(object):
         :param str tag_name: The name of the tag that should be removed.
         """
         self.remove_feature('tag', tag_name)
-
 
     def collect_nodes_to(self, end_node):
         """
@@ -508,7 +488,6 @@ class ContentNode(object):
                 break
         return nodes
 
-
     def tag_nodes_to(self, end_node, tag_to_apply):
         """
         Tag all the nodes from this node to the end_node with the given tag name
@@ -519,7 +498,6 @@ class ContentNode(object):
         :param str tag_to_apply: The tag name that will be applied to each node
         """
         [node.tag(tag_to_apply) for node in self.collect_nodes_to(end_node)]
-
 
     def tag_range(self, start_content_re, end_content_re, tag_to_apply, node_type_re='.*', use_all_content=False):
         """
@@ -568,7 +546,6 @@ class ContentNode(object):
         :param content_re: the regular expression that you wish to use to tag, note that we will create a tag for each matching group
         :param use_all_content: apply the regular expression to the all_content (include content from child nodes)
         :param node_only: Ignore the matching groups and tag the whole node
-        :param include_children: Include recurse into children and tag where matching
         :param fixed_position: use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
         :param data: Attach the a dictionary of data for the given tag
         """
@@ -590,19 +567,20 @@ class ContentNode(object):
                         if node.content:
                             content = node.content
                         else:
-                            return
+                            content = None
                     else:
                         content = node.get_all_content()
 
-                    match = pattern.match(content)
-                    if match:
-                        if node_only:
-                            node.add_feature('tag', tag_to_apply, Tag(data=data))
-                        else:
-                            for index, m in enumerate(match.groups()):
-                                idx = index + 1
-                                node.add_feature('tag', tag_to_apply,
-                                                 Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
+                    if content is not None:
+                        match = pattern.match(content)
+                        if match:
+                            if node_only:
+                                node.add_feature('tag', tag_to_apply, Tag(data=data))
+                            else:
+                                for index, m in enumerate(match.groups()):
+                                    idx = index + 1
+                                    node.add_feature('tag', tag_to_apply,
+                                                     Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
 
     def get_tags(self):
         """
@@ -676,9 +654,8 @@ class ContentNode(object):
                 return True
         return False
 
-
     def find(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=1,
-            tag_name_re=None, use_all_content=False):
+             tag_name_re=None, use_all_content=False):
         """
         Return a node related to this node (parent or child) that matches the content and/or node type specified by regular expressions.
 
@@ -707,8 +684,7 @@ class ContentNode(object):
         if instance < 1 or len(results) < instance:
             return None
         else:
-            return results[instance-1]
-
+            return results[instance - 1]
 
     def find_with_feature_value(self, feature_type, feature_name, value, direction=FindDirection.CHILDREN, instance=1):
         """
@@ -733,8 +709,8 @@ class ContentNode(object):
             return None
         else:
             return next(
-                itertools.islice(self.findall_with_feature_value(feature_type, feature_name, value, direction), instance - 1, 1), None)
-
+                itertools.islice(self.findall_with_feature_value(feature_type, feature_name, value, direction),
+                                 instance - 1, 1), None)
 
     def findall_with_feature_value(self, feature_type, feature_name, value, direction=FindDirection.CHILDREN):
         """
@@ -762,7 +738,6 @@ class ContentNode(object):
             if self.parent:
                 yield from self.parent.findall_with_feature_value(feature_type, feature_name, value, direction)
 
-
     def is_first_child(self):
         """
         Determines if this node is the first child of its parent or has no parent.
@@ -774,7 +749,6 @@ class ContentNode(object):
             return True
         else:
             return self.index == 0
-
 
     def is_last_child(self):
         """
@@ -788,7 +762,6 @@ class ContentNode(object):
             return True
         else:
             return self.index == self.parent.get_last_child_index()
-
 
     def get_last_child_index(self):
         """
@@ -808,7 +781,6 @@ class ContentNode(object):
 
         return max_index
 
-
     def get_node_at_index(self, index):
         """
         Returns the child node at the specified index. If the specified index is outside the first (0), or
@@ -826,8 +798,9 @@ class ContentNode(object):
         if self.children:
 
             if index < self.children[0].index:
-                virtual_node = self.document.create_node(node_type=self.children[0].node_type, virtual=True, parent=self,
-                                                        index=index)
+                virtual_node = self.document.create_node(node_type=self.children[0].node_type, virtual=True,
+                                                         parent=self,
+                                                         index=index)
                 return virtual_node
 
             last_child = None
@@ -842,13 +815,12 @@ class ContentNode(object):
             if last_child:
                 if last_child.index is not index and index < self.children[-1].index:
                     virtual_node = self.document.create_node(node_type=last_child.node_type, virtual=True, parent=self,
-                                                            index=index)
+                                                             index=index)
                     return virtual_node
             else:
                 return None
         else:
             return None
-
 
     def has_next_node(self, node_type_re=".*", skip_virtual=False):
         """
@@ -864,7 +836,6 @@ class ContentNode(object):
         """
         return self.next_node(node_type_re, skip_virtual=skip_virtual) is not None
 
-
     def has_previous_node(self, node_type_re=".*", skip_virtual=False):
         """
         Determine if this node has a previous sibling that matches the type specified by the node_type_re regex.
@@ -878,7 +849,6 @@ class ContentNode(object):
         :rtype: bool
         """
         return self.previous_node(node_type_re=node_type_re, skip_virtual=skip_virtual) is not None
-
 
     def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=True):
         """
@@ -913,7 +883,6 @@ class ContentNode(object):
 
             search_index += 1
 
-
     def previous_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
         """
         Returns the previous sibling content node. 
@@ -935,7 +904,7 @@ class ContentNode(object):
         :rtype: ContentNode or None
         """
 
-        #TODO: impement/differentiate traverse logic for CHILDREN and SIBLING
+        # TODO: impement/differentiate traverse logic for CHILDREN and SIBLING
         if self.index == 0:
             if traverse == traverse.ALL or traverse == traverse.PARENT and self.parent:
                 # Lets look for a previous node on the parent
@@ -957,7 +926,6 @@ class ContentNode(object):
                     return node
 
             search_index -= 1
-
 
     def findall(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None,
                 tag_name_re=None, use_all_content=False):
@@ -991,11 +959,10 @@ class ContentNode(object):
         else:
             tag_name_re_compiled = None
         return self.findall_compiled(value_compiled, node_type_compiled, direction, tag_name, tag_name_re_compiled,
-                                    use_all_content)
-
+                                     use_all_content)
 
     def findall_compiled(self, value_re_compiled, node_type_re_compiled, direction, tag_name, tag_name_compiled,
-                        use_all_content):
+                         use_all_content):
         """
         Search for a node that matches on the value and or type using
         regular expressions using compiled expressions
@@ -1021,21 +988,13 @@ class ContentNode(object):
         if direction is FindDirection.CHILDREN:
             for child in self.get_children():
                 hits.extend(child.findall_compiled(value_re_compiled, node_type_re_compiled, direction, tag_name,
-                                                tag_name_compiled, use_all_content))
+                                                   tag_name_compiled, use_all_content))
         else:
             if self.parent:
                 hits.extend(self.parent.findall_compiled(value_re_compiled, node_type_re_compiled, direction, tag_name,
-                                                        tag_name_compiled, use_all_content))
+                                                         tag_name_compiled, use_all_content))
 
         return hits
-
-
-
-
-
-
-
-
 
 
 class ContentFeature(object):
@@ -1087,8 +1046,8 @@ class Document(object):
     A Document is a collection of metadata and a set of content nodes.
     """
 
-    PREVOUS_VERSION:str = "1.0.0"
-    CURRENT_VERSION:str = "2.0.0"
+    PREVOUS_VERSION: str = "1.0.0"
+    CURRENT_VERSION: str = "2.0.0"
 
     def __str__(self):
         return f"kdxa//{self.uuid}/{self.metadata}"
@@ -1151,7 +1110,6 @@ class Document(object):
             data_loaded = msgpack.unpack(data_file, raw=False)
         return Document.from_dict(data_loaded)
 
-
     def to_msgpack(self):
         """
         Convert this document object structure into a message pack
@@ -1171,7 +1129,6 @@ class Document(object):
         """
         return json.dumps(self.to_dict(), ensure_ascii=False)
 
-
     def _repr_html_(self):
         return self.to_html()
 
@@ -1184,10 +1141,8 @@ class Document(object):
         """
         return DocumentRender(self).to_html()
 
-
     def to_arrow(self):
         pass
-
 
     def to_dict(self):
         """
@@ -1205,7 +1160,6 @@ class Document(object):
                 'log': self.log,
                 'uuid': self.uuid}
 
-
     @staticmethod
     def from_dict(doc_dict):
         """
@@ -1221,7 +1175,8 @@ class Document(object):
         new_document = Document(DocumentMetadata(doc_dict['metadata']))
         for mixin in doc_dict['mixins']:
             registry.add_mixin_to_document(mixin, new_document)
-        new_document.version = doc_dict['version'] if 'version' in doc_dict and doc_dict['version'] else Document.PREVOUS_VERSION #some older docs don't have a version or it's None
+        new_document.version = doc_dict['version'] if 'version' in doc_dict and doc_dict[
+            'version'] else Document.PREVOUS_VERSION  # some older docs don't have a version or it's None
         new_document.log = doc_dict['log'] if 'log' in doc_dict else []
         new_document.exceptions = doc_dict['exceptions'] if 'exceptions' in doc_dict else []
         new_document.uuid = doc_dict['uuid'] if 'uuid' in doc_dict else str(
@@ -1230,7 +1185,6 @@ class Document(object):
             new_document.content_node = ContentNode.from_dict(new_document, doc_dict['content_node'])
 
         return new_document
-
 
     @staticmethod
     def from_json(json_string):
@@ -1246,7 +1200,6 @@ class Document(object):
         """
         return Document.from_dict(json.loads(json_string))
 
-
     @staticmethod
     def from_msgpack(bytes):
         """
@@ -1260,7 +1213,6 @@ class Document(object):
         :rtype: Document
         """
         return Document.from_dict(msgpack.unpackb(bytes, raw=False))
-
 
     def get_mixins(self):
         """
@@ -1331,7 +1283,6 @@ class Document(object):
         file_document.metadata.connector_options.file = file
         return file_document
 
-
     @classmethod
     def from_url(cls, url, headers=None):
         """
@@ -1350,7 +1301,6 @@ class Document(object):
         url_document.metadata.connector_options.url = url
         url_document.metadata.connector_options.headers = headers
         return url_document
-
 
     def select(self, selector, variables={}):
         """
@@ -1374,7 +1324,6 @@ class Document(object):
                 return [self.content_node] if bool(result) else []
         else:
             return []
-
 
     def select_as_node(self, selector, variables={}):
         """

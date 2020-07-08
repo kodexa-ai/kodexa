@@ -10,5 +10,5 @@ class CoreMixin:
 
     @staticmethod
     def apply_to(node):
-        # all functions have been moved to ContentNodde
+        # all functions have been moved to ContentNode
         pass
