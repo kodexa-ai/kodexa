@@ -26,16 +26,14 @@ def get_test_document_with_three_children():
 
 def test_get_nodes_between():
     document = get_test_document_with_three_children()
-    document.add_mixin("core")
-
+    
     nodes = document.content_node.children[0].collect_nodes_to(document.content_node.children[2])
     assert len(nodes) == 2
 
 
 def test_tag_nodes_between():
     document = get_test_document_with_three_children()
-    document.add_mixin("core")
-
+    
     document.content_node.children[0].tag_nodes_to(document.content_node.children[2], 'test-tag')
     assert len(document.content_node.findall(tag_name_re='test-tag')) == 2
 
@@ -48,15 +46,12 @@ def test_basic_document_with_content_node():
 
 def test_finder():
     document = get_test_document()
-    document.add_mixin("core")
     node = document.get_root().find(node_type_re="bar")
     assert node.node_type == 'bar'
 
 
 def test_navigation():
     document = get_test_document()
-
-    document.add_mixin('core')
 
     document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'))
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'))
@@ -68,7 +63,6 @@ def test_navigation():
 
 def test_virtual_navigation_with_no_0_index():
     document = Document(DocumentMetadata())
-    document.add_mixin('core')
     node = document.create_node(node_type='loopy')
     node.content = "banana"
     document.content_node = node
@@ -105,8 +99,6 @@ def test_add_feature():
     document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
-    document.add_mixin('core')
-
     # add feature accpeting "add_feature" defaults
     new_feature = document.content_node.children[0].add_feature('test', 'test', 'cheese')
     assert len(new_feature.value) == 1
@@ -140,8 +132,6 @@ def test_feature_find():
     document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
-    document.add_mixin('core')
-
     document.content_node.children[0].add_feature('test', 'test', 'cheese')
     document.content_node.children[1].add_feature('test', 'test', 'fishstick')
 
@@ -151,7 +141,6 @@ def test_feature_find():
 
 def test_finder_and_tag():
     document = get_test_document()
-    document.add_mixin("core")
     node = document.get_root().find(node_type_re="bar")
     assert node.node_type == "bar"
 

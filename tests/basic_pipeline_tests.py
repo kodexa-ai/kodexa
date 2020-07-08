@@ -166,7 +166,6 @@ def test_url_pipeline():
     assert new_document_store.count() == 1
 
     new_doc = new_document_store.get_document(0)
-    new_doc.add_mixin('core')
     print(new_doc.content_node.get_all_content())
 
 
