@@ -260,8 +260,7 @@ def test_basic_text_pipeline():
            'merge with the Carolingian-based cultures of West Francia. ' \
            'The distinct cultural and ethnic identity of the Normans emerged initially ' \
            'in the first half of the 10th century, ' \
-           'and it continued to evolve over the succeeding centuries.' \
- \
+           'and it continued to evolve over the succeeding centuries.' 
     pipeline = Pipeline.from_text(text)
     pipeline.run()
     doc = pipeline.context.output_document
