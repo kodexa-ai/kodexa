@@ -1221,7 +1221,7 @@ class Document(object):
         new_document = Document(DocumentMetadata(doc_dict['metadata']))
         for mixin in doc_dict['mixins']:
             registry.add_mixin_to_document(mixin, new_document)
-        new_document.version = doc_dict['version'] if 'version' in doc_dict else Document.PREVOUS_VERSION #some older docs don't have a version
+        new_document.version = doc_dict['version'] if 'version' in doc_dict and doc_dict['version'] else Document.PREVOUS_VERSION #some older docs don't have a version or it's None
         new_document.log = doc_dict['log'] if 'log' in doc_dict else []
         new_document.exceptions = doc_dict['exceptions'] if 'exceptions' in doc_dict else []
         new_document.uuid = doc_dict['uuid'] if 'uuid' in doc_dict else str(
