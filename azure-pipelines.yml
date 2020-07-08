@@ -28,7 +28,7 @@ steps:
     pip install -r requirements.txt
   displayName: 'Install dependencies'
 - script: |
-    mypy
+    mypy kodexa
   displayName: 'type checking'
 - script: |
     pip install pytest pytest-azurepipelines
