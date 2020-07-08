@@ -89,6 +89,7 @@ class PipelineContext:
         self.content_provider = content_provider
         self.context = context
         self.store_provider = store_provider
+        self.stop_on_exception = True
 
     def get_context(self):
         return self.context
@@ -144,6 +145,67 @@ class PipelineContext:
         return self.store_provider.get_store(name)
 
 
+class PipelineStep:
+    """
+    The representation of a step within a step, which captures both the step itself and
+    also the details around the step's use.
+
+    It is internally used by the Pipeline and is not a public API
+    """
+
+    def __init__(self, step, enabled=False, condition=None, name=None):
+        self.step = step
+        self.name = name
+        self.condition = condition
+        self.enabled = enabled
+
+        if callable(self.step):
+            logging.info(f"Adding new step function {step.__name__} to pipeline {self.name}")
+        else:
+            logging.info(f"Adding new step {step.get_name()} to pipeline {self.name}")
+
+    def execute(self, context, document):
+        if self.will_execute(context, document):
+            try:
+                if not callable(self.step):
+                    logging.info(f"Starting step {self.step.get_name()}")
+
+                    if len(signature(self.step.process).parameters) == 1:
+                        return self.step.process(document)
+                    else:
+                        return self.step.process(document, context)
+                else:
+                    logging.info(f"Starting step function {self.step.__name__}")
+
+                    if len(signature(self.step).parameters) == 1:
+                        return self.step(document)
+                    else:
+                        return self.step(document, context)
+            except:
+                tt, value, tb = sys.exc_info()
+                document.exceptions.append({
+                    "step": self.step.__name__ if callable(self.step) else self.step.get_name(),
+                    "traceback": traceback.format_exception(tt, value, tb)
+                })
+                if context.stop_on_exception:
+                    raise
+                else:
+                    return document
+        else:
+            return document
+        
+    def will_execute(self, context, document):
+        if not self.enabled:
+            return False
+
+        if self.condition:
+            from simpleeval import simple_eval
+            return bool(
+                simple_eval(self.condition, names={'document': document, 'step': self}))
+
+        return True
+
+
 class Pipeline:
     """
     A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
@@ -170,7 +232,7 @@ class Pipeline:
         self.sink = None
         self.name = name
         self.context = PipelineContext()
-        self.stop_on_exception = stop_on_exception
+        self.context.stop_on_exception = stop_on_exception
         self.logging_level = logging_level
 
     def add_store(self, name, store):
@@ -187,7 +249,7 @@ class Pipeline:
 
         return self
 
-    def add_step(self, step):
+    def add_step(self, step, name=None, enabled=True, condition=None):
         """
         Add the given step to the current pipeline
 
@@ -202,13 +264,11 @@ class Pipeline:
             >>> pipeline.add_step(my_function)
 
         :param step: the step to add
+        :param name: the name to use to describe the step (default None)
+        :param enabled: is the step enabled (default True)
+        :param condition: condition to evaluate before executing the step (default None)
         """
-        if callable(step):
-            logging.info(f"Adding new step function {step.__name__} to pipeline {self.name}")
-        else:
-            logging.info(f"Adding new step {step.get_name()} to pipeline {self.name}")
-
-        self.steps.append(step)
+        self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition))
 
         return self
 
@@ -265,29 +325,7 @@ class Pipeline:
             logging.basicConfig(stream=log_stream, level=self.logging_level)
             logging.info(f"Processing {document}")
             for step in self.steps:
-                try:
-                    if not callable(step):
-                        logging.info(f"Starting step {step.get_name()}")
-
-                        if len(signature(step.process).parameters) == 1:
-                            document = step.process(document)
-                        else:
-                            document = step.process(document, self.context)
-                    else:
-                        logging.info(f"Starting step function {step.__name__}")
-
-                        if len(signature(step).parameters) == 1:
-                            document = step(document)
-                        else:
-                            document = step(document, self.context)
-                except:
-                    tt, value, tb = sys.exc_info()
-                    document.exceptions.append({
-                        "step": step.__name__ if callable(step) else step.get_name(),
-                        "traceback": traceback.format_exception(tt, value, tb)
-                    })
-                    if self.stop_on_exception:
-                        raise
+                document = step.execute(self.context, document)
 
             if self.sink:
                 logging.info(f"Writing to sink {self.sink.get_name()}")

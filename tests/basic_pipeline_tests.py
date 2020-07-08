@@ -1,6 +1,4 @@
 import logging
-import os
-from pathlib import Path
 
 from kodexa.model import DocumentMetadata, Document
 from kodexa.pipeline import Pipeline
@@ -72,6 +70,22 @@ def test_class_step_step_with_context():
     assert new_document_store.get_document(0).metadata.cheese == pipeline.context.transaction_id
 
     print(new_document_store.get_document(0).log)
+
+
+def test_enabled_steps():
+    class MyProcessingStep:
+
+        def get_name(self):
+            return "test-step"
+
+        def process(self, doc):
+            doc.metadata.cheese = 'burger'
+            return doc
+
+    assert Pipeline.from_text('Hello World').add_step(MyProcessingStep(), enabled=True).run().output_document.metadata[
+               'cheese'] == 'burger'
+    assert 'cheese' not in Pipeline.from_text('Hello World').add_step(MyProcessingStep(),
+                                                                      enabled=False).run().output_document.metadata
 
 
 def test_function_step_with_context():
@@ -226,7 +240,6 @@ def test_table_stores_with_extractor():
 
 
 def test_basic_url_pipeline():
-
     url = 'http://www.google.com'
     pipeline = Pipeline.from_url(url)
     pipeline.run()
@@ -235,22 +248,20 @@ def test_basic_url_pipeline():
     assert doc.metadata.connector_options.url == url
 
 
-
 def test_basic_text_pipeline():
-
     text = 'The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) ' \
-        'were the people who in the 10th and 11th centuries gave their name to ' \
-        'Normandy, a region in France. They were descended from Norse ' \
-        '(\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, ' \
-        'Iceland and Norway who, under their leader Rollo, ' \
-        'agreed to swear fealty to King Charles III of West Francia. ' \
-        'Through generations of assimilation and mixing with the native ' \
-        'Frankish and Roman-Gaulish populations, their descendants would gradually ' \
-        'merge with the Carolingian-based cultures of West Francia. ' \
-        'The distinct cultural and ethnic identity of the Normans emerged initially ' \
-        'in the first half of the 10th century, ' \
-        'and it continued to evolve over the succeeding centuries.' \
-
+           'were the people who in the 10th and 11th centuries gave their name to ' \
+           'Normandy, a region in France. They were descended from Norse ' \
+           '(\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, ' \
+           'Iceland and Norway who, under their leader Rollo, ' \
+           'agreed to swear fealty to King Charles III of West Francia. ' \
+           'Through generations of assimilation and mixing with the native ' \
+           'Frankish and Roman-Gaulish populations, their descendants would gradually ' \
+           'merge with the Carolingian-based cultures of West Francia. ' \
+           'The distinct cultural and ethnic identity of the Normans emerged initially ' \
+           'in the first half of the 10th century, ' \
+           'and it continued to evolve over the succeeding centuries.' \
+ \
     pipeline = Pipeline.from_text(text)
     pipeline.run()
     doc = pipeline.context.output_document
