@@ -2,6 +2,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
+from typing import List
 
 from kodexa.model import Document
 
@@ -16,7 +17,7 @@ class JsonDocumentStore:
 
     def __init__(self, store_path: str, force_initialize: bool = False):
         self.store_path = store_path
-        self.document_ids = []
+        self.document_ids: List[str] = []
         self.index = 0
 
         # We will delete any store we find
@@ -125,7 +126,7 @@ class JsonDocumentStore:
         Method to write the JSON store index back to store path
         """
         with open(os.path.join(self.store_path, 'index.idx'), 'w') as f:
-            #f.writelines(self.document_ids)
+            # f.writelines(self.document_ids)
             f.write('\n'.join(self.document_ids))
 
     def reset_connector(self):

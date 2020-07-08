@@ -6,6 +6,7 @@ import tempfile
 import urllib
 from os import listdir
 from os.path import join
+from typing import Dict
 
 import requests
 
@@ -122,7 +123,7 @@ class UrlConnector:
                  "connector_options": {"url": self.url, "headers": self.headers}}))
 
 
-registered_connectors = {}
+registered_connectors: Dict[str, object] = {}
 
 
 def get_connectors():
