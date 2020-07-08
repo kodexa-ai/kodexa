@@ -1,6 +1,7 @@
 import json
 import re
 import uuid
+from typing import List, Optional, Any
 
 import msgpack
 from addict import Dict
@@ -48,18 +49,18 @@ class ContentNode(object):
         >>> current_content_node.add_child(new_page)
     """
 
-    def __init__(self, document, type, content="", content_parts=[]):
-        self.type = type
-        self.content = content
-        self.document = document
-        self.content_parts = content_parts
-        self.parent = None
-        self.children = []
-        self.index = 0
-        self.uuid = str(uuid.uuid4())
-
+    def __init__(self, document, type: str, content="", content_parts=[]):
+        self.type: str = type
+        self.content: str = content
+        self.document: Document = document
+        self.content_parts: List[Any] = content_parts
+        self.parent: Optional[ContentNode] = None
+        self.children: List[ContentNode] = []
+        self.index: int = 0
+        self.uuid: str = str(uuid.uuid4())
+        self.virtual: bool = False
         # Added for performance
-        self._feature_map = {}
+        self._feature_map: Dict[str, ContentFeature] = {}
 
     def __str__(self):
         return f"ContentNode [type:{self.type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
@@ -103,7 +104,7 @@ class ContentNode(object):
         return new_dict
 
     @staticmethod
-    def from_dict(document, content_node_dict):
+    def from_dict(document: Document, content_node_dict: Dict) -> ContentNode:
         """
         Accepts a dictionary that contains data for a ContentNode, unpacks it, and adds it to the document.
 
@@ -641,12 +642,12 @@ class Document(object):
         if metadata is None:
             metadata = DocumentMetadata()
         self.metadata: DocumentMetadata = metadata
-        self.content_node: ContentNode = content_node
+        self.content_node: Optional[ContentNode] = content_node
         self.virtual: bool = False
-        self._mixins = []
+        self._mixins: List[str] = []
         self.uuid: str = str(uuid.uuid4())
-        self.exceptions = []
-        self.log = []
+        self.exceptions: List = []
+        self.log: List[str] = []
         self.version = "1.0.0"
         self.add_mixin('core')
         self.source: SourceMetadata = source
@@ -794,7 +795,7 @@ class Document(object):
         """
         registry.add_mixin_to_document(mixin, self)
 
-    def create_node(self, type: str = type, content: str = None, virtual: bool = False, parent: ContentNode = None,
+    def create_node(self, type: str, content: str = None, virtual: bool = False, parent: ContentNode = None,
                     index: int = 0):
         """
         Creates a new node for the document, this doesn't add the node to the document however
