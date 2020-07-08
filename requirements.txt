@@ -14,3 +14,4 @@ pyyaml
 pyarrow
 anytree
 mypy
+simpleeval
