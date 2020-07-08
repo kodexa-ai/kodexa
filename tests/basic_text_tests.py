@@ -19,7 +19,6 @@ def get_test_pipeline(filename):
 
     # Make sure the finders are available
     document = document_sink.get_document(0)
-    registry.add_mixin_to_document("core", document)
     return document
 
 
