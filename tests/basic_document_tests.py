@@ -99,6 +99,42 @@ def test_virtual_navigation():
     assert document.content_node.children[0].next_node().next_node().content is 'cheeseburger'
 
 
+def test_add_feature():
+
+    document = get_test_document()
+    document.content_node.add_child(document.create_node(type='bar', content='cheeseburger'), index=2)
+    document.content_node.add_child(document.create_node(type='bar', content='lemon'), index=5)
+
+    document.add_mixin('core')
+
+    # add feature accpeting "add_feature" defaults
+    new_feature = document.content_node.children[0].add_feature('test', 'test', 'cheese')
+    assert len(new_feature.value) == 1
+    assert new_feature.value[0] == "cheese"
+
+    #adding a 2nd feature with the same type/name
+    another_feature = document.content_node.children[0].add_feature('test', 'test', 'pickels')
+    assert len(another_feature.value) == 2
+    assert another_feature.value[0] == "cheese"
+    assert another_feature.value[1] == "pickels"
+
+    #adding a 3rd feature with the same type/name - changing default values
+    yet_another_feature = document.content_node.children[0].add_feature('test', 'test', 'lettuce', single=False, serialized=True)
+    assert len(yet_another_feature.value) == 3
+    assert yet_another_feature.value[0] == "cheese"
+    assert yet_another_feature.value[1] == "pickels"
+    assert yet_another_feature.value[2] == "lettuce"
+
+    #adding completely new feature and changing the default values
+    
+    #Setting a feature with single=False
+    #This allows me to set a string as if it was a collection...and later I can't add to it with append.  Not sure that's the desiered behavior
+    new_again = document.content_node.children[0].add_feature('test_2', 'test_2_name', 'sesame_seeds', single=False, serialized=False)
+
+    #This would fail, as the original value 'seasme_seeds' is not a collection, even though it was stated to be one
+    #new_again_2 = document.content_node.children[0].add_feature('test_2', 'test_2_name', 'special_sauce')
+
+
 def test_feature_find():
     document = get_test_document()
     document.content_node.add_child(document.create_node(type='bar', content='cheeseburger'), index=2)
@@ -110,7 +146,6 @@ def test_feature_find():
     document.content_node.children[1].add_feature('test', 'test', 'fishstick')
 
     assert document.get_root().find_with_feature_value('test', 'test', 'cheese') is not None
-
     assert document.get_root().children[1].get_all_content() == 'cheeseburger'
 
 
