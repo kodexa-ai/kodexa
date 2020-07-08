@@ -38,19 +38,19 @@ class ContentNode(object):
     You should always create a node using the Document's create_node method to
     ensure that the correct mixins are applied.
 
-        >>> new_page = document.create_node(type='page')
+        >>> new_page = document.create_node(node_type='page')
         <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         >>> current_content_node.add_child(new_page)
 
     or
 
-        >>> new_page = document.create_node(type='page', content='This is page 1')
+        >>> new_page = document.create_node(node_type='page', content='This is page 1')
         <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         >>> current_content_node.add_child(new_page)
     """
 
-    def __init__(self, document, type: str, content="", content_parts=[]):
-        self.type: str = type
+    def __init__(self, document, node_type: str, content="", content_parts=[]):
+        self.node_type: str = node_type
         self.content: str = content
         self.document: Document = document
         self.content_parts: List[Any] = content_parts
@@ -63,7 +63,7 @@ class ContentNode(object):
         self._feature_map: Dict[str, ContentFeature] = {}
 
     def __str__(self):
-        return f"ContentNode [type:{self.type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
+        return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
             self.content) + "]"
 
     def _repr_html_(self):
@@ -100,7 +100,7 @@ class ContentNode(object):
         :return: The properties of this ContentNode and all of its children structured as a dictionary.
         :rtype: dict
         """
-        new_dict = {'type': self.type, 'content': self.content, 'content_parts': self.content_parts, 'features': [],
+        new_dict = {'node_type': self.node_type, 'content': self.content, 'content_parts': self.content_parts, 'features': [],
                     'index': self.index, 'children': [], 'uuid': self.uuid}
         for feature in self.get_features():
             new_dict['features'].append(feature.to_dict())
@@ -123,7 +123,10 @@ class ContentNode(object):
         :return: A ContentNode containing the unpacked values from the content_node_dict parameter.
         :rtype: ContentNode
         """
-        new_content_node = document.create_node(type=content_node_dict['type'], content=content_node_dict[
+
+        node_type = content_node_dict['type'] if document.version == Document.PREVOUS_VERSION else content_node_dict['node_type']
+
+        new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
             'content'] if 'content' in content_node_dict else None)
         if 'uuid' in content_node_dict:
             new_content_node.uuid = content_node_dict['uuid']
@@ -144,7 +147,7 @@ class ContentNode(object):
         """
         Add a ContentNode as a child of this ContentNode
 
-            >>> new_page = document.create_node(type='page')
+            >>> new_page = document.create_node(node_type='page')
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.add_child(new_page)
 
@@ -176,7 +179,7 @@ class ContentNode(object):
         """
         Sets a feature for this ContentNode, replacing the value if a feature by this type and name already exists.
 
-           >>> new_page = document.create_node(type='page')
+           >>> new_page = document.create_node(node_type='page')
            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
            >>> new_page.add_feature('pagination','pageNum',1)
 
@@ -197,7 +200,7 @@ class ContentNode(object):
 
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
-           >>> new_page = document.create_node(type='page')
+           >>> new_page = document.create_node(node_type='page')
            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
            >>> new_page.add_feature('pagination','pageNum',1)
 
@@ -328,7 +331,7 @@ class ContentNode(object):
         return self.content
 
 
-    def get_type(self):
+    def get_node_type(self):
         """
         Get the type of this node.
 
@@ -338,7 +341,7 @@ class ContentNode(object):
         :return: The type of this ContentNode.
         :rtype: str
         """
-        return self.type
+        return self.node_type
 
 
     def select(self, selector, variables=None):
@@ -390,7 +393,7 @@ class ContentNode(object):
         :return: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
         :rtype: ContentNode
         """
-        new_node = self.document.create_node(type='result')
+        new_node = self.document.create_node(node_type='result')
         new_node.children = self.select(selector, variables)
         return new_node
 
@@ -504,7 +507,7 @@ class ContentNode(object):
         [node.tag(tag_to_apply) for node in self.collect_nodes_to(end_node)]
 
 
-    def tag_range(self, start_content_re, end_content_re, tag_to_apply, type_re='.*', use_all_content=False):
+    def tag_range(self, start_content_re, end_content_re, tag_to_apply, node_type_re='.*', use_all_content=False):
         """
         This will tag all the child nodes between the start and end content regular expressions
 
@@ -513,12 +516,12 @@ class ContentNode(object):
         :param start_content_re: The regular expression to match the starting child
         :param end_content_re: The regular expression to match the ending child
         :param tag_to_apply: The tag name that will be applied to the nodes in range
-        :param type_re: The type to match (default is all)
+        :param node_type_re: The node type to match (default is all)
         :param use_all_content: Use full content (including child nodes, default is False)
         """
 
         # Could be line, word, or content-area
-        all_nodes = self.findall(type_re=type_re)
+        all_nodes = self.findall(node_type_re=node_type_re)
 
         start_index_list = [n_idx for n_idx, node in enumerate(all_nodes)
                             if re.compile(start_content_re).match(node.get_all_content()
@@ -614,12 +617,13 @@ class ContentNode(object):
 
     def get_all_tags(self):
         """
-        Returns a list of the names of the tags on the given node and all its children
+        Get the names of all tags that have been applied to this node or to its children.
 
             >>> document.content_node.find(content_re='.*Cheese.*').get_all_tags()
             ['is_cheese']
 
-        :return: A list of the tag names
+        :return: A list of the tag names belonging to this node and/or its children.
+        :rtype: list[str]
         """
         tags = []
         tags.extend(self.get_tags())
@@ -629,27 +633,29 @@ class ContentNode(object):
 
     def has_tags(self):
         """
-        Returns True if the node has any tags
+        Determines if this node has any tags at all.
 
             >>> document.content_node.find(content_re='.*Cheese.*').has_tags()
             True
 
-        :return: True if node has any tags else False
+        :return: True if node has any tags; else, False;
+        :rtype: bool
         """
         return len([i.value for i in self.get_features_of_type("tag")]) > 0
 
     def has_tag(self, tag):
         """
-        Returns True if the node has given tag
+        Determine if this node has a tag with the specified name.
 
             >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_cheese')
             True
             >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_fish')
             False
 
-        :param tag: The tag name
+        :param str tag: The name of the tag.
 
-        :return: True if node has tag else False
+        :return: True if node has a tag by the specified name; else, False;
+        :rtype: bool
         """
         for feature in self.get_features():
             if feature.feature_type == 'tag' and feature.name == tag:
@@ -706,6 +712,9 @@ class Document(object):
     A Document is a collection of metadata and a set of content nodes.
     """
 
+    PREVOUS_VERSION:str = "1.0.0"
+    CURRENT_VERSION:str = "2.0.0"
+
     def __str__(self):
         return f"kdxa//{self.uuid}/{self.metadata}"
 
@@ -719,7 +728,7 @@ class Document(object):
         self.uuid: str = str(uuid.uuid4())
         self.exceptions: List = []
         self.log: List[str] = []
-        self.version = "1.0.0"
+        self.version = Document.CURRENT_VERSION
         self.add_mixin('core')
         self.source: SourceMetadata = source
 
@@ -729,7 +738,7 @@ class Document(object):
     @classmethod
     def from_text(cls, text):
         new_document = Document()
-        new_document.content_node = new_document.create_node(type='text', content=text)
+        new_document.content_node = new_document.create_node(node_type='text', content=text)
         new_document.add_mixin('text')
         return new_document
 
@@ -766,6 +775,7 @@ class Document(object):
         with open(file_path, 'rb') as data_file:
             data_loaded = msgpack.unpack(data_file, raw=False)
         return Document.from_dict(data_loaded)
+
 
     def to_msgpack(self):
         """
@@ -813,7 +823,7 @@ class Document(object):
         :return: A dictionary representation of this Document.
         :rtype: dict  
         """
-        return {'version': self.version, 'metadata': self.metadata,
+        return {'version': Document.CURRENT_VERSION, 'metadata': self.metadata,
                 'content_node': self.content_node.to_dict() if self.content_node else None,
                 'mixins': self._mixins,
                 'exceptions': self.exceptions,
@@ -836,7 +846,7 @@ class Document(object):
         new_document = Document(DocumentMetadata(doc_dict['metadata']))
         for mixin in doc_dict['mixins']:
             registry.add_mixin_to_document(mixin, new_document)
-        new_document.version = doc_dict['version'] if 'version' in doc_dict else '1.0.0'
+        new_document.version = doc_dict['version'] if 'version' in doc_dict else Document.PREVOUS_VERSION #some older docs don't have a version
         new_document.log = doc_dict['log'] if 'log' in doc_dict else []
         new_document.exceptions = doc_dict['exceptions'] if 'exceptions' in doc_dict else []
         new_document.uuid = doc_dict['uuid'] if 'uuid' in doc_dict else str(
@@ -845,6 +855,7 @@ class Document(object):
             new_document.content_node = ContentNode.from_dict(new_document, doc_dict['content_node'])
 
         return new_document
+
 
     @staticmethod
     def from_json(json_string):
@@ -896,17 +907,17 @@ class Document(object):
         """
         registry.add_mixin_to_document(mixin, self)
 
-    def create_node(self, type: str, content: str = None, virtual: bool = False, parent: ContentNode = None,
+    def create_node(self, node_type: str, content: str = None, virtual: bool = False, parent: ContentNode = None,
                     index: int = 0):
         """
         Creates a new node for the document.  The new node is not added to the document, but any mixins that have been 
         applied to the document will also be available on the new node.
 
-            >>> document.create_node(type='page')
+            >>> document.create_node(node_type='page')
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
 
 
-        :param str type: The type of node.
+        :param str node_type: The type of node.
         :param str content: The content for the node; defaults to None.
         :param bool virtual: Indicates if this is a 'real' or 'virtual' node; default is False.  'Real' nodes contain document content.  
         'Virtual' nodes are synthesized as necessary to fill gaps in between non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
@@ -917,7 +928,7 @@ class Document(object):
         :rtype: ContentNode
 
         """
-        content_node = ContentNode(document=self, type=type, content=content)
+        content_node = ContentNode(document=self, node_type=node_type, content=content)
         content_node.parent = parent
         content_node.index = index
         content_node.virtual = virtual
@@ -1007,7 +1018,7 @@ class Document(object):
         if self.content_node:
             return self.content_node.select_as_node(selector, variables)
         else:
-            return self.create_node(type='results')
+            return self.create_node(node_type='results')
 
 
 class KodexaRender:

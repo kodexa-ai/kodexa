@@ -5,7 +5,7 @@ def set_statistics(self, statistics):
     """
     Set the spatial statistics for this node
 
-        >>> document.content_node.find(type_re='page').set_statistics(NodeStatistics())
+        >>> document.select.('//page')[0].set_statistics(NodeStatistics())
 
     :param statistics: the statistics object
 
@@ -17,7 +17,7 @@ def get_statistics(self):
     """
     Get the spatial statistics for this node
 
-        >>> document.content_node.find(type_re='page').get_statistics()
+        >>> document.select.('//page')[0].get_statistics()
         <kodexa.spatial.NodeStatistics object at 0x7f80605e53c8>
 
     :return: the statistics object (or None if not set)
@@ -33,7 +33,7 @@ def set_bbox(self, bbox):
 
     [x1,y1,x2,y2]
 
-        >>> document.content_node.find(type_re='page').set_bbox([10,20,50,100])
+        >>> document.select.('//page')[0].set_bbox([10,20,50,100])
 
     :param bbox: the bounding box array
 
@@ -47,7 +47,7 @@ def get_bbox(self):
 
     [x1,y1,x2,y2]
 
-        >>> document.content_node.find(type_re='page').get_bbox()
+        >>> document.select.('//page')[0].get_bbox()
         [10,20,50,100]
 
     :return: the bounding box array
@@ -83,14 +83,14 @@ def set_bbox_from_children(self):
         self.set_bbox([x_min, y_min, x_max, y_max])
 
 
-def collapse(self, type_re):
+def collapse(self, node_type_re):
     """
-    Will collapse the given type, this will remove this type from the hierarchy.
+    Will collapse the given node type and will remove this node type from the hierarchy.
 
-    :param type_re: the type that you will collapse
+    :param node_type_re: the type that you will collapse
     :return:
     """
-    for node in self.findall(type_re=type_re):
+    for node in self.findall(node_type_re=node_type_re):
         pass
 
 
@@ -98,7 +98,7 @@ def set_rotate(self, rotate):
     """
     Set the rotate of the node
 
-        >>> document.content_node.find(type_re='page').set_rotate(90)
+        >>> document.select.('//page')[0].set_rotate(90)
 
     :param rotate the rotation of the node
 
@@ -110,7 +110,7 @@ def get_rotate(self):
     """
     Get the rotate of the node
 
-        >>> document.content_node.find(type_re='page').get_rotate()
+        >>> document.select.('//page')[0].get_rotate()
         90
 
     :return: the rotation of the node
@@ -124,7 +124,7 @@ def get_x(self):
     """
     Get the X position of the node
 
-        >>> document.content_node.find(type_re='page').get_x()
+        >>> document.select.('//page')[0].get_x()
         10
 
     :return: the X position of the node
@@ -142,7 +142,7 @@ def get_y(self):
     """
     Get the Y position of the node
 
-        >>> document.content_node.find(type_re='page').get_y()
+        >>> document.select.('//page')[0].get_y()
         90
 
     :return: the Y position of the node
@@ -158,7 +158,7 @@ def get_width(self):
     """
     Get the width of the node
 
-        >>> document.content_node.find(type_re='page').get_width()
+        >>> document.select.('//page')[0].get_width()
         70
 
     :return: the width of the node
@@ -174,7 +174,7 @@ def get_height(self):
     """
     Get the height of the node
 
-        >>> document.content_node.find(type_re='page').get_height()
+        >>> document.select.('//page')[0].get_height()
         40
 
     :return: the height of the node

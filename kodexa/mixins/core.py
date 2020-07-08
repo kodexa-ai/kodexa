@@ -19,18 +19,18 @@ class Traverse(Enum):
     ALL = 4
 
 
-def find(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=1,
+def find(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=1,
          tag_name_re=None, use_all_content=False):
     """
-    Return a node related to this node (parent or child) that matches the content and/or type specified by regular expressions.
+    Return a node related to this node (parent or child) that matches the content and/or node type specified by regular expressions.
 
         >>> document.get_root().find(content_re='.*Cheese.*',instance=2)
         <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
 
     :param content_re: The regular expression to match against the node's content; default is '.*'.
     :type content_re: str, optional
-    :param type_re: The regular expression to match against the node's type; default is '.*'.
-    :type type_re: str, optional
+    :param node_type_re: The regular expression to match against the node's type; default is '.*'.
+    :type node_type_re: str, optional
     :param direction: The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
     :type direction: FindDirection(enum), optional
     :param tag_name: The tag name that must exist on the node; default is None.
@@ -45,7 +45,7 @@ def find(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDREN, 
     :return: Matching node (if found), or None.
     :rtype: ContentNode or None.
     """
-    results = self.findall(content_re, type_re, direction, tag_name, tag_name_re, use_all_content)
+    results = self.findall(content_re, node_type_re, direction, tag_name, tag_name_re, use_all_content)
     if instance < 1 or len(results) < instance:
         return None
     else:
@@ -158,7 +158,7 @@ def get_node_at_index(self, index):
     
     Note:  documents allow for sparse representation and child nodes may not have consecutive index numbers. 
     If there isn't a child node at the specfied index, a 'virtual' node will be returned.  This 'virtual' node
-    will have the type of its nearest sibling and will have an index value, but will have no features or content.
+    will have the node type of its nearest sibling and will have an index value, but will have no features or content.
 
     :param int index: The index (zero-based) for the child node.
 
@@ -168,7 +168,7 @@ def get_node_at_index(self, index):
     if self.children:
 
         if index < self.children[0].index:
-            virtual_node = self.document.create_node(type=self.children[0].type, virtual=True, parent=self,
+            virtual_node = self.document.create_node(node_type=self.children[0].node_type, virtual=True, parent=self,
                                                      index=index)
             return virtual_node
 
@@ -183,7 +183,7 @@ def get_node_at_index(self, index):
 
         if last_child:
             if last_child.index is not index and index < self.children[-1].index:
-                virtual_node = self.document.create_node(type=last_child.type, virtual=True, parent=self,
+                virtual_node = self.document.create_node(node_type=last_child.node_type, virtual=True, parent=self,
                                                          index=index)
                 return virtual_node
         else:
@@ -192,37 +192,37 @@ def get_node_at_index(self, index):
         return None
 
 
-def has_next_node(self, type_re=".*", skip_virtual=False):
+def has_next_node(self, node_type_re=".*", skip_virtual=False):
     """
-    Determine if this node has a next sibling that matches the type specified by the type_re regex.
+    Determine if this node has a next sibling that matches the type specified by the node_type_re regex.
 
-    :param type_re: The regular expression to match against the next sibling node's type; default is '.*'.
-    :type type_re: str, optional
+    :param node_type_re: The regular expression to match against the next sibling node's type; default is '.*'.
+    :type node_type_re: str, optional
     :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
     :type skip_virtual: bool, optional
 
     :return: True if there is a next sibling node matching the specified type regex; else, False.
     :rtype: bool
     """
-    return self.next_node(type_re, skip_virtual=skip_virtual) is not None
+    return self.next_node(node_type_re, skip_virtual=skip_virtual) is not None
 
 
-def has_previous_node(self, type_re=".*", skip_virtual=False):
+def has_previous_node(self, node_type_re=".*", skip_virtual=False):
     """
-    Determine if this node has a previous sibling that matches the type specified by the type_re regex.
+    Determine if this node has a previous sibling that matches the type specified by the node_type_re regex.
 
-    :param type_re: The regular expression to match against the previous sibling node's type; default is '.*'.
-    :type type_re: str, optional
+    :param node_type_re: The regular expression to match against the previous sibling node's type; default is '.*'.
+    :type node_type_re: str, optional
     :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
     :type skip_virtual: bool, optional
 
     :return: True if there is a previous sibling node matching the specified type regex; else, False.
     :rtype: bool
      """
-    return self.previous_node(type_re=type_re, skip_virtual=skip_virtual) is not None
+    return self.previous_node(node_type_re=node_type_re, skip_virtual=skip_virtual) is not None
 
 
-def next_node(self, type_re='.*', skip_virtual=False, has_no_content=False):
+def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False):
     """
     Returns the next sibling content node. 
     
@@ -230,8 +230,8 @@ def next_node(self, type_re='.*', skip_virtual=False, has_no_content=False):
     Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the 
     skip_virtual parameter to False.
 
-    :param type_re: The regular expression to match against the next sibling node's type; default is '.*'.
-    :type type_re: str, optional
+    :param node_type_re: The regular expression to match against the next sibling node's type; default is '.*'.
+    :type node_type_re: str, optional
     :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
     :type skip_virtual: bool, optional
     :param has_no_content: Allow a node that has no content to be returned; default is False.
@@ -241,7 +241,7 @@ def next_node(self, type_re='.*', skip_virtual=False, has_no_content=False):
     :rtype: ContentNode or None
     """
     search_index = self.index + 1
-    compiled_type_re = re.compile(type_re)
+    compiled_node_type_re = re.compile(node_type_re)
 
     while True:
         node = self.parent.get_node_at_index(search_index)
@@ -249,7 +249,7 @@ def next_node(self, type_re='.*', skip_virtual=False, has_no_content=False):
         if not node:
             return node
 
-        if compiled_type_re.match(node.type) and (not skip_virtual or not node.virtual):
+        if compiled_node_type_re.match(node.node_type) and (not skip_virtual or not node.virtual):
             if (not has_no_content) or (has_no_content and not node.content):
                 return node
         if not node:
@@ -257,7 +257,7 @@ def next_node(self, type_re='.*', skip_virtual=False, has_no_content=False):
         search_index += 1
 
 
-def previous_node(self, type_re='.*', skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
+def previous_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
     """
     Returns the previous sibling content node. 
     
@@ -265,8 +265,8 @@ def previous_node(self, type_re='.*', skip_virtual=False, has_no_content=False, 
     Therefore, the previous node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the 
     skip_virtual parameter to False.
 
-    :param type_re: The regular expression to match against the previous node's type; default is '.*'.
-    :type type_re: str, optional
+    :param node_type_re: The regular expression to match against the previous node's type; default is '.*'.
+    :type node_type_re: str, optional
     :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
     :type skip_virtual: bool, optional
     :param has_no_content: Allow a node that has no content to be returned; default is False.
@@ -282,12 +282,12 @@ def previous_node(self, type_re='.*', skip_virtual=False, has_no_content=False, 
     if self.index == 0:
         if traverse == traverse.ALL or traverse == traverse.PARENT and self.parent:
             # Lets look for a previous node on the parent
-            return self.parent.previous_node(type_re, skip_virtual, has_no_content, traverse)
+            return self.parent.previous_node(node_type_re, skip_virtual, has_no_content, traverse)
         else:
             return None
 
     search_index = self.index - 1
-    compiled_type_re = re.compile(type_re)
+    compiled_node_type_re = re.compile(node_type_re)
 
     while True:
         node = self.parent.get_node_at_index(search_index)
@@ -295,14 +295,14 @@ def previous_node(self, type_re='.*', skip_virtual=False, has_no_content=False, 
         if not node:
             return node
 
-        if compiled_type_re.match(node.type) and (not skip_virtual or not node.virtual):
+        if compiled_node_type_re.match(node.node_type) and (not skip_virtual or not node.virtual):
             if (not has_no_content) or (has_no_content and not node.content):
                 return node
 
         search_index -= 1
 
 
-def findall(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDREN, tag_name=None,
+def findall(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None,
             tag_name_re=None, use_all_content=False):
     """
     Search for related nodes (child or parent) that match the content and/or type specified by regular expressions.
@@ -313,8 +313,8 @@ def findall(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDRE
 
     :param content_re: The regular expression to match against the node's content; default is '.*'.
     :type content_re: str, optional
-    :param type_re: The regular expression to match against the node's type; default is '.*'.
-    :type type_re: str, optional
+    :param node_type_re: The regular expression to match against the node's type; default is '.*'.
+    :type node_type_re: str, optional
     :param direction: The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
     :type direction: FindDirection(enum), optional
     :param tag_name: The tag name that must exist on the node; default is None.
@@ -328,16 +328,16 @@ def findall(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDRE
     :rtype: list[ContentNode]
     """
     value_compiled = re.compile(content_re)
-    type_compiled = re.compile(type_re)
+    node_type_compiled = re.compile(node_type_re)
     if tag_name_re:
         tag_name_re_compiled = re.compile(tag_name_re)
     else:
         tag_name_re_compiled = None
-    return self.findall_compiled(value_compiled, type_compiled, direction, tag_name, tag_name_re_compiled,
+    return self.findall_compiled(value_compiled, node_type_compiled, direction, tag_name, tag_name_re_compiled,
                                  use_all_content)
 
 
-def findall_compiled(self, value_re_compiled, type_re_compiled, direction, tag_name, tag_name_compiled,
+def findall_compiled(self, value_re_compiled, node_type_re_compiled, direction, tag_name, tag_name_compiled,
                      use_all_content):
     """
     Search for a node that matches on the value and or type using
@@ -350,7 +350,7 @@ def findall_compiled(self, value_re_compiled, type_re_compiled, direction, tag_n
     else:
         content = "" if not self.get_content() else self.get_content()
 
-    if value_re_compiled.match(content) and type_re_compiled.match(self.get_type()):
+    if value_re_compiled.match(content) and node_type_re_compiled.match(self.get_node_type()):
 
         if tag_name_compiled:
             for tag_name in self.get_tags():
@@ -363,11 +363,11 @@ def findall_compiled(self, value_re_compiled, type_re_compiled, direction, tag_n
 
     if direction is FindDirection.CHILDREN:
         for child in self.get_children():
-            hits.extend(child.findall_compiled(value_re_compiled, type_re_compiled, direction, tag_name,
+            hits.extend(child.findall_compiled(value_re_compiled, node_type_re_compiled, direction, tag_name,
                                                tag_name_compiled, use_all_content))
     else:
         if self.parent:
-            hits.extend(self.parent.findall_compiled(value_re_compiled, type_re_compiled, direction, tag_name,
+            hits.extend(self.parent.findall_compiled(value_re_compiled, node_type_re_compiled, direction, tag_name,
                                                      tag_name_compiled, use_all_content))
 
     return hits

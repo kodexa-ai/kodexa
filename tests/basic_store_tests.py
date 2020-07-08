@@ -10,11 +10,11 @@ def get_test_directory():
 
 def get_test_document():
     document = Document(DocumentMetadata())
-    node = document.create_node(type='foo')
+    node = document.create_node(node_type='foo')
     node.content = "cheese"
     document.content_node = node
 
-    document.content_node.add_child(document.create_node(type='bar', content='fishstick'))
+    document.content_node.add_child(document.create_node(node_type='bar', content='fishstick'))
     return document
 
 

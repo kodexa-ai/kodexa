@@ -130,10 +130,10 @@ def test_parent_axis():
     first_paragraph = document.select('(//p)[0]')
     assert len(first_paragraph) == 1
     assert len(first_paragraph[0].select('parent::div')) == 1
-    assert first_paragraph[0].select('parent::div')[0].type == 'div'
+    assert first_paragraph[0].select('parent::div')[0].node_type == 'div'
 
     link = document.select('//a')[0]
-    assert link.select('parent::div')[0].type == 'div'
+    assert link.select('parent::div')[0].node_type == 'div'
 
 
 def test_instance_indexes():

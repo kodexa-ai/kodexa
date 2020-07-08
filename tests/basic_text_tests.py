@@ -27,13 +27,13 @@ def test_hello_txt():
     filename = 'hello'
     document = get_test_pipeline(filename)
 
-    assert document.content_node.type == 'text'
+    assert document.content_node.node_type == 'text'
     assert document.content_node.content == 'Hello World'
 
 
 def test_text_find():
     document = Document.from_text('Hello world')
-    nodes = document.content_node.findall(type_re='.*')
+    nodes = document.content_node.findall(node_type_re='.*')
 
     assert len(nodes) == 1
 
