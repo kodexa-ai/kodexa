@@ -53,7 +53,7 @@ class TextParser:
             except (UnicodeDecodeError, AttributeError):
                 pass
 
-            text_node = document.create_node(type='text', content=data if self.decode else data)
+            text_node = document.create_node(node_type='text', content=data if self.decode else data)
             document.content_node = text_node
             document.add_mixin('text')
 
@@ -76,8 +76,8 @@ class RollupTransformer:
     def process(self, document):
 
         if document.content_node:
-            for type_re in self.collapse_type_res:
-                nodes = document.content_node.findall(type_re=type_re)
+            for node_type_re in self.collapse_type_res:
+                nodes = document.content_node.findall(node_type_re=node_type_re)
 
                 nodes.reverse()
 

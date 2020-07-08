@@ -8,11 +8,11 @@ from kodexa.stores import JsonDocumentStore, TableDataStore, DictDataStore
 
 def create_document():
     document = Document(DocumentMetadata())
-    node = document.create_node(type='foo')
+    node = document.create_node(node_type='foo')
     node.content = "cheese"
     document.content_node = node
 
-    foo2 = document.create_node(type='bar')
+    foo2 = document.create_node(node_type='bar')
     foo2.content = "fishstick"
     document.content_node.add_child(foo2)
     return document

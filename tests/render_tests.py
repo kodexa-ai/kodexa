@@ -13,7 +13,7 @@ def test_kodexa_service():
     from anytree import RenderTree
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
     for pre, _, node in RenderTree(document.content_node):
-        print("%s%s" % (pre, f"{node.content} ({node.type})"))
+        print("%s%s" % (pre, f"{node.content} ({node.node_type})"))
 
     print(RenderTree(document.content_node, style=AsciiStyle()).by_attr("type"))
 

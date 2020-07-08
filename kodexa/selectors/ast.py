@@ -215,7 +215,7 @@ class NameTest(object):
 
     def test(self, obj, variables):
         if isinstance(obj, ContentNode):
-            return self.name == '*' or obj.type == self.name
+            return self.name == '*' or obj.node_type == self.name
         if isinstance(obj, ContentFeature):
             return self.name == '*' or (obj.feature_type == self.prefix and obj.name == self.name)
         return False
@@ -303,8 +303,8 @@ class FunctionCall(object):
 
         if self.name == 'typeRegex':
             compiled_pattern = re.compile(args[0])
-            if content_node.type is not None and compiled_pattern.match(content_node.type):
-                return content_node.type
+            if content_node.node_type is not None and compiled_pattern.match(content_node.node_type):
+                return content_node.node_type
             else:
                 return None
 
@@ -334,8 +334,8 @@ class FunctionCall(object):
         if self.name == 'uuid':
             return content_node.uuid
 
-        if self.name == 'type':
-            return content_node.type
+        if self.name == 'node_type':
+            return content_node.node_type
 
         if self.name == 'index':
             return content_node.index

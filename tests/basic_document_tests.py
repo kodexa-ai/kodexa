@@ -3,23 +3,23 @@ from kodexa.model import DocumentMetadata, Document
 
 def get_test_document():
     document = Document(DocumentMetadata())
-    node = document.create_node(type='foo')
+    node = document.create_node(node_type='foo')
     node.content = "cheese"
     document.content_node = node
 
-    document.content_node.add_child(document.create_node(type='bar', content='fishstick'))
+    document.content_node.add_child(document.create_node(node_type='bar', content='fishstick'))
     return document
 
 
 def get_test_document_with_three_children():
     document = Document(DocumentMetadata())
-    node = document.create_node(type='foo')
+    node = document.create_node(node_type='foo')
     node.content = "cheese"
     document.content_node = node
 
-    document.content_node.add_child(document.create_node(type='bar', content='fishstick'))
-    document.content_node.add_child(document.create_node(type='bar', content='cheeseburger'))
-    document.content_node.add_child(document.create_node(type='bar', content='beans'))
+    document.content_node.add_child(document.create_node(node_type='bar', content='fishstick'))
+    document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'))
+    document.content_node.add_child(document.create_node(node_type='bar', content='beans'))
 
     return document
 
@@ -49,8 +49,8 @@ def test_basic_document_with_content_node():
 def test_finder():
     document = get_test_document()
     document.add_mixin("core")
-    node = document.get_root().find(type_re="bar")
-    assert node.type == 'bar'
+    node = document.get_root().find(node_type_re="bar")
+    assert node.node_type == 'bar'
 
 
 def test_navigation():
@@ -58,8 +58,8 @@ def test_navigation():
 
     document.add_mixin('core')
 
-    document.content_node.add_child(document.create_node(type='bar', content='cheeseburger'))
-    document.content_node.add_child(document.create_node(type='bar', content='lemon'))
+    document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'))
+    document.content_node.add_child(document.create_node(node_type='bar', content='lemon'))
 
     assert document.content_node.children[0].next_node().content == 'cheeseburger'
     assert document.content_node.children[2].previous_node().content == 'cheeseburger'
@@ -69,11 +69,11 @@ def test_navigation():
 def test_virtual_navigation_with_no_0_index():
     document = Document(DocumentMetadata())
     document.add_mixin('core')
-    node = document.create_node(type='loopy')
+    node = document.create_node(node_type='loopy')
     node.content = "banana"
     document.content_node = node
 
-    document.content_node.add_child(document.create_node(type='loopy', content='banana2'), index=2)
+    document.content_node.add_child(document.create_node(node_type='loopy', content='banana2'), index=2)
 
     assert document.content_node.get_node_at_index(0).content is None
     assert document.content_node.get_node_at_index(0).next_node().content is None
@@ -82,8 +82,8 @@ def test_virtual_navigation_with_no_0_index():
 
 def test_virtual_navigation():
     document = get_test_document()
-    document.content_node.add_child(document.create_node(type='bar', content='cheeseburger'), index=2)
-    document.content_node.add_child(document.create_node(type='bar', content='lemon'), index=5)
+    document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
+    document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
     document.add_mixin('navigation')
 
@@ -102,8 +102,8 @@ def test_virtual_navigation():
 def test_add_feature():
 
     document = get_test_document()
-    document.content_node.add_child(document.create_node(type='bar', content='cheeseburger'), index=2)
-    document.content_node.add_child(document.create_node(type='bar', content='lemon'), index=5)
+    document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
+    document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
     document.add_mixin('core')
 
@@ -137,8 +137,8 @@ def test_add_feature():
 
 def test_feature_find():
     document = get_test_document()
-    document.content_node.add_child(document.create_node(type='bar', content='cheeseburger'), index=2)
-    document.content_node.add_child(document.create_node(type='bar', content='lemon'), index=5)
+    document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
+    document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
     document.add_mixin('core')
 
@@ -152,10 +152,10 @@ def test_feature_find():
 def test_finder_and_tag():
     document = get_test_document()
     document.add_mixin("core")
-    node = document.get_root().find(type_re="bar")
-    assert node.type == "bar"
+    node = document.get_root().find(node_type_re="bar")
+    assert node.node_type == "bar"
 
-    node = document.get_root().find(type_re="bar")
+    node = document.get_root().find(node_type_re="bar")
     node.tag("sticky", content_re="fish(.*)")
     print(node.to_json())
     assert len(node.get_tags()) == 1
