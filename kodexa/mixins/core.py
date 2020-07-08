@@ -19,13 +19,7 @@ class Traverse(Enum):
     ALL = 4
 
 
-def update_content_markup(self):
-    """
-    This will tag (see Feature Tagging) the expression groups identified by the regular expression
-    """
-
-
-def find(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=0,
+def find(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=1,
          tag_name_re=None, use_all_content=False):
     """
     Return a node related to this node (parent or child) that matches the content and/or type specified by regular expressions.
@@ -41,7 +35,7 @@ def find(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDREN, 
     :type direction: FindDirection(enum), optional
     :param tag_name: The tag name that must exist on the node; default is None.
     :type tag_name: str, optional
-    :param instance: The instance of the matching node to return (may have multiple matches); default is 0.
+    :param instance: The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
     :type instance: int, optional
     :param tag_name_re: The regular expression that will match the tag_name that must exist on the node;  default is None.
     :type tag_name_re: str, optional
@@ -52,10 +46,10 @@ def find(self, content_re=".*", type_re=".*", direction=FindDirection.CHILDREN, 
     :rtype: ContentNode or None.
     """
     results = self.findall(content_re, type_re, direction, tag_name, tag_name_re, use_all_content)
-    if len(results) < instance + 1:
+    if instance < 1 or len(results) < instance:
         return None
     else:
-        return results[instance]
+        return results[instance-1]
 
 
 def find_with_feature_value(self, feature_type, feature_name, value, direction=FindDirection.CHILDREN, instance=1):
@@ -70,15 +64,18 @@ def find_with_feature_value(self, feature_type, feature_name, value, direction=F
     :param Any value: The feature value.
     :param direction: The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
     :type direction: FindDirection(enum), optional
-    :param instance: The instance of the matching node to return (may have multiple matches); default is 1.
+    :param instance: The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
     :type instance: int, optional
 
     :return: Matching node (if found), or None.
     :rtype: ContentNode or None
     """
-    return next(
-        itertools.islice(self.findall_with_feature_value(feature_type, feature_name, value, direction), instance - 1, 1),
-        None)
+
+    if instance < 1:
+        return None
+    else:
+        return next(
+            itertools.islice(self.findall_with_feature_value(feature_type, feature_name, value, direction), instance - 1, 1), None)
 
 
 def findall_with_feature_value(self, feature_type, feature_name, value, direction=FindDirection.CHILDREN):
@@ -280,6 +277,8 @@ def previous_node(self, type_re='.*', skip_virtual=False, has_no_content=False, 
     :return: The previous node or None, if no node exists
     :rtype: ContentNode or None
     """
+
+    #TODO: impement/differentiate traverse logic for CHILDREN and SIBLING
     if self.index == 0:
         if traverse == traverse.ALL or traverse == traverse.PARENT and self.parent:
             # Lets look for a previous node on the parent
