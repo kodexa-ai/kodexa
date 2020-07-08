@@ -27,12 +27,13 @@ steps:
     python -m pip install --upgrade pip
     pip install -r requirements.txt
   displayName: 'Install dependencies'
-
+- script: |
+  mypy
+  displayName: 'type checking'
 - script: |
     pip install pytest pytest-azurepipelines
     pytest
   displayName: 'pytest'
-
 - script: |
     python setup.py bdist_wheel sdist
   displayName: 'pytest'
