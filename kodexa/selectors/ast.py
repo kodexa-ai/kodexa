@@ -12,10 +12,11 @@ This code was derived from https://github.com/emory-libraries/eulxml
 from __future__ import unicode_literals
 
 import re
-
 # python2/3 string type logic borrowed from six
 # NOTE: not importing six here because setup.py needs to generate
 # the parser at install time, when six installation is not yet available
+from typing import List
+
 from kodexa import ContentNode, ContentFeature
 
 __all__ = [
@@ -46,7 +47,7 @@ class PipelineExpression(object):
 
     def resolve(self, content_node: ContentNode, variables):
         left_nodes = self.left.resolve(content_node, variables)
-        result_nodes = []
+        result_nodes: List[ContentNode] = []
         for node in left_nodes:
             result_nodes = result_nodes + self.right.resolve(node, variables)
         return result_nodes

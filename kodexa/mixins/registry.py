@@ -1,8 +1,10 @@
+from typing import Dict
+
 from kodexa.mixins.core import CoreMixin
 from kodexa.mixins.navigation import NavigationMixin
 from kodexa.mixins.spatial import SpatialMixin
 
-registered_mixins = {}
+registered_mixins: Dict[str, object] = {}
 
 
 def get_mixin(mixin):
