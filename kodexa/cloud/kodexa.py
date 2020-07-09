@@ -55,14 +55,14 @@ class RemoteSession:
             raise Exception("Unable to create a session, check your URL and access token")
         self.cloud_session = Dict(json.loads(r.text))
 
-    def execute_service(self, document, options, attach_source):
+    def execution_action(self, document, options, attach_source):
         files = {}
         if attach_source:
             files["file"] = get_source(document)
         else:
             files["document"] = document.to_msgpack()
 
-        data = {"options": json.dumps(options)}
+        data = {"options": json.dumps(options), "document_metadata": json.dumps(document.metadata)}
 
         r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
                           params={self.session_type: self.slug},
@@ -163,7 +163,7 @@ class RemotePipeline(Pipeline):
         for document in self.connector:
             logging.info(f"Processing {document}")
             context = PipelineContext()
-            execution = cloud_session.execute_service(document, self.parameters, self.attach_source)
+            execution = cloud_session.execution_action(document, self.parameters, self.attach_source)
             execution = cloud_session.wait_for_execution(execution)
 
             result_document = cloud_session.get_output_document(execution)
@@ -204,7 +204,7 @@ class RemoteAction:
     def process(self, document, context):
         cloud_session = RemoteSession("service", self.slug)
         cloud_session.start()
-        execution = cloud_session.execute_service(document, self.options, self.attach_source)
+        execution = cloud_session.execution_action(document, self.options, self.attach_source)
         execution = cloud_session.wait_for_execution(execution)
 
         result_document = cloud_session.get_output_document(execution)
