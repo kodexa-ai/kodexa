@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 import time
 from json import JSONDecodeError
 
@@ -164,6 +165,21 @@ class RemotePipeline:
         self.parameters = parameters
         self.auth = auth
 
+    def set_sink(self, sink):
+        """
+        Set the sink you wish to use, note that it will replace any currently assigned
+        sink
+
+            >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+            >>> pipeline.set_sink(ExampleSink())
+
+        :param sink: the sink for the pipeline
+        """
+        logging.info(f"Setting sink {sink.get_name()} on {self.slug}")
+        self.sink = sink
+
+        return self
+
     def run(self):
         self.context.statistics = PipelineStatistics()
 
@@ -183,6 +199,19 @@ class RemotePipeline:
 
             self.context.statistics.processed_document(document)
             self.context.output_document = document
+
+            if self.sink:
+                logging.info(f"Writing to sink {self.sink.get_name()}")
+                try:
+                    self.sink.sink(document)
+                except:
+                    if document:
+                        document.exceptions.append({
+                            "step": self.sink.get_name(),
+                            "exception": sys.exc_info()[0]
+                        })
+                    if self.context.stop_on_exception:
+                        raise
 
         logging.info(f"Completed pipeline {self.slug}")
 
