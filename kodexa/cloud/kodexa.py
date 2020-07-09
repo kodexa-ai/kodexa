@@ -120,9 +120,9 @@ class KodexaSession:
         raw_store = Dict(json.loads(response.text))
         return TableDataStore(raw_store.data.columns, raw_store.data.rows)
 
-    def merge_stores(self, execution, context):
+    def merge_stores(self, execution, context: PipelineContext):
         for store in execution.stores:
-            context.add_store(store.name, self.get_store(execution, store))
+            context.merge_store(store.name, self.get_store(execution, store))
 
 
 class KodexaPipeline:
