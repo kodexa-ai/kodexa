@@ -1141,8 +1141,6 @@ class Document(object):
         """
         return DocumentRender(self).to_html()
 
-    def to_arrow(self):
-        pass
 
     def to_dict(self):
         """
