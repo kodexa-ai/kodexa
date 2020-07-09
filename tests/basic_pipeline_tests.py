@@ -259,9 +259,16 @@ def test_basic_text_pipeline():
            'merge with the Carolingian-based cultures of West Francia. ' \
            'The distinct cultural and ethnic identity of the Normans emerged initially ' \
            'in the first half of the 10th century, ' \
-           'and it continued to evolve over the succeeding centuries.' 
+           'and it continued to evolve over the succeeding centuries.'
     pipeline = Pipeline.from_text(text)
     pipeline.run()
     doc = pipeline.context.output_document
 
     assert len(doc.get_root().get_all_content()) == 742
+
+
+def test_basic_folder_pipeline():
+    context = Pipeline.from_folder('../test_documents/recursion_test', '*.txt', recursive=True, relative=True).run()
+    assert context.statistics.documents_processed == 4
+    context = Pipeline.from_folder('../test_documents/recursion_test', '*.txt', recursive=False, relative=True).run()
+    assert context.statistics.documents_processed == 1
