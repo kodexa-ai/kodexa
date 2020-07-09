@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -8,6 +10,7 @@ import requests
 from addict import Dict
 
 from kodexa.connectors import get_source
+from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import TableDataStore
@@ -136,13 +139,21 @@ class RemoteSession:
             context.merge_store(store.name, self.get_store(execution, store))
 
 
-class RemotePipeline(Pipeline):
+class RemotePipeline:
     """
     Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform
     """
 
     def __init__(self, slug, connector, version=None, attach_source=True, parameters=None, auth=None):
-        super().__init__(connector)
+        logging.info(f"Initializing a new pipeline {slug}")
+
+        if isinstance(connector, Document):
+            self.connector = [connector]
+        else:
+            self.connector = connector
+        self.sink = None
+        self.context: PipelineContext = PipelineContext()
+
         if auth is None:
             auth = []
         if parameters is None:
@@ -156,7 +167,7 @@ class RemotePipeline(Pipeline):
     def run(self):
         self.context.statistics = PipelineStatistics()
 
-        logging.info(f"Starting remote pipeline {self.name}")
+        logging.info(f"Starting remote pipeline {self.slug}")
         cloud_session = RemoteSession("pipeline", self.slug)
         cloud_session.start()
 
@@ -173,9 +184,63 @@ class RemotePipeline(Pipeline):
             self.context.statistics.processed_document(document)
             self.context.output_document = document
 
-        logging.info(f"Completed pipeline {self.name}")
+        logging.info(f"Completed pipeline {self.slug}")
 
         return self.context
+
+    @staticmethod
+    def from_url(slug: str, url, headers=None) -> RemotePipeline:
+        """
+        Build a new pipeline with the input being a document created from the given URL
+
+        :param slug: The slug for the remote pipeline
+        :param url: The URL ie. https://www.google.com
+        :param headers: A dictionary of headers
+        :return: A new instance of a remote pipeline
+        """
+        return RemotePipeline(slug, Document.from_url(url, headers))
+
+    @staticmethod
+    def from_file(slug: str, file_path: str) -> RemotePipeline:
+        """
+        Create a new pipeline using a file path as a source
+
+        :param slug: The slug for the remote pipeline
+        :param file_path: The path to the file
+        :return: A new pipeline
+        :rtype: Pipeline
+        """
+        return RemotePipeline(slug, Document.from_file(file_path))
+
+    @staticmethod
+    def from_text(slug: str, text: str, *args, **kwargs) -> RemotePipeline:
+        """
+        Build a new pipeline and provide text as the basic to create a document
+
+        :param slug: The slug for the remote pipeline
+        :param text: Text to use to create document
+        :return: A new pipeline
+        :rtype: RemotePipeline
+        """
+        return RemotePipeline(slug, Document.from_text(text))
+
+    @staticmethod
+    def from_folder(slug: str, folder_path: str, filename_filter: str = "*", recursive: bool = False,
+                    relative: bool = False,
+                    caller_path: str = get_caller_dir()) -> RemotePipeline:
+        """
+        Create a pipeline that will run against a set of local files from a folder
+
+        :param slug: The slug for the remote pipeline
+        :param folder_path: The folder path
+        :param filename_filter: The filter for filename (i.e. *.pdf)
+        :param recursive: Should we look recursively in sub-directories (default False)
+        :param relative: Is the folder path relative to the caller (default False)
+        :param caller_path: The caller path (defaults to trying to work this out from the stack)
+        :return: A new pipeline
+        :rtype: RemotePipeline
+        """
+        return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path))
 
 
 class RemoteAction:

@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+f
 import logging
 import sys
 import traceback
@@ -381,8 +380,8 @@ class Pipeline:
 
         return self.context
 
-    @classmethod
-    def from_url(cls, url, headers=None):
+    @staticmethod
+    def from_url(url, headers=None):
         """
         Build a new pipeline with the input being a document created from the given URL
 
@@ -392,8 +391,8 @@ class Pipeline:
         """
         return Pipeline(Document.from_url(url, headers))
 
-    @classmethod
-    def from_file(cls, file_path: str) -> Pipeline:
+    @staticmethod
+    def from_file(file_path: str) -> Pipeline:
         """
         Create a new pipeline using a file path as a source
         :param file_path: The path to the file
@@ -402,8 +401,8 @@ class Pipeline:
         """
         return Pipeline(Document.from_file(file_path))
 
-    @classmethod
-    def from_text(cls, text: str) -> Pipeline:
+    @staticmethod
+    def from_text(text: str) -> Pipeline:
         """
         Build a new pipeline and provide text as the basic to create a document
 
@@ -413,9 +412,9 @@ class Pipeline:
         """
         return Pipeline(Document.from_text(text))
 
-    @classmethod
-    def from_folder(cls, folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
-                    caller_path: str = get_caller_dir()) -> Pipeline:
+    @staticmethod
+    def from_folder(folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
+                    caller_path: str = get_caller_dir(), *args, **kwargs) -> Pipeline:
         """
         Create a pipeline that will run against a set of local files from a folder
 
