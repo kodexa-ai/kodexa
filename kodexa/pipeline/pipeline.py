@@ -4,10 +4,11 @@ import logging
 import sys
 import traceback
 import uuid
+from collections import KeysView
 from enum import Enum
 from inspect import signature
 from io import StringIO
-from typing import List
+from typing import List, Optional, Dict
 from uuid import uuid4
 
 import yaml
@@ -66,7 +67,7 @@ class InMemoryStoreProvider:
     def get_store(self, name):
         return self.stores[name] if name in self.stores else None
 
-    def get_store_names(self):
+    def get_store_names(self) -> KeysView:
         return self.stores.keys()
 
 
@@ -86,15 +87,16 @@ class PipelineContext:
         if existing_content_objects is None:
             existing_content_objects = []
         self.transaction_id = str(uuid4())
-        self.statistics = PipelineStatistics()
-        self.output_document = None
+        self.statistics: PipelineStatistics = PipelineStatistics()
+        self.output_document: Optional[Document] = None
         self.content_objects: List[ContentObject] = existing_content_objects
         self.content_provider = content_provider
-        self.context = context
+        self.context: Dict = context
         self.store_provider = store_provider
         self.stop_on_exception = True
+        self.current_document = None
 
-    def get_context(self):
+    def get_context(self) -> Dict:
         return self.context
 
     def get_content_objects(self) -> List[ContentObject]:
@@ -106,7 +108,7 @@ class PipelineContext:
     def put_content(self, content_object: ContentObject, content):
         self.content_provider.put_content(content_object, content)
 
-    def add_store(self, name, store):
+    def add_store(self, name: str, store):
         """
         Add a store with given name to the context
 
@@ -115,7 +117,7 @@ class PipelineContext:
         """
         self.store_provider.put_store(name, store)
 
-    def get_store_names(self):
+    def get_store_names(self) -> KeysView:
         """
         Return the list of store names in context
 
@@ -123,7 +125,23 @@ class PipelineContext:
         """
         return self.store_provider.get_store_names()
 
-    def set_output_document(self, output_document):
+    def set_current_document(self, current_document: Document):
+        """
+        Set the Document that is currently being processed in the pipeline
+
+        :param current_document: The current document
+        """
+        self.current_document = current_document
+
+    def get_current_document(self) -> Document:
+        """
+        Get the current document that is being processed in the pipeline
+
+        :return: The current document, or None
+        """
+        return self.current_document
+
+    def set_output_document(self, output_document: Document):
         """
         Set the output document from the pipeline
 
@@ -132,7 +150,7 @@ class PipelineContext:
         """
         self.output_document = output_document
 
-    def get_store(self, name, default=None):
+    def get_store(self, name: str, default=None):
         """
         Get a store with given name from the context
 
@@ -144,6 +162,7 @@ class PipelineContext:
 
         if not store and default:
             self.store_provider.put_store(name, default)
+            default.set_pipeline_context(self)
 
         return self.store_provider.get_store(name)
 
@@ -240,7 +259,7 @@ class Pipeline:
         self.steps = []
         self.sink = None
         self.name = name
-        self.context = PipelineContext()
+        self.context: PipelineContext = PipelineContext()
         self.context.stop_on_exception = stop_on_exception
         self.logging_level = logging_level
 
@@ -300,7 +319,7 @@ class Pipeline:
         """
         Will return the YAML representation of any actions that support conversion to YAML
 
-        The YAML representation for KodexaAction's can be used for metadata only pipelines in the Kodexa Platform
+        The YAML representation for RemoteAction's can be used for metadata only pipelines in the Kodexa Platform
 
         :return: YAML representation
         """

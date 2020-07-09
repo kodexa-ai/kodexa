@@ -25,10 +25,10 @@ API Documentation
    .. autoclass:: KodexaPlatform
       :members:
 
-   .. autoclass:: KodexaPipeline
+   .. autoclass:: RemotePipeline
       :members:
 
-   .. autoclass:: KodexaAction
+   .. autoclass:: RemoteAction
       :members:
 
 .. automodule:: kodexa.connectors

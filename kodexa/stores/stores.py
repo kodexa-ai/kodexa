@@ -2,8 +2,9 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Optional
 
+from kodexa.pipeline import PipelineContext
 from kodexa.model import Document
 
 logger = logging.getLogger('kodexa-stores')
@@ -152,8 +153,10 @@ class TableDataStore:
             rows = []
         if columns is None:
             columns = []
-        self.columns = columns
-        self.rows = rows
+        self.columns: List[str] = columns
+        self.rows: List[List] = rows
+        self.source_documents: Dict[str, Dict] = {}
+        self.pipeline_context: Optional[PipelineContext] = None
 
     """
     Return the store as a dict for serialization
@@ -173,7 +176,8 @@ class TableDataStore:
             "type": "table",
             "data": {
                 "columns": self.columns,
-                "rows": self.rows
+                "rows": self.rows,
+                "source_documents": self.source_documents
             }
         }
 
@@ -188,6 +192,9 @@ class TableDataStore:
         else:
             return pd.DataFrame(self.rows, columns=self.columns)
 
+    def set_pipeline_context(self, pipeline_context: PipelineContext):
+        self.pipeline_context = pipeline_context
+
     def add(self, row):
         """
         Writes a row to the Data Store
@@ -195,6 +202,12 @@ class TableDataStore:
         :param row: the row (as a list) to add
         """
         self.rows.append(row)
+
+        if self.pipeline_context and self.pipeline_context.current_document:
+            current_document = self.pipeline_context.get_current_document()
+            if current_document.uuid not in self.source_documents:
+                self.source_documents[current_document.uuid] = {"metadata": current_document.metadata, "rows": []}
+            self.source_documents[current_document.uuid]["rows"].append(len(self.rows) - 1)
 
     def count(self):
         """
@@ -225,6 +238,7 @@ class DictDataStore:
         if dicts is None:
             dicts = []
         self.dicts = dicts
+        self.pipeline_context = None
 
     """
     Return the store as a dict for serialization
@@ -245,6 +259,9 @@ class DictDataStore:
                 "dicts": self.dicts
             }
         }
+
+    def set_pipeline_context(self, pipeline_context):
+        self.pipeline_context = pipeline_context
 
     def add(self, dict):
         """
