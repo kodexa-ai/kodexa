@@ -83,17 +83,6 @@ def set_bbox_from_children(self):
         self.set_bbox([x_min, y_min, x_max, y_max])
 
 
-def collapse(self, node_type_re):
-    """
-    Will collapse the given node type and will remove this node type from the hierarchy.
-
-    :param node_type_re: the type that you will collapse
-    :return:
-    """
-    for node in self.findall(node_type_re=node_type_re):
-        pass
-
-
 def set_rotate(self, rotate):
     """
     Set the rotate of the node
