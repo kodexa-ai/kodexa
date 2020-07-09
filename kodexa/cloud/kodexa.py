@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+from json import JSONDecodeError
 
 import requests
 from addict import Dict
@@ -77,7 +78,12 @@ class KodexaSession:
             r = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()})
-            execution = Dict(json.loads(r.text))
+            try:
+                execution = Dict(json.loads(r.text))
+            except JSONDecodeError:
+                logger.error("Unable to handle response [" + r.text + "]")
+                raise
+
             if status != execution.status:
                 logger.info(f"Status changed from {status} -> {execution.status}")
                 status = execution.status
