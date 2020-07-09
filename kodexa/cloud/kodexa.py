@@ -68,7 +68,12 @@ class KodexaSession:
                           params={self.session_type: self.slug},
                           data=data,
                           headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)
-        execution = Dict(json.loads(r.text))
+        try:
+            execution = Dict(json.loads(r.text))
+        except JSONDecodeError:
+            logger.error("Unable to handle response [" + r.text + "]")
+            raise
+
         return execution
 
     def wait_for_execution(self, execution):
