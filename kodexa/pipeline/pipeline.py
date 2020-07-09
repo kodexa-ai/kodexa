@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import sys
 import traceback
@@ -11,6 +13,7 @@ from uuid import uuid4
 import yaml
 
 from kodexa.connectors import FolderConnector
+from kodexa.connectors.connectors import get_caller_dir
 from kodexa.model import Document
 
 
@@ -193,7 +196,7 @@ class PipelineStep:
                     return document
         else:
             return document
-        
+
     def will_execute(self, context, document):
         if not self.enabled:
             return False
@@ -337,7 +340,7 @@ class Pipeline:
                             "step": self.sink.get_name(),
                             "exception": sys.exc_info()[0]
                         })
-                    if self.stop_on_exception:
+                    if self.context.stop_on_exception:
                         raise
 
             if document:
@@ -352,15 +355,51 @@ class Pipeline:
 
     @classmethod
     def from_url(cls, url, headers=None):
+        """
+        Build a new pipeline with the input being a document created from the given URL
+
+        :param url: The URL ie. https://www.google.com
+        :param headers: A dictionary of headers
+        :return: A new instance of a pipeline
+        """
         return Pipeline(Document.from_url(url, headers))
 
     @classmethod
-    def from_file(cls, file):
-        return Pipeline(Document.from_file(file))
+    def from_file(cls, file_path: str) -> Pipeline:
+        """
+        Create a new pipeline using a file path as a source
+        :param file_path: The path to the file
+        :return: A new pipeline
+        :rtype: Pipeline
+        """
+        return Pipeline(Document.from_file(file_path))
 
     @classmethod
-    def from_text(cls, text):
+    def from_text(cls, text: str) -> Pipeline:
+        """
+        Build a new pipeline and provide text as the basic to create a document
+
+        :param text: Text to use to create document
+        :return: A new pipeline
+        :rtype: Pipeline
+        """
         return Pipeline(Document.from_text(text))
+
+    @classmethod
+    def from_folder(cls, folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
+                    caller_path: str = get_caller_dir()) -> Pipeline:
+        """
+        Create a pipeline that will run against a set of local files from a folder
+
+        :param folder_path: The folder path
+        :param filename_filter: The filter for filename (i.e. *.pdf)
+        :param recursive: Should we look recursively in sub-directories (default False)
+        :param relative: Is the folder path relative to the caller (default False)
+        :param caller_path: The caller path (defaults to trying to work this out from the stack)
+        :return: A new pipeline
+        :rtype: Pipeline
+        """
+        return Pipeline(FolderConnector(folder_path, filename_filter, recursive, relative, caller_path))
 
 
 class PipelineStatistics:
