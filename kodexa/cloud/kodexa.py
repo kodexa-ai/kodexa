@@ -84,8 +84,21 @@ class KodexaSession:
             time.sleep(1)
 
         if status == "FAILED":
-            logger.error("Failed to execution in session")
-            logger.exception(execution)
+            logger.error("Execution has failed")
+            for step in execution.steps:
+                if step.status == 'FAILED':
+                    logger.error(f"Step {step.name} has failed. {step.exceptionDetails.message}.")
+
+                    if step.exceptionDetails.errorType == 'Validation':
+                        logger.error("Additional validation information has been provided:")
+                        for validation_error in step.exceptionDetails.validationErrors:
+                            logger.error(f"- {validation_error.option} : {validation_error.message}")
+
+                    if step.exceptionDetails.help:
+                        logger.error(f"Additional help is available:\n\n{step.exceptionDetails.help}")
+
+            logger.debug(execution)
+
             raise Exception("Processing has failed")
 
         return execution
