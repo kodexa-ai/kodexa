@@ -1,16 +1,28 @@
 import fnmatch
+import inspect
 import io
 import logging
 import mimetypes
+import os
 import tempfile
 import urllib
-from os import listdir
 from os.path import join
-from typing import Dict
+from typing import Dict, Type
 
 import requests
 
 from kodexa.model import Document, DocumentMetadata
+
+
+def get_caller_dir():
+    # get the caller's stack frame and extract its file path
+    frame_info = inspect.stack()[3]
+    filepath = frame_info.filename
+    del frame_info  # drop the reference to the stack frame to avoid reference cycles
+
+    # make the path absolute (optional)
+    filepath = os.path.dirname(os.path.abspath(filepath))
+    return filepath
 
 
 class FolderConnector:
@@ -19,9 +31,12 @@ class FolderConnector:
     def get_name():
         return "folder"
 
-    def __init__(self, path, file_filter="*"):
+    def __init__(self, path, file_filter="*", recursive=False, relative=False, caller_path=get_caller_dir()):
         self.path = path
         self.file_filter = file_filter
+        self.recursive = recursive
+        self.relative = relative
+        self.caller_path = caller_path
 
         if not self.path:
             raise ValueError('You must provide a path')
@@ -46,8 +61,24 @@ class FolderConnector:
                  "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
 
     def __get_files__(self):
-        return [f for f in listdir(self.path) if
-                fnmatch.fnmatch(f, self.file_filter)]
+        all_files = []
+        base_path = self.path
+
+        if self.relative:
+            base_path = os.path.join(self.caller_path, base_path)
+
+        print("HELELLLLO" + base_path)
+
+        for dp, dn, fn in os.walk(os.path.expanduser(base_path)):
+            for f in fn:
+                file_name = os.path.join(dp, f)
+                if fnmatch.fnmatch(f, self.file_filter):
+                    all_files.append(file_name)
+
+            if not self.recursive:
+                break
+
+        return all_files
 
 
 class FileHandleConnector:
@@ -123,7 +154,7 @@ class UrlConnector:
                  "connector_options": {"url": self.url, "headers": self.headers}}))
 
 
-registered_connectors: Dict[str, object] = {}
+registered_connectors: Dict[str, Type] = {}
 
 
 def get_connectors():
