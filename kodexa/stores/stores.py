@@ -204,6 +204,15 @@ class TableDataStore:
         """
         return len(self.rows)
 
+    def merge(self, other_store):
+        """
+        Merge another table store into this store
+
+        :param other_store:
+        :return: the other store
+        """
+        self.rows = self.rows + other_store.rows
+
 
 class DictDataStore:
     """
@@ -237,7 +246,6 @@ class DictDataStore:
             }
         }
 
-
     def add(self, dict):
         """
         Writes a dict to the Data Store
@@ -253,6 +261,15 @@ class DictDataStore:
         :return: number of dictionaries
         """
         return len(self.dicts)
+
+    def merge(self, other_store):
+        """
+        Merge another table store into this store
+
+        :param other_store:
+        :return: the other store
+        """
+        self.dicts = self.dicts + other_store.dicts
 
 
 class DataStoreHelper:

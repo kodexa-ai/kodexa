@@ -147,6 +147,12 @@ class PipelineContext:
 
         return self.store_provider.get_store(name)
 
+    def merge_store(self, name, store):
+        if name not in self.get_store_names():
+            self.add_store(name, store)
+        else:
+            self.get_store(name).merge(store)
+
 
 class PipelineStep:
     """
