@@ -62,7 +62,7 @@ class RemoteSession:
         else:
             files["document"] = document.to_msgpack()
 
-        data = {"options": json.dumps(options), "document_metadata": json.dumps(document.metadata)}
+        data = {"options": json.dumps(options), "document_metadata_json": json.dumps(document.metadata)}
 
         r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
                           params={self.session_type: self.slug},
