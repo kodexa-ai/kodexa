@@ -66,9 +66,6 @@ class FolderConnector:
 
         if self.relative:
             base_path = os.path.join(self.caller_path, base_path)
-
-        print("HELELLLLO" + base_path)
-
         for dp, dn, fn in os.walk(os.path.expanduser(base_path)):
             for f in fn:
                 file_name = os.path.join(dp, f)
