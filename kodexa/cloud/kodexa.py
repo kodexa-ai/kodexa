@@ -7,9 +7,9 @@ from json import JSONDecodeError
 import requests
 from addict import Dict
 
-from kodexa.connectors import get_source, FileHandleConnector
+from kodexa.connectors import get_source
 from kodexa.model import Document
-from kodexa.pipeline import PipelineContext
+from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import TableDataStore
 
 logger = logging.getLogger('kodexa.platform')
@@ -34,7 +34,7 @@ class KodexaPlatform:
         os.environ["KODEXA_URL"] = url
 
 
-class KodexaSession:
+class RemoteSession:
     """
     A Session on the Kodexa platform for leveraging pipelines and services
     """
@@ -136,43 +136,49 @@ class KodexaSession:
             context.merge_store(store.name, self.get_store(execution, store))
 
 
-class KodexaPipeline:
+class RemotePipeline(Pipeline):
     """
-    Allow you to interact with a pipeline that has been deployed in the Kodexa platform
+    Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform
     """
 
-    def __init__(self, slug, version=None, attach_source=True, options=None, auth=None):
+    def __init__(self, slug, connector, version=None, attach_source=True, parameters=None, auth=None):
+        super().__init__(connector)
         if auth is None:
             auth = []
-        if options is None:
-            options = {}
+        if parameters is None:
+            parameters = {}
         self.slug = slug
         self.version = version
         self.attach_source = attach_source
-        self.options = options
+        self.parameters = parameters
         self.auth = auth
 
-    def execute(self, input):
-        cloud_session = KodexaSession("pipeline", self.slug)
+    def run(self):
+        self.context.statistics = PipelineStatistics()
+
+        logging.info(f"Starting remote pipeline {self.name}")
+        cloud_session = RemoteSession("pipeline", self.slug)
         cloud_session.start()
 
-        if isinstance(input, Document):
-            document = input
-        else:
-            connector = FileHandleConnector(input)
-            document = connector.__next__()
-        context = PipelineContext()
-        execution = cloud_session.execute_service(document, self.options, self.attach_source)
-        execution = cloud_session.wait_for_execution(execution)
+        for document in self.connector:
+            logging.info(f"Processing {document}")
+            context = PipelineContext()
+            execution = cloud_session.execute_service(document, self.parameters, self.attach_source)
+            execution = cloud_session.wait_for_execution(execution)
 
-        result_document = cloud_session.get_output_document(execution)
-        context.set_output_document(result_document)
-        cloud_session.merge_stores(execution, context)
+            result_document = cloud_session.get_output_document(execution)
+            context.set_output_document(result_document)
+            cloud_session.merge_stores(execution, context)
 
-        return context
+            self.context.statistics.processed_document(document)
+            self.context.output_document = document
+
+        logging.info(f"Completed pipeline {self.name}")
+
+        return self.context
 
 
-class KodexaAction:
+class RemoteAction:
     """
     Allows you to interact with an action that has been deployed in the Kodexa platform
     """
@@ -193,10 +199,10 @@ class KodexaAction:
         config = {}
 
     def get_name(self):
-        return f"Kodexa Service ({self.slug})"
+        return f"Remote Action ({self.slug})"
 
     def process(self, document, context):
-        cloud_session = KodexaSession("service", self.slug)
+        cloud_session = RemoteSession("service", self.slug)
         cloud_session.start()
         execution = cloud_session.execute_service(document, self.options, self.attach_source)
         execution = cloud_session.wait_for_execution(execution)

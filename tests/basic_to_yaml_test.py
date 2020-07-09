@@ -1,11 +1,11 @@
-from kodexa import Pipeline, KodexaAction
+from kodexa import Pipeline, RemoteAction
 
 
 def test_to_yaml():
     # Create the pipeline
 
     pipeline = Pipeline.from_file('examples/USBankSample.pdf')
-    pipeline.add_step(KodexaAction(slug='kodexa/pdf-parser',
+    pipeline.add_step(RemoteAction(slug='kodexa/pdf-parser',
                                    options={"layout_analysis_options": {"rollup": "word", "space_multiplier": 1},
                                             "analyze_layout": True},
                                    attach_source=True))
@@ -21,7 +21,7 @@ def test_to_yaml():
     other_deposits_re = '^Other Deposits$'
     total_other_deposits_re = '^Total Other Deposits.*\d{2}$'
     balance_re = '^BALANCE YOUR ACCOUNT$'
-    pipeline.add_step(KodexaAction(slug='kodexa/pattern-table-tagger',
+    pipeline.add_step(RemoteAction(slug='kodexa/pattern-table-tagger',
                                    options={"col_space_multiplier": col_space_multiplier,
                                             "tag_to_apply": other_deposits_table_tag_name,
                                             "page_start_re": other_deposits_re,
@@ -40,7 +40,7 @@ def test_to_yaml():
     card_withdrawals_re = '^Card Withdrawals$'
     subtotal_card_withdrawals_re = '^Card \d{4} Withdrawals Subtotal.*\d{2}.$'
     total_card_withdrawals_re = '^Total Card Withdrawals.*\d{2}.$'
-    pipeline.add_step(KodexaAction(slug='kodexa/pattern-table-tagger',
+    pipeline.add_step(RemoteAction(slug='kodexa/pattern-table-tagger',
                                    options={"col_space_multiplier": col_space_multiplier,
                                             "tag_to_apply": card_withdrawals_table_tag_name,
                                             "page_start_re": card_withdrawals_re,
@@ -58,7 +58,7 @@ def test_to_yaml():
     other_withdrawals_table_tag_name = "Other Withdrawals"
     other_withdrawals_re = '^Other Withdrawals$'
     total_other_withdrawals_re = '^Total Other Withdrawals.*\d{2}.$'
-    pipeline.add_step(KodexaAction(slug='kodexa/pattern-table-tagger',
+    pipeline.add_step(RemoteAction(slug='kodexa/pattern-table-tagger',
                                    options={"col_space_multiplier": col_space_multiplier,
                                             "tag_to_apply": other_withdrawals_table_tag_name,
                                             "page_start_re": other_withdrawals_re,
@@ -78,7 +78,7 @@ def test_to_yaml():
     checks_re = '^Checks Presented Conventionally$'
     checks_paid_re = '.*Conventional Checks Paid.*\d{2}.$'
 
-    pipeline.add_step(KodexaAction(slug='kodexa/pattern-table-tagger',
+    pipeline.add_step(RemoteAction(slug='kodexa/pattern-table-tagger',
                                    options={"col_space_multiplier": col_space_multiplier,
                                             "tag_to_apply": checks_table_tag_name,
                                             "page_start_re": checks_re,
