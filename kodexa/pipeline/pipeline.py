@@ -195,6 +195,9 @@ class PipelineStep:
     def execute(self, context, document):
         if self.will_execute(context, document):
             try:
+
+                context.set_current_document(document)
+
                 if not callable(self.step):
                     logging.info(f"Starting step {self.step.get_name()}")
 
@@ -256,7 +259,7 @@ class Pipeline:
         else:
             self.connector = connector
 
-        self.steps = []
+        self.steps: List[PipelineStep] = []
         self.sink = None
         self.name = name
         self.context: PipelineContext = PipelineContext()

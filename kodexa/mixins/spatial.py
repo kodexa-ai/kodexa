@@ -198,4 +198,3 @@ class SpatialMixin:
         add_method_to_node(get_width, node)
         add_method_to_node(get_height, node)
         add_method_to_node(set_bbox_from_children, node)
-        add_method_to_node(collapse, node)

@@ -4,8 +4,8 @@ import shutil
 from pathlib import Path
 from typing import List, Dict, Optional
 
-from kodexa.pipeline import PipelineContext
 from kodexa.model import Document
+from kodexa.pipeline import PipelineContext
 
 logger = logging.getLogger('kodexa-stores')
 
@@ -145,17 +145,20 @@ class TableDataStore:
 
     :param columns: a list of the column names (default to dynamic)
     :param rows: initial set of rows (default to empty)
+    :param source_documents: initial dictionary of document UUID to row links (default to empty)
 
     """
 
-    def __init__(self, columns=None, rows=None):
+    def __init__(self, columns=None, rows=None, source_documents=None):
+        if source_documents is None:
+            source_documents = {}
         if rows is None:
             rows = []
         if columns is None:
             columns = []
         self.columns: List[str] = columns
         self.rows: List[List] = rows
-        self.source_documents: Dict[str, Dict] = {}
+        self.source_documents: Dict[str, Dict] = source_documents
         self.pipeline_context: Optional[PipelineContext] = None
 
     """

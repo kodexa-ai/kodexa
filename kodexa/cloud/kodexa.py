@@ -129,7 +129,7 @@ class RemoteSession:
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         logger.debug(f"Response from server [{response.text}]")
         raw_store = Dict(json.loads(response.text))
-        return TableDataStore(raw_store.data.columns, raw_store.data.rows)
+        return TableDataStore(raw_store.data.columns, raw_store.data.rows, raw_store.data.source_documents)
 
     def merge_stores(self, execution, context: PipelineContext):
         for store in execution.stores:
