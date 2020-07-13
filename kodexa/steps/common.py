@@ -100,7 +100,7 @@ class RollupTransformer:
                         else:
                             # We just need to bring the content onto the end of the parent content and remove
                             # this node
-                            node.parent.content = node.parent.content + node.content
+                            node.parent.content = node.parent.content + node.content if node.parent.content else node.content
                             node.parent.children.remove(node)
 
                         if self.reindex:
