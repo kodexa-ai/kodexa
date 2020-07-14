@@ -41,27 +41,111 @@ def test_rollup_of_pdf():
     # first test - collapsing words and lines up to their common parent
     test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
 
+    # how many pre-rollup lines?
+    assert len(test_doc.select('//line')) == 3824
+    # how many pre-rollup words?
+    assert len(test_doc.select('//word')) == 52903
+    # how many pre-rollup content-areas?
+    assert len(test_doc.select('//content-area')) == 817
+    # what is the pre-rollup length of ALL the content in the document?
+    assert len(test_doc.get_root().get_all_content()) == 329792
+
     rollup_pipeline = Pipeline(test_doc)
-    rollup_pipeline.add_step(RollupTransformer(collapse_type_res=["word", "line"]))
+    rollup_pipeline.add_step(RollupTransformer(collapse_type_res=["word", "line"], separator_character=' '))
     rollup_pipeline.run()
 
     collapsed_doc = rollup_pipeline.context.output_document
 
-    ## This will collapse all word nodes into lines and then lines into content-areas, but there are no spaces retained
-    ## all the text rolls together
-    print(collapsed_doc.select("//content-area")[12].get_all_content())
-    #'follows:aswarrantandrepresentagree,covenant,herebyheretopartiestheAgreement,thisinforthsetwarrantiesandrepresentationsagreements,covenants,theandLenderbyLoantheofmakingtheofconsiderationinTHEREFORE,NOW'
+    # how many post-rollup lines?
+    assert len(test_doc.select('//line')) == 0
+    # how many post-rollup words?
+    assert len(test_doc.select('//word')) == 0
+    # how many post-rollup content-areas?
+    assert len(test_doc.select('//content-area')) == 817
+    # what is the post-rollup length of ALL the content in the document?
+    assert len(test_doc.get_root().get_all_content()) == 329792   
+
+    assert len(collapsed_doc.select("//content-area")[12].get_all_content()) == 235
 
 
-    ## second test - just collapse the line up to its parent (content-area)
+    ## second test - just collapse the line up to its parent (content-area) - roll up the line's children
     test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
 
     rollup_pipeline = Pipeline(test_doc)
-    rollup_pipeline.add_step(RollupTransformer(collapse_type_res=["line"]))
+    rollup_pipeline.add_step(RollupTransformer(collapse_type_res=["line"], separator_character=' ', get_all_content=True))
     rollup_pipeline.run()
 
     collapsed_doc = rollup_pipeline.context.output_document
 
-    ## there is no text on the content-area because we're not getting all content for the node we're collapsing
-    ## and the line had no content of it's own, it was it's children
-    print(collapsed_doc.select("//content-area")[12].get_all_content())
+    # how many post-rollup lines?
+    assert len(test_doc.select('//line')) == 0
+    # how many post-rollup words?
+    assert len(test_doc.select('//word')) == 0
+    # how many post-rollup content-areas?
+    assert len(test_doc.select('//content-area')) == 817
+    # what is the post-rollup length of ALL the content in the document?
+    assert len(test_doc.get_root().get_all_content()) == 329792   
+
+    ## verify that we can collapse line nodes AND include their children
+    assert len(collapsed_doc.select("//content-area")[12].get_all_content()) == 235
+
+
+    ## third test - select specific nodes in which we'll do the roll ups
+    test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
+
+    node_selector = "//content-area[contentRegex('.*LOAN AGREEMENT.*', true)]"
+
+    # verify we have 3 nodes match this selector
+    node_matches = test_doc.select(node_selector) 
+    assert len(node_matches) == 3
+
+    # before we rollup, let's make sure the matching nodes conform to known expectations
+    assert len(node_matches[0].select('//word')) == 2
+    assert len(node_matches[0].select('//line')) == 1
+    assert len(node_matches[0].select('//content-area')) == 1
+    assert len(node_matches[0].get_all_content()) == 14
+
+    assert len(node_matches[1].select('//word')) == 2
+    assert len(node_matches[1].select('//line')) == 1
+    assert len(node_matches[1].select('//content-area')) == 1
+    assert len(node_matches[1].get_all_content()) == 14
+
+    assert len(node_matches[2].select('//word')) == 71
+    assert len(node_matches[2].select('//line')) == 6
+    assert len(node_matches[2].select('//content-area')) == 1
+    assert len(node_matches[2].get_all_content()) == 500
+
+    rollup_pipeline = Pipeline(test_doc)
+    rollup_pipeline.add_step(RollupTransformer(selector="//content-area[contentRegex('.*LOAN AGREEMENT.*', true)]", collapse_type_res=["line"], separator_character=' ', get_all_content=True))
+    rollup_pipeline.run()
+
+    collapsed_doc = rollup_pipeline.context.output_document
+
+    # check those matching nodes - we shouldn't have any words or lines, but
+    # all other node_types should exist and the content should stay the same.
+    assert len(node_matches[0].select('//word')) == 0
+    assert len(node_matches[0].select('//line')) == 0
+    assert len(node_matches[0].select('//content-area')) == 1
+    assert len(node_matches[0].get_all_content()) == 14
+
+    assert len(node_matches[1].select('//word')) == 0
+    assert len(node_matches[1].select('//line')) == 0
+    assert len(node_matches[1].select('//content-area')) == 1
+    assert len(node_matches[1].get_all_content()) == 14
+
+    assert len(node_matches[2].select('//word')) == 0
+    assert len(node_matches[2].select('//line')) == 0
+    assert len(node_matches[2].select('//content-area')) == 1
+    assert len(node_matches[2].get_all_content()) == 500
+
+    # how many post-rollup lines? (still have some lines, but fewer than we started with)
+    assert len(test_doc.select('//line')) == 3816
+    # how many post-rollup words? (still have some words, but fewer than we started with)
+    assert len(test_doc.select('//word')) == 52828
+    # how many post-rollup content-areas? (same number of content-areas)
+    assert len(test_doc.select('//content-area')) == 817
+    # what is the post-rollup length of ALL the content in the document?
+    assert len(test_doc.get_root().get_all_content()) == 329792   
+
+    ## verify that we can collapse line nodes AND include their children
+    assert len(collapsed_doc.select("//content-area")[12].get_all_content()) == 235
