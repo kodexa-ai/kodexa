@@ -189,13 +189,12 @@ class RemotePipeline:
 
         for document in self.connector:
             logging.info(f"Processing {document}")
-            context = PipelineContext()
             execution = cloud_session.execution_action(document, self.parameters, self.attach_source)
             execution = cloud_session.wait_for_execution(execution)
 
             result_document = cloud_session.get_output_document(execution)
-            context.set_output_document(result_document)
-            cloud_session.merge_stores(execution, context)
+            self.context.set_output_document(result_document)
+            cloud_session.merge_stores(execution, self.context)
 
             self.context.statistics.processed_document(document)
             self.context.output_document = document
