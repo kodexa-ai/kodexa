@@ -114,6 +114,7 @@ def test_rollup_of_pdf():
     assert len(node_matches[2].select('//line')) == 6
     assert len(node_matches[2].select('//content-area')) == 1
     assert len(node_matches[2].get_all_content()) == 500
+    #assert node_matches[2].get_all_content() == 'THIS LOAN AGREEMENT, dated as of November __, 2019 (as amended, restated, replaced, supplemented or otherwise modified from time to time, this “Agreement”), between CIBC INC., a Delaware corporation, having an address at 120 South LaSalle Street, 11th Floor, Chicago, Illinois 60603 Attn: Executive Director (together with its successors and assigns, “Lender”) and PALATINE OWNER LLC, a Delaware limited liability company (“Borrower”), and having its principal place of business at _________________.'
 
     rollup_pipeline = Pipeline(test_doc)
     rollup_pipeline.add_step(RollupTransformer(selector="//content-area[contentRegex('.*LOAN AGREEMENT.*', true)]", collapse_type_res=["line"], separator_character=' ', get_all_content=True))
@@ -137,6 +138,7 @@ def test_rollup_of_pdf():
     assert len(node_matches[2].select('//line')) == 0
     assert len(node_matches[2].select('//content-area')) == 1
     assert len(node_matches[2].get_all_content()) == 500
+    #assert node_matches[2].get_all_content() == 'THIS LOAN AGREEMENT, dated as of November __, 2019 (as amended, restated, replaced, supplemented or otherwise modified from time to time, this “Agreement”), between CIBC INC., a Delaware corporation, having an address at 120 South LaSalle Street, 11th Floor, Chicago, Illinois 60603 Attn: Executive Director (together with its successors and assigns, “Lender”) and PALATINE OWNER LLC, a Delaware limited liability company (“Borrower”), and having its principal place of business at _________________.'
 
     # how many post-rollup lines? (still have some lines, but fewer than we started with)
     assert len(test_doc.select('//line')) == 3816
