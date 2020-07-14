@@ -78,10 +78,13 @@ class PipelineContext:
 
     It also provides access to the 'stores' that have been added to the pipeline
     """
-
-    def __init__(self, content_provider=InMemoryContentProvider(), store_provider=InMemoryStoreProvider(),
+    def __init__(self, content_provider=None, store_provider=None,
                  existing_content_objects=None,
                  context=None):
+        if content_provider is None:
+            content_provider = InMemoryContentProvider()
+        if store_provider is None:
+            store_provider = InMemoryStoreProvider()
         if context is None:
             context = {}
         if existing_content_objects is None:
