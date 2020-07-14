@@ -103,10 +103,7 @@ class RollupTransformer:
                                 node.parent.content = ""
                                 for content_part in node.parent.content_parts:
                                     if isinstance(content_part, str):
-                                        if self.get_all_content:
-                                            node.parent.content = node.parent.content + self.separator_character + node.get_all_content() if node.parent.content else node.get_all_content()
-                                        else:
-                                            node.parent.content = node.parent.content + self.separator_character + node.content if node.parent.content else node.content
+                                        node.parent.content = node.parent.content + self.separator_character + content_part
 
                             else:
                                 # We just need to bring the content onto the end of the parent content and remove
