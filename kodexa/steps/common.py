@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 from kodexa import get_source
 from kodexa.stores import TableDataStore
@@ -66,61 +67,74 @@ class RollupTransformer:
     while maintaining content and features as needed
     """
 
-    def __init__(self, collapse_type_res=[], reindex=True):
+    def __init__(self, collapse_type_res:List[str]=[], reindex:bool=True, selector:str=".", separator_character:str=None, get_all_content:bool=False):
         self.collapse_type_res = collapse_type_res
         self.reindex = reindex
+        self.selector = selector
+        self.separator_character = separator_character if separator_character else ''
+        self.get_all_content = get_all_content
 
     def get_name(self):
         return "Rollup Transformer"
 
     def process(self, document):
 
-        if document.content_node:
-            for node_type_re in self.collapse_type_res:
-                nodes = document.content_node.findall(node_type_re=node_type_re)
+        if document.get_root():
+            # Select those nodes that we want to do the 'rollup' in
+            selected_nodes = document.select(self.selector)
+            for selected_node in selected_nodes:
 
-                nodes.reverse()
+                for node_type_re in self.collapse_type_res:
+                    nodes = selected_node.findall(node_type_re=node_type_re)
 
-                for node in nodes:
-                    if node.parent:
-                        if node.parent.content_parts:
-                            # We need to insert into the content part that represents the child - then remove the child
-                            content_part_index = node.parent.content_parts.index(node.index)
-                            node.parent.content_parts.remove(node.index)
-                            node.parent.content_parts[content_part_index:content_part_index] = node.content_parts
-                            child_node_index = node.parent.children.index(node)
-                            node.parent.children[child_node_index:child_node_index] = node.children
-                            node.parent.children.remove(node)
+                    nodes.reverse()
 
-                            node.parent.content = ""
-                            for content_part in node.parent.content_parts:
-                                if isinstance(content_part, str):
-                                    node.parent.content = node.parent.content + content_part
-
-                        else:
-                            # We just need to bring the content onto the end of the parent content and remove
-                            # this node
-                            node.parent.content = node.parent.content + node.content if node.parent.content else node.content
-                            node.parent.children.remove(node)
-
-                        if self.reindex:
-
-                            # Reindex all the children
-                            idx = 0
-                            for child in node.parent.children:
-                                child.index = idx
-                                idx += 1
-                            # Reindex content parts
+                    for node in nodes:
+                        if node.parent:
                             if node.parent.content_parts:
+                                # We need to insert into the content part that represents the child - then remove the child
+                                content_part_index = node.parent.content_parts.index(node.index)
+                                node.parent.content_parts.remove(node.index)
+                                node.parent.content_parts[content_part_index:content_part_index] = node.content_parts
+                                child_node_index = node.parent.children.index(node)
+                                node.parent.children[child_node_index:child_node_index] = node.children
+                                node.parent.children.remove(node)
+
+                                node.parent.content = ""
+                                for content_part in node.parent.content_parts:
+                                    if isinstance(content_part, str):
+                                        if self.get_all_content:
+                                            node.parent.content = node.parent.content + self.separator_character + node.get_all_content() if node.parent.content else node.get_all_content()
+                                        else:
+                                            node.parent.content = node.parent.content + self.separator_character + node.content if node.parent.content else node.content
+
+                            else:
+                                # We just need to bring the content onto the end of the parent content and remove
+                                # this node
+                                if self.get_all_content:
+                                    node.parent.content = node.parent.content + self.separator_character + node.get_all_content() if node.parent.content else node.get_all_content()
+                                else:
+                                    node.parent.content = node.parent.content + self.separator_character + node.content if node.parent.content else node.content
+                                node.parent.children.remove(node)
+
+                            if self.reindex:
+
+                                # Reindex all the children
                                 idx = 0
-                                final_cps = []
-                                for cp in node.parent.content_parts:
-                                    if not isinstance(cp, str):
-                                        final_cps.append(idx)
-                                        idx += 1
-                                    else:
-                                        final_cps.append(cp)
-                                node.parent.content_parts = final_cps
+                                for child in node.parent.children:
+                                    child.index = idx
+                                    idx += 1
+                                # Reindex content parts
+                                if node.parent.content_parts:
+                                    idx = 0
+                                    final_cps = []
+                                    for cp in node.parent.content_parts:
+                                        if not isinstance(cp, str):
+                                            final_cps.append(idx)
+                                            idx += 1
+                                        else:
+                                            final_cps.append(cp)
+                                    node.parent.content_parts = final_cps
 
         return document
 
