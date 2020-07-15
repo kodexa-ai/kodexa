@@ -1,6 +1,3 @@
-import json
-from typing import List
-
 from kodexa import get_source
 from kodexa.stores import TableDataStore
 
@@ -30,6 +27,7 @@ class NodeTagger:
                                   node_only=self.node_only)
 
         return document
+
 
 class TextParser:
     """
@@ -67,7 +65,10 @@ class RollupTransformer:
     while maintaining content and features as needed
     """
 
-    def __init__(self, collapse_type_res:List[str]=[], reindex:bool=True, selector:str=".", separator_character:str=None, get_all_content:bool=False):
+    def __init__(self, collapse_type_res=None, reindex: bool = True, selector: str = ".",
+                 separator_character: str = None, get_all_content: bool = False):
+        if collapse_type_res is None:
+            collapse_type_res = []
         self.collapse_type_res = collapse_type_res
         self.reindex = reindex
         self.selector = selector
@@ -87,9 +88,14 @@ class RollupTransformer:
                 for node_type_re in self.collapse_type_res:
                     nodes = selected_node.findall(node_type_re=node_type_re)
 
-                    nodes.reverse()
+                    final_nodes = []
 
+                    # Remove any nodes where the parent node is in the list as well
                     for node in nodes:
+                        if not self.is_node_in_list(node.parent, nodes):
+                            final_nodes.append(node)
+
+                    for node in final_nodes:
                         if node.parent:
                             if node.parent.content_parts:
                                 # We need to insert into the content part that represents the child - then remove the child
@@ -134,6 +140,16 @@ class RollupTransformer:
                                     node.parent.content_parts = final_cps
 
         return document
+
+    def is_node_in_list(self, node, nodes):
+        for target in nodes:
+            if target.uuid == node.uuid:
+                return True
+
+        if node.parent:
+            return self.is_node_in_list(node.parent, nodes)
+        else:
+            return False
 
 
 class TagsToKeyValuePairExtractor:
@@ -180,4 +196,3 @@ class TagsToKeyValuePairExtractor:
 
         for child in node.children:
             self.process_node(table_store, child)
-
