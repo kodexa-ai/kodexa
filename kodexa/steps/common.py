@@ -89,15 +89,16 @@ class RollupTransformer:
                     nodes = selected_node.findall(node_type_re=node_type_re)
 
                     final_nodes = []
-
+                    node_ids = [node.uuid for node in nodes]
                     # Remove any nodes where the parent node is in the list as well
                     for node in nodes:
-                        if not self.is_node_in_list(node.parent, nodes):
+                        if not self.is_node_in_list(node.parent, node_ids):
                             final_nodes.append(node)
 
                     for node in final_nodes:
                         if node.parent:
                             if node.parent.content_parts:
+
                                 # We need to insert into the content part that represents the child - then remove the child
                                 content_part_index = node.parent.content_parts.index(node.index)
                                 node.parent.content_parts.remove(node.index)
@@ -141,13 +142,12 @@ class RollupTransformer:
 
         return document
 
-    def is_node_in_list(self, node, nodes):
-        for target in nodes:
-            if target.uuid == node.uuid:
-                return True
+    def is_node_in_list(self, node, node_ids):
+        if node.uuid in node_ids:
+            return True
 
         if node.parent:
-            return self.is_node_in_list(node.parent, nodes)
+            return self.is_node_in_list(node.parent, node_ids)
         else:
             return False
 
