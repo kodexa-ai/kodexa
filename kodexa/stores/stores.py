@@ -4,13 +4,13 @@ import shutil
 from pathlib import Path
 from typing import List, Dict, Optional
 
-from kodexa.model import Document
+from kodexa.model import Document, Store
 from kodexa.pipeline import PipelineContext
 
 logger = logging.getLogger('kodexa-stores')
 
 
-class JsonDocumentStore:
+class JsonDocumentStore(Store):
     """
     An implementation of a document store that uses JSON files to store the documents and
     maintains an index.idx containing some basics of the documents
@@ -137,7 +137,7 @@ class JsonDocumentStore:
         self.index = 0
 
 
-class TableDataStore:
+class TableDataStore(Store):
     """
     Stores data as a list of lists that can represent a table.
 
@@ -228,6 +228,10 @@ class TableDataStore:
         :return: the other store
         """
         self.rows = self.rows + other_store.rows
+
+    @classmethod
+    def from_dict(cls, store_dict):
+        return TableDataStore(columns=store_dict['data']['columns'], rows=store_dict['data']['rows'])
 
 
 class DictDataStore:

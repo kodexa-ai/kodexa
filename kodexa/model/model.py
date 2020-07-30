@@ -11,6 +11,27 @@ from addict import Dict
 from kodexa.mixins import registry
 
 
+class Store:
+    """
+    Base interface for Store
+    """
+
+    def get_name(self):
+        pass
+
+    def merge(self, other_store):
+        pass
+
+    def to_dict(self):
+        pass
+
+    def set_pipeline_context(self, pipeline_context):
+        pass
+
+    def count(self):
+        pass
+
+
 class DocumentMetadata(Dict):
     """
     A flexible dict based approach to capturing metadata for the document
@@ -1140,7 +1161,6 @@ class Document(object):
         :rtype: str
         """
         return DocumentRender(self).to_html()
-
 
     def to_dict(self):
         """

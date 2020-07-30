@@ -1,6 +1,6 @@
 import os
 
-from kodexa import Document, DocumentRender, Pipeline, PipelineContext, TagsToKeyValuePairExtractor, RollupTransformer
+from kodexa import Document, Pipeline, PipelineContext, TagsToKeyValuePairExtractor, RollupTransformer
 
 
 def get_test_directory():
@@ -18,12 +18,11 @@ def test_html_rollup():
     # Collapse out all the <a> tags
     step = RollupTransformer(collapse_type_res=["a"])
     step.process(document)
-    
-    #after rollup
+
+    # after rollup
     assert len(document.select('//a')) == 0
     # see where the href rolled up
     assert len(document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].content_parts) == 3
-
 
 
 def test_tag_key_value():
@@ -31,13 +30,13 @@ def test_tag_key_value():
     step = TagsToKeyValuePairExtractor(store_name='test_store')
     context = PipelineContext()
     step.process(document, context)
-    
+
     assert context.get_store('test_store').count() == 45
     assert context.get_store('test_store').rows[14][0] == 'LOC'
     assert context.get_store('test_store').rows[14][1] == 'Europe'
 
-def test_rollup_of_pdf():
 
+def test_rollup_of_pdf():
     # first test - collapsing words and lines up to their common parent
     test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
 
@@ -63,16 +62,16 @@ def test_rollup_of_pdf():
     # how many post-rollup content-areas?
     assert len(test_doc.select('//content-area')) == 817
     # what is the post-rollup length of ALL the content in the document?
-    assert len(test_doc.get_root().get_all_content()) == 329792   
+    assert len(test_doc.get_root().get_all_content()) == 329792
 
     assert len(collapsed_doc.select("//content-area")[12].get_all_content()) == 235
-
 
     ## second test - just collapse the line up to its parent (content-area) - roll up the line's children
     test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
 
     rollup_pipeline = Pipeline(test_doc)
-    rollup_pipeline.add_step(RollupTransformer(collapse_type_res=["line"], separator_character=' ', get_all_content=True))
+    rollup_pipeline.add_step(
+        RollupTransformer(collapse_type_res=["line"], separator_character=' ', get_all_content=True))
     rollup_pipeline.run()
 
     collapsed_doc = rollup_pipeline.context.output_document
@@ -84,11 +83,10 @@ def test_rollup_of_pdf():
     # how many post-rollup content-areas?
     assert len(test_doc.select('//content-area')) == 817
     # what is the post-rollup length of ALL the content in the document?
-    assert len(test_doc.get_root().get_all_content()) == 329792   
+    assert len(test_doc.get_root().get_all_content()) == 329792
 
     ## verify that we can collapse line nodes AND include their children
     assert len(collapsed_doc.select("//content-area")[12].get_all_content()) == 235
-
 
     ## third test - select specific nodes in which we'll do the roll ups
     test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
@@ -96,7 +94,7 @@ def test_rollup_of_pdf():
     node_selector = "//content-area[contentRegex('.*LOAN AGREEMENT.*', true)]"
 
     # verify we have 3 nodes match this selector
-    node_matches = test_doc.select(node_selector) 
+    node_matches = test_doc.select(node_selector)
     assert len(node_matches) == 3
 
     # before we rollup, let's make sure the matching nodes conform to known expectations
@@ -114,10 +112,12 @@ def test_rollup_of_pdf():
     assert len(node_matches[2].select('//line')) == 6
     assert len(node_matches[2].select('//content-area')) == 1
     assert len(node_matches[2].get_all_content()) == 500
-    #assert node_matches[2].get_all_content() == 'THIS LOAN AGREEMENT, dated as of November __, 2019 (as amended, restated, replaced, supplemented or otherwise modified from time to time, this “Agreement”), between CIBC INC., a Delaware corporation, having an address at 120 South LaSalle Street, 11th Floor, Chicago, Illinois 60603 Attn: Executive Director (together with its successors and assigns, “Lender”) and PALATINE OWNER LLC, a Delaware limited liability company (“Borrower”), and having its principal place of business at _________________.'
+    # assert node_matches[2].get_all_content() == 'THIS LOAN AGREEMENT, dated as of November __, 2019 (as amended, restated, replaced, supplemented or otherwise modified from time to time, this “Agreement”), between CIBC INC., a Delaware corporation, having an address at 120 South LaSalle Street, 11th Floor, Chicago, Illinois 60603 Attn: Executive Director (together with its successors and assigns, “Lender”) and PALATINE OWNER LLC, a Delaware limited liability company (“Borrower”), and having its principal place of business at _________________.'
 
     rollup_pipeline = Pipeline(test_doc)
-    rollup_pipeline.add_step(RollupTransformer(selector="//content-area[contentRegex('.*LOAN AGREEMENT.*', true)]", collapse_type_res=["line"], separator_character=' ', get_all_content=True))
+    rollup_pipeline.add_step(RollupTransformer(selector="//content-area[contentRegex('.*LOAN AGREEMENT.*', true)]",
+                                               collapse_type_res=["line"], separator_character=' ',
+                                               get_all_content=True))
     rollup_pipeline.run()
 
     collapsed_doc = rollup_pipeline.context.output_document
@@ -138,7 +138,7 @@ def test_rollup_of_pdf():
     assert len(node_matches[2].select('//line')) == 0
     assert len(node_matches[2].select('//content-area')) == 1
     assert len(node_matches[2].get_all_content()) == 500
-    #assert node_matches[2].get_all_content() == 'THIS LOAN AGREEMENT, dated as of November __, 2019 (as amended, restated, replaced, supplemented or otherwise modified from time to time, this “Agreement”), between CIBC INC., a Delaware corporation, having an address at 120 South LaSalle Street, 11th Floor, Chicago, Illinois 60603 Attn: Executive Director (together with its successors and assigns, “Lender”) and PALATINE OWNER LLC, a Delaware limited liability company (“Borrower”), and having its principal place of business at _________________.'
+    # assert node_matches[2].get_all_content() == 'THIS LOAN AGREEMENT, dated as of November __, 2019 (as amended, restated, replaced, supplemented or otherwise modified from time to time, this “Agreement”), between CIBC INC., a Delaware corporation, having an address at 120 South LaSalle Street, 11th Floor, Chicago, Illinois 60603 Attn: Executive Director (together with its successors and assigns, “Lender”) and PALATINE OWNER LLC, a Delaware limited liability company (“Borrower”), and having its principal place of business at _________________.'
 
     # how many post-rollup lines? (still have some lines, but fewer than we started with)
     assert len(test_doc.select('//line')) == 3816
@@ -147,7 +147,7 @@ def test_rollup_of_pdf():
     # how many post-rollup content-areas? (same number of content-areas)
     assert len(test_doc.select('//content-area')) == 817
     # what is the post-rollup length of ALL the content in the document?
-    assert len(test_doc.get_root().get_all_content()) == 329792   
+    assert len(test_doc.get_root().get_all_content()) == 329792
 
     ## verify that we can collapse line nodes AND include their children
     assert len(collapsed_doc.select("//content-area")[12].get_all_content()) == 235

@@ -27,7 +27,8 @@ setup(name='kodexa',
           'msgpack==1.0.0',
           'urllib3==1.25.8',
           'pyyaml',
-          'ply'
+          'ply',
+          'deepdiff'
       ],
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])
