@@ -32,7 +32,7 @@ steps:
   displayName: 'type checking'
 - script: |
     pip install pytest pytest-azurepipelines
-    pytest
+    pytest --rootdir=tests
   displayName: 'pytest'
 - script: |
     python setup.py bdist_wheel sdist
