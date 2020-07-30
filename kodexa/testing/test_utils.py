@@ -1,6 +1,6 @@
 import errno
 import logging
-from typing import Dict
+from typing import Dict, cast
 
 from kodexa import PipelineContext, TableDataStore, Document, ContentNode
 
@@ -17,7 +17,7 @@ def print_data_table(context: PipelineContext, store_name: str):
     """
     if store_name in context.get_store_names():
         print(f"\n{store_name}\n")
-        data_table = context.get_store(store_name)
+        data_table = cast(TableDataStore, context.get_store(store_name))
         from texttable import Texttable
         table = Texttable(max_width=1000).header(data_table.columns)
         table.add_rows(data_table.rows, header=False)
@@ -73,8 +73,8 @@ def compare_document(document: Document, filename: str, throw_exception=True):
 
     if not path.exists(filename):
         with open(filename, 'w') as f:
-            simplfied_document = simplify_document(document)
-            json.dump(simplfied_document, f)
+            simplified_document = simplify_document(document)
+            json.dump(simplified_document, f)
 
         logger.warning("WARNING!!! Creating snapshot file")
         return True
@@ -125,7 +125,7 @@ def compare_store(context: PipelineContext, store_name: str, filename: str, thro
     # A list of the descriptions of issues
     issues = []
 
-    target_table_store: TableDataStore = context.get_store(store_name)
+    target_table_store: TableDataStore = cast(TableDataStore, context.get_store(store_name))
 
     if target_table_store is None:
         print(f"Store {store_name} doesn't exist in the pipeline context")
