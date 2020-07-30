@@ -78,6 +78,7 @@ class PipelineContext:
 
     It also provides access to the 'stores' that have been added to the pipeline
     """
+
     def __init__(self, content_provider=None, store_provider=None,
                  existing_content_objects=None,
                  context=None):
@@ -153,7 +154,7 @@ class PipelineContext:
         """
         self.output_document = output_document
 
-    def get_store(self, name: str, default=None):
+    def get_store(self, name: str, default: str = None) -> Store:
         """
         Get a store with given name from the context
 
@@ -253,6 +254,7 @@ class Pipeline:
     :param stop_on_exception: Should the pipeline raise exceptions and stop (default True)
     :param logging_level: The logging level of the pipeline (default INFO)
     """
+    context: PipelineContext
 
     def __init__(self, connector, name="Default", stop_on_exception=True, logging_level=logging.INFO):
         logging.info(f"Initializing a new pipeline {name}")

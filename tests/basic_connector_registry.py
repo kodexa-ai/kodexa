@@ -1,5 +1,6 @@
-from kodexa import connectors
 import tempfile
+
+from kodexa import connectors
 
 
 def test_connector_registry():

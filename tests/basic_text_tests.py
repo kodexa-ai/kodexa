@@ -1,8 +1,8 @@
 import os
 
 from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, Document
-from kodexa.mixins import registry
 from kodexa.steps.common import TextParser
+from kodexa.testing.test_utils import compare_document
 
 
 def get_test_directory():
@@ -29,6 +29,8 @@ def test_hello_txt():
     assert document.content_node.node_type == 'text'
     assert document.content_node.content == 'Hello World'
 
+    compare_document(document, 'test_hello_txt.json')
+
 
 def test_text_find():
     document = Document.from_text('Hello world')
@@ -40,3 +42,5 @@ def test_text_find():
     nodes = document.content_node.findall(content_re='.*')
 
     assert len(nodes) == 1
+
+    compare_document(document, 'test_text_find.json')
