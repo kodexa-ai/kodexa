@@ -15,7 +15,7 @@ import yaml
 
 from kodexa.connectors import FolderConnector
 from kodexa.connectors.connectors import get_caller_dir
-from kodexa.model import Document
+from kodexa.model import Document, Store
 
 
 def new_id():
@@ -61,7 +61,7 @@ class InMemoryStoreProvider:
     def __init__(self):
         self.stores = {}
 
-    def put_store(self, name: str, store):
+    def put_store(self, name: str, store: Store):
         self.stores[name] = store
 
     def get_store(self, name):
@@ -154,7 +154,7 @@ class PipelineContext:
         """
         self.output_document = output_document
 
-    def get_store(self, name: str, default: str = None) -> Store:
+    def get_store(self, name: str, default: Store = None) -> Store:
         """
         Get a store with given name from the context
 
