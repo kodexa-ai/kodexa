@@ -64,12 +64,12 @@ def compare_document(document: Document, filename: str, throw_exception=True):
     import os
 
     try:
-        os.makedirs('snapshots')
+        os.makedirs('test_snapshots')
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
 
-    filename = "snapshots/" + filename
+    filename = "test_snapshots/" + filename
 
     if not path.exists(filename):
         with open(filename, 'w') as f:
@@ -108,12 +108,12 @@ def compare_store(context: PipelineContext, store_name: str, filename: str, thro
 
     import os
     try:
-        os.makedirs('snapshots')
+        os.makedirs('test_snapshots')
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
 
-    filename = "snapshots/" + filename
+    filename = "test_snapshots/" + filename
 
     if not path.exists(filename):
         snapshot_store(context, store_name, filename)
