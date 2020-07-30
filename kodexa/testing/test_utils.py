@@ -77,7 +77,7 @@ def compare_document(document: Document, filename: str, throw_exception=True):
             json.dump(simplified_document, f)
 
         logger.warning("WARNING!!! Creating snapshot file")
-        return True
+        raise Exception("Creating snapshot, invalid test")
 
     with open(filename) as f:
         snapshot_document = json.load(f)
@@ -118,7 +118,7 @@ def compare_store(context: PipelineContext, store_name: str, filename: str, thro
     if not path.exists(filename):
         snapshot_store(context, store_name, filename)
         logger.warning("WARNING!!! Creating snapshot file")
-        return True
+        raise Exception("Creating snapshot, invalid test")
 
     import json
 
