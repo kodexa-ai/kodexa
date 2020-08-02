@@ -2,7 +2,7 @@
 
 [![Build Status](https://dev.azure.com/kodexa/Dharma/_apis/build/status/kodexa-ai.kodexa?branchName=master)](https://dev.azure.com/kodexa/Dharma/_build/latest?definitionId=36&branchName=master)
 ![https://docs.readthedocs.io/en/latest/?badge=latest](https://readthedocs.org/projects/docs/badge/?version=latest) 
-![https://slack.yourdomain.com/badge.svg](https://slack.kodexa.com)
+![https://slack.kodexa.com/badge.svg](https://slack.kodexa.com)
 
 The Kodexa Content Framework framework is designed to allow you to work with a wide range of unstructured and semi-structured content and enables you to work with the Kodexa Cloud (https://cloud.kodexa.com).
 
