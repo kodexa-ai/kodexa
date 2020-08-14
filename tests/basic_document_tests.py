@@ -1,4 +1,5 @@
 from kodexa.model import DocumentMetadata, Document
+from kodexa.testing.test_utils import compare_document
 
 
 def get_test_document():
@@ -26,16 +27,18 @@ def get_test_document_with_three_children():
 
 def test_get_nodes_between():
     document = get_test_document_with_three_children()
-    
+
     nodes = document.content_node.children[0].collect_nodes_to(document.content_node.children[2])
     assert len(nodes) == 2
 
 
 def test_tag_nodes_between():
     document = get_test_document_with_three_children()
-    
+
     document.content_node.children[0].tag_nodes_to(document.content_node.children[2], 'test-tag')
     assert len(document.content_node.findall(tag_name_re='test-tag')) == 2
+
+    compare_document(document, "test_tag_nodes_between.json")
 
 
 def test_basic_document_with_content_node():
@@ -94,7 +97,6 @@ def test_virtual_navigation():
 
 
 def test_add_feature():
-
     document = get_test_document()
     document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
@@ -104,27 +106,29 @@ def test_add_feature():
     assert len(new_feature.value) == 1
     assert new_feature.value[0] == "cheese"
 
-    #adding a 2nd feature with the same type/name
+    # adding a 2nd feature with the same type/name
     another_feature = document.content_node.children[0].add_feature('test', 'test', 'pickels')
     assert len(another_feature.value) == 2
     assert another_feature.value[0] == "cheese"
     assert another_feature.value[1] == "pickels"
 
-    #adding a 3rd feature with the same type/name - changing default values
-    yet_another_feature = document.content_node.children[0].add_feature('test', 'test', 'lettuce', single=False, serialized=True)
+    # adding a 3rd feature with the same type/name - changing default values
+    yet_another_feature = document.content_node.children[0].add_feature('test', 'test', 'lettuce', single=False,
+                                                                        serialized=True)
     assert len(yet_another_feature.value) == 3
     assert yet_another_feature.value[0] == "cheese"
     assert yet_another_feature.value[1] == "pickels"
     assert yet_another_feature.value[2] == "lettuce"
 
-    #adding completely new feature and changing the default values
-    
-    #Setting a feature with single=False
-    #This allows me to set a string as if it was a collection...and later I can't add to it with append.  Not sure that's the desiered behavior
-    new_again = document.content_node.children[0].add_feature('test_2', 'test_2_name', 'sesame_seeds', single=False, serialized=False)
+    # adding completely new feature and changing the default values
 
-    #This would fail, as the original value 'seasme_seeds' is not a collection, even though it was stated to be one
-    #new_again_2 = document.content_node.children[0].add_feature('test_2', 'test_2_name', 'special_sauce')
+    # Setting a feature with single=False
+    # This allows me to set a string as if it was a collection...and later I can't add to it with append.  Not sure that's the desiered behavior
+    new_again = document.content_node.children[0].add_feature('test_2', 'test_2_name', 'sesame_seeds', single=False,
+                                                              serialized=False)
+
+    # This would fail, as the original value 'seasme_seeds' is not a collection, even though it was stated to be one
+    # new_again_2 = document.content_node.children[0].add_feature('test_2', 'test_2_name', 'special_sauce')
 
 
 def test_feature_find():

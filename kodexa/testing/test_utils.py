@@ -45,7 +45,7 @@ def simplify_node(node: ContentNode):
     return {
         "index": node.index,
         "node_type": node.node_type,
-        "features": [feature.t.typeo_dict() for feature in node._feature_map.values()],
+        "features": [feature.to_dict() for feature in node._feature_map.values()],
         "content": node.content,
         "content_parts": node.content_parts,
         "children": [simplify_node(child_node) for child_node in node.children]
@@ -82,15 +82,15 @@ def compare_document(document: Document, filename: str, throw_exception=True):
     with open(filename) as f:
         snapshot_document = json.load(f)
 
-    target_document = simplify_document(document)
+    target_document = json.loads(json.dumps(simplify_document(document)))
 
     from deepdiff import DeepDiff
     diff = DeepDiff(snapshot_document, target_document, ignore_order=False)
 
     if bool(diff) and throw_exception:
+        print(diff)
         raise Exception('Document does not match')
 
-    print(diff)
     return diff
 
 
