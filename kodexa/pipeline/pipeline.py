@@ -196,6 +196,15 @@ class PipelineStep:
         else:
             logging.info(f"Adding new step {step.get_name()} to pipeline {self.name}")
 
+    def to_dict(self):
+        try:
+            metadata = self.step.to_dict()
+            metadata['name'] = self.name
+            metadata['condition'] = self.condition
+            metadata['enabled'] = self.enabled
+        except AttributeError as e:
+            raise Exception("All steps must implement to_dict() for deployment", e)
+
     def execute(self, context, document):
         if self.will_execute(context, document):
             try:
