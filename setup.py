@@ -24,7 +24,7 @@ setup(name='kodexa',
                 'kodexa.cloud', 'kodexa.testing'],
       install_requires=[
           'addict==2.2.1',
-          'requests==2.23.0',
+          'requests==2.24.0',
           'msgpack==1.0.0',
           'urllib3==1.25.8',
           'pyyaml',
