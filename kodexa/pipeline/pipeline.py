@@ -202,6 +202,7 @@ class PipelineStep:
             metadata['name'] = self.name
             metadata['condition'] = self.condition
             metadata['enabled'] = self.enabled
+            return metadata
         except AttributeError as e:
             raise Exception("All steps must implement to_dict() for deployment", e)
 
