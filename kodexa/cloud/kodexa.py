@@ -287,9 +287,11 @@ class RemoteAction:
         self.options = options
         self.auth = auth
 
-    def to_yaml(self):
-        # TODO needs implementation
-        config = {}
+    def to_dict(self):
+        return {
+            'ref': self.slug,
+            'options': self.options
+        }
 
     def get_name(self):
         return f"Remote Action ({self.slug})"
