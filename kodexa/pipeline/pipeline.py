@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 import sys
 import traceback
@@ -198,7 +199,10 @@ class PipelineStep:
 
     def to_dict(self):
         try:
-            metadata = self.step.to_dict()
+            if callable(self.step):
+                metadata = {'script': inspect.getsource(self.step)}
+            else:
+                metadata = self.step.to_dict()
             metadata['name'] = self.name
             metadata['condition'] = self.condition
             metadata['enabled'] = self.enabled
