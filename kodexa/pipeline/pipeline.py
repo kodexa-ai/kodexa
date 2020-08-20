@@ -194,13 +194,16 @@ class PipelineStep:
 
         if callable(self.step):
             logging.info(f"Adding new step function {step.__name__} to pipeline {self.name}")
+            self.name = step.__name__
         else:
             logging.info(f"Adding new step {step.get_name()} to pipeline {self.name}")
 
     def to_dict(self):
         try:
             if callable(self.step):
-                metadata = {'script': inspect.getsource(self.step)}
+                metadata = {
+                    'function': self.step.__name__,
+                    'script': inspect.getsource(self.step)}
             else:
                 metadata = self.step.to_dict()
             metadata['name'] = self.name
@@ -351,7 +354,7 @@ class Pipeline:
         for step in self.steps:
 
             try:
-                configuration_steps.append(step.to_configuration())
+                configuration_steps.append(step.to_dict())
             except:
                 pass
 
