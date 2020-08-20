@@ -94,3 +94,14 @@ def test_to_yaml():
                                             }))
 
     print(pipeline.to_yaml())
+
+
+def test_function_step_to_yaml():
+    pipeline = Pipeline.from_file('test')
+
+    def do_it(document):
+        print("hello")
+        return document
+
+    pipeline.add_step(do_it)
+    print(pipeline.to_yaml())
