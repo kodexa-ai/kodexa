@@ -9,6 +9,7 @@ from collections import KeysView
 from enum import Enum
 from inspect import signature
 from io import StringIO
+from textwrap import dedent
 from typing import List, Optional, Dict
 from uuid import uuid4
 
@@ -203,7 +204,8 @@ class PipelineStep:
             if callable(self.step):
                 metadata = {
                     'function': self.step.__name__,
-                    'script': inspect.getsource(self.step)}
+                    'script': dedent(inspect.getsource(self.step))
+                }
             else:
                 metadata = self.step.to_dict()
             metadata['name'] = self.name
