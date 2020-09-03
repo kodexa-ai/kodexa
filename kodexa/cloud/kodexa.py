@@ -73,9 +73,13 @@ class RemoteSession:
                           data=data,
                           headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)
         try:
-            execution = Dict(json.loads(r.text))
+            if r.status_code==200:
+                execution = Dict(json.loads(r.text))
+            else:
+                logger.error("Execution creation failed [" + r.text + "], response " + str(r.status_code))
+                raise Exception("Execution creation failed [" + r.text + "], response " + str(r.status_code))
         except JSONDecodeError:
-            logger.error("Unable to handle response [" + r.text + "]")
+            logger.error("Unable to handle response [" + r.text + "], response "+str(r.status_code))
             raise
 
         return execution
