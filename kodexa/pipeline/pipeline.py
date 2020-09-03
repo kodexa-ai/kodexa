@@ -16,7 +16,7 @@ from uuid import uuid4
 import yaml
 
 from kodexa.connectors import FolderConnector
-from kodexa.connectors.connectors import get_caller_dir
+from kodexa.connectors.connectors import get_caller_dir, KodexaPlatformStore
 from kodexa.model import Document, Store
 
 
@@ -452,6 +452,19 @@ class Pipeline:
         :rtype: Pipeline
         """
         return Pipeline(FolderConnector(folder_path, filename_filter, recursive, relative, caller_path))
+
+    @staticmethod
+    def from_store(org_slug: str, slug: str, query: str = "*") -> Pipeline:
+        """
+        Create a pipeline that will again the documents in a Kodexa platform store
+
+        :param org_slug: The organization's slug
+        :param slug: The store slug
+        :param query: A query to be applied (defaults to *)
+        :return: A new pipeline
+        :rtype: Pipeline
+        """
+        return Pipeline(KodexaPlatformStore(org_slug, slug, query))
 
 
 class PipelineStatistics:

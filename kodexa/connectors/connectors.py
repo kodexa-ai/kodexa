@@ -105,6 +105,62 @@ class FileHandleConnector:
                  "connector_options": {"file": self.file}}))
 
 
+class KodexaPlatformStore:
+
+    @staticmethod
+    def get_name():
+        return "kodexa-platform-store"
+
+    def __init__(self, org_slug, slug, query="*"):
+        self.org_slug = org_slug
+        self.slug = slug
+        self.query = query
+        self.page = 1
+        self.objects = []
+
+        self.get_next_objects()
+
+    def get_next_objects(self):
+        from kodexa import KodexaPlatform
+        content_objects_response = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.org_slug}/{self.slug}/contents",
+            params={"query": self.query, "page": self.page, "pageSize": 20},
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if content_objects_response.status_code != 200:
+            raise Exception(
+                f"Exception occurred while trying to fetch objects [{content_objects_response.status_code}]")
+        else:
+            self.objects = content_objects_response.json()['content']
+
+    def get_source(self, document):
+        from kodexa import KodexaPlatform
+        doc = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{document.metadata['connector_options']['org_slug']}/{document.metadata['connector_options']['slug']}/contents/{document.metadata['connector_options']['id']}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        return Document.from_msgpack(doc.content)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if len(self.objects) == 0:
+            raise StopIteration
+        else:
+            content_object = self.objects.pop(0)
+
+            if content_object['content_type'] == "Document":
+                from kodexa import KodexaPlatform
+                doc = requests.get(
+                    f"{KodexaPlatform.get_url()}/api/stores/{self.org_slug}/{self.slug}/contents/{content_object['id']}",
+                    headers={"x-access-token": KodexaPlatform.get_access_token()})
+                return Document.from_msgpack(doc.content)
+            else:
+                return Document(DocumentMetadata(
+                    {"connector": self.get_name(),
+                     "connector_options": {"org_slug": self.org_slug, "slug": self.slug, "id": content_object['id']}}))
+
+
 class UrlConnector:
 
     @staticmethod
@@ -181,3 +237,4 @@ def get_source(document):
 add_connector(FolderConnector)
 add_connector(FileHandleConnector)
 add_connector(UrlConnector)
+add_connector(KodexaPlatformStore)

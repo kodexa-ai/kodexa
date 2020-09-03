@@ -16,3 +16,5 @@ anytree
 mypy
 simpleeval
 deepdiff==5.0.2
+pydoc-markdown>=3.0.0,<4.0.0
+mkdocs
