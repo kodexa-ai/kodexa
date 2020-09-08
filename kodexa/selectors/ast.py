@@ -131,7 +131,7 @@ class PredicatedExpression(object):
                     results.append(node)
                     return results
                 else:
-                    if predicate.resolve(node):
+                    if not isinstance(predicate, int) and predicate.resolve(node):
                         results.append(node)
 
         return results

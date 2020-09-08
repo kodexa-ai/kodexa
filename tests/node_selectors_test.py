@@ -92,6 +92,11 @@ def test_selector_complex_doc_1():
     all_ps = document.content_node.select('//p')
     assert len(all_ps) == 18
 
+    for pos in range(18):
+        selected_p = document.content_node.select(f'(//p)[{pos}]')
+        assert len(selected_p) == 1
+        assert selected_p[0].uuid == all_ps[pos].uuid
+
 
 def test_tagged_content():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
