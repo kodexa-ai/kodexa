@@ -187,7 +187,9 @@ class PipelineStep:
     It is internally used by the Pipeline and is not a public API
     """
 
-    def __init__(self, step, enabled=False, condition=None, name=None):
+    def __init__(self, step, enabled=False, condition=None, name=None, options=None, attach_source=False):
+        if options is None:
+            options = {}
         self.step = step
         self.name = name
         self.condition = condition
@@ -196,6 +198,10 @@ class PipelineStep:
         if callable(self.step):
             logging.info(f"Adding new step function {step.__name__} to pipeline {self.name}")
             self.name = step.__name__
+        if isinstance(step, str):
+            logging.info(f"Add new remote step {step} to pipeline {self.name}")
+            from kodexa import RemoteAction
+            self.step = RemoteAction(str, options, attach_source)
         else:
             logging.info(f"Adding new step {step.get_name()} to pipeline {self.name}")
 
@@ -260,7 +266,7 @@ class PipelineStep:
         return True
 
 
-class Pipeline:
+class fPipeline:
     """
     A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
 
