@@ -5,7 +5,9 @@ import logging
 import os
 import sys
 import time
+import typing
 from json import JSONDecodeError
+from typing import List
 
 import requests
 from addict import Dict
@@ -17,6 +19,149 @@ from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import TableDataStore
 
 logger = logging.getLogger('kodexa.platform')
+
+
+class PipelineMetadataBuilder:
+    """
+    Build a metadata representation of the pipeline for passing to an instance of the
+    Kodexa platform
+    """
+
+    def __init__(self, pipeline: Pipeline):
+        self.pipeline = pipeline
+
+    def build_steps(self, pipeline_metadata: Dict):
+        pipeline_metadata.metadata.steps = []
+
+        for idx, step in enumerate(self.pipeline.steps):
+
+            step_meta = step.to_dict()
+            if step_meta['name'] is None:
+                step_meta['name'] = f"Step {idx + 1}"
+
+            if 'script' in step_meta:
+                print(str(step_meta))
+                pipeline_metadata.metadata.steps.append({
+                    'ref': 'kodexa/python-step',
+                    'name': step_meta['name'],
+                    'enabled': True,
+                    'condition': None,
+                    'options': {
+                        'function_name': step_meta['function'],
+                        'script': step_meta['script']
+                    }
+                })
+            else:
+                pipeline_metadata.metadata.steps.append(step_meta)
+
+        return pipeline_metadata
+
+
+class KodexaDeployer:
+    """
+    The deployer allows you to take a locally build Pipeline and then push that pipeline
+    to a Kodexa platform instance
+    """
+
+    @staticmethod
+    def get_access_token_details():
+        response = requests.get(
+            f"{KodexaPlatform.get_url()}/api/account/accessToken",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if response.status_code == 200:
+            return Dict(response.json())
+        else:
+            if response.status_code == 404:
+                raise Exception("Unable to find access token")
+            else:
+                raise Exception("An error occurred connecting to the Kodexa platform")
+
+    @staticmethod
+    def deploy(slug: str, pipeline: Pipeline, name: str = "A new pipeline", description: str = "A Kodexa Pipeline",
+               example_urls: List[typing.Dict[str, str]] = [], more_info_url: str = None, force_replace=False,
+               public=False):
+
+        builder = PipelineMetadataBuilder(pipeline)
+
+        if '/' not in slug:
+            logger.error("A slug must be valid, i.e. org_slug/pipeline_slug")
+            raise Exception("Invalid slug")
+
+        logger.info(f"Deploying pipeline {slug}")
+        access_token = KodexaDeployer.get_access_token_details()
+        logger.info(f"Using organization {access_token}")
+
+        new_pipeline = Dict()
+
+        organization_slug = slug.split('/')[0]
+        pipeline_slug = slug.split('/')[1]
+
+        new_pipeline.slug = pipeline_slug
+        new_pipeline.name = name
+        new_pipeline.type = 'pipeline'
+        new_pipeline.description = description
+        new_pipeline.metadata.parameters = []
+        new_pipeline.metadata.steps = []
+        new_pipeline.orgSlug = organization_slug
+        new_pipeline.publicAccess = public
+        new_pipeline.exampleUrls = example_urls
+        new_pipeline.moreInfoUrl = more_info_url
+
+        builder.build_steps(new_pipeline)
+
+        if organization_slug not in access_token.organizationSlugs:
+            logger.error(f"You do not have access to the organization {organization_slug}")
+            raise Exception("Unable to deploy, no access to organization")
+
+        response = requests.get(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
+                                headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                         "content-type": "application/json"})
+
+        if response.status_code == 401:
+            logger.error("You do not have the permissions to access this pipeline")
+            raise Exception("Not authorized on pipeline")
+
+        if response.status_code == 404:
+            logger.info("Pipeline doesn't exist, will publish")
+            response = requests.post(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}",
+                                     json=new_pipeline.to_dict(),
+                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                              "content-type": "application/json"})
+            if response.status_code == 200:
+                logger.info("Pipeline deployed")
+            else:
+                logger.error(response.text)
+                raise Exception("Unable to deploy new pipeline")
+        else:
+            logger.info("Pipeline already exists")
+            if force_replace:
+                logger.info("Replacing pipeline")
+                response = requests.put(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
+                                        json=new_pipeline.to_dict(),
+                                        headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                                 "content-type": "application/json"})
+                if response.status_code == 200:
+                    logger.info("Pipeline deployed")
+                else:
+                    logger.error(response.text)
+                    raise Exception("Unable to deploy and replace existing pipeline")
+            else:
+                logger.info("Not updating")
+                return
+
+    @staticmethod
+    def undeploy(slug: str):
+        organization_slug = slug.split('/')[0]
+        pipeline_slug = slug.split('/')[1]
+
+        response = requests.delete(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
+                                   headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                            "content-type": "application/json"})
+        if response.status_code == 200:
+            logger.info("Pipeline undeployed")
+        else:
+            logger.error(response.text)
+            raise Exception("Unable to undeploy and replace existing pipeline")
 
 
 class KodexaPlatform:
@@ -73,13 +218,13 @@ class RemoteSession:
                           data=data,
                           headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)
         try:
-            if r.status_code==200:
+            if r.status_code == 200:
                 execution = Dict(json.loads(r.text))
             else:
                 logger.error("Execution creation failed [" + r.text + "], response " + str(r.status_code))
                 raise Exception("Execution creation failed [" + r.text + "], response " + str(r.status_code))
         except JSONDecodeError:
-            logger.error("Unable to handle response [" + r.text + "], response "+str(r.status_code))
+            logger.error("Unable to handle response [" + r.text + "], response " + str(r.status_code))
             raise
 
         return execution
