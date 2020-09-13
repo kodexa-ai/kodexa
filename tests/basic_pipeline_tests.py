@@ -2,6 +2,7 @@ import logging
 
 import pytest
 
+from kodexa import RemoteAction
 from kodexa.model import DocumentMetadata, Document
 from kodexa.pipeline import Pipeline
 from kodexa.steps.common import TextParser
@@ -18,6 +19,14 @@ def create_document():
     foo2.content = "fishstick"
     document.content_node.add_child(foo2)
     return document
+
+
+def test_simplified_remote_action_reference():
+    pipeline = Pipeline.from_text('hello')
+    pipeline.add_step('kodexa/ner-tagger', options={})
+
+    assert len(pipeline.steps) == 1
+    assert isinstance(pipeline.steps[0].step, RemoteAction)
 
 
 def test_basic_json_store():
