@@ -310,7 +310,7 @@ class Pipeline:
 
         return self
 
-    def add_step(self, step, name=None, enabled=True, condition=None, options={}):
+    def add_step(self, step, name=None, enabled=True, condition=None, options=None):
         """
         Add the given step to the current pipeline
 
@@ -324,12 +324,19 @@ class Pipeline:
             >>>      return doc
             >>> pipeline.add_step(my_function)
 
+        If you are using remote actions on a server, or for deployment to a remote
+        pipeline you can also use a shorthand
+
+            >>> pipeline.add_step('kodexa/html-parser',options={'summarize':False})
+
         :param step: the step to add
         :param name: the name to use to describe the step (default None)
         :param enabled: is the step enabled (default True)
         :param condition: condition to evaluate before executing the step (default None)
         :param options: options to be passed to the step if it is a simplified remote action
         """
+        if options is None:
+            options = {}
         self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition, options=options))
 
         return self
