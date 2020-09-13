@@ -198,10 +198,10 @@ class PipelineStep:
         if callable(self.step):
             logging.info(f"Adding new step function {step.__name__} to pipeline {self.name}")
             self.name = step.__name__
-        if isinstance(step, str):
-            logging.info(f"Add new remote step {step} to pipeline {self.name}")
+        elif isinstance(self.step, str):
+            logging.info(f"Adding new remote step {step} to pipeline {self.name}")
             from kodexa import RemoteAction
-            self.step = RemoteAction(str, options, attach_source)
+            self.step = RemoteAction(step, options, attach_source)
         else:
             logging.info(f"Adding new step {step.get_name()} to pipeline {self.name}")
 
@@ -266,7 +266,7 @@ class PipelineStep:
         return True
 
 
-class fPipeline:
+class Pipeline:
     """
     A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
 
@@ -310,7 +310,7 @@ class fPipeline:
 
         return self
 
-    def add_step(self, step, name=None, enabled=True, condition=None):
+    def add_step(self, step, name=None, enabled=True, condition=None, options={}):
         """
         Add the given step to the current pipeline
 
@@ -328,8 +328,9 @@ class fPipeline:
         :param name: the name to use to describe the step (default None)
         :param enabled: is the step enabled (default True)
         :param condition: condition to evaluate before executing the step (default None)
+        :param options: options to be passed to the step if it is a simplified remote action
         """
-        self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition))
+        self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition, options=options))
 
         return self
 
