@@ -178,3 +178,16 @@ def test_document_uuid():
     doc_1 = Document.from_text('The sun is very bright today.')
     doc_2 = Document.from_text('Fluffy clouds float through the sky.')
     assert doc_1.uuid != doc_2.uuid
+
+
+def test_basic_tagging():
+    doc = Document.from_text('It is going to be a great day')
+    doc.content_node.tag('cheese', fixed_position=[1, 2])
+    doc.content_node.tag('cheese', fixed_position=[3, 4])
+    assert isinstance(doc.content_node.get_tag('cheese'), list)
+
+
+def test_basic_tagging():
+    doc = Document.from_text('It is going to be a great day')
+    doc.content_node.tag('cheese', fixed_position=[1, 2])
+    assert isinstance(doc.content_node.get_tag('cheese'), list)

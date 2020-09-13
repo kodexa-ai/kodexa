@@ -84,7 +84,9 @@ class ContentNode(object):
         >>> current_content_node.add_child(new_page)
     """
 
-    def __init__(self, document, node_type: str, content="", content_parts=[]):
+    def __init__(self, document, node_type: str, content="", content_parts=None):
+        if content_parts is None:
+            content_parts = []
         self.node_type: str = node_type
         self.content: str = content
         self.document: Document = document
@@ -118,7 +120,7 @@ class ContentNode(object):
         Create a JSON string representation of this ContentNode.
 
             >>> node.to_json()
-    
+
         :return: The JSON formatted string representation of this ContentNode.
         :rtype: str
         """
@@ -200,7 +202,7 @@ class ContentNode(object):
         Returns a list of the children of this node.
 
            >>> node.get_children()
-        
+
         :return: The list of child nodes for this ContentNode.
         :rtype: list[ContentNode]
         """
@@ -280,7 +282,7 @@ class ContentNode(object):
            []
 
         :param str feature_type: The type of the feature.
-        
+
         :return: A list of feature with the specified type.  If no features are found, an empty list is returned.
         :rtype: list[ContentFeature]
         """
@@ -295,7 +297,7 @@ class ContentNode(object):
 
         :param str feature_type: The type of the feature.
         :param str name: The name of the feature.
-        
+
         :return: True if the feature is present; else, False.
         :rtype: bool
         """
@@ -373,12 +375,12 @@ class ContentNode(object):
            [ContentNode]
 
         or
-           
+
         >>> document.get_root().select('//*[hasTag($tagName)]', {"tagName": "div"})
            [ContentNode]
 
         :param str selector: The selector (ie. //*)
-        :param variables: A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector. 
+        :param variables: A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
         :type variables: dict, optional
 
         :return: A list of the matching content nodes.  If no matches are found, the list will be empty.
@@ -392,9 +394,9 @@ class ContentNode(object):
 
     def select_as_node(self, selector, variables=None):
         """
-        Select and return the child nodes of this content node that match the selector value.  
+        Select and return the child nodes of this content node that match the selector value.
         Matching nodes will be returned as the children of a new proxy content node.
-        
+
         Note this doesn't impact this content node's children.  They are not adopted by the proxy node,
         therefore their parents remain intact.
 
@@ -402,12 +404,12 @@ class ContentNode(object):
            ContentNode
 
         or
-           
+
         >>> document.get_root().select_as_node('//*[hasTag($tagName)]', {"tagName": "div"})
            ContentNode
 
         :param str selector: The selector (ie. //*)
-        :param variables: A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector. 
+        :param variables: A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
         :type variables: dict, optional
 
         :return: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
@@ -446,10 +448,10 @@ class ContentNode(object):
         It will be added to the end of the parent
 
             >>> # Get first node of type 'line' from the first page
-            >>> target_child = document.get_root().select('//page')[0].select('//line')[0]  
+            >>> target_child = document.get_root().select('//page')[0].select('//line')[0]
             >>> # Get sixth node of type 'page'
-            >>> target_parent = document.get_root().select('//page')[5]  
-            >>> # Move target_child (line) to the target_parent (sixth page) 
+            >>> target_parent = document.get_root().select('//page')[5]
+            >>> # Move target_child (line) to the target_parent (sixth page)
             >>> document.get_root().move_child_to_parent(target_child, target_parent)
 
         :param ContentNode target_child: The child node that will be moved to a new parent node (target_parent).
@@ -462,7 +464,7 @@ class ContentNode(object):
         """
         This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
 
-            >>> # select all nodes of type 'line', then the root node 'adopts' them 
+            >>> # select all nodes of type 'line', then the root node 'adopts' them
             >>> # and replaces all it's existing children with these 'line' nodes.
             >>> document.get_root().adopt_children(document.select('//line'), replace=True)
 
@@ -496,7 +498,7 @@ class ContentNode(object):
 
         :param ContentNode end_node: The node to end at
 
-        :return: A list of sibling nodes between this node and the end_node. 
+        :return: A list of sibling nodes between this node and the end_node.
         :rtype: list[ContentNode]
         """
         nodes = []
@@ -624,9 +626,13 @@ class ContentNode(object):
 
         :param tag_name: The name of the tag
 
-        :return: The tagged location and value (or a list if more than one)
+        :return: A list tagged location and values for this label in this node
         """
-        return self.get_feature_value('tag', tag_name)
+        tag_details = self.get_feature_value('tag', tag_name)
+        if isinstance(tag_details, list):
+            return tag_details
+        else:
+            return [tag_details]
 
     def get_all_tags(self):
         """
@@ -762,7 +768,7 @@ class ContentNode(object):
     def is_first_child(self):
         """
         Determines if this node is the first child of its parent or has no parent.
-        
+
         :return: True if this node is the first child of its parent or if this node has no parent; else, False;
         :rtype: bool
         """
@@ -805,9 +811,9 @@ class ContentNode(object):
     def get_node_at_index(self, index):
         """
         Returns the child node at the specified index. If the specified index is outside the first (0), or
-        last child's index, None is returned.  
-        
-        Note:  documents allow for sparse representation and child nodes may not have consecutive index numbers. 
+        last child's index, None is returned.
+
+        Note:  documents allow for sparse representation and child nodes may not have consecutive index numbers.
         If there isn't a child node at the specfied index, a 'virtual' node will be returned.  This 'virtual' node
         will have the node type of its nearest sibling and will have an index value, but will have no features or content.
 
@@ -873,10 +879,10 @@ class ContentNode(object):
 
     def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=True):
         """
-        Returns the next sibling content node. 
-        
+        Returns the next sibling content node.
+
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
-        Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the 
+        Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
 
         :param node_type_re: The regular expression to match against the next sibling node's type; default is '.*'.
@@ -906,10 +912,10 @@ class ContentNode(object):
 
     def previous_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
         """
-        Returns the previous sibling content node. 
-        
+        Returns the previous sibling content node.
+
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
-        Therefore, the previous node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the 
+        Therefore, the previous node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
 
         :param node_type_re: The regular expression to match against the previous node's type; default is '.*'.
@@ -1140,13 +1146,13 @@ class Document(object):
         return msgpack.packb(self.to_dict(), use_bin_type=True)
 
     def to_json(self):
-        """ 
+        """
         Create a JSON string representation of this Document.
 
             >>> document.to_json()
 
         :return: The JSON formatted string representation of this Document.
-        :rtype: str 
+        :rtype: str
         """
         return json.dumps(self.to_dict(), ensure_ascii=False)
 
@@ -1169,7 +1175,7 @@ class Document(object):
             >>> document.to_dict()
 
         :return: A dictionary representation of this Document.
-        :rtype: dict  
+        :rtype: dict
         """
         return {'version': Document.CURRENT_VERSION, 'metadata': self.metadata,
                 'content_node': self.content_node.to_dict() if self.content_node else None,
@@ -1186,7 +1192,7 @@ class Document(object):
             >>> Document.from_dict(doc_dict)
 
         :param dict doc_dict: A dictionary representation of a Kodexa Document.
-        
+
         :return: A complete Kodexa Document
         :rtype: Document
         """
@@ -1212,7 +1218,7 @@ class Document(object):
             >>> Document.from_json(json_string)
 
         :param str json_string: A JSON string representation of a Kodexa Document
-        
+
         :return: A complete Kodexa Document
         :rtype: Document
         """
@@ -1255,7 +1261,7 @@ class Document(object):
     def create_node(self, node_type: str, content: str = None, virtual: bool = False, parent: ContentNode = None,
                     index: int = 0):
         """
-        Creates a new node for the document.  The new node is not added to the document, but any mixins that have been 
+        Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
         applied to the document will also be available on the new node.
 
             >>> document.create_node(node_type='page')
@@ -1264,7 +1270,7 @@ class Document(object):
 
         :param str node_type: The type of node.
         :param str content: The content for the node; defaults to None.
-        :param bool virtual: Indicates if this is a 'real' or 'virtual' node; default is False.  'Real' nodes contain document content.  
+        :param bool virtual: Indicates if this is a 'real' or 'virtual' node; default is False.  'Real' nodes contain document content.
         'Virtual' nodes are synthesized as necessary to fill gaps in between non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
         :param ContentNode parent: The parent for this newly created node; default is None;
         :param int index: The index property to be set on this node; default is 0;
@@ -1292,7 +1298,7 @@ class Document(object):
         Creates a Document that has a 'file-handle' connector to the specified file.
 
         :param file file: The file to which the new Document is connected.
-        
+
         :return: A Document connected to the specified file.
         :rtype: Document
         """
@@ -1307,8 +1313,8 @@ class Document(object):
         Creates a Document that has a 'url' connector for the specified url.
 
         :param str url: The URL to which the new Document is connected.
-        :param dict headers: Headers that should be used when reading from the URL 
-        
+        :param dict headers: Headers that should be used when reading from the URL
+
         :return: A Document connected to the specified URL with the specified headers (if any).
         :rtype: Document
         """
@@ -1328,8 +1334,8 @@ class Document(object):
            [ContentNode]
 
         :param str selector: The selector (ie. //*)
-        :param variables: A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector. 
-        :type variables: dict, optional 
+        :param variables: A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
+        :type variables: dict, optional
 
         :return: A list of the matching ContentNodes.  If no matches found, list is empty.
         :rtype: list[ContentNodes]
