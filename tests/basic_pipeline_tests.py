@@ -23,10 +23,11 @@ def create_document():
 
 def test_simplified_remote_action_reference():
     pipeline = Pipeline.from_text('hello')
-    pipeline.add_step('kodexa/ner-tagger', options={})
+    pipeline.add_step('kodexa/ner-tagger', options={"option": "test"})
 
     assert len(pipeline.steps) == 1
     assert isinstance(pipeline.steps[0].step, RemoteAction)
+    assert "option" in pipeline.steps[0].step.options
 
 
 def test_basic_json_store():
