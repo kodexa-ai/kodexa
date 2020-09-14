@@ -310,7 +310,7 @@ class Pipeline:
 
         return self
 
-    def add_step(self, step, name=None, enabled=True, condition=None, options=None):
+    def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False):
         """
         Add the given step to the current pipeline
 
@@ -334,10 +334,13 @@ class Pipeline:
         :param enabled: is the step enabled (default True)
         :param condition: condition to evaluate before executing the step (default None)
         :param options: options to be passed to the step if it is a simplified remote action
+        :param attach_source: if step is simplified remote action this determines if we need to add the source
+
         """
         if options is None:
             options = {}
-        self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition, options=options))
+        self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition, options=options,
+                                       attach_source=attach_source))
 
         return self
 
