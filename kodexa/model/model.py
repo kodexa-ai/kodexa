@@ -178,6 +178,20 @@ class ContentNode(object):
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
         return new_content_node
 
+    def add_child_content(self, node_type, content, index=None):
+        """
+        Convenience method to allow you to quick add a child node with a type and content
+
+        :param node_type: the node type
+        :param content: the content
+        :param index: the index (optional)
+        :return: the new ContentNode
+        """
+        new_node = self.document.create_node(node_type=node_type)
+        new_node.content = content
+        self.add_child(new_node, index)
+        return new_node
+
     def add_child(self, child, index=None):
         """
         Add a ContentNode as a child of this ContentNode
@@ -602,8 +616,13 @@ class ContentNode(object):
                             else:
                                 for index, m in enumerate(match.groups()):
                                     idx = index + 1
-                                    node.add_feature('tag', tag_to_apply,
-                                                     Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
+
+                                    if not use_all_content:
+                                        node.add_feature('tag', tag_to_apply,
+                                                         Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
+                                    else:
+                                        # We need to work out where the content is in the child nodes
+                                        pass
 
     def get_tags(self):
         """
@@ -615,6 +634,23 @@ class ContentNode(object):
         :return: A list of the tag name
         """
         return [i.name for i in self.get_features_of_type("tag")]
+
+    def get_tag_values(self, tag_name, include_children=False):
+        """
+        Get the values for a specific tag name
+
+        :param tag_name: tag name
+        :param include_children: include the children of this node
+        :return: a list of the tag values
+        """
+        values = []
+        for tag in self.get_tag(tag_name):
+            values.append(tag.value)
+
+        for child in self.get_children():
+            values.extend(child.get_tag_values(tag_name, include_children))
+
+        return values
 
     def get_tag(self, tag_name):
         """
@@ -629,6 +665,10 @@ class ContentNode(object):
         :return: A list tagged location and values for this label in this node
         """
         tag_details = self.get_feature_value('tag', tag_name)
+
+        if tag_details is None:
+            return []
+
         if isinstance(tag_details, list):
             return tag_details
         else:
