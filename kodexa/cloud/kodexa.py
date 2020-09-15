@@ -57,7 +57,24 @@ class PipelineMetadataBuilder:
         return pipeline_metadata
 
 
-class KodexaDeployer:
+class KodexaPlatform:
+
+    @staticmethod
+    def get_access_token():
+        return os.getenv('KODEXA_ACCESS_TOKEN')
+
+    @staticmethod
+    def get_url():
+        return os.getenv('KODEXA_URL', "https://platform.kodexa.com")
+
+    @staticmethod
+    def set_access_token(access_token):
+        os.environ["KODEXA_ACCESS_TOKEN"] = access_token
+
+    @staticmethod
+    def set_url(url):
+        os.environ["KODEXA_URL"] = url
+
     """
     The deployer allows you to take a locally build Pipeline and then push that pipeline
     to a Kodexa platform instance
@@ -78,8 +95,11 @@ class KodexaDeployer:
 
     @staticmethod
     def deploy(slug: str, pipeline: Pipeline, name: str = "A new pipeline", description: str = "A Kodexa Pipeline",
-               example_urls: List[typing.Dict[str, str]] = [], more_info_url: str = None, force_replace=False,
+               example_urls=None, more_info_url: str = None, force_replace=False,
                public=False):
+
+        if example_urls is None:
+            example_urls = []
 
         builder = PipelineMetadataBuilder(pipeline)
 
@@ -88,7 +108,7 @@ class KodexaDeployer:
             raise Exception("Invalid slug")
 
         logger.info(f"Deploying pipeline {slug}")
-        access_token = KodexaDeployer.get_access_token_details()
+        access_token = KodexaPlatform.get_access_token_details()
         logger.info(f"Using organization {access_token}")
 
         new_pipeline = Dict()
@@ -149,38 +169,21 @@ class KodexaDeployer:
                 logger.info("Not updating")
                 return
 
-    @staticmethod
-    def undeploy(slug: str):
-        organization_slug = slug.split('/')[0]
-        pipeline_slug = slug.split('/')[1]
+@staticmethod
+def undeploy(slug: str):
+    organization_slug = slug.split('/')[0]
+    pipeline_slug = slug.split('/')[1]
 
-        response = requests.delete(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
-                                   headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                            "content-type": "application/json"})
-        if response.status_code == 200:
-            logger.info("Pipeline undeployed")
-        else:
-            logger.error(response.text)
-            raise Exception("Unable to undeploy and replace existing pipeline")
+    response = requests.delete(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
+                               headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                        "content-type": "application/json"})
+    if response.status_code == 200:
+        logger.info("Pipeline undeployed")
+    else:
+        logger.error(response.text)
+        raise Exception("Unable to undeploy and replace existing pipeline")
 
 
-class KodexaPlatform:
-
-    @staticmethod
-    def get_access_token():
-        return os.getenv('KODEXA_ACCESS_TOKEN')
-
-    @staticmethod
-    def get_url():
-        return os.getenv('KODEXA_URL', "https://platform.kodexa.com")
-
-    @staticmethod
-    def set_access_token(access_token):
-        os.environ["KODEXA_ACCESS_TOKEN"] = access_token
-
-    @staticmethod
-    def set_url(url):
-        os.environ["KODEXA_URL"] = url
 
 
 class RemoteSession:
