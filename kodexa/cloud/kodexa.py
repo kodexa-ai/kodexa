@@ -5,9 +5,7 @@ import logging
 import os
 import sys
 import time
-import typing
 from json import JSONDecodeError
-from typing import List
 
 import requests
 from addict import Dict
@@ -169,21 +167,19 @@ class KodexaPlatform:
                 logger.info("Not updating")
                 return
 
-@staticmethod
-def undeploy(slug: str):
-    organization_slug = slug.split('/')[0]
-    pipeline_slug = slug.split('/')[1]
+    @staticmethod
+    def undeploy(slug: str):
+        organization_slug = slug.split('/')[0]
+        pipeline_slug = slug.split('/')[1]
 
-    response = requests.delete(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
-                               headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                        "content-type": "application/json"})
-    if response.status_code == 200:
-        logger.info("Pipeline undeployed")
-    else:
-        logger.error(response.text)
-        raise Exception("Unable to undeploy and replace existing pipeline")
-
-
+        response = requests.delete(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
+                                   headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                            "content-type": "application/json"})
+        if response.status_code == 200:
+            logger.info("Pipeline undeployed")
+        else:
+            logger.error(response.text)
+            raise Exception("Unable to undeploy and replace existing pipeline")
 
 
 class RemoteSession:
