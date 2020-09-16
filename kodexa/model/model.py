@@ -570,9 +570,20 @@ class ContentNode(object):
         if start_index is not None:
             [node.tag(tag_to_apply) for node in all_nodes[start_index:end_index]]
 
+    def tag_text_tree(self):
+        """
+        Return a text tree
+        :return:
+        """
+        from anytree import RenderTree
+        result = ""
+        for pre, _, node in RenderTree(self):
+            result = result + ("%s%s" % (pre, f"{node.content} ({node.node_type}) {node.get_tags()}\n"))
+        return result
+
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=False,
-            fixed_position=None, data=None):
+            fixed_position=None, data=None, separator=" "):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
@@ -582,20 +593,49 @@ class ContentNode(object):
         :param selector: The selector to identify the source nodes to work on (default . - the current node)
         :param content_re: the regular expression that you wish to use to tag, note that we will create a tag for each matching group
         :param use_all_content: apply the regular expression to the all_content (include content from child nodes)
+        :param separator: Separator to use for use_all_content
         :param node_only: Ignore the matching groups and tag the whole node
         :param fixed_position: use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
         :param data: Attach the a dictionary of data for the given tag
+
         """
+
+        def tag_node_position(node_to_check, start, end, node_data):
+            if len(node_to_check.content) > 0:
+                if start < len(node_to_check.content) and end < len(node_to_check.content):
+                    node_to_check.add_feature('tag', tag_to_apply,
+                                              Tag(start, end,
+                                                  node_to_check.content[start:end],
+                                                  data=node_data))
+                    return -1
+                elif start < len(node_to_check.content) <= end:
+                    node_to_check.add_feature('tag', tag_to_apply,
+                                              Tag(start,
+                                                  len(node_to_check.content),
+                                                  value=node_to_check.content[start:],
+                                                  data=node_data))
+
+            end = end - len(node_to_check.content) + len(separator)
+            start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
+                node_to_check.content) - len(separator)
+
+            for child_node in node_to_check.children:
+                result = tag_node_position(child_node, start, end, node_data)
+                if result < 0:
+                    return -1
+                else:
+                    end = end - result
+                    start = 0 if start - result < 0 else start - result
+
+            return end
 
         if content_re:
             pattern = re.compile(content_re)
 
         for node in self.select(selector):
             if fixed_position:
-                node.add_feature('tag', tag_to_apply,
-                                 Tag(fixed_position[0], fixed_position[1],
-                                     node.content[fixed_position[0]:fixed_position[1]],
-                                     data))
+                tag_node_position(node, fixed_position[0], fixed_position[1], data)
+
             else:
                 if not content_re:
                     node.add_feature('tag', tag_to_apply, Tag(data=data))
@@ -606,7 +646,7 @@ class ContentNode(object):
                         else:
                             content = None
                     else:
-                        content = node.get_all_content()
+                        content = node.get_all_content(separator=separator)
 
                     if content is not None:
                         match = pattern.match(content)
@@ -617,12 +657,16 @@ class ContentNode(object):
                                 for index, m in enumerate(match.groups()):
                                     idx = index + 1
 
-                                    if not use_all_content:
+                                    if node_only:
                                         node.add_feature('tag', tag_to_apply,
-                                                         Tag(match.start(idx), match.end(idx), match.group(idx), data=data))
+                                                         Tag(match.start(idx), match.end(idx), match.group(idx),
+                                                             data=data))
                                     else:
                                         # We need to work out where the content is in the child nodes
-                                        pass
+                                        start_offset = match.start(idx)
+                                        end_offset = match.end(idx)
+
+                                        tag_node_position(node, start_offset, end_offset, data)
 
     def get_tags(self):
         """
@@ -647,8 +691,9 @@ class ContentNode(object):
         for tag in self.get_tag(tag_name):
             values.append(tag.value)
 
-        for child in self.get_children():
-            values.extend(child.get_tag_values(tag_name, include_children))
+        if include_children:
+            for child in self.get_children():
+                values.extend(child.get_tag_values(tag_name, include_children))
 
         return values
 
