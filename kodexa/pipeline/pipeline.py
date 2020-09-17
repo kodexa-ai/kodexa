@@ -260,8 +260,10 @@ class PipelineStep:
 
         if self.condition:
             from simpleeval import simple_eval
+            from addict import Dict
+            addict_dict = Dict(context.context)
             return bool(
-                simple_eval(self.condition, names={'document': document, 'step': self}))
+                simple_eval(self.condition, names={'context': addict_dict}))
 
         return True
 
