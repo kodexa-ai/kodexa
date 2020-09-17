@@ -187,15 +187,21 @@ class PipelineStep:
     It is internally used by the Pipeline and is not a public API
     """
 
-    def __init__(self, step, enabled=False, condition=None, name=None, options=None, attach_source=False):
+    def __init__(self, step, enabled=False, condition=None, name=None, options=None, attach_source=False,
+                 parameterized=False):
         if options is None:
             options = {}
         self.step = step
         self.name = name
         self.condition = condition
         self.enabled = enabled
+        self.options = options
+        self.parameterized = parameterized
 
-        if callable(self.step):
+        if str(type(self.step)) == "<class 'type'>":
+            logging.info(f"Adding new step class {step.__name__} to pipeline {self.name}")
+            self.step = step
+        elif callable(self.step):
             logging.info(f"Adding new step function {step.__name__} to pipeline {self.name}")
             self.name = step.__name__
         elif isinstance(self.step, str):
@@ -226,8 +232,43 @@ class PipelineStep:
             try:
 
                 context.set_current_document(document)
+                if str(type(self.step)) == "<class 'type'>":
 
-                if not callable(self.step):
+                    # We need to handle the parameterization
+                    import copy
+
+                    option_copy = copy.deepcopy(self.options)
+                    if self.parameterized:
+                        import collections
+
+                        def replace_params(opts, params):
+                            if isinstance(opts, dict):
+                                for key, val in opts.items():
+                                    opts[key] = replace_params(val, params)
+                            elif isinstance(opts, list):
+                                new_list = []
+                                for list_val in opts:
+                                    new_list.append(replace_params(list_val))
+                                return new_list
+                            elif isinstance(opts, str):
+                                if opts.startswith('${') and opts.endswith('}'):
+                                    param_name = opts[2:-1]
+                                    if param_name in params:
+                                        return params[param_name]
+                                    else:
+                                        raise Exception("Unable to find parameter name " + param_name)
+
+                            return opts
+
+                        replace_params(option_copy, context.parameters)
+
+                    step_instance = self.step(**option_copy)
+                    if len(signature(step_instance.process).parameters) == 1:
+                        return step_instance.process(document)
+                    else:
+                        return step_instance.process(document, context)
+
+                elif not callable(self.step):
                     logging.info(f"Starting step {self.step.get_name()}")
 
                     if len(signature(self.step.process).parameters) == 1:
@@ -312,7 +353,8 @@ class Pipeline:
 
         return self
 
-    def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False):
+    def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
+                 parameterized=False):
         """
         Add the given step to the current pipeline
 
@@ -337,12 +379,13 @@ class Pipeline:
         :param condition: condition to evaluate before executing the step (default None)
         :param options: options to be passed to the step if it is a simplified remote action
         :param attach_source: if step is simplified remote action this determines if we need to add the source
+        :param parameterized: apply the pipeline's parameters to the options
 
         """
         if options is None:
             options = {}
         self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition, options=options,
-                                       attach_source=attach_source))
+                                       attach_source=attach_source, parameterized=parameterized))
 
         return self
 
@@ -381,7 +424,7 @@ class Pipeline:
 
         return yaml.dump(configuration_steps)
 
-    def run(self):
+    def run(self, parameters=None):
         """
         Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
 
@@ -391,7 +434,12 @@ class Pipeline:
 
         :return: The context from the run
         """
+        if parameters is None:
+            parameters = {}
+
         self.context.statistics = PipelineStatistics()
+        self.context.parameters = parameters
+
         logging.info(f"Starting pipeline {self.name}")
         for document in self.connector:
 
@@ -401,24 +449,26 @@ class Pipeline:
             for step in self.steps:
                 document = step.execute(self.context, document)
 
-            if self.sink:
-                logging.info(f"Writing to sink {self.sink.get_name()}")
-                try:
-                    self.sink.sink(document)
-                except:
-                    if document:
-                        document.exceptions.append({
-                            "step": self.sink.get_name(),
-                            "exception": sys.exc_info()[0]
-                        })
-                    if self.context.stop_on_exception:
-                        raise
-
             if document:
+                if self.sink:
+                    logging.info(f"Writing to sink {self.sink.get_name()}")
+                    try:
+                        self.sink.sink(document)
+                    except:
+                        if document:
+                            document.exceptions.append({
+                                "step": self.sink.get_name(),
+                                "exception": sys.exc_info()[0]
+                            })
+                        if self.context.stop_on_exception:
+                            raise
+
                 document.log = log_stream.getvalue()
 
-            self.context.statistics.processed_document(document)
-            self.context.output_document = document
+                self.context.statistics.processed_document(document)
+                self.context.output_document = document
+            else:
+                logging.warning("A step did not return a document?")
 
         logging.info(f"Completed pipeline {self.name}")
 
@@ -506,5 +556,5 @@ class PipelineStatistics:
         """
         self.documents_processed += 1
 
-        if document.exceptions:
+        if document and document.exceptions:
             self.document_exceptions += 1
