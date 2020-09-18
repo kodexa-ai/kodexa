@@ -213,15 +213,25 @@ class PipelineStep:
 
     def to_dict(self):
         try:
-            if callable(self.step):
+            if str(type(self.step)) == "<class 'type'>":
+                raise Exception("You can not yet deploy a pipeline with a class instance style step")
+            elif isinstance(self.step, str):
+                return {
+                    'ref': self.step,
+                    'options': self.options
+                }
+            elif callable(self.step):
                 metadata = {
                     'function': self.step.__name__,
                     'script': dedent(inspect.getsource(self.step))
                 }
             else:
                 metadata = self.step.to_dict()
+
             metadata['name'] = self.name
             metadata['condition'] = self.condition
+            metadata['conditional'] = self.condition is not None
+            metadata['parameterized'] = self.parameterized
             metadata['enabled'] = self.enabled
             return metadata
         except AttributeError as e:
