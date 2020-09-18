@@ -38,7 +38,6 @@ class PipelineMetadataBuilder:
                 step_meta['name'] = f"Step {idx + 1}"
 
             if 'script' in step_meta:
-                print(str(step_meta))
                 pipeline_metadata.metadata.steps.append({
                     'ref': 'kodexa/python-step',
                     'name': step_meta['name'],
@@ -244,6 +243,7 @@ class RemoteSession:
             if status != execution.status:
                 logger.info(f"Status changed from {status} -> {execution.status}")
                 status = execution.status
+
             time.sleep(1)
 
         if status == "FAILED":
@@ -345,7 +345,6 @@ class RemotePipeline:
             cloud_session.merge_stores(execution, self.context)
 
             self.context.statistics.processed_document(document)
-            self.context.output_document = document
 
             if self.sink:
                 logging.info(f"Writing to sink {self.sink.get_name()}")
