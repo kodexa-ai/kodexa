@@ -601,23 +601,26 @@ class ContentNode(object):
         """
 
         def tag_node_position(node_to_check, start, end, node_data):
-            if node_to_check.content and len(node_to_check.content) > 0:
-                if start < len(node_to_check.content) and end < len(node_to_check.content):
-                    node_to_check.add_feature('tag', tag_to_apply,
-                                              Tag(start, end,
-                                                  node_to_check.content[start:end],
-                                                  data=node_data))
-                    return -1
-                elif start < len(node_to_check.content) <= end:
-                    node_to_check.add_feature('tag', tag_to_apply,
-                                              Tag(start,
-                                                  len(node_to_check.content),
-                                                  value=node_to_check.content[start:],
-                                                  data=node_data))
 
-            end = end - len(node_to_check.content) + len(separator)
-            start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
-                node_to_check.content) - len(separator)
+            # Make sure we have content on the node
+            if node_to_check.content:
+                if len(node_to_check.content) > 0:
+                    if start < len(node_to_check.content) and end < len(node_to_check.content):
+                        node_to_check.add_feature('tag', tag_to_apply,
+                                                  Tag(start, end,
+                                                      node_to_check.content[start:end],
+                                                      data=node_data))
+                        return -1
+                    elif start < len(node_to_check.content) <= end:
+                        node_to_check.add_feature('tag', tag_to_apply,
+                                                  Tag(start,
+                                                      len(node_to_check.content),
+                                                      value=node_to_check.content[start:],
+                                                      data=node_data))
+
+                end = end - len(node_to_check.content) + len(separator)
+                start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
+                    node_to_check.content) - len(separator)
 
             for child_node in node_to_check.children:
                 result = tag_node_position(child_node, start, end, node_data)
