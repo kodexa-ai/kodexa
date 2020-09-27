@@ -601,7 +601,7 @@ class ContentNode(object):
         """
 
         def tag_node_position(node_to_check, start, end, node_data):
-            if len(node_to_check.content) > 0:
+            if node_to_check.content and len(node_to_check.content) > 0:
                 if start < len(node_to_check.content) and end < len(node_to_check.content):
                     node_to_check.add_feature('tag', tag_to_apply,
                                               Tag(start, end,
@@ -1470,7 +1470,7 @@ class KodexaRender:
     def build_html(self, document: Document, node: ContentNode):
         render_uuid = str(uuid.uuid4())
         return """
-  <div id='kodexa-div-""" + render_uuid + """'></div> 
+  <div id='kodexa-div-""" + render_uuid + """'></div>
   <script>
 
 require.config({
@@ -1486,7 +1486,7 @@ require(['kodexa-lib-""" + render_uuid + """','jquery'], function() {
        widget.attach($('#kodexa-div-""" + render_uuid + """'))
        widget.render(""" + ("'" + node.uuid + "'" if node else "") + """);
     });
-    
+
 });
 </script>
 """
