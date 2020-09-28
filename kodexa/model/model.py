@@ -582,12 +582,15 @@ class ContentNode(object):
         return result
 
     def tag(self, tag_to_apply, selector=".", content_re=None,
-            use_all_content=False, node_only=False,
+            use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" "):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
             >>> document.content_node.tag('is_cheese')
+
+        Note that if you use the flag use_all_content then node_only will default to True if not set, else it
+        will default to False
 
         :param tag_to_apply: the name of tag that will be applied to the node
         :param selector: The selector to identify the source nodes to work on (default . - the current node)
@@ -599,6 +602,11 @@ class ContentNode(object):
         :param data: Attach the a dictionary of data for the given tag
 
         """
+
+        if use_all_content and node_only is None:
+            node_only = True
+        elif node_only is None:
+            node_only = False
 
         def tag_node_position(node_to_check, start, end, node_data):
 
