@@ -8,6 +8,7 @@ import time
 from json import JSONDecodeError
 
 import requests
+import yaml
 from addict import Dict
 
 from kodexa.connectors import get_source
@@ -66,11 +67,13 @@ class KodexaPlatform:
 
     @staticmethod
     def set_access_token(access_token):
-        os.environ["KODEXA_ACCESS_TOKEN"] = access_token
+        if access_token is not None:
+            os.environ["KODEXA_ACCESS_TOKEN"] = access_token
 
     @staticmethod
     def set_url(url):
-        os.environ["KODEXA_URL"] = url
+        if url is not None:
+            os.environ["KODEXA_URL"] = url
 
     """
     The deployer allows you to take a locally build Pipeline and then push that pipeline
@@ -89,6 +92,21 @@ class KodexaPlatform:
                 raise Exception("Unable to find access token")
             else:
                 raise Exception("An error occurred connecting to the Kodexa platform")
+
+    @staticmethod
+    def deploy_extension(metadata):
+
+        print(metadata.to_dict())
+
+        response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/",
+                                 json=metadata.to_dict(),
+                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                          "content-type": "application/json"})
+        if response.status_code == 200:
+            logger.info("Extension deployed")
+        else:
+            logger.error(response.text)
+            raise Exception("Unable to deploy new extension")
 
     @staticmethod
     def deploy(slug: str, pipeline: Pipeline, name: str = "A new pipeline", description: str = "A Kodexa Pipeline",
@@ -165,6 +183,13 @@ class KodexaPlatform:
             else:
                 logger.info("Not updating")
                 return
+
+    @staticmethod
+    def list_objects(organization_slug, object_type):
+        list_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}",
+                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                              "content-type": "application/json"})
+        print(list_response.json())
 
     @staticmethod
     def undeploy(slug: str):
@@ -464,3 +489,22 @@ class RemoteAction:
             "ref": self.slug,
             "options": self.options
         }
+
+
+class ExtensionHelper:
+
+    @staticmethod
+    def load_metadata(path):
+        if os.path.exists(os.path.join(path, 'dharma.json')):
+            dharma_metadata_file = open(os.path.join(path, 'dharma.json'))
+            dharma_metadata = Dict(json.loads(dharma_metadata_file.read()))
+        elif os.path.exists(os.path.join(path, 'dharma.yml')):
+            dharma_metadata_file = open(os.path.join(path, 'dharma.yml'))
+            dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
+        elif os.path.exists(os.path.join(path, 'kodexa.yml')):
+            dharma_metadata_file = open(os.path.join(path, 'kodexa.yml'))
+            dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
+        else:
+            raise Exception("Unable to find a kodexa.yml file describing your extension")
+
+        return dharma_metadata

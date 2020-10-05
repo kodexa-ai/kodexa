@@ -21,7 +21,7 @@ setup(name='kodexa',
       url='https://www.github.com/kodexa-ai/kodexa',
       packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.sinks', 'kodexa.pipeline',
                 'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.selectors',
-                'kodexa.cloud', 'kodexa.testing'],
+                'kodexa.cloud', 'kodexa.testing', 'kodexa.cli'],
       install_requires=[
           'addict==2.2.1',
           'requests==2.24.0',
@@ -29,7 +29,32 @@ setup(name='kodexa',
           'urllib3==1.25.8',
           'pyyaml',
           'ply',
-          'deepdiff'
+          'click',
+          'deepdiff',
+          'texttable'
+      ],
+      entry_points="""
+        [console_scripts]
+        kodexa=kodexa.cli.cli:cli
+        """,
+      classifiers=[
+          # How mature is this project? Common values are
+          #   3 - Alpha
+          #   4 - Beta
+          #   5 - Production/Stable
+          'Development Status :: 5 - Production/Stable',
+
+          # Indicate who your project is intended for.
+          'Intended Audience :: Developers',
+          'Topic :: Software Development :: Libraries',
+
+          # Pick your license.  (It should match "license" above.)
+
+          '''License :: OSI Approved :: Apache 2.0''',  # noqa
+          # noqa
+          # Specify the Python versions you support here. In particular, ensure
+          # that you indicate whether you support Python 2, Python 3 or both.
+          'Programming Language :: Python :: 3.8',
       ],
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])
