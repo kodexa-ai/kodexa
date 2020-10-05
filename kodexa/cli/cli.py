@@ -22,6 +22,7 @@ import logging
 import os
 
 import click
+from texttable import Texttable
 
 from kodexa.cloud.kodexa import ExtensionHelper, KodexaPlatform
 
@@ -84,17 +85,28 @@ def deploy(_: Info, path: str, url: str, token: str):
     KodexaPlatform.deploy_extension(metadata)
 
 
-@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
-@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@cli.command()
 @click.argument('object_type')
 @click.argument('organization_slug')
-@cli.command()
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def get(_: Info, object_type: str, organization_slug: str, url: str, token: str):
     """Deploy extension pack to an Kodexa platform instance"""
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.list_objects(organization_slug, object_type)
+    objects = KodexaPlatform.list_objects(organization_slug, object_type)
+    table = Texttable().header(['org', 'slug', 'name', 'description', 'type'])
+    for object_dict in objects['content']:
+        table.add_row([
+            object_dict['orgSlug'],
+            object_dict['slug'],
+            object_dict['name'] if 'name' in object_dict else '',
+            object_dict['description'] if 'description' in object_dict else '',
+            object_dict['type'],
+        ])
+
+    print(table.draw() + "\n")
 
 
 @cli.command()

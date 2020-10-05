@@ -95,9 +95,6 @@ class KodexaPlatform:
 
     @staticmethod
     def deploy_extension(metadata):
-
-        print(metadata.to_dict())
-
         response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/",
                                  json=metadata.to_dict(),
                                  headers={"x-access-token": KodexaPlatform.get_access_token(),
@@ -189,7 +186,11 @@ class KodexaPlatform:
         list_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}",
                                      headers={"x-access-token": KodexaPlatform.get_access_token(),
                                               "content-type": "application/json"})
-        print(list_response.json())
+        if list_response.status_code == 200:
+            return list_response.json()
+        else:
+            logger.error(list_response.text)
+            raise Exception("Unable to list objects")
 
     @staticmethod
     def undeploy(slug: str):
