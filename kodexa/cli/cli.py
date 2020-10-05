@@ -110,6 +110,20 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
 
 
 @cli.command()
+@click.argument('object_type')
+@click.argument('organization_slug')
+@click.argument('slug')
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@pass_info
+def delete(_: Info, object_type: str, organization_slug: str, slug: str, url: str, token: str):
+    """Delete object from the platform"""
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+    KodexaPlatform.delete_object(organization_slug, slug, object_type)
+
+
+@cli.command()
 @click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
 @pass_info
 def metadata(_: Info, path: str):

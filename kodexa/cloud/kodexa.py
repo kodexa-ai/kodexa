@@ -206,6 +206,15 @@ class KodexaPlatform:
             logger.error(response.text)
             raise Exception("Unable to undeploy and replace existing pipeline")
 
+    @staticmethod
+    def delete_object(organization_slug, slug, object_type):
+        delete_response = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}/{slug}",
+                                          headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                                   "content-type": "application/json"})
+        if delete_response.status_code != 200:
+            logger.error(delete_response.text)
+            raise Exception("Unable to list objects")
+
 
 class RemoteSession:
     """
