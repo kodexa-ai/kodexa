@@ -50,7 +50,7 @@ setup(name='kodexa',
 
           # Pick your license.  (It should match "license" above.)
 
-          '''License :: OSI Approved :: Apache 2.0''',  # noqa
+          '''License :: OSI Approved :: Apache Software License''',  # noqa
           # noqa
           # Specify the Python versions you support here. In particular, ensure
           # that you indicate whether you support Python 2, Python 3 or both.
