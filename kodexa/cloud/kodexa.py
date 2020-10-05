@@ -95,7 +95,7 @@ class KodexaPlatform:
 
     @staticmethod
     def deploy_extension(metadata):
-        response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/",
+        response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{metadata['orgSlug']}",
                                  json=metadata.to_dict(),
                                  headers={"x-access-token": KodexaPlatform.get_access_token(),
                                           "content-type": "application/json"})
