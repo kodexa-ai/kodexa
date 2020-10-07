@@ -1,0 +1,65 @@
+# {{service.name}}
+
+### **Overview**
+
+{{service.description}}
+
+{% if service.metadata.options is defined and service.metadata.options|length > 0 %}
+### **Parameters**
+
+| **Parameter Name** | Default | Required? | Type | Description |
+| :--- | :--- | :--- | :--- | :--- |
+{% for option in service.metadata.options %}| {{option.name}} | {{option.default}} | {{option.required}} | {{option.type}} | {{option.description}} |
+{% if option.group|length > 0 -%}| _Additional options if {{option.name}} is True (option group : {{option.group.name}}_ ) | | | | |
+{% for group_option in option.group.options %}| {{group_option.name}} | {{group_option.default}} | {{group_option.required}} | {{group_option.type}} | {{group_option.description}} |
+{% endfor -%}
+| _End of option group : {{option.group.name}}_ | | | | |
+{% endif %}
+{%- endfor %}
+{% endif %}
+
+### **Code Samples**
+
+The following section provides an example of how you might use this cloud action in different languages.
+
+#### YAML
+
+The following is an example of how you register the action using YAML
+
+```yaml
+- name: Example Step
+  ref: {{service.slug}}
+  options: {}
+```
+
+#### Python
+
+The following is an example of adding the action to a Python pipeline
+
+```python
+pipeline = Pipeline.from_folder('/myfiles','*.*')
+pipeline.add_step(RemoteAction(slug='{{service.ref}}', options={}, attach_source={{service.metadata.requiresSource}}))
+context = pipeline.run()
+
+document = context.output_document
+```
+
+[Get Started with Python](https://developer.kodexa.com/developers/quick-starts/python-quick-start)
+
+#### Java
+
+The following is an example of adding the action to a Python pipeline
+
+```java
+Pipeline pipeline = Pipeline.fromFolder('/myfiles','*.*', false)
+pipeline.addStep(new RemoteAction("{{service.ref}}",
+                Options.start()
+                 {%- for option in service.metadata.options %}.set("{{option.name}}", "{{option.default}}"){% endfor %}
+                 {%- if service.metadata.requiresSource -%}.attachSource(){% endif %}
+                ));
+PipelineContext context = pipeline.run();
+
+Document output = content.getOutputDocument();
+```
+
+[Get Started with Java](https://developer.kodexa.com/developers/quick-starts/using-kodexa-with-java-and-maven)
