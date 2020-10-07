@@ -34,6 +34,24 @@ LOGGING_LEVELS = {
     4: logging.DEBUG,
 }  #: a mapping of `verbose` option counts to logging levels
 
+DEFAULT_COLUMNS = {
+    'extensionPacks': [
+        'orgSlug',
+        'slug',
+        'name',
+        'description',
+        'type',
+        'status'
+    ],
+    'default': [
+        'orgSlug',
+        'slug',
+        'name',
+        'description',
+        'type'
+    ]
+}
+
 
 class Info(object):
     """An information object to pass data between CLI functions."""
@@ -83,6 +101,7 @@ def deploy(_: Info, path: str, url: str, token: str):
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.deploy_extension(metadata)
+    click.echo(f"Deployed extension")
 
 
 @cli.command()
@@ -92,21 +111,26 @@ def deploy(_: Info, path: str, url: str, token: str):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def get(_: Info, object_type: str, organization_slug: str, url: str, token: str):
-    """Deploy extension pack to an Kodexa platform instance"""
+    """List the instance of the object type"""
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     objects = KodexaPlatform.list_objects(organization_slug, object_type)
-    table = Texttable().header(['org', 'slug', 'name', 'description', 'type'])
-    for object_dict in objects['content']:
-        table.add_row([
-            object_dict['orgSlug'],
-            object_dict['slug'],
-            object_dict['name'] if 'name' in object_dict else '',
-            object_dict['description'] if 'description' in object_dict else '',
-            object_dict['type'],
-        ])
 
-    print(table.draw() + "\n")
+    cols = DEFAULT_COLUMNS['default']
+
+    if object_type in DEFAULT_COLUMNS:
+        cols = DEFAULT_COLUMNS[object_type]
+
+    table = Texttable().header(cols)
+    for object_dict in objects['content']:
+        row = []
+
+        for col in cols:
+            row.append(object_dict[col] if col in object_dict else '')
+
+        table.add_row(row)
+
+    click.echo(table.draw() + "\n")
 
 
 @cli.command()
@@ -121,6 +145,7 @@ def delete(_: Info, object_type: str, organization_slug: str, slug: str, url: st
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.delete_object(organization_slug, slug, object_type)
+    click.echo(f"Deleted {object_type} {organization_slug}/{slug}")
 
 
 @cli.command()
@@ -129,3 +154,15 @@ def delete(_: Info, object_type: str, organization_slug: str, slug: str, url: st
 def metadata(_: Info, path: str):
     """Load metadata"""
     metadata = ExtensionHelper.load_metadata(path)
+    click.echo("Metadata loaded and valid")
+
+
+@cli.command()
+@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
+@pass_info
+def document(_: Info, path: str):
+    """Load metadata"""
+    metadata = ExtensionHelper.load_metadata(path)
+    from kodexa.cli.documentation import generate_documentation
+    generate_documentation(metadata)
+    click.echo("Documentation built")

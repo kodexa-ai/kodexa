@@ -21,7 +21,7 @@ setup(name='kodexa',
       url='https://www.github.com/kodexa-ai/kodexa',
       packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.sinks', 'kodexa.pipeline',
                 'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.selectors',
-                'kodexa.cloud', 'kodexa.testing', 'kodexa.cli'],
+                'kodexa.cloud', 'kodexa.testing', 'kodexa.cli', 'kodexa.cli.templates'],
       install_requires=[
           'addict==2.2.1',
           'requests==2.24.0',
@@ -31,7 +31,9 @@ setup(name='kodexa',
           'ply',
           'click',
           'deepdiff',
-          'texttable'
+          'simpleeval',
+          'texttable',
+          'jinja2'
       ],
       entry_points="""
         [console_scripts]
@@ -56,5 +58,9 @@ setup(name='kodexa',
           # that you indicate whether you support Python 2, Python 3 or both.
           'Programming Language :: Python :: 3.8',
       ],
+      package_data={
+          # If any package contains *.j2
+          '': ['*.j2'],
+      },
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])
