@@ -505,6 +505,7 @@ class ExtensionHelper:
 
     @staticmethod
     def load_metadata(path):
+
         if os.path.exists(os.path.join(path, 'dharma.json')):
             dharma_metadata_file = open(os.path.join(path, 'dharma.json'))
             dharma_metadata = Dict(json.loads(dharma_metadata_file.read()))

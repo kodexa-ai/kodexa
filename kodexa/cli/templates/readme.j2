@@ -1,0 +1,34 @@
+# {{ metadata.description }}
+
+## Setting up Development Environment
+
+If you want to build this project, it should follow Kodexa standards and therefore should be able to run:
+
+    conda env create -f environment.yml --force
+
+This will create the base environment, make sure you activate the environment in Conda. In IntelliJ you can now use this
+Conda Environment as your runtime Python.
+
+You can then use pip to manage your dependencies:
+
+    pip install -r requirements.txt
+
+# Packaged Extensions
+
+## Actions
+
+The following actions are available as part of this project
+
+{% for service in metadata.services %}
+  * [{{service.name}}](docs/{{service.slug}}.md)
+{% endfor %}
+
+
+## Updating Documentation
+
+This documentation is generated with the Kodexa CLI tool, if you want to regenerate it (for example you have edited
+the kodexa.yml) you can run:
+
+    kodexa document
+
+Built with :heart: by Kodexa CLI
