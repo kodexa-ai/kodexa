@@ -168,7 +168,7 @@ def test_fluent_pipeline():
 
 
 def test_url_pipeline():
-    document = Document(DocumentMetadata({"connector": "url", "connector_options": {"url": "http://www.google.com"}}))
+    document = Document.from_url("http://www.google.com")
     new_document_store = JsonDocumentStore("/tmp/test-json-store", force_initialize=True)
 
     stats = Pipeline(document).add_step(TextParser(encoding='ISO-8859-1')).set_sink(new_document_store).run().statistics
@@ -256,7 +256,7 @@ def test_basic_url_pipeline():
     pipeline.run()
 
     doc = pipeline.context.output_document
-    assert doc.metadata.connector_options.url == url
+    assert doc.source.original_path == url
 
 
 def test_basic_text_pipeline():

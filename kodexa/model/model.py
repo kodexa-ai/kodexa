@@ -8,6 +8,7 @@ from typing import List, Optional, Any
 
 import msgpack
 from addict import Dict
+from dataclasses_json import dataclass_json
 
 from kodexa.mixins import registry
 
@@ -1162,6 +1163,7 @@ class DocumentRender:
 
 
 @dataclass
+@dataclass_json
 class SourceMetadata(object):
     """
     Class for keeping track of the original source information for a
@@ -1412,8 +1414,8 @@ class Document(object):
         :rtype: Document
         """
         file_document = Document()
-        file_document.metadata.connector = 'file-handle'
-        file_document.metadata.connector_options.file = file
+        file_document.source.connector = 'file-handle'
+        file_document.source.original_path = file
         return file_document
 
     @classmethod
@@ -1430,9 +1432,9 @@ class Document(object):
         if headers is None:
             headers = {}
         url_document = Document()
-        url_document.metadata.connector = 'url'
-        url_document.metadata.connector_options.url = url
-        url_document.metadata.connector_options.headers = headers
+        url_document.source.connector = 'url'
+        url_document.source.original_path = url
+        url_document.source.headers = headers
         return url_document
 
     def select(self, selector, variables={}):
