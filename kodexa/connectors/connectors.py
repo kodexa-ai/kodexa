@@ -46,8 +46,9 @@ class FolderConnector:
         self.files = self.__get_files__()
         self.index = 0
 
-    def get_source(self, document):
-        return open(join(self.path, document.source.original_filename), 'rb')
+    @staticmethod
+    def get_source(document):
+        return open(join(document.source.original_path, document.source.original_filename), 'rb')
 
     def __iter__(self):
         return self
@@ -93,13 +94,14 @@ class FileHandleConnector:
     def get_name():
         return 'file-handle'
 
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, original_path):
+        self.file = original_path
         self.index = 0
         self.completed = False
 
-    def get_source(self, document):
-        return open(document.source.original_filename, 'rb')
+    @staticmethod
+    def get_source(document):
+        return open(document.source.original_path, 'rb')
 
     def __iter__(self):
         return self
@@ -146,7 +148,8 @@ class KodexaPlatformStore:
         else:
             self.objects = content_objects_response.json()['content']
 
-    def get_source(self, document):
+    @staticmethod
+    def get_source(document):
         from kodexa import KodexaPlatform
         doc = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{document.source.original_path}",
@@ -181,15 +184,16 @@ class UrlConnector:
     def get_name():
         return "url"
 
-    def __init__(self, url, headers=None):
+    def __init__(self, original_path, headers=None):
         if headers is None:
             headers = {}
-        self.url = url
+        self.url = original_path
         self.headers = headers
         self.index = 0
         self.completed = False
 
-    def get_source(self, document):
+    @staticmethod
+    def get_source(document):
 
         # If we have an http URL then we should use requests, it is much
         # cleaner
@@ -233,7 +237,7 @@ def get_connectors():
 def get_connector(connector, options):
     if connector in registered_connectors:
         logging.info("Getting registered connector")
-        return registered_connectors[connector](**options)
+        return registered_connectors[connector]
     else:
         logging.info(f"Unable to find connector {connector}")
         return None
@@ -244,9 +248,8 @@ def add_connector(connector):
 
 
 def get_source(document):
-    connector = get_connector(document.metadata['connector'],
-                              document.metadata[
-                                  'connector_options'] if 'connector_options' in document.metadata else {})
+    connector = get_connector(document.source.connector,
+                              document.source)
     return connector.get_source(document)
 
 

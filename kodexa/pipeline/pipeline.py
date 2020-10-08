@@ -331,7 +331,7 @@ class PipelineStep:
         return True
 
     def get_cache_name(self, document):
-        return f"{self.cache_path}/{document.source.original_filename}.kdxa"
+        return f"{self.cache_path}/{document.source.original_filename if document.source.original_filename is not None else document.source.original_path.replace('/', '_')}.kdxa"
 
 
 class Pipeline:
