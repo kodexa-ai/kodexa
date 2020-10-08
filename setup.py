@@ -5,12 +5,14 @@ import os
 from setuptools import setup
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+version_file = open(os.path.join(dir_path, 'VERSION'))
+version = version_file.read().strip()
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='kodexa',
-      version='2.2.0',
+      version=version,
       author='Kodexa',
       description='Kodexa Content Framework',
       author_email='support@kodexa.io',
