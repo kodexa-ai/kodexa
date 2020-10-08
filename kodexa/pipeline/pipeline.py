@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import os
 import sys
 import traceback
 import uuid
@@ -188,7 +189,7 @@ class PipelineStep:
     """
 
     def __init__(self, step, enabled=False, condition=None, name=None, options=None, attach_source=False,
-                 parameterized=False):
+                 parameterized=False, cache_path=None):
         if options is None:
             options = {}
         self.step = step
@@ -197,6 +198,7 @@ class PipelineStep:
         self.enabled = enabled
         self.options = options
         self.parameterized = parameterized
+        self.cache_path = cache_path
 
         if str(type(self.step)) == "<class 'type'>":
             logging.info(f"Adding new step class {step.__name__} to pipeline {self.name}")
@@ -238,6 +240,13 @@ class PipelineStep:
             raise Exception("All steps must implement to_dict() for deployment", e)
 
     def execute(self, context, document):
+
+        if self.cache_path:
+            # Check to see if we have a cached file
+            cache_name = self.get_cache_name(document)
+            if os.path.isfile(cache_name):
+                return Document.from_kdxa(cache_name)
+
         if self.will_execute(context, document):
             try:
 
@@ -303,6 +312,9 @@ class PipelineStep:
                 else:
                     return document
         else:
+            if self.cache_path:
+                document.to_kdxa(self.get_cache_name(document))
+
             return document
 
     def will_execute(self, context, document):
@@ -317,6 +329,9 @@ class PipelineStep:
                 simple_eval(self.condition, names={'context': addict_dict}))
 
         return True
+
+    def get_cache_name(self, document):
+        return f"{self.cache_path}/{document.source.original_filename}.kdxa"
 
 
 class Pipeline:
@@ -364,7 +379,7 @@ class Pipeline:
         return self
 
     def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
-                 parameterized=False):
+                 parameterized=False, cache_path=None):
         """
         Add the given step to the current pipeline
 
@@ -390,12 +405,13 @@ class Pipeline:
         :param options: options to be passed to the step if it is a simplified remote action
         :param attach_source: if step is simplified remote action this determines if we need to add the source
         :param parameterized: apply the pipeline's parameters to the options
+        :param cache_path: cache the document locally, note this is only for local pipelines
 
         """
         if options is None:
             options = {}
         self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition, options=options,
-                                       attach_source=attach_source, parameterized=parameterized))
+                                       attach_source=attach_source, parameterized=parameterized, cache_path=cache_path))
 
         return self
 
