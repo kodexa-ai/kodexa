@@ -87,13 +87,13 @@ def test_virtual_navigation():
     assert document.content_node.get_node_at_index(0).content is "fishstick"
 
     assert document.content_node.children[0].next_node().content is None
-    assert document.content_node.children[0].next_node().next_node().next_node().index is 3
-    assert document.content_node.children[0].next_node().next_node().next_node().next_node().index is 4
-    assert document.content_node.children[0].next_node().next_node().next_node().next_node().next_node().index is 5
+    assert document.content_node.children[0].next_node().next_node().next_node().index == 3
+    assert document.content_node.children[0].next_node().next_node().next_node().next_node().index == 4
+    assert document.content_node.children[0].next_node().next_node().next_node().next_node().next_node().index == 5
     assert document.content_node.children[
                0].next_node().next_node().next_node().next_node().next_node().next_node() is None
 
-    assert document.content_node.children[0].next_node().next_node().content is 'cheeseburger'
+    assert document.content_node.children[0].next_node().next_node().content == 'cheeseburger'
 
 
 def test_add_feature():
