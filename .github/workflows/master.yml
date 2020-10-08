@@ -25,4 +25,10 @@ jobs:
           pytest
       - name: Package
         run: |
+          bump
           python setup.py bdist_wheel sdist
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Version bump"
+          git push
