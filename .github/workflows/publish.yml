@@ -28,7 +28,7 @@ jobs:
           $CONDA/bin/mypy kodexa
       - name: Test with pytest
         run: |
-          conda install pytest
+          $CONDA/bin/conda activate base
           $CONDA/bin/pytest
       - name: Package
         run: |
