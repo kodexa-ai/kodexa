@@ -74,7 +74,7 @@ def test_virtual_navigation_with_no_0_index():
 
     assert document.content_node.get_node_at_index(0).content is None
     assert document.content_node.get_node_at_index(0).next_node().content is None
-    assert document.content_node.get_node_at_index(0).next_node().next_node().content is 'banana2'
+    assert document.content_node.get_node_at_index(0).next_node().next_node().content == 'banana2'
 
 
 def test_virtual_navigation():
@@ -84,7 +84,7 @@ def test_virtual_navigation():
 
     document.add_mixin('navigation')
 
-    assert document.content_node.get_node_at_index(0).content is "fishstick"
+    assert document.content_node.get_node_at_index(0).content == "fishstick"
 
     assert document.content_node.children[0].next_node().content is None
     assert document.content_node.children[0].next_node().next_node().next_node().index == 3
