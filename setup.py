@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='kodexa',
-      version='2.2.0',
+      version='2.2.1',
       author='Kodexa',
       description='Kodexa Content Framework',
       author_email='support@kodexa.io',
