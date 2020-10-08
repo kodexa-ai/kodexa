@@ -24,7 +24,7 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
           conda install mypy
-          mypy kodexa
+          $CONDA/bin/mypy kodexa
       - name: Test with pytest
         run: |
           conda install pytest
