@@ -1167,13 +1167,13 @@ class SourceMetadata(object):
     Class for keeping track of the original source information for a
     document
     """
-    original_filename: str = None
-    original_path: str = None
-    checksum: str = None
-    last_modified: str = None
-    created: str = None
-    connector: str = None
-    mime_type: str = None
+    original_filename: Optional[str] = None
+    original_path: Optional[str] = None
+    checksum: Optional[str] = None
+    last_modified: Optional[str] = None
+    created: Optional[str] = None
+    connector: Optional[str] = None
+    mime_type: Optional[str] = None
     headers: dict = field(default_factory=dict)
 
 
