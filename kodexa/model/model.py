@@ -2,6 +2,7 @@ import itertools
 import json
 import re
 import uuid
+from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Any
 
@@ -1160,8 +1161,20 @@ class DocumentRender:
         return self.kodexa_render.build_html(self.document, node)
 
 
+@dataclass
 class SourceMetadata(object):
-    pass
+    """
+    Class for keeping track of the original source information for a
+    document
+    """
+    original_filename: str
+    original_path: str
+    checksum: str
+    last_modified: str
+    created: str
+    connector: str
+    mime_type: str
+    headers: dict
 
 
 class Document(object):

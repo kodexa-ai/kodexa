@@ -11,7 +11,7 @@ from typing import Dict, Type
 
 import requests
 
-from kodexa.model import Document, DocumentMetadata
+from kodexa.model import Document
 
 
 def get_caller_dir():
@@ -31,12 +31,14 @@ class FolderConnector:
     def get_name():
         return "folder"
 
-    def __init__(self, path, file_filter="*", recursive=False, relative=False, caller_path=get_caller_dir()):
+    def __init__(self, path, file_filter="*", recursive=False, relative=False, caller_path=get_caller_dir(),
+                 unpack=False):
         self.path = path
         self.file_filter = file_filter
         self.recursive = recursive
         self.relative = relative
         self.caller_path = caller_path
+        self.unpack = unpack
 
         if not self.path:
             raise ValueError('You must provide a path')
@@ -45,7 +47,7 @@ class FolderConnector:
         self.index = 0
 
     def get_source(self, document):
-        return open(join(self.path, document.metadata.source_path), 'rb')
+        return open(join(self.path, document.source.original_filename), 'rb')
 
     def __iter__(self):
         return self
@@ -55,10 +57,17 @@ class FolderConnector:
             raise StopIteration
         else:
             self.index += 1
-            return Document(DocumentMetadata(
-                {"source_path": self.files[self.index - 1], "connector": self.get_name(),
-                 "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
-                 "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
+            if self.unpack:
+                return Document.from_kdxa(self.path)
+            else:
+                document = Document()
+                document.source.original_filename = self.files[self.index - 1]
+                document.source.original_path = self.path
+                document.source.connector = self.get_name()
+                document.source.mime_type = mimetypes.guess_type(self.files[self.index - 1])
+
+                # TODO we need to get the checksum and last_updated and created times
+                return document
 
     def __get_files__(self):
         all_files = []
@@ -90,7 +99,7 @@ class FileHandleConnector:
         self.completed = False
 
     def get_source(self, document):
-        return open(document.metadata['connector_options']['file'], 'rb')
+        return open(document.source.original_filename, 'rb')
 
     def __iter__(self):
         return self
@@ -99,10 +108,14 @@ class FileHandleConnector:
         if self.completed:
             raise StopIteration
         else:
-            return Document(DocumentMetadata(
-                {"source_path": self.file, "connector": self.get_name(),
-                 "mime_type": mimetypes.guess_type(self.file),
-                 "connector_options": {"file": self.file}}))
+            document = Document()
+            document.source.original_filename = self.file
+            document.source.original_path = self.path
+            document.source.connector = self.get_name()
+            document.source.mime_type = mimetypes.guess_type(self.file)
+
+            # TODO we need to get the checksum and last_updated and created times
+            return document
 
 
 class KodexaPlatformStore:
@@ -136,7 +149,7 @@ class KodexaPlatformStore:
     def get_source(self, document):
         from kodexa import KodexaPlatform
         doc = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{document.metadata['connector_options']['org_slug']}/{document.metadata['connector_options']['slug']}/contents/{document.metadata['connector_options']['id']}",
+            f"{KodexaPlatform.get_url()}/api/stores/{document.source.original_path}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         return Document.from_msgpack(doc.content)
 
@@ -156,9 +169,10 @@ class KodexaPlatformStore:
                     headers={"x-access-token": KodexaPlatform.get_access_token()})
                 return Document.from_msgpack(doc.content)
             else:
-                return Document(DocumentMetadata(
-                    {"connector": self.get_name(),
-                     "connector_options": {"org_slug": self.org_slug, "slug": self.slug, "id": content_object['id']}}))
+                document = Document()
+                document.source.connector = self.get_name()
+                document.source.original_path = f"{self.org_slug}/{self.slug}/contents/{content_object['id']}"
+                return document
 
 
 class UrlConnector:
@@ -179,18 +193,18 @@ class UrlConnector:
 
         # If we have an http URL then we should use requests, it is much
         # cleaner
-        if document.metadata['connector_options']['url'].startswith('http'):
-            response = requests.get(document.metadata['connector_options']['url'],
-                                    headers=document.metadata['connector_options']['headers'])
+        if document.source.original_path.startswith('http'):
+            response = requests.get(document.source.original_path,
+                                    headers=document.source.headers)
             return io.BytesIO(response.content)
         else:
-            if 'headers' in document.metadata.connector_options:
+            if document.source.headers:
                 opener = urllib.request.build_opener()
-                for header in document.metadata.connector_options.headers:
-                    opener.addheaders = [(header, document.metadata['connector_options']['headers'][header])]
+                for header in document.source.headers:
+                    opener.addheaders = [(header, document.source.headers[header])]
                 urllib.request.install_opener(opener)
             with tempfile.NamedTemporaryFile(delete=True) as tmp_file:
-                urllib.request.urlretrieve(document.metadata['connector_options']['url'], tmp_file.name)
+                urllib.request.urlretrieve(document.source.original_path, tmp_file.name)
 
                 return open(tmp_file.name, 'rb')
 
@@ -202,9 +216,11 @@ class UrlConnector:
             raise StopIteration
         else:
             self.completed = True
-            return Document(DocumentMetadata(
-                {"connector": self.get_name(),
-                 "connector_options": {"url": self.url, "headers": self.headers}}))
+            document = Document()
+            document.source.connector = self.get_name()
+            document.source.original_path = self.url
+            document.source.headers = self.headers
+            return document
 
 
 registered_connectors: Dict[str, Type] = {}
