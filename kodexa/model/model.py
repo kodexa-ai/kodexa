@@ -2,7 +2,7 @@ import itertools
 import json
 import re
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional, Any
 
@@ -1167,14 +1167,14 @@ class SourceMetadata(object):
     Class for keeping track of the original source information for a
     document
     """
-    original_filename: str
-    original_path: str
-    checksum: str
-    last_modified: str
-    created: str
-    connector: str
-    mime_type: str
-    headers: dict
+    original_filename: str = None
+    original_path: str = None
+    checksum: str = None
+    last_modified: str = None
+    created: str = None
+    connector: str = None
+    mime_type: str = None
+    headers: dict = field(default_factory=dict)
 
 
 class Document(object):
