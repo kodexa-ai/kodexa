@@ -18,6 +18,5 @@ simpleeval
 deepdiff==5.0.2
 click
 jinja2
-bump
 flake8
 dataclasses-json

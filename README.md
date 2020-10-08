@@ -1,6 +1,6 @@
 # Kodexa
 
-[![Build Status](https://dev.azure.com/kodexa/Dharma/_apis/build/status/kodexa-ai.kodexa?branchName=master)](https://dev.azure.com/kodexa/Dharma/_build/latest?definitionId=36&branchName=master)
+![Build](https://github.com/kodexa-ai/kodexa/workflows/Python%20Package%20Using%20Anaconda/badge.svg)
 ![https://docs.readthedocs.io/en/latest/?badge=latest](https://readthedocs.org/projects/docs/badge/?version=latest) 
 [![Slack](https://slack.kodexa.com/badge.svg?version)](https://slack.kodexa.com/)
 
