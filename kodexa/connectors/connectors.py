@@ -118,7 +118,7 @@ class FileHandleConnector:
                  "mime_type": mimetypes.guess_type(self.file),
                  "connector_options": {"file": self.file}}))
             document.source.original_filename = self.file
-            document.source.original_path = self.path
+            document.source.original_path = self.file
             document.source.connector = self.get_name()
             document.source.mime_type = mimetypes.guess_type(self.file)
 
@@ -247,8 +247,8 @@ def get_connector(connector, options):
         logging.info("Getting registered connector")
         return registered_connectors[connector]
     else:
-        logging.info(f"Unable to find connector {connector}")
-        return None
+        logging.error(f"Unable to find connector {connector}")
+        raise Exception(f"Unable to find connector {connector}")
 
 
 def add_connector(connector):
