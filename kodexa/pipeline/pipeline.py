@@ -16,6 +16,7 @@ from uuid import uuid4
 
 import yaml
 
+from kodexa import TableDataStore
 from kodexa.connectors import FolderConnector
 from kodexa.connectors.connectors import get_caller_dir, KodexaPlatformStore
 from kodexa.model import Document, Store
@@ -32,7 +33,11 @@ class ContentType(Enum):
 
 class ContentObject:
 
-    def __init__(self, name="untitled", id=new_id(), content_type=ContentType.DOCUMENT, tags=[], metadata={}):
+    def __init__(self, name="untitled", id=new_id(), content_type=ContentType.DOCUMENT, tags=None, metadata=None):
+        if metadata is None:
+            metadata = {}
+        if tags is None:
+            tags = []
         self.id = id
         self.name = name
         self.content_type = content_type
@@ -267,7 +272,7 @@ class PipelineStep:
                             elif isinstance(opts, list):
                                 new_list = []
                                 for list_val in opts:
-                                    new_list.append(replace_params(list_val))
+                                    new_list.append(replace_params(list_val, params))
                                 return new_list
                             elif isinstance(opts, str):
                                 if opts.startswith('${') and opts.endswith('}'):
@@ -331,7 +336,9 @@ class PipelineStep:
         return True
 
     def get_cache_name(self, document):
-        return f"{self.cache_path}/{document.source.original_filename if document.source.original_filename is not None else document.source.original_path.replace('/', '_')}.kdxa"
+        file_name = document.source.original_filename \
+            if document.source.original_filename is not None else document.uuid
+        return f"{self.cache_path}/{file_name}.kdxa"
 
 
 class Pipeline:
@@ -369,7 +376,7 @@ class Pipeline:
         Add the store to the pipeline so that it is available to the pipeline
 
             >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.add_store("test-store", InMemoryObjectStore())
+            >>> pipeline.add_store("test-store", TableDataStore())
 
         :param name: the name of the store (to refer to it)
         :param store: the store that should be added

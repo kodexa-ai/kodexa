@@ -11,8 +11,7 @@ from typing import Dict, Type
 
 import requests
 
-from kodexa import DocumentMetadata
-from kodexa.model import Document
+from kodexa.model import Document, DocumentMetadata
 
 
 def get_caller_dir():

@@ -5,6 +5,7 @@ import pytest
 from kodexa import RemoteAction
 from kodexa.model import DocumentMetadata, Document
 from kodexa.pipeline import Pipeline
+from kodexa.sinks import FolderSink
 from kodexa.steps.common import TextParser
 from kodexa.stores import JsonDocumentStore, TableDataStore, DictDataStore
 
@@ -28,6 +29,12 @@ def test_simplified_remote_action_reference():
     assert len(pipeline.steps) == 1
     assert isinstance(pipeline.steps[0].step, RemoteAction)
     assert "option" in pipeline.steps[0].step.options
+
+
+def test_basic_folder_sink():
+    pipeline = Pipeline.from_text('cheese burger')
+    pipeline.set_sink(FolderSink('/tmp'))
+    pipeline.run()
 
 
 def test_basic_json_store():

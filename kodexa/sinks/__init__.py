@@ -6,3 +6,5 @@ Sinks are the end-point of a Pipeline and allow for the final output of the pipe
 out
 """
 from .inmemory import InMemoryDocumentSink
+from .cloud import KodexaPlatformSink
+from .local import FolderSink
