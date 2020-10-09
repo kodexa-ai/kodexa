@@ -23,10 +23,31 @@ def get_test_pipeline(filename):
 
 
 def test_folder_sink_from_file():
+
+    if os.path.exists('/tmp/hello.txt.kdxa'):
+        os.remove('/tmp/hello.txt.kdxa')
+
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='hello.txt'))
     pipeline.add_step(TextParser(decode=True))
     pipeline.set_sink(FolderSink('/tmp'))
     pipeline.run()
+
+    assert os.path.exists('/tmp/hello.txt.kdxa') is True
+
+
+def test_caching():
+
+    if os.path.exists('/tmp/hello.txt.kdxa'):
+        os.remove('/tmp/hello.txt.kdxa')
+
+    pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='hello.txt'))
+    pipeline.add_step(TextParser(decode=True), cache_path="/tmp")
+    pipeline.set_sink(FolderSink('/tmp'))
+    pipeline.run()
+
+    assert os.path.exists('/tmp/hello.txt.kdxa') is True
+
+    os.remove('/tmp/hello.txt.kdxa')
 
 
 def test_hello_txt():
