@@ -249,7 +249,6 @@ class PipelineStep:
             # Check to see if we have a cached file
             cache_name = self.get_cache_name(document)
             if os.path.isfile(cache_name):
-
                 return Document.from_kdxa(cache_name)
 
         if self.will_execute(context, document):
@@ -543,7 +542,7 @@ class Pipeline:
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
-                    caller_path: str = get_caller_dir(), *args, **kwargs) -> Pipeline:
+                    unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -> Pipeline:
         """
         Create a pipeline that will run against a set of local files from a folder
 
@@ -552,10 +551,12 @@ class Pipeline:
         :param recursive: Should we look recursively in sub-directories (default False)
         :param relative: Is the folder path relative to the caller (default False)
         :param caller_path: The caller path (defaults to trying to work this out from the stack)
+        :param unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
         :return: A new pipeline
         :rtype: Pipeline
         """
-        return Pipeline(FolderConnector(folder_path, filename_filter, recursive, relative, caller_path))
+        return Pipeline(FolderConnector(folder_path, filename_filter, recursive=recursive, relative=relative,
+                                        caller_path=caller_path, unpack=unpack))
 
     @staticmethod
     def from_store(org_slug: str, slug: str, query: str = "*") -> Pipeline:
