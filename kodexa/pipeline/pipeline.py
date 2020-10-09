@@ -249,6 +249,7 @@ class PipelineStep:
             # Check to see if we have a cached file
             cache_name = self.get_cache_name(document)
             if os.path.isfile(cache_name):
+
                 return Document.from_kdxa(cache_name)
 
         if self.will_execute(context, document):
