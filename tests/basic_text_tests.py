@@ -1,6 +1,6 @@
 import os
 
-from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, Document
+from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, Document, FolderSink
 from kodexa.steps.common import TextParser
 from kodexa.testing.test_utils import compare_document
 
@@ -20,6 +20,13 @@ def get_test_pipeline(filename):
     # Make sure the finders are available
     document = document_sink.get_document(0)
     return document
+
+
+def test_folder_sink_from_file():
+    pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='hello.txt'))
+    pipeline.add_step(TextParser(decode=True))
+    pipeline.set_sink(FolderSink('/tmp'))
+    pipeline.run()
 
 
 def test_hello_txt():
