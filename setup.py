@@ -33,7 +33,8 @@ setup(name='kodexa',
           'deepdiff',
           'simpleeval',
           'texttable',
-          'jinja2'
+          'jinja2',
+          'dataclasses_json'
       ],
       entry_points="""
         [console_scripts]
