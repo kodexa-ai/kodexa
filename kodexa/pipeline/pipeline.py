@@ -16,7 +16,6 @@ from uuid import uuid4
 
 import yaml
 
-from kodexa import TableDataStore
 from kodexa.connectors import FolderConnector
 from kodexa.connectors.connectors import get_caller_dir, KodexaPlatformStore
 from kodexa.model import Document, Store
