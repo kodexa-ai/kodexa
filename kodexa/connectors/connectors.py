@@ -11,6 +11,7 @@ from typing import Dict, Type
 
 import requests
 
+from kodexa import DocumentMetadata
 from kodexa.model import Document
 
 
@@ -61,7 +62,10 @@ class FolderConnector:
             if self.unpack:
                 return Document.from_kdxa(self.path)
             else:
-                document = Document()
+                document = Document(DocumentMetadata(
+                    {"source_path": self.files[self.index - 1], "connector": self.get_name(),
+                     "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
+                     "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
                 document.source.original_filename = self.files[self.index - 1]
                 document.source.original_path = self.path
                 document.source.connector = self.get_name()
@@ -110,7 +114,10 @@ class FileHandleConnector:
         if self.completed:
             raise StopIteration
         else:
-            document = Document()
+            document = Document(DocumentMetadata(
+                {"source_path": self.file, "connector": self.get_name(),
+                 "mime_type": mimetypes.guess_type(self.file),
+                 "connector_options": {"file": self.file}}))
             document.source.original_filename = self.file
             document.source.original_path = self.path
             document.source.connector = self.get_name()
@@ -220,7 +227,9 @@ class UrlConnector:
             raise StopIteration
         else:
             self.completed = True
-            document = Document()
+            document = Document(DocumentMetadata(
+                {"connector": self.get_name(),
+                 "connector_options": {"url": self.url, "headers": self.headers}}))
             document.source.connector = self.get_name()
             document.source.original_path = self.url
             document.source.headers = self.headers
