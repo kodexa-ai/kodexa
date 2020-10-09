@@ -254,6 +254,9 @@ class PipelineStep:
         if self.will_execute(context, document):
             try:
 
+                if self.cache_path:
+                    document.to_kdxa(self.get_cache_name(document))
+
                 context.set_current_document(document)
                 if str(type(self.step)) == "<class 'type'>":
 
@@ -316,8 +319,7 @@ class PipelineStep:
                 else:
                     return document
         else:
-            if self.cache_path:
-                document.to_kdxa(self.get_cache_name(document))
+            return document
 
             return document
 
