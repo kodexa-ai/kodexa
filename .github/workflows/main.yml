@@ -1,6 +1,9 @@
 name: Python Package Using Anaconda
 
-on: [push]
+on:
+  push:
+    branches:
+      - 'master'
 
 jobs:
   build-linux:
