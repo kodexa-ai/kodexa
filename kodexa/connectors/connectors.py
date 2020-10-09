@@ -65,7 +65,7 @@ class FolderConnector:
                     {"source_path": self.files[self.index - 1], "connector": self.get_name(),
                      "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
                      "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
-                document.source.original_filename = self.files[self.index - 1]
+                document.source.original_filename = os.path.basename(self.files[self.index - 1])
                 document.source.original_path = self.path
                 document.source.connector = self.get_name()
                 document.source.mime_type = mimetypes.guess_type(self.files[self.index - 1])
@@ -118,7 +118,7 @@ class FileHandleConnector:
                  "mime_type": mimetypes.guess_type(self.file),
                  "connector_options": {"file": self.file}}))
             document.source.original_filename = self.file
-            document.source.original_path = self.file
+            document.source.original_path = os.path.basename(self.file)
             document.source.connector = self.get_name()
             document.source.mime_type = mimetypes.guess_type(self.file)
 
