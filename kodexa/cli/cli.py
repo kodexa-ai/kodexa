@@ -22,6 +22,7 @@ import logging
 import os
 
 import click
+from rich import print
 from texttable import Texttable
 
 from kodexa.cloud.kodexa import ExtensionHelper, KodexaPlatform
@@ -92,16 +93,26 @@ def cli(info: Info, verbose: int):
 
 @click.option('--path', default=os.getcwd(), help='Path to folder containing kodexa.yml')
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--org', help='The slug for the organization to deploy to')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @cli.command()
 @pass_info
-def deploy(_: Info, path: str, url: str, token: str):
+def deploy(_: Info, path: str, url: str, org: str, token: str):
     """Deploy extension pack to an Kodexa platform instance"""
-    metadata = ExtensionHelper.load_metadata(path)
+
+    print("Starting deployment from path", path)
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.deploy_extension(metadata)
-    click.echo(f"Deployed extension")
+
+    if '://' in path:
+        print("Deploying from URI", path)
+        KodexaPlatform.deploy_extension_from_uri(path, org)
+    else:
+        print("Deploying local metadata from", path)
+        metadata = ExtensionHelper.load_metadata(path)
+        metadata['orgSlug'] = org;
+        KodexaPlatform.deploy_extension(metadata)
+    print("Deployed extension")
 
 
 @cli.command()
@@ -142,6 +153,7 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
 @pass_info
 def delete(_: Info, object_type: str, organization_slug: str, slug: str, url: str, token: str):
     """Delete object from the platform"""
+    print(f"Deleting {object_type} {slug} in organization {organization_slug}")
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.delete_object(organization_slug, slug, object_type)
@@ -154,7 +166,7 @@ def delete(_: Info, object_type: str, organization_slug: str, slug: str, url: st
 def metadata(_: Info, path: str):
     """Load metadata"""
     metadata = ExtensionHelper.load_metadata(path)
-    click.echo("Metadata loaded and valid")
+    print(f"Metadata loaded")
 
 
 @cli.command()
@@ -163,6 +175,7 @@ def metadata(_: Info, path: str):
 def document(_: Info, path: str):
     """Load metadata"""
     metadata = ExtensionHelper.load_metadata(path)
+    print("[green]Metadata loaded :tada: [/green]")
     from kodexa.cli.documentation import generate_documentation
     generate_documentation(metadata)
-    click.echo("Documentation built")
+    print("[green]Documentation has been successfully built[/green]")
