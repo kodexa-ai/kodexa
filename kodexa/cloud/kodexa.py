@@ -106,6 +106,17 @@ class KodexaPlatform:
             raise Exception("Unable to deploy new extension")
 
     @staticmethod
+    def deploy_extension_from_uri(path, organisation_slug):
+        response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}",
+                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                          "content-type": "application/json"})
+        if response.status_code == 200:
+            logger.info("Extension deployed")
+        else:
+            logger.error(response.text)
+            raise Exception("Unable to deploy new extension")
+
+    @staticmethod
     def deploy(slug: str, pipeline: Pipeline, name: str = "A new pipeline", description: str = "A Kodexa Pipeline",
                example_urls=None, more_info_url: str = None, force_replace=False,
                public=False):
@@ -517,5 +528,4 @@ class ExtensionHelper:
             dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
         else:
             raise Exception("Unable to find a kodexa.yml file describing your extension")
-
         return dharma_metadata
