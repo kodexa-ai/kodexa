@@ -32,7 +32,6 @@ setup(name='kodexa',
           'click',
           'deepdiff',
           'simpleeval',
-          'texttable',
           'jinja2',
           'dataclasses_json',
           'rich'
