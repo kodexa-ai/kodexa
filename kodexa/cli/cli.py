@@ -20,9 +20,11 @@ Itcan be used as a handy facility for running the task from a command line.
 """
 import logging
 import os
+import sys
 
 import click
 from rich import print
+from rich.table import Table
 
 from kodexa.cloud.kodexa import ExtensionHelper, KodexaPlatform
 
@@ -52,6 +54,40 @@ DEFAULT_COLUMNS = {
     ]
 }
 
+OBJECT_TYPES = {
+    "extensionPacks": {
+        "name": "extension pack",
+        "plural": "extension packs"
+    },
+    "pipelines": {
+        "name": "pipelines",
+        "plural": "pipelines"
+    },
+    "actions": {
+        "name": "action",
+        "plural": "actions"
+    }
+}
+
+
+def resolve_object_type(obj_type):
+    hits = []
+    keys = []
+    for target_type in OBJECT_TYPES.keys():
+        if obj_type in target_type:
+            hits.append(OBJECT_TYPES[target_type])
+            keys.append(target_type)
+
+    if len(hits) == 1:
+        return keys[0], hits[0]
+
+    if len(hits) == 0:
+        print(":exclaimation: Unable to find object type {obj_type}")
+        sys.exit(1)
+    else:
+        print(f":exclaimation: To many potential matches for object type ({','.join(keys)}")
+        sys.exit(1)
+
 
 class Info(object):
     """An information object to pass data between CLI functions."""
@@ -72,7 +108,7 @@ pass_info = click.make_pass_decorator(Info, ensure=True)
 @click.option("--verbose", "-v", count=True, help="Enable verbose output.")
 @pass_info
 def cli(info: Info, verbose: int):
-    """Run dharma."""
+    """Run Kodexa."""
     # Use the verbosity count to determine the logging level...
     if verbose > 0:
         logging.basicConfig(
@@ -111,7 +147,7 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
         metadata = ExtensionHelper.load_metadata(path)
         metadata['orgSlug'] = org;
         KodexaPlatform.deploy_extension(metadata)
-    print("Deployed extension")
+    print("Deployed extension pack :tada:")
 
 
 @cli.command()
@@ -124,6 +160,7 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
     """List the instance of the object type"""
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
+    object_type, object_type_metadata = resolve_object_type(object_type)
     objects = KodexaPlatform.list_objects(organization_slug, object_type)
 
     cols = DEFAULT_COLUMNS['default']
@@ -131,9 +168,8 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
     if object_type in DEFAULT_COLUMNS:
         cols = DEFAULT_COLUMNS[object_type]
 
-    from rich.table import Table
-
-    table = Table(title=object_type)
+    print("\n")
+    table = Table(title=f"Listing {object_type_metadata['plural']}")
     for col in cols:
         table.add_column(col)
     for object_dict in objects['content']:
@@ -143,7 +179,6 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
             row.append(object_dict[col] if col in object_dict else '')
         table.add_row(*row)
 
-    from rich import print
     print(table)
 
 
@@ -156,11 +191,16 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
 @pass_info
 def delete(_: Info, object_type: str, organization_slug: str, slug: str, url: str, token: str):
     """Delete object from the platform"""
-    print(f"Deleting {object_type} {slug} in organization {organization_slug}")
+    object_type, object_type_metadata = resolve_object_type(object_type)
+
+    print(f"Deleting {object_type_metadata['name']} [bold]{organization_slug}/{slug}[/bold]")
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.delete_object(organization_slug, slug, object_type)
-    click.echo(f"Deleted {object_type} {organization_slug}/{slug}")
+    try:
+        KodexaPlatform.delete_object(organization_slug, slug, object_type)
+        print(f"Deleted {object_type_metadata['name']} [bold]{organization_slug}/{slug}[/bold] :tada:")
+    except:
+        print(f"\n:exclamation: Failed to delete {object_type_metadata['name']} [{sys.exc_info()[0]}]")
 
 
 @cli.command()
@@ -178,7 +218,7 @@ def metadata(_: Info, path: str):
 def document(_: Info, path: str):
     """Load metadata"""
     metadata = ExtensionHelper.load_metadata(path)
-    print("[green]Metadata loaded :tada: [/green]")
+    print("Metadata loaded")
     from kodexa.cli.documentation import generate_documentation
     generate_documentation(metadata)
-    print("[green]Documentation has been successfully built[/green]")
+    print("Documentation has been successfully built :tada:")
