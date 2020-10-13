@@ -107,7 +107,8 @@ class KodexaPlatform:
 
     @staticmethod
     def deploy_extension_from_uri(path, organisation_slug):
-        response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}",
+        url = f"{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}"
+        response = requests.post(url,
                                  headers={"x-access-token": KodexaPlatform.get_access_token(),
                                           "content-type": "application/json"})
         if response.status_code == 200:

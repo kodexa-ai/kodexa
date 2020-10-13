@@ -23,7 +23,6 @@ import os
 
 import click
 from rich import print
-from texttable import Texttable
 
 from kodexa.cloud.kodexa import ExtensionHelper, KodexaPlatform
 
@@ -132,16 +131,20 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
     if object_type in DEFAULT_COLUMNS:
         cols = DEFAULT_COLUMNS[object_type]
 
-    table = Texttable().header(cols)
+    from rich.table import Table
+
+    table = Table(title=object_type)
+    for col in cols:
+        table.add_column(col)
     for object_dict in objects['content']:
         row = []
 
         for col in cols:
             row.append(object_dict[col] if col in object_dict else '')
+        table.add_row(*row)
 
-        table.add_row(row)
-
-    click.echo(table.draw() + "\n")
+    from rich import print
+    print(table)
 
 
 @cli.command()
