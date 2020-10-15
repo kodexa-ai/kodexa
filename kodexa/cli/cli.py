@@ -40,6 +40,7 @@ DEFAULT_COLUMNS = {
     'extensionPacks': [
         'orgSlug',
         'slug',
+        'version',
         'name',
         'description',
         'type',
@@ -48,6 +49,7 @@ DEFAULT_COLUMNS = {
     'default': [
         'orgSlug',
         'slug',
+        'version',
         'name',
         'description',
         'type'
@@ -66,6 +68,22 @@ OBJECT_TYPES = {
     "actions": {
         "name": "action",
         "plural": "actions"
+    },
+    "stores": {
+        "name": "store",
+        "plural": "stores"
+    },
+    "connectors": {
+        "name": "connector",
+        "plural": "connectors"
+    },
+    "taxonomies": {
+        "name": "taxonomy",
+        "plural": "taxonomies"
+    },
+    "workflows": {
+        "name": "workflow",
+        "plural": "workflows"
     }
 }
 
@@ -147,6 +165,7 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
         metadata = ExtensionHelper.load_metadata(path)
         metadata['orgSlug'] = org;
         KodexaPlatform.deploy_extension(metadata)
+
     print("Deployed extension pack :tada:")
 
 
@@ -161,25 +180,28 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     object_type, object_type_metadata = resolve_object_type(object_type)
-    objects = KodexaPlatform.list_objects(organization_slug, object_type)
+    try:
+        objects = KodexaPlatform.list_objects(organization_slug, object_type)
 
-    cols = DEFAULT_COLUMNS['default']
+        cols = DEFAULT_COLUMNS['default']
 
-    if object_type in DEFAULT_COLUMNS:
-        cols = DEFAULT_COLUMNS[object_type]
+        if object_type in DEFAULT_COLUMNS:
+            cols = DEFAULT_COLUMNS[object_type]
 
-    print("\n")
-    table = Table(title=f"Listing {object_type_metadata['plural']}")
-    for col in cols:
-        table.add_column(col)
-    for object_dict in objects['content']:
-        row = []
-
+        print("\n")
+        table = Table(title=f"Listing {object_type_metadata['plural']}")
         for col in cols:
-            row.append(object_dict[col] if col in object_dict else '')
-        table.add_row(*row)
+            table.add_column(col)
+        for object_dict in objects['content']:
+            row = []
 
-    print(table)
+            for col in cols:
+                row.append(object_dict[col] if col in object_dict else '')
+            table.add_row(*row)
+
+        print(table)
+    except:
+        print(f"\n:exclamation: Failed to get {object_type_metadata['name']} [{sys.exc_info()[0]}]")
 
 
 @cli.command()
