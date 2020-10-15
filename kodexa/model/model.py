@@ -1178,6 +1178,11 @@ class SourceMetadata(object):
     mime_type: Optional[str] = None
     headers: dict = field(default_factory=dict)
 
+    @staticmethod
+    def from_dict(dict_obj):
+        from dacite import from_dict
+        return from_dict(data_class=SourceMetadata, data=dict_obj)
+
 
 class Document(object):
     """
@@ -1290,6 +1295,7 @@ class Document(object):
         """
         return {'version': Document.CURRENT_VERSION, 'metadata': self.metadata,
                 'content_node': self.content_node.to_dict() if self.content_node else None,
+                'source': self.source.to_dict(),
                 'mixins': self._mixins,
                 'exceptions': self.exceptions,
                 'log': self.log,
@@ -1318,7 +1324,8 @@ class Document(object):
             uuid.uuid5(uuid.NAMESPACE_DNS, 'kodexa.com'))
         if 'content_node' in doc_dict and doc_dict['content_node']:
             new_document.content_node = ContentNode.from_dict(new_document, doc_dict['content_node'])
-
+        if 'source' in doc_dict and doc_dict['source']:
+            new_document.source = SourceMetadata.from_dict(doc_dict['source'])
         return new_document
 
     @staticmethod

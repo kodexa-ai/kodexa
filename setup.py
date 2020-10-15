@@ -34,7 +34,8 @@ setup(name='kodexa',
           'simpleeval',
           'jinja2',
           'dataclasses_json',
-          'rich'
+          'rich',
+          'dacite'
       ],
       entry_points="""
         [console_scripts]
