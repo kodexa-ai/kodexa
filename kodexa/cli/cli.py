@@ -18,6 +18,7 @@ Itcan be used as a handy facility for running the task from a command line.
 .. currentmodule:: dharma_cli.cli
 .. moduleauthor:: Kodexa, Inc <support@kodexa.com>
 """
+import json
 import logging
 import os
 import sys
@@ -243,4 +244,29 @@ def document(_: Info, path: str):
     print("Metadata loaded")
     from kodexa.cli.documentation import generate_documentation
     generate_documentation(metadata)
-    print("Documentation has been successfully built :tada:")
+    print("Extension documentation has been successfully built :tada:")
+
+
+@cli.command()
+@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml (defaults to current)')
+@click.option('--output', default=os.getcwd() + "/dist",
+              help='Path to the output folder (defaults to dist under current)')
+@click.option('--version', default=os.getenv('VERSION'), help='Version number (defaults to 1.0.0)')
+@pass_info
+def package(_: Info, path: str, output: str, version: str):
+    """Load metadata"""
+    metadata_obj = ExtensionHelper.load_metadata(path)
+    print("Metadata loaded")
+    try:
+        os.makedirs(output)
+    except OSError as e:
+        import errno
+        if e.errno != errno.EEXIST:
+            raise
+
+    metadata_obj['version'] = version if version is not None else '1.0.0'
+
+    with open(os.path.join(output, f"kodexa-{metadata_obj['version']}.json"), 'w') as outfile:
+        json.dump(metadata_obj, outfile)
+
+    print("Extension has been packaged :tada:")
