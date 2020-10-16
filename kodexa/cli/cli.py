@@ -266,7 +266,7 @@ def package(_: Info, path: str, output: str, version: str):
 
     metadata_obj['version'] = version if version is not None else '1.0.0'
 
-    with open(os.path.join(output, f"kodexa-{metadata_obj['version']}.json"), 'w') as outfile:
+    with open(os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json"), 'w') as outfile:
         json.dump(metadata_obj, outfile)
 
     print("Extension has been packaged :tada:")
