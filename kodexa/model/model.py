@@ -1,14 +1,13 @@
+import dataclasses
 import itertools
 import json
 import re
 import uuid
-from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional, Any
 
 import msgpack
 from addict import Dict
-from dataclasses_json import dataclass_json
 
 from kodexa.mixins import registry
 
@@ -1162,9 +1161,8 @@ class DocumentRender:
         return self.kodexa_render.build_html(self.document, node)
 
 
-@dataclass
-@dataclass_json
-class SourceMetadata(object):
+@dataclasses.dataclass()
+class SourceMetadata:
     """
     Class for keeping track of the original source information for a
     document
@@ -1176,12 +1174,7 @@ class SourceMetadata(object):
     created: Optional[str] = None
     connector: Optional[str] = None
     mime_type: Optional[str] = None
-    headers: dict = field(default_factory=dict)
-
-    @staticmethod
-    def from_dict(dict_obj):
-        from dacite import from_dict
-        return from_dict(data_class=SourceMetadata, data=dict_obj)
+    headers: Optional[Dict] = None
 
 
 class Document(object):
@@ -1295,7 +1288,7 @@ class Document(object):
         """
         return {'version': Document.CURRENT_VERSION, 'metadata': self.metadata,
                 'content_node': self.content_node.to_dict() if self.content_node else None,
-                'source': self.source.to_dict(),
+                'source': dataclasses.asdict(self.source),
                 'mixins': self._mixins,
                 'exceptions': self.exceptions,
                 'log': self.log,
@@ -1325,7 +1318,7 @@ class Document(object):
         if 'content_node' in doc_dict and doc_dict['content_node']:
             new_document.content_node = ContentNode.from_dict(new_document, doc_dict['content_node'])
         if 'source' in doc_dict and doc_dict['source']:
-            new_document.source = SourceMetadata.from_dict(doc_dict['source'])
+            new_document.source = SourceMetadata(**doc_dict['source'])
         return new_document
 
     @staticmethod
