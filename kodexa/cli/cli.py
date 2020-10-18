@@ -209,21 +209,20 @@ def get(_: Info, object_type: str, organization_slug: str, url: str, token: str)
 
 @cli.command()
 @click.argument('object_type')
-@click.argument('organization_slug')
-@click.argument('slug')
+@click.argument('ref')
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
-def delete(_: Info, object_type: str, organization_slug: str, slug: str, url: str, token: str):
+def delete(_: Info, object_type: str, ref: str, url: str, token: str):
     """Delete object from the platform"""
     object_type, object_type_metadata = resolve_object_type(object_type)
 
-    print(f"Deleting {object_type_metadata['name']} [bold]{organization_slug}/{slug}[/bold]")
+    print(f"Deleting {object_type_metadata['name']} [bold]{ref}[/bold]")
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     try:
-        KodexaPlatform.delete_object(organization_slug, slug, object_type)
-        print(f"Deleted {object_type_metadata['name']} [bold]{organization_slug}/{slug}[/bold] :tada:")
+        KodexaPlatform.delete_object(ref, object_type)
+        print(f"Deleted {object_type_metadata['name']} [bold]{ref}[/bold] :tada:")
     except:
         print(f"\n:exclamation: Failed to delete {object_type_metadata['name']} [{sys.exc_info()[0]}]")
 
@@ -271,8 +270,13 @@ def package(_: Info, path: str, output: str, version: str):
     if 'source' in metadata_obj and 'location' in metadata_obj['source']:
         metadata_obj['source']['location'] = metadata_obj['source']['location'].format(**metadata_obj)
 
-    with open(os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json"), 'w') as outfile:
+    versioned_metadata = os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json")
+    unversioned_metadata = os.path.join(output, "kodexa.json")
+    with open(versioned_metadata, 'w') as outfile:
         json.dump(metadata_obj, outfile)
+
+    from shutil import copyfile
+    copyfile(versioned_metadata, unversioned_metadata)
 
     output_filename = f"{metadata_obj['slug']}-{metadata_obj['version']}.tar.gz"
     with tarfile.open(output_filename, "w:gz") as tar:
