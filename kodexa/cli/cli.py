@@ -21,7 +21,9 @@ Itcan be used as a handy facility for running the task from a command line.
 import json
 import logging
 import os
+import os.path
 import sys
+import tarfile
 
 import click
 from rich import print
@@ -256,7 +258,7 @@ def document(_: Info, path: str):
 def package(_: Info, path: str, output: str, version: str):
     """Load metadata"""
     metadata_obj = ExtensionHelper.load_metadata(path)
-    print("Metadata loaded")
+    print("Preparing to pack")
     try:
         os.makedirs(output)
     except OSError as e:
@@ -266,7 +268,16 @@ def package(_: Info, path: str, output: str, version: str):
 
     metadata_obj['version'] = version if version is not None else '1.0.0'
 
+    if 'source' in metadata_obj and 'location' in metadata_obj['source']:
+        metadata_obj['source']['location'] = metadata_obj['source']['location'].format(**metadata_obj)
+
     with open(os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json"), 'w') as outfile:
         json.dump(metadata_obj, outfile)
+
+    output_filename = f"{metadata_obj['slug']}-{metadata_obj['version']}.tar.gz"
+    with tarfile.open(output_filename, "w:gz") as tar:
+        tar.add(output, arcname=os.path.basename(output))
+
+    os.rename(output_filename, os.path.join(output, output_filename))
 
     print("Extension has been packaged :tada:")
