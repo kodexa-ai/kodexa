@@ -611,6 +611,8 @@ class ContentNode(object):
 
         def tag_node_position(node_to_check, start, end, node_data):
 
+            content_length = 0
+
             # Make sure we have content on the node
             if node_to_check.content:
                 if len(node_to_check.content) > 0:
@@ -628,18 +630,20 @@ class ContentNode(object):
                                                       data=node_data))
 
                 end = end - len(node_to_check.content) + len(separator)
+                content_length = len(node_to_check.content) + len(separator)
                 start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
                     node_to_check.content) - len(separator)
 
             for child_node in node_to_check.children:
                 result = tag_node_position(child_node, start, end, node_data)
+                content_length = content_length + result
                 if result < 0:
                     return -1
                 else:
                     end = end - result
                     start = 0 if start - result < 0 else start - result
 
-            return end
+            return content_length
 
         if content_re:
             pattern = re.compile(content_re)
