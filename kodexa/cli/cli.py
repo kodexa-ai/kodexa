@@ -174,35 +174,42 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 
 @cli.command()
 @click.argument('object_type')
-@click.argument('organization_slug')
+@click.argument('ref')
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
-def get(_: Info, object_type: str, organization_slug: str, url: str, token: str):
+def get(_: Info, object_type: str, ref: str, url: str, token: str):
     """List the instance of the object type"""
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     object_type, object_type_metadata = resolve_object_type(object_type)
+
     try:
-        objects = KodexaPlatform.list_objects(organization_slug, object_type)
 
-        cols = DEFAULT_COLUMNS['default']
+        # If ref is just the org then we will list them
+        if '/' in ref:
+            obj = KodexaPlatform.get_object(ref, object_type)
+            import yaml
+            print(obj)
+        else:
+            objects = KodexaPlatform.list_objects(ref, object_type)
+            cols = DEFAULT_COLUMNS['default']
 
-        if object_type in DEFAULT_COLUMNS:
-            cols = DEFAULT_COLUMNS[object_type]
+            if object_type in DEFAULT_COLUMNS:
+                cols = DEFAULT_COLUMNS[object_type]
 
-        print("\n")
-        table = Table(title=f"Listing {object_type_metadata['plural']}")
-        for col in cols:
-            table.add_column(col)
-        for object_dict in objects['content']:
-            row = []
-
+            print("\n")
+            table = Table(title=f"Listing {object_type_metadata['plural']}")
             for col in cols:
-                row.append(object_dict[col] if col in object_dict else '')
-            table.add_row(*row)
+                table.add_column(col)
+            for object_dict in objects['content']:
+                row = []
 
-        print(table)
+                for col in cols:
+                    row.append(object_dict[col] if col in object_dict else '')
+                table.add_row(*row)
+
+            print(table)
     except:
         print(f"\n:exclamation: Failed to get {object_type_metadata['name']} [{sys.exc_info()[0]}]")
 

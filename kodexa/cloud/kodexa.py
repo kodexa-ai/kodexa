@@ -221,13 +221,25 @@ class KodexaPlatform:
     @staticmethod
     def delete_object(ref, object_type):
         # Generate a URL ref
-        url_ref = ref.replace(':','/')
+        url_ref = ref.replace(':', '/')
         delete_response = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
                                           headers={"x-access-token": KodexaPlatform.get_access_token(),
                                                    "content-type": "application/json"})
         if delete_response.status_code != 200:
             logger.error(delete_response.text)
             raise Exception("Unable to list objects")
+
+    @staticmethod
+    def get_object(ref, object_type):
+        url_ref = ref.replace(':', '/')
+        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
+                                    headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                             "content-type": "application/json"})
+        if obj_response.status_code != 200:
+            logger.error(obj_response.text)
+            raise Exception(f"Unable to get object {ref}")
+        else:
+            return obj_response.json()
 
 
 class RemoteSession:
