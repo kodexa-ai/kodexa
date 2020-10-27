@@ -266,7 +266,13 @@ class ContentNode(object):
     def delete_children(self, nodes: Optional[List[ContentNode]] = None,
                         exclude_nodes: Optional[List[ContentNode]] = None):
         """Delete the children of this node, you can either supply a list of the nodes to delete
-           or the nodes to exclude from the delete, if neither are supplied then we delete all the children
+           or the nodes to exclude from the delete, if neither are supplied then we delete all the children.
+
+           Note there is precedence in place, if you have provided a list of nodes to delete then the nodes
+           to exclude is ignored.
+
+           :param nodes:Optional[List[ContentNode]] a list of content nodes that are children to delete
+           :param exclude_nodes:Optional[List[ContentNode]] a list of content node that are children not to delete
 
         """
         children_to_delete = []
