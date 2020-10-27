@@ -8,8 +8,7 @@ from typing import List, Dict, Optional
 
 import requests
 
-from kodexa.model import Document, Store
-from kodexa.pipeline import PipelineContext
+from kodexa.model import Document, Store, DocumentStore
 
 logger = logging.getLogger('kodexa-stores')
 
@@ -163,6 +162,9 @@ class TableDataStore(Store):
         self.columns: List[str] = columns
         self.rows: List[List] = rows
         self.source_documents: Dict[str, Dict] = source_documents
+
+        from kodexa.pipeline import PipelineContext
+
         self.pipeline_context: Optional[PipelineContext] = None
 
     """
@@ -199,7 +201,8 @@ class TableDataStore(Store):
         else:
             return pd.DataFrame(self.rows, columns=self.columns)
 
-    def set_pipeline_context(self, pipeline_context: PipelineContext):
+
+    def set_pipeline_context(self, pipeline_context):
         self.pipeline_context = pipeline_context
 
     def add(self, row):
@@ -333,18 +336,6 @@ class DataStoreHelper:
             return None
 
 
-class DocumentStore:
-
-    def get(self, path: str) -> Document:
-        pass
-
-    def list(self) -> List[str]:
-        pass
-
-    def put(self, path: str, document: Document):
-        pass
-
-
 class LocalDocumentStore(DocumentStore):
 
     def __init__(self, store_path: str, force_initialize: bool = False):
@@ -382,7 +373,7 @@ class RemoteDocumentStore(DocumentStore):
     def __init__(self, ref: str, query: str = "*"):
         self.ref = ref
         self.query = query
-        self.objects:List[Dict] = []
+        self.objects: List[Dict] = []
         self.page = 1
 
     def put(self, path: str, document: Document):
