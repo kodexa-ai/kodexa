@@ -11,4 +11,4 @@ from .model import DocumentMetadata, ContentNode, ContentFeature, SourceMetadata
 from .pipeline import Pipeline, PipelineStatistics, PipelineContext
 from .sinks import InMemoryDocumentSink, FolderSink
 from .steps import NodeTagger, TextParser, RollupTransformer, TagsToKeyValuePairExtractor
-from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreHelper
+from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreHelper, LocalDocumentStore
