@@ -6,7 +6,7 @@ from .cloud import RemoteSession, RemotePipeline, RemoteAction, KodexaPlatform
 from .connectors import FolderConnector, FileHandleConnector, UrlConnector, registered_connectors, get_connectors, \
     get_connector, add_connector, get_source
 from .extractors import *
-from .model import DocumentMetadata, ContentNode, ContentFeature, DocumentRender, SourceMetadata, \
+from .model import DocumentMetadata, ContentNode, ContentFeature, SourceMetadata, \
     Document
 from .pipeline import Pipeline, PipelineStatistics, PipelineContext
 from .sinks import InMemoryDocumentSink, FolderSink
