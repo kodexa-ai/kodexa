@@ -201,7 +201,6 @@ class TableDataStore(Store):
         else:
             return pd.DataFrame(self.rows, columns=self.columns)
 
-
     def set_pipeline_context(self, pipeline_context):
         self.pipeline_context = pipeline_context
 
@@ -360,7 +359,7 @@ class LocalDocumentStore(DocumentStore):
         import glob
         documents = []
         for file in glob.glob(os.path.join(self.store_path, "*.kdxa")):
-            documents.append(file.replace('*.kdxa', ''))
+            documents.append(file.replace('.kdxa', '').replace(self.store_path, ''))
 
         return documents
 
