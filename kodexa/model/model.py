@@ -282,9 +282,12 @@ class ContentNode(object):
                     if node_to_delete.uuid == child_node.uuid:
                         children_to_delete.append(child_node)
             elif exclude_nodes is not None:
-                for nodes_to_exclude in exclude_nodes:
-                    if nodes_to_exclude.uuid != child_node.uuid:
-                        children_to_delete.append(child_node)
+                if len(exclude_nodes) == 0:
+                    children_to_delete.append(child_node)
+                else:
+                    for nodes_to_exclude in exclude_nodes:
+                        if nodes_to_exclude.uuid != child_node.uuid:
+                            children_to_delete.append(child_node)
             else:
                 children_to_delete.append(child_node)
 
