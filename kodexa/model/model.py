@@ -9,7 +9,6 @@ from typing import List, Optional, Any
 import msgpack
 from addict import Dict
 
-from kodexa import ContentNode
 from kodexa.mixins import registry
 
 
@@ -263,8 +262,8 @@ class ContentNode(object):
             self._feature_map[new_feature.feature_type + ":" + new_feature.name] = new_feature
             return new_feature
 
-    def delete_children(self, nodes: Optional[List[ContentNode]] = None,
-                        exclude_nodes: Optional[List[ContentNode]] = None):
+    def delete_children(self, nodes: Optional[List] = None,
+                        exclude_nodes: Optional[List] = None):
         """Delete the children of this node, you can either supply a list of the nodes to delete
            or the nodes to exclude from the delete, if neither are supplied then we delete all the children.
 
