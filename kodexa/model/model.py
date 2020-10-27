@@ -104,18 +104,6 @@ class ContentNode(object):
         return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
             self.content) + "]"
 
-    def _repr_html_(self):
-        return self.to_html()
-
-    def to_html(self):
-        """
-        Generate HTML and javascript necessary for rendering this ContentNode.
-
-        :return:  HTML and javascript that will render this ContentNode
-        :rtype: str
-        """
-        return DocumentRender(self.document).render_node(self)
-
     def to_json(self):
         """
         Create a JSON string representation of this ContentNode.
@@ -1152,19 +1140,6 @@ class ContentFeature(object):
         return {'name': self.feature_type + ':' + self.name, 'value': self.value, 'single': self.single}
 
 
-class DocumentRender:
-
-    def __init__(self, document):
-        self.document = document
-        self.kodexa_render = KodexaRender()
-
-    def to_html(self):
-        return self.kodexa_render.build_html(self.document, self.document.content_node)
-
-    def render_node(self, node):
-        return self.kodexa_render.build_html(self.document, node)
-
-
 @dataclasses.dataclass()
 class SourceMetadata:
     """
@@ -1268,18 +1243,6 @@ class Document(object):
         :rtype: str
         """
         return json.dumps(self.to_dict(), ensure_ascii=False)
-
-    def _repr_html_(self):
-        return self.to_html()
-
-    def to_html(self):
-        """
-        Generate HTML and javascript necessary for rendering this ContentNode.
-
-        :return:  HTML and javascript that will render this ContentNode
-        :rtype: str
-        """
-        return DocumentRender(self).to_html()
 
     def to_dict(self):
         """
@@ -1489,39 +1452,14 @@ class Document(object):
             return self.create_node(node_type='results')
 
 
-class KodexaRender:
-    KODEXA_JS_URL = 'https://cdn.jsdelivr.net/npm/kodexajs/kodexa'
+class DocumentStore:
+    """A document store supports storing, listing and retrieving Kodexa documents"""
 
-    """
-    An implementation of a render that uses the KodexaJS
-    library to render the document
+    def get(self, path: str) -> Document:
+        pass
 
-    See https://github.com/kodexa-ai/kodexa.js
-    """
+    def list(self) -> List[str]:
+        pass
 
-    def build_node_html(self, node: ContentNode):
-        self.build_html(node.document, node)
-
-    def build_html(self, document: Document, node: ContentNode):
-        render_uuid = str(uuid.uuid4())
-        return """
-  <div id='kodexa-div-""" + render_uuid + """'></div>
-  <script>
-
-require.config({
-    paths: {
-        'kodexa-lib-""" + render_uuid + """': '""" + KodexaRender.KODEXA_JS_URL + """',
-        'jquery': '//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min'
-    }
-});
-
-require(['kodexa-lib-""" + render_uuid + """','jquery'], function() {
-    kodexa.fromMap(""" + document.to_json() + """).then(kdxaDocument => {
-       let widget = kodexa.newDocumentWidget(kdxaDocument);
-       widget.attach($('#kodexa-div-""" + render_uuid + """'))
-       widget.render(""" + ("'" + node.uuid + "'" if node else "") + """);
-    });
-
-});
-</script>
-"""
+    def put(self, path: str, document: Document):
+        pass
