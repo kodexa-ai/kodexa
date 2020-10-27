@@ -7,7 +7,7 @@ class DocumentStoreSink:
     A sink that writes to the underlying store
     """
 
-    def __init__(self, document_store: DocumentStore = None):
+    def __init__(self, document_store: DocumentStore):
         self.document_store = document_store
 
     @staticmethod

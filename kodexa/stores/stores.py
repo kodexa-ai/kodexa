@@ -338,7 +338,7 @@ class DocumentStore:
     def get(self, path: str) -> Document:
         pass
 
-    def list(self) -> List[Document]:
+    def list(self) -> List[str]:
         pass
 
     def put(self, path: str, document: Document):
@@ -382,7 +382,7 @@ class RemoteDocumentStore(DocumentStore):
     def __init__(self, ref: str, query: str = "*"):
         self.ref = ref
         self.query = query
-        self.objects = []
+        self.objects:List[Dict] = []
         self.page = 1
 
     def put(self, path: str, document: Document):
