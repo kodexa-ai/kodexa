@@ -1225,7 +1225,7 @@ class Document(object):
         """
         return self.content_node
 
-    def to_kdxa(self, file_path):
+    def to_kdxa(self, file_path: str):
         """
         Write the document to the kdxa format (msgpack) which can be
         used with the Kodexa platform

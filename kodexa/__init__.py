@@ -9,6 +9,6 @@ from .extractors import *
 from .model import DocumentMetadata, ContentNode, ContentFeature, DocumentRender, SourceMetadata, \
     Document
 from .pipeline import Pipeline, PipelineStatistics, PipelineContext
-from .sinks import InMemoryDocumentSink, FolderSink, KodexaPlatformSink
+from .sinks import InMemoryDocumentSink, FolderSink
 from .steps import NodeTagger, TextParser, RollupTransformer, TagsToKeyValuePairExtractor
 from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreHelper

@@ -10,6 +10,7 @@ from json import JSONDecodeError
 import requests
 import yaml
 from addict import Dict
+from rich import print
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
@@ -53,6 +54,77 @@ class PipelineMetadataBuilder:
                 pipeline_metadata.metadata.steps.append(step_meta)
 
         return pipeline_metadata
+
+
+DEFAULT_COLUMNS = {
+    'extensionPacks': [
+        'orgSlug',
+        'slug',
+        'version',
+        'name',
+        'description',
+        'type',
+        'status'
+    ],
+    'default': [
+        'orgSlug',
+        'slug',
+        'version',
+        'name',
+        'description',
+        'type'
+    ]
+}
+
+OBJECT_TYPES = {
+    "extensionPacks": {
+        "name": "extension pack",
+        "plural": "extension packs"
+    },
+    "pipelines": {
+        "name": "pipelines",
+        "plural": "pipelines"
+    },
+    "actions": {
+        "name": "action",
+        "plural": "actions"
+    },
+    "stores": {
+        "name": "store",
+        "plural": "stores"
+    },
+    "connectors": {
+        "name": "connector",
+        "plural": "connectors"
+    },
+    "taxonomies": {
+        "name": "taxonomy",
+        "plural": "taxonomies"
+    },
+    "workflows": {
+        "name": "workflow",
+        "plural": "workflows"
+    }
+}
+
+
+def resolve_object_type(obj_type):
+    hits = []
+    keys = []
+    for target_type in OBJECT_TYPES.keys():
+        if obj_type in target_type:
+            hits.append(OBJECT_TYPES[target_type])
+            keys.append(target_type)
+
+    if len(hits) == 1:
+        return keys[0], hits[0]
+
+    if len(hits) == 0:
+        print(":exclaimation: Unable to find object type {obj_type}")
+        sys.exit(1)
+    else:
+        print(f":exclaimation: To many potential matches for object type ({','.join(keys)}")
+        sys.exit(1)
 
 
 class KodexaPlatform:
@@ -240,6 +312,53 @@ class KodexaPlatform:
             raise Exception(f"Unable to get object {ref}")
         else:
             return obj_response.json()
+
+    @classmethod
+    def get(cls, object_type, ref):
+
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        try:
+
+            # If ref is just the org then we will list them
+            if '/' in ref:
+                obj = KodexaPlatform.get_object(ref, object_type)
+                import yaml
+                print(obj)
+            else:
+                objects = KodexaPlatform.list_objects(ref, object_type)
+                cols = DEFAULT_COLUMNS['default']
+
+                if object_type in DEFAULT_COLUMNS:
+                    cols = DEFAULT_COLUMNS[object_type]
+
+                print("\n")
+                from rich.table import Table
+
+                table = Table(title=f"Listing {object_type_metadata['plural']}")
+                for col in cols:
+                    table.add_column(col)
+                for object_dict in objects['content']:
+                    row = []
+
+                    for col in cols:
+                        row.append(object_dict[col] if col in object_dict else '')
+                    table.add_row(*row)
+
+                print(table)
+        except:
+            print(f"\n:exclamation: Failed to get {object_type_metadata['name']} [{sys.exc_info()[0]}]")
+
+    @classmethod
+    def delete(cls, object_type, ref):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+        print(f"Deleting {object_type_metadata['name']} [bold]{ref}[/bold]")
+
+        try:
+            KodexaPlatform.delete_object(ref, object_type)
+            print(f"Deleted {object_type_metadata['name']} [bold]{ref}[/bold] :tada:")
+        except:
+            print(f"\n:exclamation: Failed to delete {object_type_metadata['name']} [{sys.exc_info()[0]}]")
 
 
 class RemoteSession:

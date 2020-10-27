@@ -1,8 +1,12 @@
+import json
 import logging
 import os
 import shutil
+from json import JSONDecodeError
 from pathlib import Path
 from typing import List, Dict, Optional
+
+import requests
 
 from kodexa.model import Document, Store
 from kodexa.pipeline import PipelineContext
@@ -310,7 +314,7 @@ class DataStoreHelper:
             >>> Document.from_dict(doc_dict)
 
         :param dict doc_dict: A dictionary representation of a Kodexa Document.
-        
+
         :return: A TableDataStore or DictDataStore - driven from 'type' in doc_dict.  If 'type' is not present or does not align with one of these two types, None is returend.
         :rtype: TableDataStore, DictDataStore, or None
         """
@@ -327,3 +331,121 @@ class DataStoreHelper:
         else:
             logger.info(f"Unknown store")
             return None
+
+
+class DocumentStore:
+
+    def get(self, path: str) -> Document:
+        pass
+
+    def list(self) -> List[Document]:
+        pass
+
+    def put(self, path: str, document: Document):
+        pass
+
+
+class LocalDocumentStore(DocumentStore):
+
+    def __init__(self, store_path: str, force_initialize: bool = False):
+        self.store_path = store_path
+        self.index = 0
+
+        path = Path(store_path)
+
+        if force_initialize and path.exists():
+            shutil.rmtree(store_path)
+
+        if path.is_file():
+            raise Exception("Unable to load store, since it is pointing to a file?")
+        elif not path.exists():
+            logging.info(f"Creating new local document store in {store_path}")
+            path.mkdir(parents=True)
+
+    def get(self, path: str) -> Document:
+        return Document.from_kdxa(os.path.join(self.store_path, path) + ".kdxa")
+
+    def list(self) -> List[str]:
+        import glob
+        documents = []
+        for file in glob.glob(os.path.join(self.store_path, "*.kdxa")):
+            documents.append(file.replace('*.kdxa', ''))
+
+        return documents
+
+    def put(self, path: str, document: Document):
+        document.to_kdxa(os.path.join(self.store_path, path) + ".kdxa")
+
+
+class RemoteDocumentStore(DocumentStore):
+
+    def __init__(self, ref: str, query: str = "*"):
+        self.ref = ref
+        self.query = query
+        self.objects = []
+        self.page = 1
+
+    def put(self, path: str, document: Document):
+
+        from kodexa import KodexaPlatform
+
+        files = {"file": document.to_msgpack()}
+        content_object_response = requests.post(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+            headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)
+
+        try:
+            if content_object_response.status_code == 200:
+                from addict import Dict
+                content_object = Dict(json.loads(content_object_response.text))
+            else:
+                logger.error("Execution creation failed [" + content_object_response.text + "], response " + str(
+                    content_object_response.status_code))
+                raise Exception("Execution creation failed [" + content_object_response.text + "], response " + str(
+                    content_object_response.status_code))
+        except JSONDecodeError:
+            logger.error("Unable to handle response [" + content_object_response.text + "], response " + str(
+                content_object_response.status_code))
+            raise
+
+    def get_next_objects(self):
+        from kodexa import KodexaPlatform
+        content_objects_response = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+            params={"query": self.query, "page": self.page, "pageSize": 20},
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if content_objects_response.status_code != 200:
+            raise Exception(
+                f"Exception occurred while trying to fetch objects [{content_objects_response.status_code}]")
+        else:
+            self.objects = content_objects_response.json()['content']
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if len(self.objects) == 0:
+            raise StopIteration
+        else:
+            content_object = self.objects.pop(0)
+
+            if content_object['content_type'] == "Document":
+                from kodexa import KodexaPlatform
+                doc = requests.get(
+                    f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{content_object['id']}",
+                    headers={"x-access-token": KodexaPlatform.get_access_token()})
+                return Document.from_msgpack(doc.content)
+            else:
+
+                # TODO we need the connector?
+                document = Document()
+                document.source.connector = self.get_name()
+                document.source.original_path = f"{self.ref}/contents/{content_object['id']}"
+                return document
+
+
+class DocumentReference:
+
+    def __init__(self, document_store: DocumentStore, path: str):
+        pass
