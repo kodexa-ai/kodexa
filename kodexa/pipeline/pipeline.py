@@ -19,6 +19,7 @@ import yaml
 from kodexa.connectors import FolderConnector
 from kodexa.connectors.connectors import get_caller_dir
 from kodexa.model import Document, Store
+from kodexa.stores.stores import DocumentStore
 
 
 def new_id():
@@ -436,6 +437,19 @@ class Pipeline:
         logging.info(f"Setting sink {sink.get_name()} on {self.name}")
         self.sink = sink
 
+        return self
+
+    def to_store(self, document_store: DocumentStore):
+        """
+        Allows you to provide the sink store easily
+
+        This will wrap the store in a document store sink
+
+        :param document_store: document store to use
+        :return: the pipeline
+        """
+        from kodexa.sinks import DocumentStoreSink
+        self.set_sink(DocumentStoreSink(document_store))
         return self
 
     def to_yaml(self):
