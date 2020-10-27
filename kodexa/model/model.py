@@ -289,7 +289,8 @@ class ContentNode(object):
                 children_to_delete.append(child_node)
 
         for child_to_delete in children_to_delete:
-            self.children.remove(child_to_delete)
+            if child_to_delete in self.children:
+                self.children.remove(child_to_delete)
 
     def get_feature(self, feature_type, name):
         """

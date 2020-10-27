@@ -359,7 +359,7 @@ class LocalDocumentStore(DocumentStore):
         import glob
         documents = []
         for file in glob.glob(os.path.join(self.store_path, "*.kdxa")):
-            documents.append(file.replace('.kdxa', '').replace(self.store_path, ''))
+            documents.append(file.replace('.kdxa', '').replace(self.store_path, '').replace('/', ''))
 
         return documents
 
