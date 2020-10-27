@@ -262,6 +262,34 @@ class ContentNode(object):
             self._feature_map[new_feature.feature_type + ":" + new_feature.name] = new_feature
             return new_feature
 
+    def delete_children(self, nodes=None, exclude_nodes=None):
+        """Delete the children of this node, you can either supply a list of the nodes to delete
+           or the nodes to exclude from the delete, if neither are supplied then we delete all the children
+
+        """
+
+        if nodes is None:
+            nodes = []
+        if exclude_nodes is None:
+            nodes = []
+
+        children_to_delete = []
+
+        for child_node in self.children:
+            if nodes is not None:
+                for node_to_delete in nodes:
+                    if node_to_delete.uuid == child_node.uuid:
+                        children_to_delete.append(child_node)
+            elif exclude_nodes is not None:
+                for nodes_to_exclude in exclude_nodes:
+                    if nodes_to_exclude.uuid != child_node.uuid:
+                        children_to_delete.append(child_node)
+            else:
+                children_to_delete.append(child_node)
+
+        for child_to_delete in children_to_delete:
+            self.children.remove(child_to_delete)
+
     def get_feature(self, feature_type, name):
         """
         Gets the value for the given feature.
