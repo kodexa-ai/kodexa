@@ -36,6 +36,43 @@ def test_tag_key_value():
     assert context.get_store('test_store').rows[14][1] == 'Europe'
 
 
+def test_tag_key_value_include_exclude():
+
+    # Testing include parameter
+    include_tags = ['DATE', 'LOC']
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    step = TagsToKeyValuePairExtractor(store_name='test_store', include=include_tags)
+    context = PipelineContext()
+    step.process(document, context)
+    assert context.get_store('test_store').count() == 11
+
+    # Testing exclude parameter
+    exclude_tags = ['DATE', 'LOC']
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    step = TagsToKeyValuePairExtractor(store_name='test_store', exclude=exclude_tags)
+    context = PipelineContext()
+    step.process(document, context)
+    assert context.get_store('test_store').count() == 34
+
+    # Testing both include and exclude parameters
+    include_tags = ['LOC']
+    exclude_tags = ['DATE']
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    step = TagsToKeyValuePairExtractor(store_name='test_store', include=include_tags, exclude=exclude_tags)
+    context = PipelineContext()
+    step.process(document, context)
+    assert context.get_store('test_store').count() == 5
+
+
+    # Testing both include - this should be the same as before as 'exclude' shouldn't have really done anything
+    include_tags = ['LOC']
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    step = TagsToKeyValuePairExtractor(store_name='test_store', include=include_tags)
+    context = PipelineContext()
+    step.process(document, context)
+    assert context.get_store('test_store').count() == 5
+
+
 def test_rollup_of_pdf():
     # first test - collapsing words and lines up to their common parent
     test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
