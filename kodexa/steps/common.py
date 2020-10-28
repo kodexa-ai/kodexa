@@ -184,7 +184,7 @@ class TagsToKeyValuePairExtractor:
 
     def process_node(self, table_store, node):
         for feature in node.get_features():
-            if feature.feature_type == 'tag':
+            if feature.feature_type == 'tag' and (feature.name in self.include or len(self.include) == 0) and (feature.name not in self.exclude or len(self.exclude) == 0) :
                 tagged_text = node.content
                 if 'start' in feature.value[0]:
                     tagged_text = node.content[feature.value[0]['start']:feature.value[0]['end']]
