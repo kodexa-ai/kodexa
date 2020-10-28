@@ -1491,7 +1491,7 @@ class DocumentStore:
     def get(self, path: str) -> Document:
         pass
 
-    def list(self) -> List[str]:
+    def list(self) -> List[Dict]:
         pass
 
     def put(self, path: str, document: Document):
