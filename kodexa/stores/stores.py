@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import logging
 import os
@@ -340,6 +341,7 @@ class LocalDocumentStore(DocumentStore):
     def __init__(self, store_path: str, force_initialize: bool = False):
         self.store_path = store_path
         self.index = 0
+        self.metastore = []
 
         path = Path(store_path)
 
@@ -352,20 +354,39 @@ class LocalDocumentStore(DocumentStore):
             logging.info(f"Creating new local document store in {store_path}")
             path.mkdir(parents=True)
 
+            # Create an empty index file
+            self.metastore = []
+            self.write_metastore()
+
+        self.read_metastore()
+
+        logging.info(f"Found {len(self.metastore)} documents in {store_path}")
+
+    def read_metastore(self):
+        """
+        Read the metadata stire
+        """
+        self.metastore:List[Dict] = []
+        with open(os.path.join(self.store_path, 'metastore.json')) as f:
+            self.metastore = json.load(f)
+
+    def write_metastore(self):
+        """
+        Method to write the JSON store index back to store path
+        """
+        with open(os.path.join(self.store_path, 'metastore.json'), 'w') as f:
+            json.dump(self.metastore, f)
+
     def get(self, path: str) -> Document:
         return Document.from_kdxa(os.path.join(self.store_path, path) + ".kdxa")
 
-    def list(self) -> List[str]:
-        import glob
-        documents = []
-        for file in glob.glob(os.path.join(self.store_path, "*.kdxa")):
-            documents.append(file.replace('.kdxa', '').replace(self.store_path, '').replace('/', ''))
-
-        return documents
+    def list(self) -> List[Dict]:
+        return self.metastore
 
     def put(self, path: str, document: Document):
         document.to_kdxa(os.path.join(self.store_path, path) + ".kdxa")
-
+        self.metastore.append({'metadata':document.metadata,'source': dataclasses.asdict(document.source),'uuid':document.uuid, 'path': path})
+        self.write_metastore()
 
 class RemoteDocumentStore(DocumentStore):
 
