@@ -116,9 +116,11 @@ class RollupTransformer:
                                 # We just need to bring the content onto the end of the parent content and remove
                                 # this node
                                 if self.get_all_content:
-                                    node.parent.content = node.parent.content + self.separator_character + node.get_all_content() if node.parent.content else node.get_all_content()
+                                    node.parent.content = node.parent.content + self.separator_character +\
+                                        node.get_all_content() if node.parent.content else node.get_all_content()
                                 else:
-                                    node.parent.content = node.parent.content + self.separator_character + node.content if node.parent.content else node.content
+                                    node.parent.content = node.parent.content + self.separator_character + node.content \
+                                        if node.parent.content else node.content
                                 node.parent.children.remove(node)
 
                             if self.reindex:
@@ -184,7 +186,9 @@ class TagsToKeyValuePairExtractor:
 
     def process_node(self, table_store, node):
         for feature in node.get_features():
-            if feature.feature_type == 'tag':
+            if feature.feature_type == 'tag' \
+                    and (feature.name in self.include or len(self.include) == 0) \
+                    and (feature.name not in self.exclude or len(self.exclude) == 0):
                 tagged_text = node.content
                 if 'start' in feature.value[0]:
                     tagged_text = node.content[feature.value[0]['start']:feature.value[0]['end']]
