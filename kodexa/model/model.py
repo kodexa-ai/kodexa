@@ -1496,3 +1496,26 @@ class DocumentStore:
 
     def put(self, path: str, document: Document):
         pass
+
+
+class FileStore:
+    """A file store supports storing, listing and retrieving native files"""
+
+    def get(self, path: str) -> Document:
+        pass
+
+    def list(self) -> List[str]:
+        pass
+
+    def put(self, path: str, document: Document):
+        pass
+
+
+class ModelStore:
+    """A model store supports storing and retrieving of a ML models"""
+
+    def get(self, path: str) -> Document:
+        pass
+
+    def put(self, path: str, document: Document):
+        pass
