@@ -341,7 +341,7 @@ class LocalDocumentStore(DocumentStore):
     def __init__(self, store_path: str, force_initialize: bool = False):
         self.store_path = store_path
         self.index = 0
-        self.metastore = []
+        self.metastore:List[Dict] = []
 
         path = Path(store_path)
 
@@ -388,6 +388,7 @@ class LocalDocumentStore(DocumentStore):
         self.metastore.append({'metadata':document.metadata,'source': dataclasses.asdict(document.source),'uuid':document.uuid, 'path': path})
         self.write_metastore()
 
+
 class RemoteDocumentStore(DocumentStore):
 
     def __init__(self, ref: str, query: str = "*"):
@@ -400,7 +401,7 @@ class RemoteDocumentStore(DocumentStore):
 
         from kodexa import KodexaPlatform
 
-        files = {"file": document.to_msgpack()}
+        files = {"file": document.to_msgpack(),"path": path}
         content_object_response = requests.post(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
             headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)
