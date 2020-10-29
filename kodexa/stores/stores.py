@@ -341,7 +341,7 @@ class LocalDocumentStore(DocumentStore):
     def __init__(self, store_path: str, force_initialize: bool = False):
         self.store_path = store_path
         self.index = 0
-        self.metastore:List[Dict] = []
+        self.metastore: List[Dict] = []
 
         path = Path(store_path)
 
