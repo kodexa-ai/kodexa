@@ -19,3 +19,4 @@ click
 jinja2
 flake8
 rich
+GitPython

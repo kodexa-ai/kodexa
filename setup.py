@@ -26,14 +26,15 @@ setup(name='kodexa',
           'addict==2.2.1',
           'requests==2.24.0',
           'msgpack==1.0.0',
-          'urllib3==1.25.8',
+          'urllib3==1.25.9',
           'pyyaml',
           'ply',
           'click',
           'deepdiff',
           'simpleeval',
           'jinja2',
-          'rich'
+          'rich',
+          'GitPython'
       ],
       entry_points="""
         [console_scripts]
@@ -60,7 +61,7 @@ setup(name='kodexa',
       ],
       package_data={
           # If any package contains *.j2
-          '': ['*.j2'],
+          '': ['*.j2','*.j2.html'],
       },
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])
