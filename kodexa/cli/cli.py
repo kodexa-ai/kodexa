@@ -27,6 +27,7 @@ import tarfile
 import click
 from rich import print
 
+from kodexa.cli.documentation import generate_site
 from kodexa.cloud.kodexa import ExtensionHelper, KodexaPlatform
 
 LOGGING_LEVELS = {
@@ -140,7 +141,7 @@ def metadata(_: Info, path: str):
 @click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
 @pass_info
 def document(_: Info, path: str):
-    """Load metadata"""
+    """Build markdown documentation for this extension"""
     metadata = ExtensionHelper.load_metadata(path)
     print("Metadata loaded")
     from kodexa.cli.documentation import generate_documentation
@@ -153,8 +154,11 @@ def document(_: Info, path: str):
 @click.option('--output', default=os.getcwd() + "/dist",
               help='Path to the output folder (defaults to dist under current)')
 @click.option('--version', default=os.getenv('VERSION'), help='Version number (defaults to 1.0.0)')
+@click.option('--site/--no-site', default=False, help='Generate website to serve extension')
+@click.option('--sitedir', default='site', help='Path to folder for site contents')
+@click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
-def package(_: Info, path: str, output: str, version: str):
+def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
     """Load metadata"""
     metadata_obj = ExtensionHelper.load_metadata(path)
     print("Preparing to pack")
@@ -185,3 +189,9 @@ def package(_: Info, path: str, output: str, version: str):
     os.rename(output_filename, os.path.join(output, output_filename))
 
     print("Extension has been packaged :tada:")
+
+    if site:
+        metadata_obj['source']['location'] = url + metadata_obj['version'] + '/' + output_filename
+        generate_site(metadata=metadata_obj, base_dir=sitedir, output_filename=os.path.join(output, output_filename),
+                      url=url)
+        print("Extension site has been successfully built :tada:")
