@@ -1442,7 +1442,7 @@ class Document(object):
         url_document.source.connector = 'url'
         import base64
         encoded_url = base64.b64encode(url.encode('ascii'))
-        url_document.source.original_filename = encoded_url
+        url_document.source.original_filename = encoded_url.decode('ascii')
         url_document.source.original_path = url
         url_document.source.headers = headers
         return url_document
