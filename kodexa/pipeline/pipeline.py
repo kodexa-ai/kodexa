@@ -264,10 +264,10 @@ class PipelineStep:
         if self.will_execute(context, document):
             try:
 
-                if self.cache_path:
-                    document.to_kdxa(self.get_cache_name(document))
-
                 context.set_current_document(document)
+
+                result_document = None
+
                 if str(type(self.step)) == "<class 'type'>":
 
                     # We need to handle the parameterization
@@ -300,24 +300,29 @@ class PipelineStep:
 
                     step_instance = self.step(**option_copy)
                     if len(signature(step_instance.process).parameters) == 1:
-                        return step_instance.process(document)
+                        result_document = step_instance.process(document)
                     else:
-                        return step_instance.process(document, context)
+                        result_document = step_instance.process(document, context)
 
                 elif not callable(self.step):
                     logging.info(f"Starting step {self.step.get_name()}")
 
                     if len(signature(self.step.process).parameters) == 1:
-                        return self.step.process(document)
+                        result_document = self.step.process(document)
                     else:
-                        return self.step.process(document, context)
+                        result_document = self.step.process(document, context)
                 else:
                     logging.info(f"Starting step function {self.step.__name__}")
 
                     if len(signature(self.step).parameters) == 1:
-                        return self.step(document)
+                        result_document = self.step(document)
                     else:
-                        return self.step(document, context)
+                        result_document = self.step(document, context)
+
+                if self.cache_path and result_document:
+                    result_document.to_kdxa(self.get_cache_name(result_document))
+
+                return result_document
             except:
                 tt, value, tb = sys.exc_info()
                 document.exceptions.append({
@@ -329,8 +334,6 @@ class PipelineStep:
                 else:
                     return document
         else:
-            return document
-
             return document
 
     def will_execute(self, context, document):
