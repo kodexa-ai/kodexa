@@ -1,6 +1,7 @@
 import dataclasses
 import itertools
 import json
+import os
 import re
 import uuid
 from enum import Enum
@@ -1417,6 +1418,7 @@ class Document(object):
         file_document.metadata.connector = 'file-handle'
         file_document.metadata.connector_options.file = file
         file_document.source.connector = 'file-handle'
+        file_document.source.original_filename = os.path.basename(file)
         file_document.source.original_path = file
         return file_document
 
@@ -1438,6 +1440,9 @@ class Document(object):
         url_document.metadata.connector_options.url = url
         url_document.metadata.connector_options.headers = headers
         url_document.source.connector = 'url'
+        import base64
+        encoded_url = base64.b64encode(url)
+        url_document.source.original_filename = os.path.basename(encoded_url)
         url_document.source.original_path = url
         url_document.source.headers = headers
         return url_document
