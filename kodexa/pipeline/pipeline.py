@@ -48,7 +48,7 @@ class ContentObject:
         return {
             'id': self.id,
             'tags': self.tags,
-            'content_type': self.content_type,
+            'content_type': str(self.content_type),
             'metadata': self.metadata,
             'name': self.name
         }
