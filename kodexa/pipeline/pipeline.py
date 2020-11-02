@@ -44,6 +44,15 @@ class ContentObject:
         self.tags = tags
         self.metadata = metadata
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'tags': self.tags,
+            'content_type': self.content_type,
+            'metadata': self.metadata,
+            'name': self.name
+        }
+
 
 class InMemoryContentProvider:
     """
