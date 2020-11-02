@@ -1442,12 +1442,12 @@ class Document(object):
         url_document.source.connector = 'url'
         import base64
         encoded_url = base64.b64encode(url)
-        url_document.source.original_filename = os.path.basename(encoded_url)
+        url_document.source.original_filename = encoded_url
         url_document.source.original_path = url
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector, variables={}):
+    def select(self, selector, variables=None):
         """
         Execute a selector on the root node and then return a list of the matching nodes.
 
@@ -1461,6 +1461,8 @@ class Document(object):
         :return: A list of the matching ContentNodes.  If no matches found, list is empty.
         :rtype: list[ContentNodes]
         """
+        if variables is None:
+            variables = {}
         if self.content_node:
             result = self.content_node.select(selector, variables)
             if isinstance(result, list):
