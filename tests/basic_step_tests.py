@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from kodexa import Document, Pipeline, PipelineContext, TagsToKeyValuePairExtractor, RollupTransformer
 
 
@@ -71,7 +73,7 @@ def test_tag_key_value_include_exclude():
     step.process(document, context)
     assert context.get_store('test_store').count() == 5
 
-
+@pytest.mark.skip
 def test_rollup_of_pdf():
     # first test - collapsing words and lines up to their common parent
     test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
