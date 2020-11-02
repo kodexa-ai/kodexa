@@ -1472,7 +1472,7 @@ class Document(object):
         else:
             return []
 
-    def select_as_node(self, selector, variables={}):
+    def select_as_node(self, selector, variables=None):
         """
         Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
@@ -1486,6 +1486,8 @@ class Document(object):
         :return: A new ContentNode.  All ContentNodes on this Document that match the selector value are added as the children for the returned ContentNode.
         :rtype: ContentNode
         """
+        if variables is None:
+            variables = {}
         if self.content_node:
             return self.content_node.select_as_node(selector, variables)
         else:
