@@ -1533,10 +1533,13 @@ class Document(object):
 class DocumentStore:
     """A document store supports storing, listing and retrieving Kodexa documents"""
 
-    def get_by_uuid(self, uuid_value: str) -> Document:
+    def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
         pass
 
     def list(self) -> List[Dict]:
+        pass
+
+    def query(self, query: str) -> List[Dict]:
         pass
 
     def put(self, path: str, document: Document):
