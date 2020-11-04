@@ -10,4 +10,4 @@ Create a new instance of a Document, you will be required to provide a DocumentM
     >>> document = Document(DocumentMetadata())
 """
 from .model import DocumentMetadata, ContentNode, ContentFeature, SourceMetadata, \
-    Document, Store, DocumentStore
+    Document, Store, DocumentStore, LocalModelStore

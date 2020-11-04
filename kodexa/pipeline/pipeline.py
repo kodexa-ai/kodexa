@@ -17,7 +17,7 @@ from uuid import uuid4
 import yaml
 
 from kodexa.connectors import FolderConnector
-from kodexa.connectors.connectors import get_caller_dir
+from kodexa.connectors.connectors import get_caller_dir, DocumentStoreConnector
 from kodexa.model import Document, Store
 from kodexa.stores.stores import DocumentStore
 
@@ -354,6 +354,12 @@ class PipelineStep:
             if document.source.original_filename is not None else document.uuid
         return f"{self.cache_path}/{file_name}.kdxa"
 
+    def end_processing(self, context):
+        try:
+            self.step.end_processing(context)
+        except:
+            pass
+
 
 class LabelStep(object):
     """
@@ -591,9 +597,25 @@ class Pipeline:
             else:
                 logging.warning("A step did not return a document?")
 
+        logging.info(f"Completing pipeline {self.name}")
+
+        for step in self.steps:
+            step.end_processing(self.context)
+
         logging.info(f"Completed pipeline {self.name}")
 
         return self.context
+
+    @staticmethod
+    def from_store(store: DocumentStore, subscription=None):
+        """
+        Build a new pipeline with the input documents from a document store
+
+        :param store:DocumentStore The URL ie. https://www.google.com
+        :param subscription:str The subscription query to use
+        :return: A new instance of a pipeline
+        """
+        return Pipeline(DocumentStoreConnector(store, subscription))
 
     @staticmethod
     def from_url(url, headers=None):

@@ -3,8 +3,10 @@ import itertools
 import json
 import os
 import re
+import shutil
 import uuid
 from enum import Enum
+from pathlib import Path
 from typing import List, Optional, Any
 
 import msgpack
@@ -1190,7 +1192,6 @@ class SourceMetadata:
     headers: Optional[Dict] = None
 
 
-
 class Document(object):
     """
     A Document is a collection of metadata and a set of content nodes.
@@ -1520,11 +1521,19 @@ class Document(object):
         else:
             return self.create_node(node_type='results')
 
+    def get_labels(self) -> List[str]:
+        """
+        Return the list of labels associated with this document
+
+        :return: list of associated labels
+        """
+        return self.labels
+
 
 class DocumentStore:
     """A document store supports storing, listing and retrieving Kodexa documents"""
 
-    def get(self, path: str) -> Document:
+    def get_by_uuid(self, uuid_value: str) -> Document:
         pass
 
     def list(self) -> List[Dict]:
@@ -1532,6 +1541,9 @@ class DocumentStore:
 
     def put(self, path: str, document: Document):
         pass
+
+    def count(self) -> int:
+        return 0
 
 
 class FileStore:
@@ -1550,8 +1562,35 @@ class FileStore:
 class ModelStore:
     """A model store supports storing and retrieving of a ML models"""
 
-    def get(self, path: str) -> Document:
+    def get(self, path: str):
         pass
 
-    def put(self, path: str, document: Document):
+    def put(self, path: str, content):
         pass
+
+
+class LocalModelStore(ModelStore):
+
+    def __init__(self, store_path: str, force_initialize=False):
+        path = Path(store_path)
+
+        if force_initialize and path.exists():
+            shutil.rmtree(store_path)
+
+        if path.is_file():
+            raise Exception("Unable to load store, since it is pointing to a file?")
+        elif not path.exists():
+            path.mkdir(parents=True)
+
+    def get(self, object_path: str):
+        path = Path(object_path)
+
+        if path.is_file():
+            return open(path, 'rb')
+        else:
+            return None
+
+    def put(self, object_path: str, content):
+        path = Path(object_path)
+        with open(path, 'wb') as object_file:
+            object_file.write(content)
