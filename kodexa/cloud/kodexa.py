@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import json
 import logging
 import os
@@ -19,6 +20,31 @@ from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import TableDataStore
 
 logger = logging.getLogger('kodexa.platform')
+
+from appdirs import AppDirs
+
+dirs = AppDirs("Kodexa", "Kodexa")
+
+
+def get_config():
+    path = os.path.join(dirs.user_config_dir, '.kodexa.json')
+    if os.path.exists(path):
+        with open(path, 'r') as outfile:
+            return json.load(outfile)
+    else:
+        return {'url': None, 'access_token': None}
+
+
+def save_config(config_obj):
+    path = os.path.join(dirs.user_config_dir, '.kodexa.json')
+    if not os.path.exists(os.path.dirname(path)):
+        try:
+            os.makedirs(os.path.dirname(path))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+    with open(path, 'w') as outfile:
+        json.dump(config_obj, outfile)
 
 
 class PipelineMetadataBuilder:
@@ -131,11 +157,15 @@ class KodexaPlatform:
 
     @staticmethod
     def get_access_token():
-        return os.getenv('KODEXA_ACCESS_TOKEN')
+        kodexa_config = get_config()
+        access_token = os.getenv('KODEXA_ACCESS_TOKEN')
+        return access_token if access_token is not None else kodexa_config['access_token']
 
     @staticmethod
     def get_url():
-        return os.getenv('KODEXA_URL', "https://platform.kodexa.com")
+        kodexa_config = get_config()
+        env_url = os.getenv('KODEXA_URL', None)
+        return env_url if env_url is not None else kodexa_config['url']
 
     @staticmethod
     def set_access_token(access_token):
@@ -359,6 +389,21 @@ class KodexaPlatform:
             print(f"Deleted {object_type_metadata['name']} [bold]{ref}[/bold] :tada:")
         except:
             print(f"\n:exclamation: Failed to delete {object_type_metadata['name']} [{sys.exc_info()[0]}]")
+
+    @classmethod
+    def login(cls, kodexa_url, username, password):
+        from requests.auth import HTTPBasicAuth
+        obj_response = requests.get(f"{kodexa_url}/api/account/me/token",
+                                    auth=HTTPBasicAuth(username, password),
+                                    headers={"content-type": "application/json"})
+        if obj_response.status_code == 200:
+            kodexa_config = get_config()
+            kodexa_config['url'] = kodexa_url
+            kodexa_config['access_token'] = obj_response.text
+            save_config(kodexa_config)
+            print("Logged in")
+        else:
+            print(f"Check your URL and password [{obj_response.status_code}]")
 
 
 class RemoteSession:

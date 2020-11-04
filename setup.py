@@ -34,7 +34,7 @@ setup(name='kodexa',
           'simpleeval',
           'jinja2',
           'rich',
-          'GitPython'
+          'appdirs'
       ],
       entry_points="""
         [console_scripts]
