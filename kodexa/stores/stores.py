@@ -366,7 +366,7 @@ class LocalDocumentStore(DocumentStore):
         """
         Read the metadata stire
         """
-        self.metastore:List[Dict] = []
+        self.metastore: List[Dict] = []
         with open(os.path.join(self.store_path, 'metastore.json')) as f:
             self.metastore = json.load(f)
 
@@ -391,7 +391,9 @@ class LocalDocumentStore(DocumentStore):
 
     def put(self, path: str, document: Document):
         document.to_kdxa(os.path.join(self.store_path, path) + ".kdxa")
-        self.metastore.append({'metadata':document.metadata,'source': dataclasses.asdict(document.source),'uuid':document.uuid, 'path': path})
+        self.metastore.append(
+            {'metadata': document.metadata, 'source': dataclasses.asdict(document.source), 'uuid': document.uuid,
+             'path': path, 'labels': document.get_labels()})
         self.write_metastore()
 
 
@@ -407,7 +409,7 @@ class RemoteDocumentStore(DocumentStore):
 
         from kodexa import KodexaPlatform
 
-        files = {"file": document.to_msgpack(),"path": path}
+        files = {"file": document.to_msgpack(), "path": path}
         content_object_response = requests.post(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
             headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)

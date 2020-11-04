@@ -3,10 +3,12 @@
 """
 
 from __future__ import unicode_literals
+
 import os
 import re
-from ply import lex, yacc
 import tempfile
+
+from ply import lex, yacc
 
 from kodexa.selectors import lexrules
 from kodexa.selectors import parserules

@@ -11,7 +11,7 @@ from typing import Dict, Type
 
 import requests
 
-from kodexa.model import Document, DocumentMetadata
+from kodexa.model import Document, DocumentMetadata, DocumentStore
 
 
 def get_caller_dir():
@@ -201,6 +201,25 @@ def get_source(document):
     connector = get_connector(document.source.connector,
                               document.source)
     return connector.get_source(document)
+
+
+class DocumentStoreConnector(object):
+
+    def __init__(self, store: DocumentStore, subscription: str):
+        self.store = store
+        self.subscription = subscription
+        self.index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.index >= self.store.count():
+            raise StopIteration
+        else:
+            uuid_value = self.store.list()[self.index]['uuid']
+            self.index += 1
+            return self.store.get_by_uuid(uuid_value)
 
 
 add_connector(FolderConnector)

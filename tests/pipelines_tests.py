@@ -1,4 +1,4 @@
-from kodexa import Pipeline, LocalDocumentStore
+from kodexa import Pipeline, LocalDocumentStore, LocalModelStore
 
 
 def test_interesting_pipeline():
@@ -10,6 +10,10 @@ def test_interesting_pipeline():
     def test_step(document):
         return document
 
+    def test_model_store(document, context):
+        context.get_store('my-model-store').put('cheese.txt', 'so cheesy'.encode('ascii'))
+        return document
+
     training_prep = Pipeline.from_text("hello world").to_store(training_documents)
     training_prep.add_step(test_step)
     training_prep.add_label('training_document')
@@ -18,3 +22,12 @@ def test_interesting_pipeline():
 
     assert training_documents.count() == 1
     assert training_documents.get_by_uuid(training_documents.list()[0]['uuid']) is not None
+
+    model_store = LocalModelStore('/tmp/my-model')
+    training_pipeline = Pipeline.from_store(training_documents)
+    training_pipeline.add_store('my-model-store', model_store)
+    training_pipeline.add_step(test_model_store)
+
+    context = training_pipeline.run()
+
+    assert model_store.get('cheese.txt').read().decode('ascii') == 'so cheesy'

@@ -679,6 +679,11 @@ class RemoteAction:
 
         return result_document if result_document else document
 
+    def end_processing(self):
+
+        # TODO not yet implemented for remote steps
+        pass
+
     def to_configuration(self):
         """
         Returns a dictionary representing the configuration information for the step
