@@ -1190,6 +1190,7 @@ class SourceMetadata:
     headers: Optional[Dict] = None
 
 
+
 class Document(object):
     """
     A Document is a collection of metadata and a set of content nodes.
@@ -1214,9 +1215,32 @@ class Document(object):
         self.version = Document.CURRENT_VERSION
         self.add_mixin('core')
         self.source: SourceMetadata = source
+        self.labels: List[str] = []
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
+
+    def add_label(self, label: str):
+        """
+        Add a label to the document
+
+        :param label:str Label to add
+        :return: the document
+        """
+        if label not in self.labels:
+            self.labels.append(label)
+
+        return self
+
+    def remove_label(self, label: str):
+        """
+        Remove a label to the document
+
+        :param label:str Label to remove
+        :return: the document
+        """
+        self.labels.remove(label)
+        return self
 
     @classmethod
     def from_text(cls, text):
@@ -1293,6 +1317,7 @@ class Document(object):
                 'mixins': self._mixins,
                 'exceptions': self.exceptions,
                 'log': self.log,
+                'labels': self.labels,
                 'uuid': self.uuid}
 
     @staticmethod
@@ -1320,6 +1345,8 @@ class Document(object):
             new_document.content_node = ContentNode.from_dict(new_document, doc_dict['content_node'])
         if 'source' in doc_dict and doc_dict['source']:
             new_document.source = SourceMetadata(**doc_dict['source'])
+        if 'labels' in doc_dict and doc_dict['labels']:
+            new_document.labels = doc_dict['labels']
         return new_document
 
     @staticmethod

@@ -377,11 +377,17 @@ class LocalDocumentStore(DocumentStore):
         with open(os.path.join(self.store_path, 'metastore.json'), 'w') as f:
             json.dump(self.metastore, f)
 
-    def get(self, path: str) -> Document:
-        return Document.from_kdxa(os.path.join(self.store_path, path) + ".kdxa")
+    def get_by_uuid(self, uuid: str) -> Optional[Document]:
+        for metadata in self.metastore:
+            if metadata['uuid'] == uuid:
+                return Document.from_kdxa(os.path.join(self.store_path, metadata['path']) + ".kdxa")
+        return None
 
     def list(self) -> List[Dict]:
         return self.metastore
+
+    def count(self) -> int:
+        return len(self.metastore)
 
     def put(self, path: str, document: Document):
         document.to_kdxa(os.path.join(self.store_path, path) + ".kdxa")

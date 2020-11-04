@@ -355,6 +355,26 @@ class PipelineStep:
         return f"{self.cache_path}/{file_name}.kdxa"
 
 
+class LabelStep(object):
+    """
+    A simple step for handling the labelling for a document
+    """
+
+    def __init__(self, label: str, remove=False):
+        self.label = label
+        self.remove = remove
+
+    def get_name(self):
+        return f"Remove label {self.label}" if self.remove else f"Add label {self.label}"
+
+    def process(self, document: Document):
+        if self.remove:
+            document.remove_label(self.label)
+        else:
+            document.add_label(self.label)
+        return document
+
+
 class Pipeline:
     """
     A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
@@ -397,6 +417,46 @@ class Pipeline:
         """
         self.context.add_store(name, store)
 
+        return self
+
+    def add_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
+                  parameterized=False, cache_path=None):
+        """
+        Adds a label to the document
+
+        :param label: label to add
+        :param enabled: is the step enabled (default True)
+        :param condition: condition to evaluate before executing the step (default None)
+        :param options: options to be passed to the step if it is a simplified remote action
+        :param attach_source: if step is simplified remote action this determines if we need to add the source
+        :param parameterized: apply the pipeline's parameters to the options
+        :param cache_path: cache the document locally, note this is only for local pipelines
+        :return: the pipeline
+        """
+        self.steps.append(
+            PipelineStep(step=LabelStep(label), name=f"Add label {label}", enabled=enabled, condition=condition,
+                         options=options,
+                         attach_source=attach_source, parameterized=parameterized, cache_path=cache_path))
+        return self
+
+    def remove_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
+                     parameterized=False, cache_path=None):
+        """
+        Adds a label to the document
+
+        :param label: label to remove
+        :param enabled: is the step enabled (default True)
+        :param condition: condition to evaluate before executing the step (default None)
+        :param options: options to be passed to the step if it is a simplified remote action
+        :param attach_source: if step is simplified remote action this determines if we need to add the source
+        :param parameterized: apply the pipeline's parameters to the options
+        :param cache_path: cache the document locally, note this is only for local pipelines
+        :return: the pipeline
+        """
+        self.steps.append(
+            PipelineStep(step=LabelStep(label, remove=True), name=f"Remove label {label}", enabled=enabled,
+                         condition=condition, options=options,
+                         attach_source=attach_source, parameterized=parameterized, cache_path=cache_path))
         return self
 
     def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
@@ -451,13 +511,14 @@ class Pipeline:
 
         return self
 
-    def to_store(self, document_store: DocumentStore):
+    def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
         """
         Allows you to provide the sink store easily
 
         This will wrap the store in a document store sink
 
         :param document_store: document store to use
+        :param processing_mode: the processing mode (update or new)
         :return: the pipeline
         """
         from kodexa.sinks import DocumentStoreSink

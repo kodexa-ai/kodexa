@@ -23,6 +23,7 @@ import logging
 import os
 import os.path
 import tarfile
+from getpass import getpass
 
 import click
 from rich import print
@@ -135,6 +136,20 @@ def metadata(_: Info, path: str):
     """Load metadata"""
     metadata = ExtensionHelper.load_metadata(path)
     print(f"Metadata loaded")
+
+
+@cli.command()
+@pass_info
+def login(_: Info):
+    """Login and store your PAT"""
+    try:
+        kodexa_url = input("Enter the Kodexa URL: ")
+        username = input("Enter your email: ")
+        password = getpass("Enter your password: ")
+    except Exception as error:
+        print('ERROR', error)
+    else:
+        KodexaPlatform.login(kodexa_url, username, password)
 
 
 @cli.command()
