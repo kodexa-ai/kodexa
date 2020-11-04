@@ -1587,10 +1587,8 @@ class LocalModelStore(ModelStore):
             path.mkdir(parents=True)
 
     def get(self, object_path: str):
-        path = Path(object_path)
-
-        if path.is_file():
-            return open(os.path.join(self.store_path, path), 'rb')
+        if Path(os.path.join(self.store_path, object_path)).is_file():
+            return open(os.path.join(self.store_path, object_path), 'rb')
         else:
             return None
 
