@@ -1572,6 +1572,7 @@ class ModelStore:
 class LocalModelStore(ModelStore):
 
     def __init__(self, store_path: str, force_initialize=False):
+        self.store_path = store_path
         path = Path(store_path)
 
         if force_initialize and path.exists():
@@ -1586,11 +1587,11 @@ class LocalModelStore(ModelStore):
         path = Path(object_path)
 
         if path.is_file():
-            return open(path, 'rb')
+            return open(os.path.join(self.store_path, path), 'rb')
         else:
             return None
 
     def put(self, object_path: str, content):
         path = Path(object_path)
-        with open(path, 'wb') as object_file:
+        with open(os.path.join(self.store_path, path), 'wb') as object_file:
             object_file.write(content)
