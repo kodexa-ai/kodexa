@@ -1536,10 +1536,36 @@ class DocumentStore:
     def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
         pass
 
-    def list(self) -> List[Dict]:
+    def list_objects(self) -> List[Dict]:
         pass
 
-    def query(self, query: str) -> List[Dict]:
+    def list(self):
+        objects = self.list_objects()
+        self._draw_table(objects)
+
+    def query(self, query: str = "*"):
+        objects = self.query_objects(query)
+        self._draw_table(objects)
+
+    def _draw_table(self, objects):
+        from rich.table import Table
+        from rich import print
+
+        table = Table(title=f"Listing Objects")
+
+        cols = ['id', 'content_type', 'path']
+        for col in cols:
+            table.add_column(col)
+        for object_dict in objects:
+            row = []
+
+            for col in cols:
+                row.append(object_dict[col] if col in object_dict else '')
+            table.add_row(*row)
+
+        print(table)
+
+    def query_objects(self, query: str) -> List[Dict]:
         pass
 
     def put(self, path: str, document: Document):
