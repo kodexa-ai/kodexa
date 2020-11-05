@@ -11,7 +11,7 @@ import requests
 
 from kodexa.model import Document, Store, DocumentStore
 
-logger = logging.getLogger('kodexa-stores')
+logger = logging.getLogger('kodexa.stores')
 
 
 class JsonDocumentStore(Store):
@@ -399,11 +399,21 @@ class LocalDocumentStore(DocumentStore):
                 return Document.from_kdxa(os.path.join(self.store_path, metadata['path']) + ".kdxa")
         return None
 
+    def get_by_path(self, path: str) -> Optional[Document]:
+        for metadata in self.metastore:
+            if metadata['source']['original_path']+"/"+metadata['source']['original_filename'] == path:
+                return Document.from_kdxa(os.path.join(self.store_path, metadata['path']) + ".kdxa")
+        return None
+
     def list(self) -> List[Dict]:
         return self.metastore
 
     def count(self) -> int:
         return len(self.metastore)
+
+    def load_kdxa(self, path: str):
+        document = Document.from_kdxa(path)
+        self.put(document.uuid, document)
 
     def put(self, path: str, document: Document):
         document.to_kdxa(os.path.join(self.store_path, path) + ".kdxa")

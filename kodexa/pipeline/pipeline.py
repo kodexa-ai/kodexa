@@ -270,7 +270,7 @@ class PipelineStep:
                 context.set_current_document(document)
 
                 result_document = None
-
+                logger.info(f"Starting step")
                 if str(type(self.step)) == "<class 'type'>":
 
                     logger.info(f"Starting step based on class {self.step}")

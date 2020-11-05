@@ -11,6 +11,7 @@ from json import JSONDecodeError
 import requests
 import yaml
 from addict import Dict
+from kodexa.stores.stores import RemoteDocumentStore, LocalDocumentStore
 from rich import print
 
 from kodexa.connectors import get_source
@@ -220,79 +221,118 @@ class KodexaPlatform:
             raise Exception("Unable to deploy new extension")
 
     @staticmethod
-    def deploy(slug: str, pipeline: Pipeline, name: str = "A new pipeline", description: str = "A Kodexa Pipeline",
-               example_urls=None, more_info_url: str = None, force_replace=False,
-               public=False):
+    def resolve_ref(ref: str):
+        org_slug = ref.split('/')[0]
+        slug = ref.split('/')[1].split(":")[0]
 
-        if example_urls is None:
-            example_urls = []
+        version = None
 
-        builder = PipelineMetadataBuilder(pipeline)
+        if len(ref.split('/')[1].split(":")) == 2:
+            version = ref.split('/')[1].split(":")[1]
 
-        if '/' not in slug:
-            logger.error("A slug must be valid, i.e. org_slug/pipeline_slug")
+        return [org_slug, slug, version]
+
+    @staticmethod
+    def deploy(ref: str, kodexa_object, name: str = "A new object", description: str = "A new Kodexa object",
+               options=None, public=False, force_replace=False):
+
+        if '/' not in ref:
+            logger.error("A ref must be valid, i.e. org_slug/pipeline_slug:version")
             raise Exception("Invalid slug")
 
-        logger.info(f"Deploying pipeline {slug}")
+        [organization_slug, object_slug, object_version] = KodexaPlatform.resolve_ref(ref)
+
+        if options is None:
+            options = {}
+
+        metadata_object = Dict()
+        metadata_object.orgSlug = organization_slug
+        metadata_object.publicAccess = public
+        metadata_object.slug = object_slug
+        metadata_object.version = object_version
+        metadata_object.name = name
+        metadata_object.description = description
+
+        object_url = None
+
+        if isinstance(kodexa_object, Pipeline):
+
+            object_url = "pipelines"
+
+            if "example_urls" not in options is None:
+                example_urls = []
+            else:
+                example_urls = options["example_urls"]
+
+            if "more_info_url" not in options is None:
+                more_info_url = None
+            else:
+                more_info_url = options["more_info_url"]
+
+            builder = PipelineMetadataBuilder(kodexa_object)
+
+            metadata_object.type = 'pipeline'
+            metadata_object.metadata.parameters = []
+            metadata_object.metadata.steps = []
+            metadata_object.exampleUrls = example_urls
+            metadata_object.moreInfoUrl = more_info_url
+
+            builder.build_steps(metadata_object)
+
+        elif isinstance(kodexa_object, LocalDocumentStore):
+            object_url = 'stores'
+            metadata_object.type = 'store'
+            metadata_object.contentType = 'DOCUMENT'
+        else:
+            raise Exception("Unknown object type, unable to deploy")
+
+        logger.info(f"Deploying {metadata_object.type} {ref}")
+
         access_token = KodexaPlatform.get_access_token_details()
-        logger.info(f"Using organization {access_token}")
-
-        new_pipeline = Dict()
-
-        organization_slug = slug.split('/')[0]
-        pipeline_slug = slug.split('/')[1]
-
-        new_pipeline.slug = pipeline_slug
-        new_pipeline.name = name
-        new_pipeline.type = 'pipeline'
-        new_pipeline.description = description
-        new_pipeline.metadata.parameters = []
-        new_pipeline.metadata.steps = []
-        new_pipeline.orgSlug = organization_slug
-        new_pipeline.publicAccess = public
-        new_pipeline.exampleUrls = example_urls
-        new_pipeline.moreInfoUrl = more_info_url
-
-        builder.build_steps(new_pipeline)
 
         if organization_slug not in access_token.organizationSlugs:
             logger.error(f"You do not have access to the organization {organization_slug}")
             raise Exception("Unable to deploy, no access to organization")
 
-        response = requests.get(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
+        if object_version:
+            url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}/{object_version}"
+        else:
+            url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}"
+
+        response = requests.get(url,
                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
                                          "content-type": "application/json"})
 
         if response.status_code == 401:
-            logger.error("You do not have the permissions to access this pipeline")
+            logger.error(f"You do not have the permissions to access this {metadata_object.type}")
             raise Exception("Not authorized on pipeline")
 
         if response.status_code == 404:
-            logger.info("Pipeline doesn't exist, will publish")
-            response = requests.post(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}",
-                                     json=new_pipeline.to_dict(),
+            logger.info("Object doesn't exist, will deploy")
+            response = requests.post(f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}",
+                                     json=metadata_object.to_dict(),
                                      headers={"x-access-token": KodexaPlatform.get_access_token(),
                                               "content-type": "application/json"})
             if response.status_code == 200:
-                logger.info("Pipeline deployed")
+                logger.info("Deployed")
             else:
                 logger.error(response.text)
-                raise Exception("Unable to deploy new pipeline")
+                raise Exception("Unable to deploy")
         else:
-            logger.info("Pipeline already exists")
+            logger.info(f"{ref} already exists")
             if force_replace:
-                logger.info("Replacing pipeline")
-                response = requests.put(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
-                                        json=new_pipeline.to_dict(),
+                logger.info(f"Replacing {ref}")
+                response = requests.put(url,
+                                        json=metadata_object.to_dict(),
                                         headers={"x-access-token": KodexaPlatform.get_access_token(),
                                                  "content-type": "application/json"})
                 if response.status_code == 200:
-                    logger.info("Pipeline deployed")
+                    logger.info("Deployed")
                 else:
                     logger.error(response.text)
-                    raise Exception("Unable to deploy and replace existing pipeline")
+                    raise Exception("Unable to deploy and replace")
             else:
-                logger.info("Not updating")
+                logger.warning("Not updating")
                 return
 
     @staticmethod
@@ -307,11 +347,9 @@ class KodexaPlatform:
             raise Exception("Unable to list objects")
 
     @staticmethod
-    def undeploy(slug: str):
-        organization_slug = slug.split('/')[0]
-        pipeline_slug = slug.split('/')[1]
-
-        response = requests.delete(f"{KodexaPlatform.get_url()}/api/pipelines/{organization_slug}/{pipeline_slug}",
+    def undeploy(ref: str):
+        url_ref = ref.replace(':', '/')
+        response = requests.delete(f"{KodexaPlatform.get_url()}/api/pipelines/{url_ref}",
                                    headers={"x-access-token": KodexaPlatform.get_access_token(),
                                             "content-type": "application/json"})
         if response.status_code == 200:
@@ -418,7 +456,7 @@ class RemoteSession:
 
     def get_action_metadata(self, ref):
         r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref}",
-                          headers={"x-access-token": KodexaPlatform.get_access_token()})
+                         headers={"x-access-token": KodexaPlatform.get_access_token()})
         return r.json()
 
     def start(self):
@@ -679,7 +717,8 @@ class RemoteAction:
 
         logger.info(f"Loading metadata for {self.slug}")
         action_metadata = cloud_session.get_action_metadata(self.slug)
-        execution = cloud_session.execution_action(document, self.options, self.attach_source if self.attach_source else action_metadata['metadata']['requiresSource'])
+        execution = cloud_session.execution_action(document, self.options, self.attach_source if self.attach_source else
+        action_metadata['metadata']['requiresSource'])
         execution = cloud_session.wait_for_execution(execution)
 
         result_document = cloud_session.get_output_document(execution)
