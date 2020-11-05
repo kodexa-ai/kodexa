@@ -6,6 +6,7 @@ import shutil
 from json import JSONDecodeError
 from pathlib import Path
 from typing import List, Dict, Optional
+from rich import print
 
 import requests
 
@@ -401,11 +402,11 @@ class LocalDocumentStore(DocumentStore):
 
     def get_by_path(self, path: str) -> Optional[Document]:
         for metadata in self.metastore:
-            if metadata['source']['original_path']+"/"+metadata['source']['original_filename'] == path:
+            if metadata['source']['original_path'] + "/" + metadata['source']['original_filename'] == path:
                 return Document.from_kdxa(os.path.join(self.store_path, metadata['path']) + ".kdxa")
         return None
 
-    def list(self) -> List[Dict]:
+    def list_objects(self) -> List[Dict]:
         return self.metastore
 
     def count(self) -> int:
@@ -447,12 +448,15 @@ class RemoteDocumentStore(DocumentStore):
 
         from kodexa import KodexaPlatform
 
-        files = {"file": document.to_msgpack(), "path": path}
-        content_object_response = requests.post(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
-            headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)
-
         try:
+            import io
+            files = {"file": document.to_msgpack()}
+            data = {"path": path}
+            content_object_response = requests.post(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+                headers={"x-access-token": KodexaPlatform.get_access_token()},
+                files=files, data=data)
+
             if content_object_response.status_code == 200:
                 from addict import Dict
                 content_object = Dict(json.loads(content_object_response.text))
@@ -462,8 +466,8 @@ class RemoteDocumentStore(DocumentStore):
                 raise Exception("Execution creation failed [" + content_object_response.text + "], response " + str(
                     content_object_response.status_code))
         except JSONDecodeError:
-            logger.error("Unable to handle response [" + content_object_response.text + "], response " + str(
-                content_object_response.status_code))
+            logger.error(
+                f"Unable to handle response [{content_object_response.text}], response {content_object_response.status_code}")
             raise
 
     def get_next_objects(self):
@@ -478,6 +482,27 @@ class RemoteDocumentStore(DocumentStore):
                 f"Exception occurred while trying to fetch objects [{content_objects_response.status_code}]")
         else:
             self.objects = content_objects_response.json()['content']
+
+    def query_objects(self, query: str) -> List[Dict]:
+        from kodexa import KodexaPlatform
+        list_content = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+            params={'query':query},
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if list_content.status_code != 200:
+            raise Exception(
+                f"Exception occurred while trying to fetch objects [{list_content.status_code}]")
+        return list_content.json()['content']
+
+    def list_objects(self) -> List[Dict]:
+        from kodexa import KodexaPlatform
+        list_content = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if list_content.status_code != 200:
+            raise Exception(
+                f"Exception occurred while trying to fetch objects [{list_content.status_code}]")
+        return list_content.json()['content']
 
     def __iter__(self):
         return self
