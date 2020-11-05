@@ -53,6 +53,9 @@ class JsonDocumentStore(Store):
     def __iter__(self):
         return self
 
+    def accept(self, document: Document):
+        return True
+
     def __next__(self):
         if self.index > len(self.document_ids) - 1:
             raise StopIteration
