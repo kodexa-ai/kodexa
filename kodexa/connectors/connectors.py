@@ -13,6 +13,8 @@ import requests
 
 from kodexa.model import Document, DocumentMetadata, DocumentStore
 
+logger = logging.getLogger('kodexa.connectors')
+
 
 def get_caller_dir():
     # get the caller's stack frame and extract its file path
@@ -186,7 +188,7 @@ def get_connectors():
 
 def get_connector(connector, options):
     if connector in registered_connectors:
-        logging.info("Getting registered connector")
+        logger.info(f"Getting registered connector {connector}")
         return registered_connectors[connector]
     else:
         logging.error(f"Unable to find connector {connector}")

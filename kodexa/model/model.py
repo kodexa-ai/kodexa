@@ -1548,6 +1548,9 @@ class DocumentStore:
     def count(self) -> int:
         return 0
 
+    def accept(self, document: Document):
+        return True
+
 
 class FileStore:
     """A file store supports storing, listing and retrieving native files"""

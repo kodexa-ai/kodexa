@@ -416,6 +416,11 @@ class RemoteSession:
         self.slug = slug
         self.cloud_session = None
 
+    def get_action_metadata(self, ref):
+        r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref}",
+                          headers={"x-access-token": KodexaPlatform.get_access_token()})
+        return r.json()
+
     def start(self):
         logger.info(f"Creating session {self.slug} ({KodexaPlatform.get_url()})")
         r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions", params={self.session_type: self.slug},
@@ -519,7 +524,7 @@ class RemotePipeline:
     """
 
     def __init__(self, slug, connector, version=None, attach_source=True, parameters=None, auth=None):
-        logging.info(f"Initializing a new pipeline {slug}")
+        logger.info(f"Initializing a new pipeline {slug}")
 
         if isinstance(connector, Document):
             self.connector = [connector]
@@ -548,7 +553,7 @@ class RemotePipeline:
 
         :param sink: the sink for the pipeline
         """
-        logging.info(f"Setting sink {sink.get_name()} on {self.slug}")
+        logger.info(f"Setting sink {sink.get_name()} on {self.slug}")
         self.sink = sink
 
         return self
@@ -556,12 +561,12 @@ class RemotePipeline:
     def run(self):
         self.context.statistics = PipelineStatistics()
 
-        logging.info(f"Starting remote pipeline {self.slug}")
+        logger.info(f"Starting remote pipeline {self.slug}")
         cloud_session = RemoteSession("pipeline", self.slug)
         cloud_session.start()
 
         for document in self.connector:
-            logging.info(f"Processing {document}")
+            logger.info(f"Processing {document}")
             execution = cloud_session.execution_action(document, self.parameters, self.attach_source)
             execution = cloud_session.wait_for_execution(execution)
 
@@ -572,7 +577,7 @@ class RemotePipeline:
             self.context.statistics.processed_document(document)
 
             if self.sink:
-                logging.info(f"Writing to sink {self.sink.get_name()}")
+                logger.info(f"Writing to sink {self.sink.get_name()}")
                 try:
                     self.sink.sink(document)
                 except:
@@ -584,7 +589,7 @@ class RemotePipeline:
                     if self.context.stop_on_exception:
                         raise
 
-        logging.info(f"Completed pipeline {self.slug}")
+        logger.info(f"Completed pipeline {self.slug}")
 
         return self.context
 
@@ -671,7 +676,10 @@ class RemoteAction:
     def process(self, document, context):
         cloud_session = RemoteSession("service", self.slug)
         cloud_session.start()
-        execution = cloud_session.execution_action(document, self.options, self.attach_source)
+
+        logger.info(f"Loading metadata for {self.slug}")
+        action_metadata = cloud_session.get_action_metadata(self.slug)
+        execution = cloud_session.execution_action(document, self.options, self.attach_source if self.attach_source else action_metadata['metadata']['requiresSource'])
         execution = cloud_session.wait_for_execution(execution)
 
         result_document = cloud_session.get_output_document(execution)
