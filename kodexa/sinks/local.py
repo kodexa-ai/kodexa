@@ -33,6 +33,9 @@ class FolderSink:
     def get_name():
         return "Folder"
 
+    def accept(self, document: Document):
+        return True
+
     def sink(self, document: Document):
         """
         Adds the document to the sink
