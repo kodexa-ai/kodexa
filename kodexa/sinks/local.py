@@ -17,6 +17,9 @@ class DocumentStoreSink:
     def sink(self, document: Document):
         self.document_store.put(document.uuid, document)
 
+    def accept(self, document: Document):
+        return self.document_store.accept(document)
+
 
 class FolderSink:
     """

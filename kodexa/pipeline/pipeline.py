@@ -4,12 +4,12 @@ import inspect
 import logging
 import os
 import sys
+import time
 import traceback
 import uuid
 from collections import KeysView
 from enum import Enum
 from inspect import signature
-from io import StringIO
 from textwrap import dedent
 from typing import List, Optional, Dict
 from uuid import uuid4
@@ -20,6 +20,8 @@ from kodexa.connectors import FolderConnector
 from kodexa.connectors.connectors import get_caller_dir, DocumentStoreConnector
 from kodexa.model import Document, Store
 from kodexa.stores.stores import DocumentStore
+
+logger = logging.getLogger('kodexa.pipeline')
 
 
 def new_id():
@@ -215,17 +217,17 @@ class PipelineStep:
         self.cache_path = cache_path
 
         if str(type(self.step)) == "<class 'type'>":
-            logging.info(f"Adding new step class {step.__name__} to pipeline {self.name}")
+            logger.info(f"Adding new step class {step.__name__} to pipeline")
             self.step = step
         elif callable(self.step):
-            logging.info(f"Adding new step function {step.__name__} to pipeline {self.name}")
+            logger.info(f"Adding new step function {step.__name__} to pipeline")
             self.name = step.__name__
         elif isinstance(self.step, str):
-            logging.info(f"Adding new remote step {step} to pipeline {self.name}")
+            logger.info(f"Adding new remote step {step} to pipeline")
             from kodexa import RemoteAction
             self.step = RemoteAction(step, options=options, attach_source=attach_source)
         else:
-            logging.info(f"Adding new step {step.get_name()} to pipeline {self.name}")
+            logger.info(f"Adding new step {step.get_name()} to pipeline")
 
     def to_dict(self):
         try:
@@ -255,6 +257,7 @@ class PipelineStep:
 
     def execute(self, context, document):
 
+        start = time.perf_counter()
         if self.cache_path:
             # Check to see if we have a cached file
             cache_name = self.get_cache_name(document)
@@ -269,6 +272,8 @@ class PipelineStep:
                 result_document = None
 
                 if str(type(self.step)) == "<class 'type'>":
+
+                    logger.info(f"Starting step based on class {self.step}")
 
                     # We need to handle the parameterization
                     import copy
@@ -305,14 +310,14 @@ class PipelineStep:
                         result_document = step_instance.process(document, context)
 
                 elif not callable(self.step):
-                    logging.info(f"Starting step {self.step.get_name()}")
+                    logger.info(f"Starting step {self.step.get_name()}")
 
                     if len(signature(self.step.process).parameters) == 1:
                         result_document = self.step.process(document)
                     else:
                         result_document = self.step.process(document, context)
                 else:
-                    logging.info(f"Starting step function {self.step.__name__}")
+                    logger.info(f"Starting step function {self.step.__name__}")
 
                     if len(signature(self.step).parameters) == 1:
                         result_document = self.step(document)
@@ -322,8 +327,12 @@ class PipelineStep:
                 if self.cache_path and result_document:
                     result_document.to_kdxa(self.get_cache_name(result_document))
 
+                end = time.perf_counter()
+                logger.info(f"Step completed (f{end - start:0.4f}s)")
+
                 return result_document
             except:
+                logger.warning("Step failed")
                 tt, value, tb = sys.exc_info()
                 document.exceptions.append({
                     "step": self.step.__name__ if callable(self.step) else self.step.get_name(),
@@ -396,8 +405,8 @@ class Pipeline:
     """
     context: PipelineContext
 
-    def __init__(self, connector, name="Default", stop_on_exception=True, logging_level=logging.INFO):
-        logging.info(f"Initializing a new pipeline {name}")
+    def __init__(self, connector, name="Default", stop_on_exception=True, logging_level=logger.info):
+        logger.info(f"Initializing a new pipeline {name}")
 
         if isinstance(connector, Document):
             self.connector = [connector]
@@ -512,7 +521,7 @@ class Pipeline:
 
         :param sink: the sink for the pipeline
         """
-        logging.info(f"Setting sink {sink.get_name()} on {self.name}")
+        logger.info(f"Setting sink {sink.get_name()} on {self.name}")
         self.sink = sink
 
         return self
@@ -567,18 +576,22 @@ class Pipeline:
         self.context.statistics = PipelineStatistics()
         self.context.parameters = parameters
 
-        logging.info(f"Starting pipeline {self.name}")
+        logger.info(f"Starting pipeline {self.name}")
         for document in self.connector:
 
-            log_stream = StringIO()
-            logging.basicConfig(stream=log_stream, level=self.logging_level)
-            logging.info(f"Processing {document}")
+            logger.info(f"Processing {document}")
+
+            if self.sink:
+                if not self.sink.accept(document):
+                    logger.info("Skipping document, since sink won't accept")
+                    break
+
             for step in self.steps:
                 document = step.execute(self.context, document)
 
             if document:
                 if self.sink:
-                    logging.info(f"Writing to sink {self.sink.get_name()}")
+                    logger.info(f"Writing to sink {self.sink.get_name()}")
                     try:
                         self.sink.sink(document)
                     except:
@@ -590,19 +603,17 @@ class Pipeline:
                         if self.context.stop_on_exception:
                             raise
 
-                document.log = log_stream.getvalue()
-
                 self.context.statistics.processed_document(document)
                 self.context.output_document = document
             else:
-                logging.warning("A step did not return a document?")
+                logger.warning("A step did not return a document?")
 
-        logging.info(f"Completing pipeline {self.name}")
+        logger.info(f"Completing pipeline {self.name}")
 
         for step in self.steps:
             step.end_processing(self.context)
 
-        logging.info(f"Completed pipeline {self.name}")
+        logger.info(f"Completed pipeline {self.name}")
 
         return self.context
 

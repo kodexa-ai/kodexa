@@ -35,14 +35,14 @@ class JsonDocumentStore(Store):
         if path.is_file():
             raise Exception("Unable to load store, since it is pointing to a file?")
         elif not path.exists():
-            logging.info(f"Creating new store in {store_path}")
+            logger.info(f"Creating new store in {store_path}")
             path.mkdir(parents=True)
 
             # Create an empty index file
             open(os.path.join(path, 'index.idx'), 'a').close()
         self.read_index()
 
-        logging.info(f"Found {len(self.document_ids)} documents in {store_path}")
+        logger.info(f"Found {len(self.document_ids)} documents in {store_path}")
 
     def get_name(self):
         return f"JSON Document Store [{self.store_path}]"
@@ -338,10 +338,17 @@ class DataStoreHelper:
 
 class LocalDocumentStore(DocumentStore):
 
-    def __init__(self, store_path: str, force_initialize: bool = False):
+    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = 'ALL'):
+
+        modes = ['ALL', 'ONLY_NEW']
+
+        if mode not in modes:
+            raise Exception(f"LocalDocumentStore mode must be one of {','.join(modes)}")
+
         self.store_path = store_path
         self.index = 0
         self.metastore: List[Dict] = []
+        self.mode = mode
 
         path = Path(store_path)
 
@@ -351,7 +358,7 @@ class LocalDocumentStore(DocumentStore):
         if path.is_file():
             raise Exception("Unable to load store, since it is pointing to a file?")
         elif not path.exists():
-            logging.info(f"Creating new local document store in {store_path}")
+            logger.info(f"Creating new local document store in {store_path}")
             path.mkdir(parents=True)
 
             # Create an empty index file
@@ -360,7 +367,13 @@ class LocalDocumentStore(DocumentStore):
 
         self.read_metastore()
 
-        logging.info(f"Found {len(self.metastore)} documents in {store_path}")
+        logger.info(f"Found {len(self.metastore)} documents in {store_path}")
+
+    def accept(self, document: Document):
+        if self.mode == 'ALL':
+            return True
+        if self.mode == 'ONLY_NEW':
+            return not self.exists(document)
 
     def read_metastore(self):
         """
@@ -395,6 +408,19 @@ class LocalDocumentStore(DocumentStore):
             {'metadata': document.metadata, 'source': dataclasses.asdict(document.source), 'uuid': document.uuid,
              'path': path, 'labels': document.get_labels()})
         self.write_metastore()
+
+    def exists(self, document):
+        """
+        Look to see if we have document with the same original path and original filename
+
+        :param document: document to check
+        :return: True if it is already in the document store
+        """
+        for metadata in self.metastore:
+            if document.source.original_path == metadata['source'][
+                'original_path'] and document.source.original_filename == metadata['source']['original_filename']:
+                return True
+        return False
 
 
 class RemoteDocumentStore(DocumentStore):
