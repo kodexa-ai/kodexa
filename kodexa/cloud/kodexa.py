@@ -259,12 +259,12 @@ class KodexaPlatform:
 
             object_url = "pipelines"
 
-            if "example_urls" not in options is None:
+            if "example_urls" not in options:
                 example_urls = []
             else:
                 example_urls = options["example_urls"]
 
-            if "more_info_url" not in options is None:
+            if "more_info_url" not in options:
                 more_info_url = None
             else:
                 more_info_url = options["more_info_url"]
