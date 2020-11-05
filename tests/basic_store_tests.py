@@ -54,7 +54,7 @@ def test_basic_local_document_store():
     lds = LocalDocumentStore('/tmp/lds', force_initialize=True)
     lds.put('my-doc', Document.from_text('hello!'))
 
-    assert len(lds.list()) == 1
+    assert len(lds.list_objects()) == 1
 
     lds2 = LocalDocumentStore('/tmp/lds')
-    assert len(lds2.list()) == 1
+    assert len(lds2.list_objects()) == 1
