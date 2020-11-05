@@ -219,7 +219,7 @@ class DocumentStoreConnector(object):
         if self.index >= self.store.count():
             raise StopIteration
         else:
-            uuid_value = self.store.list()[self.index]['uuid']
+            uuid_value = self.store.list_objects()[self.index]['uuid']
             self.index += 1
             return self.store.get_by_uuid(uuid_value)
 
