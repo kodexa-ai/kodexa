@@ -116,6 +116,24 @@ def get(_: Info, object_type: str, ref: str, url: str, token: str):
 
 
 @cli.command()
+@pass_info
+def platform(_: Info):
+    """Get details of the instance of Kodexa you are using"""
+
+    platform_url = KodexaPlatform.get_url()
+
+    if platform_url is not None:
+        print(f"Kodexa URL: {KodexaPlatform.get_url()}")
+        print(f"Access Token: {KodexaPlatform.get_access_token()}")
+        kodexa_version = KodexaPlatform.get_server_info()
+        print(f"Version: {kodexa_version['version']}")
+        print(f"Release: {kodexa_version['release']}")
+
+    else:
+        print("Kodexa is not logged in")
+
+
+@cli.command()
 @click.argument('object_type')
 @click.argument('ref')
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')

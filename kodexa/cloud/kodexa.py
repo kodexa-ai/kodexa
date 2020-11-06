@@ -11,7 +11,6 @@ from json import JSONDecodeError
 import requests
 import yaml
 from addict import Dict
-from kodexa.stores.stores import RemoteDocumentStore, LocalDocumentStore
 from rich import print
 
 from kodexa.connectors import get_source
@@ -19,6 +18,7 @@ from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import TableDataStore
+from kodexa.stores.stores import LocalDocumentStore
 
 logger = logging.getLogger('kodexa.platform')
 
@@ -442,6 +442,12 @@ class KodexaPlatform:
             print("Logged in")
         else:
             print(f"Check your URL and password [{obj_response.status_code}]")
+
+    @classmethod
+    def get_server_info(cls):
+        return requests.get(f"{KodexaPlatform.get_url()}/api",
+                            headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                     "content-type": "application/json"}).json()
 
 
 class RemoteSession:
