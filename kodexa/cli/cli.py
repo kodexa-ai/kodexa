@@ -117,7 +117,8 @@ def get(_: Info, object_type: str, ref: str, url: str, token: str):
 
 @cli.command()
 @pass_info
-def platform(_: Info):
+@click.option('--python/--no-python', default=False, help='Print out the header for a Python file')
+def platform(_: Info, python: bool):
     """Get details of the instance of Kodexa you are using"""
 
     platform_url = KodexaPlatform.get_url()
@@ -128,7 +129,11 @@ def platform(_: Info):
         kodexa_version = KodexaPlatform.get_server_info()
         print(f"Version: {kodexa_version['version']}")
         print(f"Release: {kodexa_version['release']}")
-
+        if python:
+            print("\nPython example:\n\n")
+            print(f"from kodexa import *")
+            print(f"KodexaPlatform.set_url('{KodexaPlatform.get_url()}')")
+            print(f"KodexaPlatform.set_access_token('{KodexaPlatform.get_access_token()}')")
     else:
         print("Kodexa is not logged in")
 
@@ -161,7 +166,10 @@ def metadata(_: Info, path: str):
 def login(_: Info):
     """Login and store your PAT"""
     try:
-        kodexa_url = input("Enter the Kodexa URL: ")
+        kodexa_url = input("Enter the Kodexa URL (https://platform.kodexa.com): ")
+        if kodexa_url == "":
+            print("Using default as https://platform.kodexa.com")
+            kodexa_url = "https://platform.kodexa.com"
         username = input("Enter your email: ")
         password = getpass("Enter your password: ")
     except Exception as error:
@@ -192,7 +200,7 @@ def document(_: Info, path: str):
 @click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
 def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
-    """Load metadata"""
+    """Package the extension for Kodexa"""
     metadata_obj = ExtensionHelper.load_metadata(path)
     print("Preparing to pack")
     try:
