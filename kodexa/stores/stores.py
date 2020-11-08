@@ -6,7 +6,6 @@ import shutil
 from json import JSONDecodeError
 from pathlib import Path
 from typing import List, Dict, Optional
-from rich import print
 
 import requests
 
@@ -381,7 +380,7 @@ class LocalDocumentStore(DocumentStore):
 
     def read_metastore(self):
         """
-        Read the metadata stire
+        Read the metadata store
         """
         self.metastore: List[Dict] = []
         with open(os.path.join(self.store_path, 'metastore.json')) as f:
@@ -397,13 +396,13 @@ class LocalDocumentStore(DocumentStore):
     def get_by_uuid(self, uuid: str) -> Optional[Document]:
         for metadata in self.metastore:
             if metadata['uuid'] == uuid:
-                return Document.from_kdxa(os.path.join(self.store_path, metadata['path']) + ".kdxa")
+                return Document.from_kdxa(os.path.join(self.store_path, metadata['uuid']) + ".kdxa")
         return None
 
     def get_by_path(self, path: str) -> Optional[Document]:
         for metadata in self.metastore:
             if metadata['source']['original_path'] + "/" + metadata['source']['original_filename'] == path:
-                return Document.from_kdxa(os.path.join(self.store_path, metadata['path']) + ".kdxa")
+                return Document.from_kdxa(os.path.join(self.store_path, metadata['uuid']) + ".kdxa")
         return None
 
     def list_objects(self) -> List[Dict]:
@@ -417,9 +416,10 @@ class LocalDocumentStore(DocumentStore):
         self.put(document.uuid, document)
 
     def put(self, path: str, document: Document):
-        document.to_kdxa(os.path.join(self.store_path, path) + ".kdxa")
+        document.to_kdxa(os.path.join(self.store_path, document.uuid) + ".kdxa")
         self.metastore.append(
             {'metadata': document.metadata, 'source': dataclasses.asdict(document.source), 'uuid': document.uuid,
+             'content_type': 'Document',
              'path': path, 'labels': document.get_labels()})
         self.write_metastore()
 
@@ -431,8 +431,8 @@ class LocalDocumentStore(DocumentStore):
         :return: True if it is already in the document store
         """
         for metadata in self.metastore:
-            if document.source.original_path == metadata['source'][
-                'original_path'] and document.source.original_filename == metadata['source']['original_filename']:
+            if document.source.original_path == metadata['source']['original_path'] and \
+                    document.source.original_filename == metadata['source']['original_filename']:
                 return True
         return False
 
@@ -487,7 +487,7 @@ class RemoteDocumentStore(DocumentStore):
         from kodexa import KodexaPlatform
         list_content = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
-            params={'query':query},
+            params={'query': query},
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         if list_content.status_code != 200:
             raise Exception(
