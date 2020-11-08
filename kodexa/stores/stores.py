@@ -401,7 +401,7 @@ class LocalDocumentStore(DocumentStore):
 
     def get_by_path(self, path: str) -> Optional[Document]:
         for metadata in self.metastore:
-            if metadata['source']['original_path'] + "/" + metadata['source']['original_filename'] == path:
+            if metadata['path'] == path:
                 return Document.from_kdxa(os.path.join(self.store_path, metadata['uuid']) + ".kdxa")
         return None
 
