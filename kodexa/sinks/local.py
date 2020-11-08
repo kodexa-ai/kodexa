@@ -15,7 +15,10 @@ class DocumentStoreSink:
         return "Store Sink"
 
     def sink(self, document: Document):
-        self.document_store.put(document.source.original_path + "/" + document.source.original_filename, document)
+        if document.source.original_path is not None and document.source.original_filename is not None:
+            self.document_store.put(document.source.original_path + "/" + document.source.original_filename, document)
+        else:
+            self.document_store.put(document.uuid, document)
 
     def accept(self, document: Document):
         return self.document_store.accept(document)
