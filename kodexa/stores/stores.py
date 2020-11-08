@@ -419,6 +419,7 @@ class LocalDocumentStore(DocumentStore):
         document.to_kdxa(os.path.join(self.store_path, document.uuid) + ".kdxa")
         self.metastore.append(
             {'metadata': document.metadata, 'source': dataclasses.asdict(document.source), 'uuid': document.uuid,
+             'id': document.uuid,
              'content_type': 'Document',
              'path': path, 'labels': document.get_labels()})
         self.write_metastore()
