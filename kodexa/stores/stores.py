@@ -10,7 +10,7 @@ from typing import List, Dict, Optional
 import requests
 
 from kodexa.model import Document, Store, DocumentStore
-from kodexa.model.model import RemoteStore
+from kodexa.model.model import RemoteStore, LocalModelStore, RemoteModelStore
 
 logger = logging.getLogger('kodexa.stores')
 
@@ -187,7 +187,7 @@ class TableDataStore(Store):
         """
 
         return {
-            "type": "table",
+            "type": "TABLE",
             "data": {
                 "columns": self.columns,
                 "rows": self.rows,
@@ -272,7 +272,7 @@ class DictDataStore:
         :rtype: dict
         """
         return {
-            "type": "dictionary",
+            "type": "DICTIONARY",
             "data": {
                 "dicts": self.dicts
             }
@@ -327,12 +327,22 @@ class DataStoreHelper:
         """
 
         if 'type' in dict:
-            if 'table' == dict['type']:
+            if 'TABLE' == dict['type']:
                 columns = dict['data']['columns'] if 'columns' in dict['data'] else None
                 rows = dict['data']['rows'] if 'rows' in dict['data'] else None
                 return TableDataStore(columns=columns, rows=rows)
-            elif 'dictionary' == dict['type']:
+            elif 'DICTIONARY' == dict['type']:
                 return DictDataStore(dict['data']['dicts'])
+            elif 'DOCUMENT' == dict['type']:
+                if 'ref' in dict:
+                    return RemoteDocumentStore(dict['ref'])
+                else:
+                    return LocalDocumentStore(dict['data']['path'])
+            elif 'MODEL' == dict['type']:
+                if 'ref' in dict:
+                    return RemoteModelStore(dict['ref'])
+                else:
+                    return LocalModelStore(dict['data']['path'])
             else:
                 return None
         else:
@@ -372,6 +382,14 @@ class LocalDocumentStore(DocumentStore):
         self.read_metastore()
 
         logger.info(f"Found {len(self.metastore)} documents in {store_path}")
+
+    def to_dict(self):
+        return {
+            "type": "DOCUMENT",
+            "data": {
+                "path": self.store_path
+            }
+        }
 
     def accept(self, document: Document):
         if self.mode == 'ALL':
@@ -445,6 +463,12 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         self.ref: str = ref
         self.objects: List[Dict] = []
         self.page = 1
+
+    def to_dict(self):
+        return {
+            "type": "DOCUMENT",
+            "ref": self.ref
+        }
 
     def get(self, document_id: str) -> Optional[Document]:
         from kodexa import KodexaPlatform
