@@ -1629,6 +1629,14 @@ class LocalModelStore(ModelStore):
         elif not path.exists():
             path.mkdir(parents=True)
 
+    def to_dict(self):
+        return {
+            "type": "MODEL",
+            "data": {
+                "path": self.store_path
+            }
+        }
+
     def get(self, object_path: str):
         if Path(os.path.join(self.store_path, object_path)).is_file():
             return open(os.path.join(self.store_path, object_path), 'rb')
@@ -1641,7 +1649,13 @@ class LocalModelStore(ModelStore):
             object_file.write(content)
 
 
-class RemoteModelStore(ModelStore):
+class RemoteModelStore(ModelStore, RemoteStore):
+
+    def to_dict(self):
+        return {
+            "type": "MODEL",
+            "ref": self.ref
+        }
 
     def __init__(self, ref: str):
         self.ref = ref
