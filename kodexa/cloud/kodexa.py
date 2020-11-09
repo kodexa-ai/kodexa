@@ -221,6 +221,7 @@ class KodexaPlatform:
     @staticmethod
     def deploy_extension_from_uri(path, organisation_slug):
         url = f"{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}"
+        logger.info(f"Publishing extension pack to organization {organisation_slug}")
         response = requests.post(url,
                                  headers={"x-access-token": KodexaPlatform.get_access_token(),
                                           "content-type": "application/json"})
