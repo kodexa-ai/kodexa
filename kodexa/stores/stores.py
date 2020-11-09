@@ -10,6 +10,7 @@ from typing import List, Dict, Optional
 import requests
 
 from kodexa.model import Document, Store, DocumentStore
+from kodexa.model.model import RemoteStore
 
 logger = logging.getLogger('kodexa.stores')
 
@@ -438,19 +439,57 @@ class LocalDocumentStore(DocumentStore):
         return False
 
 
-class RemoteDocumentStore(DocumentStore):
+class RemoteDocumentStore(DocumentStore, RemoteStore):
 
     def __init__(self, ref: str):
         self.ref: str = ref
         self.objects: List[Dict] = []
         self.page = 1
 
-    def put(self, path: str, document: Document):
-
+    def get(self, document_id: str) -> Optional[Document]:
         from kodexa import KodexaPlatform
+        doc = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if doc.status_code == 200:
+            return Document.from_msgpack(doc.content)
+        elif doc.status_code == 404:
+            return None
+        else:
+            logger.error("Get document failed [" + doc.text + "], response " + str(doc.status_code))
+            raise Exception("Get document failed [" + doc.text + "], response " + str(doc.status_code))
 
+    def delete(self, document_id: str):
+        from kodexa import KodexaPlatform
+        delete_document_response = requests.delete(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if delete_document_response.status_code == 200:
+            logger.info(f"Deleted document {document_id}")
+        else:
+            logger.error("Delete document failed [" + delete_document_response.text + "], response " + str(
+                delete_document_response.status_code))
+            raise Exception("Delete document failed [" + delete_document_response.text + "], response " + str(
+                delete_document_response.status_code))
+
+    def get_ref(self) -> str:
+        return self.ref
+
+    def get_by_path(self, path) -> Optional[Document]:
+        hits = self.query(f"path:{path}")
+        if len(hits) == 1:
+            return self.get(hits[0]['id'])
+        else:
+            return None
+
+    def put(self, path: str, document: Document):
+        from kodexa import KodexaPlatform
         try:
             import io
+
+            logger.info(f"Putting document with path {path}")
+
             files = {"file": document.to_msgpack()}
             data = {"path": path}
             content_object_response = requests.post(
@@ -515,11 +554,7 @@ class RemoteDocumentStore(DocumentStore):
             content_object = self.objects.pop(0)
 
             if content_object['content_type'] == "Document":
-                from kodexa import KodexaPlatform
-                doc = requests.get(
-                    f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{content_object['id']}",
-                    headers={"x-access-token": KodexaPlatform.get_access_token()})
-                return Document.from_msgpack(doc.content)
+                return self.get(content_object['id'])
             else:
 
                 # TODO we need the connector?

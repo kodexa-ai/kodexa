@@ -390,6 +390,13 @@ class LabelStep(object):
         return document
 
 
+class PipelineStore:
+
+    def __init__(self, name: str, store: Store):
+        self.name = name
+        self.store = store
+
+
 class Pipeline:
     """
     A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
@@ -414,13 +421,14 @@ class Pipeline:
             self.connector = connector
 
         self.steps: List[PipelineStep] = []
+        self.stores: List[PipelineStore] = []
         self.sink = None
         self.name = name
         self.context: PipelineContext = PipelineContext()
         self.context.stop_on_exception = stop_on_exception
         self.logging_level = logging_level
 
-    def add_store(self, name, store):
+    def add_store(self, name: str, store: Store):
         """
         Add the store to the pipeline so that it is available to the pipeline
 
@@ -430,8 +438,7 @@ class Pipeline:
         :param name: the name of the store (to refer to it)
         :param store: the store that should be added
         """
-        self.context.add_store(name, store)
-
+        self.stores.append(PipelineStore(name, store))
         return self
 
     def add_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
@@ -572,6 +579,10 @@ class Pipeline:
         """
         if parameters is None:
             parameters = {}
+
+        self.context = PipelineContext()
+        for pipeline_store in self.stores:
+            self.context.add_store(pipeline_store.name, pipeline_store.store)
 
         self.context.statistics = PipelineStatistics()
         self.context.parameters = parameters
