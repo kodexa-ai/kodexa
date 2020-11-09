@@ -36,6 +36,20 @@ class Store:
         pass
 
 
+class RemoteStore:
+    """
+    A remote store is one that refers to a Kodexa platform  instance
+    """
+
+    def get_ref(self) -> str:
+        """
+        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+
+        :return: The reference
+        """
+        pass
+
+
 class DocumentMetadata(Dict):
     """
     A flexible dict based approach to capturing metadata for the document
@@ -1625,3 +1639,17 @@ class LocalModelStore(ModelStore):
         path = Path(object_path)
         with open(os.path.join(self.store_path, path), 'wb') as object_file:
             object_file.write(content)
+
+
+class RemoteModelStore(ModelStore):
+
+    def __init__(self, ref: str):
+        self.ref = ref
+
+    def get(self, object_path: str):
+        # TODO implement
+        pass
+
+    def put(self, object_path: str, content):
+        # TODO implement
+        pass

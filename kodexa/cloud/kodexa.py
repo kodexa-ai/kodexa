@@ -16,6 +16,7 @@ from rich import print
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
+from kodexa.model.model import RemoteStore
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import TableDataStore
 from kodexa.stores.stores import LocalDocumentStore
@@ -59,6 +60,15 @@ class PipelineMetadataBuilder:
 
     def build_steps(self, pipeline_metadata: Dict):
         pipeline_metadata.metadata.steps = []
+        pipeline_metadata.metadata.stores = []
+
+        for pipeline_store in self.pipeline.stores:
+
+            if isinstance(pipeline_store.store, RemoteStore):
+                pipeline_metadata.metadata.stores.append(
+                    {"name": pipeline_store.name, "ref": pipeline_store.store.get_ref()})
+            else:
+                raise Exception("Pipeline refers to a non-remote store, deployment of local stores is not supported")
 
         for idx, step in enumerate(self.pipeline.steps):
 
