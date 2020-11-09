@@ -23,6 +23,7 @@ from kodexa.stores.stores import DocumentStore
 
 logger = logging.getLogger('kodexa.pipeline')
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 def new_id():
     return str(uuid.uuid4()).replace("-", "")
@@ -424,8 +425,7 @@ class Pipeline:
         self.stores: List[PipelineStore] = []
         self.sink = None
         self.name = name
-        self.context: PipelineContext = PipelineContext()
-        self.context.stop_on_exception = stop_on_exception
+        self.stop_on_exception = stop_on_exception
         self.logging_level = logging_level
 
     def add_store(self, name: str, store: Store):
@@ -581,6 +581,7 @@ class Pipeline:
             parameters = {}
 
         self.context = PipelineContext()
+        self.context.stop_on_exception = self.stop_on_exception
         for pipeline_store in self.stores:
             self.context.add_store(pipeline_store.name, pipeline_store.store)
 
