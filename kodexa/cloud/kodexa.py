@@ -20,10 +20,10 @@ from kodexa.model.model import RemoteStore
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import TableDataStore
 from kodexa.stores.stores import LocalDocumentStore
+from appdirs import AppDirs
 
 logger = logging.getLogger('kodexa.platform')
 
-from appdirs import AppDirs
 
 dirs = AppDirs("Kodexa", "Kodexa")
 
@@ -739,7 +739,8 @@ class RemoteAction:
         if 'requiresSource' in action_metadata['metadata']:
             requires_source = action_metadata['metadata']['requiresSource']
 
-        execution = cloud_session.execution_action(document, self.options, self.attach_source if self.attach_source else requires_source)
+        execution = cloud_session.execution_action(document, self.options,
+                                                   self.attach_source if self.attach_source else requires_source)
         execution = cloud_session.wait_for_execution(execution)
 
         result_document = cloud_session.get_output_document(execution)
