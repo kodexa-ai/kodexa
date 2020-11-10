@@ -23,7 +23,6 @@ from kodexa.stores.stores import DocumentStore
 
 logger = logging.getLogger('kodexa.pipeline')
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 def new_id():
     return str(uuid.uuid4()).replace("-", "")
