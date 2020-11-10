@@ -70,7 +70,6 @@ class FolderConnector:
                 document.source.original_filename = os.path.basename(self.files[self.index - 1])
                 document.source.original_path = self.path
                 document.source.connector = self.get_name()
-                document.source.mime_type = mimetypes.guess_type(self.files[self.index - 1])
 
                 # TODO we need to get the checksum and last_updated and created times
                 return document
@@ -122,7 +121,6 @@ class FileHandleConnector:
             document.source.original_filename = self.file
             document.source.original_path = os.path.basename(self.file)
             document.source.connector = self.get_name()
-            document.source.mime_type = mimetypes.guess_type(self.file)
 
             # TODO we need to get the checksum and last_updated and created times
             return document
