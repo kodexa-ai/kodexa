@@ -734,8 +734,12 @@ class RemoteAction:
 
         logger.info(f"Loading metadata for {self.slug}")
         action_metadata = cloud_session.get_action_metadata(self.slug)
-        execution = cloud_session.execution_action(document, self.options, self.attach_source if self.attach_source else
-        action_metadata['metadata']['requiresSource'])
+
+        requires_source = False
+        if 'requiresSource' in action_metadata['metadata']:
+            requires_source = action_metadata['metadata']['requiresSource']
+
+        execution = cloud_session.execution_action(document, self.options, self.attach_source if self.attach_source else requires_source)
         execution = cloud_session.wait_for_execution(execution)
 
         result_document = cloud_session.get_output_document(execution)
