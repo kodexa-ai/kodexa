@@ -491,6 +491,7 @@ class RemoteSession:
         files = {}
         if attach_source:
             files["file"] = get_source(document)
+            files["file_document"] = document.to_msgpack()
         else:
             files["document"] = document.to_msgpack()
 
