@@ -412,7 +412,8 @@ class Pipeline:
     """
     context: PipelineContext
 
-    def __init__(self, connector, name="Default", stop_on_exception=True, logging_level=logger.info):
+    def __init__(self, connector, name: str = "Default", stop_on_exception: bool = True,
+                 logging_level=logger.info, apply_lineage: bool = True):
         logger.info(f"Initializing a new pipeline {name}")
 
         if isinstance(connector, Document):
@@ -426,6 +427,7 @@ class Pipeline:
         self.name = name
         self.stop_on_exception = stop_on_exception
         self.logging_level = logging_level
+        self.apply_lineage = apply_lineage
 
     def add_store(self, name: str, store: Store):
         """
@@ -592,6 +594,9 @@ class Pipeline:
 
             logger.info(f"Processing {document}")
 
+            initial_source_metadata = document.source
+            lineage_document_uuid = document.uuid
+
             if self.sink:
                 if not self.sink.accept(document):
                     logger.info("Skipping document, since sink won't accept")
@@ -601,6 +606,11 @@ class Pipeline:
                 document = step.execute(self.context, document)
 
             if document:
+
+                if self.apply_lineage:
+                    document.source = initial_source_metadata
+                    document.source.lineage_document_uuid = lineage_document_uuid
+
                 if self.sink:
                     logger.info(f"Writing to sink {self.sink.get_name()}")
                     try:

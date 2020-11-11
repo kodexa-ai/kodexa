@@ -165,7 +165,7 @@ class ContentNode(object):
         :rtype: ContentNode
         """
 
-        node_type = content_node_dict['type'] if document.version == Document.PREVOUS_VERSION else content_node_dict[
+        node_type = content_node_dict['type'] if document.version == Document.PREVIOUS_VERSION else content_node_dict[
             'node_type']
 
         new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
@@ -1204,6 +1204,7 @@ class SourceMetadata:
     connector: Optional[str] = None
     mime_type: Optional[str] = None
     headers: Optional[Dict] = None
+    lineage_document_uuid: Optional[str] = None
 
 
 class Document(object):
@@ -1211,7 +1212,7 @@ class Document(object):
     A Document is a collection of metadata and a set of content nodes.
     """
 
-    PREVOUS_VERSION: str = "1.0.0"
+    PREVIOUS_VERSION: str = "1.0.0"
     CURRENT_VERSION: str = "2.0.0"
 
     def __str__(self):
@@ -1351,7 +1352,7 @@ class Document(object):
         for mixin in doc_dict['mixins']:
             registry.add_mixin_to_document(mixin, new_document)
         new_document.version = doc_dict['version'] if 'version' in doc_dict and doc_dict[
-            'version'] else Document.PREVOUS_VERSION  # some older docs don't have a version or it's None
+            'version'] else Document.PREVIOUS_VERSION  # some older docs don't have a version or it's None
         new_document.log = doc_dict['log'] if 'log' in doc_dict else []
         new_document.exceptions = doc_dict['exceptions'] if 'exceptions' in doc_dict else []
         new_document.uuid = doc_dict['uuid'] if 'uuid' in doc_dict else str(
