@@ -11,8 +11,7 @@ from typing import Dict, Type, List
 
 import requests
 
-from kodexa import SourceMetadata
-from kodexa.model import Document, DocumentMetadata, DocumentStore
+from kodexa.model import Document, DocumentMetadata, DocumentStore, SourceMetadata
 
 logger = logging.getLogger('kodexa.connectors')
 
@@ -185,11 +184,15 @@ registered_connectors: Dict[str, Type] = {}
 class CacheConnector:
     """
     A Cache Connector can be used to inject caching of content
-    in front of a connector
+    in front of a connector, you must extend this type to implement
+    a cache
     """
 
     def is_cached(self, source: SourceMetadata):
         return False
+
+    def get_source(self, document:Document):
+        pass
 
 
 # The registered caches

@@ -1230,7 +1230,7 @@ class Document(object):
     CURRENT_VERSION: str = "2.0.0"
 
     def __str__(self):
-        return f"kdxa//{self.uuid}/{self.metadata}"
+        return f"kodexa:://{self.uuid}"
 
     def __init__(self, metadata=None, content_node: ContentNode = None, source=SourceMetadata()):
         if metadata is None:
