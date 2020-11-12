@@ -191,7 +191,7 @@ class CacheConnector:
     def is_cached(self, source: SourceMetadata):
         return False
 
-    def get_source(self, document:Document):
+    def get_source(self, document: Document):
         pass
 
 
