@@ -35,7 +35,10 @@ class ContentType(Enum):
 
 class ContentObject:
 
-    def __init__(self, name="untitled", id=new_id(), content_type=ContentType.DOCUMENT, tags=None, metadata=None):
+    def __init__(self, name="untitled", id=new_id(), content_type=ContentType.DOCUMENT, tags=None, metadata=None,
+                 store_ref=None, labels=None):
+        if labels is None:
+            labels = []
         if metadata is None:
             metadata = {}
         if tags is None:
@@ -44,15 +47,19 @@ class ContentObject:
         self.name = name
         self.content_type = content_type
         self.tags = tags
+        self.store_ref = store_ref
         self.metadata = metadata
+        self.labels = labels
 
     def to_dict(self):
         return {
             'id': self.id,
             'tags': self.tags,
+            'labels': self.labels,
             'content_type': self.content_type.name,
             'metadata': self.metadata,
-            'name': self.name
+            'name': self.name,
+            'store_ref': self.store_ref
         }
 
 
