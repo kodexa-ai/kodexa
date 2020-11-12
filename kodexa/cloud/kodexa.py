@@ -485,11 +485,13 @@ class RemoteSession:
             logger.error("Unable to create session")
             logger.error(r.text)
             raise Exception("Unable to create a session, check your URL and access token")
+
         self.cloud_session = Dict(json.loads(r.text))
 
     def execution_action(self, document, options, attach_source):
         files = {}
         if attach_source:
+            logger.info("Attaching source")
             files["file"] = get_source(document)
             files["file_document"] = document.to_msgpack()
         else:
@@ -497,6 +499,7 @@ class RemoteSession:
 
         data = {"options": json.dumps(options), "document_metadata_json": json.dumps(document.metadata)}
 
+        logger.info(f"Executing session {self.cloud_session.id}")
         r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
                           params={self.session_type: self.slug},
                           data=data,
