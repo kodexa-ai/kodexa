@@ -1,4 +1,5 @@
 import dataclasses
+import inspect
 import itertools
 import json
 import os
@@ -1212,6 +1213,13 @@ class SourceMetadata:
     # noting that multiple documents coming from an original source
     lineage_document_uuid: Optional[str] = None
 
+    @classmethod
+    def from_dict(cls, env):
+        return cls(**{
+            k: v for k, v in env.items()
+            if k in inspect.signature(cls).parameters
+        })
+
 
 class Document(object):
     """
@@ -1379,7 +1387,7 @@ class Document(object):
         if 'content_node' in doc_dict and doc_dict['content_node']:
             new_document.content_node = ContentNode.from_dict(new_document, doc_dict['content_node'])
         if 'source' in doc_dict and doc_dict['source']:
-            new_document.source = SourceMetadata(**doc_dict['source'])
+            new_document.source = SourceMetadata.from_dict(doc_dict['source'])
         if 'labels' in doc_dict and doc_dict['labels']:
             new_document.labels = doc_dict['labels']
         return new_document
