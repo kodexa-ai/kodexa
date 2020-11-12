@@ -7,10 +7,11 @@ import os
 import tempfile
 import urllib
 from os.path import join
-from typing import Dict, Type
+from typing import Dict, Type, List
 
 import requests
 
+from kodexa import SourceMetadata
 from kodexa.model import Document, DocumentMetadata, DocumentStore
 
 logger = logging.getLogger('kodexa.connectors')
@@ -177,14 +178,50 @@ class UrlConnector:
             return document
 
 
+# The registered connectors
 registered_connectors: Dict[str, Type] = {}
 
 
+class CacheConnector:
+    """
+    A Cache Connector can be used to inject caching of content
+    in front of a connector
+    """
+
+    def is_cached(self, source: SourceMetadata):
+        return False
+
+
+# The registered caches
+registered_caches: List[CacheConnector] = []
+
+
 def get_connectors():
+    """
+    Return a list of the registered connectors
+
+    :return:
+    """
     return registered_connectors.keys()
 
 
-def get_connector(connector, options):
+def add_cache(cache_connector: CacheConnector):
+    """
+    Register a cache connector, this can intercept a source request and
+    determine if there is already an object in a cache that holds it
+
+    :param cache_connector:
+    :return:
+    """
+    registered_caches.append(cache_connector)
+
+
+def get_connector(connector: str, source: SourceMetadata):
+    # Adding support for cache connectors
+    for cache_connector in registered_caches:
+        if cache_connector.is_cached(source):
+            return cache_connector
+
     if connector in registered_connectors:
         logger.info(f"Getting registered connector {connector}")
         return registered_connectors[connector]
