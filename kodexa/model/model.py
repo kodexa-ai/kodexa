@@ -1199,11 +1199,17 @@ class SourceMetadata:
     original_filename: Optional[str] = None
     original_path: Optional[str] = None
     checksum: Optional[str] = None
+
+    # The ID used for internal caching
+    cid: Optional[str] = None
     last_modified: Optional[str] = None
     created: Optional[str] = None
     connector: Optional[str] = None
     mime_type: Optional[str] = None
     headers: Optional[Dict] = None
+
+    # The UUID of the document that this document was derived from
+    # noting that multiple documents coming from an original source
     lineage_document_uuid: Optional[str] = None
 
 
@@ -1327,9 +1333,22 @@ class Document(object):
         :return: A dictionary representation of this Document.
         :rtype: dict
         """
+
+        # We don't want to store the none values
+        def clean_none_values(d):
+            clean = {}
+            for k, v in d.items():
+                if isinstance(v, dict):
+                    nested = clean_none_values(v)
+                    if len(nested.keys()) > 0:
+                        clean[k] = nested
+                elif v is not None:
+                    clean[k] = v
+            return clean
+
         return {'version': Document.CURRENT_VERSION, 'metadata': self.metadata,
                 'content_node': self.content_node.to_dict() if self.content_node else None,
-                'source': dataclasses.asdict(self.source),
+                'source': clean_none_values(dataclasses.asdict(self.source)),
                 'mixins': self._mixins,
                 'exceptions': self.exceptions,
                 'log': self.log,
