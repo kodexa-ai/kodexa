@@ -250,6 +250,10 @@ class DocumentStoreConnector(object):
         self.subscription = subscription
         self.index = 0
 
+    @staticmethod
+    def get_name():
+        return "document-store"
+
     def __iter__(self):
         return self
 
@@ -261,6 +265,11 @@ class DocumentStoreConnector(object):
             self.index += 1
             return self.store.get_by_uuid(uuid_value)
 
+    @staticmethod
+    def get_source(document):
+        from kodexa import RemoteDocumentStore
+        remote_document_store = RemoteDocumentStore(document.source.headers['ref'])
+        return remote_document_store.get(document.source.headers['id'])
 
 add_connector(FolderConnector)
 add_connector(FileHandleConnector)

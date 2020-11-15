@@ -399,9 +399,14 @@ class LabelStep(object):
 
 class PipelineStore:
 
-    def __init__(self, name: str, store: Store):
+    def __init__(self, name: str, store: Store, extracted_labelled: bool = False):
         self.name = name
         self.store = store
+        self.extract_labelled = extracted_labelled
+
+    def extract(self, document):
+        # TODO implement
+        pass
 
 
 class Pipeline:
@@ -436,7 +441,7 @@ class Pipeline:
         self.logging_level = logging_level
         self.apply_lineage = apply_lineage
 
-    def add_store(self, name: str, store: Store):
+    def add_store(self, name: str, store: Store, extracted_labelled=False):
         """
         Add the store to the pipeline so that it is available to the pipeline
 
@@ -445,8 +450,10 @@ class Pipeline:
 
         :param name: the name of the store (to refer to it)
         :param store: the store that should be added
+        :param extracted_labelled: at the end of the pipeline we will extract the labelled data
+                                   to this store
         """
-        self.stores.append(PipelineStore(name, store))
+        self.stores.append(PipelineStore(name, store, extracted_labelled))
         return self
 
     def add_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
@@ -633,6 +640,12 @@ class Pipeline:
 
                 self.context.statistics.processed_document(document)
                 self.context.output_document = document
+
+                # Determine if any of the stores will automatically extract the data
+                for store in self.stores:
+                    if store.extract_labelled:
+                        store.extract(document)
+
             else:
                 logger.warning("A step did not return a document?")
 

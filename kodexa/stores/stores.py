@@ -514,7 +514,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
             logger.info(f"Putting document with path {path}")
 
-            files = {"file": document.to_msgpack()}
+            files = {"document": document.to_msgpack()}
             data = {"path": path}
             content_object_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
