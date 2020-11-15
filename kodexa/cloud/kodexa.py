@@ -11,6 +11,7 @@ from json import JSONDecodeError
 import requests
 import yaml
 from addict import Dict
+from appdirs import AppDirs
 from rich import print
 
 from kodexa.connectors import get_source
@@ -18,12 +19,12 @@ from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
 from kodexa.model.model import RemoteStore
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
+from kodexa.stores import RemoteDocumentStore
 from kodexa.stores import TableDataStore
 from kodexa.stores.stores import LocalDocumentStore
-from appdirs import AppDirs
+from kodexa.workflow import Workflow
 
 logger = logging.getLogger('kodexa.platform')
-
 
 dirs = AppDirs("Kodexa", "Kodexa")
 
@@ -244,7 +245,7 @@ class KodexaPlatform:
         return [org_slug, slug, version]
 
     @staticmethod
-    def deploy(ref: str, kodexa_object, name: str = "A new object", description: str = "A new Kodexa object",
+    def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
                options=None, public=False, force_replace=False):
 
         if '/' not in ref:
@@ -268,6 +269,9 @@ class KodexaPlatform:
 
         if isinstance(kodexa_object, Pipeline):
 
+            metadata_object.name = 'New Pipeline' if metadata_object.name is None else metadata_object.name
+            metadata_object.description = 'A new pipeline' if metadata_object.description is None else metadata_object.description
+
             object_url = "pipelines"
 
             if "example_urls" not in options:
@@ -290,10 +294,18 @@ class KodexaPlatform:
 
             builder.build_steps(metadata_object)
 
-        elif isinstance(kodexa_object, LocalDocumentStore):
+        elif isinstance(kodexa_object, LocalDocumentStore) or isinstance(kodexa_object, RemoteDocumentStore):
             object_url = 'stores'
+            metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
+            metadata_object.description = 'A document store' if metadata_object.description is None else metadata_object.description
+
             metadata_object.type = 'store'
             metadata_object.contentType = 'DOCUMENT'
+        elif isinstance(kodexa_object, Workflow):
+            metadata_object.name = 'New Workflow' if metadata_object.name is None else metadata_object.name
+            metadata_object.description = 'A new workflow' if metadata_object.description is None else metadata_object.description
+            object_url = 'workflows'
+            metadata_object.type = 'workflow'
         else:
             raise Exception("Unknown object type, unable to deploy")
 

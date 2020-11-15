@@ -13,3 +13,4 @@ from .sinks import InMemoryDocumentSink, FolderSink
 from .steps import NodeTagger, TextParser, RollupTransformer, TagsToKeyValuePairExtractor
 from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreHelper, LocalDocumentStore, \
     RemoteDocumentStore
+from .workflow import Workflow
