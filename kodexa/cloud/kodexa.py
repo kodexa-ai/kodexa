@@ -306,9 +306,9 @@ class KodexaPlatform:
             metadata_object.description = 'A new workflow' if metadata_object.description is None else metadata_object.description
             object_url = 'workflows'
             metadata_object.type = 'workflow'
-            metadata_object.pipelines = map(lambda x: x.__dict__, kodexa_object.pipelines)
-            metadata_object.stores = map(lambda x: x.__dict__, kodexa_object.stores)
-            metadata_object.connectors = map(lambda x: x.__dict__, kodexa_object.connectors)
+            metadata_object.pipelines = list(map(lambda x: x.__dict__, kodexa_object.pipelines))
+            metadata_object.stores = list(map(lambda x: x.__dict__, kodexa_object.stores))
+            metadata_object.connectors = list(map(lambda x: x.__dict__, kodexa_object.connectors))
         else:
             raise Exception("Unknown object type, unable to deploy")
 
