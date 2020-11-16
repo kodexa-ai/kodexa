@@ -14,6 +14,7 @@ from addict import Dict
 from appdirs import AppDirs
 from rich import print
 
+from kodexa.taxonomy.taxonomy import Taxonomy
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
@@ -309,6 +310,12 @@ class KodexaPlatform:
             metadata_object.pipelines = list(map(lambda x: x.__dict__, kodexa_object.pipelines))
             metadata_object.stores = list(map(lambda x: x.__dict__, kodexa_object.stores))
             metadata_object.connectors = list(map(lambda x: x.__dict__, kodexa_object.connectors))
+        elif isinstance(kodexa_object, Taxonomy):
+            metadata_object.name = 'New Taxonomy' if metadata_object.name is None else metadata_object.name
+            metadata_object.description = 'A new taxonomy' if metadata_object.description is None else metadata_object.description
+            object_url = 'taxonomies'
+            metadata_object.type = 'taxonomy'
+            metadata_object.taxons = list(map(lambda x: x.__dict__, kodexa_object.taxons))
         else:
             raise Exception("Unknown object type, unable to deploy")
 
@@ -373,16 +380,19 @@ class KodexaPlatform:
             raise Exception("Unable to list objects")
 
     @staticmethod
-    def undeploy(ref: str):
+    def undeploy(object_type:str, ref: str):
+
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
         url_ref = ref.replace(':', '/')
-        response = requests.delete(f"{KodexaPlatform.get_url()}/api/pipelines/{url_ref}",
+        response = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type_metadata['plural']}/{url_ref}",
                                    headers={"x-access-token": KodexaPlatform.get_access_token(),
                                             "content-type": "application/json"})
         if response.status_code == 200:
-            logger.info("Pipeline undeployed")
+            logger.info(f"Undeployed {object_type_metadata['name']} {ref}")
         else:
             logger.error(response.text)
-            raise Exception("Unable to undeploy and replace existing pipeline")
+            raise Exception(f"Unable to undeploy {object_type_metadata['name']} {ref}")
 
     @staticmethod
     def delete_object(ref, object_type):
