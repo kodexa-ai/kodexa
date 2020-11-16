@@ -307,7 +307,7 @@ class KodexaPlatform:
             object_url = 'workflows'
             metadata_object.type = 'workflow'
             metadata_object.pipelines = kodexa_object.pipelines
-            metadata_object.stores = kodexa_object.sources
+            metadata_object.stores = kodexa_object.stores
             metadata_object.connectors = kodexa_object.connectors
         else:
             raise Exception("Unknown object type, unable to deploy")
