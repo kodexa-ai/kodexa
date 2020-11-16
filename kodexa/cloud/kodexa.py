@@ -22,7 +22,7 @@ from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore
 from kodexa.stores import TableDataStore
 from kodexa.stores.stores import LocalDocumentStore
-from kodexa.workflow import Workflow
+from kodexa.workflow.workflow import Workflow
 
 logger = logging.getLogger('kodexa.platform')
 
