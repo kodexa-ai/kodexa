@@ -20,7 +20,7 @@ class WorkflowConnector:
 
 class WorkflowPipeline:
 
-    def __init__(self, name: str, ref: str, subscription: str, parameters=None):
+    def __init__(self, name: str, ref: str, subscription: str, target: str = None, parameters=None):
         if parameters is None:
             parameters = {}
         self.name: str = name
@@ -36,3 +36,9 @@ class Workflow:
         self.stores: List[WorkflowStore] = []
         self.pipelines: List[WorkflowPipeline] = []
         self.connectors: List[WorkflowConnector] = []
+
+    def add_store(self, name: str, ref: str):
+        self.stores.append(WorkflowStore(name, ref))
+
+    def add_pipeline(self, name: str, ref: str, subscription: str = "*", target: str = None, parameters=None):
+        self.pipelines.append(WorkflowPipeline(name, ref, subscription, target, parameters))
