@@ -310,6 +310,7 @@ class KodexaPlatform:
             metadata_object.pipelines = list(map(lambda x: x.__dict__, kodexa_object.pipelines))
             metadata_object.stores = list(map(lambda x: x.__dict__, kodexa_object.stores))
             metadata_object.connectors = list(map(lambda x: x.__dict__, kodexa_object.connectors))
+            metadata_object.accessToken = kodexa_object.access_token
         elif isinstance(kodexa_object, Taxonomy):
             metadata_object.name = 'New Taxonomy' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new taxonomy' if metadata_object.description is None else metadata_object.description
