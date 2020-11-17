@@ -482,9 +482,16 @@ class KodexaPlatform:
 
     @classmethod
     def get_server_info(cls):
-        return requests.get(f"{KodexaPlatform.get_url()}/api",
+        r = requests.get(f"{KodexaPlatform.get_url()}/api",
                             headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                     "content-type": "application/json"}).json()
+                                     "content-type": "application/json"})
+        if r.status_code == 401:
+            raise Exception("Your access token was not authorized")
+        elif r.status_code == 200:
+            return r.json()
+        else:
+            logger.error(r.text)
+            raise Exception("Unable to get action metadata, check your reference and platform settings")
 
 
 class RemoteSession:
@@ -500,7 +507,13 @@ class RemoteSession:
     def get_action_metadata(self, ref):
         r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref}",
                          headers={"x-access-token": KodexaPlatform.get_access_token()})
-        return r.json()
+        if r.status_code == 401:
+            raise Exception("Your access token was not authorized")
+        elif r.status_code == 200:
+            return r.json()
+        else:
+            logger.error(r.text)
+            raise Exception("Unable to get action metadata, check your reference and platform settings")
 
     def start(self):
         logger.info(f"Creating session {self.slug} ({KodexaPlatform.get_url()})")
