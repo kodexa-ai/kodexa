@@ -72,3 +72,18 @@ def test_text_find():
     assert len(nodes) == 1
 
     compare_document(document, 'test_text_find.json')
+
+
+def test_folder_connector_unpack_wildcard():
+
+    document_sink = InMemoryDocumentSink()
+    pipeline = Pipeline(FolderConnector(path=str(get_test_directory()) + 'folder_unpack_test', file_filter='*.*', unpack=True))
+    pipeline.set_sink(document_sink)
+    pipeline.run()
+
+    # let's make sure we properly unpacked each document and have all ContentNodes
+    for doc in document_sink.documents:
+        if doc.get_root().get_all_content().find('HSBC') > -1:
+            assert len(doc.select("//*")) == 39
+        elif doc.get_root().get_all_content().find('flea') > -1:
+            assert len(doc.select("//*")) == 6
