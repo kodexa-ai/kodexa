@@ -61,7 +61,7 @@ class FolderConnector:
         else:
             self.index += 1
             if self.unpack:
-                return Document.from_kdxa(self.path)
+                return Document.from_kdxa(self.files[self.index - 1])
             else:
                 document = Document(DocumentMetadata(
                     {"source_path": self.files[self.index - 1], "connector": self.get_name(),
@@ -271,6 +271,8 @@ class DocumentStoreConnector(object):
         remote_document_store = RemoteDocumentStore(document.source.headers['ref'])
         return remote_document_store.get(document.source.headers['id'])
 
+
 add_connector(FolderConnector)
 add_connector(FileHandleConnector)
 add_connector(UrlConnector)
+add_connector(DocumentStoreConnector)
