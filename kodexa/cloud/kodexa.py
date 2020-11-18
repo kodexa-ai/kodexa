@@ -14,15 +14,14 @@ from addict import Dict
 from appdirs import AppDirs
 from rich import print
 
-from kodexa.taxonomy.taxonomy import Taxonomy
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
-from kodexa.model.model import RemoteStore
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore
 from kodexa.stores import TableDataStore
 from kodexa.stores.stores import LocalDocumentStore
+from kodexa.taxonomy.taxonomy import Taxonomy
 from kodexa.workflow.workflow import Workflow
 
 logger = logging.getLogger('kodexa.platform')
@@ -66,9 +65,9 @@ class PipelineMetadataBuilder:
 
         for pipeline_store in self.pipeline.stores:
 
-            if isinstance(pipeline_store.store, RemoteStore):
+            if isinstance(pipeline_store.store, RemoteDocumentStore):
                 pipeline_metadata.metadata.stores.append(
-                    {"name": pipeline_store.name, "ref": pipeline_store.store.get_ref()})
+                    {"name": pipeline_store.name, "ref": pipeline_store.store.get_ref(), "storeType": "DOCUMENT"})
             else:
                 raise Exception("Pipeline refers to a non-remote store, deployment of local stores is not supported")
 
@@ -381,7 +380,7 @@ class KodexaPlatform:
             raise Exception("Unable to list objects")
 
     @staticmethod
-    def undeploy(object_type:str, ref: str):
+    def undeploy(object_type: str, ref: str):
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
@@ -483,8 +482,8 @@ class KodexaPlatform:
     @classmethod
     def get_server_info(cls):
         r = requests.get(f"{KodexaPlatform.get_url()}/api",
-                            headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                     "content-type": "application/json"})
+                         headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                  "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
         elif r.status_code == 200:
