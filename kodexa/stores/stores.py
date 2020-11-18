@@ -473,8 +473,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     def get(self, document_id: str) -> Optional[Document]:
         from kodexa import KodexaPlatform
 
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}/contents"
+        logger.info(f"Downloading document from {url}")
         doc = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}",
+            url,
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         if doc.status_code == 200:
             return Document.from_msgpack(doc.content)
@@ -487,8 +489,11 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     def get_source(self, document_id: str):
         from kodexa import KodexaPlatform
 
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}/contents"
+        logger.info(f"Downloading source from {url}")
+
         doc = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}/contents",
+            url,
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if doc.status_code == 200:
