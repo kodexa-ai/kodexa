@@ -472,11 +472,26 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
     def get(self, document_id: str) -> Optional[Document]:
         from kodexa import KodexaPlatform
+
         doc = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         if doc.status_code == 200:
             return Document.from_msgpack(doc.content)
+        elif doc.status_code == 404:
+            return None
+        else:
+            logger.error("Get document failed [" + doc.text + "], response " + str(doc.status_code))
+            raise Exception("Get document failed [" + doc.text + "], response " + str(doc.status_code))
+
+    def get_source(self, document_id: str):
+        from kodexa import KodexaPlatform
+
+        doc = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if doc.status_code == 200:
+            return doc.content
         elif doc.status_code == 404:
             return None
         else:
