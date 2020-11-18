@@ -490,6 +490,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         doc = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
+
         if doc.status_code == 200:
             return doc.content
         elif doc.status_code == 404:
