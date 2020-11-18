@@ -464,6 +464,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         self.objects: List[Dict] = self.query_objects(query)
         self.page = 1
 
+    def get_name(self):
+        return "document-store"
+
     def to_dict(self):
         return {
             "type": "DOCUMENT",
@@ -598,15 +601,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         else:
             content_object = self.objects.pop(0)
 
-            if content_object['content_type'] == "Document":
+            if content_object['content_type'] == "DOCUMENT":
                 return self.get(content_object['id'])
-            else:
 
-                # TODO we need the connector?
-                document = Document()
-                document.source.connector = self.get_name()
-                document.source.original_path = f"{self.ref}/contents/{content_object['id']}"
-                return document
+            raise StopIteration
 
 
 class DocumentReference:
