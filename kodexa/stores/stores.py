@@ -461,8 +461,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
     def __init__(self, ref: str, query: str = "*"):
         self.ref: str = ref
-        self.objects: List[Dict] = self.query_objects(query)
+        self.objects: List[Dict] = None
         self.page = 1
+        self.query = query
 
     def get_name(self):
         return "document-store"
@@ -596,6 +597,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         return self
 
     def __next__(self):
+
+        if self.objects is None:
+            self.objects = self.query_objects(self.query)
+
         if len(self.objects) == 0:
             raise StopIteration
         else:
