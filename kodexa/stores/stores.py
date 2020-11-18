@@ -473,7 +473,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     def get(self, document_id: str) -> Optional[Document]:
         from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents/{document_id}/contents"
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents/{document_id}/content"
         logger.info(f"Downloading document from {url}")
         doc = requests.get(
             url,
@@ -489,7 +489,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     def get_source(self, document_id: str):
         from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents/{document_id}/contents"
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents/{document_id}/content"
         logger.info(f"Downloading source from {url}")
 
         doc = requests.get(
