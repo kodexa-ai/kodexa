@@ -269,7 +269,7 @@ class DocumentStoreConnector(object):
     def get_source(document):
         from kodexa import RemoteDocumentStore
         remote_document_store = RemoteDocumentStore(document.source.headers['ref'])
-        return remote_document_store.get(document.source.headers['id'])
+        return io.BytesIO(remote_document_store.get_source(document.source.headers['id']))
 
 
 add_connector(FolderConnector)
