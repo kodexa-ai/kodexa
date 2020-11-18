@@ -16,7 +16,7 @@ from rich import print
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
-from kodexa.model import Document
+from kodexa.model import Document, DocumentStore
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore
 from kodexa.stores import TableDataStore
@@ -744,6 +744,19 @@ class RemotePipeline:
         """
         return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path))
 
+    def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
+        """
+        Allows you to provide the sink store easily
+
+        This will wrap the store in a document store sink
+
+        :param document_store: document store to use
+        :param processing_mode: the processing mode (update or new)
+        :return: the pipeline
+        """
+        from kodexa.sinks import DocumentStoreSink
+        self.set_sink(DocumentStoreSink(document_store))
+        return self
 
 class RemoteAction:
     """
