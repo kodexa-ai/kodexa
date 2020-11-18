@@ -459,9 +459,9 @@ class LocalDocumentStore(DocumentStore):
 
 class RemoteDocumentStore(DocumentStore, RemoteStore):
 
-    def __init__(self, ref: str):
+    def __init__(self, ref: str, query: str = "*"):
         self.ref: str = ref
-        self.objects: List[Dict] = self.list_objects()
+        self.objects: List[Dict] = self.query_objects(query)
         self.page = 1
 
     def to_dict(self):
