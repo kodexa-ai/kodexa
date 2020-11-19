@@ -218,7 +218,7 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
     versioned_metadata = os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json")
 
     if site:
-        metadata_obj['source']['location'] = url + metadata_obj['version'] + '/' + versioned_metadata
+        metadata_obj['source']['location'] = url + metadata_obj['version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.json"
 
     unversioned_metadata = os.path.join(output, "kodexa.json")
     with open(versioned_metadata, 'w') as outfile:
