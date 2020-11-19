@@ -236,7 +236,7 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
     print("Extension has been packaged :tada:")
 
     if site:
-        metadata['json_location'] = url + metadata_obj['version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.json"
+        metadata_obj['json_location'] = url + metadata_obj['version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.json"
         generate_site(metadata=metadata_obj, base_dir=sitedir, output_filename=os.path.join(output, output_filename),
                       url=url, output_json=versioned_metadata)
         print("Extension site has been successfully built :tada:")
