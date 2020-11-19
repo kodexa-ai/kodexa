@@ -418,7 +418,7 @@ class KodexaPlatform:
             return obj_response.json()
 
     @classmethod
-    def get(cls, object_type, ref):
+    def get(cls, object_type, ref, path=None):
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
@@ -427,6 +427,10 @@ class KodexaPlatform:
             # If ref is just the org then we will list them
             if '/' in ref:
                 obj = KodexaPlatform.get_object(ref, object_type)
+
+                if path is not None:
+                    import jq
+                    obj = jq.compile(path).input(obj).all()
                 import yaml
                 print(obj)
             else:

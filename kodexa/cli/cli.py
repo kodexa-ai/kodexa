@@ -107,12 +107,14 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 @click.argument('ref')
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@click.option('--path', default=None, help='JQ path to content you want')
+
 @pass_info
-def get(_: Info, object_type: str, ref: str, url: str, token: str):
+def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = None):
     """List the instance of the object type"""
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref)
+    KodexaPlatform.get(object_type, ref, path)
 
 
 @cli.command()
@@ -218,7 +220,8 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
     versioned_metadata = os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json")
 
     if site:
-        metadata_obj['source']['location'] = url + metadata_obj['version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.tar.gz"
+        metadata_obj['source']['location'] = url + metadata_obj[
+            'version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.tar.gz"
 
     unversioned_metadata = os.path.join(output, "kodexa.json")
     with open(versioned_metadata, 'w') as outfile:
@@ -236,7 +239,8 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
     print("Extension has been packaged :tada:")
 
     if site:
-        metadata_obj['json_location'] = url + metadata_obj['version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.json"
+        metadata_obj['json_location'] = url + metadata_obj[
+            'version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.json"
         generate_site(metadata=metadata_obj, base_dir=sitedir, output_filename=os.path.join(output, output_filename),
                       url=url, output_json=versioned_metadata)
         print("Extension site has been successfully built :tada:")

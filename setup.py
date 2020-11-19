@@ -34,7 +34,8 @@ setup(name='kodexa',
           'simpleeval',
           'jinja2',
           'rich',
-          'appdirs'
+          'appdirs',
+          'jq'
       ],
       entry_points="""
         [console_scripts]
