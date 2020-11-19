@@ -43,7 +43,7 @@ def write_template(template, output_location, metadata, service=None):
         text_file.write(processed_template)
 
 
-def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str):
+def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str, output_json: str):
     import os
     try:
         os.makedirs(os.path.join(base_dir, metadata['version']))
@@ -67,6 +67,7 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str)
     })
 
     copyfile(output_filename, os.path.join(base_dir, metadata['version'], os.path.basename(output_filename)))
+    copyfile(output_json, os.path.join(base_dir, metadata['version'], os.path.basename(output_filename)))
 
     write_template("releases.j2.html", os.path.join(base_dir, 'index.html'),
                    {'metadata': Dict(metadata), 'releases': releases})
