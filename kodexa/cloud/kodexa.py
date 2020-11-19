@@ -504,6 +504,7 @@ class RemoteSession:
         self.cloud_session = None
 
     def get_action_metadata(self, ref):
+        logger.debug(f"Downloading metadata for action {ref}")
         r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref}",
                          headers={"x-access-token": KodexaPlatform.get_access_token()})
         if r.status_code == 401:
@@ -529,7 +530,7 @@ class RemoteSession:
     def execution_action(self, document, options, attach_source):
         files = {}
         if attach_source:
-            logger.info("Attaching source")
+            logger.debug("Attaching source to call")
             files["file"] = get_source(document)
             files["file_document"] = document.to_msgpack()
         else:
