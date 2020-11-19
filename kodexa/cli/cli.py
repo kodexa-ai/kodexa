@@ -216,6 +216,10 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
         metadata_obj['source']['location'] = metadata_obj['source']['location'].format(**metadata_obj)
 
     versioned_metadata = os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json")
+
+    if site:
+        metadata_obj['source']['location'] = url + metadata_obj['version'] + '/' + versioned_metadata
+
     unversioned_metadata = os.path.join(output, "kodexa.json")
     with open(versioned_metadata, 'w') as outfile:
         json.dump(metadata_obj, outfile)
@@ -232,7 +236,6 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
     print("Extension has been packaged :tada:")
 
     if site:
-        metadata_obj['source']['location'] = url + metadata_obj['version'] + '/' + output_filename
         generate_site(metadata=metadata_obj, base_dir=sitedir, output_filename=os.path.join(output, output_filename),
                       url=url, output_json=versioned_metadata)
         print("Extension site has been successfully built :tada:")
