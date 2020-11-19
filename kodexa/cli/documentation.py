@@ -67,7 +67,7 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
     })
 
     copyfile(output_filename, os.path.join(base_dir, metadata['version'], os.path.basename(output_filename)))
-    copyfile(output_json, os.path.join(base_dir, metadata['version'], os.path.basename(output_filename)))
+    copyfile(output_json, os.path.join(base_dir, metadata['version'], os.path.basename(output_json)))
 
     write_template("releases.j2.html", os.path.join(base_dir, 'index.html'),
                    {'metadata': Dict(metadata), 'releases': releases})
