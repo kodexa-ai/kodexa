@@ -526,7 +526,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         return self.ref
 
     def get_by_path(self, path) -> Optional[Document]:
-        hits = self.query(f"path:{path}")
+        hits = self.query_objects(f"path:{path}")
         if len(hits) == 1:
             return self.get(hits[0]['id'])
         else:
