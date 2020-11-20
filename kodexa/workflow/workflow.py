@@ -25,6 +25,7 @@ class WorkflowPipeline:
             parameters = {}
         self.name: str = name
         self.ref: str = ref
+        self.target: str = target
 
         self.subscription: str = subscription
         self.parameters: Dict[str, Any] = parameters
