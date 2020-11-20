@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 class WorkflowStore:
@@ -25,7 +25,7 @@ class WorkflowPipeline:
             parameters = {}
         self.name: str = name
         self.ref: str = ref
-        self.target: str = target
+        self.target: Optional[str] = target
 
         self.subscription: str = subscription
         self.parameters: Dict[str, Any] = parameters
