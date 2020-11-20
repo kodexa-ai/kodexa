@@ -1475,7 +1475,7 @@ class Document(object):
         return content_node
 
     @classmethod
-    def from_file(cls, file):
+    def from_file(cls, file, unpack: bool = False):
         """
         Creates a Document that has a 'file-handle' connector to the specified file.
 
@@ -1484,13 +1484,16 @@ class Document(object):
         :return: A Document connected to the specified file.
         :rtype: Document
         """
-        file_document = Document()
-        file_document.metadata.connector = 'file-handle'
-        file_document.metadata.connector_options.file = file
-        file_document.source.connector = 'file-handle'
-        file_document.source.original_filename = os.path.basename(file)
-        file_document.source.original_path = file
-        return file_document
+        if unpack:
+            Document.from_kdxa(file)
+        else:
+            file_document = Document()
+            file_document.metadata.connector = 'file-handle'
+            file_document.metadata.connector_options.file = file
+            file_document.source.connector = 'file-handle'
+            file_document.source.original_filename = os.path.basename(file)
+            file_document.source.original_path = file
+            return file_document
 
     @classmethod
     def from_url(cls, url, headers=None):
