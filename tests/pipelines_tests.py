@@ -14,7 +14,7 @@ def test_interesting_pipeline():
         context.get_store('my-model-store').put('cheese.txt', 'so cheesy'.encode('ascii'))
         return document
 
-    training_prep = Pipeline.from_text("hello world").to_store(training_documents)
+    training_prep = Pipeline.from_text("hello world", apply_lineage=False).to_store(training_documents)
     training_prep.add_step(test_step)
     training_prep.add_label('training_document')
 

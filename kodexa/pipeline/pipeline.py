@@ -661,7 +661,7 @@ class Pipeline:
         return self.context
 
     @staticmethod
-    def from_store(store: DocumentStore, subscription=None):
+    def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
         """
         Build a new pipeline with the input documents from a document store
 
@@ -669,10 +669,10 @@ class Pipeline:
         :param subscription:str The subscription query to use
         :return: A new instance of a pipeline
         """
-        return Pipeline(DocumentStoreConnector(store, subscription))
+        return Pipeline(DocumentStoreConnector(store, subscription), *args, **kwargs)
 
     @staticmethod
-    def from_url(url, headers=None):
+    def from_url(url, headers=None, *args, **kwargs):
         """
         Build a new pipeline with the input being a document created from the given URL
 
@@ -680,20 +680,20 @@ class Pipeline:
         :param headers: A dictionary of headers
         :return: A new instance of a pipeline
         """
-        return Pipeline(Document.from_url(url, headers))
+        return Pipeline(Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(file_path: str) -> Pipeline:
+    def from_file(file_path: str, *args, **kwargs) -> Pipeline:
         """
         Create a new pipeline using a file path as a source
         :param file_path: The path to the file
         :return: A new pipeline
         :rtype: Pipeline
         """
-        return Pipeline(Document.from_file(file_path))
+        return Pipeline(Document.from_file(file_path), *args, **kwargs)
 
     @staticmethod
-    def from_text(text: str) -> Pipeline:
+    def from_text(text: str, *args, **kwargs) -> Pipeline:
         """
         Build a new pipeline and provide text as the basic to create a document
 
@@ -701,7 +701,7 @@ class Pipeline:
         :return: A new pipeline
         :rtype: Pipeline
         """
-        return Pipeline(Document.from_text(text))
+        return Pipeline(Document.from_text(text), *args, **kwargs)
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
@@ -719,7 +719,7 @@ class Pipeline:
         :rtype: Pipeline
         """
         return Pipeline(FolderConnector(folder_path, filename_filter, recursive=recursive, relative=relative,
-                                        caller_path=caller_path, unpack=unpack))
+                                        caller_path=caller_path, unpack=unpack), *args, **kwargs)
 
 
 class PipelineStatistics:
