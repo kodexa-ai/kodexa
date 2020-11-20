@@ -696,7 +696,7 @@ class RemotePipeline:
         return self.context
 
     @staticmethod
-    def from_url(slug: str, url, headers=None) -> RemotePipeline:
+    def from_url(slug: str, url, headers=None, *args, **kwargs) -> RemotePipeline:
         """
         Build a new pipeline with the input being a document created from the given URL
 
@@ -705,19 +705,20 @@ class RemotePipeline:
         :param headers: A dictionary of headers
         :return: A new instance of a remote pipeline
         """
-        return RemotePipeline(slug, Document.from_url(url, headers))
+        return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(slug: str, file_path: str) -> RemotePipeline:
+    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -> RemotePipeline:
         """
         Create a new pipeline using a file path as a source
 
         :param slug: The slug for the remote pipeline
         :param file_path: The path to the file
+        :param unpack: Unpack the file as a KDXA
         :return: A new pipeline
         :rtype: Pipeline
         """
-        return RemotePipeline(slug, Document.from_file(file_path))
+        return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
 
     @staticmethod
     def from_text(slug: str, text: str, *args, **kwargs) -> RemotePipeline:
@@ -729,10 +730,11 @@ class RemotePipeline:
         :return: A new pipeline
         :rtype: RemotePipeline
         """
-        return RemotePipeline(slug, Document.from_text(text))
+        return RemotePipeline(slug, Document.from_text(text), *args, **kwargs)
 
     @staticmethod
     def from_folder(slug: str, folder_path: str, filename_filter: str = "*", recursive: bool = False,
+                    unpack: bool = False,
                     relative: bool = False,
                     caller_path: str = get_caller_dir()) -> RemotePipeline:
         """
@@ -744,10 +746,12 @@ class RemotePipeline:
         :param recursive: Should we look recursively in sub-directories (default False)
         :param relative: Is the folder path relative to the caller (default False)
         :param caller_path: The caller path (defaults to trying to work this out from the stack)
+        :param unpack: Unpack the file as a KDXA document
         :return: A new pipeline
         :rtype: RemotePipeline
         """
-        return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path))
+        return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path,
+                                                    unpack=unpack))
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
         """
@@ -762,6 +766,7 @@ class RemotePipeline:
         from kodexa.sinks import DocumentStoreSink
         self.set_sink(DocumentStoreSink(document_store))
         return self
+
 
 class RemoteAction:
     """
