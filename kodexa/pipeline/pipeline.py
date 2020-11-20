@@ -621,9 +621,11 @@ class Pipeline:
 
             if document:
 
+                document.source = initial_source_metadata
                 if self.apply_lineage:
-                    document.source = initial_source_metadata
                     document.source.lineage_document_uuid = lineage_document_uuid
+                else:
+                    document.source.lineage_document_uuid = None
 
                 if self.sink:
                     logger.info(f"Writing to sink {self.sink.get_name()}")
