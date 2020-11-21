@@ -145,11 +145,14 @@ class JsonDocumentStore(Store):
         self.index = 0
 
 
-class RemoteTableDataStore(Store):
+class RemoteTableDataStore(RemoteStore):
 
     def __init__(self, ref: str, columns: List[str] = []):
         self.ref = ref
         self.columns = columns
+
+    def get_ref(self):
+        return self.ref
 
     def add(self, row):
         from kodexa import KodexaPlatform
@@ -275,10 +278,13 @@ class TableDataStore(Store):
         return TableDataStore(columns=store_dict['data']['columns'], rows=store_dict['data']['rows'])
 
 
-class RemoteDictDataStore:
+class RemoteDictDataStore(RemoteStore):
 
     def __init__(self, ref: str):
         self.ref: str = ref
+
+    def get_ref(self):
+        return self.ref
 
     def add(self, dict):
         """
