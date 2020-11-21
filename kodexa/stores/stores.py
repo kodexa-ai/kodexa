@@ -145,6 +145,36 @@ class JsonDocumentStore(Store):
         self.index = 0
 
 
+class RemoteTableDataStore(Store):
+
+    def __init__(self, ref: str, columns: List[str] = []):
+        self.ref = ref
+        self.columns = columns
+
+    def add(self, row):
+        from kodexa import KodexaPlatform
+
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
+        logger.debug(f"Uploading rows to store {url}")
+
+        row_dict = {}
+        for idx, row_value in enumerate(row):
+            if len(self.columns) == 0 or len(self.columns) <= idx:
+                row_dict[f'col{idx}'] = row_value
+            else:
+                row_dict[self.columns[idx]] = row_value
+
+        doc = requests.post(
+            url,
+            [{'data': row_dict}],
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if doc.status_code == 200:
+            return
+        else:
+            logger.error("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+            raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+
+
 class TableDataStore(Store):
     """
     Stores data as a list of lists that can represent a table.
@@ -243,6 +273,32 @@ class TableDataStore(Store):
     @classmethod
     def from_dict(cls, store_dict):
         return TableDataStore(columns=store_dict['data']['columns'], rows=store_dict['data']['rows'])
+
+
+class RemoteDictDataStore:
+
+    def __init__(self, ref: str):
+        self.ref: str = ref
+
+    def add(self, dict):
+        """
+        Writes a dict to the Data Store
+
+        :param dict: the dict to add to the store
+        """
+        from kodexa import KodexaPlatform
+
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dictionaries"
+        logger.debug(f"Uploading dictionaries to store {url}")
+        doc = requests.post(
+            url,
+            [{'data': dict}],
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if doc.status_code == 200:
+            return
+        else:
+            logger.error("Unable to post dict to remote store [" + doc.text + "], response " + str(doc.status_code))
+            raise Exception("Unable to post dict to remote store [" + doc.text + "], response " + str(doc.status_code))
 
 
 class DictDataStore:
