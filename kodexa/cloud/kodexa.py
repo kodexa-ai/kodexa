@@ -601,11 +601,13 @@ class RemoteSession:
 
     def get_output_document(self, execution):
         if execution.outputId:
+            logger.info("Downloading output document [{execition.outputId}]")
             doc = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()})
             return Document.from_msgpack(doc.content)
         else:
+            logger.info("No output document")
             return None
 
     def get_store(self, execution, store):
@@ -673,6 +675,7 @@ class RemotePipeline:
             execution = cloud_session.execution_action(document, self.parameters, self.attach_source, self.context)
             execution = cloud_session.wait_for_execution(execution)
 
+            logger.info("Capturing output")
             result_document = cloud_session.get_output_document(execution)
             self.context.set_output_document(result_document)
             cloud_session.merge_stores(execution, self.context)
@@ -682,7 +685,7 @@ class RemotePipeline:
             if self.sink:
                 logger.info(f"Writing to sink {self.sink.get_name()}")
                 try:
-                    self.sink.sink(document)
+                    self.sink.sink(result_document)
                 except:
                     if document:
                         document.exceptions.append({
