@@ -670,7 +670,7 @@ class RemotePipeline:
 
         for document in self.connector:
             logger.info(f"Processing {document}")
-            execution = cloud_session.execution_action(document, self.parameters, self.attach_source)
+            execution = cloud_session.execution_action(document, self.parameters, self.attach_source, self.context)
             execution = cloud_session.wait_for_execution(execution)
 
             result_document = cloud_session.get_output_document(execution)
