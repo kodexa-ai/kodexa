@@ -19,9 +19,8 @@ from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, DocumentStore
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore
-from kodexa.stores import TableDataStore
-from kodexa.stores.stores import LocalDocumentStore
-from kodexa.taxonomy.taxonomy import Taxonomy
+from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
+from kodexa.taxonomy import Taxonomy
 from kodexa.workflow.workflow import Workflow
 
 logger = logging.getLogger('kodexa.platform')
@@ -301,6 +300,13 @@ class KodexaPlatform:
 
             metadata_object.type = 'store'
             metadata_object.contentType = 'DOCUMENT'
+        elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
+            object_url = 'stores'
+            metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
+            metadata_object.description = 'A model store' if metadata_object.description is None else metadata_object.description
+
+            metadata_object.type = 'store'
+            metadata_object.contentType = 'MODEL'
         elif isinstance(kodexa_object, Workflow):
             metadata_object.name = 'New Workflow' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new workflow' if metadata_object.description is None else metadata_object.description
