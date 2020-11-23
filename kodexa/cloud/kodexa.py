@@ -531,7 +531,7 @@ class RemoteSession:
 
         self.cloud_session = Dict(json.loads(r.text))
 
-    def execution_action(self, document, options, attach_source):
+    def execution_action(self, document, options, attach_source, context):
         files = {}
         if attach_source:
             logger.debug("Attaching source to call")
@@ -540,7 +540,8 @@ class RemoteSession:
         else:
             files["document"] = document.to_msgpack()
 
-        data = {"options": json.dumps(options), "document_metadata_json": json.dumps(document.metadata)}
+        data = {"options": json.dumps(options), "document_metadata_json": json.dumps(document.metadata),
+                "context": json.dumps(context.context)}
 
         logger.info(f"Executing session {self.cloud_session.id}")
         r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
@@ -805,10 +806,15 @@ class RemoteAction:
             requires_source = action_metadata['metadata']['requiresSource']
 
         execution = cloud_session.execution_action(document, self.options,
-                                                   self.attach_source if self.attach_source else requires_source)
+                                                   self.attach_source if self.attach_source else requires_source,
+                                                   context)
+
         execution = cloud_session.wait_for_execution(execution)
 
         result_document = cloud_session.get_output_document(execution)
+
+        context.context = execution.context
+
         cloud_session.merge_stores(execution, context)
 
         return result_document if result_document else document
