@@ -595,7 +595,7 @@ class RemoteSession:
 
             logger.debug(execution)
 
-            raise Exception("Processing has failed")
+            raise Exception(f"Processing has failed\nDetails: {step.exceptionDetails.help}")
 
         return execution
 
@@ -680,7 +680,7 @@ class RemotePipeline:
             self.context.set_output_document(result_document)
             cloud_session.merge_stores(execution, self.context)
 
-            self.context.statistics.processed_document(document)
+            self.context.statistics.processed_document(result_document)
 
             if self.sink:
                 logger.info(f"Writing to sink {self.sink.get_name()}")
