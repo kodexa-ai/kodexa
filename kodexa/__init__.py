@@ -7,11 +7,11 @@ from .connectors import FolderConnector, FileHandleConnector, UrlConnector, regi
     get_connector, add_connector, get_source
 from .extractors import *
 from .model import DocumentMetadata, ContentNode, ContentFeature, SourceMetadata, \
-    Document, LocalModelStore, RemoteStore, RemoteModelStore, DocumentStore
+    Document, RemoteStore, DocumentStore
 from .pipeline import Pipeline, PipelineStatistics, PipelineContext
 from .sinks import InMemoryDocumentSink, FolderSink
 from .steps import NodeTagger, TextParser, RollupTransformer, TagsToKeyValuePairExtractor
 from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreHelper, LocalDocumentStore, \
-    RemoteDocumentStore, RemoteTableDataStore, RemoteDictDataStore
+    RemoteDocumentStore, RemoteTableDataStore, RemoteDictDataStore, RemoteModelStore, LocalModelStore
 from .taxonomy import Taxonomy
 from .workflow import Workflow

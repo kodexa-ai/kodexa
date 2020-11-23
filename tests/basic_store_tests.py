@@ -1,7 +1,7 @@
 import os
 
 from kodexa import Document, Pipeline, DocumentMetadata, JsonDocumentStore, TagsToKeyValuePairExtractor, NodeTagger, \
-    LocalDocumentStore
+    LocalDocumentStore, TableDataStore
 from kodexa.testing.test_utils import compare_store
 
 
@@ -58,3 +58,26 @@ def test_basic_local_document_store():
 
     lds2 = LocalDocumentStore('/tmp/lds')
     assert len(lds2.list_objects()) == 1
+
+
+def test_predefined_table_store():
+    def process(document, context):
+        if context.get_store('prediction-data-store'):
+            document.get_root().content = 'We have a data store name'
+        elif context.get_store_names() and len(context.get_store_names()) > 0:
+            document.get_root().content = ' '.join(context.get_store_names())
+        else:
+            document.get_root().content = 'No stores on context'
+
+        return document
+
+    pipeline = Pipeline.from_text("Hello World")
+    pipeline.add_store('prediction-data-store', TableDataStore())
+    pipeline.add_step(process)
+
+    context = pipeline.run()
+
+    new_doc = context.output_document
+    print(new_doc.content_node.content)
+
+    assert new_doc.content_node.content == 'We have a data store name'

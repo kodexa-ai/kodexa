@@ -597,7 +597,9 @@ class Pipeline:
 
         self.context = PipelineContext()
         self.context.stop_on_exception = self.stop_on_exception
+
         for pipeline_store in self.stores:
+            logger.info(f"Adding store {pipeline_store.name}")
             self.context.add_store(pipeline_store.name, pipeline_store.store)
 
         self.context.statistics = PipelineStatistics()

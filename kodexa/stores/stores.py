@@ -9,8 +9,7 @@ from typing import List, Dict, Optional
 
 import requests
 
-from kodexa.model import Document, Store, DocumentStore
-from kodexa.model.model import RemoteStore, LocalModelStore, RemoteModelStore
+from kodexa.model import Document, Store, DocumentStore, RemoteStore, ModelStore
 
 logger = logging.getLogger('kodexa.stores')
 
@@ -678,3 +677,92 @@ class DocumentReference:
 
     def __init__(self, document_store: DocumentStore, path: str):
         pass
+
+
+class LocalModelStore(ModelStore):
+
+    def __init__(self, store_path: str, force_initialize=False):
+        self.store_path = store_path
+        path = Path(store_path)
+
+        if force_initialize and path.exists():
+            shutil.rmtree(store_path)
+
+        if path.is_file():
+            raise Exception("Unable to load store, since it is pointing to a file?")
+        elif not path.exists():
+            path.mkdir(parents=True)
+
+    def to_dict(self):
+        return {
+            "type": "MODEL",
+            "data": {
+                "path": self.store_path
+            }
+        }
+
+    def get(self, object_path: str):
+        if Path(os.path.join(self.store_path, object_path)).is_file():
+            return open(os.path.join(self.store_path, object_path), 'rb')
+        else:
+            return None
+
+    def put(self, object_path: str, content):
+        path = Path(object_path)
+        with open(os.path.join(self.store_path, path), 'wb') as object_file:
+            object_file.write(content)
+
+
+class RemoteModelStore(ModelStore, RemoteStore):
+
+    def to_dict(self):
+
+        return {
+            "type": "MODEL",
+            "ref": self.ref
+        }
+
+    def __init__(self, ref: str):
+        self.ref = ref
+
+    def get(self, object_path: str):
+        from kodexa import KodexaPlatform
+        import requests
+        import io
+        resp = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/fs/{object_path}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return resp.content
+        else:
+            msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
+            logger.error(msg)
+            raise Exception(msg)
+
+
+    def put(self, path: str, content):
+        from kodexa import KodexaPlatform
+        import requests
+        try:
+            import io
+
+            files = {"file": content}
+            data = {"path": path}
+            content_object_response = requests.post(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+                headers={"x-access-token": KodexaPlatform.get_access_token()},
+                files=files, data=data)
+
+            if content_object_response.status_code == 200:
+                from addict import Dict
+                content_object = Dict(json.loads(content_object_response.text))
+            else:
+                logger.error("Execution creation failed [" + content_object_response.text + "], response " + str(
+                    content_object_response.status_code))
+                raise Exception("Execution creation failed [" + content_object_response.text + "], response " + str(
+                    content_object_response.status_code))
+        except JSONDecodeError:
+            logger.error(
+                f"Unable to handle response [{content_object_response.text}], response {content_object_response.status_code}")
+            raise
