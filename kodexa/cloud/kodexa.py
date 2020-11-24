@@ -299,14 +299,14 @@ class KodexaPlatform:
             metadata_object.description = 'A document store' if metadata_object.description is None else metadata_object.description
 
             metadata_object.type = 'store'
-            metadata_object.contentType = 'DOCUMENT'
+            metadata_object.storeType = 'DOCUMENT'
         elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
             object_url = 'stores'
             metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A model store' if metadata_object.description is None else metadata_object.description
 
             metadata_object.type = 'store'
-            metadata_object.contentType = 'MODEL'
+            metadata_object.storeType = 'MODEL'
         elif isinstance(kodexa_object, Workflow):
             metadata_object.name = 'New Workflow' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new workflow' if metadata_object.description is None else metadata_object.description
