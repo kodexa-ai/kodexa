@@ -687,7 +687,7 @@ class RemotePipeline:
             cloud_session.merge_stores(execution, self.context)
 
             self.context.statistics.processed_document(result_document)
-
+            self.context.context = execution.context
             if self.sink:
                 logger.info(f"Writing to sink {self.sink.get_name()}")
                 try:
