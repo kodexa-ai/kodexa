@@ -166,7 +166,12 @@ def metadata(_: Info, path: str):
 @cli.command()
 @pass_info
 def login(_: Info):
-    """Login and store your PAT"""
+    """
+    Logs into the specified platform environment using the email address and password provided,  
+    then downloads and stores the personal access token (PAT) of the user.  
+    Once successfully logged in, calls to remote actions, pipelines, and workflows will be made to the
+    platform that was set via this login function and will use the stored PAT for authentication.
+    """
     try:
         kodexa_url = input("Enter the Kodexa URL (https://platform.kodexa.com): ")
         if kodexa_url == "":
