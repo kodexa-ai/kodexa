@@ -50,6 +50,22 @@ class RemoteStore:
         """
         pass
 
+    def delete_contents(self):
+        """
+        Delete the contents of the store
+        """
+        from kodexa import KodexaPlatform
+        import requests
+        resp = requests.delete(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref()}/contents",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return resp.content
+        else:
+            msg = f"Unable to delete contents {resp.text}, status : {resp.status_code}"
+            raise Exception(msg)
+
 
 class DocumentMetadata(Dict):
     """

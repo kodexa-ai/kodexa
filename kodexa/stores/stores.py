@@ -728,7 +728,6 @@ class RemoteModelStore(ModelStore, RemoteStore):
     def get(self, object_path: str):
         from kodexa import KodexaPlatform
         import requests
-        import io
         resp = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/fs/{object_path}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
