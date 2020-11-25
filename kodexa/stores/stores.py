@@ -716,7 +716,6 @@ class LocalModelStore(ModelStore):
 class RemoteModelStore(ModelStore, RemoteStore):
 
     def to_dict(self):
-
         return {
             "type": "MODEL",
             "ref": self.ref
@@ -724,6 +723,9 @@ class RemoteModelStore(ModelStore, RemoteStore):
 
     def __init__(self, ref: str):
         self.ref = ref
+
+    def get_ref(self) -> str:
+        return self.ref
 
     def get(self, object_path: str):
         from kodexa import KodexaPlatform
