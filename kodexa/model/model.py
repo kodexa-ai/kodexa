@@ -4,10 +4,8 @@ import itertools
 import json
 import os
 import re
-import shutil
 import uuid
 from enum import Enum
-from pathlib import Path
 from typing import List, Optional, Any
 
 import msgpack
@@ -78,12 +76,15 @@ class DocumentMetadata(Dict):
 
 class Tag(Dict):
 
-    def __init__(self, start=None, end=None, value=None, data=None, *args, **kwargs):
+    def __init__(self, start=Optional[int], end: Optional[int] = None, value: Optional[str] = None,
+                 uuid: Optional[str] = None, data: Any = None, *args,
+                 **kwargs):
         super().__init__(*args, **kwargs)
-        self.start = start
-        self.end = end
-        self.value = value
-        self.data = data
+        self.start: Optional[int] = start
+        self.end: Optional[int] = end
+        self.value: Optional[str] = value
+        self.data: Optional[Any] = data
+        self.uuid: Optional[str] = uuid
 
 
 class FindDirection(Enum):
@@ -659,12 +660,14 @@ class ContentNode(object):
 
         """
 
+        tag_uuid: str = str(uuid.uuid4())
+
         if use_all_content and node_only is None:
             node_only = True
         elif node_only is None:
             node_only = False
 
-        def tag_node_position(node_to_check, start, end, node_data):
+        def tag_node_position(node_to_check, start, end, node_data, tag_uuid):
 
             content_length = 0
 
@@ -675,14 +678,14 @@ class ContentNode(object):
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start, end,
                                                       node_to_check.content[start:end],
-                                                      data=node_data))
+                                                      data=node_data, uuid=tag_uuid))
                         return -1
                     elif start < len(node_to_check.content) <= end:
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
                                                       value=node_to_check.content[start:],
-                                                      data=node_data))
+                                                      data=node_data, uuid=tag_uuid))
 
                 end = end - len(node_to_check.content) + len(separator)
                 content_length = len(node_to_check.content) + len(separator)
@@ -690,7 +693,7 @@ class ContentNode(object):
                     node_to_check.content) - len(separator)
 
             for child_node in node_to_check.children:
-                result = tag_node_position(child_node, start, end, node_data)
+                result = tag_node_position(child_node, start, end, node_data, tag_uuid)
                 content_length = content_length + result
                 if result < 0:
                     return -1
@@ -705,11 +708,11 @@ class ContentNode(object):
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data)
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, tag_uuid)
 
             else:
                 if not content_re:
-                    node.add_feature('tag', tag_to_apply, Tag(data=data))
+                    node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -723,7 +726,7 @@ class ContentNode(object):
                         match = pattern.match(content)
                         if match:
                             if node_only:
-                                node.add_feature('tag', tag_to_apply, Tag(data=data))
+                                node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
                             else:
                                 for index, m in enumerate(match.groups()):
                                     idx = index + 1
@@ -731,13 +734,13 @@ class ContentNode(object):
                                     if node_only:
                                         node.add_feature('tag', tag_to_apply,
                                                          Tag(match.start(idx), match.end(idx), match.group(idx),
-                                                             data=data))
+                                                             data=data, uuid=tag_uuid))
                                     else:
                                         # We need to work out where the content is in the child nodes
                                         start_offset = match.start(idx)
                                         end_offset = match.end(idx)
 
-                                        tag_node_position(node, start_offset, end_offset, data)
+                                        tag_node_position(node, start_offset, end_offset, data, uuid)
 
     def get_tags(self):
         """
@@ -1660,5 +1663,3 @@ class ModelStore:
 
     def put(self, path: str, content):
         pass
-
-
