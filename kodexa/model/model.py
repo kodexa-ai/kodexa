@@ -121,8 +121,6 @@ class ContentNode(object):
     """
     def __init__(self, document, node_type: str, content: Optional[str] = None,
                  content_parts: Optional[List[Any]] = None):
-        if content is None:
-            content = ""
         if content_parts is None:
             content_parts = []
         self.node_type: str = node_type
