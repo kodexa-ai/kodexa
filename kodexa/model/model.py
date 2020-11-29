@@ -4,10 +4,8 @@ import itertools
 import json
 import os
 import re
-import shutil
 import uuid
 from enum import Enum
-from pathlib import Path
 from typing import List, Optional, Any
 
 import msgpack
@@ -78,12 +76,15 @@ class DocumentMetadata(Dict):
 
 class Tag(Dict):
 
-    def __init__(self, start=None, end=None, value=None, data=None, *args, **kwargs):
+    def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
+                 uuid: Optional[str] = None, data: Any = None, *args,
+                 **kwargs):
         super().__init__(*args, **kwargs)
-        self.start = start
-        self.end = end
-        self.value = value
-        self.data = data
+        self.start: Optional[int] = start
+        self.end: Optional[int] = end
+        self.value: Optional[str] = value
+        self.data: Optional[Any] = data
+        self.uuid: Optional[str] = uuid
 
 
 class FindDirection(Enum):
@@ -118,12 +119,12 @@ class ContentNode(object):
         <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         >>> current_content_node.add_child(new_page)
     """
-
-    def __init__(self, document, node_type: str, content="", content_parts=None):
+    def __init__(self, document, node_type: str, content: Optional[str] = None,
+                 content_parts: Optional[List[Any]] = None):
         if content_parts is None:
             content_parts = []
         self.node_type: str = node_type
-        self.content: str = content
+        self.content: Optional[str] = content
         self.document: Document = document
         self.content_parts: List[Any] = content_parts
         self.parent: Optional[ContentNode] = None
@@ -581,7 +582,7 @@ class ContentNode(object):
                 break
         return nodes
 
-    def tag_nodes_to(self, end_node, tag_to_apply):
+    def tag_nodes_to(self, end_node, tag_to_apply, tag_uuid: str = None):
         """
         Tag all the nodes from this node to the end_node with the given tag name
 
@@ -589,8 +590,9 @@ class ContentNode(object):
 
         :param ContentNode end_node: The node to end with
         :param str tag_to_apply: The tag name that will be applied to each node
+        :param str tag_uuid: The tag uuid used if you want to group them
         """
-        [node.tag(tag_to_apply) for node in self.collect_nodes_to(end_node)]
+        [node.tag(tag_to_apply, tag_uuid=tag_uuid) for node in self.collect_nodes_to(end_node)]
 
     def tag_range(self, start_content_re, end_content_re, tag_to_apply, node_type_re='.*', use_all_content=False):
         """
@@ -639,7 +641,7 @@ class ContentNode(object):
 
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=" "):
+            fixed_position=None, data=None, separator=" ", tag_uuid: str = None):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
@@ -656,15 +658,18 @@ class ContentNode(object):
         :param node_only: Ignore the matching groups and tag the whole node
         :param fixed_position: use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
         :param data: Attach the a dictionary of data for the given tag
-
+        :param tag_uuid: A UUID used to tie together tags across elements as part of the same "tag"
         """
+
+        if tag_uuid is None:
+            tag_uuid = str(uuid.uuid4())
 
         if use_all_content and node_only is None:
             node_only = True
         elif node_only is None:
             node_only = False
 
-        def tag_node_position(node_to_check, start, end, node_data):
+        def tag_node_position(node_to_check, start, end, node_data, tag_uuid):
 
             content_length = 0
 
@@ -675,14 +680,14 @@ class ContentNode(object):
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start, end,
                                                       node_to_check.content[start:end],
-                                                      data=node_data))
+                                                      data=node_data, uuid=tag_uuid))
                         return -1
                     elif start < len(node_to_check.content) <= end:
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
                                                       value=node_to_check.content[start:],
-                                                      data=node_data))
+                                                      data=node_data, uuid=tag_uuid))
 
                 end = end - len(node_to_check.content) + len(separator)
                 content_length = len(node_to_check.content) + len(separator)
@@ -690,7 +695,7 @@ class ContentNode(object):
                     node_to_check.content) - len(separator)
 
             for child_node in node_to_check.children:
-                result = tag_node_position(child_node, start, end, node_data)
+                result = tag_node_position(child_node, start, end, node_data, tag_uuid)
                 content_length = content_length + result
                 if result < 0:
                     return -1
@@ -705,11 +710,11 @@ class ContentNode(object):
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data)
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, tag_uuid)
 
             else:
                 if not content_re:
-                    node.add_feature('tag', tag_to_apply, Tag(data=data))
+                    node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -723,7 +728,7 @@ class ContentNode(object):
                         match = pattern.match(content)
                         if match:
                             if node_only:
-                                node.add_feature('tag', tag_to_apply, Tag(data=data))
+                                node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
                             else:
                                 for index, m in enumerate(match.groups()):
                                     idx = index + 1
@@ -731,13 +736,13 @@ class ContentNode(object):
                                     if node_only:
                                         node.add_feature('tag', tag_to_apply,
                                                          Tag(match.start(idx), match.end(idx), match.group(idx),
-                                                             data=data))
+                                                             data=data, uuid=tag_uuid))
                                     else:
                                         # We need to work out where the content is in the child nodes
                                         start_offset = match.start(idx)
                                         end_offset = match.end(idx)
 
-                                        tag_node_position(node, start_offset, end_offset, data)
+                                        tag_node_position(node, start_offset, end_offset, data, tag_uuid)
 
     def get_tags(self):
         """
@@ -1456,7 +1461,8 @@ class Document(object):
         """
         registry.add_mixin_to_document(mixin, self)
 
-    def create_node(self, node_type: str, content: str = None, virtual: bool = False, parent: ContentNode = None,
+    def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
+                    parent: ContentNode = None,
                     index: int = 0):
         """
         Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
@@ -1660,5 +1666,3 @@ class ModelStore:
 
     def put(self, path: str, content):
         pass
-
-
