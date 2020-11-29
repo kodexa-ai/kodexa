@@ -35,7 +35,8 @@ def test_basic_json_store():
 def test_table_data_store():
     # Testing with 'include_node_content' set to True.  Should result in 3 columns
     pipeline = Pipeline(Document.from_kdxa(os.path.join(get_test_directory(), 'tongue_twister.kdxa')))
-    pipeline.add_step(NodeTagger(selector='//*[contentRegex(".*flue.*")]', tag_to_apply='has_flue', node_only=True))
+    pipeline.add_step(NodeTagger(selector='//*[contentRegex(".*flue.*")]', tag_to_apply='has_flue', node_only=True,
+                                 node_tag_uuid='test'))
     pipeline.add_step(TagsToKeyValuePairExtractor(store_name='tagged_data', include_node_content=True))
     context = pipeline.run()
 

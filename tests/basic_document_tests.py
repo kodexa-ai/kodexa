@@ -35,7 +35,7 @@ def test_get_nodes_between():
 def test_tag_nodes_between():
     document = get_test_document_with_three_children()
 
-    document.content_node.children[0].tag_nodes_to(document.content_node.children[2], 'test-tag')
+    document.content_node.children[0].tag_nodes_to(document.content_node.children[2], 'test-tag', 'unit-test-1')
     assert len(document.content_node.findall(tag_name_re='test-tag')) == 2
 
     compare_document(document, "test_tag_nodes_between.json")
@@ -149,11 +149,11 @@ def test_finder_and_tag():
     assert node.node_type == "bar"
 
     node = document.get_root().find(node_type_re="bar")
-    node.tag("sticky", content_re="fish(.*)")
+    node.tag("sticky", content_re="fish(.*)", tag_uuid='unit-test')
     print(node.to_json())
     assert len(node.get_tags()) == 1
 
-    node.tag("sticky2")
+    node.tag("sticky2", tag_uuid='unit-test-2')
     print(node.to_json())
     assert len(node.get_tags()) == 2
     node.remove_tag("sticky2")
