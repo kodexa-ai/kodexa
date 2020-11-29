@@ -119,8 +119,10 @@ class ContentNode(object):
         <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         >>> current_content_node.add_child(new_page)
     """
-
-    def __init__(self, document, node_type: str, content: str = "", content_parts: Optional[List[Any]] = None):
+    def __init__(self, document, node_type: str, content: Optional[str] = None,
+                 content_parts: Optional[List[Any]] = None):
+        if content is None:
+            content = ""
         if content_parts is None:
             content_parts = []
         self.node_type: str = node_type
@@ -1461,7 +1463,8 @@ class Document(object):
         """
         registry.add_mixin_to_document(mixin, self)
 
-    def create_node(self, node_type: str, content: str = None, virtual: bool = False, parent: ContentNode = None,
+    def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
+                    parent: ContentNode = None,
                     index: int = 0):
         """
         Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
