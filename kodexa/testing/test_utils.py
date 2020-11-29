@@ -45,7 +45,7 @@ def simplify_node(node: ContentNode):
     return {
         "index": node.index,
         "node_type": node.node_type,
-        "features": [feature.to_dict() for feature in node._feature_map.values()],
+        "features": [feature.to_dict() for feature in node.get_features()],
         "content": node.content,
         "content_parts": node.content_parts,
         "children": [simplify_node(child_node) for child_node in node.children]
