@@ -124,7 +124,7 @@ class ContentNode(object):
         if content_parts is None:
             content_parts = []
         self.node_type: str = node_type
-        self.content: str = content
+        self.content: Optional[str] = content
         self.document: Document = document
         self.content_parts: List[Any] = content_parts
         self.parent: Optional[ContentNode] = None
