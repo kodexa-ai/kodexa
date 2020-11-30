@@ -607,7 +607,7 @@ class RemoteSession:
 
     def get_output_document(self, execution):
         if execution.outputId:
-            logger.info("Downloading output document [{execition.outputId}]")
+            logger.info("Downloading output document [{execution.outputId}]")
             doc = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()})
