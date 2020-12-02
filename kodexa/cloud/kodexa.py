@@ -740,7 +740,7 @@ class RemotePipeline:
         :return: A new pipeline
         :rtype: RemotePipeline
         """
-        return RemotePipeline(slug, Document.from_text(text), *args, **kwargs)
+        return RemotePipeline(slug, Document.from_text(text), attach_source=False, *args, **kwargs)
 
     @staticmethod
     def from_folder(slug: str, folder_path: str, filename_filter: str = "*", recursive: bool = False,
