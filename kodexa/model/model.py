@@ -725,24 +725,17 @@ class ContentNode(object):
                         content = node.get_all_content(separator=separator)
 
                     if content is not None:
-                        match = pattern.match(content)
-                        if match:
+                        matches = pattern.finditer(content)
+
+                        if matches:
                             if node_only:
                                 node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
                             else:
-                                for index, m in enumerate(match.groups()):
-                                    idx = index + 1
+                                for match in matches:
+                                    start_offset = match.span()[0]
+                                    end_offset = match.span()[1]
+                                    tag_node_position(node, start_offset, end_offset, data, tag_uuid)
 
-                                    if node_only:
-                                        node.add_feature('tag', tag_to_apply,
-                                                         Tag(match.start(idx), match.end(idx), match.group(idx),
-                                                             data=data, uuid=tag_uuid))
-                                    else:
-                                        # We need to work out where the content is in the child nodes
-                                        start_offset = match.start(idx)
-                                        end_offset = match.end(idx)
-
-                                        tag_node_position(node, start_offset, end_offset, data, tag_uuid)
 
     def get_tags(self):
         """

@@ -84,7 +84,7 @@ def cli(info: Info, verbose: int):
 @cli.command()
 @pass_info
 def deploy(_: Info, path: str, url: str, org: str, token: str):
-    """Deploy extension pack to an Kodexa platform instance"""
+    """Deploy extension pack to a Kodexa platform instance"""
 
     print("Starting deployment from path", path)
     KodexaPlatform.set_url(url)
