@@ -727,14 +727,17 @@ class ContentNode(object):
                     if content is not None:
                         matches = pattern.finditer(content)
 
-                        if any(True for _ in matches):
-                            if node_only:
+                        if node_only:
+                            # If we are only tagging the node we
+                            # simply need to know if there are any matches
+
+                            if any(True for _ in matches):
                                 node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
-                            else:
-                                for match in matches:
-                                    start_offset = match.span()[0]
-                                    end_offset = match.span()[1]
-                                    tag_node_position(node, start_offset, end_offset, data, tag_uuid)
+                        else:
+                            for match in matches:
+                                start_offset = match.span()[0]
+                                end_offset = match.span()[1]
+                                tag_node_position(node, start_offset, end_offset, data, tag_uuid)
 
 
     def get_tags(self):
