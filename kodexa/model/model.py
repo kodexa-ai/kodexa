@@ -727,7 +727,7 @@ class ContentNode(object):
                     if content is not None:
                         matches = pattern.finditer(content)
 
-                        if matches:
+                        if any(True for _ in matches):
                             if node_only:
                                 node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
                             else:
