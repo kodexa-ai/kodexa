@@ -55,7 +55,7 @@ class RemoteStore:
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref()}/contents",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':','/')}/contents",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:

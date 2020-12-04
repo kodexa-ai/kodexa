@@ -534,6 +534,14 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         """
         return "document-store"
 
+    def get_ref(self) -> str:
+        """
+        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+
+        :return: The reference
+        """
+        return self.ref
+
     def to_dict(self):
         return {
             "type": "DOCUMENT",
@@ -769,6 +777,14 @@ class RemoteModelStore(ModelStore, RemoteStore):
 
     def __init__(self, ref: str):
         self.ref = ref
+
+    def get_ref(self) -> str:
+        """
+        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+
+        :return: The reference
+        """
+        return self.ref
 
     def delete(self, object_path: str):
         """
