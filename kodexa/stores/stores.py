@@ -527,6 +527,11 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         self.query_string: str = query
 
     def get_name(self):
+        """
+        The name of the connector
+
+        :return: 'document-store'
+        """
         return "document-store"
 
     def to_dict(self):
@@ -536,6 +541,12 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         }
 
     def get(self, document_id: str) -> Optional[Document]:
+        """
+        Get the document from the remote store using the document's ID
+
+        :param document_id: the ID of the document
+        :return: Optionally the document, if the document is not found we will return None
+        """
         from kodexa import KodexaPlatform
 
         url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents/{document_id}/content"
@@ -552,6 +563,12 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception("Get document failed [" + doc.text + "], response " + str(doc.status_code))
 
     def get_source(self, document_id: str):
+        """
+        Gets the source for a given document ID from the document store, as per the connector protocol
+
+        :param document_id: document id for which you what the source
+        :return: either the source content (byte-array) or None if the document doesn't exist
+        """
         from kodexa import KodexaPlatform
 
         url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents/{document_id}/content"
@@ -570,6 +587,11 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception("Get document failed [" + doc.text + "], response " + str(doc.status_code))
 
     def delete(self, document_id: str):
+        """
+        Delete the document with this document ID from the remote document store
+
+        :param document_id: the ID of the document to delete
+        """
         from kodexa import KodexaPlatform
         delete_document_response = requests.delete(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents/{document_id}",
@@ -594,6 +616,14 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             return None
 
     def put(self, path: str, document: Document):
+        """
+        Put the document into the document store at the given path, note that if there is already a document
+        at this path then the lineage UUID for this document must related to one of the documents the documents
+        that are held at that path
+
+        :param path: the path to the document to use
+        :param document: the document
+        """
         from kodexa import KodexaPlatform
         try:
             import io
@@ -617,7 +647,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                     content_object_response.status_code))
         except JSONDecodeError:
             logger.error(
-                f"Unable to handle response [{content_object_response.text}], response {content_object_response.status_code}")
+                f"Unable to decode the JSON response")
             raise
 
     def get_next_objects(self):
@@ -633,11 +663,24 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         else:
             self.objects = content_objects_response.json()['content']
 
-    def query_objects(self, query: str) -> List[Dict]:
+    def query_objects(self, query: str, sort_by=None, sort_direction='asc') -> List[Dict]:
+        """
+        Query the documents in the given document store and a list of the document metadata matches
+
+        :param sort_direction: the sort direction (either asc - ascending or desc - descending)
+        :param sort_by: the name of the metadata field to sort by (ie. createdDate)
+        :param query: A lucene style query for the metadata in the document store
+        :return: A list of dictionaries containing the metadata for the documents
+        """
         from kodexa import KodexaPlatform
+        params = {'query': query}
+        if sort_by is not None:
+            params['sortBy'] = sort_by
+            params['sortDesc'] = sort_direction
+
         list_content = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
-            params={'query': query},
+            params=params,
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         if list_content.status_code != 200:
             raise Exception(
@@ -645,6 +688,11 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         return list_content.json()['content']
 
     def list_objects(self) -> List[Dict]:
+        """
+        List the objects in the remote document store
+
+        :return: a list of the dictionaries containing the metadata for the documents in the store
+        """
         from kodexa import KodexaPlatform
         list_content = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
@@ -671,12 +719,6 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 return self.get(content_object['id'])
 
             raise StopIteration
-
-
-class DocumentReference:
-
-    def __init__(self, document_store: DocumentStore, path: str):
-        pass
 
 
 class LocalModelStore(ModelStore):
@@ -727,6 +769,28 @@ class RemoteModelStore(ModelStore, RemoteStore):
     def get_ref(self) -> str:
         return self.ref
 
+    def delete(self, object_path: str):
+        """
+        Delete the content stored in the model store at the given path
+
+        :param object_path: the path to the content (ie. mymodel.dat)
+        :return: True if deleted, False if there was no file at the path
+        """
+        from kodexa import KodexaPlatform
+        import requests
+        resp = requests.delete(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/fs/{object_path}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return True
+        if resp.status_code == 404:
+            return False
+        else:
+            msg = f"Unable to delete model object {resp.text}, status : {resp.status_code}"
+            logger.error(msg)
+            raise Exception(msg)
+
     def get(self, object_path: str):
         from kodexa import KodexaPlatform
         import requests
@@ -740,7 +804,6 @@ class RemoteModelStore(ModelStore, RemoteStore):
             msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
             logger.error(msg)
             raise Exception(msg)
-
 
     def put(self, path: str, content):
         from kodexa import KodexaPlatform
@@ -765,5 +828,5 @@ class RemoteModelStore(ModelStore, RemoteStore):
                     content_object_response.status_code))
         except JSONDecodeError:
             logger.error(
-                f"Unable to handle response [{content_object_response.text}], response {content_object_response.status_code}")
+                f"Unable to JSON decode the response?")
             raise
