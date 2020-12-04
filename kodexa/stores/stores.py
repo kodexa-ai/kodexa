@@ -605,17 +605,20 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception("Delete document failed [" + delete_document_response.text + "], response " + str(
                 delete_document_response.status_code))
 
-    def get_ref(self) -> str:
-        return self.ref
-
     def get_by_path(self, path) -> Optional[Document]:
+        """
+        Return the latest representation document at a given path
+
+        :param path: the path (i.e. /my-folder/file.pdf)
+        :return: The latest document representation for that path
+        """
         hits = self.query_objects(f"path:{path}")
         if len(hits) == 1:
             return self.get(hits[0]['id'])
         else:
             return None
 
-    def put(self, path: str, document: Document):
+    def put(self, path: str, document: Document, force_replace=False):
         """
         Put the document into the document store at the given path, note that if there is already a document
         at this path then the lineage UUID for this document must related to one of the documents the documents
@@ -623,6 +626,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
         :param path: the path to the document to use
         :param document: the document
+        :param force_replace: this will remove all the representations of the document at this path and replace it with this one
         """
         from kodexa import KodexaPlatform
         try:
@@ -631,7 +635,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.info(f"Putting document with path {path}")
 
             files = {"document": document.to_msgpack()}
-            data = {"path": path}
+            data = {"path": path, "forceReplace": force_replace}
             content_object_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
@@ -766,9 +770,6 @@ class RemoteModelStore(ModelStore, RemoteStore):
     def __init__(self, ref: str):
         self.ref = ref
 
-    def get_ref(self) -> str:
-        return self.ref
-
     def delete(self, object_path: str):
         """
         Delete the content stored in the model store at the given path
@@ -792,6 +793,12 @@ class RemoteModelStore(ModelStore, RemoteStore):
             raise Exception(msg)
 
     def get(self, object_path: str):
+        """
+        Get the bytes for the object at the given path, will return None if there is no object there
+
+        :param object_path: the object path
+        :return: the bytes or None is nothing is at the path
+        """
         from kodexa import KodexaPlatform
         import requests
         resp = requests.get(
@@ -805,14 +812,21 @@ class RemoteModelStore(ModelStore, RemoteStore):
             logger.error(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content):
+    def put(self, path: str, content, force_replace=False):
+        """
+        Put the content into the model store at the given path
+
+        :param path: The path you wish to put the content at
+        :param content: The content for that object
+        :param force_replace: overwrite the existing object if it is there (defaulted to False)
+        """
         from kodexa import KodexaPlatform
         import requests
         try:
             import io
 
             files = {"file": content}
-            data = {"path": path}
+            data = {"path": path, "forceReplace": force_replace}
             content_object_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
@@ -821,6 +835,11 @@ class RemoteModelStore(ModelStore, RemoteStore):
             if content_object_response.status_code == 200:
                 from addict import Dict
                 content_object = Dict(json.loads(content_object_response.text))
+            elif content_object_response.status_code == 400:
+                from addict import Dict
+                bad_request = Dict(json.loads(content_object_response.text))
+                for error_key in bad_request.errors.keys():
+                    print(bad_request.errors[error_key] + " (" + error_key + ")")
             else:
                 logger.error("Execution creation failed [" + content_object_response.text + "], response " + str(
                     content_object_response.status_code))
