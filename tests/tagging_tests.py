@@ -13,8 +13,8 @@ def test_fixed_tagging_with_child():
     doc.content_node.add_child_content("text", "Philip")
     doc.content_node.add_child_content("text", "Dodds")
 
-    #Hello Philip Dodds
-    #012345678901234567
+    # Hello Philip Dodds
+    # 012345678901234567
 
     doc.content_node.tag('name', fixed_position=[6, 11], separator=" ")
 
@@ -23,3 +23,13 @@ def test_fixed_tagging_with_child():
 
     assert doc.content_node.get_tag_values('name', include_children=True)[0] == 'Philip'
     assert doc.content_node.get_tag_values('lastName', include_children=True)[0] == 'Dodds'
+
+
+def test_node_only_tagging():
+    doc = Document.from_text("Hello World")
+
+    doc.content_node.tag(node_only=True, content_re="Hello World", tag_to_apply="test")
+    assert len(doc.content_node.get_tag_values("test")) == 1
+
+    doc.content_node.tag(node_only=True, content_re="Hello Cheese", tag_to_apply="test2")
+    assert len(doc.content_node.get_tag_values("test2")) == 0
