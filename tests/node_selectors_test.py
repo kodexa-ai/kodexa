@@ -168,35 +168,5 @@ def test_spatial_doc_sample_two():
     assert doc.get_root() is not None
 
 
-def test_tag_multiple_regex_matches():
-
-    doc_string = "Mary had a little lamb, little lamb, little lamb.  Mary had a little lamb whose fleece was white as snow."
-
-    document = Document.from_text(doc_string)
-    pipeline = Pipeline(document)
-    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE', content_re=r'(little)', node_only=False))
-    context = pipeline.run()
-
-    tags = context.output_document.get_root().get_all_tags()
-    assert len(tags) == 1
-
-    # we expect 4 tags to be applied, one for each instance of the word 'little'
-    feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE')
-    assert type(feature_values) == list and len(feature_values) == 4
-    assert feature_values[2]['start'] == 37
-    assert feature_values[2]['end'] == 43
-
-
-    document = Document.from_text(doc_string)
-    pipeline = Pipeline(document)
-    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE_2', content_re=r'.*(little).*', node_only=True))
-    context = pipeline.run()
-
-    tags = context.output_document.get_root().get_all_tags()
-    assert len(tags) == 1
-
-    # we expect one tag to be applied and there to be no start or end value
-    feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE_2')
-    assert feature_values['start'] == None and feature_values['end'] == None 
 
 
