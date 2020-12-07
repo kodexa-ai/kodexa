@@ -561,34 +561,41 @@ class ContentNode(object):
         """
         self.remove_feature('tag', tag_name)
 
-    def copy_tag(self, existing_tag_name, new_tag_name):
+    def copy_tag(self, selector=".", existing_tag_name=None, new_tag_name=None):
         """
-        Creates a new tag of 'new_tag_name' on this content node with the same information as the tag with 'existing_tag_name'
-
+        Creates a new tag of 'new_tag_name' on the selected content node(s) with the same information as the tag with 'existing_tag_name'.
+        Both existing_tag_name and new_tag_name values are required and must be different from one another.  Otherwise, no action is taken.
+        If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.
+        
             >>> document.get_root().copy_tag('foo', 'bar')
 
         :param str existing_tag_name: The name of the existing tag whose values will be copied to the new tag.
-        :param str new_tag_name: The name of the new tag.
+        :param str new_tag_name: The name of the new tag.  This must be different from the existing_tag_name.
+        :param selector: The selector to identify the source nodes to work on (default . - the current node)
         """
-        existing_tag_values = self.get_feature_value('tag', existing_tag_name)
-        if existing_tag_values:
-            if type(existing_tag_values) == list:
+        if existing_tag_name == None or new_tag_name == None or existing_tag_name == new_tag_name:
+            return # do nothing, just exit function
 
-                # It's possible to have multiple features with the same tag name that also share the same uuid.
-                # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
-                sorted_tag_values = sorted(existing_tag_values, key=lambda k: k['uuid']) 
-                previous_uuid = None
-                new_uuid = None
-                for val in sorted_tag_values:
-                    if previous_uuid == None or previous_uuid != val['uuid']:
-                        new_uuid = str(uuid.uuid4())
-                    
-                    previous_uuid = val['uuid']
-                    tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=new_uuid, data=val['data'])
-                    self.add_feature('tag', new_tag_name, tag)
-            else:
-                tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'], value=existing_tag_values['value'], uuid=str(uuid.uuid4()), data=existing_tag_values['data'])
-                self.add_feature('tag', new_tag_name, tag)
+        for node in self.select(selector):
+            existing_tag_values = node.get_feature_value('tag', existing_tag_name)
+            if existing_tag_values:
+                if type(existing_tag_values) == list:
+
+                    # It's possible to have multiple features with the same tag name that also share the same uuid.
+                    # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
+                    sorted_tag_values = sorted(existing_tag_values, key=lambda k: k['uuid']) 
+                    previous_uuid = None
+                    new_uuid = None
+                    for val in sorted_tag_values:
+                        if previous_uuid == None or previous_uuid != val['uuid']:
+                            new_uuid = str(uuid.uuid4())
+                        
+                        previous_uuid = val['uuid']
+                        tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=new_uuid, data=val['data'])
+                        node.add_feature('tag', new_tag_name, tag)
+                else:
+                    tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'], value=existing_tag_values['value'], uuid=str(uuid.uuid4()), data=existing_tag_values['data'])
+                    node.add_feature('tag', new_tag_name, tag)
 
         
     def collect_nodes_to(self, end_node):
