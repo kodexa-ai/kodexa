@@ -561,6 +561,36 @@ class ContentNode(object):
         """
         self.remove_feature('tag', tag_name)
 
+    def copy_tag(self, existing_tag_name, new_tag_name):
+        """
+        Creates a new tag of 'new_tag_name' on this content node with the same information as the tag with 'existing_tag_name'
+
+            >>> document.get_root().copy_tag('foo', 'bar')
+
+        :param str existing_tag_name: The name of the existing tag whose values will be copied to the new tag.
+        :param str new_tag_name: The name of the new tag.
+        """
+        existing_tag_values = self.get_feature_value('tag', existing_tag_name)
+        if existing_tag_values:
+            if type(existing_tag_values) == list:
+
+                # It's possible to have multiple features with the same tag name that also share the same uuid.
+                # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
+                sorted_tag_values = sorted(existing_tag_values, key=lambda k: k['uuid']) 
+                previous_uuid = None
+                new_uuid = None
+                for val in sorted_tag_values:
+                    if previous_uuid == None or previous_uuid != val['uuid']:
+                        new_uuid = str(uuid.uuid4())
+                    
+                    previous_uuid = val['uuid']
+                    tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=new_uuid, data=val['data'])
+                    self.add_feature('tag', new_tag_name, tag)
+            else:
+                tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'], value=existing_tag_values['value'], uuid=str(uuid.uuid4()), data=existing_tag_values['data'])
+                self.add_feature('tag', new_tag_name, tag)
+
+        
     def collect_nodes_to(self, end_node):
         """
         Get the the sibling nodes between the current node and the end_node.
@@ -650,24 +680,35 @@ class ContentNode(object):
         Note that if you use the flag use_all_content then node_only will default to True if not set, else it
         will default to False
 
-        :param tag_to_apply: the name of tag that will be applied to the node
+        :param tag_to_apply: The name of tag that will be applied to the node
         :param selector: The selector to identify the source nodes to work on (default . - the current node)
-        :param content_re: the regular expression that you wish to use to tag, note that we will create a tag for each matching group
-        :param use_all_content: apply the regular expression to the all_content (include content from child nodes)
+        :param content_re: The regular expression that you wish to use to tag, note that we will create a tag for each matching group
+        :param use_all_content: Apply the regular expression to the all_content (include content from child nodes)
         :param separator: Separator to use for use_all_content
         :param node_only: Ignore the matching groups and tag the whole node
-        :param fixed_position: use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
-        :param data: Attach the a dictionary of data for the given tag
-        :param tag_uuid: A UUID used to tie together tags across elements as part of the same "tag"
+        :param fixed_position: Use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
+        :param data: A dictionary of data for the given tag
+        :param tag_uuid: A UUID used to tie tags in order to demonstrate they're related and form a single concept.  
+                        For example, if tagging the two words "Wells" and "Fargo" as an ORGANIZATION, the tag on both words should have the 
+                        same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
+                        on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
+                        For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.  
+                        The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re 
+                        pattern.  In that case, each feature value would share the same UUID.
+                        If no tag_uuid is provided, a new uuid is generated for each tag instance. 
         """
-
-        if tag_uuid is None:
-            tag_uuid = str(uuid.uuid4())
 
         if use_all_content and node_only is None:
             node_only = True
         elif node_only is None:
             node_only = False
+
+        def get_tag_uuid(tag_uuid):
+            if tag_uuid:
+                return tag_uuid
+            else:
+                return str(uuid.uuid4())
+
 
         def tag_node_position(node_to_check, start, end, node_data, tag_uuid):
 
@@ -710,11 +751,11 @@ class ContentNode(object):
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data, tag_uuid)
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid))
 
             else:
                 if not content_re:
-                    node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
+                    node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=get_tag_uuid(tag_uuid)))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -730,14 +771,13 @@ class ContentNode(object):
                         if node_only:
                             # If we are only tagging the node we
                             # simply need to know if there are any matches
-
                             if any(True for _ in matches):
-                                node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=tag_uuid))
+                                node.add_feature('tag', tag_to_apply, Tag(data=data, uuid=get_tag_uuid(tag_uuid)))
                         else:
                             for match in matches:
                                 start_offset = match.span()[0]
                                 end_offset = match.span()[1]
-                                tag_node_position(node, start_offset, end_offset, data, tag_uuid)
+                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
 
 
     def get_tags(self):
