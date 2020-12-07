@@ -116,6 +116,7 @@ def test_tag_copy():
     assert len(list(uuid_intersection)) == 0
 
     # Now test that tagging the entire node, rather than references within the node, only produce 1 feature
+    document = Document.from_text(doc_string)  #starting with a clean document
     pipeline = Pipeline(document)
     pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE_2', content_re=r'.*(little).*', node_only=True))
     context = pipeline.run()
@@ -132,3 +133,29 @@ def test_tag_copy():
 
     # the uuids for the SIZE_2 and LAMB_INFO_2 features should be different
     assert size_2_feature_values['uuid'] != lamb_info_2_feature_values['uuid']
+
+
+    # now we need to test that when features are related (indicated by the same tag_uuid), they remain related when copying
+    document = Document.from_text(doc_string)  #starting with a clean document
+    pipeline = Pipeline(document)
+    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='FLEECE_INFO', content_re=r'((white|snow))', node_only=False, node_tag_uuid=str(uuid.uuid4())))
+    context = pipeline.run()
+    
+    # now, let's copy the SIZE tags and create new ones called LAMB_INFO
+    for n in context.output_document.select('//*[hasTag("FLEECE_INFO")]'):
+        n.copy_tag('FLEECE_INFO', 'WOOL_INFO')
+    
+    # The feature values should have the same UUID - for both WOOL_INFO and FLEECE_INFO
+    wool_values = context.output_document.get_root().get_feature_value('tag', 'WOOL_INFO')
+    assert type(wool_values) == list and len(wool_values) == 2
+    wool_uuids = set(dic['uuid'] for dic in wool_values )
+    assert len(list(wool_uuids)) == 1
+
+    fleece_info_values = context.output_document.get_root().get_feature_value('tag', 'FLEECE_INFO')
+    assert type(fleece_info_values) == list and len(fleece_info_values) == 2
+    fleece_uuids = set(dic['uuid'] for dic in fleece_info_values )
+    assert len(list(fleece_uuids)) == 1
+
+    # the uuids for the WOOL_INFO and FLEECE_INFO features should be unique
+    uuid_intersection = fleece_uuids.intersection(wool_uuids)
+    assert len(list(uuid_intersection)) == 0
