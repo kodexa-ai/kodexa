@@ -191,3 +191,14 @@ def test_basic_tagging():
     doc = Document.from_text('It is going to be a great day')
     doc.content_node.tag('cheese', fixed_position=[1, 2])
     assert isinstance(doc.content_node.get_tag('cheese'), list)
+
+
+def test_doc_from_text():
+    doc = Document.from_text('It is going to be a great day')
+    assert doc.get_root().content == 'It is going to be a great day'
+    assert len(doc.get_root().children) == 0
+
+    doc = Document.from_text('It is going to be a great day', separator=' ')
+    assert doc.get_root().content == None
+    assert len(doc.get_root().children) == 8
+    assert doc.get_root().children[4].content == 'be'
