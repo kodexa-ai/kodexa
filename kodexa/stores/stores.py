@@ -691,7 +691,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             params['sortDesc'] = sort_direction
 
         list_content = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents",
             params=params,
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         if list_content.status_code != 200:
