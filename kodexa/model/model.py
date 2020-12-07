@@ -566,12 +566,12 @@ class ContentNode(object):
         Creates a new tag of 'new_tag_name' on the selected content node(s) with the same information as the tag with 'existing_tag_name'.
         Both existing_tag_name and new_tag_name values are required and must be different from one another.  Otherwise, no action is taken.
         If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.
-        
+
             >>> document.get_root().copy_tag('foo', 'bar')
 
+        :param selector: The selector to identify the source nodes to work on (default . - the current node)
         :param str existing_tag_name: The name of the existing tag whose values will be copied to the new tag.
         :param str new_tag_name: The name of the new tag.  This must be different from the existing_tag_name.
-        :param selector: The selector to identify the source nodes to work on (default . - the current node)
         """
         if existing_tag_name == None or new_tag_name == None or existing_tag_name == new_tag_name:
             return # do nothing, just exit function
