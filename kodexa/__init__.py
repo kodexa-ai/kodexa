@@ -14,4 +14,4 @@ from .steps import NodeTagger, TextParser, RollupTransformer, TagsToKeyValuePair
 from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreHelper, LocalDocumentStore, \
     RemoteDocumentStore, RemoteTableDataStore, RemoteDictDataStore, RemoteModelStore, LocalModelStore
 from .taxonomy import Taxonomy
-from .workflow import Workflow
+from .workflow import Workflow, CronSchedule

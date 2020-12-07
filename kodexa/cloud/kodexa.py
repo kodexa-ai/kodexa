@@ -315,6 +315,7 @@ class KodexaPlatform:
             metadata_object.pipelines = list(map(lambda x: x.__dict__, kodexa_object.pipelines))
             metadata_object.stores = list(map(lambda x: x.__dict__, kodexa_object.stores))
             metadata_object.connectors = list(map(lambda x: x.__dict__, kodexa_object.connectors))
+            metadata_object.schedules = list(map(lambda x: x.__dict__, kodexa_object.schedules))
             metadata_object.accessToken = kodexa_object.access_token
         elif isinstance(kodexa_object, Taxonomy):
             metadata_object.name = 'New Taxonomy' if metadata_object.name is None else metadata_object.name
@@ -357,7 +358,7 @@ class KodexaPlatform:
             else:
                 logger.error(response.text)
                 raise Exception("Unable to deploy")
-        else:
+        elif response.status_code == 200:
             logger.info(f"{ref} already exists")
             if force_replace:
                 logger.info(f"Replacing {ref}")
@@ -373,6 +374,9 @@ class KodexaPlatform:
             else:
                 logger.warning("Not updating")
                 return
+        else:
+            logger.error("Unable to deploy")
+            logger.error(response.content)
 
     @staticmethod
     def list_objects(organization_slug, object_type):
