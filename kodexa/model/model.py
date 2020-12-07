@@ -1328,7 +1328,7 @@ class Document(object):
 
     def remove_label(self, label: str):
         """
-        Remove a label to the document
+        Remove a label from the document
 
         :param label:str Label to remove
         :return: the document
@@ -1337,9 +1337,23 @@ class Document(object):
         return self
 
     @classmethod
-    def from_text(cls, text):
+    def from_text(cls, text, separator=None):
+        """
+        Creates a new Document from the text provided.
+
+        :param text:str  Text to be used as content on the Document's ContentNode(s)
+        :param separator:str   If provided, this string will be used to split the text and the resulting text will be placed on children of the root ContentNode.
+        :return: the document
+        """
         new_document = Document()
-        new_document.content_node = new_document.create_node(node_type='text', content=text)
+        new_document.content_node = new_document.create_node(node_type='text')
+        if text:
+            if separator:
+                for s in text.split(separator):
+                    new_document.content_node.add_child(new_document.create_node(node_type='text', content=s))
+            else:
+                new_document.content_node.content = text
+
         new_document.add_mixin('text')
         return new_document
 
