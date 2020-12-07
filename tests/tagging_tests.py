@@ -1,4 +1,4 @@
-from kodexa import Document, Pipeline, NodeTagger
+from kodexa import Document, Pipeline, NodeTagger, NodeTagCopy
 import os
 import uuid
 
@@ -95,10 +95,26 @@ def test_tag_copy():
     pipeline = Pipeline(document)
     pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE', content_re=r'(little)', node_only=False))
     context = pipeline.run()
+
+    # both existing and new tag names must be provided, and they must be different, test for that first.
+    for n in document.select('//*[hasTag("SIZE")]'):
+        n.copy_tag(existing_tag_name=None, new_tag_name='NewTagNone')
+
+    for n in document.select('//*[hasTag("SIZE")]'):
+        n.copy_tag(existing_tag_name='SIZE', new_tag_name=None)
+
+    for n in document.select('//*[hasTag("SIZE")]'):
+        n.copy_tag(existing_tag_name='SIZE', new_tag_name='SIZE')
+
+    # verify that the only tag that exists is tag 'SIZE' and that there are only 4 feature values for it
+    assert len(document.get_root().get_all_tags()) == 1 
+    assert 'SIZE' in document.get_root().get_all_tags()
     
     # now, let's copy the SIZE tags and create new ones called LAMB_INFO
-    for n in document.select('//*[hasTag("SIZE")]'):
-        n.copy_tag('SIZE', 'LAMB_INFO')
+    # reusing the previously tagged document and testing out NodeTagCopy action
+    pipeline = Pipeline(document)
+    pipeline.add_step(NodeTagCopy(selector='//*[hasTag("SIZE")]', existing_tag_name='SIZE', new_tag_name='LAMB_INFO'))
+    context = pipeline.run()
 
     # we should now have 4 feature values for 'LAMB_INFO' and 4 feature values for 'SIZE' - all with different UUIDs
     size_feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE')
@@ -121,10 +137,10 @@ def test_tag_copy():
     pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE_2', content_re=r'.*(little).*', node_only=True))
     context = pipeline.run()
 
-    # now, let's copy the SIZE_2 tags and create new ones called LAMB_INFO
+    # now, let's copy the SIZE_2 tags and create new ones called LAMB_INFO (using node's tag_copy)
     for n in document.select('//*[hasTag("SIZE_2")]'):
-        n.copy_tag('SIZE_2', 'LAMB_INFO_2')
-
+        n.copy_tag(existing_tag_name='SIZE_2', new_tag_name='LAMB_INFO_2')
+      
     # we should now have 1 feature values for 'LAMB_INFO_2' and 1 feature values for 'SIZE_2'
     size_2_feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE_2')
     assert type(size_2_feature_values) != list
@@ -142,8 +158,9 @@ def test_tag_copy():
     context = pipeline.run()
     
     # now, let's copy the SIZE tags and create new ones called LAMB_INFO
-    for n in context.output_document.select('//*[hasTag("FLEECE_INFO")]'):
-        n.copy_tag('FLEECE_INFO', 'WOOL_INFO')
+    pipeline = Pipeline(document)   #reusing the previously tagged document & testing out the NodeTagCopy action
+    pipeline.add_step(NodeTagCopy(selector='//*[hasTag("FLEECE_INFO")]', existing_tag_name='FLEECE_INFO', new_tag_name='WOOL_INFO'))
+    context = pipeline.run()
     
     # The feature values should have the same UUID - for both WOOL_INFO and FLEECE_INFO
     wool_values = context.output_document.get_root().get_feature_value('tag', 'WOOL_INFO')

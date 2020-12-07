@@ -31,6 +31,25 @@ class NodeTagger:
         return document
 
 
+class NodeTagCopy:
+    """
+    The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
+    If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.
+    """
+
+    def __init__(self, selector, existing_tag_name, new_tag_name):
+        self.selector = selector
+        self.existing_tag_name = existing_tag_name
+        self.new_tag_name = new_tag_name
+        
+    def get_name(self):
+        return f"Node Tag Copy [selector='{self.selector}' existing_tag_name='{self.existing_tag_name} new_tag_name={self.new_tag_name}']"
+
+    def process(self, document):
+        document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name, new_tag_name=self.new_tag_name)
+        return document
+
+
 class TextParser:
     """
     The text parser can load a source file as a text document and creates a single content node with the
