@@ -645,7 +645,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             files = {"document": document.to_msgpack()}
             data = {"path": path, "forceReplace": force_replace}
             content_object_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
