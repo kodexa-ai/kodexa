@@ -626,6 +626,43 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         else:
             return None
 
+    def put_native(self, path: str, content, force_replace=False):
+        """
+        Push content directly, this will create both a native object in the store and also a
+        related Document that refers to it.
+
+        :param path: the path where you want to put the native content
+        :param content: the binary content for the native file
+        :param force_replace: replace the content at this path completely
+        :return: None
+        """
+        from kodexa import KodexaPlatform
+        try:
+            import io
+
+            logger.info(f"Putting document with path {path}")
+
+            files = {"file": content}
+            data = {"path": path, "forceReplace": force_replace}
+            content_object_response = requests.post(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
+                headers={"x-access-token": KodexaPlatform.get_access_token()},
+                files=files, data=data)
+
+            if content_object_response.status_code == 200:
+                from addict import Dict
+                content_object = Dict(json.loads(content_object_response.text))
+            else:
+                logger.error("Execution creation failed [" + content_object_response.text + "], response " + str(
+                    content_object_response.status_code))
+                raise Exception("Execution creation failed [" + content_object_response.text + "], response " + str(
+                    content_object_response.status_code))
+        except JSONDecodeError:
+            logger.error(
+                f"Unable to decode the JSON response")
+            raise
+
+
     def put(self, path: str, document: Document, force_replace=False):
         """
         Put the document into the document store at the given path, note that if there is already a document
@@ -665,7 +702,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     def get_next_objects(self):
         from kodexa import KodexaPlatform
         content_objects_response = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
             params={"query": self.query, "page": self.page, "pageSize": 20},
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
@@ -707,7 +744,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         """
         from kodexa import KodexaPlatform
         list_content = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         if list_content.status_code != 200:
             raise Exception(
@@ -796,7 +833,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/fs/{object_path}",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/fs/{object_path}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
@@ -818,7 +855,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         resp = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/fs/{object_path}",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/fs/{object_path}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
@@ -844,7 +881,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
             files = {"file": content}
             data = {"path": path, "forceReplace": force_replace}
             content_object_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref}/contents",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
