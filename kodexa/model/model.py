@@ -583,13 +583,13 @@ class ContentNode(object):
 
                     # It's possible to have multiple features with the same tag name that also share the same uuid.
                     # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
-                    sorted_tag_values = sorted(existing_tag_values, key=lambda k: k['uuid']) 
+                    sorted_tag_values = sorted(existing_tag_values, key=lambda k: k['uuid'])
                     previous_uuid = None
                     new_uuid = None
                     for val in sorted_tag_values:
                         if previous_uuid == None or previous_uuid != val['uuid']:
                             new_uuid = str(uuid.uuid4())
-                        
+
                         previous_uuid = val['uuid']
                         tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=new_uuid, data=val['data'])
                         node.add_feature('tag', new_tag_name, tag)
@@ -597,7 +597,7 @@ class ContentNode(object):
                     tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'], value=existing_tag_values['value'], uuid=str(uuid.uuid4()), data=existing_tag_values['data'])
                     node.add_feature('tag', new_tag_name, tag)
 
-        
+
     def collect_nodes_to(self, end_node):
         """
         Get the the sibling nodes between the current node and the end_node.
@@ -695,14 +695,14 @@ class ContentNode(object):
         :param node_only: Ignore the matching groups and tag the whole node
         :param fixed_position: Use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
         :param data: A dictionary of data for the given tag
-        :param tag_uuid: A UUID used to tie tags in order to demonstrate they're related and form a single concept.  
-                        For example, if tagging the two words "Wells" and "Fargo" as an ORGANIZATION, the tag on both words should have the 
+        :param tag_uuid: A UUID used to tie tags in order to demonstrate they're related and form a single concept.
+                        For example, if tagging the two words "Wells" and "Fargo" as an ORGANIZATION, the tag on both words should have the
                         same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
                         on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
-                        For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.  
-                        The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re 
+                        For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
+                        The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
                         pattern.  In that case, each feature value would share the same UUID.
-                        If no tag_uuid is provided, a new uuid is generated for each tag instance. 
+                        If no tag_uuid is provided, a new uuid is generated for each tag instance.
         """
 
         if use_all_content and node_only is None:
@@ -1296,9 +1296,12 @@ class Document(object):
     def __str__(self):
         return f"kodexa://{self.uuid}"
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=SourceMetadata()):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None):
         if metadata is None:
             metadata = DocumentMetadata()
+        if source is None:
+            source = SourceMetadata()
+
         self.metadata: DocumentMetadata = metadata
         self.content_node: Optional[ContentNode] = content_node
         self.virtual: bool = False
