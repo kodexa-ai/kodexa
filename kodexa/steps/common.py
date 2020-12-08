@@ -52,29 +52,42 @@ class NodeTagCopy:
 
 class TextParser:
     """
-    The text parser can load a source file as a text document and creates a single content node with the
-    text
+    Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes).
+    
+    :param encoding: str  The encoding that should be used when attempting to decode data  (default 'utf-8')
+    :param lines_as_child_nodes:bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
     """
-
-    def __init__(self, decode=False, encoding="utf-8"):
-        self.decode = decode
+    
+    def __init__(self, encoding="utf-8", lines_as_child_nodes=False):
         self.encoding = encoding
+        self.lines_as_child_nodes = lines_as_child_nodes
 
     @staticmethod
     def get_name():
         return "Text Parser"
 
+    def decode_text(self, data):
+        try:
+            data = data.decode(self.encoding)
+        except (UnicodeDecodeError, AttributeError):
+            pass
+        return data
+
     def process(self, document):
         with get_source(document) as fh:
-            data = fh.read()
 
-            try:
-                data = data.decode(self.encoding)
-            except (UnicodeDecodeError, AttributeError):
-                pass
+            if self.lines_as_child_nodes:
+                lines = fh.readlines()
+                document.content_node = document.create_node(node_type='text')
 
-            text_node = document.create_node(node_type='text', content=data if self.decode else data)
-            document.content_node = text_node
+                for data in lines:
+                    text_node = document.create_node(node_type='text', content=self.decode_text(data).strip())
+                    document.content_node.add_child(text_node)
+            else:
+                data = fh.read()
+                text_node = document.create_node(node_type='text', content=self.decode_text(data))
+                document.content_node = text_node
+            
             document.add_mixin('text')
 
         return document
