@@ -10,11 +10,13 @@ class WorkflowStore:
 
 class WorkflowConnector:
 
-    def __init__(self, name: str, ref: str, subscription: str = "true", target: Optional[str] = None, options=None):
+    def __init__(self, name: str, ref: str, subscription: str = "true", target: Optional[str] = None, options=None,
+                 download=False):
         if options is None:
             options = {}
         self.name: str = name
         self.ref: str = ref
+        self.download = download
         self.subscription = subscription
         self.target: Optional[str] = target
         self.options: Dict[str, Any] = options
