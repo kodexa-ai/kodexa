@@ -13,7 +13,7 @@ def get_test_pipeline(filename):
     document_sink = InMemoryDocumentSink()
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter=filename + '.txt'))
-    pipeline.add_step(TextParser(decode=True))
+    pipeline.add_step(TextParser())
     pipeline.set_sink(document_sink)
     pipeline.run()
 
@@ -28,7 +28,7 @@ def test_folder_sink_from_file():
         os.remove('/tmp/hello.txt.kdxa')
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='hello.txt'))
-    pipeline.add_step(TextParser(decode=True))
+    pipeline.add_step(TextParser())
     pipeline.set_sink(FolderSink('/tmp'))
     pipeline.run()
 
@@ -41,7 +41,7 @@ def test_caching():
         os.remove('/tmp/hello.txt.kdxa')
 
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='hello.txt'))
-    pipeline.add_step(TextParser(decode=True), cache_path="/tmp")
+    pipeline.add_step(TextParser(), cache_path="/tmp")
     pipeline.set_sink(FolderSink('/tmp'))
     pipeline.run()
 
@@ -87,3 +87,26 @@ def test_folder_connector_unpack_wildcard():
             assert len(doc.select("//*")) == 39
         elif doc.get_root().get_all_content().find('flea') > -1:
             assert len(doc.select("//*")) == 6
+
+
+def test_lines_of_text():
+
+    # first test with all content being placed on root ContentNode
+    pipeline = Pipeline.from_file(get_test_directory() + 'multiline_text.txt')
+    pipeline.add_step(TextParser)
+    context = pipeline.run()
+
+    doc = context.output_document
+    assert len(doc.get_root().children) == 0
+    assert len(doc.get_root().get_all_content()) > 0
+
+
+    # next, test with all content being placed the root's children
+    pipeline = Pipeline.from_file(get_test_directory() + 'multiline_text.txt')
+    pipeline.add_step(TextParser(lines_as_child_nodes=True))
+    context = pipeline.run()
+
+    doc = context.output_document
+    assert len(doc.get_root().children) > 0
+    assert doc.get_root().get_content() == None
+
