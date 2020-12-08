@@ -519,7 +519,7 @@ class RemoteSession:
 
     def get_action_metadata(self, ref):
         logger.debug(f"Downloading metadata for action {ref}")
-        r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref}",
+        r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref.replace(':', '/')}",
                          headers={"x-access-token": KodexaPlatform.get_access_token()})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
