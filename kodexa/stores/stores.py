@@ -620,7 +620,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         :param path: the path (i.e. /my-folder/file.pdf)
         :return: The latest document representation for that path
         """
-        hits = self.query_objects(f"path:{path}")
+        hits = self.query_objects(f"path:'{path}'")
         if len(hits) == 1:
             return self.get(hits[0]['id'])
         else:
