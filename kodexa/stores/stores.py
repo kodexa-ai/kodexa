@@ -620,8 +620,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         :param path: the path (i.e. /my-folder/file.pdf)
         :return: The latest document representation for that path
         """
-        hits = self.query_objects(f"path:'{path}'")
-        if len(hits) == 1:
+        hits = self.query_objects(f"path:'{path}'", sort_by='createdDate', sort_direction='desc')
+        if len(hits) > 0:
             return self.get(hits[0]['id'])
         else:
             return None
@@ -727,6 +727,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             params['sortBy'] = sort_by
             params['sortDesc'] = sort_direction
 
+        print(query)
+        print(f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents")
         list_content = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents",
             params=params,
