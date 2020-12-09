@@ -62,8 +62,9 @@ class Workflow:
     def add_schedule(self, schedule: WorkflowSchedule):
         self.schedules.append(schedule)
 
-    def add_connector(self, name: str, ref: str, subscription: str = "true", target: str = None, options=None):
-        self.connectors.append(WorkflowConnector(name, ref, subscription, target, options))
+    def add_connector(self, name: str, ref: str, subscription: str = "true", target: str = None, options=None,
+                      download=False):
+        self.connectors.append(WorkflowConnector(name, ref, subscription, target, options, download))
 
     def add_pipeline(self, name: str, ref: str, subscription: str = "true", target: str = None, parameters=None):
         self.pipelines.append(WorkflowPipeline(name, ref, subscription, target, parameters))
