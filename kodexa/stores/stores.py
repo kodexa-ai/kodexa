@@ -620,11 +620,20 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         :param path: the path (i.e. /my-folder/file.pdf)
         :return: The latest document representation for that path
         """
-        hits = self.query_objects(f"path:'{path}'", sort_by='createdDate', sort_direction='desc')
-        if len(hits) > 0:
-            return self.get(hits[0]['id'])
-        else:
+        from kodexa import KodexaPlatform
+        import requests
+        resp = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/fs/{path}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return Document.from_msgpack(resp.content)
+        if resp.status_code == 404:
             return None
+        else:
+            msg = f"Unable to delete model object {resp.text}, status : {resp.status_code}"
+            logger.error(msg)
+            raise Exception(msg)
 
     def put_native(self, path: str, content, force_replace=False):
         """
