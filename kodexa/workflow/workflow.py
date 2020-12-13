@@ -34,17 +34,27 @@ class CronSchedule(WorkflowSchedule):
         self.cron: str = cron
 
 
+class StorePublisher(dict):
+
+    def __init__(self, target_store: str, taxonomies: List[str]):
+        dict.__init__(self, targetStore=target_store, taxonomies=taxonomies)
+
+
 class WorkflowPipeline:
 
-    def __init__(self, name: str, ref: str, subscription: str, target: str = None, parameters=None):
+    def __init__(self, name: str, ref: str, subscription: str, target: str = None, parameters=None, publishers=None):
         if parameters is None:
             parameters = {}
+        if publishers is None:
+            publishers = []
+        self.publishers = publishers
         self.name: str = name
         self.ref: str = ref
         self.target: Optional[str] = target
 
         self.subscription: str = subscription
         self.parameters: Dict[str, Any] = parameters
+        self.type = "pipeline"
 
 
 class Workflow:
@@ -66,5 +76,6 @@ class Workflow:
                       download=False):
         self.connectors.append(WorkflowConnector(name, ref, subscription, target, options, download))
 
-    def add_pipeline(self, name: str, ref: str, subscription: str = "true", target: str = None, parameters=None):
-        self.pipelines.append(WorkflowPipeline(name, ref, subscription, target, parameters))
+    def add_pipeline(self, name: str, ref: str, subscription: str = "true", target: str = None, parameters=None,
+                     publishers=None):
+        self.pipelines.append(WorkflowPipeline(name, ref, subscription, target, parameters, publishers))

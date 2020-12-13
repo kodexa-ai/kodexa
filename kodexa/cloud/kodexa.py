@@ -266,6 +266,7 @@ class KodexaPlatform:
 
         object_url = None
 
+        from kodexa import RemoteTableDataStore
         if isinstance(kodexa_object, Pipeline):
 
             metadata_object.name = 'New Pipeline' if metadata_object.name is None else metadata_object.name
@@ -307,6 +308,13 @@ class KodexaPlatform:
 
             metadata_object.type = 'store'
             metadata_object.storeType = 'MODEL'
+        elif isinstance(kodexa_object, RemoteTableDataStore):
+            object_url = 'stores'
+            metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
+            metadata_object.description = 'A table data store' if metadata_object.description is None else metadata_object.description
+
+            metadata_object.type = 'store'
+            metadata_object.storeType = 'TABLE'
         elif isinstance(kodexa_object, Workflow):
             metadata_object.name = 'New Workflow' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new workflow' if metadata_object.description is None else metadata_object.description
