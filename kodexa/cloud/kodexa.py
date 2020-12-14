@@ -8,6 +8,7 @@ import sys
 import time
 from json import JSONDecodeError
 
+import jsonpickle
 import requests
 import yaml
 from addict import Dict
@@ -320,17 +321,17 @@ class KodexaPlatform:
             metadata_object.description = 'A new workflow' if metadata_object.description is None else metadata_object.description
             object_url = 'workflows'
             metadata_object.type = 'workflow'
-            metadata_object.pipelines = list(map(lambda x: x.__dict__, kodexa_object.pipelines))
-            metadata_object.stores = list(map(lambda x: x.__dict__, kodexa_object.stores))
-            metadata_object.connectors = list(map(lambda x: x.__dict__, kodexa_object.connectors))
-            metadata_object.schedules = list(map(lambda x: x.__dict__, kodexa_object.schedules))
+            metadata_object.pipelines = jsonpickle.decode(jsonpickle.encode(kodexa_object.pipelines, unpicklable=False))
+            metadata_object.stores = jsonpickle.decode(jsonpickle.encode(kodexa_object.stores, unpicklable=False))
+            metadata_object.connectors = jsonpickle.decode(jsonpickle.encode(kodexa_object.connectors, unpicklable=False))
+            metadata_object.schedules = jsonpickle.decode(jsonpickle.encode(kodexa_object.schedules, unpicklable=False))
             metadata_object.accessToken = kodexa_object.access_token
         elif isinstance(kodexa_object, Taxonomy):
             metadata_object.name = 'New Taxonomy' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new taxonomy' if metadata_object.description is None else metadata_object.description
             object_url = 'taxonomies'
             metadata_object.type = 'taxonomy'
-            metadata_object.taxons = list(map(lambda x: x.__dict__, kodexa_object.taxons))
+            metadata_object.taxons = jsonpickle.decode(jsonpickle.encode(kodexa_object.taxons, unpicklable=False))
         else:
             raise Exception("Unknown object type, unable to deploy")
 
