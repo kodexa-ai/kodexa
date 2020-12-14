@@ -21,3 +21,4 @@ flake8
 rich
 appdirs
 jq
+jsonpickle

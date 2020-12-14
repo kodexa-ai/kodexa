@@ -34,10 +34,11 @@ class CronSchedule(WorkflowSchedule):
         self.cron: str = cron
 
 
-class StorePublisher(dict):
+class StorePublisher:
 
     def __init__(self, target_store: str, taxonomies: List[str]):
-        dict.__init__(self, targetStore=target_store, taxonomies=taxonomies)
+        self.targetStore = target_store
+        self.taxonomies = taxonomies
 
 
 class WorkflowPipeline:

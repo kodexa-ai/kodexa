@@ -35,7 +35,8 @@ setup(name='kodexa',
           'jinja2',
           'rich',
           'appdirs',
-          'jq'
+          'jq',
+          'jsonpickle'
       ],
       entry_points="""
         [console_scripts]
