@@ -122,7 +122,7 @@ def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = N
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
-def get(_: Info, object_type: str, ref: str, url: str, token: str):
+def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
     """List the instance of the object type"""
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)

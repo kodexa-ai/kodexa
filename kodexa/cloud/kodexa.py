@@ -520,13 +520,13 @@ class KodexaPlatform:
         object_type, object_type_metadata = resolve_object_type(object_type)
         print(f"Reindexing {object_type_metadata['name']} [bold]{ref}[/bold]")
         url_ref = ref.replace(':', '/')
-        r = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}/_reindex",
+        r = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}/_reindex",
                                           headers={"x-access-token": KodexaPlatform.get_access_token(),
                                                    "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
         elif r.status_code == 200:
-            return r.json()
+            return r.text
         else:
             logger.error(r.text)
             raise Exception("Unable to reindex check your reference and platform settings")
