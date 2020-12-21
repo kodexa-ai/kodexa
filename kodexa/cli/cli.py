@@ -108,13 +108,25 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--path', default=None, help='JQ path to content you want')
-
 @pass_info
 def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = None):
     """List the instance of the object type"""
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.get(object_type, ref, path)
+
+
+@cli.command()
+@click.argument('object_type')
+@click.argument('ref')
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@pass_info
+def get(_: Info, object_type: str, ref: str, url: str, token: str):
+    """List the instance of the object type"""
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+    KodexaPlatform.reindex(object_type, ref)
 
 
 @cli.command()
@@ -167,8 +179,8 @@ def metadata(_: Info, path: str):
 @pass_info
 def login(_: Info):
     """
-    Logs into the specified platform environment using the email address and password provided,  
-    then downloads and stores the personal access token (PAT) of the user.  
+    Logs into the specified platform environment using the email address and password provided,
+    then downloads and stores the personal access token (PAT) of the user.
     Once successfully logged in, calls to remote actions, pipelines, and workflows will be made to the
     platform that was set via this login function and will use the stored PAT for authentication.
     """
