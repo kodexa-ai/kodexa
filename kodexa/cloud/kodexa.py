@@ -15,6 +15,7 @@ from addict import Dict
 from appdirs import AppDirs
 from rich import print
 
+from kodexa import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, DocumentStore
@@ -120,8 +121,12 @@ OBJECT_TYPES = {
         "plural": "extension packs"
     },
     "pipelines": {
-        "name": "pipelines",
+        "name": "pipeline",
         "plural": "pipelines"
+    },
+    "assistants": {
+        "name": "assistant",
+        "plural": "assistants"
     },
     "actions": {
         "name": "action",
@@ -332,6 +337,13 @@ class KodexaPlatform:
             object_url = 'taxonomies'
             metadata_object.type = 'taxonomy'
             metadata_object.taxons = jsonpickle.decode(jsonpickle.encode(kodexa_object.taxons, unpicklable=False))
+        elif isinstance(kodexa_object, Assistant):
+            metadata_object.name = 'New Assistant Definition' if metadata_object.name is None else metadata_object.name
+            metadata_object.description = 'A new assistant definition' if metadata_object.description is None else metadata_object.description
+            object_url = 'assistants'
+            metadata_object.type = 'assistant'
+            metadata_object.workflows = jsonpickle.decode(jsonpickle.encode(kodexa_object.workflows, unpicklable=False))
+            metadata_object.requiredStores = jsonpickle.decode(jsonpickle.encode(kodexa_object.required_stores, unpicklable=False))
         else:
             raise Exception("Unknown object type, unable to deploy")
 
