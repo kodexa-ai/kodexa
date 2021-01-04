@@ -21,7 +21,8 @@ setup(name='kodexa',
       url='https://www.github.com/kodexa-ai/kodexa',
       packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.sinks', 'kodexa.pipeline', 'kodexa.taxonomy',
                 'kodexa.stores', 'kodexa.model', 'kodexa.extractors', 'kodexa.steps', 'kodexa.selectors',
-                'kodexa.cloud', 'kodexa.testing', 'kodexa.cli', 'kodexa.workflow', 'kodexa.cli.templates'],
+                'kodexa.assistant', 'kodexa.cloud', 'kodexa.testing', 'kodexa.cli', 'kodexa.workflow',
+                'kodexa.cli.templates'],
       install_requires=[
           'addict==2.2.1',
           'requests==2.24.0',
@@ -62,7 +63,7 @@ setup(name='kodexa',
       ],
       package_data={
           # If any package contains *.j2
-          '': ['*.j2','*.j2.html'],
+          '': ['*.j2', '*.j2.html'],
       },
       setup_requires=["pytest-runner"],
       tests_require=["pytest"])

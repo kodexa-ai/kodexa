@@ -15,3 +15,4 @@ from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreH
     RemoteDocumentStore, RemoteTableDataStore, RemoteDictDataStore, RemoteModelStore, LocalModelStore
 from .taxonomy import Taxonomy, Taxon
 from .workflow import Workflow, CronSchedule, StorePublisher
+from .assistant import Assistant
