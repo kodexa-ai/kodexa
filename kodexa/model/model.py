@@ -1313,6 +1313,8 @@ class Document(object):
         self.add_mixin('core')
         self.source: SourceMetadata = source
         self.labels: List[str] = []
+        self.taxonomies: List[str] = []
+        self.classifications: List[str] = []
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
@@ -1439,6 +1441,8 @@ class Document(object):
                 'content_node': self.content_node.to_dict() if self.content_node else None,
                 'source': clean_none_values(dataclasses.asdict(self.source)),
                 'mixins': self._mixins,
+                'taxonomies': self.taxonomies,
+                'classifications': self.classifications,
                 'exceptions': self.exceptions,
                 'log': self.log,
                 'labels': self.labels,
@@ -1471,6 +1475,10 @@ class Document(object):
             new_document.source = SourceMetadata.from_dict(doc_dict['source'])
         if 'labels' in doc_dict and doc_dict['labels']:
             new_document.labels = doc_dict['labels']
+        if 'classifications' in doc_dict and doc_dict['labels']:
+            new_document.labels = doc_dict['labels']
+        if 'taxomomies' in doc_dict and doc_dict['taxomomies']:
+            new_document.labels = doc_dict['taxomomies']
         return new_document
 
     @staticmethod
