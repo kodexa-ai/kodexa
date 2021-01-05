@@ -15,7 +15,7 @@ from addict import Dict
 from appdirs import AppDirs
 from rich import print
 
-from kodexa import Assistant
+from kodexa.assistant import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, DocumentStore
@@ -342,6 +342,7 @@ class KodexaPlatform:
             metadata_object.description = 'A new assistant definition' if metadata_object.description is None else metadata_object.description
             object_url = 'assistants'
             metadata_object.type = 'assistant'
+            metadata_object.fullDescription = kodexa_object.full_description
             metadata_object.workflows = jsonpickle.decode(jsonpickle.encode(kodexa_object.workflows, unpicklable=False))
             metadata_object.requiredStores = jsonpickle.decode(jsonpickle.encode(kodexa_object.required_stores, unpicklable=False))
         else:
