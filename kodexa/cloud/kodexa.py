@@ -328,7 +328,8 @@ class KodexaPlatform:
             metadata_object.type = 'workflow'
             metadata_object.pipelines = jsonpickle.decode(jsonpickle.encode(kodexa_object.pipelines, unpicklable=False))
             metadata_object.stores = jsonpickle.decode(jsonpickle.encode(kodexa_object.stores, unpicklable=False))
-            metadata_object.connectors = jsonpickle.decode(jsonpickle.encode(kodexa_object.connectors, unpicklable=False))
+            metadata_object.connectors = jsonpickle.decode(
+                jsonpickle.encode(kodexa_object.connectors, unpicklable=False))
             metadata_object.schedules = jsonpickle.decode(jsonpickle.encode(kodexa_object.schedules, unpicklable=False))
             metadata_object.accessToken = kodexa_object.access_token
         elif isinstance(kodexa_object, Taxonomy):
@@ -336,6 +337,7 @@ class KodexaPlatform:
             metadata_object.description = 'A new taxonomy' if metadata_object.description is None else metadata_object.description
             object_url = 'taxonomies'
             metadata_object.type = 'taxonomy'
+            metadata_object.taxonomyType = metadata_object.taxonomy_type
             metadata_object.taxons = jsonpickle.decode(jsonpickle.encode(kodexa_object.taxons, unpicklable=False))
         elif isinstance(kodexa_object, Assistant):
             metadata_object.name = 'New Assistant Definition' if metadata_object.name is None else metadata_object.name
@@ -344,7 +346,11 @@ class KodexaPlatform:
             metadata_object.type = 'assistant'
             metadata_object.fullDescription = kodexa_object.full_description
             metadata_object.workflows = jsonpickle.decode(jsonpickle.encode(kodexa_object.workflows, unpicklable=False))
-            metadata_object.requiredStores = jsonpickle.decode(jsonpickle.encode(kodexa_object.required_stores, unpicklable=False))
+            metadata_object.requiredStores = jsonpickle.decode(
+                jsonpickle.encode(kodexa_object.required_stores, unpicklable=False))
+            metadata_object.processingTaxonomies = jsonpickle.decode(
+                jsonpickle.encode(kodexa_object.processing_taxonomies, unpicklable=False))
+
         else:
             raise Exception("Unknown object type, unable to deploy")
 
@@ -534,8 +540,8 @@ class KodexaPlatform:
         print(f"Reindexing {object_type_metadata['name']} [bold]{ref}[/bold]")
         url_ref = ref.replace(':', '/')
         r = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}/_reindex",
-                                          headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                                   "content-type": "application/json"})
+                          headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                   "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
         elif r.status_code == 200:

@@ -14,8 +14,9 @@ class Taxon:
 
 class Taxonomy:
 
-    def __init__(self):
+    def __init__(self, taxonomy_type='CONTENT'):
         self.taxons: List[Taxon] = []
+        self.taxonomy_type = taxonomy_type
 
     def add_taxon(self, label: str, name: str):
         self.taxons.append(Taxon(label, name))
