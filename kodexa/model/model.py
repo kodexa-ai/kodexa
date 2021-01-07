@@ -55,7 +55,7 @@ class RemoteStore:
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':','/')}/contents",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/contents",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
@@ -119,6 +119,7 @@ class ContentNode(object):
         <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         >>> current_content_node.add_child(new_page)
     """
+
     def __init__(self, document, node_type: str, content: Optional[str] = None,
                  content_parts: Optional[List[Any]] = None):
         if content_parts is None:
@@ -195,9 +196,17 @@ class ContentNode(object):
             new_content_node.content_parts = content_node_dict['content_parts']
 
         for dict_feature in content_node_dict['features']:
-            new_feature = new_content_node.add_feature(dict_feature['name'].split(':')[0],
-                                                       dict_feature['name'].split(':')[1],
-                                                       dict_feature['value'], dict_feature['single'], True)
+
+            feature_type = dict_feature['name'].split(':')[0]
+            if feature_type == 'tag':
+                new_content_node.add_feature(feature_type,
+                                             dict_feature['name'].split(':')[1],
+                                             Dict(dict_feature['value']), dict_feature['single'], True)
+            else:
+                new_content_node.add_feature(feature_type,
+                                             dict_feature['name'].split(':')[1],
+                                             Tag(dict_feature['value']), dict_feature['single'], True)
+
         for dict_child in content_node_dict['children']:
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
         return new_content_node
@@ -574,7 +583,7 @@ class ContentNode(object):
         :param str new_tag_name: The name of the new tag.  This must be different from the existing_tag_name.
         """
         if existing_tag_name == None or new_tag_name == None or existing_tag_name == new_tag_name:
-            return # do nothing, just exit function
+            return  # do nothing, just exit function
 
         for node in self.select(selector):
             existing_tag_values = node.get_feature_value('tag', existing_tag_name)
@@ -591,12 +600,14 @@ class ContentNode(object):
                             new_uuid = str(uuid.uuid4())
 
                         previous_uuid = val['uuid']
-                        tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=new_uuid, data=val['data'])
+                        tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=new_uuid,
+                                  data=val['data'])
                         node.add_feature('tag', new_tag_name, tag)
                 else:
-                    tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'], value=existing_tag_values['value'], uuid=str(uuid.uuid4()), data=existing_tag_values['data'])
+                    tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'],
+                              value=existing_tag_values['value'], uuid=str(uuid.uuid4()),
+                              data=existing_tag_values['data'])
                     node.add_feature('tag', new_tag_name, tag)
-
 
     def collect_nodes_to(self, end_node):
         """
@@ -716,7 +727,6 @@ class ContentNode(object):
             else:
                 return str(uuid.uuid4())
 
-
         def tag_node_position(node_to_check, start, end, node_data, tag_uuid):
 
             content_length = 0
@@ -785,7 +795,6 @@ class ContentNode(object):
                                 start_offset = match.span()[0]
                                 end_offset = match.span()[1]
                                 tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
-
 
     def get_tags(self):
         """

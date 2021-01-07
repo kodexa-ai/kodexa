@@ -337,7 +337,8 @@ class KodexaPlatform:
             metadata_object.description = 'A new taxonomy' if metadata_object.description is None else metadata_object.description
             object_url = 'taxonomies'
             metadata_object.type = 'taxonomy'
-            metadata_object.taxonomyType = metadata_object.taxonomy_type
+            metadata_object.enabled = kodexa_object.enabled
+            metadata_object.taxonomyType = kodexa_object.taxonomy_type
             metadata_object.taxons = jsonpickle.decode(jsonpickle.encode(kodexa_object.taxons, unpicklable=False))
         elif isinstance(kodexa_object, Assistant):
             metadata_object.name = 'New Assistant Definition' if metadata_object.name is None else metadata_object.name
