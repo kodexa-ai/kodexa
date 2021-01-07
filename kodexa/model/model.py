@@ -205,7 +205,7 @@ class ContentNode(object):
             else:
                 new_content_node.add_feature(feature_type,
                                              dict_feature['name'].split(':')[1],
-                                             Tag(dict_feature['value']), dict_feature['single'], True)
+                                             Dict(dict_feature['value']), dict_feature['single'], True)
 
         for dict_child in content_node_dict['children']:
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
