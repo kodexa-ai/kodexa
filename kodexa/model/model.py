@@ -556,7 +556,7 @@ class ContentNode(object):
 
         if replace:
             for child in self.children:
-                self.parent = None
+                child.parent = None
             self.children = []
 
         for child in children:
