@@ -37,7 +37,7 @@ class RemoteTaxonomy:
         self.taxonomy_type = response.json()['taxonomy_type']
         self.enabled = response.json()['enabled']
 
-        self.taxons = []
+        self.taxons: List[Taxon] = []
 
         def build_taxons(json_taxons, taxons):
             for json_taxon in json_taxons:
