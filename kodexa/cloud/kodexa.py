@@ -251,7 +251,7 @@ class KodexaPlatform:
 
     @staticmethod
     def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
-               options=None, public=False, force_replace=False):
+               options=None, public=False, force_replace=False, dry_run=False, print_yaml=False):
 
         if '/' not in ref:
             logger.error("A ref must be valid, i.e. org_slug/pipeline_slug:version")
@@ -273,6 +273,7 @@ class KodexaPlatform:
         object_url = None
 
         from kodexa import RemoteTableDataStore
+
         if isinstance(kodexa_object, Pipeline):
 
             metadata_object.name = 'New Pipeline' if metadata_object.name is None else metadata_object.name
@@ -352,60 +353,77 @@ class KodexaPlatform:
             metadata_object.processingTaxonomies = jsonpickle.decode(
                 jsonpickle.encode(kodexa_object.processing_taxonomies, unpicklable=False))
 
+            # For our services we are actually going to dry run each of these
+            # as deploys to create the correct objects
+
+            metadata_object.services = []
+            for service in kodexa_object.services:
+                metadata_object.services.append(KodexaPlatform.deploy(f'./{service.slug}', service, dry_run=True))
+
         else:
             raise Exception("Unknown object type, unable to deploy")
 
-        logger.info(f"Deploying {metadata_object.type} {ref}")
+        if dry_run:
 
-        access_token = KodexaPlatform.get_access_token_details()
+            if print_yaml:
+                logger.info(f"Dry run output for {metadata_object.type} {ref}")
+                logger.info(f"YAML output:\n")
+                logger.info(yaml.dump(metadata_object.to_dict()))
 
-        if organization_slug not in access_token.organizationSlugs:
-            logger.error(f"You do not have access to the organization {organization_slug}")
-            raise Exception("Unable to deploy, no access to organization")
-
-        if object_version:
-            url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}/{object_version}"
         else:
-            url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}"
+            logger.info(f"Deploying {metadata_object.type} {ref}")
 
-        response = requests.get(url,
-                                headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                         "content-type": "application/json"})
+            access_token = KodexaPlatform.get_access_token_details()
 
-        if response.status_code == 401:
-            logger.error(f"You do not have the permissions to access this {metadata_object.type}")
-            raise Exception("Not authorized on pipeline")
+            if organization_slug not in access_token.organizationSlugs:
+                logger.error(f"You do not have access to the organization {organization_slug}")
+                raise Exception("Unable to deploy, no access to organization")
 
-        if response.status_code == 404:
-            logger.info("Object doesn't exist, will deploy")
-            response = requests.post(f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}",
-                                     json=metadata_object.to_dict(),
-                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                              "content-type": "application/json"})
-            if response.status_code == 200:
-                logger.info("Deployed")
+            if object_version:
+                url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}/{object_version}"
             else:
-                logger.error(response.text)
-                raise Exception("Unable to deploy")
-        elif response.status_code == 200:
-            logger.info(f"{ref} already exists")
-            if force_replace:
-                logger.info(f"Replacing {ref}")
-                response = requests.put(url,
-                                        json=metadata_object.to_dict(),
-                                        headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                                 "content-type": "application/json"})
+                url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}"
+
+            response = requests.get(url,
+                                    headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                             "content-type": "application/json"})
+
+            if response.status_code == 401:
+                logger.error(f"You do not have the permissions to access this {metadata_object.type}")
+                raise Exception("Not authorized on pipeline")
+
+            if response.status_code == 404:
+                logger.info("Object doesn't exist, will deploy")
+                response = requests.post(f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}",
+                                         json=metadata_object.to_dict(),
+                                         headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                                  "content-type": "application/json"})
                 if response.status_code == 200:
                     logger.info("Deployed")
                 else:
                     logger.error(response.text)
-                    raise Exception("Unable to deploy and replace")
+                    raise Exception("Unable to deploy")
+            elif response.status_code == 200:
+                logger.info(f"{ref} already exists")
+                if force_replace:
+                    logger.info(f"Replacing {ref}")
+                    response = requests.put(url,
+                                            json=metadata_object.to_dict(),
+                                            headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                                     "content-type": "application/json"})
+                    if response.status_code == 200:
+                        logger.info("Deployed")
+                    else:
+                        logger.error(response.text)
+                        raise Exception("Unable to deploy and replace")
+                else:
+                    logger.warning("Not updating")
+                    return
             else:
-                logger.warning("Not updating")
-                return
-        else:
-            logger.error("Unable to deploy")
-            logger.error(response.content)
+                logger.error("Unable to deploy")
+                logger.error(response.content)
+
+        return metadata_object
 
     @staticmethod
     def list_objects(organization_slug, object_type):

@@ -4,6 +4,7 @@ class Assistant:
         self.required_stores = []
         self.workflows = []
         self.processing_taxonomies = []
+        self.services = []
 
         self.full_description = full_description
 
@@ -25,3 +26,7 @@ class Assistant:
         self.processing_taxonomies.append({
             'ref': ref
         })
+
+    def add_service(self, slug, service):
+        service.slug = slug
+        self.services.append(service)
