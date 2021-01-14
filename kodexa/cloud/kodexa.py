@@ -250,6 +250,25 @@ class KodexaPlatform:
         return [org_slug, slug, version]
 
     @staticmethod
+    def get_object_instance(ref: str, object_type: str):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        if object_type == 'taxonomies':
+            from kodexa import RemoteTaxonomy
+            return RemoteTaxonomy(ref)
+        if object_type == 'stores':
+            # We need to work out what type of store we have
+            obj_info = KodexaPlatform.get_object(ref, object_type)
+            if obj_info['storeType'] == 'TABLE':
+                from kodexa import RemoteTableDataStore
+                return RemoteTableDataStore(ref)
+            if obj_info['storeType'] == 'DOCUMENT':
+                return RemoteDocumentStore(ref)
+
+        # TODO - there are other things we need?
+        raise Exception(f"Unable to get a local instance of {ref} of type {object_type}")
+
+    @staticmethod
     def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
                options=None, public=False, force_replace=False, dry_run=False, print_yaml=False):
 
