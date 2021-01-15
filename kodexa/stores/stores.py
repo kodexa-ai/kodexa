@@ -161,7 +161,7 @@ class RemoteTableDataStore(RemoteStore):
 
         doc = requests.post(
             url,
-            rows,
+            json=rows,
             headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
         if doc.status_code == 200:
             return
@@ -184,8 +184,8 @@ class RemoteTableDataStore(RemoteStore):
 
         doc = requests.post(
             url,
-            [{'data': row_dict}],
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
+            json=[{'data': row_dict}],
+            headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
         if doc.status_code == 200:
             return
         else:
