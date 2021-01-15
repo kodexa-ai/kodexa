@@ -45,8 +45,9 @@ class RemoteTaxonomy:
         def build_taxons(json_taxons, taxons):
             for json_taxon in json_taxons:
                 new_taxon = Taxon(label=json_taxon['label'], name=json_taxon['name'], id=json_taxon['id'],
-                                  color=json_taxon['color'], value_path=json_taxon['valuePath'],
-                                  data_path=json_taxon['dataPath'])
+                                  color=json_taxon['color'],
+                                  value_path=json_taxon['valuePath'] if 'valuePath' in json_taxon else None,
+                                  data_path=json_taxon['dataPath'] if 'dataPath' in json_taxon else None)
 
                 if 'children' in json_taxon:
                     build_taxons(json_taxon['children'], new_taxon.children)
