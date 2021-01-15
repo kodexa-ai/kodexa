@@ -34,7 +34,7 @@ class RemoteTaxonomy:
                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
                                          "content-type": "application/json"})
 
-        self.taxonomy_type = response.json()['taxonomy_type']
+        self.taxonomy_type = response.json()['taxonomyType']
         self.enabled = response.json()['enabled']
 
         self.taxons: List[Taxon] = []
