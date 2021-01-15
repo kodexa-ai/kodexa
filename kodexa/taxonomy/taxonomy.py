@@ -4,12 +4,15 @@ from typing import List, Optional
 
 class Taxon:
 
-    def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None):
+    def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
+                 value_path: Optional[str] = None, data_path: Optional[str] = None):
         self.id = id
         self.name: str = name
         self.label: str = label
         self.color = "#" + ("%06x" % random.randint(0, 0xFFFFFF)) if color is None else color
         self.children: List[Taxon] = []
+        self.value_path = value_path
+        self.data_path = data_path
 
 
 class Taxonomy:
@@ -42,7 +45,8 @@ class RemoteTaxonomy:
         def build_taxons(json_taxons, taxons):
             for json_taxon in json_taxons:
                 new_taxon = Taxon(label=json_taxon['label'], name=json_taxon['name'], id=json_taxon['id'],
-                                  color=json_taxon['color'])
+                                  color=json_taxon['color'], value_path=json_taxon['valuePath'],
+                                  data_path=json_taxon['dataPath'])
 
                 if 'children' in json_taxon:
                     build_taxons(json_taxon['children'], new_taxon.children)
