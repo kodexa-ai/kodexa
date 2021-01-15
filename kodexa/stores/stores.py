@@ -162,7 +162,7 @@ class RemoteTableDataStore(RemoteStore):
         doc = requests.post(
             url,
             rows,
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
+            headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
         if doc.status_code == 200:
             return
         else:
@@ -639,7 +639,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         resp = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/fs/{path}",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
@@ -670,7 +670,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             files = {"file": content}
             data = {"path": path, "forceReplace": force_replace}
             content_object_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
@@ -686,7 +686,6 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.error(
                 f"Unable to decode the JSON response")
             raise
-
 
     def put(self, path: str, document: Document, force_replace=False):
         """
@@ -707,7 +706,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             files = {"document": document.to_msgpack()}
             data = {"path": path, "forceReplace": force_replace}
             content_object_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
@@ -727,7 +726,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     def get_next_objects(self):
         from kodexa import KodexaPlatform
         content_objects_response = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents",
             params={"query": self.query, "page": self.page, "pageSize": 20},
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
@@ -771,7 +770,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         """
         from kodexa import KodexaPlatform
         list_content = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         if list_content.status_code != 200:
             raise Exception(
@@ -860,7 +859,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/fs/{object_path}",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{object_path}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
@@ -882,7 +881,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         resp = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/fs/{object_path}",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{object_path}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
@@ -908,7 +907,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
             files = {"file": content}
             data = {"path": path, "forceReplace": force_replace}
             content_object_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':','/')}/contents",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
