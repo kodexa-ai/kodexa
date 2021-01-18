@@ -647,7 +647,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         if resp.status_code == 404:
             return None
         else:
-            msg = f"Unable to delete model object {resp.text}, status : {resp.status_code}"
+            msg = f"Unable to get file from store at given path - {resp.text} - status : {resp.status_code}"
             logger.error(msg)
             raise Exception(msg)
 
