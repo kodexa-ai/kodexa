@@ -60,12 +60,13 @@ class WorkflowPipeline:
 
 class Workflow:
 
-    def __init__(self, access_token: str):
+    def __init__(self, access_token: str, active=True):
         self.stores: List[WorkflowStore] = []
         self.pipelines: List[WorkflowPipeline] = []
         self.connectors: List[WorkflowConnector] = []
         self.schedules: List[WorkflowSchedule] = []
         self.access_token = access_token
+        self.active = active
 
     def add_store(self, name: str, ref: str):
         self.stores.append(WorkflowStore(name, ref))

@@ -352,6 +352,7 @@ class KodexaPlatform:
                 jsonpickle.encode(kodexa_object.connectors, unpicklable=False))
             metadata_object.schedules = jsonpickle.decode(jsonpickle.encode(kodexa_object.schedules, unpicklable=False))
             metadata_object.accessToken = kodexa_object.access_token
+            metadata_object.active = kodexa_object.active
         elif isinstance(kodexa_object, Taxonomy):
             metadata_object.name = 'New Taxonomy' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new taxonomy' if metadata_object.description is None else metadata_object.description
