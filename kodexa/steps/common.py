@@ -2,6 +2,16 @@ from kodexa import get_source
 from kodexa.stores import TableDataStore
 
 
+class KodexaProcessingException(Exception):
+
+    def __init__(self, message, description, advice=None, documentation_url=None):
+        self.description = description
+        self.advice = advice
+        self.message = message
+        self.documentation_url = documentation_url
+        super().__init__(self.message)
+
+
 class NodeTagger:
     """
     A node tagger allows you to provide a type and content regular expression and then
@@ -41,12 +51,13 @@ class NodeTagCopy:
         self.selector = selector
         self.existing_tag_name = existing_tag_name
         self.new_tag_name = new_tag_name
-        
+
     def get_name(self):
         return f"Node Tag Copy [selector='{self.selector}' existing_tag_name='{self.existing_tag_name} new_tag_name={self.new_tag_name}']"
 
     def process(self, document):
-        document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name, new_tag_name=self.new_tag_name)
+        document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
+                                       new_tag_name=self.new_tag_name)
         return document
 
 
@@ -57,7 +68,7 @@ class TextParser:
     :param encoding: str  The encoding that should be used when attempting to decode data  (default 'utf-8')
     :param lines_as_child_nodes:bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
     """
-    
+
     def __init__(self, encoding="utf-8", lines_as_child_nodes=False):
         self.encoding = encoding
         self.lines_as_child_nodes = lines_as_child_nodes
@@ -87,7 +98,7 @@ class TextParser:
                 data = fh.read()
                 text_node = document.create_node(node_type='text', content=self.decode_text(data))
                 document.content_node = text_node
-            
+
             document.add_mixin('text')
 
         return document
