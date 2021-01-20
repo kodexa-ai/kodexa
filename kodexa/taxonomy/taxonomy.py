@@ -17,13 +17,16 @@ class Taxon:
 
 class Taxonomy:
 
-    def __init__(self, taxonomy_type='CONTENT', enabled=True):
+    def __init__(self, taxonomy_type='CONTENT', enabled=True, ref=""):
         self.taxons: List[Taxon] = []
         self.taxonomy_type = taxonomy_type
         self.enabled = enabled
+        self.ref = ref
 
     def add_taxon(self, label: str, name: str):
-        self.taxons.append(Taxon(label, name))
+        new_taxon = Taxon(label, name)
+        self.taxons.append(new_taxon)
+        return new_taxon
 
 
 class RemoteTaxonomy:
