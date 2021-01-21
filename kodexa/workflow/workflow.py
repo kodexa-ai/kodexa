@@ -33,6 +33,13 @@ class CronSchedule(WorkflowSchedule):
         self.name: str = name
         self.cron: str = cron
 
+        
+class WebSchedule(WorkflowSchedule):
+
+    def __init__(self, name: str):
+        self.type: str = 'web'
+        self.name: str = name
+
 
 class StorePublisher:
 
