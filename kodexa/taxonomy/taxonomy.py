@@ -5,7 +5,7 @@ from typing import List, Optional
 class Taxon:
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
-                 value_path: Optional[str] = None, data_path: Optional[str] = None):
+                 value_path: Optional[str] = None, data_path: Optional[str] = None, metadata_path: Optional[str] = None):
         self.id = id
         self.name: str = name
         self.label: str = label
@@ -13,6 +13,7 @@ class Taxon:
         self.children: List[Taxon] = []
         self.value_path = value_path
         self.data_path = data_path
+        self.metadata_path = metadata_path
 
 
 class Taxonomy:
@@ -52,7 +53,8 @@ class RemoteTaxonomy:
                 new_taxon = Taxon(label=json_taxon['label'], name=json_taxon['name'], id=json_taxon['id'],
                                   color=json_taxon['color'],
                                   value_path=json_taxon['valuePath'] if 'valuePath' in json_taxon else None,
-                                  data_path=json_taxon['dataPath'] if 'dataPath' in json_taxon else None)
+                                  data_path=json_taxon['dataPath'] if 'dataPath' in json_taxon else None,
+                                  metadata_path=json_taxon['metadataPath'] if 'metadataPath' in json_taxon else None)
 
                 if 'children' in json_taxon:
                     build_taxons(json_taxon['children'], new_taxon.children)
