@@ -153,6 +153,22 @@ class RemoteTableDataStore(RemoteStore):
     def get_ref(self):
         return self.ref
 
+    def delete_rows_by_content_object(self, content_object_id:str, taxonomy_ref:str):
+        from kodexa import KodexaPlatform
+
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
+        logger.debug(f"Uploading rows to store {url}")
+
+        doc = requests.delete(
+            url,
+            params={"contentObjectId": content_object_id, "taxonomyRef": taxonomy_ref},
+            headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
+        if doc.status_code == 200:
+            return
+        else:
+            logger.error("Unable to delete rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+            raise Exception("Unable to delete rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+
     def add_rows(self, rows):
         from kodexa import KodexaPlatform
 
