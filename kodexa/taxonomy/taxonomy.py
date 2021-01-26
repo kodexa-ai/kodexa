@@ -6,7 +6,7 @@ from typing import List, Optional, Dict
 class Taxon:
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
-                 value_path: Optional[str] = None, data_path: Optional[str] = None, options: Dict = None,
+                 value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
                  metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
         if options is None:
             options = []
@@ -95,4 +95,4 @@ class RemoteTaxonomy:
                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
                                          "content-type": "application/json"})
 
-        return Taxonomy.from_dict()
+        return Taxonomy.from_dict(response.json())
