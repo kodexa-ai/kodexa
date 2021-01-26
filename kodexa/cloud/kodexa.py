@@ -255,7 +255,7 @@ class KodexaPlatform:
 
         if object_type == 'taxonomies':
             from kodexa import RemoteTaxonomy
-            return RemoteTaxonomy(ref)
+            return RemoteTaxonomy.get(ref)
         if object_type == 'stores':
             # We need to work out what type of store we have
             obj_info = KodexaPlatform.get_object(ref, object_type)
