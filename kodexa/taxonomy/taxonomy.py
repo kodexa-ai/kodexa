@@ -1,12 +1,13 @@
 import random
-from typing import List, Optional
 import uuid
+from typing import List, Optional
+
 
 class Taxon:
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                  value_path: Optional[str] = None, data_path: Optional[str] = None, options=None,
-                 metadata_path: Optional[str] = None, node_types=None, enabled=True):
+                 metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
         if options is None:
             options = []
         if node_types is None:
