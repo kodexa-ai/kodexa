@@ -1,12 +1,12 @@
 import random
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 
 class Taxon:
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
-                 value_path: Optional[str] = None, data_path: Optional[str] = None, options=None,
+                 value_path: Optional[str] = None, data_path: Optional[str] = None, options: Dict = None,
                  metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
         if options is None:
             options = []
@@ -28,7 +28,7 @@ class Taxon:
     def from_dict(dict_taxon):
         new_taxon = Taxon(label=dict_taxon['label'], name=dict_taxon['name'], id=dict_taxon['id'],
                           color=dict_taxon['color'], node_types=dict_taxon['nodeTypes'],
-                          options=dict_taxon['options'], enabled=self.enabled,
+                          options=dict_taxon['options'], enabled=dict_taxon['enabled'],
                           value_path=dict_taxon['valuePath'] if 'valuePath' in dict_taxon else None,
                           data_path=dict_taxon['dataPath'] if 'dataPath' in dict_taxon else None,
                           metadata_path=dict_taxon['metadataPath'] if 'metadataPath' in dict_taxon else None)
@@ -52,7 +52,7 @@ class Taxon:
 
 class Taxonomy:
 
-    def __init__(self, taxonomy_type='CONTENT', enabled=True, ref=""):
+    def __init__(self, taxonomy_type='CONTENT', enabled: bool = True, ref: str = ""):
         self.taxons: List[Taxon] = []
         self.taxonomy_type = taxonomy_type
         self.enabled = enabled
