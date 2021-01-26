@@ -5,8 +5,12 @@ from typing import List, Optional
 class Taxon:
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
-                 value_path: Optional[str] = None, data_path: Optional[str] = None,
-                 metadata_path: Optional[str] = None):
+                 value_path: Optional[str] = None, data_path: Optional[str] = None, options=None,
+                 metadata_path: Optional[str] = None, node_types=Non, enabled=True):
+        if options is None:
+            options = []
+        if node_types is None:
+            node_types = []
         self.id = id
         self.name: str = name
         self.label: str = label
@@ -15,11 +19,15 @@ class Taxon:
         self.value_path = value_path
         self.data_path = data_path
         self.metadata_path = metadata_path
+        self.node_types = node_types
+        self.options = options
+        self.enabled = enabled
 
     @staticmethod
     def from_dict(dict_taxon):
         new_taxon = Taxon(label=dict_taxon['label'], name=dict_taxon['name'], id=dict_taxon['id'],
-                          color=dict_taxon['color'],
+                          color=dict_taxon['color'], node_types=dict_taxon['nodeTypes'],
+                          options=dict_taxon['options'], enabled=self.enabled,
                           value_path=dict_taxon['valuePath'] if 'valuePath' in dict_taxon else None,
                           data_path=dict_taxon['dataPath'] if 'dataPath' in dict_taxon else None,
                           metadata_path=dict_taxon['metadataPath'] if 'metadataPath' in dict_taxon else None)
@@ -32,7 +40,7 @@ class Taxon:
 
     def to_dict(self):
         dict = {'id': self.id, 'name': self.name, 'color': self.color, 'valuePath': self.value_path,
-                'label': self.label,
+                'label': self.label, 'nodeTypes': self.node_types, 'options': self.options, 'enabled': self.enabled,
                 'dataPath': self.data_path, 'metadataPath': self.metadata_path, 'children': []}
 
         for child in self.children:
