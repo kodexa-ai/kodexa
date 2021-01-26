@@ -1,12 +1,13 @@
 import random
 from typing import List, Optional
+import uuid
 
 
 class Taxon:
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                  value_path: Optional[str] = None, data_path: Optional[str] = None, metadata_path: Optional[str] = None):
-        self.id = id
+        self.id = id if id and len(id) > 0 else str(uuid.uuid4())
         self.name: str = name
         self.label: str = label
         self.color = "#" + ("%06x" % random.randint(0, 0xFFFFFF)) if color is None else color
