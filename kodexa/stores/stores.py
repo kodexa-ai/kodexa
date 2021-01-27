@@ -153,6 +153,42 @@ class RemoteTableDataStore(RemoteStore):
     def get_ref(self):
         return self.ref
 
+    def get_table(self, table: str):
+
+        # We need to get the first set of rows,
+        rows = []
+        row_response = self.get_table_page_request(table, 1)
+
+        # lets work out the last page
+        rows = rows + row_response['contents']
+        total_pages = row_response['totalPages']
+
+        for page in range(2, total_pages):
+            row_response = self.get_table_page_request(table, page)
+            rows = rows + row_response['contents']
+
+        return rows
+
+    def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
+        from kodexa import KodexaPlatform
+
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
+        logger.debug(f"Downloading a specific table from {url}")
+
+        # We need to go through and pull all the pages
+        rows_response = requests.get(
+            url,
+            params={"table": table, "page": page_number, "pageSize": page_size},
+            headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
+
+        if rows_response.status_code == 200:
+            return rows_response.json()
+        else:
+            logger.error("Unable to get table from remote store [" + rows_response.text + "], response " + str(
+                rows_response.status_code))
+            raise Exception("Unable to get table from remote store  [" + rows_response.text + "], response " + str(
+                rows_response.status_code))
+
     def add_rows(self, rows):
         from kodexa import KodexaPlatform
 

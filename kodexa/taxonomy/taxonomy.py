@@ -1,6 +1,6 @@
 import random
 import uuid
-from typing import List, Optional, Dict
+from typing import List, Optional
 
 
 class Taxon:
@@ -26,9 +26,9 @@ class Taxon:
 
     @staticmethod
     def from_dict(dict_taxon):
-        new_taxon = Taxon(label=dict_taxon['label'], name=dict_taxon['name'], id=dict_taxon['id'],
+        new_taxon = Taxon(label=dict_taxon.get('label', None), name=dict_taxon['name'], id=dict_taxon['id'],
                           color=dict_taxon['color'], node_types=dict_taxon['nodeTypes'],
-                          options=dict_taxon['options'], enabled=dict_taxon['enabled'],
+                          options=dict_taxon['options'], enabled=dict_taxon.get('enabled', False),
                           value_path=dict_taxon['valuePath'] if 'valuePath' in dict_taxon else None,
                           data_path=dict_taxon['dataPath'] if 'dataPath' in dict_taxon else None,
                           metadata_path=dict_taxon['metadataPath'] if 'metadataPath' in dict_taxon else None)
