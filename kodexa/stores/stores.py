@@ -153,21 +153,50 @@ class RemoteTableDataStore(RemoteStore):
     def get_ref(self):
         return self.ref
 
+    def get_table_df(self, table: str):
+        import pandas as pd
+
+        table_result = self.get_table(table)
+        return pd.DataFrame(table_result['rows'], columns=table_result['columns'])
+
     def get_table(self, table: str):
 
         # We need to get the first set of rows,
-        rows = []
+        rows: List = []
         row_response = self.get_table_page_request(table, 1)
 
         # lets work out the last page
-        rows = rows + row_response['contents']
+        rows = rows + row_response['content']
         total_pages = row_response['totalPages']
 
         for page in range(2, total_pages):
             row_response = self.get_table_page_request(table, page)
-            rows = rows + row_response['contents']
+            rows = rows + row_response['content']
 
-        return rows
+        # Once we have all the rows we will then get a list of all the columns
+        # and convert this into a more nature form for structured data
+
+        column_names: List[str] = []
+        for row in rows:
+            for key in row['data'].keys():
+                if key not in column_names:
+                    column_names.append(key)
+
+        # Now lets get all the rows and make sure we put them in the same
+        # order as the columns
+
+        new_rows: List[List[str]] = []
+
+        for row in rows:
+            new_row = []
+            for column_name in column_names:
+                new_row.append(row['data'].get(column_name, None))
+            new_rows.append(new_row)
+
+        return {
+            "columns": column_names,
+            "rows": new_rows
+        }
 
     def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
         from kodexa import KodexaPlatform
