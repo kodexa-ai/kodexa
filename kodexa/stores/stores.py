@@ -742,6 +742,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             if content_object_response.status_code == 200:
                 from addict import Dict
                 content_object = Dict(json.loads(content_object_response.text))
+                return content_object
             else:
                 logger.error("Execution creation failed [" + content_object_response.text + "], response " + str(
                     content_object_response.status_code))

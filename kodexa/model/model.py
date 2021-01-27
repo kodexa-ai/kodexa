@@ -1288,6 +1288,12 @@ class SourceMetadata:
     # noting that multiple documents coming from an original source
     lineage_document_uuid: Optional[str] = None
 
+    # The UUID of the original first document
+    source_document_uuid: Optional[str] = None
+
+    # The UUID of the document in a PDF form (used for archiving and preview)
+    pdf_document_uuid: Optional[str] = None
+
     @classmethod
     def from_dict(cls, env):
         return cls(**{
