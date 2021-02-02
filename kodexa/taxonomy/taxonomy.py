@@ -26,9 +26,9 @@ class Taxon:
 
     @staticmethod
     def from_dict(dict_taxon):
-        new_taxon = Taxon(label=dict_taxon.get('label', None), name=dict_taxon['name'], id=dict_taxon['id'],
-                          color=dict_taxon['color'], node_types=dict_taxon['nodeTypes'],
-                          options=dict_taxon['options'], enabled=dict_taxon.get('enabled', False),
+        new_taxon = Taxon(label=dict_taxon.get('label', None), name=dict_taxon['name'], id=dict_taxon.get('id', None),
+                          color=dict_taxon.get('color', None), node_types=dict_taxon.get('nodeTypes', None),
+                          options=dict_taxon.get('options', None), enabled=dict_taxon.get('enabled', False),
                           value_path=dict_taxon['valuePath'] if 'valuePath' in dict_taxon else None,
                           data_path=dict_taxon['dataPath'] if 'dataPath' in dict_taxon else None,
                           metadata_path=dict_taxon['metadataPath'] if 'metadataPath' in dict_taxon else None)
@@ -58,8 +58,13 @@ class Taxonomy:
         self.enabled = enabled
         self.ref = ref
 
-    def add_taxon(self, label: str, name: str):
-        new_taxon = Taxon(label, name)
+    def add_taxon(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
+                  value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
+                  metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
+
+        new_taxon = Taxon(label, name, id=id, color=color, value_path=value_path, data_path=data_path, 
+                          options=options, metadata_path=metadata_path, node_types=node_types, enabled=enabled)
+
         self.taxons.append(new_taxon)
         return new_taxon
 
