@@ -18,7 +18,7 @@ def test_interesting_pipeline():
     training_prep.add_step(test_step)
     training_prep.add_label('training_document')
 
-    context = training_prep.run()
+    training_prep.run()
 
     assert training_documents.count() == 1
     assert training_documents.get_by_uuid(training_documents.list_objects()[0]['uuid']) is not None
@@ -28,6 +28,6 @@ def test_interesting_pipeline():
     training_pipeline.add_store('my-model-store', model_store)
     training_pipeline.add_step(test_model_store)
 
-    context = training_pipeline.run()
+    training_pipeline.run()
 
     assert model_store.get('cheese.txt').read().decode('ascii') == 'so cheesy'
