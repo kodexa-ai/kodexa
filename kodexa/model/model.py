@@ -6,7 +6,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 
 import msgpack
 from addict import Dict
@@ -853,7 +853,7 @@ class ContentNode(object):
         else:
             tagged_nodes = self.select('.')
         
-        value_groups = {}
+        value_groups:Dict[str, Any] = {}
         for tag_node in tagged_nodes:
             tag_feature_vals = tag_node.get_feature_value('tag', tag_name)
             if tag_feature_vals:
