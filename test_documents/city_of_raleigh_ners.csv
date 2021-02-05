@@ -1,0 +1,29 @@
+,entity_text,entity_label,start_offset,end_offset
+0,Moody’s: Aaa S&P,ORG,9,25
+1,AAA Fitch,ORG,27,36
+2,the Local Government Commission,ORG,136,167
+3,North Carolina,GPE,171,185
+4,the City of Raleigh,GPE,190,209
+5,North Carolina,GPE,211,225
+6,"68,000,000",MONEY,646,656
+7,Raleigh,GPE,665,672
+8,North Carolina,ORG,674,688
+9,Tax Treatment,ORG,805,818
+10,Bond Counsel,ORG,837,849
+11,the City of Raleigh,GPE,918,937
+12,North Carolina,GPE,939,953
+13,the “City,FAC,955,964
+14,the Internal Revenue Code,ORG,1023,1048
+15,1986,DATE,1052,1056
+16,the “Code,LAW,1070,1079
+17,Bond Counsel,ORG,1629,1641
+18,North Carolina,GPE,1721,1735
+19,the City.,GPE,2000,2009
+20,February 1 and August 1,DATE,2033,2056
+21,"August 1, 2017",DATE,2069,2083
+22,"5,000",MONEY,2100,2105
+23,Womble Carlyle Sandridge & Rice,ORG,2199,2230
+24,LLP,ORG,2232,2235
+25,Raleigh,GPE,2237,2244
+26,North Carolina,GPE,2246,2260
+27,"January 24, 2017",DATE,2300,2316

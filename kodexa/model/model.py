@@ -757,7 +757,7 @@ class ContentNode(object):
             for child_node in node_to_check.children:
                 result = tag_node_position(child_node, start, end, node_data, tag_uuid)
                 content_length = content_length + result
-                if result < 0:
+                if result < 0 or (end - result) < 0:
                     return -1
                 else:
                     end = end - result
@@ -826,6 +826,49 @@ class ContentNode(object):
                 values.extend(child.get_tag_values(tag_name, include_children))
 
         return values
+
+
+    def get_related_tag_values(self, tag_name:str, include_children:bool=False, value_separator:str=' '):
+        
+        """
+        Get the values for a specific tag name, grouped by uuid
+
+        :param tag_name: tag name
+        :param include_children: include the children of this node
+        :param value_separator: the string to be used to join related tag values
+        :return: a list of the tag values
+        """
+
+        def group_tag_values(group_dict, feature_val):
+            # we know the names of all these tags are the same, but we want to group them if they share the same uuid
+            if feature_val['uuid'] in value_groups.keys():
+                # we've seen this UUID - add it's value to the group
+                group_dict[feature_val['uuid']].append(feature_val['value'])
+            else:
+                # first occurrence
+                group_dict[feature_val['uuid']] = [feature_val['value']]
+
+        if include_children:
+            tagged_nodes = self.select('//*[hasTag("' + tag_name + '")]')
+        else:
+            tagged_nodes = self.select('.')
+        
+        value_groups = {}
+        for tag_node in tagged_nodes:
+            tag_feature_vals = tag_node.get_feature_value('tag', tag_name)
+            if tag_feature_vals:
+                if not isinstance(tag_feature_vals, list):
+                    tag_feature_vals = [tag_feature_vals]
+
+                for v in tag_feature_vals:
+                    group_tag_values(value_groups, v)
+
+        value_strings = []
+        for k in value_groups.keys():
+            value_strings.append(value_separator.join(value_groups[k]))
+                    
+        return value_strings
+
 
     def get_tag(self, tag_name):
         """

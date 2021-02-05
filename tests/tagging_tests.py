@@ -1,6 +1,8 @@
 from kodexa import Document, Pipeline, NodeTagger, NodeTagCopy
 import os
 import uuid
+import pandas as pd
+import collections
 
 def get_test_directory():
     return os.path.dirname(os.path.abspath(__file__)) + "/../test_documents/"
@@ -176,3 +178,22 @@ def test_tag_copy():
     # the uuids for the WOOL_INFO and FLEECE_INFO features should be unique
     uuid_intersection = fleece_uuids.intersection(wool_uuids)
     assert len(list(uuid_intersection)) == 0
+
+
+def test_tag_with_grouped_values():
+    kdxa_doc = Document.from_kdxa(get_test_directory() + 'CityOfRaleigh_ocr.kdxa')
+
+    # This CSV contains the NER labels and the string offsets that we expect to find on the first page (generated via spaCy)
+    ner_df = pd.read_csv(get_test_directory() + 'city_of_raleigh_ners.csv')
+
+    for i, row in ner_df.iterrows():
+        kdxa_doc.select('//page')[0].tag(row['entity_label'], fixed_position=(row['start_offset'], row['end_offset']))
+
+
+    # now let's check the entities that were tagged
+    for ent_label in ner_df.entity_label.unique():
+        grouped_tags = kdxa_doc.select('//page')[0].get_related_tag_values(ent_label, True)
+        orig_org_ners = ner_df.loc[ner_df['entity_label'] == ent_label]['entity_text'].to_list()
+
+        assert len(orig_org_ners) == len(grouped_tags)
+        assert collections.Counter(grouped_tags) == collections.Counter(orig_org_ners)
