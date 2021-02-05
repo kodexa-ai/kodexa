@@ -6,7 +6,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any
 
 import msgpack
 from addict import Dict
@@ -584,7 +584,7 @@ class ContentNode(object):
         :param str existing_tag_name: The name of the existing tag whose values will be copied to the new tag.
         :param str new_tag_name: The name of the new tag.  This must be different from the existing_tag_name.
         """
-        if existing_tag_name == None or new_tag_name == None or existing_tag_name == new_tag_name:
+        if existing_tag_name is None or new_tag_name is None or existing_tag_name == new_tag_name:
             return  # do nothing, just exit function
 
         for node in self.select(selector):
@@ -598,7 +598,7 @@ class ContentNode(object):
                     previous_uuid = None
                     new_uuid = None
                     for val in sorted_tag_values:
-                        if previous_uuid == None or previous_uuid != val['uuid']:
+                        if previous_uuid is None or previous_uuid != val['uuid']:
                             new_uuid = str(uuid.uuid4())
 
                         previous_uuid = val['uuid']
@@ -827,9 +827,7 @@ class ContentNode(object):
 
         return values
 
-
-    def get_related_tag_values(self, tag_name:str, include_children:bool=False, value_separator:str=' '):
-        
+    def get_related_tag_values(self, tag_name: str, include_children: bool = False, value_separator: str = ' '):
         """
         Get the values for a specific tag name, grouped by uuid
 
@@ -852,8 +850,8 @@ class ContentNode(object):
             tagged_nodes = self.select('//*[hasTag("' + tag_name + '")]')
         else:
             tagged_nodes = self.select('.')
-        
-        value_groups:Dict[str, Any] = {}
+
+        value_groups: Dict[str, Any] = {}
         for tag_node in tagged_nodes:
             tag_feature_vals = tag_node.get_feature_value('tag', tag_name)
             if tag_feature_vals:
@@ -866,9 +864,8 @@ class ContentNode(object):
         value_strings = []
         for k in value_groups.keys():
             value_strings.append(value_separator.join(value_groups[k]))
-                    
-        return value_strings
 
+        return value_strings
 
     def get_tag(self, tag_name):
         """
@@ -1746,7 +1743,7 @@ class DocumentStore:
         from rich.table import Table
         from rich import print
 
-        table = Table(title=f"Listing Objects")
+        table = Table(title="Listing Objects")
 
         cols = ['id', 'content_type', 'path']
         for col in cols:

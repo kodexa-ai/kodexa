@@ -73,6 +73,7 @@ def test_tag_key_value_include_exclude():
     step.process(document, context)
     assert context.get_store('test_store').count() == 5
 
+
 @pytest.mark.skip
 def test_rollup_of_pdf():
     # first test - collapsing words and lines up to their common parent
