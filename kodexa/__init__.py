@@ -10,7 +10,8 @@ from .model import DocumentMetadata, ContentNode, ContentFeature, SourceMetadata
     Document, RemoteStore, DocumentStore
 from .pipeline import Pipeline, PipelineStatistics, PipelineContext
 from .sinks import InMemoryDocumentSink, FolderSink
-from .steps import NodeTagger, NodeTagCopy, TextParser, RollupTransformer, TagsToKeyValuePairExtractor
+from .steps import NodeTagger, NodeTagCopy, TextParser, RollupTransformer, TagsToKeyValuePairExtractor, \
+    KodexaProcessingException
 from .stores import JsonDocumentStore, TableDataStore, DictDataStore, DataStoreHelper, LocalDocumentStore, \
     RemoteDocumentStore, RemoteTableDataStore, RemoteDictDataStore, RemoteModelStore, LocalModelStore
 from .taxonomy import Taxonomy, Taxon, RemoteTaxonomy

@@ -11,6 +11,9 @@ class KodexaProcessingException(Exception):
         self.documentation_url = documentation_url
         super().__init__(self.message)
 
+    def __str__(self):
+        return f'{self.message} ::: {self.description}'
+
 
 class NodeTagger:
     """
