@@ -130,7 +130,7 @@ class LocalDocumentStore(DocumentStore):
             if family.id == document_family_id:
                 family.add_document(document, document_relationship)
 
-    def get_document_by_content_object(self, content_object: ContentObject):
+    def get_document_by_content_object(self, content_object: ContentObject) -> Document:
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
 
     def put(self, path: str, document: Document):
