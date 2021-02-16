@@ -113,8 +113,12 @@ class LocalDocumentStore(DocumentStore):
                 return family
         return None
 
-    def list_objects(self) -> List[DocumentFamily]:
-        return self.metastore
+    def list_objects(self) -> List[ContentObject]:
+        co_list: List[ContentObject] = []
+        for family in self.metastore:
+            co_list.extend(family.content_objects)
+
+        return co_list
 
     def count(self) -> int:
         return len(self.metastore)

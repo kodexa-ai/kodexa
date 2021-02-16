@@ -1728,7 +1728,7 @@ class DocumentStore:
     def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
         pass
 
-    def list_objects(self) -> List:
+    def list_objects(self) -> List[ContentObject]:
         pass
 
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
