@@ -6,6 +6,9 @@ from kodexa.model.document_families import ContentEvent
 
 class TestAction:
 
+    def __init__(self, cheese: str = None):
+        self.cheese = cheese
+
     def get_name(self):
         return "Hello"
 

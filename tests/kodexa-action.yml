@@ -10,3 +10,7 @@ services:
     step:
       package: kodexa.testing
       class: TestAction
+    metadata:
+      options:
+        - name: cheese
+          required: false
