@@ -1,4 +1,3 @@
-import dataclasses
 import json
 import logging
 import os
@@ -479,6 +478,7 @@ class DataStoreHelper:
                 if 'ref' in dict:
                     return RemoteDocumentStore(dict['ref'])
                 else:
+                    from kodexa import LocalDocumentStore
                     return LocalDocumentStore(dict['data']['path'])
             elif 'MODEL' == dict['type']:
                 if 'ref' in dict:
@@ -490,113 +490,6 @@ class DataStoreHelper:
         else:
             logger.info(f"Unknown store")
             return None
-
-
-class LocalDocumentStore(DocumentStore):
-
-    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = 'ALL'):
-
-        modes = ['ALL', 'ONLY_NEW']
-
-        if mode not in modes:
-            raise Exception(f"LocalDocumentStore mode must be one of {','.join(modes)}")
-
-        self.store_path = store_path
-        self.index = 0
-        self.metastore: List[Dict] = []
-        self.mode = mode
-
-        path = Path(store_path)
-
-        if force_initialize and path.exists():
-            shutil.rmtree(store_path)
-
-        if path.is_file():
-            raise Exception("Unable to load store, since it is pointing to a file?")
-        elif not path.exists():
-            logger.info(f"Creating new local document store in {store_path}")
-            path.mkdir(parents=True)
-
-            # Create an empty index file
-            self.metastore = []
-            self.write_metastore()
-
-        self.read_metastore()
-
-        logger.info(f"Found {len(self.metastore)} documents in {store_path}")
-
-    def to_dict(self):
-        return {
-            "type": "DOCUMENT",
-            "data": {
-                "path": self.store_path
-            }
-        }
-
-    def accept(self, document: Document):
-        if self.mode == 'ALL':
-            return True
-        if self.mode == 'ONLY_NEW':
-            return not self.exists(document)
-
-    def read_metastore(self):
-        """
-        Read the metadata store
-        """
-        self.metastore: List[Dict] = []
-        with open(os.path.join(self.store_path, 'metastore.json')) as f:
-            self.metastore = json.load(f)
-
-    def write_metastore(self):
-        """
-        Method to write the JSON store index back to store path
-        """
-        with open(os.path.join(self.store_path, 'metastore.json'), 'w') as f:
-            json.dump(self.metastore, f)
-
-    def get_by_uuid(self, uuid: str) -> Optional[Document]:
-        for metadata in self.metastore:
-            if metadata['uuid'] == uuid:
-                return Document.from_kdxa(os.path.join(self.store_path, metadata['uuid']) + ".kdxa")
-        return None
-
-    def get_by_path(self, path: str) -> Optional[Document]:
-        for metadata in self.metastore:
-            if metadata['path'] == path:
-                return Document.from_kdxa(os.path.join(self.store_path, metadata['uuid']) + ".kdxa")
-        return None
-
-    def list_objects(self) -> List[Dict]:
-        return self.metastore
-
-    def count(self) -> int:
-        return len(self.metastore)
-
-    def load_kdxa(self, path: str):
-        document = Document.from_kdxa(path)
-        self.put(document.uuid, document)
-
-    def put(self, path: str, document: Document):
-        document.to_kdxa(os.path.join(self.store_path, document.uuid) + ".kdxa")
-        self.metastore.append(
-            {'metadata': document.metadata, 'source': dataclasses.asdict(document.source), 'uuid': document.uuid,
-             'id': document.uuid,
-             'content_type': 'Document',
-             'path': path, 'labels': document.get_labels()})
-        self.write_metastore()
-
-    def exists(self, document):
-        """
-        Look to see if we have document with the same original path and original filename
-
-        :param document: document to check
-        :return: True if it is already in the document store
-        """
-        for metadata in self.metastore:
-            if document.source.original_path == metadata['source']['original_path'] and \
-                    document.source.original_filename == metadata['source']['original_filename']:
-                return True
-        return False
 
 
 class RemoteDocumentStore(DocumentStore, RemoteStore):

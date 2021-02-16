@@ -1,0 +1,23 @@
+from typing import List
+
+from kodexa import Assistant, Pipeline
+from kodexa.model.document_families import ContentEvent
+
+
+class TestAction:
+
+    def get_name(self):
+        return "Hello"
+
+
+class TestAssistant(Assistant):
+
+    def process_event(self, event: ContentEvent) -> List[Pipeline]:
+        # This is just an example of an assistant
+        # basically we are just going to return a pipeline that
+        # adds a label to the document - creating a new version
+
+        pipeline = Pipeline()
+        pipeline.add_label('hello')
+
+        return [pipeline]

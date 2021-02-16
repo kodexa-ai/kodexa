@@ -8,7 +8,6 @@ import time
 import traceback
 import uuid
 from collections import KeysView
-from enum import Enum
 from inspect import signature
 from textwrap import dedent
 from typing import List, Optional, Dict
@@ -18,7 +17,7 @@ import yaml
 
 from kodexa.connectors import FolderConnector
 from kodexa.connectors.connectors import get_caller_dir, DocumentStoreConnector
-from kodexa.model import Document, Store
+from kodexa.model import Document, Store, ContentObject
 from kodexa.stores.stores import DocumentStore
 
 logger = logging.getLogger('kodexa.pipeline')
@@ -26,41 +25,6 @@ logger = logging.getLogger('kodexa.pipeline')
 
 def new_id():
     return str(uuid.uuid4()).replace("-", "")
-
-
-class ContentType(Enum):
-    DOCUMENT = 'DOCUMENT'
-    NATIVE = 'NATIVE'
-
-
-class ContentObject:
-
-    def __init__(self, name="untitled", id=new_id(), content_type=ContentType.DOCUMENT, tags=None, metadata=None,
-                 store_ref=None, labels=None):
-        if labels is None:
-            labels = []
-        if metadata is None:
-            metadata = {}
-        if tags is None:
-            tags = []
-        self.id = id
-        self.name = name
-        self.content_type = content_type
-        self.tags = tags
-        self.store_ref = store_ref
-        self.metadata = metadata
-        self.labels = labels
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'tags': self.tags,
-            'labels': self.labels,
-            'content_type': self.content_type.name,
-            'metadata': self.metadata,
-            'name': self.name,
-            'store_ref': self.store_ref
-        }
 
 
 class InMemoryContentProvider:
@@ -424,7 +388,7 @@ class Pipeline:
     """
     context: PipelineContext
 
-    def __init__(self, connector, name: str = "Default", stop_on_exception: bool = True,
+    def __init__(self, connector=None, name: str = "Default", stop_on_exception: bool = True,
                  logging_level=logger.info, apply_lineage: bool = True):
         logger.info(f"Initializing a new pipeline {name}")
 
@@ -594,6 +558,9 @@ class Pipeline:
         """
         if parameters is None:
             parameters = {}
+
+        if self.connector is None:
+            raise Exception("You can not run a pipeline that has no connector in place")
 
         self.context = PipelineContext()
         self.context.stop_on_exception = self.stop_on_exception

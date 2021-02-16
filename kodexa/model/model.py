@@ -14,6 +14,43 @@ from addict import Dict
 from kodexa.mixins import registry
 
 
+class ContentType(Enum):
+    DOCUMENT = 'DOCUMENT'
+    NATIVE = 'NATIVE'
+
+
+class ContentObject:
+
+    def __init__(self, name="untitled", id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
+                 store_ref=None, labels=None):
+        if labels is None:
+            labels = []
+        if metadata is None:
+            metadata = {}
+        if tags is None:
+            tags = []
+        from kodexa.pipeline import new_id
+        self.id = new_id() if id is None else id
+        self.name = name
+        self.content_type = content_type
+        self.tags = tags
+        self.store_ref = store_ref
+        self.metadata = metadata
+        self.labels = labels
+        self.path = name
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'tags': self.tags,
+            'labels': self.labels,
+            'content_type': self.content_type.name,
+            'metadata': self.metadata,
+            'name': self.name,
+            'store_ref': self.store_ref
+        }
+
+
 class Store:
     """
     Base interface for Store
@@ -1683,12 +1720,18 @@ class Document(object):
 
 
 class DocumentStore:
-    """A document store supports storing, listing and retrieving Kodexa documents"""
+    """A document store supports storing, listing and retrieving Kodexa documents and document families"""
+
+    def get_ref(self) -> str:
+        pass
 
     def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
         pass
 
-    def list_objects(self) -> List[Dict]:
+    def list_objects(self) -> List:
+        pass
+
+    def get_document_by_content_object(self, content_object: ContentObject):
         pass
 
     def list(self):
@@ -1698,6 +1741,9 @@ class DocumentStore:
     def query(self, query: str = "*"):
         objects = self.query_objects(query)
         self._draw_table(objects)
+
+    def register_listener(self, listener):
+        pass
 
     def _draw_table(self, objects):
         from rich.table import Table
@@ -1728,19 +1774,6 @@ class DocumentStore:
 
     def accept(self, document: Document):
         return True
-
-
-class FileStore:
-    """A file store supports storing, listing and retrieving native files"""
-
-    def get(self, path: str) -> Document:
-        pass
-
-    def list(self) -> List[str]:
-        pass
-
-    def put(self, path: str, document: Document):
-        pass
 
 
 class ModelStore:
