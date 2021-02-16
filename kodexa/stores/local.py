@@ -25,7 +25,7 @@ class LocalDocumentStore(DocumentStore):
         self.index = 0
         self.metastore: List[DocumentFamily] = []
         self.mode = mode
-        self.listeners = []
+        self.listeners: List = []
 
         path = Path(store_path)
 
@@ -86,9 +86,11 @@ class LocalDocumentStore(DocumentStore):
             f.write(jsonpickle.encode(self.metastore))
 
     def get_by_uuid(self, uuid: str) -> Optional[Document]:
-        for metadata in self.metastore:
-            if metadata['uuid'] == uuid:
-                return Document.from_kdxa(os.path.join(self.store_path, metadata['uuid']) + ".kdxa")
+        for family in self.metastore:
+            for content_object in family.content_objects:
+
+                if content_object.id == uuid:
+                    return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
         return None
 
     def get_by_path(self, path: str) -> Optional[Document]:
