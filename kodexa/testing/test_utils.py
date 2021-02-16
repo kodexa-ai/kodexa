@@ -229,6 +229,9 @@ class AssistantTestHarness:
         raise Exception(f"Unable to get store ref {event.document_family.store_ref}")
 
 
+class OptionException(Exception):
+    pass
+
 class ExtensionPackUtil:
 
     def __init__(self, file_path='kodexa.yml'):
@@ -246,6 +249,19 @@ class ExtensionPackUtil:
         for service in self.kodexa_metadata.services:
             if service.type == 'action' and service.slug == action_slug:
                 # TODO We need to validate all the options
+
+                if len(service.metadata.options) > 0:
+                    option_names = []
+                    for option in service.metadata.options:
+                        option_names.append(option.name)
+                        if option.name not in options and option.default is not None:
+                            options[option.name] = option.default
+                        if option.required and option.name not in options:
+                            raise OptionException(f"Missing required option {option.name}")
+
+                    for option_name in options.keys():
+                        if option_name not in option_names:
+                            raise OptionException(f"Unexpected option {option_name}")
 
                 # We need to create and return our action
                 module = importlib.import_module(service.step.package)
