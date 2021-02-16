@@ -1,0 +1,12 @@
+---
+slug: kodexa-test-extension-pack
+type: extensionPack
+name: Test Extension Pack
+description: A test extension pack definition
+services:
+  - slug: my-assistant
+    name: Test Assistant
+    type: assistant
+    assistant:
+      package: kodexa.testing
+      class: TestAssistant

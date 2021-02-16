@@ -1,0 +1,12 @@
+---
+slug: kodexa-test-extension-pack
+type: extensionPack
+name: Test Extension Pack
+description: A test extension pack definition
+services:
+  - slug: my-action
+    name: Test Action
+    type: action
+    step:
+      package: kodexa.testing
+      class: TestAction
