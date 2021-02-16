@@ -6,7 +6,7 @@ from typing import List, Dict, Optional
 import requests
 
 from kodexa.model import Document, DocumentStore, RemoteStore, ModelStore, ContentObject
-from kodexa.stores.local import LocalModelStore
+from kodexa.stores.local import LocalModelStore, TableDataStore
 
 logger = logging.getLogger('kodexa.stores')
 
