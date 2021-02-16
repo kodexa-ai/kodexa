@@ -6,7 +6,7 @@ from typing import List, Optional, Dict
 
 import jsonpickle
 
-from kodexa.model import DocumentFamily, DocumentStore, Document, ContentObject
+from kodexa.model import DocumentFamily, DocumentStore, Document, ContentObject, ModelStore, Store
 from kodexa.model.document_families import ContentEvent, DocumentRelationship
 
 logger = logging.getLogger('kodexa.stores')
@@ -167,3 +167,137 @@ class LocalDocumentStore(DocumentStore):
             if document.source.original_filename == family.path:
                 return True
         return False
+
+
+class LocalModelStore(ModelStore):
+
+    def __init__(self, store_path: str, force_initialize=False):
+        self.store_path = store_path
+        path = Path(store_path)
+
+        if force_initialize and path.exists():
+            shutil.rmtree(store_path)
+
+        if path.is_file():
+            raise Exception("Unable to load store, since it is pointing to a file?")
+        elif not path.exists():
+            path.mkdir(parents=True)
+
+    def to_dict(self):
+        return {
+            "type": "MODEL",
+            "data": {
+                "path": self.store_path
+            }
+        }
+
+    def get(self, object_path: str):
+        if Path(os.path.join(self.store_path, object_path)).is_file():
+            return open(os.path.join(self.store_path, object_path), 'rb')
+        else:
+            return None
+
+    def put(self, object_path: str, content):
+        path = Path(object_path)
+        with open(os.path.join(self.store_path, path), 'wb') as object_file:
+            object_file.write(content)
+
+
+class TableDataStore(Store):
+    """
+    Stores data as a list of lists that can represent a table.
+
+    This is a good store when you are capturing nested or tabular data.
+
+    :param columns: a list of the column names (default to dynamic)
+    :param rows: initial set of rows (default to empty)
+    :param source_documents: initial dictionary of document UUID to row links (default to empty)
+
+    """
+
+    def __init__(self, columns=None, rows=None, source_documents=None):
+        if source_documents is None:
+            source_documents = {}
+        if rows is None:
+            rows = []
+        if columns is None:
+            columns = []
+        self.columns: List[str] = columns
+        self.rows: List[List] = rows
+        self.source_documents: Dict[str, Dict] = source_documents
+
+        from kodexa.pipeline import PipelineContext
+
+        self.pipeline_context: Optional[PipelineContext] = None
+
+    """
+    Return the store as a dict for serialization
+    """
+
+    def to_dict(self):
+        """
+        Create a dictionary representing this TableDataStore's structure and content.
+
+            >>> table_data_store.to_dict()
+
+        :return: The properties of this TableDataStore structured as a dictionary.
+        :rtype: dict
+        """
+
+        return {
+            "type": "TABLE",
+            "data": {
+                "columns": self.columns,
+                "rows": self.rows,
+                "source_documents": self.source_documents
+            }
+        }
+
+    def clear(self):
+        self.rows = []
+
+    def to_df(self):
+        import pandas as pd
+
+        if not self.columns:
+            return pd.DataFrame(self.rows)
+        else:
+            return pd.DataFrame(self.rows, columns=self.columns)
+
+    def set_pipeline_context(self, pipeline_context):
+        self.pipeline_context = pipeline_context
+
+    def add(self, row):
+        """
+        Writes a row to the Data Store
+
+        :param row: the row (as a list) to add
+        """
+        self.rows.append(row)
+
+        if self.pipeline_context and self.pipeline_context.current_document:
+            current_document = self.pipeline_context.get_current_document()
+            if current_document.uuid not in self.source_documents:
+                self.source_documents[current_document.uuid] = {"metadata": current_document.metadata, "rows": []}
+            self.source_documents[current_document.uuid]["rows"].append(len(self.rows) - 1)
+
+    def count(self):
+        """
+        Returns the number of rows in the store
+
+        :return: number of rows
+        """
+        return len(self.rows)
+
+    def merge(self, other_store):
+        """
+        Merge another table store into this store
+
+        :param other_store:
+        :return: the other store
+        """
+        self.rows = self.rows + other_store.rows
+
+    @classmethod
+    def from_dict(cls, store_dict):
+        return TableDataStore(columns=store_dict['data']['columns'], rows=store_dict['data']['rows'])
