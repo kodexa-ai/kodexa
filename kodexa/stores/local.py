@@ -71,8 +71,8 @@ class LocalDocumentStore(DocumentStore):
         if document.document_family:
             self.put(document.document_family.path, document)
         else:
-            self.put(document.source.original_filename, document)
-
+            if document.source.original_filename is not None:
+                self.put(document.source.original_filename, document)
 
     def get_ref(self) -> str:
         return self.store_path
