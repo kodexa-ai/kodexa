@@ -1,6 +1,6 @@
 import os
 
-from kodexa import Document, Pipeline, DocumentMetadata, JsonDocumentStore, TagsToKeyValuePairExtractor, NodeTagger, \
+from kodexa import Document, Pipeline, DocumentMetadata, TagsToKeyValuePairExtractor, NodeTagger, \
     LocalDocumentStore, TableDataStore
 from kodexa.testing.test_utils import compare_store
 
@@ -17,19 +17,6 @@ def get_test_document():
 
     document.content_node.add_child(document.create_node(node_type='bar', content='fishstick'))
     return document
-
-
-def test_basic_json_store():
-    store = JsonDocumentStore(store_path='/tmp/json-store', force_initialize=True)
-
-    assert store.count() == 0
-    # need to add more than one document to the store to make sure indexes are written
-    # to the index.idx correctly
-    store.add(get_test_document())
-    store.add(get_test_document())
-
-    store2 = JsonDocumentStore(store_path='/tmp/json-store')
-    assert store2.count() == 2
 
 
 def test_table_data_store():

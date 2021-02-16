@@ -1370,6 +1370,14 @@ class Document(object):
         self.taxonomies: List[str] = []
         self.classifications: List[str] = []
 
+        # We have these - we don't serialize them
+        # but it allows us to capture the relationship
+        # from a document to its content object and family
+
+        from kodexa.model import DocumentFamily
+        self.document_family: Optional[DocumentFamily] = None
+        self.content_object: Optional[ContentObject] = None
+
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
@@ -1657,9 +1665,7 @@ class Document(object):
         url_document.metadata.connector_options.url = url
         url_document.metadata.connector_options.headers = headers
         url_document.source.connector = 'url'
-        import base64
-        encoded_url = base64.b64encode(url.encode('ascii'))
-        url_document.source.original_filename = encoded_url.decode('ascii')
+        url_document.source.original_filename = url
         url_document.source.original_path = url
         url_document.source.headers = headers
         return url_document

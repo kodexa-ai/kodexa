@@ -46,6 +46,34 @@ class LocalDocumentStore(DocumentStore):
 
         logger.info(f"Found {len(self.metastore)} documents in {store_path}")
 
+    def get_name(self):
+        return "Local Document Store"
+
+    def __iter__(self):
+        self.index = 0
+        return self
+
+    def __next__(self):
+        if self.index >= len(self.metastore):
+            raise StopIteration
+        content_object = self.metastore[self.index].content_objects[-1]
+        document = self.get_document_by_content_object(content_object)
+
+        # Add the details of the document family and content object
+
+        document.document_family = self.metastore[self.index]
+        document.content_object = content_object
+        self.index = self.index + 1
+        return document
+
+    def sink(self, document: Document):
+
+        if document.document_family:
+            self.put(document.document_family.path, document)
+        else:
+            self.put(document.source.original_filename, document)
+
+
     def get_ref(self) -> str:
         return self.store_path
 
@@ -113,6 +141,12 @@ class LocalDocumentStore(DocumentStore):
                 return family
         return None
 
+    def get_latest_document(self, path: str) -> Optional[Document]:
+        for family in self.metastore:
+            if family.path == path:
+                return self.get_document_by_content_object(family.content_objects[-1])
+        return None
+
     def list_objects(self) -> List[ContentObject]:
         co_list: List[ContentObject] = []
         for family in self.metastore:
@@ -121,6 +155,11 @@ class LocalDocumentStore(DocumentStore):
         return co_list
 
     def count(self) -> int:
+        """
+        Returns a count of the number of document families
+
+        :return:
+        """
         return len(self.metastore)
 
     def load_kdxa(self, path: str):
