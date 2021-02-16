@@ -1,7 +1,7 @@
 import errno
 import importlib
 import logging
-from typing import cast, List, Optional
+from typing import cast, List
 
 from addict import Dict, addict
 
@@ -204,10 +204,11 @@ class AssistantTestHarness:
             if pipeline_context.output_document is not None:
                 # We need to build the relationship between the old and the new
 
-                document_relationship = DocumentRelationship("DERIVED",event.content_object.id, None, {'type':'assistant'})
+                document_relationship = DocumentRelationship("DERIVED", event.content_object.id, None,
+                                                             {'type': 'assistant'})
 
-                store.add_related_document_to_family(event.document_family.id, document_relationship,  pipeline_context.output_document)
-
+                store.add_related_document_to_family(event.document_family.id, document_relationship,
+                                                     pipeline_context.output_document)
 
             # We need to handle the context here, basically we are going to take the result
             # of the pipeline as a new document and add it to the family?? think about that?
@@ -220,11 +221,12 @@ class AssistantTestHarness:
     def register_local_document_store(self, store: LocalDocumentStore):
         pass
 
-    def get_store(self, event: ContentEvent) -> Optional[DocumentStore]:
+    def get_store(self, event: ContentEvent) -> DocumentStore:
         for store in self.stores:
             if event.document_family.store_ref == store.get_ref():
                 return store
-        return None
+
+        raise Exception(f"Unable to get store ref {event.document_family.store_ref}")
 
 
 class ExtensionPackUtil:
