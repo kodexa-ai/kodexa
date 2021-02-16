@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 
 import requests
 
-from kodexa.model import Document, Store, DocumentStore, RemoteStore, ModelStore
+from kodexa.model import Document, Store, DocumentStore, RemoteStore, ModelStore, ContentObject
 
 logger = logging.getLogger('kodexa.stores')
 
@@ -721,7 +721,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 f"Exception occurred while trying to fetch objects [{list_content.status_code}]")
         return list_content.json()['content']
 
-    def list_objects(self) -> List[Dict]:
+    def list_objects(self) -> List[ContentObject]:
         """
         List the objects in the remote document store
 
@@ -734,6 +734,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         if list_content.status_code != 200:
             raise Exception(
                 f"Exception occurred while trying to fetch objects [{list_content.status_code}]")
+
+        # TODO serialization
+
         return list_content.json()['content']
 
     def __iter__(self):
