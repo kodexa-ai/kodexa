@@ -1731,7 +1731,11 @@ class DocumentStore:
     def list_objects(self) -> List:
         pass
 
-    def get_document_by_content_object(self, content_object: ContentObject):
+    def add_related_document_to_family(self, document_family_id: str, document_relationship,
+                                       document: Document):
+        pass
+
+    def get_document_by_content_object(self, content_object: ContentObject) -> Optional[Document]:
         pass
 
     def list(self):
