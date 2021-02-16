@@ -1735,7 +1735,7 @@ class DocumentStore:
                                        document: Document):
         pass
 
-    def get_document_by_content_object(self, content_object: ContentObject) -> Optional[Document]:
+    def get_document_by_content_object(self, content_object: ContentObject) -> Document:
         pass
 
     def list(self):
