@@ -7,7 +7,7 @@ def test_basic_assistant():
     # The assistant will monitor this and so we will actually interact through the store to
     # see the processing
 
-    extension_pack_util = ExtensionPackUtil("kodexa-assistant.yml")
+    extension_pack_util = ExtensionPackUtil("tests/kodexa-assistant.yml")
     lds = LocalDocumentStore('/tmp/assistant-lds', force_initialize=True)
     assistant_harness = extension_pack_util.get_assistant_test_harness("my-assistant", stores=[lds])
 
