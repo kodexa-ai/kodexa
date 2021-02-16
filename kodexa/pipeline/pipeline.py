@@ -361,7 +361,7 @@ class PipelineStep:
             from addict import Dict
             addict_dict = Dict(context.context)
             return bool(
-                simple_eval(self.condition, names={'context': addict_dict}))
+                simple_eval(self.condition, names={'context': addict_dict, 'document': document}))
 
         return True
 
