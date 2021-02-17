@@ -36,10 +36,20 @@ from addict import Dict
 
 
 def get_path():
+    &#34;&#34;&#34;
+    Gets the path of the documentation
+
+    :return: the path of this module file
+    &#34;&#34;&#34;
     return os.path.abspath(__file__)
 
 
 def get_template_env():
+    &#34;&#34;&#34;
+    Get the Jinja2 template environmnet
+
+    :return:
+    &#34;&#34;&#34;
     cli_path = os.path.dirname(get_path())
     package_location = os.path.join(cli_path, &#34;templates&#34;)
     template_loader = jinja2.FileSystemLoader(searchpath=package_location)
@@ -47,6 +57,12 @@ def get_template_env():
 
 
 def generate_documentation(metadata):
+    &#34;&#34;&#34;
+    Given the metadata object from a kodexa.yml generate the documentation
+
+    :param metadata:
+    :return:
+    &#34;&#34;&#34;
     os.makedirs(&#39;docs&#39;, exist_ok=True)
     for service in metadata.services:
         write_template(&#34;action.j2&#34;, f&#34;docs/{service.slug}.md&#34;, Dict(metadata), Dict(service))
@@ -115,12 +131,20 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
 <span>def <span class="ident">generate_documentation</span></span>(<span>metadata)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Given the metadata object from a kodexa.yml generate the documentation</p>
+<p>:param metadata:
+:return:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def generate_documentation(metadata):
+    &#34;&#34;&#34;
+    Given the metadata object from a kodexa.yml generate the documentation
+
+    :param metadata:
+    :return:
+    &#34;&#34;&#34;
     os.makedirs(&#39;docs&#39;, exist_ok=True)
     for service in metadata.services:
         write_template(&#34;action.j2&#34;, f&#34;docs/{service.slug}.md&#34;, Dict(metadata), Dict(service))
@@ -182,12 +206,18 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
 <span>def <span class="ident">get_path</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Gets the path of the documentation</p>
+<p>:return: the path of this module file</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_path():
+    &#34;&#34;&#34;
+    Gets the path of the documentation
+
+    :return: the path of this module file
+    &#34;&#34;&#34;
     return os.path.abspath(__file__)</code></pre>
 </details>
 </dd>
@@ -195,12 +225,18 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
 <span>def <span class="ident">get_template_env</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get the Jinja2 template environmnet</p>
+<p>:return:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_template_env():
+    &#34;&#34;&#34;
+    Get the Jinja2 template environmnet
+
+    :return:
+    &#34;&#34;&#34;
     cli_path = os.path.dirname(get_path())
     package_location = os.path.join(cli_path, &#34;templates&#34;)
     template_loader = jinja2.FileSystemLoader(searchpath=package_location)

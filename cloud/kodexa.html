@@ -59,6 +59,11 @@ dirs = AppDirs(&#34;Kodexa&#34;, &#34;Kodexa&#34;)
 
 
 def get_config():
+    &#34;&#34;&#34;
+    Get the kodexa config object we use when you want to store your PAT locally
+
+    :return: the config as a dict
+    &#34;&#34;&#34;
     path = os.path.join(dirs.user_config_dir, &#39;.kodexa.json&#39;)
     if os.path.exists(path):
         with open(path, &#39;r&#39;) as outfile:
@@ -68,6 +73,12 @@ def get_config():
 
 
 def save_config(config_obj):
+    &#34;&#34;&#34;
+    Saves the configuration dictionary for the user
+
+    :param config_obj:
+    :return:
+    &#34;&#34;&#34;
     path = os.path.join(dirs.user_config_dir, &#39;.kodexa.json&#39;)
     if not os.path.exists(os.path.dirname(path)):
         try:
@@ -143,6 +154,7 @@ DEFAULT_COLUMNS = {
     ]
 }
 
+
 OBJECT_TYPES = {
     &#34;extensionPacks&#34;: {
         &#34;name&#34;: &#34;extension pack&#34;,
@@ -180,6 +192,12 @@ OBJECT_TYPES = {
 
 
 def resolve_object_type(obj_type):
+    &#34;&#34;&#34;
+    Takes part of an object type (ie. pipelin) and then resolves the object type (pipelines)
+
+    :param obj_type: part of the object type
+    :return: The object type dict (if found)
+    &#34;&#34;&#34;
     hits = []
     keys = []
     for target_type in OBJECT_TYPES.keys():
@@ -199,6 +217,11 @@ def resolve_object_type(obj_type):
 
 
 class KodexaPlatform:
+    &#34;&#34;&#34;
+    The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
+    components
+
+    &#34;&#34;&#34;
 
     @staticmethod
     def get_access_token():
@@ -977,12 +1000,18 @@ class ExtensionHelper:
 <span>def <span class="ident">get_config</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get the kodexa config object we use when you want to store your PAT locally</p>
+<p>:return: the config as a dict</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_config():
+    &#34;&#34;&#34;
+    Get the kodexa config object we use when you want to store your PAT locally
+
+    :return: the config as a dict
+    &#34;&#34;&#34;
     path = os.path.join(dirs.user_config_dir, &#39;.kodexa.json&#39;)
     if os.path.exists(path):
         with open(path, &#39;r&#39;) as outfile:
@@ -995,12 +1024,20 @@ class ExtensionHelper:
 <span>def <span class="ident">resolve_object_type</span></span>(<span>obj_type)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Takes part of an object type (ie. pipelin) and then resolves the object type (pipelines)</p>
+<p>:param obj_type: part of the object type
+:return: The object type dict (if found)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def resolve_object_type(obj_type):
+    &#34;&#34;&#34;
+    Takes part of an object type (ie. pipelin) and then resolves the object type (pipelines)
+
+    :param obj_type: part of the object type
+    :return: The object type dict (if found)
+    &#34;&#34;&#34;
     hits = []
     keys = []
     for target_type in OBJECT_TYPES.keys():
@@ -1023,12 +1060,20 @@ class ExtensionHelper:
 <span>def <span class="ident">save_config</span></span>(<span>config_obj)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Saves the configuration dictionary for the user</p>
+<p>:param config_obj:
+:return:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def save_config(config_obj):
+    &#34;&#34;&#34;
+    Saves the configuration dictionary for the user
+
+    :param config_obj:
+    :return:
+    &#34;&#34;&#34;
     path = os.path.join(dirs.user_config_dir, &#39;.kodexa.json&#39;)
     if not os.path.exists(os.path.dirname(path)):
         try:
@@ -1106,12 +1151,18 @@ def load_metadata(path):
 <span>class <span class="ident">KodexaPlatform</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
+components</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class KodexaPlatform:
+    &#34;&#34;&#34;
+    The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
+    components
+
+    &#34;&#34;&#34;
 
     @staticmethod
     def get_access_token():
