@@ -43,3 +43,12 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
+      - name: Publish a Python distribution to PyPI
+        run: |
+          pdoc --html kodexa
+      - name: Deploy GitHub Page
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./html
+          keep_files: true

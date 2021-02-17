@@ -8,7 +8,6 @@ import time
 import traceback
 import uuid
 from collections import KeysView
-from enum import Enum
 from inspect import signature
 from textwrap import dedent
 from typing import List, Optional, Dict
@@ -18,7 +17,7 @@ import yaml
 
 from kodexa.connectors import FolderConnector
 from kodexa.connectors.connectors import get_caller_dir, DocumentStoreConnector
-from kodexa.model import Document, Store
+from kodexa.model import Document, Store, ContentObject
 from kodexa.stores.stores import DocumentStore
 
 logger = logging.getLogger('kodexa.pipeline')
@@ -26,41 +25,6 @@ logger = logging.getLogger('kodexa.pipeline')
 
 def new_id():
     return str(uuid.uuid4()).replace("-", "")
-
-
-class ContentType(Enum):
-    DOCUMENT = 'DOCUMENT'
-    NATIVE = 'NATIVE'
-
-
-class ContentObject:
-
-    def __init__(self, name="untitled", id=new_id(), content_type=ContentType.DOCUMENT, tags=None, metadata=None,
-                 store_ref=None, labels=None):
-        if labels is None:
-            labels = []
-        if metadata is None:
-            metadata = {}
-        if tags is None:
-            tags = []
-        self.id = id
-        self.name = name
-        self.content_type = content_type
-        self.tags = tags
-        self.store_ref = store_ref
-        self.metadata = metadata
-        self.labels = labels
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'tags': self.tags,
-            'labels': self.labels,
-            'content_type': self.content_type.name,
-            'metadata': self.metadata,
-            'name': self.name,
-            'store_ref': self.store_ref
-        }
 
 
 class InMemoryContentProvider:
@@ -125,6 +89,9 @@ class PipelineContext:
         self.store_provider = store_provider
         self.stop_on_exception = True
         self.current_document = None
+        self.document_family = None
+        self.content_object = None
+        self.document_store = None
 
     def get_context(self) -> Dict:
         return self.context
@@ -424,7 +391,7 @@ class Pipeline:
     """
     context: PipelineContext
 
-    def __init__(self, connector, name: str = "Default", stop_on_exception: bool = True,
+    def __init__(self, connector=None, name: str = "Default", stop_on_exception: bool = True,
                  logging_level=logger.info, apply_lineage: bool = True):
         logger.info(f"Initializing a new pipeline {name}")
 
@@ -595,6 +562,9 @@ class Pipeline:
         if parameters is None:
             parameters = {}
 
+        if self.connector is None:
+            raise Exception("You can not run a pipeline that has no connector in place")
+
         self.context = PipelineContext()
         self.context.stop_on_exception = self.stop_on_exception
 
@@ -606,7 +576,27 @@ class Pipeline:
         self.context.parameters = parameters
 
         logger.info(f"Starting pipeline {self.name}")
-        for document in self.connector:
+
+        # Note that a connector can return either an instance of a
+        # document or it can refer to a document in a store - this is
+        # important since if the document comes from a store then we
+        # also need to know the content object and also the document family
+        # and the store itself - to provide richness to the action
+
+        for connector_object in self.connector:
+
+            from kodexa.model.model import ContentObjectReference
+            if isinstance(connector_object, ContentObjectReference):
+                document = connector_object.document
+                self.context.document_store = connector_object.store
+                self.context.content_object = connector_object.content_object
+                self.context.document_family = connector_object.document_family
+            else:
+                # Otherwise assume it is a document
+                document = connector_object
+                self.context.document_store = None
+                self.context.content_object = None
+                self.context.document_family = None
 
             logger.info(f"Processing {document}")
 
@@ -614,6 +604,7 @@ class Pipeline:
             lineage_document_uuid = document.uuid
 
             if self.sink:
+
                 if not self.sink.accept(document):
                     logger.info("Skipping document, since sink won't accept")
                     break
@@ -632,7 +623,10 @@ class Pipeline:
                 if self.sink:
                     logger.info(f"Writing to sink {self.sink.get_name()}")
                     try:
-                        self.sink.sink(document)
+                        if len(signature(self.sink.sink).parameters) == 1:
+                            self.sink.sink(document)
+                        else:
+                            self.sink.sink(document, self.context)
                     except:
                         if document:
                             document.exceptions.append({

@@ -1,32 +1,37 @@
+from typing import List
+
+from kodexa.model.document_families import ContentEvent
+from kodexa.pipeline import Pipeline
+
+
+class AssistantContext:
+    """
+    The Assistant Context provides a way to interact with additional services and capabilities
+    while processing an event
+    """
+    pass
+
+
 class Assistant:
+    """
+    An assistant is a rich-API to allow you to work with a reactive content store or with an end user
+    that is working with set of content
+    """
 
-    def __init__(self, full_description=None):
-        self.required_stores = []
-        self.workflows = []
-        self.processing_taxonomies = []
-        self.services = []
+    def process_event(self, event: ContentEvent, context: AssistantContext = None) -> List[Pipeline]:
+        """
+        The assistant will need to examine the event to determine if it wants to respond
 
-        self.full_description = full_description
+        The event will focus on a specific content object (that will be stored and available).  Based on the
+        metadata from the content object the assistant can then return one or more pipelines that it wishes
+        to execute.
 
-    def add_store(self, name: str, title: str, description: str, store_type: str):
-        self.required_stores.append({
-            'name': name,
-            'title': title,
-            'description': description,
-            'storeType': store_type
-        })
+        This pipelines will be run asynchronously and the result of the pipelines might well
+        return as another event for the assistant
 
-    def add_workflow(self, ref: str, parameters=None):
-        self.workflows.append({
-            'ref': ref,
-            'parameters': parameters
-        })
+        :param event: the content event to react to
+        :param context: the assistant context
+        :return: a list of pipelines that you wish to execute
+        """
 
-    def add_processing_taxonomy(self, ref: str):
-        self.processing_taxonomies.append({
-            'ref': ref
-        })
-
-    def add_service(self, slug, service):
-        service.slug = slug
-        self.services.append(service)
+        pass

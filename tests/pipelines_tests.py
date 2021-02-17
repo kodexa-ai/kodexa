@@ -21,7 +21,6 @@ def test_interesting_pipeline():
     training_prep.run()
 
     assert training_documents.count() == 1
-    assert training_documents.get_by_uuid(training_documents.list_objects()[0]['uuid']) is not None
 
     model_store = LocalModelStore('/tmp/my-model')
     training_pipeline = Pipeline.from_store(training_documents)
