@@ -1,13 +1,5 @@
 """
-Core Model
-----------
-
-The core model provides the object structure for Documents, ContentNodes and Features which is used as the foundation
-for working with unstructured data in the framework.
-
-Create a new instance of a Document, you will be required to provide a DocumentMetadata object
-
-    >>> document = Document(DocumentMetadata())
+Document families allow the organization of documents based on relationships and actors
 """
 from .document_families import DocumentRelationship, DocumentFamily
 from .model import DocumentMetadata, ContentNode, ContentFeature, SourceMetadata, \
