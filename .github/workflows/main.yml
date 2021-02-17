@@ -43,7 +43,7 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
-      - name: Publish a Python distribution to PyPI
+      - name: Build Python Documentation
         run: |
           pdoc --html kodexa
       - name: Deploy GitHub Page
