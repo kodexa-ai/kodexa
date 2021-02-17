@@ -47,7 +47,15 @@ pass_info = click.make_pass_decorator(Info, ensure=True)
 @click.option("--verbose", "-v", count=True, help="Enable verbose output.")
 @pass_info
 def cli(info: Info, verbose: int):
-    """Run Kodexa."""
+    """Run Kodexa.
+
+    Args:
+      info: Info: 
+      verbose: int: 
+
+    Returns:
+
+    """
     # Use the verbosity count to determine the logging level...
     if verbose > 0:
         logging.basicConfig(
@@ -72,7 +80,18 @@ def cli(info: Info, verbose: int):
 @cli.command()
 @pass_info
 def deploy(_: Info, path: str, url: str, org: str, token: str):
-    """Deploy extension pack to a Kodexa platform instance"""
+    """Deploy extension pack to a Kodexa platform instance
+
+    Args:
+      _: Info: 
+      path: str: 
+      url: str: 
+      org: str: 
+      token: str: 
+
+    Returns:
+
+    """
 
     print("Starting deployment from path", path)
     KodexaPlatform.set_url(url)
@@ -98,7 +117,19 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 @click.option('--path', default=None, help='JQ path to content you want')
 @pass_info
 def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = None):
-    """List the instance of the object type"""
+    """List the instance of the object type
+
+    Args:
+      _: Info: 
+      object_type: str: 
+      ref: str: 
+      url: str: 
+      token: str: 
+      path: str:  (Default value = None)
+
+    Returns:
+
+    """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.get(object_type, ref, path)
@@ -111,7 +142,18 @@ def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = N
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
-    """List the instance of the object type"""
+    """List the instance of the object type
+
+    Args:
+      _: Info: 
+      object_type: str: 
+      ref: str: 
+      url: str: 
+      token: str: 
+
+    Returns:
+
+    """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.reindex(object_type, ref)
@@ -121,7 +163,15 @@ def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
 @pass_info
 @click.option('--python/--no-python', default=False, help='Print out the header for a Python file')
 def platform(_: Info, python: bool):
-    """Get details of the instance of Kodexa you are using"""
+    """Get details of the instance of Kodexa you are using
+
+    Args:
+      _: Info: 
+      python: bool: 
+
+    Returns:
+
+    """
 
     platform_url = KodexaPlatform.get_url()
 
@@ -147,7 +197,18 @@ def platform(_: Info, python: bool):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def delete(_: Info, object_type: str, ref: str, url: str, token: str):
-    """Delete object from the platform"""
+    """Delete object from the platform
+
+    Args:
+      _: Info: 
+      object_type: str: 
+      ref: str: 
+      url: str: 
+      token: str: 
+
+    Returns:
+
+    """
 
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
@@ -158,7 +219,15 @@ def delete(_: Info, object_type: str, ref: str, url: str, token: str):
 @click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
 @pass_info
 def metadata(_: Info, path: str):
-    """Load metadata"""
+    """Load metadata
+
+    Args:
+      _: Info: 
+      path: str: 
+
+    Returns:
+
+    """
     metadata = ExtensionHelper.load_metadata(path)
     print(f"Metadata loaded")
 
@@ -166,11 +235,16 @@ def metadata(_: Info, path: str):
 @cli.command()
 @pass_info
 def login(_: Info):
-    """
-    Logs into the specified platform environment using the email address and password provided,
+    """Logs into the specified platform environment using the email address and password provided,
     then downloads and stores the personal access token (PAT) of the user.
     Once successfully logged in, calls to remote actions, pipelines, and workflows will be made to the
     platform that was set via this login function and will use the stored PAT for authentication.
+
+    Args:
+      _: Info: 
+
+    Returns:
+
     """
     try:
         kodexa_url = input("Enter the Kodexa URL (https://platform.kodexa.com): ")
@@ -189,7 +263,15 @@ def login(_: Info):
 @click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
 @pass_info
 def document(_: Info, path: str):
-    """Build markdown documentation for this extension"""
+    """Build markdown documentation for this extension
+
+    Args:
+      _: Info: 
+      path: str: 
+
+    Returns:
+
+    """
     metadata = ExtensionHelper.load_metadata(path)
     print("Metadata loaded")
     from kodexa.cli.documentation import generate_documentation
@@ -207,7 +289,20 @@ def document(_: Info, path: str):
 @click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
 def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
-    """Package the extension for Kodexa"""
+    """Package the extension for Kodexa
+
+    Args:
+      _: Info: 
+      path: str: 
+      output: str: 
+      version: str: 
+      site: bool: 
+      sitedir: str: 
+      url: str: 
+
+    Returns:
+
+    """
     metadata_obj = ExtensionHelper.load_metadata(path)
     print("Preparing to pack")
     try:

@@ -24,49 +24,91 @@ logger = logging.getLogger('kodexa.pipeline')
 
 
 def new_id():
+    """ """
     return str(uuid.uuid4()).replace("-", "")
 
 
 class InMemoryContentProvider:
-    """
-    A content provider is used to support getting content (documents or native) to
+    """A content provider is used to support getting content (documents or native) to
     and from the pipeline
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self):
         self.content_objects = {}
 
     def get_content(self, content_object: ContentObject):
+        """
+
+        Args:
+          content_object: ContentObject: 
+
+        Returns:
+
+        """
         return self.content_objects[content_object.id]
 
     def put_content(self, content_object: ContentObject, content):
+        """
+
+        Args:
+          content_object: ContentObject: 
+          content: 
+
+        Returns:
+
+        """
         self.content_objects[content_object.id] = content
 
 
 class InMemoryStoreProvider:
-    """
-    A store provider is used to support getting stores from the pipeline
-    """
+    """A store provider is used to support getting stores from the pipeline"""
 
     def __init__(self):
         self.stores = {}
 
     def put_store(self, name: str, store: Store):
+        """
+
+        Args:
+          name: str: 
+          store: Store: 
+
+        Returns:
+
+        """
         self.stores[name] = store
 
     def get_store(self, name):
+        """
+
+        Args:
+          name: 
+
+        Returns:
+
+        """
         return self.stores[name] if name in self.stores else None
 
     def get_store_names(self) -> KeysView:
+        """ """
         return self.stores.keys()
 
 
 class PipelineContext:
-    """
-    Pipeline context is created when you create a pipeline and it provides a way to access information about the
+    """Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
-
+    
     It also provides access to the 'stores' that have been added to the pipeline
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, content_provider=None, store_provider=None,
@@ -94,66 +136,109 @@ class PipelineContext:
         self.document_store = None
 
     def get_context(self) -> Dict:
+        """ """
         return self.context
 
     def get_content_objects(self) -> List[ContentObject]:
+        """ """
         return self.content_objects
 
     def get_content(self, content_object: ContentObject):
+        """
+
+        Args:
+          content_object: ContentObject: 
+
+        Returns:
+
+        """
         self.content_provider.get_content(content_object)
 
     def put_content(self, content_object: ContentObject, content):
+        """
+
+        Args:
+          content_object: ContentObject: 
+          content: 
+
+        Returns:
+
+        """
         self.content_provider.put_content(content_object, content)
 
     def add_store(self, name: str, store):
-        """
-        Add a store with given name to the context
+        """Add a store with given name to the context
 
-        :param name: the name to refer to the store with
-        :param store: the instance of the store
+        Args:
+          name: the name to refer to the store with
+          store: the instance of the store
+          name: str: 
+
+        Returns:
+
         """
         self.store_provider.put_store(name, store)
 
     def get_store_names(self) -> KeysView:
         """
-        Return the list of store names in context
 
-        :return: the list of store names
+        Args:
+
+        Returns:
+          :return: the list of store names
+
         """
         return self.store_provider.get_store_names()
 
     def set_current_document(self, current_document: Document):
-        """
-        Set the Document that is currently being processed in the pipeline
+        """Set the Document that is currently being processed in the pipeline
 
-        :param current_document: The current document
+        Args:
+          current_document: The current document
+          current_document: Document: 
+
+        Returns:
+
         """
         self.current_document = current_document
 
     def get_current_document(self) -> Document:
-        """
-        Get the current document that is being processed in the pipeline
-
+        """Get the current document that is being processed in the pipeline
+        
         :return: The current document, or None
+
+        Args:
+
+        Returns:
+
         """
         return self.current_document
 
     def set_output_document(self, output_document: Document):
-        """
-        Set the output document from the pipeline
+        """Set the output document from the pipeline
 
-        :param output_document: the final output document from the pipeline
-        :return: the final output document
+        Args:
+          output_document: the final output document from the pipeline
+          output_document: Document: 
+
+        Returns:
+          the final output document
+
         """
         self.output_document = output_document
 
     def get_store(self, name: str, default: Store = None) -> Store:
-        """
-        Get a store with given name from the context
+        """Get a store with given name from the context
 
-        :param name: the name to refer to the store with
-        :param default: optionally the default to create the store as if it isn't there
-        :return: the store, or None is not available
+        Args:
+          name: the name to refer to the store with
+          default: optionally the default to create the store as if it isn't there
+          name: str: 
+          default: Store:  (Default value = None)
+
+        Returns:
+          the store, or None is not available
+
         """
         store = self.store_provider.get_store(name) if name in self.get_store_names() else None
 
@@ -164,6 +249,15 @@ class PipelineContext:
         return self.store_provider.get_store(name)
 
     def merge_store(self, name, store):
+        """
+
+        Args:
+          name: 
+          store: 
+
+        Returns:
+
+        """
         if name not in self.get_store_names():
             self.add_store(name, store)
         else:
@@ -171,11 +265,15 @@ class PipelineContext:
 
 
 class PipelineStep:
-    """
-    The representation of a step within a step, which captures both the step itself and
+    """The representation of a step within a step, which captures both the step itself and
     also the details around the step's use.
-
+    
     It is internally used by the Pipeline and is not a public API
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, step, enabled=False, condition=None, name=None, options=None, attach_source=False,
@@ -204,6 +302,7 @@ class PipelineStep:
             logger.info(f"Adding new step {step.get_name()} to pipeline")
 
     def to_dict(self):
+        """ """
         try:
             if str(type(self.step)) == "<class 'type'>":
                 raise Exception("You can not yet deploy a pipeline with a class instance style step")
@@ -230,6 +329,15 @@ class PipelineStep:
             raise Exception("All steps must implement to_dict() for deployment", e)
 
     def execute(self, context, document):
+        """
+
+        Args:
+          context: 
+          document: 
+
+        Returns:
+
+        """
 
         start = time.perf_counter()
         if self.cache_path:
@@ -257,6 +365,15 @@ class PipelineStep:
                         import collections
 
                         def replace_params(opts, params):
+                            """
+
+                            Args:
+                              opts: 
+                              params: 
+
+                            Returns:
+
+                            """
                             if isinstance(opts, dict):
                                 for key, val in opts.items():
                                     opts[key] = replace_params(val, params)
@@ -320,6 +437,15 @@ class PipelineStep:
             return document
 
     def will_execute(self, context, document):
+        """
+
+        Args:
+          context: 
+          document: 
+
+        Returns:
+
+        """
         if not self.enabled:
             return False
 
@@ -333,11 +459,27 @@ class PipelineStep:
         return True
 
     def get_cache_name(self, document):
+        """
+
+        Args:
+          document: 
+
+        Returns:
+
+        """
         file_name = document.source.original_filename \
             if document.source.original_filename is not None else document.uuid
         return f"{self.cache_path}/{file_name}.kdxa"
 
     def end_processing(self, context):
+        """
+
+        Args:
+          context: 
+
+        Returns:
+
+        """
         try:
             self.step.end_processing(context)
         except:
@@ -345,18 +487,25 @@ class PipelineStep:
 
 
 class LabelStep(object):
-    """
-    A simple step for handling the labelling for a document
-    """
+    """A simple step for handling the labelling for a document"""
 
     def __init__(self, label: str, remove=False):
         self.label = label
         self.remove = remove
 
     def get_name(self):
+        """ """
         return f"Remove label {self.label}" if self.remove else f"Add label {self.label}"
 
     def process(self, document: Document):
+        """
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        """
         if self.remove:
             document.remove_label(self.label)
         else:
@@ -365,6 +514,7 @@ class LabelStep(object):
 
 
 class PipelineStore:
+    """ """
 
     def __init__(self, name: str, store: Store, extracted_labelled: bool = False):
         self.name = name
@@ -372,22 +522,32 @@ class PipelineStore:
         self.extract_labelled = extracted_labelled
 
     def extract(self, document):
+        """
+
+        Args:
+          document: 
+
+        Returns:
+
+        """
         # TODO implement
         pass
 
 
 class Pipeline:
-    """
-    A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
-
+    """A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
+    
     When you create a Pipeline you must provide the connector that will be used to source the documents.
 
-        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+    Args:
+      connector: the connector that will be the starting point for the pipeline
+      name: the name of the pipeline (default 'Default')
+      stop_on_exception: Should the pipeline raise exceptions and stop (default True)
+      logging_level: The logging level of the pipeline (default INFO)
 
-    :param connector: the connector that will be the starting point for the pipeline
-    :param name: the name of the pipeline (default 'Default')
-    :param stop_on_exception: Should the pipeline raise exceptions and stop (default True)
-    :param logging_level: The logging level of the pipeline (default INFO)
+    Returns:
+
+    >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
     """
     context: PipelineContext
 
@@ -409,33 +569,41 @@ class Pipeline:
         self.apply_lineage = apply_lineage
 
     def add_store(self, name: str, store: Store, extracted_labelled=False):
-        """
-        Add the store to the pipeline so that it is available to the pipeline
+        """Add the store to the pipeline so that it is available to the pipeline
 
-            >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+        Args:
+          name: the name of the store (to refer to it)
+          store: the store that should be added
+          extracted_labelled: at the end of the pipeline we will extract the labelled data
+        to this store (Default value = False)
+          name: str: 
+          store: Store: 
+
+        Returns:
+
+        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
             >>> pipeline.add_store("test-store", TableDataStore())
-
-        :param name: the name of the store (to refer to it)
-        :param store: the store that should be added
-        :param extracted_labelled: at the end of the pipeline we will extract the labelled data
-                                   to this store
         """
         self.stores.append(PipelineStore(name, store, extracted_labelled))
         return self
 
     def add_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
                   parameterized=False, cache_path=None):
-        """
-        Adds a label to the document
+        """Adds a label to the document
 
-        :param label: label to add
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline's parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-        :return: the pipeline
+        Args:
+          label: label to add
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline's parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+          label: str: 
+
+        Returns:
+          the pipeline
+
         """
         self.steps.append(
             PipelineStep(step=LabelStep(label), name=f"Add label {label}", enabled=enabled, condition=condition,
@@ -445,17 +613,21 @@ class Pipeline:
 
     def remove_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
                      parameterized=False, cache_path=None):
-        """
-        Adds a label to the document
+        """Adds a label to the document
 
-        :param label: label to remove
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline's parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-        :return: the pipeline
+        Args:
+          label: label to remove
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline's parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+          label: str: 
+
+        Returns:
+          the pipeline
+
         """
         self.steps.append(
             PipelineStep(step=LabelStep(label, remove=True), name=f"Remove label {label}", enabled=enabled,
@@ -465,33 +637,36 @@ class Pipeline:
 
     def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
                  parameterized=False, cache_path=None):
-        """
-        Add the given step to the current pipeline
-
-            >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.add_step(ExampleStep())
-
+        """Add the given step to the current pipeline
+        
+        
         Note that it is also possible to add a function as a step, for example
+        
+        
+        If you are using remote actions on a server, or for deployment to a remote
+        pipeline you can also use a shorthand
 
+        Args:
+          step: the step to add
+          name: the name to use to describe the step (default None)
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline's parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+
+        Returns:
+
+        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+            >>> pipeline.add_step(ExampleStep())
+        
             >>> def my_function(doc):
             >>>      doc.metadata.fishstick = 'foo'
             >>>      return doc
             >>> pipeline.add_step(my_function)
-
-        If you are using remote actions on a server, or for deployment to a remote
-        pipeline you can also use a shorthand
-
+        
             >>> pipeline.add_step('kodexa/html-parser',options={'summarize':False})
-
-        :param step: the step to add
-        :param name: the name to use to describe the step (default None)
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline's parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-
         """
         if options is None:
             options = {}
@@ -501,14 +676,16 @@ class Pipeline:
         return self
 
     def set_sink(self, sink):
-        """
-        Set the sink you wish to use, note that it will replace any currently assigned
+        """Set the sink you wish to use, note that it will replace any currently assigned
         sink
 
-            >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.set_sink(ExampleSink())
+        Args:
+          sink: the sink for the pipeline
 
-        :param sink: the sink for the pipeline
+        Returns:
+
+        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+            >>> pipeline.set_sink(ExampleSink())
         """
         logger.info(f"Setting sink {sink.get_name()} on {self.name}")
         self.sink = sink
@@ -516,26 +693,35 @@ class Pipeline:
         return self
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
-        """
-        Allows you to provide the sink store easily
-
+        """Allows you to provide the sink store easily
+        
         This will wrap the store in a document store sink
 
-        :param document_store: document store to use
-        :param processing_mode: the processing mode (update or new)
-        :return: the pipeline
+        Args:
+          document_store: document store to use
+          processing_mode: the processing mode (update or new)
+          document_store: DocumentStore: 
+          processing_mode: str:  (Default value = "update")
+
+        Returns:
+          the pipeline
+
         """
         from kodexa.sinks import DocumentStoreSink
         self.set_sink(DocumentStoreSink(document_store))
         return self
 
     def to_yaml(self):
-        """
-        Will return the YAML representation of any actions that support conversion to YAML
-
+        """Will return the YAML representation of any actions that support conversion to YAML
+        
         The YAML representation for RemoteAction's can be used for metadata only pipelines in the Kodexa Platform
-
+        
         :return: YAML representation
+
+        Args:
+
+        Returns:
+
         """
 
         configuration_steps = []
@@ -550,14 +736,19 @@ class Pipeline:
         return yaml.dump(configuration_steps)
 
     def run(self, parameters=None):
-        """
-        Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
+        """Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
+        
+        
+        :return: The context from the run
 
-            >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+        Args:
+          parameters:  (Default value = None)
+
+        Returns:
+
+        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
             >>> pipeline.set_sink(ExampleSink())
             >>> pipeline.run()
-
-        :return: The context from the run
         """
         if parameters is None:
             parameters = {}
@@ -658,72 +849,107 @@ class Pipeline:
 
     @staticmethod
     def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
-        """
-        Build a new pipeline with the input documents from a document store
+        """Build a new pipeline with the input documents from a document store
 
-        :param store:DocumentStore The URL ie. https://www.google.com
-        :param subscription:str The subscription query to use
-        :return: A new instance of a pipeline
+        Args:
+          store: DocumentStore The URL ie. https://www.google.com
+          subscription: str The subscription query to use (Default value = None)
+          store: DocumentStore: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          A new instance of a pipeline
+
         """
         return Pipeline(DocumentStoreConnector(store, subscription), *args, **kwargs)
 
     @staticmethod
     def from_url(url, headers=None, *args, **kwargs):
-        """
-        Build a new pipeline with the input being a document created from the given URL
+        """Build a new pipeline with the input being a document created from the given URL
 
-        :param url: The URL ie. https://www.google.com
-        :param headers: A dictionary of headers
-        :return: A new instance of a pipeline
+        Args:
+          url: The URL ie. https://www.google.com
+          headers: A dictionary of headers (Default value = None)
+          *args: 
+          **kwargs: 
+
+        Returns:
+          A new instance of a pipeline
+
         """
         return Pipeline(Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
     def from_file(file_path: str, *args, **kwargs) -> Pipeline:
-        """
-        Create a new pipeline using a file path as a source
-        :param file_path: The path to the file
-        :return: A new pipeline
-        :rtype: Pipeline
+        """Create a new pipeline using a file path as a source
+
+        Args:
+          file_path: The path to the file
+          file_path: str: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         """
         return Pipeline(Document.from_file(file_path), *args, **kwargs)
 
     @staticmethod
     def from_text(text: str, *args, **kwargs) -> Pipeline:
-        """
-        Build a new pipeline and provide text as the basic to create a document
+        """Build a new pipeline and provide text as the basic to create a document
 
-        :param text: Text to use to create document
-        :return: A new pipeline
-        :rtype: Pipeline
+        Args:
+          text: Text to use to create document
+          text: str: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         """
         return Pipeline(Document.from_text(text), *args, **kwargs)
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
                     unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -> Pipeline:
-        """
-        Create a pipeline that will run against a set of local files from a folder
+        """Create a pipeline that will run against a set of local files from a folder
 
-        :param folder_path: The folder path
-        :param filename_filter: The filter for filename (i.e. *.pdf)
-        :param recursive: Should we look recursively in sub-directories (default False)
-        :param relative: Is the folder path relative to the caller (default False)
-        :param caller_path: The caller path (defaults to trying to work this out from the stack)
-        :param unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-        :return: A new pipeline
-        :rtype: Pipeline
+        Args:
+          folder_path: The folder path
+          filename_filter: The filter for filename (i.e. *.pdf)
+          recursive: Should we look recursively in sub-directories (default False)
+          relative: Is the folder path relative to the caller (default False)
+          caller_path: The caller path (defaults to trying to work this out from the stack)
+          unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
+          folder_path: str: 
+          filename_filter: str:  (Default value = "*")
+          recursive: bool:  (Default value = False)
+          relative: bool:  (Default value = False)
+          caller_path: str:  (Default value = get_caller_dir())
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         """
         return Pipeline(FolderConnector(folder_path, filename_filter, recursive=recursive, relative=relative,
                                         caller_path=caller_path, unpack=unpack), *args, **kwargs)
 
 
 class PipelineStatistics:
-    """
-    A set of statistics for the processed document
-
+    """A set of statistics for the processed document
+    
     documents_processed
     document_exceptions
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self):
@@ -731,10 +957,13 @@ class PipelineStatistics:
         self.document_exceptions = 0
 
     def processed_document(self, document):
-        """
-        Update statistics based on this document completing processing
+        """Update statistics based on this document completing processing
 
-        :param document: the document that has been processed
+        Args:
+          document: the document that has been processed
+
+        Returns:
+
         """
         self.documents_processed += 1
 

@@ -15,20 +15,21 @@ from kodexa.mixins import registry
 
 
 class ContentType(Enum):
-    """
-    Types of content object that are supported
-
-    """
+    """Types of content object that are supported"""
     DOCUMENT = 'DOCUMENT'
     NATIVE = 'NATIVE'
 
 
 class ContentObject:
-    """
-    A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
+    """A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
     a Kodexa document.
-
+    
     The content object allows us to capture metadata about the document or the native file without changing it
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, name="untitled", id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
@@ -58,10 +59,14 @@ class ContentObject:
         """.. deprecated::"""
 
     def to_dict(self):
-        """
-        Convert the content object to a dictionary
-
+        """Convert the content object to a dictionary
+        
         :return: dictionary
+
+        Args:
+
+        Returns:
+
         """
         return {
             'id': self.id,
@@ -75,10 +80,15 @@ class ContentObject:
 
     @classmethod
     def from_dict(cls, co_dict):
-        """
-        Create a content object from a dictionary
-
+        """Create a content object from a dictionary
+        
         :return: A content object
+
+        Args:
+          co_dict: 
+
+        Returns:
+
         """
         co = ContentObject(co_dict['name'])
         co.id = co_dict['id']
@@ -88,43 +98,60 @@ class ContentObject:
 
 
 class Store:
-    """
-    Base definition of a store in Kodexa (deprecated)
-    """
+    """Base definition of a store in Kodexa (deprecated)"""
 
     def get_name(self):
+        """ """
         pass
 
     def merge(self, other_store):
+        """
+
+        Args:
+          other_store: 
+
+        Returns:
+
+        """
         pass
 
     def to_dict(self):
+        """ """
         pass
 
     def set_pipeline_context(self, pipeline_context):
+        """
+
+        Args:
+          pipeline_context: 
+
+        Returns:
+
+        """
         pass
 
     def count(self):
+        """ """
         pass
 
 
 class RemoteStore:
-    """
-    A remote store is one that refers to a Kodexa platform  instance
-    """
+    """A remote store is one that refers to a Kodexa platform  instance"""
 
     def get_ref(self) -> str:
-        """
-        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
+        """Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+        
         :return: The reference
+
+        Args:
+
+        Returns:
+
         """
         pass
 
     def delete_contents(self):
-        """
-        Delete the contents of the store
-        """
+        """Delete the contents of the store"""
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
@@ -139,18 +166,14 @@ class RemoteStore:
 
 
 class DocumentMetadata(Dict):
-    """
-    A flexible dict based approach to capturing metadata for the document
-    """
+    """A flexible dict based approach to capturing metadata for the document"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
 class Tag(Dict):
-    """
-    A tag represents the metadata for a label that is applies as a feature on a content node
-    """
+    """A tag represents the metadata for a label that is applies as a feature on a content node"""
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
                  uuid: Optional[str] = None, data: Any = None, *args,
@@ -169,11 +192,13 @@ class Tag(Dict):
 
 
 class FindDirection(Enum):
+    """ """
     CHILDREN = 1
     PARENT = 2
 
 
 class Traverse(Enum):
+    """ """
     SIBLING = 1
     CHILDREN = 2
     PARENT = 3
@@ -181,24 +206,30 @@ class Traverse(Enum):
 
 
 class ContentNode(object):
-    """
-    A Content Node identifies a section of the document containing logical
+    """A Content Node identifies a section of the document containing logical
     grouping of information.
-
+    
     The node will have content and can include any number of features.
-
+    
     You should always create a node using the Document's create_node method to
     ensure that the correct mixins are applied.
 
-        >>> new_page = document.create_node(node_type='page')
-        <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-        >>> current_content_node.add_child(new_page)
+    >>> new_page = document.create_node(node_type='page')
+    <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
+    >>> current_content_node.add_child(new_page)
 
+    >>> new_page = document.create_node(node_type='page', content='This is page 1')
+    <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
+    >>> current_content_node.add_child(new_page)
+    
     or
 
-        >>> new_page = document.create_node(node_type='page', content='This is page 1')
-        <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-        >>> current_content_node.add_child(new_page)
+    Args:
+        document: The document to which the node belongs
+        node_type: the type of the node
+        content: the content for this node
+
+    Returns:
     """
 
     def __init__(self, document, node_type: str, content: Optional[str] = None,
@@ -222,24 +253,26 @@ class ContentNode(object):
             self.content) + "]"
 
     def to_json(self):
-        """
-        Create a JSON string representation of this ContentNode.
+        """Create a JSON string representation of this ContentNode.
 
-            >>> node.to_json()
+        Args:
 
-        :return: The JSON formatted string representation of this ContentNode.
-        :rtype: str
+        Returns:
+          str: The JSON formatted string representation of this ContentNode.
+
+        >>> node.to_json()
         """
         return json.dumps(self.to_dict())
 
     def to_dict(self):
-        """
-        Create a dictionary representing this ContentNode's structure and content.
+        """Create a dictionary representing this ContentNode's structure and content.
 
-            >>> node.to_dict()
+        Args:
 
-        :return: The properties of this ContentNode and all of its children structured as a dictionary.
-        :rtype: dict
+        Returns:
+          dict: The properties of this ContentNode and all of its children structured as a dictionary.
+
+        >>> node.to_dict()
         """
         new_dict = {'node_type': self.node_type, 'content': self.content, 'content_parts': self.content_parts,
                     'features': [],
@@ -253,16 +286,18 @@ class ContentNode(object):
 
     @staticmethod
     def from_dict(document, content_node_dict: Dict):
-        """
-        Build a new ContentNode from a dictionary representtion.
+        """Build a new ContentNode from a dictionary representtion.
 
-            >>> ContentNode.from_dict(document, content_node_dict)
+        Args:
+          Document: document: The Kodexa document from which the new ContentNode will be created (not added).
+          dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
+          document: 
+          content_node_dict: Dict: 
 
-        :param Document document: The Kodexa document from which the new ContentNode will be created (not added).
-        :param dict content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
+        Returns:
+          ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
 
-        :return: A ContentNode containing the unpacked values from the content_node_dict parameter.
-        :rtype: ContentNode
+        >>> ContentNode.from_dict(document, content_node_dict)
         """
 
         node_type = content_node_dict['type'] if document.version == Document.PREVIOUS_VERSION else content_node_dict[
@@ -295,13 +330,16 @@ class ContentNode(object):
         return new_content_node
 
     def add_child_content(self, node_type, content, index=None):
-        """
-        Convenience method to allow you to quick add a child node with a type and content
+        """Convenience method to allow you to quick add a child node with a type and content
 
-        :param node_type: the node type
-        :param content: the content
-        :param index: the index (optional)
-        :return: the new ContentNode
+        Args:
+          node_type: the node type
+          content: the content
+          index: the index (optional) (Default value = None)
+
+        Returns:
+          the new ContentNode
+
         """
         new_node = self.document.create_node(node_type=node_type)
         new_node.content = content
@@ -309,16 +347,18 @@ class ContentNode(object):
         return new_node
 
     def add_child(self, child, index=None):
-        """
-        Add a ContentNode as a child of this ContentNode
+        """Add a ContentNode as a child of this ContentNode
 
-            >>> new_page = document.create_node(node_type='page')
+        Args:
+          ContentNode: child: The node that will be added as a child of this node
+          index(int, optional, optional): The index at which this child node should be added; defaults to None.  If None, index is set as the count of child node elements.
+          child: 
+
+        Returns:
+
+        >>> new_page = document.create_node(node_type='page')
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.add_child(new_page)
-
-        :param ContentNode child: The node that will be added as a child of this node
-        :param index: The index at which this child node should be added; defaults to None.  If None, index is set as the count of child node elements.
-        :type index: int, optional
         """
         if not index:
             child.index = len(self.children)
@@ -328,54 +368,59 @@ class ContentNode(object):
         child.parent = self
 
     def get_children(self):
-        """
-        Returns a list of the children of this node.
+        """Returns a list of the children of this node.
 
-           >>> node.get_children()
+        Args:
 
-        :return: The list of child nodes for this ContentNode.
-        :rtype: list[ContentNode]
+        Returns:
+          list[ContentNode]: The list of child nodes for this ContentNode.
+
+        >>> node.get_children()
         """
         return self.children
 
     def set_feature(self, feature_type, name, value):
-        """
-        Sets a feature for this ContentNode, replacing the value if a feature by this type and name already exists.
+        """Sets a feature for this ContentNode, replacing the value if a feature by this type and name already exists.
 
-           >>> new_page = document.create_node(node_type='page')
+        Args:
+          str: feature_type: The type of feature to be added to the node.
+          str: name: The name of the feature.
+          Any: value: The value of the feature.
+          feature_type: 
+          name: 
+          value: 
+
+        Returns:
+          ContentFeature: The feature that was added to this ContentNode
+
+        >>> new_page = document.create_node(node_type='page')
            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
            >>> new_page.add_feature('pagination','pageNum',1)
-
-        :param str feature_type: The type of feature to be added to the node.
-        :param str name: The name of the feature.
-        :param Any value: The value of the feature.
-
-        :return: The feature that was added to this ContentNode
-        :rtype: ContentFeature
         """
         self.remove_feature(feature_type, name)
         return self.add_feature(feature_type, name, value)
 
     def add_feature(self, feature_type, name, value, single=True, serialized=False):
-        """
-        Add a new feature to this ContentNode.
-
+        """Add a new feature to this ContentNode.
+        
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
-           >>> new_page = document.create_node(node_type='page')
+        Args:
+          str: feature_type: The type of feature to be added to the node.
+          str: name: The name of the feature.
+          Any: value: The value of the feature.
+          single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
+          serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
+          feature_type: 
+          name: 
+          value: 
+
+        Returns:
+          ContentFeature: The feature that was added to this ContentNode.
+
+        >>> new_page = document.create_node(node_type='page')
            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
            >>> new_page.add_feature('pagination','pageNum',1)
-
-        :param str feature_type: The type of feature to be added to the node.
-        :param str name: The name of the feature.
-        :param Any value: The value of the feature.
-        :param single: Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
-        :type single: bool, optional
-        :param serialized: Indicates that the value is/is not already serialized; defaults to False.
-        :type serialized: bool, optional
-
-        :return: The feature that was added to this ContentNode.
-        :rtype: ContentFeature
         """
         if self.has_feature(feature_type, name):
             feature = self.get_feature(feature_type, name)
@@ -393,12 +438,17 @@ class ContentNode(object):
                         exclude_nodes: Optional[List] = None):
         """Delete the children of this node, you can either supply a list of the nodes to delete
            or the nodes to exclude from the delete, if neither are supplied then we delete all the children.
-
+        
            Note there is precedence in place, if you have provided a list of nodes to delete then the nodes
            to exclude is ignored.
 
-           :param nodes:Optional[List[ContentNode]] a list of content nodes that are children to delete
-           :param exclude_nodes:Optional[List[ContentNode]] a list of content node that are children not to delete
+        Args:
+          nodes: Optional[List[ContentNode]] a list of content nodes that are children to delete
+          exclude_nodes: Optional[List[ContentNode]] a list of content node that are children not to delete
+          nodes: Optional[List]:  (Default value = None)
+          exclude_nodes: Optional[List]:  (Default value = None)
+
+        Returns:
 
         """
         children_to_delete = []
@@ -423,83 +473,96 @@ class ContentNode(object):
                 self.children.remove(child_to_delete)
 
     def get_feature(self, feature_type, name):
-        """
-        Gets the value for the given feature.
+        """Gets the value for the given feature.
 
-           >>> new_page.get_feature('pagination','pageNum')
+        Args:
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type: 
+          name: 
+
+        Returns:
+          ContentFeature or None: The feature with the specified type & name.  If no feature is found, None is returned.
+
+        >>> new_page.get_feature('pagination','pageNum')
            1
-
-        :param str feature_type: The type of the feature.
-        :param str name: The name of the feature.
-
-        :return: The feature with the specified type & name.  If no feature is found, None is returned.
-        :rtype: ContentFeature or None
         """
         return self._feature_map[feature_type + ":" + name] if feature_type + ":" + name in self._feature_map else None
 
     def get_features_of_type(self, feature_type):
-        """
-        Get all features of a specific type.
+        """Get all features of a specific type.
 
-           >>> new_page.get_features_of_type('my_type')
+        Args:
+          str: feature_type: The type of the feature.
+          feature_type: 
+
+        Returns:
+          list[ContentFeature]: A list of feature with the specified type.  If no features are found, an empty list is returned.
+
+        >>> new_page.get_features_of_type('my_type')
            []
-
-        :param str feature_type: The type of the feature.
-
-        :return: A list of feature with the specified type.  If no features are found, an empty list is returned.
-        :rtype: list[ContentFeature]
         """
         return [i for i in self.get_features() if i.feature_type == feature_type]
 
     def has_feature(self, feature_type, name):
-        """
-        Determines if a feature with the given feature and name exists on this content node.
+        """Determines if a feature with the given feature and name exists on this content node.
 
-           >>> new_page.has_feature('pagination','pageNum')
+        Args:
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type: 
+          name: 
+
+        Returns:
+          bool: True if the feature is present; else, False.
+
+        >>> new_page.has_feature('pagination','pageNum')
            True
-
-        :param str feature_type: The type of the feature.
-        :param str name: The name of the feature.
-
-        :return: True if the feature is present; else, False.
-        :rtype: bool
         """
         return feature_type + ":" + name in self._feature_map
 
     def get_features(self):
-        """
-        Get all features on this ContentNode.
+        """Get all features on this ContentNode.
 
-        :return: A list of the features on this ContentNode.
-        :rtype: list[ContentFeature]
+        Args:
+
+        Returns:
+          list[ContentFeature]: A list of the features on this ContentNode.
+
         """
         return list(self._feature_map.values())
 
     def remove_feature(self, feature_type, name):
-        """
-        Removes the feature with the given name and type from this node.
+        """Removes the feature with the given name and type from this node.
 
-           >>> new_page.remove_feature('pagination','pageNum')
+        Args:
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type: 
+          name: 
 
-        :param str feature_type: The type of the feature.
-        :param str name: The name of the feature.
+        Returns:
+
+        >>> new_page.remove_feature('pagination','pageNum')
         """
         results = self.get_feature(feature_type, name)
         if results:
             del self._feature_map[feature_type + ":" + name]
 
     def get_feature_value(self, feature_type, name):
-        """
-        Get the value for a feature with the given name and type on this ContentNode.
+        """Get the value for a feature with the given name and type on this ContentNode.
 
-           >>> new_page.get_feature_value('pagination','pageNum')
+        Args:
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type: 
+          name: 
+
+        Returns:
+          Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
+
+        >>> new_page.get_feature_value('pagination','pageNum')
            1
-
-        :param str feature_type: The type of the feature.
-        :param str name: The name of the feature.
-
-        :return: The value of the feature if it exists on this ContentNode otherwise, None.
-        :rtype: Any or None
         """
         feature = self.get_feature(feature_type, name)
 
@@ -507,47 +570,50 @@ class ContentNode(object):
         return None if feature is None else feature.value[0] if feature.single else feature.value
 
     def get_content(self):
-        """
-        Get the content of this node.
+        """Get the content of this node.
 
-           >>> new_page.get_content()
+        Args:
+
+        Returns:
+          str: The content of this ContentNode.
+
+        >>> new_page.get_content()
            "This is page one"
-
-        :return: The content of this ContentNode.
-        :rtype: str
         """
         return self.content
 
     def get_node_type(self):
-        """
-        Get the type of this node.
+        """Get the type of this node.
 
-           >>> new_page.get_content()
+        Args:
+
+        Returns:
+          str: The type of this ContentNode.
+
+        >>> new_page.get_content()
            "page"
-
-        :return: The type of this ContentNode.
-        :rtype: str
         """
         return self.node_type
 
     def select(self, selector, variables=None):
-        """
-        Select and return the child nodes of this node that match the selector value.
+        """Select and return the child nodes of this node that match the selector value.
+        
+        
+        or
+
+        Args:
+          str: selector: The selector (ie. //*)
+          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
+          selector: 
+
+        Returns:
+          list[ContentNode]: A list of the matching content nodes.  If no matches are found, the list will be empty.
 
         >>> document.get_root().select('.')
            [ContentNode]
-
-        or
-
+        
         >>> document.get_root().select('//*[hasTag($tagName)]', {"tagName": "div"})
            [ContentNode]
-
-        :param str selector: The selector (ie. //*)
-        :param variables: A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-        :type variables: dict, optional
-
-        :return: A list of the matching content nodes.  If no matches are found, the list will be empty.
-        :rtype: list[ContentNode]
         """
         if variables is None:
             variables = {}
@@ -556,44 +622,44 @@ class ContentNode(object):
         return parsed_selector.resolve(self, variables)
 
     def select_as_node(self, selector, variables=None):
-        """
-        Select and return the child nodes of this content node that match the selector value.
+        """Select and return the child nodes of this content node that match the selector value.
         Matching nodes will be returned as the children of a new proxy content node.
-
+        
         Note this doesn't impact this content node's children.  They are not adopted by the proxy node,
         therefore their parents remain intact.
+        
+        
+        or
+
+        Args:
+          str: selector: The selector (ie. //*)
+          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
+          selector: 
+
+        Returns:
+          ContentNode: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
 
         >>> document.content_node.select_as_node('//line')
            ContentNode
-
-        or
-
+        
         >>> document.get_root().select_as_node('//*[hasTag($tagName)]', {"tagName": "div"})
            ContentNode
-
-        :param str selector: The selector (ie. //*)
-        :param variables: A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-        :type variables: dict, optional
-
-        :return: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
-        :rtype: ContentNode
         """
         new_node = self.document.create_node(node_type='result')
         new_node.children = self.select(selector, variables)
         return new_node
 
     def get_all_content(self, separator=" "):
-        """
-        Get this node's content, concatenated with all of its children's content.
+        """Get this node's content, concatenated with all of its children's content.
 
-            >>> document.content_node.get_all_content()
+        Args:
+          separator(str, optional, optional): The separator to use in joining content together; defaults to " ".
+
+        Returns:
+          str: The complete content for this node concatenated with the content of all child nodes.
+
+        >>> document.content_node.get_all_content()
             "This string is made up of multiple nodes"
-
-        :param separator: The separator to use in joining content together; defaults to " ".
-        :type separator: str, optional
-
-        :return: The complete content for this node concatenated with the content of all child nodes.
-        :rtype: str
         """
         s = ""
         if self.get_content():
@@ -605,34 +671,42 @@ class ContentNode(object):
         return s.strip()
 
     def move_child_to_parent(self, target_child, target_parent):
-        """
-        This will move the target_child, which must be a child of the node, to a new parent.
-
+        """This will move the target_child, which must be a child of the node, to a new parent.
+        
         It will be added to the end of the parent
 
-            >>> # Get first node of type 'line' from the first page
+        Args:
+          ContentNode: target_child: The child node that will be moved to a new parent node (target_parent).
+          ContentNode: target_parent: The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
+          target_child: 
+          target_parent: 
+
+        Returns:
+
+        >>> # Get first node of type 'line' from the first page
             >>> target_child = document.get_root().select('//page')[0].select('//line')[0]
             >>> # Get sixth node of type 'page'
             >>> target_parent = document.get_root().select('//page')[5]
             >>> # Move target_child (line) to the target_parent (sixth page)
             >>> document.get_root().move_child_to_parent(target_child, target_parent)
-
-        :param ContentNode target_child: The child node that will be moved to a new parent node (target_parent).
-        :param ContentNode target_parent: The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
         """
         self.children.remove(target_child)
         target_parent.add_child(target_child)
 
     def adopt_children(self, children, replace=False):
-        """
-        This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
+        """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
 
-            >>> # select all nodes of type 'line', then the root node 'adopts' them
+        Args:
+          list: ContentNode] children: A list of ContentNodes that will be added to the end of this node's children collection
+          bool: replace: If True, will remove all current children and replace them with the new list; defaults to True
+          children: 
+          replace:  (Default value = False)
+
+        Returns:
+
+        >>> # select all nodes of type 'line', then the root node 'adopts' them
             >>> # and replaces all it's existing children with these 'line' nodes.
             >>> document.get_root().adopt_children(document.select('//line'), replace=True)
-
-        :param list[ContentNode] children: A list of ContentNodes that will be added to the end of this node's children collection
-        :param bool replace: If True, will remove all current children and replace them with the new list; defaults to True
         """
 
         if replace:
@@ -644,26 +718,33 @@ class ContentNode(object):
             self.add_child(child)
 
     def remove_tag(self, tag_name):
-        """
-        Remove a tag from this content node.
+        """Remove a tag from this content node.
 
-            >>> document.get_root().remove_tag('foo')
+        Args:
+          str: tag_name: The name of the tag that should be removed.
+          tag_name: 
 
-        :param str tag_name: The name of the tag that should be removed.
+        Returns:
+
+        >>> document.get_root().remove_tag('foo')
         """
         self.remove_feature('tag', tag_name)
 
     def copy_tag(self, selector=".", existing_tag_name=None, new_tag_name=None):
-        """
-        Creates a new tag of 'new_tag_name' on the selected content node(s) with the same information as the tag with 'existing_tag_name'.
+        """Creates a new tag of 'new_tag_name' on the selected content node(s) with the same information as the tag with 'existing_tag_name'.
         Both existing_tag_name and new_tag_name values are required and must be different from one another.  Otherwise, no action is taken.
         If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.
 
-            >>> document.get_root().copy_tag('foo', 'bar')
+        Args:
+          selector: The selector to identify the source nodes to work on (default . - the current node)
+          str: existing_tag_name: The name of the existing tag whose values will be copied to the new tag.
+          str: new_tag_name: The name of the new tag.  This must be different from the existing_tag_name.
+          existing_tag_name:  (Default value = None)
+          new_tag_name:  (Default value = None)
 
-        :param selector: The selector to identify the source nodes to work on (default . - the current node)
-        :param str existing_tag_name: The name of the existing tag whose values will be copied to the new tag.
-        :param str new_tag_name: The name of the new tag.  This must be different from the existing_tag_name.
+        Returns:
+
+        >>> document.get_root().copy_tag('foo', 'bar')
         """
         if existing_tag_name is None or new_tag_name is None or existing_tag_name == new_tag_name:
             return  # do nothing, just exit function
@@ -693,15 +774,16 @@ class ContentNode(object):
                     node.add_feature('tag', new_tag_name, tag)
 
     def collect_nodes_to(self, end_node):
-        """
-        Get the the sibling nodes between the current node and the end_node.
+        """Get the the sibling nodes between the current node and the end_node.
 
-            >>> document.content_node.children[0].collect_nodes_to(end_node=document.content_node.children[5])
+        Args:
+          ContentNode: end_node: The node to end at
+          end_node: 
 
-        :param ContentNode end_node: The node to end at
+        Returns:
+          list[ContentNode]: A list of sibling nodes between this node and the end_node.
 
-        :return: A list of sibling nodes between this node and the end_node.
-        :rtype: list[ContentNode]
+        >>> document.content_node.children[0].collect_nodes_to(end_node=document.content_node.children[5])
         """
         nodes = []
         current_node = self
@@ -714,28 +796,35 @@ class ContentNode(object):
         return nodes
 
     def tag_nodes_to(self, end_node, tag_to_apply, tag_uuid: str = None):
-        """
-        Tag all the nodes from this node to the end_node with the given tag name
+        """Tag all the nodes from this node to the end_node with the given tag name
 
-            >>> document.content_node.children[0].tag_nodes_to(document.content_node.children[5], tag_name='foo')
+        Args:
+          ContentNode: end_node: The node to end with
+          str: tag_to_apply: The tag name that will be applied to each node
+          str: tag_uuid: The tag uuid used if you want to group them
+          end_node: 
+          tag_to_apply: 
+          tag_uuid: str:  (Default value = None)
 
-        :param ContentNode end_node: The node to end with
-        :param str tag_to_apply: The tag name that will be applied to each node
-        :param str tag_uuid: The tag uuid used if you want to group them
+        Returns:
+
+        >>> document.content_node.children[0].tag_nodes_to(document.content_node.children[5], tag_name='foo')
         """
         [node.tag(tag_to_apply, tag_uuid=tag_uuid) for node in self.collect_nodes_to(end_node)]
 
     def tag_range(self, start_content_re, end_content_re, tag_to_apply, node_type_re='.*', use_all_content=False):
-        """
-        This will tag all the child nodes between the start and end content regular expressions
+        """This will tag all the child nodes between the start and end content regular expressions
 
-             >>> document.content_node.tag_range(start_content_re='.*Cheese.*', end_content_re='.*Fish.*', tag_to_apply='foo')
+        Args:
+          start_content_re: The regular expression to match the starting child
+          end_content_re: The regular expression to match the ending child
+          tag_to_apply: The tag name that will be applied to the nodes in range
+          node_type_re: The node type to match (default is all)
+          use_all_content: Use full content (including child nodes, default is False)
 
-        :param start_content_re: The regular expression to match the starting child
-        :param end_content_re: The regular expression to match the ending child
-        :param tag_to_apply: The tag name that will be applied to the nodes in range
-        :param node_type_re: The node type to match (default is all)
-        :param use_all_content: Use full content (including child nodes, default is False)
+        Returns:
+
+        >>> document.content_node.tag_range(start_content_re='.*Cheese.*', end_content_re='.*Fish.*', tag_to_apply='foo')
         """
 
         # Could be line, word, or content-area
@@ -761,8 +850,12 @@ class ContentNode(object):
 
     def tag_text_tree(self):
         """
-        Return a text tree
-        :return:
+
+        Args:
+
+        Returns:
+          :return:
+
         """
         from anytree import RenderTree
         result = ""
@@ -773,30 +866,34 @@ class ContentNode(object):
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None):
-        """
-        This will tag (see Feature Tagging) the expression groups identified by the regular expression.
-
-            >>> document.content_node.tag('is_cheese')
-
+        """This will tag (see Feature Tagging) the expression groups identified by the regular expression.
+        
+        
         Note that if you use the flag use_all_content then node_only will default to True if not set, else it
         will default to False
 
-        :param tag_to_apply: The name of tag that will be applied to the node
-        :param selector: The selector to identify the source nodes to work on (default . - the current node)
-        :param content_re: The regular expression that you wish to use to tag, note that we will create a tag for each matching group
-        :param use_all_content: Apply the regular expression to the all_content (include content from child nodes)
-        :param separator: Separator to use for use_all_content
-        :param node_only: Ignore the matching groups and tag the whole node
-        :param fixed_position: Use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
-        :param data: A dictionary of data for the given tag
-        :param tag_uuid: A UUID used to tie tags in order to demonstrate they're related and form a single concept.
-                        For example, if tagging the two words "Wells" and "Fargo" as an ORGANIZATION, the tag on both words should have the
-                        same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
-                        on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
-                        For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
-                        The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
-                        pattern.  In that case, each feature value would share the same UUID.
-                        If no tag_uuid is provided, a new uuid is generated for each tag instance.
+        Args:
+          tag_to_apply: The name of tag that will be applied to the node
+          selector: The selector to identify the source nodes to work on (default . - the current node)
+          content_re: The regular expression that you wish to use to tag, note that we will create a tag for each matching group (Default value = None)
+          use_all_content: Apply the regular expression to the all_content (include content from child nodes) (Default value = False)
+          separator: Separator to use for use_all_content (Default value = " ")
+          node_only: Ignore the matching groups and tag the whole node (Default value = None)
+          fixed_position: Use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
+          data: A dictionary of data for the given tag (Default value = None)
+          tag_uuid: A UUID used to tie tags in order to demonstrate they're related and form a single concept.
+        For example, if tagging the two words "Wells" and "Fargo" as an ORGANIZATION, the tag on both words should have the
+        same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
+        on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
+        For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
+        The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
+        pattern.  In that case, each feature value would share the same UUID.
+        If no tag_uuid is provided, a new uuid is generated for each tag instance.
+          tag_uuid: str:  (Default value = None)
+
+        Returns:
+
+        >>> document.content_node.tag('is_cheese')
         """
 
         if use_all_content and node_only is None:
@@ -805,12 +902,32 @@ class ContentNode(object):
             node_only = False
 
         def get_tag_uuid(tag_uuid):
+            """
+
+            Args:
+              tag_uuid: 
+
+            Returns:
+
+            """
             if tag_uuid:
                 return tag_uuid
             else:
                 return str(uuid.uuid4())
 
         def tag_node_position(node_to_check, start, end, node_data, tag_uuid):
+            """
+
+            Args:
+              node_to_check: 
+              start: 
+              end: 
+              node_data: 
+              tag_uuid: 
+
+            Returns:
+
+            """
 
             content_length = 0
 
@@ -880,23 +997,30 @@ class ContentNode(object):
                                 tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
 
     def get_tags(self):
-        """
-        Returns a list of the names of the tags on the given node
-
-            >>> document.content_node.select('*').get_tags()
-            ['is_cheese']
-
+        """Returns a list of the names of the tags on the given node
+        
+        
         :return: A list of the tag name
+
+        Args:
+
+        Returns:
+
+        >>> document.content_node.select('*').get_tags()
+            ['is_cheese']
         """
         return [i.name for i in self.get_features_of_type("tag")]
 
     def get_tag_values(self, tag_name, include_children=False):
-        """
-        Get the values for a specific tag name
+        """Get the values for a specific tag name
 
-        :param tag_name: tag name
-        :param include_children: include the children of this node
-        :return: a list of the tag values
+        Args:
+          tag_name: tag name
+          include_children: include the children of this node (Default value = False)
+
+        Returns:
+          a list of the tag values
+
         """
         values = []
         for tag in self.get_tag(tag_name):
@@ -909,16 +1033,31 @@ class ContentNode(object):
         return values
 
     def get_related_tag_values(self, tag_name: str, include_children: bool = False, value_separator: str = ' '):
-        """
-        Get the values for a specific tag name, grouped by uuid
+        """Get the values for a specific tag name, grouped by uuid
 
-        :param tag_name: tag name
-        :param include_children: include the children of this node
-        :param value_separator: the string to be used to join related tag values
-        :return: a list of the tag values
+        Args:
+          tag_name: tag name
+          include_children: include the children of this node
+          value_separator: the string to be used to join related tag values
+          tag_name: str: 
+          include_children: bool:  (Default value = False)
+          value_separator: str:  (Default value = ' ')
+
+        Returns:
+          a list of the tag values
+
         """
 
         def group_tag_values(group_dict, feature_val):
+            """
+
+            Args:
+              group_dict: 
+              feature_val: 
+
+            Returns:
+
+            """
             # we know the names of all these tags are the same, but we want to group them if they share the same uuid
             if feature_val['uuid'] in value_groups.keys():
                 # we've seen this UUID - add it's value to the group
@@ -949,16 +1088,17 @@ class ContentNode(object):
         return value_strings
 
     def get_tag(self, tag_name):
-        """
-        Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
+        """Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
         content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
 
-            >>> document.content_node.find(content_re='.*Cheese.*').get_tag('is_cheese')
+        Args:
+          tag_name: The name of the tag
+
+        Returns:
+          A list tagged location and values for this label in this node
+
+        >>> document.content_node.find(content_re='.*Cheese.*').get_tag('is_cheese')
             [0,10,'The Cheese Moved']
-
-        :param tag_name: The name of the tag
-
-        :return: A list tagged location and values for this label in this node
         """
         tag_details = self.get_feature_value('tag', tag_name)
 
@@ -971,14 +1111,15 @@ class ContentNode(object):
             return [tag_details]
 
     def get_all_tags(self):
-        """
-        Get the names of all tags that have been applied to this node or to its children.
+        """Get the names of all tags that have been applied to this node or to its children.
 
-            >>> document.content_node.find(content_re='.*Cheese.*').get_all_tags()
+        Args:
+
+        Returns:
+          list[str]: A list of the tag names belonging to this node and/or its children.
+
+        >>> document.content_node.find(content_re='.*Cheese.*').get_all_tags()
             ['is_cheese']
-
-        :return: A list of the tag names belonging to this node and/or its children.
-        :rtype: list[str]
         """
         tags = []
         tags.extend(self.get_tags())
@@ -987,30 +1128,32 @@ class ContentNode(object):
         return list(set(tags))
 
     def has_tags(self):
-        """
-        Determines if this node has any tags at all.
+        """Determines if this node has any tags at all.
 
-            >>> document.content_node.find(content_re='.*Cheese.*').has_tags()
+        Args:
+
+        Returns:
+          bool: True if node has any tags; else, False;
+
+        >>> document.content_node.find(content_re='.*Cheese.*').has_tags()
             True
-
-        :return: True if node has any tags; else, False;
-        :rtype: bool
         """
         return len([i.value for i in self.get_features_of_type("tag")]) > 0
 
     def has_tag(self, tag):
-        """
-        Determine if this node has a tag with the specified name.
+        """Determine if this node has a tag with the specified name.
 
-            >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_cheese')
+        Args:
+          str: tag: The name of the tag.
+          tag: 
+
+        Returns:
+          bool: True if node has a tag by the specified name; else, False;
+
+        >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_cheese')
             True
             >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_fish')
             False
-
-        :param str tag: The name of the tag.
-
-        :return: True if node has a tag by the specified name; else, False;
-        :rtype: bool
         """
         for feature in self.get_features():
             if feature.feature_type == 'tag' and feature.name == tag:
@@ -1019,29 +1162,22 @@ class ContentNode(object):
 
     def find(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=1,
              tag_name_re=None, use_all_content=False):
-        """
-        Return a node related to this node (parent or child) that matches the content and/or node type specified by regular expressions.
+        """Return a node related to this node (parent or child) that matches the content and/or node type specified by regular expressions.
 
-            >>> document.get_root().find(content_re='.*Cheese.*',instance=2)
+        Args:
+          content_re(str, optional, optional): The regular expression to match against the node's content; default is '.*'.
+          node_type_re(str, optional, optional): The regular expression to match against the node's type; default is '.*'.
+          direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
+          tag_name(str, optional, optional): The tag name that must exist on the node; default is None.
+          instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
+          tag_name_re(str, optional, optional): The regular expression that will match the tag_name that must exist on the node;  default is None.
+          use_all_content(bool, optional, optional): Match content_re against the content of this node concatenated with the content of its child nodes; default is False.
+
+        Returns:
+          ContentNode or None.: Matching node (if found), or None.
+
+        >>> document.get_root().find(content_re='.*Cheese.*',instance=2)
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-
-        :param content_re: The regular expression to match against the node's content; default is '.*'.
-        :type content_re: str, optional
-        :param node_type_re: The regular expression to match against the node's type; default is '.*'.
-        :type node_type_re: str, optional
-        :param direction: The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-        :type direction: FindDirection(enum), optional
-        :param tag_name: The tag name that must exist on the node; default is None.
-        :type tag_name: str, optional
-        :param instance: The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
-        :type instance: int, optional
-        :param tag_name_re: The regular expression that will match the tag_name that must exist on the node;  default is None.
-        :type tag_name_re: str, optional
-        :param use_all_content: Match content_re against the content of this node concatenated with the content of its child nodes; default is False.
-        :type use_all_content: bool, optional
-
-        :return: Matching node (if found), or None.
-        :rtype: ContentNode or None.
         """
         results = self.findall(content_re, node_type_re, direction, tag_name, tag_name_re, use_all_content)
         if instance < 1 or len(results) < instance:
@@ -1050,22 +1186,23 @@ class ContentNode(object):
             return results[instance - 1]
 
     def find_with_feature_value(self, feature_type, feature_name, value, direction=FindDirection.CHILDREN, instance=1):
-        """
-        Return a node related to this node (parent or child) that has a specific feature type, feature name, and feature value.
+        """Return a node related to this node (parent or child) that has a specific feature type, feature name, and feature value.
 
-            >>> document.content_node.find_with_feature_value(feature_type='tag',feature_name='is_cheese',value=[1,10,'The Cheese has moved'])
+        Args:
+          str: feature_type: The feature type.
+          str: feature_name: The feature name.
+          Any: value: The feature value.
+          direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
+          instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
+          feature_type: 
+          feature_name: 
+          value: 
+
+        Returns:
+          ContentNode or None: Matching node (if found), or None.
+
+        >>> document.content_node.find_with_feature_value(feature_type='tag',feature_name='is_cheese',value=[1,10,'The Cheese has moved'])
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-
-        :param str feature_type: The feature type.
-        :param str feature_name: The feature name.
-        :param Any value: The feature value.
-        :param direction: The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-        :type direction: FindDirection(enum), optional
-        :param instance: The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
-        :type instance: int, optional
-
-        :return: Matching node (if found), or None.
-        :rtype: ContentNode or None
         """
 
         if instance < 1:
@@ -1076,20 +1213,22 @@ class ContentNode(object):
                                  instance - 1, 1), None)
 
     def findall_with_feature_value(self, feature_type, feature_name, value, direction=FindDirection.CHILDREN):
-        """
-        Get all nodes related to this node (parents or children) that have a specific feature type, feature name, and feature value.
+        """Get all nodes related to this node (parents or children) that have a specific feature type, feature name, and feature value.
 
-            >>> document.content_node.findall_with_feature_value(feature_type='tag',feature='is_cheese', value=[1,10,'The Cheese has moved'])
+        Args:
+          str: feature_type: The feature type.
+          str: feature_name: The feature name.
+          Any: value: The feature value.
+          direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
+          feature_type: 
+          feature_name: 
+          value: 
+
+        Returns:
+          list[ContentNode]: list of the matching content nodes
+
+        >>> document.content_node.findall_with_feature_value(feature_type='tag',feature='is_cheese', value=[1,10,'The Cheese has moved'])
             [<kodexa.model.model.ContentNode object at 0x7f80605e53c8>]
-
-        :param str feature_type: The feature type.
-        :param str feature_name: The feature name.
-        :param Any value: The feature value.
-        :param direction: The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-        :type direction: FindDirection(enum), optional
-
-        :return: list of the matching content nodes
-        :rtype: list[ContentNode]
         """
         if self.has_feature(feature_type, feature_name) and value == self.get_feature_value(feature_type, feature_name):
             yield self
@@ -1102,11 +1241,13 @@ class ContentNode(object):
                 yield from self.parent.findall_with_feature_value(feature_type, feature_name, value, direction)
 
     def is_first_child(self):
-        """
-        Determines if this node is the first child of its parent or has no parent.
+        """Determines if this node is the first child of its parent or has no parent.
 
-        :return: True if this node is the first child of its parent or if this node has no parent; else, False;
-        :rtype: bool
+        Args:
+
+        Returns:
+          bool: True if this node is the first child of its parent or if this node has no parent; else, False;
+
         """
         if not self.parent:
             return True
@@ -1114,11 +1255,13 @@ class ContentNode(object):
             return self.index == 0
 
     def is_last_child(self):
-        """
-        Determines if this node is the last child of its parent or has no parent.
+        """Determines if this node is the last child of its parent or has no parent.
 
-        :return: True if this node is the last child of its parent or if this node has no parent; else, False;
-        :rtype: bool
+        Args:
+
+        Returns:
+          bool: True if this node is the last child of its parent or if this node has no parent; else, False;
+
         """
 
         if not self.parent:
@@ -1127,11 +1270,13 @@ class ContentNode(object):
             return self.index == self.parent.get_last_child_index()
 
     def get_last_child_index(self):
-        """
-        Returns the max index value for the children of this node. If the node has no children, returns None.
+        """Returns the max index value for the children of this node. If the node has no children, returns None.
 
-        :return: The max index of the children of this node, or None if there are no children.
-        :rtype: int or None
+        Args:
+
+        Returns:
+          int or None: The max index of the children of this node, or None if there are no children.
+
         """
 
         if not self.children:
@@ -1145,18 +1290,20 @@ class ContentNode(object):
         return max_index
 
     def get_node_at_index(self, index):
-        """
-        Returns the child node at the specified index. If the specified index is outside the first (0), or
+        """Returns the child node at the specified index. If the specified index is outside the first (0), or
         last child's index, None is returned.
-
+        
         Note:  documents allow for sparse representation and child nodes may not have consecutive index numbers.
         If there isn't a child node at the specfied index, a 'virtual' node will be returned.  This 'virtual' node
         will have the node type of its nearest sibling and will have an index value, but will have no features or content.
 
-        :param int index: The index (zero-based) for the child node.
+        Args:
+          int: index: The index (zero-based) for the child node.
+          index: 
 
-        :return: Node at index, or None if the index is outside the boundaries of child nodes.
-        :rtype: ContentNode or None
+        Returns:
+          ContentNode or None: Node at index, or None if the index is outside the boundaries of child nodes.
+
         """
         if self.children:
 
@@ -1186,50 +1333,46 @@ class ContentNode(object):
             return None
 
     def has_next_node(self, node_type_re=".*", skip_virtual=False):
-        """
-        Determine if this node has a next sibling that matches the type specified by the node_type_re regex.
+        """Determine if this node has a next sibling that matches the type specified by the node_type_re regex.
 
-        :param node_type_re: The regular expression to match against the next sibling node's type; default is '.*'.
-        :type node_type_re: str, optional
-        :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
-        :type skip_virtual: bool, optional
+        Args:
+          node_type_re(str, optional, optional): The regular expression to match against the next sibling node's type; default is '.*'.
+          skip_virtual(bool, optional, optional): Skip virtual nodes and return the next real node; default is False.
 
-        :return: True if there is a next sibling node matching the specified type regex; else, False.
-        :rtype: bool
+        Returns:
+          bool: True if there is a next sibling node matching the specified type regex; else, False.
+
         """
         return self.next_node(node_type_re, skip_virtual=skip_virtual) is not None
 
     def has_previous_node(self, node_type_re=".*", skip_virtual=False):
-        """
-        Determine if this node has a previous sibling that matches the type specified by the node_type_re regex.
+        """Determine if this node has a previous sibling that matches the type specified by the node_type_re regex.
 
-        :param node_type_re: The regular expression to match against the previous sibling node's type; default is '.*'.
-        :type node_type_re: str, optional
-        :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
-        :type skip_virtual: bool, optional
+        Args:
+          node_type_re(str, optional, optional): The regular expression to match against the previous sibling node's type; default is '.*'.
+          skip_virtual(bool, optional, optional): Skip virtual nodes and return the next real node; default is False.
 
-        :return: True if there is a previous sibling node matching the specified type regex; else, False.
-        :rtype: bool
+        Returns:
+          bool: True if there is a previous sibling node matching the specified type regex; else, False.
+
         """
         return self.previous_node(node_type_re=node_type_re, skip_virtual=skip_virtual) is not None
 
     def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=True):
-        """
-        Returns the next sibling content node.
-
+        """Returns the next sibling content node.
+        
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
 
-        :param node_type_re: The regular expression to match against the next sibling node's type; default is '.*'.
-        :type node_type_re: str, optional
-        :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
-        :type skip_virtual: bool, optional
-        :param has_no_content: Allow a node that has no content to be returned; default is True.
-        :type has_no_content: bool, optional
+        Args:
+          node_type_re(str, optional, optional): The regular expression to match against the next sibling node's type; default is '.*'.
+          skip_virtual(bool, optional, optional): Skip virtual nodes and return the next real node; default is False.
+          has_no_content(bool, optional, optional): Allow a node that has no content to be returned; default is True.
 
-        :return: The next node or None, if no node exists
-        :rtype: ContentNode or None
+        Returns:
+          ContentNode or None: The next node or None, if no node exists
+
         """
         search_index = self.index + 1
         compiled_node_type_re = re.compile(node_type_re)
@@ -1247,24 +1390,21 @@ class ContentNode(object):
             search_index += 1
 
     def previous_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
-        """
-        Returns the previous sibling content node.
-
+        """Returns the previous sibling content node.
+        
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the previous node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
 
-        :param node_type_re: The regular expression to match against the previous node's type; default is '.*'.
-        :type node_type_re: str, optional
-        :param skip_virtual: Skip virtual nodes and return the next real node; default is False.
-        :type skip_virtual: bool, optional
-        :param has_no_content: Allow a node that has no content to be returned; default is False.
-        :type has_no_content: bool, optional
-        :param traverse: The relationship you'd like to traverse (SIBLING, CHILDREN, PARENT, or ALL); default is Traverse.SIBLING.
-        :type traverse: Traverse(enum), optional
+        Args:
+          node_type_re(str, optional, optional): The regular expression to match against the previous node's type; default is '.*'.
+          skip_virtual(bool, optional, optional): Skip virtual nodes and return the next real node; default is False.
+          has_no_content(bool, optional, optional): Allow a node that has no content to be returned; default is False.
+          traverse(Traverse(enum), optional, optional): The relationship you'd like to traverse (SIBLING, CHILDREN, PARENT, or ALL); default is Traverse.SIBLING.
 
-        :return: The previous node or None, if no node exists
-        :rtype: ContentNode or None
+        Returns:
+          ContentNode or None: The previous node or None, if no node exists
+
         """
 
         # TODO: impement/differentiate traverse logic for CHILDREN and SIBLING
@@ -1292,28 +1432,22 @@ class ContentNode(object):
 
     def findall(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None,
                 tag_name_re=None, use_all_content=False):
-        """
-        Search for related nodes (child or parent) that match the content and/or type specified by regular expressions.
+        """Search for related nodes (child or parent) that match the content and/or type specified by regular expressions.
 
-            >>> document.content_node.findall(content_re='.*Cheese.*')
+        Args:
+          content_re(str, optional, optional): The regular expression to match against the node's content; default is '.*'.
+          node_type_re(str, optional, optional): The regular expression to match against the node's type; default is '.*'.
+          direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
+          tag_name(str, optional, optional): The tag name that must exist on the node; default is None.
+          tag_name_re(str, optional, optional): The regular expression that will match the tag_name that must exist on the node;  default is None.
+          use_all_content(bool, optional, optional): Match content_re against the content of this node concatenated with the content of its child nodes; default is False.
+
+        Returns:
+          list[ContentNode]: List of matching content nodes
+
+        >>> document.content_node.findall(content_re='.*Cheese.*')
             [<kodexa.model.model.ContentNode object at 0x7f80605e53c8>,
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>]
-
-        :param content_re: The regular expression to match against the node's content; default is '.*'.
-        :type content_re: str, optional
-        :param node_type_re: The regular expression to match against the node's type; default is '.*'.
-        :type node_type_re: str, optional
-        :param direction: The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-        :type direction: FindDirection(enum), optional
-        :param tag_name: The tag name that must exist on the node; default is None.
-        :type tag_name: str, optional
-        :param tag_name_re: The regular expression that will match the tag_name that must exist on the node;  default is None.
-        :type tag_name_re: str, optional
-        :param use_all_content: Match content_re against the content of this node concatenated with the content of its child nodes; default is False.
-        :type use_all_content: bool, optional
-
-        :return: List of matching content nodes
-        :rtype: list[ContentNode]
         """
         value_compiled = re.compile(content_re)
         node_type_compiled = re.compile(node_type_re)
@@ -1326,9 +1460,19 @@ class ContentNode(object):
 
     def findall_compiled(self, value_re_compiled, node_type_re_compiled, direction, tag_name, tag_name_compiled,
                          use_all_content):
-        """
-        Search for a node that matches on the value and or type using
+        """Search for a node that matches on the value and or type using
         regular expressions using compiled expressions
+
+        Args:
+          value_re_compiled: 
+          node_type_re_compiled: 
+          direction: 
+          tag_name: 
+          tag_name_compiled: 
+          use_all_content: 
+
+        Returns:
+
         """
         hits = []
 
@@ -1361,9 +1505,7 @@ class ContentNode(object):
 
 
 class ContentFeature(object):
-    """
-    A feature that has been added to a ContentNode
-    """
+    """A feature that has been added to a ContentNode"""
 
     def __init__(self, feature_type, name, value, description=None, single=True):
         self.feature_type = feature_type
@@ -1376,22 +1518,27 @@ class ContentFeature(object):
         return f"Feature [type='{self.feature_type}' name='{self.name}' value='{self.value}' single='{self.single}']"
 
     def to_dict(self):
-        """
-        Create a dictionary representing this ContentFeature's structure and content.
+        """Create a dictionary representing this ContentFeature's structure and content.
 
-            >>> node.to_dict()
+        Args:
 
-        :return: The properties of this ContentFeature structured as a dictionary.
-        :rtype: dict
+        Returns:
+          dict: The properties of this ContentFeature structured as a dictionary.
+
+        >>> node.to_dict()
         """
         return {'name': self.feature_type + ':' + self.name, 'value': self.value, 'single': self.single}
 
 
 @dataclasses.dataclass()
 class SourceMetadata:
-    """
-    Class for keeping track of the original source information for a
+    """Class for keeping track of the original source information for a
     document
+
+    Args:
+
+    Returns:
+
     """
     original_filename: Optional[str] = None
     original_path: Optional[str] = None
@@ -1417,6 +1564,14 @@ class SourceMetadata:
 
     @classmethod
     def from_dict(cls, env):
+        """
+
+        Args:
+          env: 
+
+        Returns:
+
+        """
         return cls(**{
             k: v for k, v in env.items()
             if k in inspect.signature(cls).parameters
@@ -1424,9 +1579,7 @@ class SourceMetadata:
 
 
 class Document(object):
-    """
-    A Document is a collection of metadata and a set of content nodes.
-    """
+    """A Document is a collection of metadata and a set of content nodes."""
 
     PREVIOUS_VERSION: str = "1.0.0"
     CURRENT_VERSION: str = "2.0.0"
@@ -1458,11 +1611,15 @@ class Document(object):
         registry.apply_to_document(self)
 
     def add_label(self, label: str):
-        """
-        Add a label to the document
+        """Add a label to the document
 
-        :param label:str Label to add
-        :return: the document
+        Args:
+          label: str Label to add
+          label: str: 
+
+        Returns:
+          the document
+
         """
         if label not in self.labels:
             self.labels.append(label)
@@ -1470,23 +1627,30 @@ class Document(object):
         return self
 
     def remove_label(self, label: str):
-        """
-        Remove a label from the document
+        """Remove a label from the document
 
-        :param label:str Label to remove
-        :return: the document
+        Args:
+          label: str Label to remove
+          label: str: 
+
+        Returns:
+          the document
+
         """
         self.labels.remove(label)
         return self
 
     @classmethod
     def from_text(cls, text, separator=None):
-        """
-        Creates a new Document from the text provided.
+        """Creates a new Document from the text provided.
 
-        :param text:str  Text to be used as content on the Document's ContentNode(s)
-        :param separator:str   If provided, this string will be used to split the text and the resulting text will be placed on children of the root ContentNode.
-        :return: the document
+        Args:
+          text: str  Text to be used as content on the Document's ContentNode(s)
+          separator: str   If provided, this string will be used to split the text and the resulting text will be placed on children of the root ContentNode. (Default value = None)
+
+        Returns:
+          the document
+
         """
         new_document = Document()
         new_document.content_node = new_document.create_node(node_type='text')
@@ -1501,70 +1665,76 @@ class Document(object):
         return new_document
 
     def get_root(self):
-        """
-        Get the root content node for the document (same as content_node)
-
-
-            >>> node = document.get_node()
-        """
+        """Get the root content node for the document (same as content_node)"""
         return self.content_node
 
     def to_kdxa(self, file_path: str):
-        """
-        Write the document to the kdxa format (msgpack) which can be
+        """Write the document to the kdxa format (msgpack) which can be
         used with the Kodexa platform
 
-            >>> document.to_mdoc('my-document.kdxa')
+        Args:
+          file_path: the path to the mdoc you wish to create
+          file_path: str: 
 
-        :param file_path: the path to the mdoc you wish to create
+        Returns:
+
+        >>> document.to_mdoc('my-document.kdxa')
         """
         with open(file_path, 'wb') as outfile:
             msgpack.pack(self.to_dict(), outfile, use_bin_type=True)
 
     @staticmethod
     def from_kdxa(file_path):
-        """
-        Read an .kdxa file from the given file_path and
+        """Read an .kdxa file from the given file_path and
 
-            >>> document = Document.from_kdxa('my-document.kdxa')
+        Args:
+          file_path: the path to the mdoc file
 
-        :param file_path: the path to the mdoc file
+        Returns:
+
+        >>> document = Document.from_kdxa('my-document.kdxa')
         """
         with open(file_path, 'rb') as data_file:
             data_loaded = msgpack.unpack(data_file, raw=False)
         return Document.from_dict(data_loaded)
 
     def to_msgpack(self):
-        """
-        Convert this document object structure into a message pack
-
-            >>> document.to_msgpack()
-        """
+        """Convert this document object structure into a message pack"""
         return msgpack.packb(self.to_dict(), use_bin_type=True)
 
     def to_json(self):
-        """
-        Create a JSON string representation of this Document.
+        """Create a JSON string representation of this Document.
 
-            >>> document.to_json()
+        Args:
 
-        :return: The JSON formatted string representation of this Document.
-        :rtype: str
+        Returns:
+          str: The JSON formatted string representation of this Document.
+
+        >>> document.to_json()
         """
         return json.dumps(self.to_dict(), ensure_ascii=False)
 
     def to_dict(self):
-        """
-        Create a dictionary representing this Document's structure and content.
+        """Create a dictionary representing this Document's structure and content.
 
-            >>> document.to_dict()
+        Args:
 
-        :return: A dictionary representation of this Document.
-        :rtype: dict
+        Returns:
+          dict: A dictionary representation of this Document.
+
+        >>> document.to_dict()
         """
 
         # We don't want to store the none values
         def clean_none_values(d):
+            """
+
+            Args:
+              d: 
+
+            Returns:
+
+            """
             clean = {}
             for k, v in d.items():
                 if isinstance(v, dict):
@@ -1588,15 +1758,16 @@ class Document(object):
 
     @staticmethod
     def from_dict(doc_dict):
-        """
-        Build a new Document from a dictionary.
+        """Build a new Document from a dictionary.
 
-            >>> Document.from_dict(doc_dict)
+        Args:
+          dict: doc_dict: A dictionary representation of a Kodexa Document.
+          doc_dict: 
 
-        :param dict doc_dict: A dictionary representation of a Kodexa Document.
+        Returns:
+          Document: A complete Kodexa Document
 
-        :return: A complete Kodexa Document
-        :rtype: Document
+        >>> Document.from_dict(doc_dict)
         """
         new_document = Document(DocumentMetadata(doc_dict['metadata']))
         for mixin in doc_dict['mixins']:
@@ -1621,73 +1792,75 @@ class Document(object):
 
     @staticmethod
     def from_json(json_string):
-        """
-        Create an instance of a Document from a JSON string.
+        """Create an instance of a Document from a JSON string.
 
-            >>> Document.from_json(json_string)
+        Args:
+          str: json_string: A JSON string representation of a Kodexa Document
+          json_string: 
 
-        :param str json_string: A JSON string representation of a Kodexa Document
+        Returns:
+          Document: A complete Kodexa Document
 
-        :return: A complete Kodexa Document
-        :rtype: Document
+        >>> Document.from_json(json_string)
         """
         return Document.from_dict(json.loads(json_string))
 
     @staticmethod
     def from_msgpack(bytes):
-        """
-        Create an instance of a Document from a message pack byte array.
+        """Create an instance of a Document from a message pack byte array.
 
-            >>> Document.from_msgpack(open(os.path.join('news-doc.kdxa'), 'rb').read())
+        Args:
+          bytes: bytes: A message pack byte array.
 
-        :param bytes bytes: A message pack byte array.
+        Returns:
+          Document: A complete Kodexa Document
 
-        :return: A complete Kodexa Document
-        :rtype: Document
+        >>> Document.from_msgpack(open(os.path.join('news-doc.kdxa'), 'rb').read())
         """
         return Document.from_dict(msgpack.unpackb(bytes, raw=False))
 
     def get_mixins(self):
-        """
-        Get the list of mixins that have been enabled on this document.
-
-
-            >>> document.get_mixins()
-            ['spatial','finders']
-        """
+        """Get the list of mixins that have been enabled on this document."""
         return self._mixins
 
     def add_mixin(self, mixin):
-        """
-        Add the given mixin to this document,  this will apply the mixin to all the content nodes,
+        """Add the given mixin to this document,  this will apply the mixin to all the content nodes,
         and also register it with the document so that future invocations of create_node will ensure
         the node has the mixin appled.
 
-            >>> document.add_mixin('spatial')
+        Args:
+          mixin: 
+
+        Returns:
+
+        >>> document.add_mixin('spatial')
         """
         registry.add_mixin_to_document(mixin, self)
 
     def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
                     parent: ContentNode = None,
                     index: int = 0):
-        """
-        Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
+        """Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
         applied to the document will also be available on the new node.
 
-            >>> document.create_node(node_type='page')
-            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-
-
-        :param str node_type: The type of node.
-        :param str content: The content for the node; defaults to None.
-        :param bool virtual: Indicates if this is a 'real' or 'virtual' node; default is False.  'Real' nodes contain document content.
+        Args:
+          str: node_type: The type of node.
+          str: content: The content for the node; defaults to None.
+          bool: virtual: Indicates if this is a 'real' or 'virtual' node; default is False.  'Real' nodes contain document content.
         'Virtual' nodes are synthesized as necessary to fill gaps in between non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
-        :param ContentNode parent: The parent for this newly created node; default is None;
-        :param int index: The index property to be set on this node; default is 0;
+          ContentNode: parent: The parent for this newly created node; default is None;
+          int: index: The index property to be set on this node; default is 0;
+          node_type: str: 
+          content: Optional[str]:  (Default value = None)
+          virtual: bool:  (Default value = False)
+          parent: ContentNode:  (Default value = None)
+          index: int:  (Default value = 0)
 
-        :return: This newly created node.
-        :rtype: ContentNode
+        Returns:
+          ContentNode: This newly created node.
 
+        >>> document.create_node(node_type='page')
+            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         """
         content_node = ContentNode(document=self, node_type=node_type, content=content)
         content_node.parent = parent
@@ -1704,13 +1877,15 @@ class Document(object):
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
-        """
-        Creates a Document that has a 'file-handle' connector to the specified file.
+        """Creates a Document that has a 'file-handle' connector to the specified file.
 
-        :param file file: The file to which the new Document is connected.
+        Args:
+          file: file: The file to which the new Document is connected.
+          unpack: bool:  (Default value = False)
 
-        :return: A Document connected to the specified file.
-        :rtype: Document
+        Returns:
+          Document: A Document connected to the specified file.
+
         """
         if unpack:
             Document.from_kdxa(file)
@@ -1725,14 +1900,17 @@ class Document(object):
 
     @classmethod
     def from_url(cls, url, headers=None):
-        """
-        Creates a Document that has a 'url' connector for the specified url.
+        """Creates a Document that has a 'url' connector for the specified url.
 
-        :param str url: The URL to which the new Document is connected.
-        :param dict headers: Headers that should be used when reading from the URL
+        Args:
+          str: url: The URL to which the new Document is connected.
+          dict: headers: Headers that should be used when reading from the URL
+          url: 
+          headers:  (Default value = None)
 
-        :return: A Document connected to the specified URL with the specified headers (if any).
-        :rtype: Document
+        Returns:
+          Document: A Document connected to the specified URL with the specified headers (if any).
+
         """
         if headers is None:
             headers = {}
@@ -1747,18 +1925,18 @@ class Document(object):
         return url_document
 
     def select(self, selector, variables=None):
-        """
-        Execute a selector on the root node and then return a list of the matching nodes.
+        """Execute a selector on the root node and then return a list of the matching nodes.
+
+        Args:
+          str: selector: The selector (ie. //*)
+          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
+          selector: 
+
+        Returns:
+          list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
 
         >>> document.select('.')
            [ContentNode]
-
-        :param str selector: The selector (ie. //*)
-        :param variables: A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-        :type variables: dict, optional
-
-        :return: A list of the matching ContentNodes.  If no matches found, list is empty.
-        :rtype: list[ContentNodes]
         """
         if variables is None:
             variables = {}
@@ -1772,18 +1950,17 @@ class Document(object):
             return []
 
     def select_as_node(self, selector, variables=None):
-        """
-        Execute a selector on the root node and then return new ContentNode with the results set as its children.
+        """Execute a selector on the root node and then return new ContentNode with the results set as its children.
+
+        Args:
+          selector: The selector (ie. //*)
+          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
+
+        Returns:
+          ContentNode: A new ContentNode.  All ContentNodes on this Document that match the selector value are added as the children for the returned ContentNode.
 
         >>> document.select('//line')
            ContentNode
-
-        :param selector: The selector (ie. //*)
-        :param variables: A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-        :type variables: dict, optional
-
-        :return: A new ContentNode.  All ContentNodes on this Document that match the selector value are added as the children for the returned ContentNode.
-        :rtype: ContentNode
         """
         if variables is None:
             variables = {}
@@ -1794,98 +1971,136 @@ class Document(object):
 
     def get_labels(self) -> List[str]:
         """
-        Return the list of labels associated with this document
 
-        :return: list of associated labels
+        Args:
+
+        Returns:
+          :return: list of associated labels
+
         """
         return self.labels
 
 
 class DocumentStore:
-    """
-    A document store supports storing, listing and retrieving Kodexa documents and document families
-    """
+    """A document store supports storing, listing and retrieving Kodexa documents and document families"""
 
     def get_ref(self) -> str:
-        """
-        Returns the reference (org-slug/store-slug:version)
-
+        """Returns the reference (org-slug/store-slug:version)
+        
         :return: the reference
+
+        Args:
+
+        Returns:
+
         """
         pass
 
     def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
-        """
-        Get a Document based on the ID of the ContentObject
+        """Get a Document based on the ID of the ContentObject
 
-        :param uuid_value: the ID of the ContentObject
-        :return: A document (or None if not found)
+        Args:
+          uuid_value: the ID of the ContentObject
+          uuid_value: str: 
+
+        Returns:
+          A document (or None if not found)
+
         """
         pass
 
     def list_objects(self) -> List[ContentObject]:
-        """
-        List the content objects in the store
-
+        """List the content objects in the store
+        
         :return: a list of the content objects
+
+        Args:
+
+        Returns:
+
         """
         pass
 
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                        document: Document):
-        """
-        Add a document to a family as a new relationship
+        """Add a document to a family as a new relationship
 
-        :param document_family_id: the ID for the document family
-        :param document_relationship: the document relationship
-        :param document: the document
-        :return: None
+        Args:
+          document_family_id: the ID for the document family
+          document_relationship: the document relationship
+          document: the document
+          document_family_id: str: 
+          document: Document: 
+
+        Returns:
+          None
+
         """
         pass
 
     def get_document_by_content_object(self, content_object: ContentObject) -> Document:
-        """
-        Get a document for a given content object
+        """Get a document for a given content object
 
-        :param content_object: the content object
-        :return: the Document
+        Args:
+          content_object: the content object
+          content_object: ContentObject: 
+
+        Returns:
+          the Document
+
         """
         pass
 
     def list(self) -> List[ContentObject]:
-        """
-        Print out a table listing the content objects in the store
-
+        """Print out a table listing the content objects in the store
+        
         :return: The list of content objects
+
+        Args:
+
+        Returns:
+
         """
         objects = self.list_objects()
         self._draw_table(objects)
         return objects
 
     def query(self, query: str = "*"):
+        """
+
+        Args:
+          query: str:  (Default value = "*")
+
+        Returns:
+
+        """
         objects = self.query_objects(query)
         self._draw_table(objects)
 
     def register_listener(self, listener):
-        """
-        Register a listener to this store.
-
+        """Register a listener to this store.
+        
         A store listener must have the method
-
+        
             process_event(content_event:ContentEvent)
 
+        Args:
+          listener: the listener to register
 
-        :param listener: the listener to register
-        :return: None
+        Returns:
+          None
+
         """
         pass
 
     def _draw_table(self, objects):
-        """
-        Internal method to draw a table
+        """Internal method to draw a table
 
-        :param objects:
-        :return:
+        Args:
+          objects: return:
+
+        Returns:
+
         """
         from rich.table import Table
         from rich import print
@@ -1905,36 +2120,56 @@ class DocumentStore:
         print(table)
 
     def query_objects(self, query: str) -> List[ContentObject]:
+        """
+
+        Args:
+          query: str: 
+
+        Returns:
+
+        """
         pass
 
     def put(self, path: str, document: Document):
-        """
-        Puts a new document in the store with the given path.
-
+        """Puts a new document in the store with the given path.
+        
         There mustn't be a family in the path, this method will create a new family based around the
         document
 
-        :param path: the path you wish to add the document in the store
-        :param document: the document
-        :return:
+        Args:
+          path: the path you wish to add the document in the store
+          document: the document
+          path: str: 
+          document: Document: 
+
+        Returns:
+
         """
         pass
 
     def count(self) -> int:
-        """
-        The number of document families in the store
-
+        """The number of document families in the store
+        
         :return: the count of families
+
+        Args:
+
+        Returns:
+
         """
         return 0
 
     def accept(self, document: Document):
-        """
-        Determine if the store will accept this document.  This would typically mean that the store does
+        """Determine if the store will accept this document.  This would typically mean that the store does
         not yet have a document at the derived family path
 
-        :param document: the document to check
-        :return: True if there is no current family at derived path, False is there is one
+        Args:
+          document: the document to check
+          document: Document: 
+
+        Returns:
+          True if there is no current family at derived path, False is there is one
+
         """
         return True
 
@@ -1943,19 +2178,33 @@ class ModelStore:
     """A model store supports storing and retrieving of a ML models"""
 
     def get(self, path: str):
-        """
-        Returns the bytes object for the given path (or None is there nothing at that path)
+        """Returns the bytes object for the given path (or None is there nothing at that path)
 
-        :param path: the path to get content from
-        :return: Bytes or None is there is nothing at the path
+        Args:
+          path: the path to get content from
+          path: str: 
+
+        Returns:
+          Bytes or None is there is nothing at the path
+
         """
         pass
 
     def put(self, path: str, content):
+        """
+
+        Args:
+          path: str: 
+          content: 
+
+        Returns:
+
+        """
         pass
 
 
 class ContentObjectReference:
+    """ """
 
     def __init__(self, content_object: ContentObject, store: DocumentStore, document: Document,
                  document_family):
