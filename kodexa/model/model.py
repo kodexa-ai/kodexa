@@ -1795,4 +1795,5 @@ class ContentObjectReference:
         self.content_object = content_object
         self.store = store
         self.document = document
+        from kodexa.model import DocumentFamily
         self.document_family: DocumentFamily = document_family
