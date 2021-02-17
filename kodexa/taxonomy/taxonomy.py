@@ -4,6 +4,7 @@ from typing import List, Optional
 
 
 class Taxon:
+    """ """
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                  value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
@@ -26,6 +27,14 @@ class Taxon:
 
     @staticmethod
     def from_dict(dict_taxon):
+        """
+
+        Args:
+          dict_taxon: 
+
+        Returns:
+
+        """
         new_taxon = Taxon(label=dict_taxon.get('label', None), name=dict_taxon['name'], id=dict_taxon.get('id', None),
                           color=dict_taxon.get('color', None), node_types=dict_taxon.get('nodeTypes', None),
                           options=dict_taxon.get('options', None), enabled=dict_taxon.get('enabled', False),
@@ -40,6 +49,7 @@ class Taxon:
         return new_taxon
 
     def to_dict(self):
+        """ """
         dict = {'id': self.id, 'name': self.name, 'color': self.color, 'valuePath': self.value_path,
                 'label': self.label, 'nodeTypes': self.node_types, 'options': self.options, 'enabled': self.enabled,
                 'dataPath': self.data_path, 'metadataPath': self.metadata_path, 'children': []}
@@ -51,6 +61,7 @@ class Taxon:
 
 
 class Taxonomy:
+    """ """
 
     def __init__(self, taxonomy_type='CONTENT', enabled: bool = True, ref: str = ""):
         self.taxons: List[Taxon] = []
@@ -61,6 +72,23 @@ class Taxonomy:
     def add_taxon(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                   value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
                   metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
+        """
+
+        Args:
+          label: str: 
+          name: str: 
+          id: Optional[str]:  (Default value = None)
+          color: Optional[str]:  (Default value = None)
+          value_path: Optional[str]:  (Default value = None)
+          data_path: Optional[str]:  (Default value = None)
+          options: List:  (Default value = None)
+          metadata_path: Optional[str]:  (Default value = None)
+          node_types: List:  (Default value = None)
+          enabled: bool:  (Default value = True)
+
+        Returns:
+
+        """
 
         new_taxon = Taxon(label, name, id=id, color=color, value_path=value_path, data_path=data_path, 
                           options=options, metadata_path=metadata_path, node_types=node_types, enabled=enabled)
@@ -70,6 +98,14 @@ class Taxonomy:
 
     @staticmethod
     def from_dict(dict_taxonomy):
+        """
+
+        Args:
+          dict_taxonomy: 
+
+        Returns:
+
+        """
         new_taxonomy = Taxonomy(ref=dict_taxonomy['ref'], enabled=dict_taxonomy['enabled'],
                                 taxonomy_type=dict_taxonomy['taxonomyType'])
 
@@ -80,6 +116,7 @@ class Taxonomy:
         return new_taxonomy
 
     def to_dict(self):
+        """ """
         dict = {'taxonomyType': self.taxonomy_type, 'enabled': self.enabled, 'ref': self.ref, 'taxons': []}
 
         for child in self.taxons:
@@ -89,9 +126,18 @@ class Taxonomy:
 
 
 class RemoteTaxonomy:
+    """ """
 
     @staticmethod
     def get(ref: str):
+        """
+
+        Args:
+          ref: str: 
+
+        Returns:
+
+        """
         from kodexa import KodexaPlatform
         url = f"{KodexaPlatform.get_url()}/api/taxonomies/{ref.replace(':', '/')}"
 

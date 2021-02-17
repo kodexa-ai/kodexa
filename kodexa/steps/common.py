@@ -3,6 +3,7 @@ from kodexa.stores import TableDataStore
 
 
 class KodexaProcessingException(Exception):
+    """ """
 
     def __init__(self, message, description, advice=None, documentation_url=None):
         self.description = description
@@ -16,12 +17,16 @@ class KodexaProcessingException(Exception):
 
 
 class NodeTagger:
-    """
-    A node tagger allows you to provide a type and content regular expression and then
+    """A node tagger allows you to provide a type and content regular expression and then
     tag content in all matching nodes.
-
+    
     It allows for multiple matching groups to be defined, also the ability to use all content
     and also just tag the node (ignoring the matching groups)
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, selector, tag_to_apply, content_re=".*", use_all_content=True, node_only=False,
@@ -34,9 +39,18 @@ class NodeTagger:
         self.node_tag_uuid = node_tag_uuid
 
     def get_name(self):
+        """ """
         return f"Node Tagger [selector='{self.selector}' use_all_content='{self.use_all_content}']"
 
     def process(self, document):
+        """
+
+        Args:
+          document: 
+
+        Returns:
+
+        """
         document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                                   use_all_content=self.use_all_content,
                                   node_only=self.node_only, tag_uuid=self.node_tag_uuid)
@@ -45,9 +59,13 @@ class NodeTagger:
 
 
 class NodeTagCopy:
-    """
-    The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
+    """The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
     If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, selector, existing_tag_name, new_tag_name):
@@ -56,20 +74,32 @@ class NodeTagCopy:
         self.new_tag_name = new_tag_name
 
     def get_name(self):
+        """ """
         return f"Node Tag Copy [selector='{self.selector}' existing_tag_name='{self.existing_tag_name} new_tag_name={self.new_tag_name}']"
 
     def process(self, document):
+        """
+
+        Args:
+          document: 
+
+        Returns:
+
+        """
         document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
                                        new_tag_name=self.new_tag_name)
         return document
 
 
 class TextParser:
-    """
-    Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes).
-    
-    :param encoding: str  The encoding that should be used when attempting to decode data  (default 'utf-8')
-    :param lines_as_child_nodes:bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
+    """Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes).
+
+    Args:
+      encoding: str  The encoding that should be used when attempting to decode data  (default 'utf-8')
+      lines_as_child_nodes: bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
+
+    Returns:
+
     """
 
     def __init__(self, encoding="utf-8", lines_as_child_nodes=False):
@@ -78,9 +108,18 @@ class TextParser:
 
     @staticmethod
     def get_name():
+        """ """
         return "Text Parser"
 
     def decode_text(self, data):
+        """
+
+        Args:
+          data: 
+
+        Returns:
+
+        """
         try:
             data = data.decode(self.encoding)
         except (UnicodeDecodeError, AttributeError):
@@ -88,6 +127,14 @@ class TextParser:
         return data
 
     def process(self, document):
+        """
+
+        Args:
+          document: 
+
+        Returns:
+
+        """
         with get_source(document) as fh:
 
             if self.lines_as_child_nodes:
@@ -108,9 +155,13 @@ class TextParser:
 
 
 class RollupTransformer:
-    """
-    The rollup step allows you to decide how you want to collapse content in a document by removing nodes
+    """The rollup step allows you to decide how you want to collapse content in a document by removing nodes
     while maintaining content and features as needed
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, collapse_type_res=None, reindex: bool = True, selector: str = ".",
@@ -124,9 +175,18 @@ class RollupTransformer:
         self.get_all_content = get_all_content
 
     def get_name(self):
+        """ """
         return "Rollup Transformer"
 
     def process(self, document):
+        """
+
+        Args:
+          document: 
+
+        Returns:
+
+        """
 
         if document.get_root():
             # Select those nodes that we want to do the 'rollup' in
@@ -193,6 +253,15 @@ class RollupTransformer:
         return document
 
     def is_node_in_list(self, node, node_ids):
+        """
+
+        Args:
+          node: 
+          node_ids: 
+
+        Returns:
+
+        """
         if node.uuid in node_ids:
             return True
 
@@ -203,9 +272,7 @@ class RollupTransformer:
 
 
 class TagsToKeyValuePairExtractor:
-    """
-    Extract all the tags from a document into a key/value pair table store
-    """
+    """Extract all the tags from a document into a key/value pair table store"""
 
     def __init__(self, store_name, include=[], exclude=[], include_node_content=True):
         self.store_name = store_name
@@ -215,15 +282,26 @@ class TagsToKeyValuePairExtractor:
 
     @staticmethod
     def get_name():
+        """ """
         return "Extract Tags to Key/Value"
 
     def get_default_store(self):
+        """ """
         if self.include_node_content:
             return TableDataStore(columns=['tag', 'tagged_content', 'node_content'])
         else:
             return TableDataStore(columns=['tag', 'tagged_content'])
 
     def process(self, document, context):
+        """
+
+        Args:
+          document: 
+          context: 
+
+        Returns:
+
+        """
 
         table_store = context.get_store(self.store_name, self.get_default_store())
 
@@ -233,6 +311,15 @@ class TagsToKeyValuePairExtractor:
         return document
 
     def process_node(self, table_store, node):
+        """
+
+        Args:
+          table_store: 
+          node: 
+
+        Returns:
+
+        """
         for feature in node.get_features():
             if feature.feature_type == 'tag' \
                     and (feature.name in self.include or len(self.include) == 0) \

@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Optional
 
 
 class WorkflowStore:
+    """ """
 
     def __init__(self, name: str, ref: str):
         self.name: str = name
@@ -9,6 +10,7 @@ class WorkflowStore:
 
 
 class WorkflowConnector:
+    """ """
 
     def __init__(self, name: str, ref: str, subscription: str = "true", target: Optional[str] = None, options=None,
                  download=False):
@@ -23,10 +25,12 @@ class WorkflowConnector:
 
 
 class WorkflowSchedule:
+    """ """
     pass
 
 
 class CronSchedule(WorkflowSchedule):
+    """ """
 
     def __init__(self, name: str, cron: str):
         self.type: str = 'cron'
@@ -35,6 +39,7 @@ class CronSchedule(WorkflowSchedule):
 
         
 class WebSchedule(WorkflowSchedule):
+    """ """
 
     def __init__(self, name: str):
         self.type: str = 'web'
@@ -42,6 +47,7 @@ class WebSchedule(WorkflowSchedule):
 
 
 class StorePublisher:
+    """ """
 
     def __init__(self, target_store: str, taxonomies: List[str]):
         self.targetStore = target_store
@@ -49,6 +55,7 @@ class StorePublisher:
 
 
 class WorkflowPipeline:
+    """ """
 
     def __init__(self, name: str, ref: str, subscription: str, target: str = None, parameters=None, publishers=None):
         if parameters is None:
@@ -66,6 +73,7 @@ class WorkflowPipeline:
 
 
 class Workflow:
+    """ """
 
     def __init__(self, access_token: str, active=True):
         self.stores: List[WorkflowStore] = []
@@ -76,15 +84,58 @@ class Workflow:
         self.active = active
 
     def add_store(self, name: str, ref: str):
+        """
+
+        Args:
+          name: str: 
+          ref: str: 
+
+        Returns:
+
+        """
         self.stores.append(WorkflowStore(name, ref))
 
     def add_schedule(self, schedule: WorkflowSchedule):
+        """
+
+        Args:
+          schedule: WorkflowSchedule: 
+
+        Returns:
+
+        """
         self.schedules.append(schedule)
 
     def add_connector(self, name: str, ref: str, subscription: str = "true", target: str = None, options=None,
                       download=False):
+        """
+
+        Args:
+          name: str: 
+          ref: str: 
+          subscription: str:  (Default value = "true")
+          target: str:  (Default value = None)
+          options:  (Default value = None)
+          download:  (Default value = False)
+
+        Returns:
+
+        """
         self.connectors.append(WorkflowConnector(name, ref, subscription, target, options, download))
 
     def add_pipeline(self, name: str, ref: str, subscription: str = "true", target: str = None, parameters=None,
                      publishers=None):
+        """
+
+        Args:
+          name: str: 
+          ref: str: 
+          subscription: str:  (Default value = "true")
+          target: str:  (Default value = None)
+          parameters:  (Default value = None)
+          publishers:  (Default value = None)
+
+        Returns:
+
+        """
         self.pipelines.append(WorkflowPipeline(name, ref, subscription, target, parameters, publishers))

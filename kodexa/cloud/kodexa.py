@@ -31,10 +31,14 @@ dirs = AppDirs("Kodexa", "Kodexa")
 
 
 def get_config():
-    """
-    Get the kodexa config object we use when you want to store your PAT locally
-
+    """Get the kodexa config object we use when you want to store your PAT locally
+    
     :return: the config as a dict
+
+    Args:
+
+    Returns:
+
     """
     path = os.path.join(dirs.user_config_dir, '.kodexa.json')
     if os.path.exists(path):
@@ -45,11 +49,13 @@ def get_config():
 
 
 def save_config(config_obj):
-    """
-    Saves the configuration dictionary for the user
+    """Saves the configuration dictionary for the user
 
-    :param config_obj:
-    :return:
+    Args:
+      config_obj: return:
+
+    Returns:
+
     """
     path = os.path.join(dirs.user_config_dir, '.kodexa.json')
     if not os.path.exists(os.path.dirname(path)):
@@ -63,15 +69,27 @@ def save_config(config_obj):
 
 
 class PipelineMetadataBuilder:
-    """
-    Build a metadata representation of the pipeline for passing to an instance of the
+    """Build a metadata representation of the pipeline for passing to an instance of the
     Kodexa platform
+
+    Args:
+
+    Returns:
+
     """
 
     def __init__(self, pipeline: Pipeline):
         self.pipeline = pipeline
 
     def build_steps(self, pipeline_metadata: Dict):
+        """
+
+        Args:
+          pipeline_metadata: Dict: 
+
+        Returns:
+
+        """
         pipeline_metadata.metadata.steps = []
         pipeline_metadata.metadata.stores = []
 
@@ -164,11 +182,14 @@ OBJECT_TYPES = {
 
 
 def resolve_object_type(obj_type):
-    """
-    Takes part of an object type (ie. pipelin) and then resolves the object type (pipelines)
+    """Takes part of an object type (ie. pipelin) and then resolves the object type (pipelines)
 
-    :param obj_type: part of the object type
-    :return: The object type dict (if found)
+    Args:
+      obj_type: part of the object type
+
+    Returns:
+      The object type dict (if found)
+
     """
     hits = []
     keys = []
@@ -189,31 +210,52 @@ def resolve_object_type(obj_type):
 
 
 class KodexaPlatform:
-    """
-    The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
+    """The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
     components
+
+    Args:
+
+    Returns:
 
     """
 
     @staticmethod
     def get_access_token():
+        """ """
         kodexa_config = get_config()
         access_token = os.getenv('KODEXA_ACCESS_TOKEN')
         return access_token if access_token is not None else kodexa_config['access_token']
 
     @staticmethod
     def get_url():
+        """ """
         kodexa_config = get_config()
         env_url = os.getenv('KODEXA_URL', None)
         return env_url if env_url is not None else kodexa_config['url']
 
     @staticmethod
     def set_access_token(access_token):
+        """
+
+        Args:
+          access_token: 
+
+        Returns:
+
+        """
         if access_token is not None:
             os.environ["KODEXA_ACCESS_TOKEN"] = access_token
 
     @staticmethod
     def set_url(url):
+        """
+
+        Args:
+          url: 
+
+        Returns:
+
+        """
         if url is not None:
             os.environ["KODEXA_URL"] = url
 
@@ -224,6 +266,7 @@ class KodexaPlatform:
 
     @staticmethod
     def get_access_token_details():
+        """ """
         response = requests.get(
             f"{KodexaPlatform.get_url()}/api/account/accessToken",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
@@ -237,6 +280,14 @@ class KodexaPlatform:
 
     @staticmethod
     def deploy_extension(metadata):
+        """
+
+        Args:
+          metadata: 
+
+        Returns:
+
+        """
         response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{metadata['orgSlug']}",
                                  json=metadata.to_dict(),
                                  headers={"x-access-token": KodexaPlatform.get_access_token(),
@@ -249,6 +300,15 @@ class KodexaPlatform:
 
     @staticmethod
     def deploy_extension_from_uri(path, organisation_slug):
+        """
+
+        Args:
+          path: 
+          organisation_slug: 
+
+        Returns:
+
+        """
         url = f"{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}"
         logger.info(f"Publishing extension pack to organization {organisation_slug}")
         response = requests.post(url,
@@ -262,6 +322,14 @@ class KodexaPlatform:
 
     @staticmethod
     def resolve_ref(ref: str):
+        """
+
+        Args:
+          ref: str: 
+
+        Returns:
+
+        """
         org_slug = ref.split('/')[0]
         slug = ref.split('/')[1].split(":")[0]
 
@@ -274,6 +342,15 @@ class KodexaPlatform:
 
     @staticmethod
     def get_object_instance(ref: str, object_type: str):
+        """
+
+        Args:
+          ref: str: 
+          object_type: str: 
+
+        Returns:
+
+        """
         object_type, object_type_metadata = resolve_object_type(object_type)
 
         if object_type == 'taxonomies':
@@ -294,6 +371,22 @@ class KodexaPlatform:
     @staticmethod
     def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
                options=None, public=False, force_replace=False, dry_run=False, print_yaml=False):
+        """
+
+        Args:
+          ref: str: 
+          kodexa_object: 
+          name: str:  (Default value = None)
+          description: str:  (Default value = None)
+          options:  (Default value = None)
+          public:  (Default value = False)
+          force_replace:  (Default value = False)
+          dry_run:  (Default value = False)
+          print_yaml:  (Default value = False)
+
+        Returns:
+
+        """
 
         if '/' not in ref:
             logger.error("A ref must be valid, i.e. org_slug/pipeline_slug:version")
@@ -454,6 +547,15 @@ class KodexaPlatform:
 
     @staticmethod
     def list_objects(organization_slug, object_type):
+        """
+
+        Args:
+          organization_slug: 
+          object_type: 
+
+        Returns:
+
+        """
         list_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}",
                                      headers={"x-access-token": KodexaPlatform.get_access_token(),
                                               "content-type": "application/json"})
@@ -465,6 +567,15 @@ class KodexaPlatform:
 
     @staticmethod
     def undeploy(object_type: str, ref: str):
+        """
+
+        Args:
+          object_type: str: 
+          ref: str: 
+
+        Returns:
+
+        """
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
@@ -480,6 +591,15 @@ class KodexaPlatform:
 
     @staticmethod
     def delete_object(ref, object_type):
+        """
+
+        Args:
+          ref: 
+          object_type: 
+
+        Returns:
+
+        """
         # Generate a URL ref
         url_ref = ref.replace(':', '/')
         delete_response = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
@@ -491,6 +611,15 @@ class KodexaPlatform:
 
     @staticmethod
     def get_object(ref, object_type):
+        """
+
+        Args:
+          ref: 
+          object_type: 
+
+        Returns:
+
+        """
         url_ref = ref.replace(':', '/')
         obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
@@ -503,6 +632,16 @@ class KodexaPlatform:
 
     @classmethod
     def get(cls, object_type, ref, path=None):
+        """
+
+        Args:
+          object_type: 
+          ref: 
+          path:  (Default value = None)
+
+        Returns:
+
+        """
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
@@ -543,6 +682,15 @@ class KodexaPlatform:
 
     @classmethod
     def delete(cls, object_type, ref):
+        """
+
+        Args:
+          object_type: 
+          ref: 
+
+        Returns:
+
+        """
         object_type, object_type_metadata = resolve_object_type(object_type)
         print(f"Deleting {object_type_metadata['name']} [bold]{ref}[/bold]")
 
@@ -554,6 +702,16 @@ class KodexaPlatform:
 
     @classmethod
     def login(cls, kodexa_url, username, password):
+        """
+
+        Args:
+          kodexa_url: 
+          username: 
+          password: 
+
+        Returns:
+
+        """
         from requests.auth import HTTPBasicAuth
         obj_response = requests.get(f"{kodexa_url}/api/account/me/token",
                                     auth=HTTPBasicAuth(username, password),
@@ -569,6 +727,7 @@ class KodexaPlatform:
 
     @classmethod
     def get_server_info(cls):
+        """ """
         r = requests.get(f"{KodexaPlatform.get_url()}/api",
                          headers={"x-access-token": KodexaPlatform.get_access_token(),
                                   "content-type": "application/json"})
@@ -582,6 +741,15 @@ class KodexaPlatform:
 
     @classmethod
     def reindex(cls, object_type, ref):
+        """
+
+        Args:
+          object_type: 
+          ref: 
+
+        Returns:
+
+        """
         object_type, object_type_metadata = resolve_object_type(object_type)
         print(f"Reindexing {object_type_metadata['name']} [bold]{ref}[/bold]")
         url_ref = ref.replace(':', '/')
@@ -598,9 +766,7 @@ class KodexaPlatform:
 
 
 class RemoteSession:
-    """
-    A Session on the Kodexa platform for leveraging pipelines and services
-    """
+    """A Session on the Kodexa platform for leveraging pipelines and services"""
 
     def __init__(self, session_type, slug):
         self.session_type = session_type
@@ -608,6 +774,14 @@ class RemoteSession:
         self.cloud_session = None
 
     def get_action_metadata(self, ref):
+        """
+
+        Args:
+          ref: 
+
+        Returns:
+
+        """
         logger.debug(f"Downloading metadata for action {ref}")
         r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref.replace(':', '/')}",
                          headers={"x-access-token": KodexaPlatform.get_access_token()})
@@ -620,6 +794,7 @@ class RemoteSession:
             raise Exception("Unable to get action metadata, check your reference and platform settings")
 
     def start(self):
+        """ """
         logger.info(f"Creating session {self.slug} ({KodexaPlatform.get_url()})")
         r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions", params={self.session_type: self.slug},
                           headers={"x-access-token": KodexaPlatform.get_access_token()})
@@ -632,6 +807,17 @@ class RemoteSession:
         self.cloud_session = Dict(json.loads(r.text))
 
     def execution_action(self, document, options, attach_source, context):
+        """
+
+        Args:
+          document: 
+          options: 
+          attach_source: 
+          context: 
+
+        Returns:
+
+        """
         files = {}
         if attach_source:
             logger.debug("Attaching source to call")
@@ -661,6 +847,14 @@ class RemoteSession:
         return execution
 
     def wait_for_execution(self, execution):
+        """
+
+        Args:
+          execution: 
+
+        Returns:
+
+        """
 
         status = execution.status
         while execution.status == "PENDING" or execution.status == "RUNNING":
@@ -700,6 +894,14 @@ class RemoteSession:
         return execution
 
     def get_output_document(self, execution):
+        """
+
+        Args:
+          execution: 
+
+        Returns:
+
+        """
         if execution.outputId:
             logger.info("Downloading output document [{execution.outputId}]")
             doc = requests.get(
@@ -711,6 +913,15 @@ class RemoteSession:
             return None
 
     def get_store(self, execution, store):
+        """
+
+        Args:
+          execution: 
+          store: 
+
+        Returns:
+
+        """
         response = requests.get(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
@@ -719,14 +930,21 @@ class RemoteSession:
         return TableDataStore(raw_store.data.columns, raw_store.data.rows)
 
     def merge_stores(self, execution, context: PipelineContext):
+        """
+
+        Args:
+          execution: 
+          context: PipelineContext: 
+
+        Returns:
+
+        """
         for store in execution.stores:
             context.merge_store(store.name, self.get_store(execution, store))
 
 
 class RemotePipeline:
-    """
-    Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform
-    """
+    """Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform"""
 
     def __init__(self, slug, connector, version=None, attach_source=True, parameters=None, auth=None):
         logger.info(f"Initializing a new pipeline {slug}")
@@ -749,14 +967,16 @@ class RemotePipeline:
         self.auth = auth
 
     def set_sink(self, sink):
-        """
-        Set the sink you wish to use, note that it will replace any currently assigned
+        """Set the sink you wish to use, note that it will replace any currently assigned
         sink
 
-            >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.set_sink(ExampleSink())
+        Args:
+          sink: the sink for the pipeline
 
-        :param sink: the sink for the pipeline
+        Returns:
+
+        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+            >>> pipeline.set_sink(ExampleSink())
         """
         logger.info(f"Setting sink {sink.get_name()} on {self.slug}")
         self.sink = sink
@@ -764,6 +984,7 @@ class RemotePipeline:
         return self
 
     def run(self):
+        """ """
         self.context.statistics = PipelineStatistics()
 
         logger.info(f"Starting remote pipeline {self.slug}")
@@ -801,38 +1022,57 @@ class RemotePipeline:
 
     @staticmethod
     def from_url(slug: str, url, headers=None, *args, **kwargs) -> RemotePipeline:
-        """
-        Build a new pipeline with the input being a document created from the given URL
+        """Build a new pipeline with the input being a document created from the given URL
 
-        :param slug: The slug for the remote pipeline
-        :param url: The URL ie. https://www.google.com
-        :param headers: A dictionary of headers
-        :return: A new instance of a remote pipeline
+        Args:
+          slug: The slug for the remote pipeline
+          url: The URL ie. https://www.google.com
+          headers: A dictionary of headers (Default value = None)
+          slug: str: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          A new instance of a remote pipeline
+
         """
         return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
     def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -> RemotePipeline:
-        """
-        Create a new pipeline using a file path as a source
+        """Create a new pipeline using a file path as a source
 
-        :param slug: The slug for the remote pipeline
-        :param file_path: The path to the file
-        :param unpack: Unpack the file as a KDXA
-        :return: A new pipeline
-        :rtype: Pipeline
+        Args:
+          slug: The slug for the remote pipeline
+          file_path: The path to the file
+          unpack: Unpack the file as a KDXA
+          slug: str: 
+          file_path: str: 
+          unpack: bool:  (Default value = False)
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         """
         return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
 
     @staticmethod
     def from_text(slug: str, text: str, *args, **kwargs) -> RemotePipeline:
-        """
-        Build a new pipeline and provide text as the basic to create a document
+        """Build a new pipeline and provide text as the basic to create a document
 
-        :param slug: The slug for the remote pipeline
-        :param text: Text to use to create document
-        :return: A new pipeline
-        :rtype: RemotePipeline
+        Args:
+          slug: The slug for the remote pipeline
+          text: Text to use to create document
+          slug: str: 
+          text: str: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          RemotePipeline: A new pipeline
+
         """
 
         # need to update kwargs for attach_source
@@ -844,31 +1084,45 @@ class RemotePipeline:
                     unpack: bool = False,
                     relative: bool = False,
                     caller_path: str = get_caller_dir()) -> RemotePipeline:
-        """
-        Create a pipeline that will run against a set of local files from a folder
+        """Create a pipeline that will run against a set of local files from a folder
 
-        :param slug: The slug for the remote pipeline
-        :param folder_path: The folder path
-        :param filename_filter: The filter for filename (i.e. *.pdf)
-        :param recursive: Should we look recursively in sub-directories (default False)
-        :param relative: Is the folder path relative to the caller (default False)
-        :param caller_path: The caller path (defaults to trying to work this out from the stack)
-        :param unpack: Unpack the file as a KDXA document
-        :return: A new pipeline
-        :rtype: RemotePipeline
+        Args:
+          slug: The slug for the remote pipeline
+          folder_path: The folder path
+          filename_filter: The filter for filename (i.e. *.pdf)
+          recursive: Should we look recursively in sub-directories (default False)
+          relative: Is the folder path relative to the caller (default False)
+          caller_path: The caller path (defaults to trying to work this out from the stack)
+          unpack: Unpack the file as a KDXA document
+          slug: str: 
+          folder_path: str: 
+          filename_filter: str:  (Default value = "*")
+          recursive: bool:  (Default value = False)
+          unpack: bool:  (Default value = False)
+          relative: bool:  (Default value = False)
+          caller_path: str:  (Default value = get_caller_dir())
+
+        Returns:
+          RemotePipeline: A new pipeline
+
         """
         return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path,
                                                     unpack=unpack))
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
-        """
-        Allows you to provide the sink store easily
-
+        """Allows you to provide the sink store easily
+        
         This will wrap the store in a document store sink
 
-        :param document_store: document store to use
-        :param processing_mode: the processing mode (update or new)
-        :return: the pipeline
+        Args:
+          document_store: document store to use
+          processing_mode: the processing mode (update or new)
+          document_store: DocumentStore: 
+          processing_mode: str:  (Default value = "update")
+
+        Returns:
+          the pipeline
+
         """
         from kodexa.sinks import DocumentStoreSink
         self.set_sink(DocumentStoreSink(document_store))
@@ -876,9 +1130,7 @@ class RemotePipeline:
 
 
 class RemoteAction:
-    """
-    Allows you to interact with an action that has been deployed in the Kodexa platform
-    """
+    """Allows you to interact with an action that has been deployed in the Kodexa platform"""
 
     def __init__(self, slug, version=None, attach_source=False, options=None, auth=None):
         if auth is None:
@@ -892,15 +1144,26 @@ class RemoteAction:
         self.auth = auth
 
     def to_dict(self):
+        """ """
         return {
             'ref': self.slug,
             'options': self.options
         }
 
     def get_name(self):
+        """ """
         return f"Remote Action ({self.slug})"
 
     def process(self, document, context):
+        """
+
+        Args:
+          document: 
+          context: 
+
+        Returns:
+
+        """
         cloud_session = RemoteSession("service", self.slug)
         cloud_session.start()
 
@@ -926,15 +1189,20 @@ class RemoteAction:
         return result_document if result_document else document
 
     def end_processing(self):
+        """ """
 
         # TODO not yet implemented for remote steps
         pass
 
     def to_configuration(self):
-        """
-        Returns a dictionary representing the configuration information for the step
-
+        """Returns a dictionary representing the configuration information for the step
+        
         :return: dictionary representing the configuration of the step
+
+        Args:
+
+        Returns:
+
         """
         return {
             "ref": self.slug,
@@ -943,9 +1211,18 @@ class RemoteAction:
 
 
 class ExtensionHelper:
+    """ """
 
     @staticmethod
     def load_metadata(path):
+        """
+
+        Args:
+          path: 
+
+        Returns:
+
+        """
 
         if os.path.exists(os.path.join(path, 'dharma.json')):
             dharma_metadata_file = open(os.path.join(path, 'dharma.json'))

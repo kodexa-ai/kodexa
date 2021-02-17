@@ -8,19 +8,27 @@ from addict import Dict
 
 
 def get_path():
-    """
-    Gets the path of the documentation
-
+    """Gets the path of the documentation
+    
     :return: the path of this module file
+
+    Args:
+
+    Returns:
+
     """
     return os.path.abspath(__file__)
 
 
 def get_template_env():
-    """
-    Get the Jinja2 template environmnet
-
+    """Get the Jinja2 template environmnet
+    
     :return:
+
+    Args:
+
+    Returns:
+
     """
     cli_path = os.path.dirname(get_path())
     package_location = os.path.join(cli_path, "templates")
@@ -29,11 +37,11 @@ def get_template_env():
 
 
 def generate_documentation(metadata):
-    """
-    Given the metadata object from a kodexa.yml generate the documentation
+    """Given the metadata object from a kodexa.yml generate the documentation
 
-    :param metadata:
-    :return:
+    Args:
+      metadata:Dict: A dictionary of the metadata
+
     """
     os.makedirs('docs', exist_ok=True)
     for service in metadata.services:
@@ -51,6 +59,16 @@ def generate_documentation(metadata):
 
 
 def write_template(template, output_location, metadata, service=None):
+    """
+    Write the given template out to a file
+
+    Args:
+      template: the name of the template
+      output_location: the location to write the output
+      metadata: the metadata object to use in the template
+      service: the service object  (Default value = None)
+
+    """
     if service is None:
         service = {}
     template = get_template_env().get_template(template)
@@ -60,6 +78,17 @@ def write_template(template, output_location, metadata, service=None):
 
 
 def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str, output_json: str):
+    """
+    Generate web site for given extension pack metadata
+
+    Args:
+      metadata: Dict: the metadata for the extension pack
+      base_dir: str: the base directory for the site
+      output_filename: str: output filename
+      url: str: The base URL where the site will be published
+      output_json: str: the output path for the JSON extension pack (used when deploying)
+
+    """
     import os
     try:
         os.makedirs(os.path.join(base_dir, metadata['version']))

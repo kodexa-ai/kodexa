@@ -8,6 +8,14 @@ registered_mixins: Dict[str, object] = {}
 
 
 def get_mixin(mixin):
+    """
+
+    Args:
+      mixin: 
+
+    Returns:
+
+    """
     if mixin in registered_mixins:
         return registered_mixins[mixin]
     else:
@@ -15,10 +23,27 @@ def get_mixin(mixin):
 
 
 def add_mixin(mixin):
+    """
+
+    Args:
+      mixin: 
+
+    Returns:
+
+    """
     registered_mixins[mixin.get_name()] = mixin
 
 
 def apply_to_node(mixin_name, node):
+    """
+
+    Args:
+      mixin_name: 
+      node: 
+
+    Returns:
+
+    """
     if mixin_name in registered_mixins:
         registered_mixins[mixin_name].apply_to(node)
 
@@ -29,16 +54,42 @@ def apply_to_node(mixin_name, node):
 
 
 def apply_to_document(document):
+    """
+
+    Args:
+      document: 
+
+    Returns:
+
+    """
     for mixin in document.get_mixins():
         add_mixin_to_document(mixin, document)
 
 
 def add_mixins_to_document_node(document, node):
+    """
+
+    Args:
+      document: 
+      node: 
+
+    Returns:
+
+    """
     for mixin in document.get_mixins():
         apply_to_node(mixin, node)
 
 
 def add_mixin_to_document(mixin, document):
+    """
+
+    Args:
+      mixin: 
+      document: 
+
+    Returns:
+
+    """
     if mixin not in document.get_mixins():
         document.get_mixins().append(mixin)
 
@@ -63,6 +114,14 @@ add_mixin(NavigationMixin())
 
 
 def get_renderers(document):
+    """
+
+    Args:
+      document: 
+
+    Returns:
+
+    """
     renderers = {}
     for mixin in document.get_mixins():
         if mixin in registered_mixins:

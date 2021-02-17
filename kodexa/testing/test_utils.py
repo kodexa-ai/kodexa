@@ -14,12 +14,15 @@ logger = logging.getLogger('kodexa.testing')
 
 
 def print_data_table(context: PipelineContext, store_name: str):
-    """
-    A small helper to support working with a store in a test
+    """A small helper to support working with a store in a test
 
-    :param context:
-    :param store_name:
-    :return:
+    Args:
+      context: param store_name:
+      context: PipelineContext: 
+      store_name: str: 
+
+    Returns:
+
     """
     if store_name in context.get_store_names():
         print(f"\n{store_name}\n")
@@ -33,13 +36,19 @@ def print_data_table(context: PipelineContext, store_name: str):
 
 
 def snapshot_store(context: PipelineContext, store_name: str, filename: str):
-    """
-    Capture the data in a store to a JSON file so that we can use it later
+    """Capture the data in a store to a JSON file so that we can use it later
     to compare the data (usually in a test)
 
-    :param context: the pipeline context
-    :param store_name: the name of the store
-    :param filename: the name of the file to snapshot the store to
+    Args:
+      context: the pipeline context
+      store_name: the name of the store
+      filename: the name of the file to snapshot the store to
+      context: PipelineContext: 
+      store_name: str: 
+      filename: str: 
+
+    Returns:
+
     """
     import json
     logger.warning('Snapshotting store')
@@ -48,6 +57,14 @@ def snapshot_store(context: PipelineContext, store_name: str, filename: str):
 
 
 def simplify_node(node: ContentNode):
+    """
+
+    Args:
+      node: ContentNode: 
+
+    Returns:
+
+    """
     return {
         "index": node.index,
         "node_type": node.node_type,
@@ -59,12 +76,30 @@ def simplify_node(node: ContentNode):
 
 
 def simplify_document(document: Document) -> Dict:
+    """
+
+    Args:
+      document: Document: 
+
+    Returns:
+
+    """
     return {
         "content_node": simplify_node(document.get_root())
     }
 
 
 def compare_document(document: Document, filename: str, throw_exception=True):
+    """
+
+    Args:
+      document: Document: 
+      filename: str: 
+      throw_exception:  (Default value = True)
+
+    Returns:
+
+    """
     from os import path
     import json
     import os
@@ -101,13 +136,19 @@ def compare_document(document: Document, filename: str, throw_exception=True):
 
 
 def compare_store(context: PipelineContext, store_name: str, filename: str, throw_exception=True):
-    """
-    Compare a store in the provided pipeline context to the store that has been snapshot
+    """Compare a store in the provided pipeline context to the store that has been snapshot
 
-    :param context: the pipeline context containing the store to compare
-    :param store_name: the name of the store
-    :param filename: the filename of the
-    :param throw_exception: throw an exception if there is a mismatch
+    Args:
+      context: the pipeline context containing the store to compare
+      store_name: the name of the store
+      filename: the filename of the
+      throw_exception: throw an exception if there is a mismatch (Default value = True)
+      context: PipelineContext: 
+      store_name: str: 
+      filename: str: 
+
+    Returns:
+
     """
 
     from os import path
@@ -173,8 +214,21 @@ def compare_store(context: PipelineContext, store_name: str, filename: str, thro
 
 
 class AssistantTestHarness:
+    """
+    A test harness to allow the testing of assistants in unit tests and offline for development
 
+    >>> util = ExtensionPackUtil("../kodexa.yml")
+    >>> harness = util.get_assistant("my-assistant", stores=[my_local_store])
+
+    """
     def __init__(self, assistant: Assistant, stores: List[DocumentStore]):
+        """
+        Initialize the test harness
+
+        Args:
+            assistant: the instance of the assistant
+            stores: the list of stores (usually LocalDocumentStore) that we will use to monitor for events
+        """
         self.assistant = assistant
         self.stores = stores
 
@@ -182,14 +236,18 @@ class AssistantTestHarness:
             store.register_listener(self)
 
     def process_event(self, event: ContentEvent):
-        """
-        The harnesss will take the content event and
+        """The harnesss will take the content event and
         will pass it to the assistant - then we will
         take each of the pipelines and run the document
         through them in turn (note in the platform this might be in parallel)
 
-        :param event: content event
-        :return: None
+        Args:
+          event: content event
+          event: ContentEvent: 
+
+        Returns:
+          None
+
         """
 
         pipelines = self.assistant.process_event(event)
@@ -218,9 +276,27 @@ class AssistantTestHarness:
         pass
 
     def register_local_document_store(self, store: LocalDocumentStore):
+        """
+        Register a local document store with this harness
+
+        Args:
+          store: LocalDocumentStore: 
+
+        Returns:
+
+        """
         pass
 
     def get_store(self, event: ContentEvent) -> DocumentStore:
+        """
+        Get a document store for the event (based on the document family ID)
+
+        Args:
+          event: ContentEvent: 
+
+        Returns:
+          The instance of the document store
+        """
         for store in self.stores:
             if event.document_family.store_ref == store.get_ref():
                 return store
@@ -229,10 +305,24 @@ class AssistantTestHarness:
 
 
 class OptionException(Exception):
+    """
+    An exception that is raised when there is a problem with a requests option
+    """
     pass
 
 
 class ExtensionPackUtil:
+    """
+    A utility that can be used to access an action defined in a kodexa.yml.
+
+    This allows you to use the kodexa.yml in unit tests to ensure it matches your current action code
+
+    >>> util = ExtensionPackUtil("../kodexa.yml")
+    >>> pipeline = Pipeline()
+    >>> pipeline.add_step(util.get_step("my-action",{"my-option": "cheese"}))
+    >>> pipeline.run()
+
+    """
 
     def __init__(self, file_path='kodexa.yml'):
         self.file_path = file_path
@@ -243,6 +333,15 @@ class ExtensionPackUtil:
             self.kodexa_metadata = addict.Dict(yaml.safe_load(stream))
 
     def get_step(self, action_slug, options=None):
+        """
+
+        Args:
+          action_slug: 
+          options:  (Default value = None)
+
+        Returns:
+
+        """
         if options is None:
             options = {}
 
@@ -271,14 +370,17 @@ class ExtensionPackUtil:
         raise Exception("Unable to find the action " + action_slug)
 
     def get_assistant_test_harness(self, assistant_slug, options=None, stores=None) -> AssistantTestHarness:
-        """
-        Provides a local test harness that can be used to validate the functionality
+        """Provides a local test harness that can be used to validate the functionality
         of an assistant in a test case
 
-        :param assistant_slug:
-        :param options:
-        :param stores: a list of the document stores to monitor
-        :return: The assistant test harness
+        Args:
+          assistant_slug: param options:
+          stores: a list of the document stores to monitor (Default value = None)
+          options:  (Default value = None)
+
+        Returns:
+          The assistant test harness
+
         """
         if stores is None:
             stores = []
@@ -287,12 +389,14 @@ class ExtensionPackUtil:
         return AssistantTestHarness(assistant, stores)
 
     def get_assistant(self, assistant_slug, options=None):
-        """
-        Create an instance of an assistant from the kodexa metadata
+        """Create an instance of an assistant from the kodexa metadata
 
-        :param assistant_slug:
-        :param options:
-        :return:
+        Args:
+          assistant_slug: param options:
+          options:  (Default value = None)
+
+        Returns:
+
         """
         if options is None:
             options = {}
