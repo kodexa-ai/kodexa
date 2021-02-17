@@ -1724,9 +1724,20 @@ class DocumentStore:
         pass
 
     def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
+        """
+        Get a Document based on the ID of the ContentObject
+
+        :param uuid_value: the ID of the ContentObject
+        :return: A document (or None if not found)
+        """
         pass
 
     def list_objects(self) -> List[ContentObject]:
+        """
+        List the content objects in the store
+
+        :return: a list of the content objects
+        """
         pass
 
     def add_related_document_to_family(self, document_family_id: str, document_relationship,

@@ -7,7 +7,7 @@ from addict import Dict, addict
 
 from kodexa import LocalDocumentStore, Assistant
 from kodexa import PipelineContext, TableDataStore, Document, ContentNode
-from kodexa.model.document_families import ContentEvent, DocumentRelationship
+from kodexa.model.document_families import ContentEvent, DocumentRelationship, DocumentActor
 from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger('kodexa.testing')
@@ -203,9 +203,8 @@ class AssistantTestHarness:
 
             if pipeline_context.output_document is not None:
                 # We need to build the relationship between the old and the new
-
                 document_relationship = DocumentRelationship("DERIVED", event.content_object.id, None,
-                                                             {'type': 'assistant'})
+                                                             DocumentActor("testing", "assistant"))
 
                 store.add_related_document_to_family(event.document_family.id, document_relationship,
                                                      pipeline_context.output_document)
@@ -231,6 +230,7 @@ class AssistantTestHarness:
 
 class OptionException(Exception):
     pass
+
 
 class ExtensionPackUtil:
 

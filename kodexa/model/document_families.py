@@ -1,16 +1,23 @@
 import uuid
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from kodexa.model.model import ContentObject, ContentType, Document
 
 
 class ContentEventType(Enum):
+    """
+    The type of event that occurred on the content
+    """
     NEW_OBJECT = 'NEW_OBJECT'
     DERIVED_DOCUMENT = 'DERIVED_DOCUMENT'
 
 
 class ContentEvent:
+    """
+    A content event represents a change, update or deletion that has occurred in a document family
+    in a store, and can be relayed for a reaction
+    """
 
     def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
         self.content_object = content_object
@@ -34,7 +41,8 @@ class DocumentRelationship:
     A document relationship represents a link between two documents
     """
 
-    def __init__(self, relationship_type:str, source_content_object_id:str, destination_content_object_id:str,
+    def __init__(self, relationship_type: str, source_content_object_id: str,
+                 destination_content_object_id: Optional[str],
                  actor: DocumentActor = None):
         self.relationship_type = relationship_type
         self.source_content_object_id = source_content_object_id
