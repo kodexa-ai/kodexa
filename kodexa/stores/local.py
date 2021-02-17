@@ -59,17 +59,14 @@ class LocalDocumentStore(DocumentStore):
         content_object = self.metastore[self.index].content_objects[-1]
         document = self.get_document_by_content_object(content_object)
 
-        # Add the details of the document family and content object
-
-        document.document_family = self.metastore[self.index]
-        document.content_object = content_object
+        from kodexa.model.model import ContentObjectReference
+        content_object_reference = ContentObjectReference(content_object, self, document, self.metastore[self.index])
         self.index = self.index + 1
-        return document
+        return content_object_reference
 
-    def sink(self, document: Document):
-
-        if document.document_family:
-            self.put(document.document_family.path, document)
+    def sink(self, document: Document, context):
+        if context.document_family:
+            self.put(context.document_family.path, document)
         else:
             if document.source.original_filename is not None:
                 self.put(document.source.original_filename, document)

@@ -1370,14 +1370,6 @@ class Document(object):
         self.taxonomies: List[str] = []
         self.classifications: List[str] = []
 
-        # We have these - we don't serialize them
-        # but it allows us to capture the relationship
-        # from a document to its content object and family
-
-        from kodexa.model import DocumentFamily
-        self.document_family: Optional[DocumentFamily] = None
-        self.content_object: Optional[ContentObject] = None
-
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
@@ -1794,3 +1786,13 @@ class ModelStore:
 
     def put(self, path: str, content):
         pass
+
+
+class ContentObjectReference:
+
+    def __init__(self, content_object: ContentObject, store: DocumentStore, document: Document,
+                 document_family):
+        self.content_object = content_object
+        self.store = store
+        self.document = document
+        self.document_family: DocumentFamily = document_family
