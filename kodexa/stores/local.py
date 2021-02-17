@@ -7,7 +7,7 @@ from typing import List, Optional, Dict
 import jsonpickle
 
 from kodexa.model import DocumentFamily, DocumentStore, Document, ContentObject, ModelStore, Store
-from kodexa.model.document_families import ContentEvent, DocumentRelationship
+from kodexa.model.document_families import ContentEvent, DocumentTransition
 
 logger = logging.getLogger('kodexa.stores')
 
@@ -236,13 +236,13 @@ class LocalDocumentStore(DocumentStore):
         document = Document.from_kdxa(path)
         self.put(document.uuid, document)
 
-    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentRelationship,
+    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentTransition,
                                        document: Document):
         """
 
         Args:
           document_family_id: str: 
-          document_relationship: DocumentRelationship: 
+          document_relationship: DocumentTransition:
           document: Document: 
 
         Returns:

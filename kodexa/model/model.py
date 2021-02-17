@@ -1400,7 +1400,7 @@ class ContentNode(object):
           node_type_re(str, optional, optional): The regular expression to match against the previous node's type; default is '.*'.
           skip_virtual(bool, optional, optional): Skip virtual nodes and return the next real node; default is False.
           has_no_content(bool, optional, optional): Allow a node that has no content to be returned; default is False.
-          traverse(Traverse(enum), optional, optional): The relationship you'd like to traverse (SIBLING, CHILDREN, PARENT, or ALL); default is Traverse.SIBLING.
+          traverse(Traverse(enum), optional, optional): The transition you'd like to traverse (SIBLING, CHILDREN, PARENT, or ALL); default is Traverse.SIBLING.
 
         Returns:
           ContentNode or None: The previous node or None, if no node exists
@@ -2023,11 +2023,11 @@ class DocumentStore:
 
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                        document: Document):
-        """Add a document to a family as a new relationship
+        """Add a document to a family as a new transition
 
         Args:
           document_family_id: the ID for the document family
-          document_relationship: the document relationship
+          document_relationship: the document transition
           document: the document
           document_family_id: str: 
           document: Document: 
