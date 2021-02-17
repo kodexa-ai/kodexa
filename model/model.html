@@ -43,11 +43,21 @@ from kodexa.mixins import registry
 
 
 class ContentType(Enum):
+    &#34;&#34;&#34;
+    Types of content object that are supported
+
+    &#34;&#34;&#34;
     DOCUMENT = &#39;DOCUMENT&#39;
     NATIVE = &#39;NATIVE&#39;
 
 
 class ContentObject:
+    &#34;&#34;&#34;
+    A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
+    a Kodexa document.
+
+    The content object allows us to capture metadata about the document or the native file without changing it
+    &#34;&#34;&#34;
 
     def __init__(self, name=&#34;untitled&#34;, id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
                  store_ref=None, labels=None):
@@ -78,10 +88,18 @@ class ContentObject:
             &#39;store_ref&#39;: self.store_ref
         }
 
+    @classmethod
+    def from_dict(cls, co_dict):
+        co = ContentObject(co_dict[&#39;name&#39;])
+        co.id = co_dict[&#39;id&#39;]
+        co.labels = co_dict[&#39;labels&#39;]
+        co.metadata = co_dict[&#39;metadata&#39;]
+        co.content_type = co_dict[&#39;content_type&#39;]
+
 
 class Store:
     &#34;&#34;&#34;
-    Base interface for Store
+    Base definition of a store in Kodexa (deprecated)
     &#34;&#34;&#34;
 
     def get_name(self):
@@ -1786,9 +1804,16 @@ class Document(object):
 
 
 class DocumentStore:
-    &#34;&#34;&#34;A document store supports storing, listing and retrieving Kodexa documents and document families&#34;&#34;&#34;
+    &#34;&#34;&#34;
+    A document store supports storing, listing and retrieving Kodexa documents and document families
+    &#34;&#34;&#34;
 
     def get_ref(self) -&gt; str:
+        &#34;&#34;&#34;
+        Returns the reference (org-slug/store-slug:version)
+
+        :return: the reference
+        &#34;&#34;&#34;
         pass
 
     def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
@@ -1810,23 +1835,60 @@ class DocumentStore:
 
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                        document: Document):
+        &#34;&#34;&#34;
+        Add a document to a family as a new relationship
+
+        :param document_family_id: the ID for the document family
+        :param document_relationship: the document relationship
+        :param document: the document
+        :return: None
+        &#34;&#34;&#34;
         pass
 
     def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+        &#34;&#34;&#34;
+        Get a document for a given content object
+
+        :param content_object: the content object
+        :return: the Document
+        &#34;&#34;&#34;
         pass
 
-    def list(self):
+    def list(self) -&gt; List[ContentObject]:
+        &#34;&#34;&#34;
+        Print out a table listing the content objects in the store
+
+        :return: The list of content objects
+        &#34;&#34;&#34;
         objects = self.list_objects()
         self._draw_table(objects)
+        return objects
 
     def query(self, query: str = &#34;*&#34;):
         objects = self.query_objects(query)
         self._draw_table(objects)
 
     def register_listener(self, listener):
+        &#34;&#34;&#34;
+        Register a listener to this store.
+
+        A store listener must have the method
+
+            process_event(content_event:ContentEvent)
+
+
+        :param listener: the listener to register
+        :return: None
+        &#34;&#34;&#34;
         pass
 
     def _draw_table(self, objects):
+        &#34;&#34;&#34;
+        Internal method to draw a table
+
+        :param objects:
+        :return:
+        &#34;&#34;&#34;
         from rich.table import Table
         from rich import print
 
@@ -1844,16 +1906,38 @@ class DocumentStore:
 
         print(table)
 
-    def query_objects(self, query: str) -&gt; List[Dict]:
+    def query_objects(self, query: str) -&gt; List[ContentObject]:
         pass
 
     def put(self, path: str, document: Document):
+        &#34;&#34;&#34;
+        Puts a new document in the store with the given path.
+
+        There mustn&#39;t be a family in the path, this method will create a new family based around the
+        document
+
+        :param path: the path you wish to add the document in the store
+        :param document: the document
+        :return:
+        &#34;&#34;&#34;
         pass
 
     def count(self) -&gt; int:
+        &#34;&#34;&#34;
+        The number of document families in the store
+
+        :return: the count of families
+        &#34;&#34;&#34;
         return 0
 
     def accept(self, document: Document):
+        &#34;&#34;&#34;
+        Determine if the store will accept this document.  This would typically mean that the store does
+        not yet have a document at the derived family path
+
+        :param document: the document to check
+        :return: True if there is no current family at derived path, False is there is one
+        &#34;&#34;&#34;
         return True
 
 
@@ -1861,6 +1945,12 @@ class ModelStore:
     &#34;&#34;&#34;A model store supports storing and retrieving of a ML models&#34;&#34;&#34;
 
     def get(self, path: str):
+        &#34;&#34;&#34;
+        Returns the bytes object for the given path (or None is there nothing at that path)
+
+        :param path: the path to get content from
+        :return: Bytes or None is there is nothing at the path
+        &#34;&#34;&#34;
         pass
 
     def put(self, path: str, content):
@@ -5213,12 +5303,20 @@ If no tag_uuid is provided, a new uuid is generated for each tag instance.</p></
 <span>(</span><span>name='untitled', id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None, store_ref=None, labels=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
+a Kodexa document.</p>
+<p>The content object allows us to capture metadata about the document or the native file without changing it</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ContentObject:
+    &#34;&#34;&#34;
+    A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
+    a Kodexa document.
+
+    The content object allows us to capture metadata about the document or the native file without changing it
+    &#34;&#34;&#34;
 
     def __init__(self, name=&#34;untitled&#34;, id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
                  store_ref=None, labels=None):
@@ -5247,8 +5345,37 @@ If no tag_uuid is provided, a new uuid is generated for each tag instance.</p></
             &#39;metadata&#39;: self.metadata,
             &#39;name&#39;: self.name,
             &#39;store_ref&#39;: self.store_ref
-        }</code></pre>
+        }
+
+    @classmethod
+    def from_dict(cls, co_dict):
+        co = ContentObject(co_dict[&#39;name&#39;])
+        co.id = co_dict[&#39;id&#39;]
+        co.labels = co_dict[&#39;labels&#39;]
+        co.metadata = co_dict[&#39;metadata&#39;]
+        co.content_type = co_dict[&#39;content_type&#39;]</code></pre>
 </details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.model.model.ContentObject.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>co_dict)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_dict(cls, co_dict):
+    co = ContentObject(co_dict[&#39;name&#39;])
+    co.id = co_dict[&#39;id&#39;]
+    co.labels = co_dict[&#39;labels&#39;]
+    co.metadata = co_dict[&#39;metadata&#39;]
+    co.content_type = co_dict[&#39;content_type&#39;]</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.model.model.ContentObject.to_dict"><code class="name flex">
@@ -5300,12 +5427,16 @@ If no tag_uuid is provided, a new uuid is generated for each tag instance.</p></
 <span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>An enumeration.</p></div>
+<div class="desc"><p>Types of content object that are supported</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ContentType(Enum):
+    &#34;&#34;&#34;
+    Types of content object that are supported
+
+    &#34;&#34;&#34;
     DOCUMENT = &#39;DOCUMENT&#39;
     NATIVE = &#39;NATIVE&#39;</code></pre>
 </details>
@@ -6401,9 +6532,16 @@ used with the Kodexa platform</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DocumentStore:
-    &#34;&#34;&#34;A document store supports storing, listing and retrieving Kodexa documents and document families&#34;&#34;&#34;
+    &#34;&#34;&#34;
+    A document store supports storing, listing and retrieving Kodexa documents and document families
+    &#34;&#34;&#34;
 
     def get_ref(self) -&gt; str:
+        &#34;&#34;&#34;
+        Returns the reference (org-slug/store-slug:version)
+
+        :return: the reference
+        &#34;&#34;&#34;
         pass
 
     def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
@@ -6425,23 +6563,60 @@ used with the Kodexa platform</p>
 
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                        document: Document):
+        &#34;&#34;&#34;
+        Add a document to a family as a new relationship
+
+        :param document_family_id: the ID for the document family
+        :param document_relationship: the document relationship
+        :param document: the document
+        :return: None
+        &#34;&#34;&#34;
         pass
 
     def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+        &#34;&#34;&#34;
+        Get a document for a given content object
+
+        :param content_object: the content object
+        :return: the Document
+        &#34;&#34;&#34;
         pass
 
-    def list(self):
+    def list(self) -&gt; List[ContentObject]:
+        &#34;&#34;&#34;
+        Print out a table listing the content objects in the store
+
+        :return: The list of content objects
+        &#34;&#34;&#34;
         objects = self.list_objects()
         self._draw_table(objects)
+        return objects
 
     def query(self, query: str = &#34;*&#34;):
         objects = self.query_objects(query)
         self._draw_table(objects)
 
     def register_listener(self, listener):
+        &#34;&#34;&#34;
+        Register a listener to this store.
+
+        A store listener must have the method
+
+            process_event(content_event:ContentEvent)
+
+
+        :param listener: the listener to register
+        :return: None
+        &#34;&#34;&#34;
         pass
 
     def _draw_table(self, objects):
+        &#34;&#34;&#34;
+        Internal method to draw a table
+
+        :param objects:
+        :return:
+        &#34;&#34;&#34;
         from rich.table import Table
         from rich import print
 
@@ -6459,16 +6634,38 @@ used with the Kodexa platform</p>
 
         print(table)
 
-    def query_objects(self, query: str) -&gt; List[Dict]:
+    def query_objects(self, query: str) -&gt; List[ContentObject]:
         pass
 
     def put(self, path: str, document: Document):
+        &#34;&#34;&#34;
+        Puts a new document in the store with the given path.
+
+        There mustn&#39;t be a family in the path, this method will create a new family based around the
+        document
+
+        :param path: the path you wish to add the document in the store
+        :param document: the document
+        :return:
+        &#34;&#34;&#34;
         pass
 
     def count(self) -&gt; int:
+        &#34;&#34;&#34;
+        The number of document families in the store
+
+        :return: the count of families
+        &#34;&#34;&#34;
         return 0
 
     def accept(self, document: Document):
+        &#34;&#34;&#34;
+        Determine if the store will accept this document.  This would typically mean that the store does
+        not yet have a document at the derived family path
+
+        :param document: the document to check
+        :return: True if there is no current family at derived path, False is there is one
+        &#34;&#34;&#34;
         return True</code></pre>
 </details>
 <h3>Subclasses</h3>
@@ -6482,12 +6679,23 @@ used with the Kodexa platform</p>
 <span>def <span class="ident">accept</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Determine if the store will accept this document.
+This would typically mean that the store does
+not yet have a document at the derived family path</p>
+<p>:param document: the document to check
+:return: True if there is no current family at derived path, False is there is one</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def accept(self, document: Document):
+    &#34;&#34;&#34;
+    Determine if the store will accept this document.  This would typically mean that the store does
+    not yet have a document at the derived family path
+
+    :param document: the document to check
+    :return: True if there is no current family at derived path, False is there is one
+    &#34;&#34;&#34;
     return True</code></pre>
 </details>
 </dd>
@@ -6495,13 +6703,25 @@ used with the Kodexa platform</p>
 <span>def <span class="ident">add_related_document_to_family</span></span>(<span>self, document_family_id: str, document_relationship, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Add a document to a family as a new relationship</p>
+<p>:param document_family_id: the ID for the document family
+:param document_relationship: the document relationship
+:param document: the document
+:return: None</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                    document: Document):
+    &#34;&#34;&#34;
+    Add a document to a family as a new relationship
+
+    :param document_family_id: the ID for the document family
+    :param document_relationship: the document relationship
+    :param document: the document
+    :return: None
+    &#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
@@ -6509,12 +6729,18 @@ used with the Kodexa platform</p>
 <span>def <span class="ident">count</span></span>(<span>self) ‑> int</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>The number of document families in the store</p>
+<p>:return: the count of families</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def count(self) -&gt; int:
+    &#34;&#34;&#34;
+    The number of document families in the store
+
+    :return: the count of families
+    &#34;&#34;&#34;
     return 0</code></pre>
 </details>
 </dd>
@@ -6543,12 +6769,20 @@ used with the Kodexa platform</p>
 <span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>) ‑> <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get a document for a given content object</p>
+<p>:param content_object: the content object
+:return: the Document</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+    &#34;&#34;&#34;
+    Get a document for a given content object
+
+    :param content_object: the content object
+    :return: the Document
+    &#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
@@ -6556,27 +6790,40 @@ used with the Kodexa platform</p>
 <span>def <span class="ident">get_ref</span></span>(<span>self) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Returns the reference (org-slug/store-slug:version)</p>
+<p>:return: the reference</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_ref(self) -&gt; str:
+    &#34;&#34;&#34;
+    Returns the reference (org-slug/store-slug:version)
+
+    :return: the reference
+    &#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.list"><code class="name flex">
-<span>def <span class="ident">list</span></span>(<span>self)</span>
+<span>def <span class="ident">list</span></span>(<span>self) ‑> List[<a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Print out a table listing the content objects in the store</p>
+<p>:return: The list of content objects</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def list(self):
+<pre><code class="python">def list(self) -&gt; List[ContentObject]:
+    &#34;&#34;&#34;
+    Print out a table listing the content objects in the store
+
+    :return: The list of content objects
+    &#34;&#34;&#34;
     objects = self.list_objects()
-    self._draw_table(objects)</code></pre>
+    self._draw_table(objects)
+    return objects</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.list_objects"><code class="name flex">
@@ -6602,12 +6849,27 @@ used with the Kodexa platform</p>
 <span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Puts a new document in the store with the given path.</p>
+<p>There mustn't be a family in the path, this method will create a new family based around the
+document</p>
+<p>:param path: the path you wish to add the document in the store
+:param document: the document
+:return:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put(self, path: str, document: Document):
+    &#34;&#34;&#34;
+    Puts a new document in the store with the given path.
+
+    There mustn&#39;t be a family in the path, this method will create a new family based around the
+    document
+
+    :param path: the path you wish to add the document in the store
+    :param document: the document
+    :return:
+    &#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
@@ -6626,7 +6888,7 @@ used with the Kodexa platform</p>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.query_objects"><code class="name flex">
-<span>def <span class="ident">query_objects</span></span>(<span>self, query: str) ‑> List[addict.addict.Dict]</span>
+<span>def <span class="ident">query_objects</span></span>(<span>self, query: str) ‑> List[<a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -6634,7 +6896,7 @@ used with the Kodexa platform</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def query_objects(self, query: str) -&gt; List[Dict]:
+<pre><code class="python">def query_objects(self, query: str) -&gt; List[ContentObject]:
     pass</code></pre>
 </details>
 </dd>
@@ -6642,12 +6904,28 @@ used with the Kodexa platform</p>
 <span>def <span class="ident">register_listener</span></span>(<span>self, listener)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Register a listener to this store.</p>
+<p>A store listener must have the method</p>
+<pre><code>process_event(content_event:ContentEvent)
+</code></pre>
+<p>:param listener: the listener to register
+:return: None</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def register_listener(self, listener):
+    &#34;&#34;&#34;
+    Register a listener to this store.
+
+    A store listener must have the method
+
+        process_event(content_event:ContentEvent)
+
+
+    :param listener: the listener to register
+    :return: None
+    &#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
@@ -6696,6 +6974,12 @@ used with the Kodexa platform</p>
     &#34;&#34;&#34;A model store supports storing and retrieving of a ML models&#34;&#34;&#34;
 
     def get(self, path: str):
+        &#34;&#34;&#34;
+        Returns the bytes object for the given path (or None is there nothing at that path)
+
+        :param path: the path to get content from
+        :return: Bytes or None is there is nothing at the path
+        &#34;&#34;&#34;
         pass
 
     def put(self, path: str, content):
@@ -6712,12 +6996,20 @@ used with the Kodexa platform</p>
 <span>def <span class="ident">get</span></span>(<span>self, path: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Returns the bytes object for the given path (or None is there nothing at that path)</p>
+<p>:param path: the path to get content from
+:return: Bytes or None is there is nothing at the path</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(self, path: str):
+    &#34;&#34;&#34;
+    Returns the bytes object for the given path (or None is there nothing at that path)
+
+    :param path: the path to get content from
+    :return: Bytes or None is there is nothing at the path
+    &#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
@@ -6952,14 +7244,14 @@ def from_dict(cls, env):
 <span>class <span class="ident">Store</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Base interface for Store</p></div>
+<div class="desc"><p>Base definition of a store in Kodexa (deprecated)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Store:
     &#34;&#34;&#34;
-    Base interface for Store
+    Base definition of a store in Kodexa (deprecated)
     &#34;&#34;&#34;
 
     def get_name(self):
@@ -7207,6 +7499,7 @@ dict(one=1, two=2)</p></div>
 <li>
 <h4><code><a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a></code></h4>
 <ul class="">
+<li><code><a title="kodexa.model.model.ContentObject.from_dict" href="#kodexa.model.model.ContentObject.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.to_dict" href="#kodexa.model.model.ContentObject.to_dict">to_dict</a></code></li>
 </ul>
 </li>

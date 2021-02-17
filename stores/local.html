@@ -574,39 +574,6 @@ class TableDataStore(Store):
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="kodexa.stores.local.LocalDocumentStore.accept"><code class="name flex">
-<span>def <span class="ident">accept</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def accept(self, document: Document):
-    if self.mode == &#39;ALL&#39;:
-        return True
-    if self.mode == &#39;ONLY_NEW&#39;:
-        return not self.exists(document)</code></pre>
-</details>
-</dd>
-<dt id="kodexa.stores.local.LocalDocumentStore.add_related_document_to_family"><code class="name flex">
-<span>def <span class="ident">add_related_document_to_family</span></span>(<span>self, document_family_id: str, document_relationship: <a title="kodexa.model.document_families.DocumentRelationship" href="../model/document_families.html#kodexa.model.document_families.DocumentRelationship">DocumentRelationship</a>, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentRelationship,
-                                   document: Document):
-    self.read_metastore()
-    for family in self.metastore:
-        if family.id == document_family_id:
-            family.add_document(document, document_relationship)</code></pre>
-</details>
-</dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.count"><code class="name flex">
 <span>def <span class="ident">count</span></span>(<span>self) ‑> int</span>
 </code></dt>
@@ -679,19 +646,6 @@ class TableDataStore(Store):
     return None</code></pre>
 </details>
 </dd>
-<dt id="kodexa.stores.local.LocalDocumentStore.get_document_by_content_object"><code class="name flex">
-<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>) ‑> <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a></span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
-    return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)</code></pre>
-</details>
-</dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.get_family_by_path"><code class="name flex">
 <span>def <span class="ident">get_family_by_path</span></span>(<span>self, path: str) ‑> Union[<a title="kodexa.model.document_families.DocumentFamily" href="../model/document_families.html#kodexa.model.document_families.DocumentFamily">DocumentFamily</a>, NoneType]</span>
 </code></dt>
@@ -737,19 +691,6 @@ class TableDataStore(Store):
     return &#34;Local Document Store&#34;</code></pre>
 </details>
 </dd>
-<dt id="kodexa.stores.local.LocalDocumentStore.get_ref"><code class="name flex">
-<span>def <span class="ident">get_ref</span></span>(<span>self) ‑> str</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_ref(self) -&gt; str:
-    return self.store_path</code></pre>
-</details>
-</dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.load_kdxa"><code class="name flex">
 <span>def <span class="ident">load_kdxa</span></span>(<span>self, path: str)</span>
 </code></dt>
@@ -778,32 +719,6 @@ class TableDataStore(Store):
         listener.process_event(content_event)</code></pre>
 </details>
 </dd>
-<dt id="kodexa.stores.local.LocalDocumentStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def put(self, path: str, document: Document):
-
-    # We can only add a document if it doesn&#39;t already exist as a family
-    if self.get_family_by_path(path) is None:
-        new_document_family = DocumentFamily(path, self.get_ref())
-        new_event = new_document_family.add_document(document)
-        document.to_kdxa(os.path.join(self.store_path, new_event.content_object.id) + &#34;.kdxa&#34;)
-
-        self.metastore.append(new_document_family)
-        self.write_metastore()
-
-        # Notify the listeners
-        self.notify_listeners(new_event)
-
-    return self.get_family_by_path(path)</code></pre>
-</details>
-</dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.read_metastore"><code class="name flex">
 <span>def <span class="ident">read_metastore</span></span>(<span>self)</span>
 </code></dt>
@@ -820,19 +735,6 @@ class TableDataStore(Store):
     self.metastore: List[Dict] = []
     with open(os.path.join(self.store_path, &#39;metastore.json&#39;)) as f:
         self.metastore = jsonpickle.decode(&#34;&#34;.join(f.readlines()))</code></pre>
-</details>
-</dd>
-<dt id="kodexa.stores.local.LocalDocumentStore.register_listener"><code class="name flex">
-<span>def <span class="ident">register_listener</span></span>(<span>self, listener)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def register_listener(self, listener):
-    self.listeners.append(listener)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.sink"><code class="name flex">
@@ -892,8 +794,15 @@ class TableDataStore(Store):
 <ul class="hlist">
 <li><code><b><a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a></b></code>:
 <ul class="hlist">
+<li><code><a title="kodexa.model.model.DocumentStore.accept" href="../model/model.html#kodexa.model.model.DocumentStore.accept">accept</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.add_related_document_to_family" href="../model/model.html#kodexa.model.model.DocumentStore.add_related_document_to_family">add_related_document_to_family</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_by_uuid" href="../model/model.html#kodexa.model.model.DocumentStore.get_by_uuid">get_by_uuid</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="../model/model.html#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.list" href="../model/model.html#kodexa.model.model.DocumentStore.list">list</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.list_objects" href="../model/model.html#kodexa.model.model.DocumentStore.list_objects">list_objects</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.put" href="../model/model.html#kodexa.model.model.DocumentStore.put">put</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="../model/model.html#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
 </ul>
 </li>
 </ul>
@@ -947,22 +856,6 @@ class TableDataStore(Store):
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="kodexa.stores.local.LocalModelStore.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, object_path: str)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get(self, object_path: str):
-    if Path(os.path.join(self.store_path, object_path)).is_file():
-        return open(os.path.join(self.store_path, object_path), &#39;rb&#39;)
-    else:
-        return None</code></pre>
-</details>
-</dd>
 <dt id="kodexa.stores.local.LocalModelStore.put"><code class="name flex">
 <span>def <span class="ident">put</span></span>(<span>self, object_path: str, content)</span>
 </code></dt>
@@ -997,6 +890,14 @@ class TableDataStore(Store):
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="kodexa.model.model.ModelStore" href="../model/model.html#kodexa.model.model.ModelStore">ModelStore</a></b></code>:
+<ul class="hlist">
+<li><code><a title="kodexa.model.model.ModelStore.get" href="../model/model.html#kodexa.model.model.ModelStore.get">get</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="kodexa.stores.local.TableDataStore"><code class="flex name class">
 <span>class <span class="ident">TableDataStore</span></span>
@@ -1278,22 +1179,16 @@ def from_dict(cls, store_dict):
 <ul>
 <li>
 <h4><code><a title="kodexa.stores.local.LocalDocumentStore" href="#kodexa.stores.local.LocalDocumentStore">LocalDocumentStore</a></code></h4>
-<ul class="">
-<li><code><a title="kodexa.stores.local.LocalDocumentStore.accept" href="#kodexa.stores.local.LocalDocumentStore.accept">accept</a></code></li>
-<li><code><a title="kodexa.stores.local.LocalDocumentStore.add_related_document_to_family" href="#kodexa.stores.local.LocalDocumentStore.add_related_document_to_family">add_related_document_to_family</a></code></li>
+<ul class="two-column">
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.count" href="#kodexa.stores.local.LocalDocumentStore.count">count</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.exists" href="#kodexa.stores.local.LocalDocumentStore.exists">exists</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_by_path" href="#kodexa.stores.local.LocalDocumentStore.get_by_path">get_by_path</a></code></li>
-<li><code><a title="kodexa.stores.local.LocalDocumentStore.get_document_by_content_object" href="#kodexa.stores.local.LocalDocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_family_by_path" href="#kodexa.stores.local.LocalDocumentStore.get_family_by_path">get_family_by_path</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_latest_document" href="#kodexa.stores.local.LocalDocumentStore.get_latest_document">get_latest_document</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_name" href="#kodexa.stores.local.LocalDocumentStore.get_name">get_name</a></code></li>
-<li><code><a title="kodexa.stores.local.LocalDocumentStore.get_ref" href="#kodexa.stores.local.LocalDocumentStore.get_ref">get_ref</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.load_kdxa" href="#kodexa.stores.local.LocalDocumentStore.load_kdxa">load_kdxa</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.notify_listeners" href="#kodexa.stores.local.LocalDocumentStore.notify_listeners">notify_listeners</a></code></li>
-<li><code><a title="kodexa.stores.local.LocalDocumentStore.put" href="#kodexa.stores.local.LocalDocumentStore.put">put</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.read_metastore" href="#kodexa.stores.local.LocalDocumentStore.read_metastore">read_metastore</a></code></li>
-<li><code><a title="kodexa.stores.local.LocalDocumentStore.register_listener" href="#kodexa.stores.local.LocalDocumentStore.register_listener">register_listener</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.sink" href="#kodexa.stores.local.LocalDocumentStore.sink">sink</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.to_dict" href="#kodexa.stores.local.LocalDocumentStore.to_dict">to_dict</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.write_metastore" href="#kodexa.stores.local.LocalDocumentStore.write_metastore">write_metastore</a></code></li>
@@ -1302,7 +1197,6 @@ def from_dict(cls, store_dict):
 <li>
 <h4><code><a title="kodexa.stores.local.LocalModelStore" href="#kodexa.stores.local.LocalModelStore">LocalModelStore</a></code></h4>
 <ul class="">
-<li><code><a title="kodexa.stores.local.LocalModelStore.get" href="#kodexa.stores.local.LocalModelStore.get">get</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalModelStore.put" href="#kodexa.stores.local.LocalModelStore.put">put</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalModelStore.to_dict" href="#kodexa.stores.local.LocalModelStore.to_dict">to_dict</a></code></li>
 </ul>

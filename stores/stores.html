@@ -427,14 +427,14 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         else:
             self.objects = content_objects_response.json()[&#39;content&#39;]
 
-    def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[Dict]:
+    def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[ContentObject]:
         &#34;&#34;&#34;
         Query the documents in the given document store and a list of the document metadata matches
 
         :param sort_direction: the sort direction (either asc - ascending or desc - descending)
         :param sort_by: the name of the metadata field to sort by (ie. createdDate)
         :param query: A lucene style query for the metadata in the document store
-        :return: A list of dictionaries containing the metadata for the documents
+        :return: A list of content objects
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         params = {&#39;query&#39;: query}
@@ -451,7 +451,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         if list_content.status_code != 200:
             raise Exception(
                 f&#34;Exception occurred while trying to fetch objects [{list_content.status_code}]&#34;)
-        return list_content.json()[&#39;content&#39;]
+        results: List[ContentObject] = []
+        for co_dict in list_content.json()[&#39;content&#39;]:
+            results.append(ContentObject.from_dict(co_dict))
+        return results
 
     def list_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;
@@ -467,9 +470,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception(
                 f&#34;Exception occurred while trying to fetch objects [{list_content.status_code}]&#34;)
 
-        # TODO serialization
-
-        return list_content.json()[&#39;content&#39;]
+        results: List[ContentObject] = []
+        for co_dict in list_content.json()[&#39;content&#39;]:
+            results.append(ContentObject.from_dict(co_dict))
+        return results
 
     def __iter__(self):
         return self
@@ -1005,14 +1009,14 @@ instance</p></div>
         else:
             self.objects = content_objects_response.json()[&#39;content&#39;]
 
-    def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[Dict]:
+    def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[ContentObject]:
         &#34;&#34;&#34;
         Query the documents in the given document store and a list of the document metadata matches
 
         :param sort_direction: the sort direction (either asc - ascending or desc - descending)
         :param sort_by: the name of the metadata field to sort by (ie. createdDate)
         :param query: A lucene style query for the metadata in the document store
-        :return: A list of dictionaries containing the metadata for the documents
+        :return: A list of content objects
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         params = {&#39;query&#39;: query}
@@ -1029,7 +1033,10 @@ instance</p></div>
         if list_content.status_code != 200:
             raise Exception(
                 f&#34;Exception occurred while trying to fetch objects [{list_content.status_code}]&#34;)
-        return list_content.json()[&#39;content&#39;]
+        results: List[ContentObject] = []
+        for co_dict in list_content.json()[&#39;content&#39;]:
+            results.append(ContentObject.from_dict(co_dict))
+        return results
 
     def list_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;
@@ -1045,9 +1052,10 @@ instance</p></div>
             raise Exception(
                 f&#34;Exception occurred while trying to fetch objects [{list_content.status_code}]&#34;)
 
-        # TODO serialization
-
-        return list_content.json()[&#39;content&#39;]
+        results: List[ContentObject] = []
+        for co_dict in list_content.json()[&#39;content&#39;]:
+            results.append(ContentObject.from_dict(co_dict))
+        return results
 
     def __iter__(self):
         return self
@@ -1214,6 +1222,25 @@ instance</p></div>
         self.objects = content_objects_response.json()[&#39;content&#39;]</code></pre>
 </details>
 </dd>
+<dt id="kodexa.stores.stores.RemoteDocumentStore.get_ref"><code class="name flex">
+<span>def <span class="ident">get_ref</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)</p>
+<p>:return: The reference</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_ref(self) -&gt; str:
+    &#34;&#34;&#34;
+    Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+
+    :return: The reference
+    &#34;&#34;&#34;
+    return self.ref</code></pre>
+</details>
+</dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.get_source"><code class="name flex">
 <span>def <span class="ident">get_source</span></span>(<span>self, document_id: str)</span>
 </code></dt>
@@ -1274,9 +1301,10 @@ instance</p></div>
         raise Exception(
             f&#34;Exception occurred while trying to fetch objects [{list_content.status_code}]&#34;)
 
-    # TODO serialization
-
-    return list_content.json()[&#39;content&#39;]</code></pre>
+    results: List[ContentObject] = []
+    for co_dict in list_content.json()[&#39;content&#39;]:
+        results.append(ContentObject.from_dict(co_dict))
+    return results</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.put"><code class="name flex">
@@ -1383,26 +1411,26 @@ related Document that refers to it.</p>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.query_objects"><code class="name flex">
-<span>def <span class="ident">query_objects</span></span>(<span>self, query: str, sort_by=None, sort_direction='asc') ‑> List[Dict]</span>
+<span>def <span class="ident">query_objects</span></span>(<span>self, query: str, sort_by=None, sort_direction='asc') ‑> List[<a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Query the documents in the given document store and a list of the document metadata matches</p>
 <p>:param sort_direction: the sort direction (either asc - ascending or desc - descending)
 :param sort_by: the name of the metadata field to sort by (ie. createdDate)
 :param query: A lucene style query for the metadata in the document store
-:return: A list of dictionaries containing the metadata for the documents</p></div>
+:return: A list of content objects</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[Dict]:
+<pre><code class="python">def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[ContentObject]:
     &#34;&#34;&#34;
     Query the documents in the given document store and a list of the document metadata matches
 
     :param sort_direction: the sort direction (either asc - ascending or desc - descending)
     :param sort_by: the name of the metadata field to sort by (ie. createdDate)
     :param query: A lucene style query for the metadata in the document store
-    :return: A list of dictionaries containing the metadata for the documents
+    :return: A list of content objects
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     params = {&#39;query&#39;: query}
@@ -1419,7 +1447,10 @@ related Document that refers to it.</p>
     if list_content.status_code != 200:
         raise Exception(
             f&#34;Exception occurred while trying to fetch objects [{list_content.status_code}]&#34;)
-    return list_content.json()[&#39;content&#39;]</code></pre>
+    results: List[ContentObject] = []
+    for co_dict in list_content.json()[&#39;content&#39;]:
+        results.append(ContentObject.from_dict(co_dict))
+    return results</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.to_dict"><code class="name flex">
@@ -1443,12 +1474,13 @@ related Document that refers to it.</p>
 <ul class="hlist">
 <li><code><b><a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a></b></code>:
 <ul class="hlist">
+<li><code><a title="kodexa.model.model.DocumentStore.accept" href="../model/model.html#kodexa.model.model.DocumentStore.accept">accept</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.add_related_document_to_family" href="../model/model.html#kodexa.model.model.DocumentStore.add_related_document_to_family">add_related_document_to_family</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.count" href="../model/model.html#kodexa.model.model.DocumentStore.count">count</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_by_uuid" href="../model/model.html#kodexa.model.model.DocumentStore.get_by_uuid">get_by_uuid</a></code></li>
-</ul>
-</li>
-<li><code><b><a title="kodexa.model.model.RemoteStore" href="../model/model.html#kodexa.model.model.RemoteStore">RemoteStore</a></b></code>:
-<ul class="hlist">
-<li><code><a title="kodexa.model.model.RemoteStore.get_ref" href="../model/model.html#kodexa.model.model.RemoteStore.get_ref">get_ref</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.list" href="../model/model.html#kodexa.model.model.DocumentStore.list">list</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="../model/model.html#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
 </ul>
 </li>
 <li><code><b><a title="kodexa.model.model.RemoteStore" href="../model/model.html#kodexa.model.model.RemoteStore">RemoteStore</a></b></code>:
@@ -2049,6 +2081,7 @@ instance</p></div>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_by_path" href="#kodexa.stores.stores.RemoteDocumentStore.get_by_path">get_by_path</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_name" href="#kodexa.stores.stores.RemoteDocumentStore.get_name">get_name</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_next_objects" href="#kodexa.stores.stores.RemoteDocumentStore.get_next_objects">get_next_objects</a></code></li>
+<li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_ref" href="#kodexa.stores.stores.RemoteDocumentStore.get_ref">get_ref</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_source" href="#kodexa.stores.stores.RemoteDocumentStore.get_source">get_source</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.list_objects" href="#kodexa.stores.stores.RemoteDocumentStore.list_objects">list_objects</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.put" href="#kodexa.stores.stores.RemoteDocumentStore.put">put</a></code></li>
