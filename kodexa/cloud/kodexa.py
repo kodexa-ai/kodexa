@@ -363,19 +363,6 @@ class KodexaPlatform:
             metadata_object.description = 'A new assistant definition' if metadata_object.description is None else metadata_object.description
             object_url = 'assistants'
             metadata_object.type = 'assistant'
-            metadata_object.fullDescription = kodexa_object.full_description
-            metadata_object.workflows = jsonpickle.decode(jsonpickle.encode(kodexa_object.workflows, unpicklable=False))
-            metadata_object.requiredStores = jsonpickle.decode(
-                jsonpickle.encode(kodexa_object.required_stores, unpicklable=False))
-            metadata_object.processingTaxonomies = jsonpickle.decode(
-                jsonpickle.encode(kodexa_object.processing_taxonomies, unpicklable=False))
-
-            # For our services we are actually going to dry run each of these
-            # as deploys to create the correct objects
-
-            metadata_object.services = []
-            for service in kodexa_object.services:
-                metadata_object.services.append(KodexaPlatform.deploy(f'./{service.slug}', service, dry_run=True))
 
         else:
             raise Exception("Unknown object type, unable to deploy")

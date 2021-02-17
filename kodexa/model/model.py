@@ -14,6 +14,43 @@ from addict import Dict
 from kodexa.mixins import registry
 
 
+class ContentType(Enum):
+    DOCUMENT = 'DOCUMENT'
+    NATIVE = 'NATIVE'
+
+
+class ContentObject:
+
+    def __init__(self, name="untitled", id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
+                 store_ref=None, labels=None):
+        if labels is None:
+            labels = []
+        if metadata is None:
+            metadata = {}
+        if tags is None:
+            tags = []
+        from kodexa.pipeline import new_id
+        self.id = new_id() if id is None else id
+        self.name = name
+        self.content_type = content_type
+        self.tags = tags
+        self.store_ref = store_ref
+        self.metadata = metadata
+        self.labels = labels
+        self.path = name
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'tags': self.tags,
+            'labels': self.labels,
+            'content_type': self.content_type.name,
+            'metadata': self.metadata,
+            'name': self.name,
+            'store_ref': self.store_ref
+        }
+
+
 class Store:
     """
     Base interface for Store
@@ -1660,9 +1697,7 @@ class Document(object):
         url_document.metadata.connector_options.url = url
         url_document.metadata.connector_options.headers = headers
         url_document.source.connector = 'url'
-        import base64
-        encoded_url = base64.b64encode(url.encode('ascii'))
-        url_document.source.original_filename = encoded_url.decode('ascii')
+        url_document.source.original_filename = url
         url_document.source.original_path = url
         url_document.source.headers = headers
         return url_document
@@ -1723,12 +1758,33 @@ class Document(object):
 
 
 class DocumentStore:
-    """A document store supports storing, listing and retrieving Kodexa documents"""
+    """A document store supports storing, listing and retrieving Kodexa documents and document families"""
 
-    def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
+    def get_ref(self) -> str:
         pass
 
-    def list_objects(self) -> List[Dict]:
+    def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
+        """
+        Get a Document based on the ID of the ContentObject
+
+        :param uuid_value: the ID of the ContentObject
+        :return: A document (or None if not found)
+        """
+        pass
+
+    def list_objects(self) -> List[ContentObject]:
+        """
+        List the content objects in the store
+
+        :return: a list of the content objects
+        """
+        pass
+
+    def add_related_document_to_family(self, document_family_id: str, document_relationship,
+                                       document: Document):
+        pass
+
+    def get_document_by_content_object(self, content_object: ContentObject) -> Document:
         pass
 
     def list(self):
@@ -1738,6 +1794,9 @@ class DocumentStore:
     def query(self, query: str = "*"):
         objects = self.query_objects(query)
         self._draw_table(objects)
+
+    def register_listener(self, listener):
+        pass
 
     def _draw_table(self, objects):
         from rich.table import Table
@@ -1770,19 +1829,6 @@ class DocumentStore:
         return True
 
 
-class FileStore:
-    """A file store supports storing, listing and retrieving native files"""
-
-    def get(self, path: str) -> Document:
-        pass
-
-    def list(self) -> List[str]:
-        pass
-
-    def put(self, path: str, document: Document):
-        pass
-
-
 class ModelStore:
     """A model store supports storing and retrieving of a ML models"""
 
@@ -1791,3 +1837,14 @@ class ModelStore:
 
     def put(self, path: str, content):
         pass
+
+
+class ContentObjectReference:
+
+    def __init__(self, content_object: ContentObject, store: DocumentStore, document: Document,
+                 document_family):
+        self.content_object = content_object
+        self.store = store
+        self.document = document
+        from kodexa.model import DocumentFamily
+        self.document_family: DocumentFamily = document_family

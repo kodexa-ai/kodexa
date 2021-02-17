@@ -1,8 +1,14 @@
 import errno
+import importlib
 import logging
-from typing import Dict, cast
+from typing import cast, List
 
+from addict import Dict, addict
+
+from kodexa import LocalDocumentStore, Assistant
 from kodexa import PipelineContext, TableDataStore, Document, ContentNode
+from kodexa.model.document_families import ContentEvent, DocumentRelationship, DocumentActor
+from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger('kodexa.testing')
 
@@ -164,3 +170,142 @@ def compare_store(context: PipelineContext, store_name: str, filename: str, thro
         print(issue)
 
     return len(issues) == 0
+
+
+class AssistantTestHarness:
+
+    def __init__(self, assistant: Assistant, stores: List[DocumentStore]):
+        self.assistant = assistant
+        self.stores = stores
+
+        for store in self.stores:
+            store.register_listener(self)
+
+    def process_event(self, event: ContentEvent):
+        """
+        The harnesss will take the content event and
+        will pass it to the assistant - then we will
+        take each of the pipelines and run the document
+        through them in turn (note in the platform this might be in parallel)
+
+        :param event: content event
+        :return: None
+        """
+
+        pipelines = self.assistant.process_event(event)
+
+        # We need to get the document down
+        store = self.get_store(event)
+
+        for pipeline in pipelines:
+            pipeline.connector = [store.get_document_by_content_object(event.content_object)]
+            pipeline_context = pipeline.run()
+
+            if pipeline_context.output_document is not None:
+                # We need to build the relationship between the old and the new
+                document_relationship = DocumentRelationship("DERIVED", event.content_object.id, None,
+                                                             DocumentActor("testing", "assistant"))
+
+                store.add_related_document_to_family(event.document_family.id, document_relationship,
+                                                     pipeline_context.output_document)
+
+            # We need to handle the context here, basically we are going to take the result
+            # of the pipeline as a new document and add it to the family?? think about that?
+
+            # so does the assistant decide to write to the store? or do we just do it anyway?
+            # how does the assistant know what happened to the pipeline?
+
+        pass
+
+    def register_local_document_store(self, store: LocalDocumentStore):
+        pass
+
+    def get_store(self, event: ContentEvent) -> DocumentStore:
+        for store in self.stores:
+            if event.document_family.store_ref == store.get_ref():
+                return store
+
+        raise Exception(f"Unable to get store ref {event.document_family.store_ref}")
+
+
+class OptionException(Exception):
+    pass
+
+
+class ExtensionPackUtil:
+
+    def __init__(self, file_path='kodexa.yml'):
+        self.file_path = file_path
+
+        import yaml
+
+        with open(file_path, 'r') as stream:
+            self.kodexa_metadata = addict.Dict(yaml.safe_load(stream))
+
+    def get_step(self, action_slug, options=None):
+        if options is None:
+            options = {}
+
+        for service in self.kodexa_metadata.services:
+            if service.type == 'action' and service.slug == action_slug:
+                # TODO We need to validate all the options
+
+                if len(service.metadata.options) > 0:
+                    option_names = []
+                    for option in service.metadata.options:
+                        option_names.append(option.name)
+                        if option.name not in options and option.default is not None:
+                            options[option.name] = option.default
+                        if option.required and option.name not in options:
+                            raise OptionException(f"Missing required option {option.name}")
+
+                    for option_name in options.keys():
+                        if option_name not in option_names:
+                            raise OptionException(f"Unexpected option {option_name}")
+
+                # We need to create and return our action
+                module = importlib.import_module(service.step.package)
+                klass = getattr(module, service.step['class'])
+                return klass(**options)
+
+        raise Exception("Unable to find the action " + action_slug)
+
+    def get_assistant_test_harness(self, assistant_slug, options=None, stores=None) -> AssistantTestHarness:
+        """
+        Provides a local test harness that can be used to validate the functionality
+        of an assistant in a test case
+
+        :param assistant_slug:
+        :param options:
+        :param stores: a list of the document stores to monitor
+        :return: The assistant test harness
+        """
+        if stores is None:
+            stores = []
+        assistant = self.get_assistant(assistant_slug, options)
+
+        return AssistantTestHarness(assistant, stores)
+
+    def get_assistant(self, assistant_slug, options=None):
+        """
+        Create an instance of an assistant from the kodexa metadata
+
+        :param assistant_slug:
+        :param options:
+        :return:
+        """
+        if options is None:
+            options = {}
+
+        for service in self.kodexa_metadata.services:
+            if service.type == 'assistant' and service.slug == assistant_slug:
+                # TODO We need to validate all the options
+
+                # We need to create and return our action
+
+                logger.info(f"Creating new assistant {service.assistant}")
+                module = importlib.import_module(service.assistant.package)
+                klass = getattr(module, service.assistant['class'])
+                return klass(**options)
+
+        raise Exception("Unable to find the assistant " + assistant_slug)
