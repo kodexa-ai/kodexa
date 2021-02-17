@@ -41,15 +41,28 @@ class ContentObject:
             tags = []
         from kodexa.pipeline import new_id
         self.id = new_id() if id is None else id
+        """The unique ID for the content object"""
         self.name = name
+        """The name/path of the content object"""
         self.content_type = content_type
+        """The type of content the object refers to"""
         self.tags = tags
+        """A list of the tags related to the object"""
         self.store_ref = store_ref
+        """The reference to the store holding this content object"""
         self.metadata = metadata
+        """A dictionary of the metadata"""
         self.labels = labels
+        """A list of the labels related to the object"""
         self.path = name
+        """.. deprecated::"""
 
     def to_dict(self):
+        """
+        Convert the content object to a dictionary
+
+        :return: dictionary
+        """
         return {
             'id': self.id,
             'tags': self.tags,
@@ -62,6 +75,11 @@ class ContentObject:
 
     @classmethod
     def from_dict(cls, co_dict):
+        """
+        Create a content object from a dictionary
+
+        :return: A content object
+        """
         co = ContentObject(co_dict['name'])
         co.id = co_dict['id']
         co.labels = co_dict['labels']
@@ -130,16 +148,24 @@ class DocumentMetadata(Dict):
 
 
 class Tag(Dict):
+    """
+    A tag represents the metadata for a label that is applies as a feature on a content node
+    """
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
                  uuid: Optional[str] = None, data: Any = None, *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
+        """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
         self.end: Optional[int] = end
+        """The end position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
         self.value: Optional[str] = value
+        """A string representing the value that was labelled in the node"""
         self.data: Optional[Any] = data
+        """Any data object (JSON serializable) that you wish to associate with the label"""
         self.uuid: Optional[str] = uuid
+        """The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID"""
 
 
 class FindDirection(Enum):
