@@ -247,20 +247,17 @@ class TableDataStore(Store):
 
     :param columns: a list of the column names (default to dynamic)
     :param rows: initial set of rows (default to empty)
-    :param source_documents: initial dictionary of document UUID to row links (default to empty)
 
     """
 
-    def __init__(self, columns=None, rows=None, source_documents=None):
-        if source_documents is None:
-            source_documents = {}
+    def __init__(self, columns=None, rows=None):
+
         if rows is None:
             rows = []
         if columns is None:
             columns = []
         self.columns: List[str] = columns
         self.rows: List[List] = rows
-        self.source_documents: Dict[str, Dict] = source_documents
 
         from kodexa.pipeline import PipelineContext
 
@@ -284,8 +281,7 @@ class TableDataStore(Store):
             "type": "TABLE",
             "data": {
                 "columns": self.columns,
-                "rows": self.rows,
-                "source_documents": self.source_documents
+                "rows": self.rows
             }
         }
 
@@ -310,12 +306,6 @@ class TableDataStore(Store):
         :param row: the row (as a list) to add
         """
         self.rows.append(row)
-
-        if self.pipeline_context and self.pipeline_context.current_document:
-            current_document = self.pipeline_context.get_current_document()
-            if current_document.uuid not in self.source_documents:
-                self.source_documents[current_document.uuid] = {"metadata": current_document.metadata, "rows": []}
-            self.source_documents[current_document.uuid]["rows"].append(len(self.rows) - 1)
 
     def count(self):
         """
