@@ -8,10 +8,20 @@ from addict import Dict
 
 
 def get_path():
+    """
+    Gets the path of the documentation
+
+    :return: the path of this module file
+    """
     return os.path.abspath(__file__)
 
 
 def get_template_env():
+    """
+    Get the Jinja2 template environmnet
+
+    :return:
+    """
     cli_path = os.path.dirname(get_path())
     package_location = os.path.join(cli_path, "templates")
     template_loader = jinja2.FileSystemLoader(searchpath=package_location)
@@ -19,6 +29,12 @@ def get_template_env():
 
 
 def generate_documentation(metadata):
+    """
+    Given the metadata object from a kodexa.yml generate the documentation
+
+    :param metadata:
+    :return:
+    """
     os.makedirs('docs', exist_ok=True)
     for service in metadata.services:
         write_template("action.j2", f"docs/{service.slug}.md", Dict(metadata), Dict(service))
