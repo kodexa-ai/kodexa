@@ -1,0 +1,3211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>kodexa.cloud.kodexa API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>kodexa.cloud.kodexa</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from __future__ import annotations
+
+import errno
+import json
+import logging
+import os
+import sys
+import time
+from json import JSONDecodeError
+
+import jsonpickle
+import requests
+import yaml
+from addict import Dict
+from appdirs import AppDirs
+from rich import print
+
+from kodexa.assistant import Assistant
+from kodexa.connectors import get_source
+from kodexa.connectors.connectors import get_caller_dir, FolderConnector
+from kodexa.model import Document, DocumentStore
+from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
+from kodexa.stores import RemoteDocumentStore
+from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
+from kodexa.taxonomy import Taxonomy
+from kodexa.workflow.workflow import Workflow
+
+logger = logging.getLogger(&#39;kodexa.platform&#39;)
+
+dirs = AppDirs(&#34;Kodexa&#34;, &#34;Kodexa&#34;)
+
+
+def get_config():
+    path = os.path.join(dirs.user_config_dir, &#39;.kodexa.json&#39;)
+    if os.path.exists(path):
+        with open(path, &#39;r&#39;) as outfile:
+            return json.load(outfile)
+    else:
+        return {&#39;url&#39;: None, &#39;access_token&#39;: None}
+
+
+def save_config(config_obj):
+    path = os.path.join(dirs.user_config_dir, &#39;.kodexa.json&#39;)
+    if not os.path.exists(os.path.dirname(path)):
+        try:
+            os.makedirs(os.path.dirname(path))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+    with open(path, &#39;w&#39;) as outfile:
+        json.dump(config_obj, outfile)
+
+
+class PipelineMetadataBuilder:
+    &#34;&#34;&#34;
+    Build a metadata representation of the pipeline for passing to an instance of the
+    Kodexa platform
+    &#34;&#34;&#34;
+
+    def __init__(self, pipeline: Pipeline):
+        self.pipeline = pipeline
+
+    def build_steps(self, pipeline_metadata: Dict):
+        pipeline_metadata.metadata.steps = []
+        pipeline_metadata.metadata.stores = []
+
+        for pipeline_store in self.pipeline.stores:
+
+            if isinstance(pipeline_store.store, RemoteDocumentStore):
+                pipeline_metadata.metadata.stores.append(
+                    {&#34;name&#34;: pipeline_store.name, &#34;ref&#34;: pipeline_store.store.get_ref(), &#34;storeType&#34;: &#34;DOCUMENT&#34;})
+            else:
+                raise Exception(&#34;Pipeline refers to a non-remote store, deployment of local stores is not supported&#34;)
+
+        for idx, step in enumerate(self.pipeline.steps):
+
+            step_meta = step.to_dict()
+            if step_meta[&#39;name&#39;] is None:
+                step_meta[&#39;name&#39;] = f&#34;Step {idx + 1}&#34;
+
+            if &#39;script&#39; in step_meta:
+                pipeline_metadata.metadata.steps.append({
+                    &#39;ref&#39;: &#39;kodexa/python-step&#39;,
+                    &#39;name&#39;: step_meta[&#39;name&#39;],
+                    &#39;enabled&#39;: True,
+                    &#39;condition&#39;: None,
+                    &#39;options&#39;: {
+                        &#39;function_name&#39;: step_meta[&#39;function&#39;],
+                        &#39;script&#39;: step_meta[&#39;script&#39;]
+                    }
+                })
+            else:
+                pipeline_metadata.metadata.steps.append(step_meta)
+
+        return pipeline_metadata
+
+
+DEFAULT_COLUMNS = {
+    &#39;extensionPacks&#39;: [
+        &#39;orgSlug&#39;,
+        &#39;slug&#39;,
+        &#39;version&#39;,
+        &#39;name&#39;,
+        &#39;description&#39;,
+        &#39;type&#39;,
+        &#39;status&#39;
+    ],
+    &#39;default&#39;: [
+        &#39;orgSlug&#39;,
+        &#39;slug&#39;,
+        &#39;version&#39;,
+        &#39;name&#39;,
+        &#39;description&#39;,
+        &#39;type&#39;
+    ]
+}
+
+OBJECT_TYPES = {
+    &#34;extensionPacks&#34;: {
+        &#34;name&#34;: &#34;extension pack&#34;,
+        &#34;plural&#34;: &#34;extension packs&#34;
+    },
+    &#34;pipelines&#34;: {
+        &#34;name&#34;: &#34;pipeline&#34;,
+        &#34;plural&#34;: &#34;pipelines&#34;
+    },
+    &#34;assistants&#34;: {
+        &#34;name&#34;: &#34;assistant&#34;,
+        &#34;plural&#34;: &#34;assistants&#34;
+    },
+    &#34;actions&#34;: {
+        &#34;name&#34;: &#34;action&#34;,
+        &#34;plural&#34;: &#34;actions&#34;
+    },
+    &#34;stores&#34;: {
+        &#34;name&#34;: &#34;store&#34;,
+        &#34;plural&#34;: &#34;stores&#34;
+    },
+    &#34;connectors&#34;: {
+        &#34;name&#34;: &#34;connector&#34;,
+        &#34;plural&#34;: &#34;connectors&#34;
+    },
+    &#34;taxonomies&#34;: {
+        &#34;name&#34;: &#34;taxonomy&#34;,
+        &#34;plural&#34;: &#34;taxonomies&#34;
+    },
+    &#34;workflows&#34;: {
+        &#34;name&#34;: &#34;workflow&#34;,
+        &#34;plural&#34;: &#34;workflows&#34;
+    }
+}
+
+
+def resolve_object_type(obj_type):
+    hits = []
+    keys = []
+    for target_type in OBJECT_TYPES.keys():
+        if obj_type in target_type:
+            hits.append(OBJECT_TYPES[target_type])
+            keys.append(target_type)
+
+    if len(hits) == 1:
+        return keys[0], hits[0]
+
+    if len(hits) == 0:
+        print(&#34;:exclaimation: Unable to find object type {obj_type}&#34;)
+        sys.exit(1)
+    else:
+        print(f&#34;:exclaimation: To many potential matches for object type ({&#39;,&#39;.join(keys)}&#34;)
+        sys.exit(1)
+
+
+class KodexaPlatform:
+
+    @staticmethod
+    def get_access_token():
+        kodexa_config = get_config()
+        access_token = os.getenv(&#39;KODEXA_ACCESS_TOKEN&#39;)
+        return access_token if access_token is not None else kodexa_config[&#39;access_token&#39;]
+
+    @staticmethod
+    def get_url():
+        kodexa_config = get_config()
+        env_url = os.getenv(&#39;KODEXA_URL&#39;, None)
+        return env_url if env_url is not None else kodexa_config[&#39;url&#39;]
+
+    @staticmethod
+    def set_access_token(access_token):
+        if access_token is not None:
+            os.environ[&#34;KODEXA_ACCESS_TOKEN&#34;] = access_token
+
+    @staticmethod
+    def set_url(url):
+        if url is not None:
+            os.environ[&#34;KODEXA_URL&#34;] = url
+
+    &#34;&#34;&#34;
+    The deployer allows you to take a locally build Pipeline and then push that pipeline
+    to a Kodexa platform instance
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def get_access_token_details():
+        response = requests.get(
+            f&#34;{KodexaPlatform.get_url()}/api/account/accessToken&#34;,
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+        if response.status_code == 200:
+            return Dict(response.json())
+        else:
+            if response.status_code == 404:
+                raise Exception(&#34;Unable to find access token&#34;)
+            else:
+                raise Exception(&#34;An error occurred connecting to the Kodexa platform&#34;)
+
+    @staticmethod
+    def deploy_extension(metadata):
+        response = requests.post(f&#34;{KodexaPlatform.get_url()}/api/extensionPacks/{metadata[&#39;orgSlug&#39;]}&#34;,
+                                 json=metadata.to_dict(),
+                                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                          &#34;content-type&#34;: &#34;application/json&#34;})
+        if response.status_code == 200:
+            logger.info(&#34;Extension deployed&#34;)
+        else:
+            logger.error(response.text)
+            raise Exception(&#34;Unable to deploy new extension&#34;)
+
+    @staticmethod
+    def deploy_extension_from_uri(path, organisation_slug):
+        url = f&#34;{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}&#34;
+        logger.info(f&#34;Publishing extension pack to organization {organisation_slug}&#34;)
+        response = requests.post(url,
+                                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                          &#34;content-type&#34;: &#34;application/json&#34;})
+        if response.status_code == 200:
+            logger.info(&#34;Extension deployed&#34;)
+        else:
+            logger.error(response.text)
+            raise Exception(&#34;Unable to deploy new extension&#34;)
+
+    @staticmethod
+    def resolve_ref(ref: str):
+        org_slug = ref.split(&#39;/&#39;)[0]
+        slug = ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)[0]
+
+        version = None
+
+        if len(ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)) == 2:
+            version = ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)[1]
+
+        return [org_slug, slug, version]
+
+    @staticmethod
+    def get_object_instance(ref: str, object_type: str):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        if object_type == &#39;taxonomies&#39;:
+            from kodexa import RemoteTaxonomy
+            return RemoteTaxonomy.get(ref)
+        if object_type == &#39;stores&#39;:
+            # We need to work out what type of store we have
+            obj_info = KodexaPlatform.get_object(ref, object_type)
+            if obj_info[&#39;storeType&#39;] == &#39;TABLE&#39;:
+                from kodexa import RemoteTableDataStore
+                return RemoteTableDataStore(ref)
+            if obj_info[&#39;storeType&#39;] == &#39;DOCUMENT&#39;:
+                return RemoteDocumentStore(ref)
+
+        # TODO - there are other things we need?
+        raise Exception(f&#34;Unable to get a local instance of {ref} of type {object_type}&#34;)
+
+    @staticmethod
+    def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
+               options=None, public=False, force_replace=False, dry_run=False, print_yaml=False):
+
+        if &#39;/&#39; not in ref:
+            logger.error(&#34;A ref must be valid, i.e. org_slug/pipeline_slug:version&#34;)
+            raise Exception(&#34;Invalid slug&#34;)
+
+        [organization_slug, object_slug, object_version] = KodexaPlatform.resolve_ref(ref)
+
+        if options is None:
+            options = {}
+
+        metadata_object = Dict()
+        metadata_object.orgSlug = organization_slug
+        metadata_object.publicAccess = public
+        metadata_object.slug = object_slug
+        metadata_object.version = object_version
+        metadata_object.name = name
+        metadata_object.description = description
+
+        object_url = None
+
+        from kodexa import RemoteTableDataStore
+
+        if isinstance(kodexa_object, Pipeline):
+
+            metadata_object.name = &#39;New Pipeline&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A new pipeline&#39; if metadata_object.description is None else metadata_object.description
+
+            object_url = &#34;pipelines&#34;
+
+            if &#34;example_urls&#34; not in options:
+                example_urls = []
+            else:
+                example_urls = options[&#34;example_urls&#34;]
+
+            if &#34;more_info_url&#34; not in options:
+                more_info_url = None
+            else:
+                more_info_url = options[&#34;more_info_url&#34;]
+
+            builder = PipelineMetadataBuilder(kodexa_object)
+
+            metadata_object.type = &#39;pipeline&#39;
+            metadata_object.metadata.parameters = []
+            metadata_object.metadata.steps = []
+            metadata_object.exampleUrls = example_urls
+            metadata_object.moreInfoUrl = more_info_url
+
+            builder.build_steps(metadata_object)
+
+        elif isinstance(kodexa_object, LocalDocumentStore) or isinstance(kodexa_object, RemoteDocumentStore):
+            object_url = &#39;stores&#39;
+            metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A document store&#39; if metadata_object.description is None else metadata_object.description
+            metadata_object.type = &#39;store&#39;
+            metadata_object.storeType = &#39;DOCUMENT&#39;
+        elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
+            object_url = &#39;stores&#39;
+            metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A model store&#39; if metadata_object.description is None else metadata_object.description
+            metadata_object.type = &#39;store&#39;
+            metadata_object.storeType = &#39;MODEL&#39;
+        elif isinstance(kodexa_object, RemoteTableDataStore):
+            object_url = &#39;stores&#39;
+            metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A table data store&#39; if metadata_object.description is None else metadata_object.description
+            metadata_object.type = &#39;store&#39;
+            metadata_object.storeType = &#39;TABLE&#39;
+        elif isinstance(kodexa_object, Workflow):
+            metadata_object.name = &#39;New Workflow&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A new workflow&#39; if metadata_object.description is None else metadata_object.description
+            object_url = &#39;workflows&#39;
+            metadata_object.type = &#39;workflow&#39;
+            metadata_object.pipelines = jsonpickle.decode(jsonpickle.encode(kodexa_object.pipelines, unpicklable=False))
+            metadata_object.stores = jsonpickle.decode(jsonpickle.encode(kodexa_object.stores, unpicklable=False))
+            metadata_object.connectors = jsonpickle.decode(
+                jsonpickle.encode(kodexa_object.connectors, unpicklable=False))
+            metadata_object.schedules = jsonpickle.decode(jsonpickle.encode(kodexa_object.schedules, unpicklable=False))
+            metadata_object.accessToken = kodexa_object.access_token
+            metadata_object.active = kodexa_object.active
+        elif isinstance(kodexa_object, Taxonomy):
+            metadata_object.name = &#39;New Taxonomy&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A new taxonomy&#39; if metadata_object.description is None else metadata_object.description
+            object_url = &#39;taxonomies&#39;
+            metadata_object.type = &#39;taxonomy&#39;
+            metadata_object.enabled = kodexa_object.enabled
+            metadata_object.taxonomyType = kodexa_object.taxonomy_type
+            metadata_object.taxons = jsonpickle.decode(jsonpickle.encode([taxon.to_dict() for taxon in kodexa_object.taxons], unpicklable=False))
+        elif isinstance(kodexa_object, Assistant):
+            metadata_object.name = &#39;New Assistant Definition&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A new assistant definition&#39; if metadata_object.description is None else metadata_object.description
+            object_url = &#39;assistants&#39;
+            metadata_object.type = &#39;assistant&#39;
+
+        else:
+            raise Exception(&#34;Unknown object type, unable to deploy&#34;)
+
+        if dry_run:
+
+            if print_yaml:
+                logger.info(f&#34;Dry run output for {metadata_object.type} {ref}&#34;)
+                logger.info(f&#34;YAML output:\n&#34;)
+                logger.info(yaml.dump(metadata_object.to_dict()))
+
+        else:
+            logger.info(f&#34;Deploying {metadata_object.type} {ref}&#34;)
+
+            access_token = KodexaPlatform.get_access_token_details()
+
+            if organization_slug not in access_token.organizationSlugs:
+                logger.error(f&#34;You do not have access to the organization {organization_slug}&#34;)
+                raise Exception(&#34;Unable to deploy, no access to organization&#34;)
+
+            if object_version:
+                url = f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}/{object_version}&#34;
+            else:
+                url = f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}&#34;
+
+            response = requests.get(url,
+                                    headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                             &#34;content-type&#34;: &#34;application/json&#34;})
+
+            if response.status_code == 401:
+                logger.error(f&#34;You do not have the permissions to access this {metadata_object.type}&#34;)
+                raise Exception(&#34;Not authorized on pipeline&#34;)
+
+            if response.status_code == 404:
+                logger.info(&#34;Object doesn&#39;t exist, will deploy&#34;)
+                response = requests.post(f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}&#34;,
+                                         json=metadata_object.to_dict(),
+                                         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                                  &#34;content-type&#34;: &#34;application/json&#34;})
+                if response.status_code == 200:
+                    logger.info(&#34;Deployed&#34;)
+                else:
+                    logger.error(response.text)
+                    raise Exception(&#34;Unable to deploy&#34;)
+            elif response.status_code == 200:
+                logger.info(f&#34;{ref} already exists&#34;)
+                if force_replace:
+                    logger.info(f&#34;Replacing {ref}&#34;)
+                    response = requests.put(url,
+                                            json=metadata_object.to_dict(),
+                                            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                                     &#34;content-type&#34;: &#34;application/json&#34;})
+                    if response.status_code == 200:
+                        logger.info(&#34;Deployed&#34;)
+                    else:
+                        logger.error(response.text)
+                        raise Exception(&#34;Unable to deploy and replace&#34;)
+                else:
+                    logger.warning(&#34;Not updating&#34;)
+                    return
+            else:
+                logger.error(&#34;Unable to deploy&#34;)
+                logger.error(response.content)
+
+        return metadata_object
+
+    @staticmethod
+    def list_objects(organization_slug, object_type):
+        list_response = requests.get(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}&#34;,
+                                     headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                              &#34;content-type&#34;: &#34;application/json&#34;})
+        if list_response.status_code == 200:
+            return list_response.json()
+        else:
+            logger.error(list_response.text)
+            raise Exception(&#34;Unable to list objects&#34;)
+
+    @staticmethod
+    def undeploy(object_type: str, ref: str):
+
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+        response = requests.delete(f&#34;{KodexaPlatform.get_url()}/api/{object_type_metadata[&#39;plural&#39;]}/{url_ref}&#34;,
+                                   headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                            &#34;content-type&#34;: &#34;application/json&#34;})
+        if response.status_code == 200:
+            logger.info(f&#34;Undeployed {object_type_metadata[&#39;name&#39;]} {ref}&#34;)
+        else:
+            logger.error(response.text)
+            raise Exception(f&#34;Unable to undeploy {object_type_metadata[&#39;name&#39;]} {ref}&#34;)
+
+    @staticmethod
+    def delete_object(ref, object_type):
+        # Generate a URL ref
+        url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+        delete_response = requests.delete(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}&#34;,
+                                          headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                                   &#34;content-type&#34;: &#34;application/json&#34;})
+        if delete_response.status_code != 200:
+            logger.error(delete_response.text)
+            raise Exception(&#34;Unable to list objects&#34;)
+
+    @staticmethod
+    def get_object(ref, object_type):
+        url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+        obj_response = requests.get(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}&#34;,
+                                    headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                             &#34;content-type&#34;: &#34;application/json&#34;})
+        if obj_response.status_code != 200:
+            logger.error(obj_response.text)
+            raise Exception(f&#34;Unable to get object {ref}&#34;)
+        else:
+            return obj_response.json()
+
+    @classmethod
+    def get(cls, object_type, ref, path=None):
+
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        try:
+
+            # If ref is just the org then we will list them
+            if &#39;/&#39; in ref:
+                obj = KodexaPlatform.get_object(ref, object_type)
+
+                if path is not None:
+                    import jq
+                    obj = jq.compile(path).input(obj).all()
+                import yaml
+                print(obj)
+            else:
+                objects = KodexaPlatform.list_objects(ref, object_type)
+                cols = DEFAULT_COLUMNS[&#39;default&#39;]
+
+                if object_type in DEFAULT_COLUMNS:
+                    cols = DEFAULT_COLUMNS[object_type]
+
+                print(&#34;\n&#34;)
+                from rich.table import Table
+
+                table = Table(title=f&#34;Listing {object_type_metadata[&#39;plural&#39;]}&#34;)
+                for col in cols:
+                    table.add_column(col)
+                for object_dict in objects[&#39;content&#39;]:
+                    row = []
+
+                    for col in cols:
+                        row.append(object_dict[col] if col in object_dict else &#39;&#39;)
+                    table.add_row(*row)
+
+                print(table)
+        except:
+            print(f&#34;\n:exclamation: Failed to get {object_type_metadata[&#39;name&#39;]} [{sys.exc_info()[0]}]&#34;)
+
+    @classmethod
+    def delete(cls, object_type, ref):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+        print(f&#34;Deleting {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold]&#34;)
+
+        try:
+            KodexaPlatform.delete_object(ref, object_type)
+            print(f&#34;Deleted {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold] :tada:&#34;)
+        except:
+            print(f&#34;\n:exclamation: Failed to delete {object_type_metadata[&#39;name&#39;]} [{sys.exc_info()[0]}]&#34;)
+
+    @classmethod
+    def login(cls, kodexa_url, username, password):
+        from requests.auth import HTTPBasicAuth
+        obj_response = requests.get(f&#34;{kodexa_url}/api/account/me/token&#34;,
+                                    auth=HTTPBasicAuth(username, password),
+                                    headers={&#34;content-type&#34;: &#34;application/json&#34;})
+        if obj_response.status_code == 200:
+            kodexa_config = get_config()
+            kodexa_config[&#39;url&#39;] = kodexa_url
+            kodexa_config[&#39;access_token&#39;] = obj_response.text
+            save_config(kodexa_config)
+            print(&#34;Logged in&#34;)
+        else:
+            print(f&#34;Check your URL and password [{obj_response.status_code}]&#34;)
+
+    @classmethod
+    def get_server_info(cls):
+        r = requests.get(f&#34;{KodexaPlatform.get_url()}/api&#34;,
+                         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                  &#34;content-type&#34;: &#34;application/json&#34;})
+        if r.status_code == 401:
+            raise Exception(&#34;Your access token was not authorized&#34;)
+        elif r.status_code == 200:
+            return r.json()
+        else:
+            logger.error(r.text)
+            raise Exception(&#34;Unable to get server information, check your platform settings&#34;)
+
+    @classmethod
+    def reindex(cls, object_type, ref):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+        print(f&#34;Reindexing {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold]&#34;)
+        url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+        r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}/_reindex&#34;,
+                          headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                   &#34;content-type&#34;: &#34;application/json&#34;})
+        if r.status_code == 401:
+            raise Exception(&#34;Your access token was not authorized&#34;)
+        elif r.status_code == 200:
+            return r.text
+        else:
+            logger.error(r.text)
+            raise Exception(&#34;Unable to reindex check your reference and platform settings&#34;)
+
+
+class RemoteSession:
+    &#34;&#34;&#34;
+    A Session on the Kodexa platform for leveraging pipelines and services
+    &#34;&#34;&#34;
+
+    def __init__(self, session_type, slug):
+        self.session_type = session_type
+        self.slug = slug
+        self.cloud_session = None
+
+    def get_action_metadata(self, ref):
+        logger.debug(f&#34;Downloading metadata for action {ref}&#34;)
+        r = requests.get(f&#34;{KodexaPlatform.get_url()}/api/actions/{ref.replace(&#39;:&#39;, &#39;/&#39;)}&#34;,
+                         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+        if r.status_code == 401:
+            raise Exception(&#34;Your access token was not authorized&#34;)
+        elif r.status_code == 200:
+            return r.json()
+        else:
+            logger.error(r.text)
+            raise Exception(&#34;Unable to get action metadata, check your reference and platform settings&#34;)
+
+    def start(self):
+        logger.info(f&#34;Creating session {self.slug} ({KodexaPlatform.get_url()})&#34;)
+        r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions&#34;, params={self.session_type: self.slug},
+                          headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+
+        if r.status_code != 200:
+            logger.error(&#34;Unable to create session&#34;)
+            logger.error(r.text)
+            raise Exception(&#34;Unable to create a session, check your URL and access token&#34;)
+
+        self.cloud_session = Dict(json.loads(r.text))
+
+    def execution_action(self, document, options, attach_source, context):
+        files = {}
+        if attach_source:
+            logger.debug(&#34;Attaching source to call&#34;)
+            files[&#34;file&#34;] = get_source(document)
+            files[&#34;file_document&#34;] = document.to_msgpack()
+        else:
+            files[&#34;document&#34;] = document.to_msgpack()
+
+        data = {&#34;options&#34;: json.dumps(options), &#34;document_metadata_json&#34;: json.dumps(document.metadata),
+                &#34;context&#34;: json.dumps(context.context)}
+
+        logger.info(f&#34;Executing session {self.cloud_session.id}&#34;)
+        r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute&#34;,
+                          params={self.session_type: self.slug},
+                          data=data,
+                          headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()}, files=files)
+        try:
+            if r.status_code == 200:
+                execution = Dict(json.loads(r.text))
+            else:
+                logger.error(&#34;Execution creation failed [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+                raise Exception(&#34;Execution creation failed [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+        except JSONDecodeError:
+            logger.error(&#34;Unable to handle response [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+            raise
+
+        return execution
+
+    def wait_for_execution(self, execution):
+
+        status = execution.status
+        while execution.status == &#34;PENDING&#34; or execution.status == &#34;RUNNING&#34;:
+            r = requests.get(
+                f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}&#34;,
+                headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+            try:
+                execution = Dict(json.loads(r.text))
+            except JSONDecodeError:
+                logger.error(&#34;Unable to handle response [&#34; + r.text + &#34;]&#34;)
+                raise
+
+            if status != execution.status:
+                logger.info(f&#34;Status changed from {status} -&gt; {execution.status}&#34;)
+                status = execution.status
+
+            time.sleep(1)
+
+        if status == &#34;FAILED&#34;:
+            logger.error(&#34;Execution has failed&#34;)
+            for step in execution.steps:
+                if step.status == &#39;FAILED&#39;:
+                    logger.error(f&#34;Step {step.name} has failed. {step.exceptionDetails.message}.&#34;)
+
+                    if step.exceptionDetails.errorType == &#39;Validation&#39;:
+                        logger.error(&#34;Additional validation information has been provided:&#34;)
+                        for validation_error in step.exceptionDetails.validationErrors:
+                            logger.error(f&#34;- {validation_error.option} : {validation_error.message}&#34;)
+
+                    if step.exceptionDetails.help:
+                        logger.error(f&#34;Additional help is available:\n\n{step.exceptionDetails.help}&#34;)
+
+            logger.debug(execution)
+
+            raise Exception(f&#34;Processing has failed\nDetails: {step.exceptionDetails.help}&#34;)
+
+        return execution
+
+    def get_output_document(self, execution):
+        if execution.outputId:
+            logger.info(&#34;Downloading output document [{execution.outputId}]&#34;)
+            doc = requests.get(
+                f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}&#34;,
+                headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+            return Document.from_msgpack(doc.content)
+        else:
+            logger.info(&#34;No output document&#34;)
+            return None
+
+    def get_store(self, execution, store):
+        response = requests.get(
+            f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}&#34;,
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+        logger.debug(f&#34;Response from server [{response.text}]&#34;)
+        raw_store = Dict(json.loads(response.text))
+        return TableDataStore(raw_store.data.columns, raw_store.data.rows)
+
+    def merge_stores(self, execution, context: PipelineContext):
+        for store in execution.stores:
+            context.merge_store(store.name, self.get_store(execution, store))
+
+
+class RemotePipeline:
+    &#34;&#34;&#34;
+    Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform
+    &#34;&#34;&#34;
+
+    def __init__(self, slug, connector, version=None, attach_source=True, parameters=None, auth=None):
+        logger.info(f&#34;Initializing a new pipeline {slug}&#34;)
+
+        if isinstance(connector, Document):
+            self.connector = [connector]
+        else:
+            self.connector = connector
+        self.sink = None
+        self.context: PipelineContext = PipelineContext()
+
+        if auth is None:
+            auth = []
+        if parameters is None:
+            parameters = {}
+        self.slug = slug
+        self.version = version
+        self.attach_source = attach_source
+        self.parameters = parameters
+        self.auth = auth
+
+    def set_sink(self, sink):
+        &#34;&#34;&#34;
+        Set the sink you wish to use, note that it will replace any currently assigned
+        sink
+
+            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+            &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+
+        :param sink: the sink for the pipeline
+        &#34;&#34;&#34;
+        logger.info(f&#34;Setting sink {sink.get_name()} on {self.slug}&#34;)
+        self.sink = sink
+
+        return self
+
+    def run(self):
+        self.context.statistics = PipelineStatistics()
+
+        logger.info(f&#34;Starting remote pipeline {self.slug}&#34;)
+        cloud_session = RemoteSession(&#34;pipeline&#34;, self.slug)
+        cloud_session.start()
+
+        for document in self.connector:
+            logger.info(f&#34;Processing {document}&#34;)
+            execution = cloud_session.execution_action(document, self.parameters, self.attach_source, self.context)
+            execution = cloud_session.wait_for_execution(execution)
+
+            logger.info(&#34;Capturing output&#34;)
+            result_document = cloud_session.get_output_document(execution)
+            self.context.set_output_document(result_document)
+            cloud_session.merge_stores(execution, self.context)
+
+            self.context.statistics.processed_document(result_document)
+            self.context.context = execution.context
+            if self.sink:
+                logger.info(f&#34;Writing to sink {self.sink.get_name()}&#34;)
+                try:
+                    self.sink.sink(result_document)
+                except:
+                    if document:
+                        document.exceptions.append({
+                            &#34;step&#34;: self.sink.get_name(),
+                            &#34;exception&#34;: sys.exc_info()[0]
+                        })
+                    if self.context.stop_on_exception:
+                        raise
+
+        logger.info(f&#34;Completed pipeline {self.slug}&#34;)
+
+        return self.context
+
+    @staticmethod
+    def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; RemotePipeline:
+        &#34;&#34;&#34;
+        Build a new pipeline with the input being a document created from the given URL
+
+        :param slug: The slug for the remote pipeline
+        :param url: The URL ie. https://www.google.com
+        :param headers: A dictionary of headers
+        :return: A new instance of a remote pipeline
+        &#34;&#34;&#34;
+        return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
+
+    @staticmethod
+    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; RemotePipeline:
+        &#34;&#34;&#34;
+        Create a new pipeline using a file path as a source
+
+        :param slug: The slug for the remote pipeline
+        :param file_path: The path to the file
+        :param unpack: Unpack the file as a KDXA
+        :return: A new pipeline
+        :rtype: Pipeline
+        &#34;&#34;&#34;
+        return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
+
+    @staticmethod
+    def from_text(slug: str, text: str, *args, **kwargs) -&gt; RemotePipeline:
+        &#34;&#34;&#34;
+        Build a new pipeline and provide text as the basic to create a document
+
+        :param slug: The slug for the remote pipeline
+        :param text: Text to use to create document
+        :return: A new pipeline
+        :rtype: RemotePipeline
+        &#34;&#34;&#34;
+
+        # need to update kwargs for attach_source
+        kwargs.setdefault(&#39;attach_source&#39;, False)
+        return RemotePipeline(slug, Document.from_text(text), *args, **kwargs)
+
+    @staticmethod
+    def from_folder(slug: str, folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False,
+                    unpack: bool = False,
+                    relative: bool = False,
+                    caller_path: str = get_caller_dir()) -&gt; RemotePipeline:
+        &#34;&#34;&#34;
+        Create a pipeline that will run against a set of local files from a folder
+
+        :param slug: The slug for the remote pipeline
+        :param folder_path: The folder path
+        :param filename_filter: The filter for filename (i.e. *.pdf)
+        :param recursive: Should we look recursively in sub-directories (default False)
+        :param relative: Is the folder path relative to the caller (default False)
+        :param caller_path: The caller path (defaults to trying to work this out from the stack)
+        :param unpack: Unpack the file as a KDXA document
+        :return: A new pipeline
+        :rtype: RemotePipeline
+        &#34;&#34;&#34;
+        return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path,
+                                                    unpack=unpack))
+
+    def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
+        &#34;&#34;&#34;
+        Allows you to provide the sink store easily
+
+        This will wrap the store in a document store sink
+
+        :param document_store: document store to use
+        :param processing_mode: the processing mode (update or new)
+        :return: the pipeline
+        &#34;&#34;&#34;
+        from kodexa.sinks import DocumentStoreSink
+        self.set_sink(DocumentStoreSink(document_store))
+        return self
+
+
+class RemoteAction:
+    &#34;&#34;&#34;
+    Allows you to interact with an action that has been deployed in the Kodexa platform
+    &#34;&#34;&#34;
+
+    def __init__(self, slug, version=None, attach_source=False, options=None, auth=None):
+        if auth is None:
+            auth = []
+        if options is None:
+            options = {}
+        self.slug = slug
+        self.version = version
+        self.attach_source = attach_source
+        self.options = options
+        self.auth = auth
+
+    def to_dict(self):
+        return {
+            &#39;ref&#39;: self.slug,
+            &#39;options&#39;: self.options
+        }
+
+    def get_name(self):
+        return f&#34;Remote Action ({self.slug})&#34;
+
+    def process(self, document, context):
+        cloud_session = RemoteSession(&#34;service&#34;, self.slug)
+        cloud_session.start()
+
+        logger.info(f&#34;Loading metadata for {self.slug}&#34;)
+        action_metadata = cloud_session.get_action_metadata(self.slug)
+
+        requires_source = False
+        if &#39;requiresSource&#39; in action_metadata[&#39;metadata&#39;]:
+            requires_source = action_metadata[&#39;metadata&#39;][&#39;requiresSource&#39;]
+
+        execution = cloud_session.execution_action(document, self.options,
+                                                   self.attach_source if self.attach_source else requires_source,
+                                                   context)
+
+        execution = cloud_session.wait_for_execution(execution)
+
+        result_document = cloud_session.get_output_document(execution)
+
+        context.context = execution.context
+
+        cloud_session.merge_stores(execution, context)
+
+        return result_document if result_document else document
+
+    def end_processing(self):
+
+        # TODO not yet implemented for remote steps
+        pass
+
+    def to_configuration(self):
+        &#34;&#34;&#34;
+        Returns a dictionary representing the configuration information for the step
+
+        :return: dictionary representing the configuration of the step
+        &#34;&#34;&#34;
+        return {
+            &#34;ref&#34;: self.slug,
+            &#34;options&#34;: self.options
+        }
+
+
+class ExtensionHelper:
+
+    @staticmethod
+    def load_metadata(path):
+
+        if os.path.exists(os.path.join(path, &#39;dharma.json&#39;)):
+            dharma_metadata_file = open(os.path.join(path, &#39;dharma.json&#39;))
+            dharma_metadata = Dict(json.loads(dharma_metadata_file.read()))
+        elif os.path.exists(os.path.join(path, &#39;dharma.yml&#39;)):
+            dharma_metadata_file = open(os.path.join(path, &#39;dharma.yml&#39;))
+            dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
+        elif os.path.exists(os.path.join(path, &#39;kodexa.yml&#39;)):
+            dharma_metadata_file = open(os.path.join(path, &#39;kodexa.yml&#39;))
+            dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
+        else:
+            raise Exception(&#34;Unable to find a kodexa.yml file describing your extension&#34;)
+        return dharma_metadata</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="kodexa.cloud.kodexa.get_config"><code class="name flex">
+<span>def <span class="ident">get_config</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_config():
+    path = os.path.join(dirs.user_config_dir, &#39;.kodexa.json&#39;)
+    if os.path.exists(path):
+        with open(path, &#39;r&#39;) as outfile:
+            return json.load(outfile)
+    else:
+        return {&#39;url&#39;: None, &#39;access_token&#39;: None}</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.resolve_object_type"><code class="name flex">
+<span>def <span class="ident">resolve_object_type</span></span>(<span>obj_type)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def resolve_object_type(obj_type):
+    hits = []
+    keys = []
+    for target_type in OBJECT_TYPES.keys():
+        if obj_type in target_type:
+            hits.append(OBJECT_TYPES[target_type])
+            keys.append(target_type)
+
+    if len(hits) == 1:
+        return keys[0], hits[0]
+
+    if len(hits) == 0:
+        print(&#34;:exclaimation: Unable to find object type {obj_type}&#34;)
+        sys.exit(1)
+    else:
+        print(f&#34;:exclaimation: To many potential matches for object type ({&#39;,&#39;.join(keys)}&#34;)
+        sys.exit(1)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.save_config"><code class="name flex">
+<span>def <span class="ident">save_config</span></span>(<span>config_obj)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_config(config_obj):
+    path = os.path.join(dirs.user_config_dir, &#39;.kodexa.json&#39;)
+    if not os.path.exists(os.path.dirname(path)):
+        try:
+            os.makedirs(os.path.dirname(path))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+    with open(path, &#39;w&#39;) as outfile:
+        json.dump(config_obj, outfile)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="kodexa.cloud.kodexa.ExtensionHelper"><code class="flex name class">
+<span>class <span class="ident">ExtensionHelper</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ExtensionHelper:
+
+    @staticmethod
+    def load_metadata(path):
+
+        if os.path.exists(os.path.join(path, &#39;dharma.json&#39;)):
+            dharma_metadata_file = open(os.path.join(path, &#39;dharma.json&#39;))
+            dharma_metadata = Dict(json.loads(dharma_metadata_file.read()))
+        elif os.path.exists(os.path.join(path, &#39;dharma.yml&#39;)):
+            dharma_metadata_file = open(os.path.join(path, &#39;dharma.yml&#39;))
+            dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
+        elif os.path.exists(os.path.join(path, &#39;kodexa.yml&#39;)):
+            dharma_metadata_file = open(os.path.join(path, &#39;kodexa.yml&#39;))
+            dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
+        else:
+            raise Exception(&#34;Unable to find a kodexa.yml file describing your extension&#34;)
+        return dharma_metadata</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.cloud.kodexa.ExtensionHelper.load_metadata"><code class="name flex">
+<span>def <span class="ident">load_metadata</span></span>(<span>path)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def load_metadata(path):
+
+    if os.path.exists(os.path.join(path, &#39;dharma.json&#39;)):
+        dharma_metadata_file = open(os.path.join(path, &#39;dharma.json&#39;))
+        dharma_metadata = Dict(json.loads(dharma_metadata_file.read()))
+    elif os.path.exists(os.path.join(path, &#39;dharma.yml&#39;)):
+        dharma_metadata_file = open(os.path.join(path, &#39;dharma.yml&#39;))
+        dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
+    elif os.path.exists(os.path.join(path, &#39;kodexa.yml&#39;)):
+        dharma_metadata_file = open(os.path.join(path, &#39;kodexa.yml&#39;))
+        dharma_metadata = Dict(yaml.safe_load(dharma_metadata_file.read()))
+    else:
+        raise Exception(&#34;Unable to find a kodexa.yml file describing your extension&#34;)
+    return dharma_metadata</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform"><code class="flex name class">
+<span>class <span class="ident">KodexaPlatform</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class KodexaPlatform:
+
+    @staticmethod
+    def get_access_token():
+        kodexa_config = get_config()
+        access_token = os.getenv(&#39;KODEXA_ACCESS_TOKEN&#39;)
+        return access_token if access_token is not None else kodexa_config[&#39;access_token&#39;]
+
+    @staticmethod
+    def get_url():
+        kodexa_config = get_config()
+        env_url = os.getenv(&#39;KODEXA_URL&#39;, None)
+        return env_url if env_url is not None else kodexa_config[&#39;url&#39;]
+
+    @staticmethod
+    def set_access_token(access_token):
+        if access_token is not None:
+            os.environ[&#34;KODEXA_ACCESS_TOKEN&#34;] = access_token
+
+    @staticmethod
+    def set_url(url):
+        if url is not None:
+            os.environ[&#34;KODEXA_URL&#34;] = url
+
+    &#34;&#34;&#34;
+    The deployer allows you to take a locally build Pipeline and then push that pipeline
+    to a Kodexa platform instance
+    &#34;&#34;&#34;
+
+    @staticmethod
+    def get_access_token_details():
+        response = requests.get(
+            f&#34;{KodexaPlatform.get_url()}/api/account/accessToken&#34;,
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+        if response.status_code == 200:
+            return Dict(response.json())
+        else:
+            if response.status_code == 404:
+                raise Exception(&#34;Unable to find access token&#34;)
+            else:
+                raise Exception(&#34;An error occurred connecting to the Kodexa platform&#34;)
+
+    @staticmethod
+    def deploy_extension(metadata):
+        response = requests.post(f&#34;{KodexaPlatform.get_url()}/api/extensionPacks/{metadata[&#39;orgSlug&#39;]}&#34;,
+                                 json=metadata.to_dict(),
+                                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                          &#34;content-type&#34;: &#34;application/json&#34;})
+        if response.status_code == 200:
+            logger.info(&#34;Extension deployed&#34;)
+        else:
+            logger.error(response.text)
+            raise Exception(&#34;Unable to deploy new extension&#34;)
+
+    @staticmethod
+    def deploy_extension_from_uri(path, organisation_slug):
+        url = f&#34;{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}&#34;
+        logger.info(f&#34;Publishing extension pack to organization {organisation_slug}&#34;)
+        response = requests.post(url,
+                                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                          &#34;content-type&#34;: &#34;application/json&#34;})
+        if response.status_code == 200:
+            logger.info(&#34;Extension deployed&#34;)
+        else:
+            logger.error(response.text)
+            raise Exception(&#34;Unable to deploy new extension&#34;)
+
+    @staticmethod
+    def resolve_ref(ref: str):
+        org_slug = ref.split(&#39;/&#39;)[0]
+        slug = ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)[0]
+
+        version = None
+
+        if len(ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)) == 2:
+            version = ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)[1]
+
+        return [org_slug, slug, version]
+
+    @staticmethod
+    def get_object_instance(ref: str, object_type: str):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        if object_type == &#39;taxonomies&#39;:
+            from kodexa import RemoteTaxonomy
+            return RemoteTaxonomy.get(ref)
+        if object_type == &#39;stores&#39;:
+            # We need to work out what type of store we have
+            obj_info = KodexaPlatform.get_object(ref, object_type)
+            if obj_info[&#39;storeType&#39;] == &#39;TABLE&#39;:
+                from kodexa import RemoteTableDataStore
+                return RemoteTableDataStore(ref)
+            if obj_info[&#39;storeType&#39;] == &#39;DOCUMENT&#39;:
+                return RemoteDocumentStore(ref)
+
+        # TODO - there are other things we need?
+        raise Exception(f&#34;Unable to get a local instance of {ref} of type {object_type}&#34;)
+
+    @staticmethod
+    def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
+               options=None, public=False, force_replace=False, dry_run=False, print_yaml=False):
+
+        if &#39;/&#39; not in ref:
+            logger.error(&#34;A ref must be valid, i.e. org_slug/pipeline_slug:version&#34;)
+            raise Exception(&#34;Invalid slug&#34;)
+
+        [organization_slug, object_slug, object_version] = KodexaPlatform.resolve_ref(ref)
+
+        if options is None:
+            options = {}
+
+        metadata_object = Dict()
+        metadata_object.orgSlug = organization_slug
+        metadata_object.publicAccess = public
+        metadata_object.slug = object_slug
+        metadata_object.version = object_version
+        metadata_object.name = name
+        metadata_object.description = description
+
+        object_url = None
+
+        from kodexa import RemoteTableDataStore
+
+        if isinstance(kodexa_object, Pipeline):
+
+            metadata_object.name = &#39;New Pipeline&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A new pipeline&#39; if metadata_object.description is None else metadata_object.description
+
+            object_url = &#34;pipelines&#34;
+
+            if &#34;example_urls&#34; not in options:
+                example_urls = []
+            else:
+                example_urls = options[&#34;example_urls&#34;]
+
+            if &#34;more_info_url&#34; not in options:
+                more_info_url = None
+            else:
+                more_info_url = options[&#34;more_info_url&#34;]
+
+            builder = PipelineMetadataBuilder(kodexa_object)
+
+            metadata_object.type = &#39;pipeline&#39;
+            metadata_object.metadata.parameters = []
+            metadata_object.metadata.steps = []
+            metadata_object.exampleUrls = example_urls
+            metadata_object.moreInfoUrl = more_info_url
+
+            builder.build_steps(metadata_object)
+
+        elif isinstance(kodexa_object, LocalDocumentStore) or isinstance(kodexa_object, RemoteDocumentStore):
+            object_url = &#39;stores&#39;
+            metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A document store&#39; if metadata_object.description is None else metadata_object.description
+            metadata_object.type = &#39;store&#39;
+            metadata_object.storeType = &#39;DOCUMENT&#39;
+        elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
+            object_url = &#39;stores&#39;
+            metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A model store&#39; if metadata_object.description is None else metadata_object.description
+            metadata_object.type = &#39;store&#39;
+            metadata_object.storeType = &#39;MODEL&#39;
+        elif isinstance(kodexa_object, RemoteTableDataStore):
+            object_url = &#39;stores&#39;
+            metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A table data store&#39; if metadata_object.description is None else metadata_object.description
+            metadata_object.type = &#39;store&#39;
+            metadata_object.storeType = &#39;TABLE&#39;
+        elif isinstance(kodexa_object, Workflow):
+            metadata_object.name = &#39;New Workflow&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A new workflow&#39; if metadata_object.description is None else metadata_object.description
+            object_url = &#39;workflows&#39;
+            metadata_object.type = &#39;workflow&#39;
+            metadata_object.pipelines = jsonpickle.decode(jsonpickle.encode(kodexa_object.pipelines, unpicklable=False))
+            metadata_object.stores = jsonpickle.decode(jsonpickle.encode(kodexa_object.stores, unpicklable=False))
+            metadata_object.connectors = jsonpickle.decode(
+                jsonpickle.encode(kodexa_object.connectors, unpicklable=False))
+            metadata_object.schedules = jsonpickle.decode(jsonpickle.encode(kodexa_object.schedules, unpicklable=False))
+            metadata_object.accessToken = kodexa_object.access_token
+            metadata_object.active = kodexa_object.active
+        elif isinstance(kodexa_object, Taxonomy):
+            metadata_object.name = &#39;New Taxonomy&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A new taxonomy&#39; if metadata_object.description is None else metadata_object.description
+            object_url = &#39;taxonomies&#39;
+            metadata_object.type = &#39;taxonomy&#39;
+            metadata_object.enabled = kodexa_object.enabled
+            metadata_object.taxonomyType = kodexa_object.taxonomy_type
+            metadata_object.taxons = jsonpickle.decode(jsonpickle.encode([taxon.to_dict() for taxon in kodexa_object.taxons], unpicklable=False))
+        elif isinstance(kodexa_object, Assistant):
+            metadata_object.name = &#39;New Assistant Definition&#39; if metadata_object.name is None else metadata_object.name
+            metadata_object.description = &#39;A new assistant definition&#39; if metadata_object.description is None else metadata_object.description
+            object_url = &#39;assistants&#39;
+            metadata_object.type = &#39;assistant&#39;
+
+        else:
+            raise Exception(&#34;Unknown object type, unable to deploy&#34;)
+
+        if dry_run:
+
+            if print_yaml:
+                logger.info(f&#34;Dry run output for {metadata_object.type} {ref}&#34;)
+                logger.info(f&#34;YAML output:\n&#34;)
+                logger.info(yaml.dump(metadata_object.to_dict()))
+
+        else:
+            logger.info(f&#34;Deploying {metadata_object.type} {ref}&#34;)
+
+            access_token = KodexaPlatform.get_access_token_details()
+
+            if organization_slug not in access_token.organizationSlugs:
+                logger.error(f&#34;You do not have access to the organization {organization_slug}&#34;)
+                raise Exception(&#34;Unable to deploy, no access to organization&#34;)
+
+            if object_version:
+                url = f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}/{object_version}&#34;
+            else:
+                url = f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}&#34;
+
+            response = requests.get(url,
+                                    headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                             &#34;content-type&#34;: &#34;application/json&#34;})
+
+            if response.status_code == 401:
+                logger.error(f&#34;You do not have the permissions to access this {metadata_object.type}&#34;)
+                raise Exception(&#34;Not authorized on pipeline&#34;)
+
+            if response.status_code == 404:
+                logger.info(&#34;Object doesn&#39;t exist, will deploy&#34;)
+                response = requests.post(f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}&#34;,
+                                         json=metadata_object.to_dict(),
+                                         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                                  &#34;content-type&#34;: &#34;application/json&#34;})
+                if response.status_code == 200:
+                    logger.info(&#34;Deployed&#34;)
+                else:
+                    logger.error(response.text)
+                    raise Exception(&#34;Unable to deploy&#34;)
+            elif response.status_code == 200:
+                logger.info(f&#34;{ref} already exists&#34;)
+                if force_replace:
+                    logger.info(f&#34;Replacing {ref}&#34;)
+                    response = requests.put(url,
+                                            json=metadata_object.to_dict(),
+                                            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                                     &#34;content-type&#34;: &#34;application/json&#34;})
+                    if response.status_code == 200:
+                        logger.info(&#34;Deployed&#34;)
+                    else:
+                        logger.error(response.text)
+                        raise Exception(&#34;Unable to deploy and replace&#34;)
+                else:
+                    logger.warning(&#34;Not updating&#34;)
+                    return
+            else:
+                logger.error(&#34;Unable to deploy&#34;)
+                logger.error(response.content)
+
+        return metadata_object
+
+    @staticmethod
+    def list_objects(organization_slug, object_type):
+        list_response = requests.get(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}&#34;,
+                                     headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                              &#34;content-type&#34;: &#34;application/json&#34;})
+        if list_response.status_code == 200:
+            return list_response.json()
+        else:
+            logger.error(list_response.text)
+            raise Exception(&#34;Unable to list objects&#34;)
+
+    @staticmethod
+    def undeploy(object_type: str, ref: str):
+
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+        response = requests.delete(f&#34;{KodexaPlatform.get_url()}/api/{object_type_metadata[&#39;plural&#39;]}/{url_ref}&#34;,
+                                   headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                            &#34;content-type&#34;: &#34;application/json&#34;})
+        if response.status_code == 200:
+            logger.info(f&#34;Undeployed {object_type_metadata[&#39;name&#39;]} {ref}&#34;)
+        else:
+            logger.error(response.text)
+            raise Exception(f&#34;Unable to undeploy {object_type_metadata[&#39;name&#39;]} {ref}&#34;)
+
+    @staticmethod
+    def delete_object(ref, object_type):
+        # Generate a URL ref
+        url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+        delete_response = requests.delete(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}&#34;,
+                                          headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                                   &#34;content-type&#34;: &#34;application/json&#34;})
+        if delete_response.status_code != 200:
+            logger.error(delete_response.text)
+            raise Exception(&#34;Unable to list objects&#34;)
+
+    @staticmethod
+    def get_object(ref, object_type):
+        url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+        obj_response = requests.get(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}&#34;,
+                                    headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                             &#34;content-type&#34;: &#34;application/json&#34;})
+        if obj_response.status_code != 200:
+            logger.error(obj_response.text)
+            raise Exception(f&#34;Unable to get object {ref}&#34;)
+        else:
+            return obj_response.json()
+
+    @classmethod
+    def get(cls, object_type, ref, path=None):
+
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        try:
+
+            # If ref is just the org then we will list them
+            if &#39;/&#39; in ref:
+                obj = KodexaPlatform.get_object(ref, object_type)
+
+                if path is not None:
+                    import jq
+                    obj = jq.compile(path).input(obj).all()
+                import yaml
+                print(obj)
+            else:
+                objects = KodexaPlatform.list_objects(ref, object_type)
+                cols = DEFAULT_COLUMNS[&#39;default&#39;]
+
+                if object_type in DEFAULT_COLUMNS:
+                    cols = DEFAULT_COLUMNS[object_type]
+
+                print(&#34;\n&#34;)
+                from rich.table import Table
+
+                table = Table(title=f&#34;Listing {object_type_metadata[&#39;plural&#39;]}&#34;)
+                for col in cols:
+                    table.add_column(col)
+                for object_dict in objects[&#39;content&#39;]:
+                    row = []
+
+                    for col in cols:
+                        row.append(object_dict[col] if col in object_dict else &#39;&#39;)
+                    table.add_row(*row)
+
+                print(table)
+        except:
+            print(f&#34;\n:exclamation: Failed to get {object_type_metadata[&#39;name&#39;]} [{sys.exc_info()[0]}]&#34;)
+
+    @classmethod
+    def delete(cls, object_type, ref):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+        print(f&#34;Deleting {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold]&#34;)
+
+        try:
+            KodexaPlatform.delete_object(ref, object_type)
+            print(f&#34;Deleted {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold] :tada:&#34;)
+        except:
+            print(f&#34;\n:exclamation: Failed to delete {object_type_metadata[&#39;name&#39;]} [{sys.exc_info()[0]}]&#34;)
+
+    @classmethod
+    def login(cls, kodexa_url, username, password):
+        from requests.auth import HTTPBasicAuth
+        obj_response = requests.get(f&#34;{kodexa_url}/api/account/me/token&#34;,
+                                    auth=HTTPBasicAuth(username, password),
+                                    headers={&#34;content-type&#34;: &#34;application/json&#34;})
+        if obj_response.status_code == 200:
+            kodexa_config = get_config()
+            kodexa_config[&#39;url&#39;] = kodexa_url
+            kodexa_config[&#39;access_token&#39;] = obj_response.text
+            save_config(kodexa_config)
+            print(&#34;Logged in&#34;)
+        else:
+            print(f&#34;Check your URL and password [{obj_response.status_code}]&#34;)
+
+    @classmethod
+    def get_server_info(cls):
+        r = requests.get(f&#34;{KodexaPlatform.get_url()}/api&#34;,
+                         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                  &#34;content-type&#34;: &#34;application/json&#34;})
+        if r.status_code == 401:
+            raise Exception(&#34;Your access token was not authorized&#34;)
+        elif r.status_code == 200:
+            return r.json()
+        else:
+            logger.error(r.text)
+            raise Exception(&#34;Unable to get server information, check your platform settings&#34;)
+
+    @classmethod
+    def reindex(cls, object_type, ref):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+        print(f&#34;Reindexing {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold]&#34;)
+        url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+        r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}/_reindex&#34;,
+                          headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                   &#34;content-type&#34;: &#34;application/json&#34;})
+        if r.status_code == 401:
+            raise Exception(&#34;Your access token was not authorized&#34;)
+        elif r.status_code == 200:
+            return r.text
+        else:
+            logger.error(r.text)
+            raise Exception(&#34;Unable to reindex check your reference and platform settings&#34;)</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>object_type, ref)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def delete(cls, object_type, ref):
+    object_type, object_type_metadata = resolve_object_type(object_type)
+    print(f&#34;Deleting {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold]&#34;)
+
+    try:
+        KodexaPlatform.delete_object(ref, object_type)
+        print(f&#34;Deleted {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold] :tada:&#34;)
+    except:
+        print(f&#34;\n:exclamation: Failed to delete {object_type_metadata[&#39;name&#39;]} [{sys.exc_info()[0]}]&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.delete_object"><code class="name flex">
+<span>def <span class="ident">delete_object</span></span>(<span>ref, object_type)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def delete_object(ref, object_type):
+    # Generate a URL ref
+    url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+    delete_response = requests.delete(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}&#34;,
+                                      headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                               &#34;content-type&#34;: &#34;application/json&#34;})
+    if delete_response.status_code != 200:
+        logger.error(delete_response.text)
+        raise Exception(&#34;Unable to list objects&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.deploy"><code class="name flex">
+<span>def <span class="ident">deploy</span></span>(<span>ref: str, kodexa_object, name: str = None, description: str = None, options=None, public=False, force_replace=False, dry_run=False, print_yaml=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
+           options=None, public=False, force_replace=False, dry_run=False, print_yaml=False):
+
+    if &#39;/&#39; not in ref:
+        logger.error(&#34;A ref must be valid, i.e. org_slug/pipeline_slug:version&#34;)
+        raise Exception(&#34;Invalid slug&#34;)
+
+    [organization_slug, object_slug, object_version] = KodexaPlatform.resolve_ref(ref)
+
+    if options is None:
+        options = {}
+
+    metadata_object = Dict()
+    metadata_object.orgSlug = organization_slug
+    metadata_object.publicAccess = public
+    metadata_object.slug = object_slug
+    metadata_object.version = object_version
+    metadata_object.name = name
+    metadata_object.description = description
+
+    object_url = None
+
+    from kodexa import RemoteTableDataStore
+
+    if isinstance(kodexa_object, Pipeline):
+
+        metadata_object.name = &#39;New Pipeline&#39; if metadata_object.name is None else metadata_object.name
+        metadata_object.description = &#39;A new pipeline&#39; if metadata_object.description is None else metadata_object.description
+
+        object_url = &#34;pipelines&#34;
+
+        if &#34;example_urls&#34; not in options:
+            example_urls = []
+        else:
+            example_urls = options[&#34;example_urls&#34;]
+
+        if &#34;more_info_url&#34; not in options:
+            more_info_url = None
+        else:
+            more_info_url = options[&#34;more_info_url&#34;]
+
+        builder = PipelineMetadataBuilder(kodexa_object)
+
+        metadata_object.type = &#39;pipeline&#39;
+        metadata_object.metadata.parameters = []
+        metadata_object.metadata.steps = []
+        metadata_object.exampleUrls = example_urls
+        metadata_object.moreInfoUrl = more_info_url
+
+        builder.build_steps(metadata_object)
+
+    elif isinstance(kodexa_object, LocalDocumentStore) or isinstance(kodexa_object, RemoteDocumentStore):
+        object_url = &#39;stores&#39;
+        metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+        metadata_object.description = &#39;A document store&#39; if metadata_object.description is None else metadata_object.description
+        metadata_object.type = &#39;store&#39;
+        metadata_object.storeType = &#39;DOCUMENT&#39;
+    elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
+        object_url = &#39;stores&#39;
+        metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+        metadata_object.description = &#39;A model store&#39; if metadata_object.description is None else metadata_object.description
+        metadata_object.type = &#39;store&#39;
+        metadata_object.storeType = &#39;MODEL&#39;
+    elif isinstance(kodexa_object, RemoteTableDataStore):
+        object_url = &#39;stores&#39;
+        metadata_object.name = &#39;New Store&#39; if metadata_object.name is None else metadata_object.name
+        metadata_object.description = &#39;A table data store&#39; if metadata_object.description is None else metadata_object.description
+        metadata_object.type = &#39;store&#39;
+        metadata_object.storeType = &#39;TABLE&#39;
+    elif isinstance(kodexa_object, Workflow):
+        metadata_object.name = &#39;New Workflow&#39; if metadata_object.name is None else metadata_object.name
+        metadata_object.description = &#39;A new workflow&#39; if metadata_object.description is None else metadata_object.description
+        object_url = &#39;workflows&#39;
+        metadata_object.type = &#39;workflow&#39;
+        metadata_object.pipelines = jsonpickle.decode(jsonpickle.encode(kodexa_object.pipelines, unpicklable=False))
+        metadata_object.stores = jsonpickle.decode(jsonpickle.encode(kodexa_object.stores, unpicklable=False))
+        metadata_object.connectors = jsonpickle.decode(
+            jsonpickle.encode(kodexa_object.connectors, unpicklable=False))
+        metadata_object.schedules = jsonpickle.decode(jsonpickle.encode(kodexa_object.schedules, unpicklable=False))
+        metadata_object.accessToken = kodexa_object.access_token
+        metadata_object.active = kodexa_object.active
+    elif isinstance(kodexa_object, Taxonomy):
+        metadata_object.name = &#39;New Taxonomy&#39; if metadata_object.name is None else metadata_object.name
+        metadata_object.description = &#39;A new taxonomy&#39; if metadata_object.description is None else metadata_object.description
+        object_url = &#39;taxonomies&#39;
+        metadata_object.type = &#39;taxonomy&#39;
+        metadata_object.enabled = kodexa_object.enabled
+        metadata_object.taxonomyType = kodexa_object.taxonomy_type
+        metadata_object.taxons = jsonpickle.decode(jsonpickle.encode([taxon.to_dict() for taxon in kodexa_object.taxons], unpicklable=False))
+    elif isinstance(kodexa_object, Assistant):
+        metadata_object.name = &#39;New Assistant Definition&#39; if metadata_object.name is None else metadata_object.name
+        metadata_object.description = &#39;A new assistant definition&#39; if metadata_object.description is None else metadata_object.description
+        object_url = &#39;assistants&#39;
+        metadata_object.type = &#39;assistant&#39;
+
+    else:
+        raise Exception(&#34;Unknown object type, unable to deploy&#34;)
+
+    if dry_run:
+
+        if print_yaml:
+            logger.info(f&#34;Dry run output for {metadata_object.type} {ref}&#34;)
+            logger.info(f&#34;YAML output:\n&#34;)
+            logger.info(yaml.dump(metadata_object.to_dict()))
+
+    else:
+        logger.info(f&#34;Deploying {metadata_object.type} {ref}&#34;)
+
+        access_token = KodexaPlatform.get_access_token_details()
+
+        if organization_slug not in access_token.organizationSlugs:
+            logger.error(f&#34;You do not have access to the organization {organization_slug}&#34;)
+            raise Exception(&#34;Unable to deploy, no access to organization&#34;)
+
+        if object_version:
+            url = f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}/{object_version}&#34;
+        else:
+            url = f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}&#34;
+
+        response = requests.get(url,
+                                headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                         &#34;content-type&#34;: &#34;application/json&#34;})
+
+        if response.status_code == 401:
+            logger.error(f&#34;You do not have the permissions to access this {metadata_object.type}&#34;)
+            raise Exception(&#34;Not authorized on pipeline&#34;)
+
+        if response.status_code == 404:
+            logger.info(&#34;Object doesn&#39;t exist, will deploy&#34;)
+            response = requests.post(f&#34;{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}&#34;,
+                                     json=metadata_object.to_dict(),
+                                     headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                              &#34;content-type&#34;: &#34;application/json&#34;})
+            if response.status_code == 200:
+                logger.info(&#34;Deployed&#34;)
+            else:
+                logger.error(response.text)
+                raise Exception(&#34;Unable to deploy&#34;)
+        elif response.status_code == 200:
+            logger.info(f&#34;{ref} already exists&#34;)
+            if force_replace:
+                logger.info(f&#34;Replacing {ref}&#34;)
+                response = requests.put(url,
+                                        json=metadata_object.to_dict(),
+                                        headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                                 &#34;content-type&#34;: &#34;application/json&#34;})
+                if response.status_code == 200:
+                    logger.info(&#34;Deployed&#34;)
+                else:
+                    logger.error(response.text)
+                    raise Exception(&#34;Unable to deploy and replace&#34;)
+            else:
+                logger.warning(&#34;Not updating&#34;)
+                return
+        else:
+            logger.error(&#34;Unable to deploy&#34;)
+            logger.error(response.content)
+
+    return metadata_object</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.deploy_extension"><code class="name flex">
+<span>def <span class="ident">deploy_extension</span></span>(<span>metadata)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def deploy_extension(metadata):
+    response = requests.post(f&#34;{KodexaPlatform.get_url()}/api/extensionPacks/{metadata[&#39;orgSlug&#39;]}&#34;,
+                             json=metadata.to_dict(),
+                             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                      &#34;content-type&#34;: &#34;application/json&#34;})
+    if response.status_code == 200:
+        logger.info(&#34;Extension deployed&#34;)
+    else:
+        logger.error(response.text)
+        raise Exception(&#34;Unable to deploy new extension&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.deploy_extension_from_uri"><code class="name flex">
+<span>def <span class="ident">deploy_extension_from_uri</span></span>(<span>path, organisation_slug)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def deploy_extension_from_uri(path, organisation_slug):
+    url = f&#34;{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}&#34;
+    logger.info(f&#34;Publishing extension pack to organization {organisation_slug}&#34;)
+    response = requests.post(url,
+                             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                      &#34;content-type&#34;: &#34;application/json&#34;})
+    if response.status_code == 200:
+        logger.info(&#34;Extension deployed&#34;)
+    else:
+        logger.error(response.text)
+        raise Exception(&#34;Unable to deploy new extension&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>object_type, ref, path=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def get(cls, object_type, ref, path=None):
+
+    object_type, object_type_metadata = resolve_object_type(object_type)
+
+    try:
+
+        # If ref is just the org then we will list them
+        if &#39;/&#39; in ref:
+            obj = KodexaPlatform.get_object(ref, object_type)
+
+            if path is not None:
+                import jq
+                obj = jq.compile(path).input(obj).all()
+            import yaml
+            print(obj)
+        else:
+            objects = KodexaPlatform.list_objects(ref, object_type)
+            cols = DEFAULT_COLUMNS[&#39;default&#39;]
+
+            if object_type in DEFAULT_COLUMNS:
+                cols = DEFAULT_COLUMNS[object_type]
+
+            print(&#34;\n&#34;)
+            from rich.table import Table
+
+            table = Table(title=f&#34;Listing {object_type_metadata[&#39;plural&#39;]}&#34;)
+            for col in cols:
+                table.add_column(col)
+            for object_dict in objects[&#39;content&#39;]:
+                row = []
+
+                for col in cols:
+                    row.append(object_dict[col] if col in object_dict else &#39;&#39;)
+                table.add_row(*row)
+
+            print(table)
+    except:
+        print(f&#34;\n:exclamation: Failed to get {object_type_metadata[&#39;name&#39;]} [{sys.exc_info()[0]}]&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.get_access_token"><code class="name flex">
+<span>def <span class="ident">get_access_token</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_access_token():
+    kodexa_config = get_config()
+    access_token = os.getenv(&#39;KODEXA_ACCESS_TOKEN&#39;)
+    return access_token if access_token is not None else kodexa_config[&#39;access_token&#39;]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.get_access_token_details"><code class="name flex">
+<span>def <span class="ident">get_access_token_details</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_access_token_details():
+    response = requests.get(
+        f&#34;{KodexaPlatform.get_url()}/api/account/accessToken&#34;,
+        headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+    if response.status_code == 200:
+        return Dict(response.json())
+    else:
+        if response.status_code == 404:
+            raise Exception(&#34;Unable to find access token&#34;)
+        else:
+            raise Exception(&#34;An error occurred connecting to the Kodexa platform&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.get_object"><code class="name flex">
+<span>def <span class="ident">get_object</span></span>(<span>ref, object_type)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_object(ref, object_type):
+    url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+    obj_response = requests.get(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}&#34;,
+                                headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                         &#34;content-type&#34;: &#34;application/json&#34;})
+    if obj_response.status_code != 200:
+        logger.error(obj_response.text)
+        raise Exception(f&#34;Unable to get object {ref}&#34;)
+    else:
+        return obj_response.json()</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.get_object_instance"><code class="name flex">
+<span>def <span class="ident">get_object_instance</span></span>(<span>ref: str, object_type: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_object_instance(ref: str, object_type: str):
+    object_type, object_type_metadata = resolve_object_type(object_type)
+
+    if object_type == &#39;taxonomies&#39;:
+        from kodexa import RemoteTaxonomy
+        return RemoteTaxonomy.get(ref)
+    if object_type == &#39;stores&#39;:
+        # We need to work out what type of store we have
+        obj_info = KodexaPlatform.get_object(ref, object_type)
+        if obj_info[&#39;storeType&#39;] == &#39;TABLE&#39;:
+            from kodexa import RemoteTableDataStore
+            return RemoteTableDataStore(ref)
+        if obj_info[&#39;storeType&#39;] == &#39;DOCUMENT&#39;:
+            return RemoteDocumentStore(ref)
+
+    # TODO - there are other things we need?
+    raise Exception(f&#34;Unable to get a local instance of {ref} of type {object_type}&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.get_server_info"><code class="name flex">
+<span>def <span class="ident">get_server_info</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def get_server_info(cls):
+    r = requests.get(f&#34;{KodexaPlatform.get_url()}/api&#34;,
+                     headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                              &#34;content-type&#34;: &#34;application/json&#34;})
+    if r.status_code == 401:
+        raise Exception(&#34;Your access token was not authorized&#34;)
+    elif r.status_code == 200:
+        return r.json()
+    else:
+        logger.error(r.text)
+        raise Exception(&#34;Unable to get server information, check your platform settings&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.get_url"><code class="name flex">
+<span>def <span class="ident">get_url</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def get_url():
+    kodexa_config = get_config()
+    env_url = os.getenv(&#39;KODEXA_URL&#39;, None)
+    return env_url if env_url is not None else kodexa_config[&#39;url&#39;]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.list_objects"><code class="name flex">
+<span>def <span class="ident">list_objects</span></span>(<span>organization_slug, object_type)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def list_objects(organization_slug, object_type):
+    list_response = requests.get(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}&#34;,
+                                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                          &#34;content-type&#34;: &#34;application/json&#34;})
+    if list_response.status_code == 200:
+        return list_response.json()
+    else:
+        logger.error(list_response.text)
+        raise Exception(&#34;Unable to list objects&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.login"><code class="name flex">
+<span>def <span class="ident">login</span></span>(<span>kodexa_url, username, password)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def login(cls, kodexa_url, username, password):
+    from requests.auth import HTTPBasicAuth
+    obj_response = requests.get(f&#34;{kodexa_url}/api/account/me/token&#34;,
+                                auth=HTTPBasicAuth(username, password),
+                                headers={&#34;content-type&#34;: &#34;application/json&#34;})
+    if obj_response.status_code == 200:
+        kodexa_config = get_config()
+        kodexa_config[&#39;url&#39;] = kodexa_url
+        kodexa_config[&#39;access_token&#39;] = obj_response.text
+        save_config(kodexa_config)
+        print(&#34;Logged in&#34;)
+    else:
+        print(f&#34;Check your URL and password [{obj_response.status_code}]&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.reindex"><code class="name flex">
+<span>def <span class="ident">reindex</span></span>(<span>object_type, ref)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def reindex(cls, object_type, ref):
+    object_type, object_type_metadata = resolve_object_type(object_type)
+    print(f&#34;Reindexing {object_type_metadata[&#39;name&#39;]} [bold]{ref}[/bold]&#34;)
+    url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+    r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}/_reindex&#34;,
+                      headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                               &#34;content-type&#34;: &#34;application/json&#34;})
+    if r.status_code == 401:
+        raise Exception(&#34;Your access token was not authorized&#34;)
+    elif r.status_code == 200:
+        return r.text
+    else:
+        logger.error(r.text)
+        raise Exception(&#34;Unable to reindex check your reference and platform settings&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.resolve_ref"><code class="name flex">
+<span>def <span class="ident">resolve_ref</span></span>(<span>ref: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def resolve_ref(ref: str):
+    org_slug = ref.split(&#39;/&#39;)[0]
+    slug = ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)[0]
+
+    version = None
+
+    if len(ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)) == 2:
+        version = ref.split(&#39;/&#39;)[1].split(&#34;:&#34;)[1]
+
+    return [org_slug, slug, version]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.set_access_token"><code class="name flex">
+<span>def <span class="ident">set_access_token</span></span>(<span>access_token)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def set_access_token(access_token):
+    if access_token is not None:
+        os.environ[&#34;KODEXA_ACCESS_TOKEN&#34;] = access_token</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.set_url"><code class="name flex">
+<span>def <span class="ident">set_url</span></span>(<span>url)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def set_url(url):
+    if url is not None:
+        os.environ[&#34;KODEXA_URL&#34;] = url</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.KodexaPlatform.undeploy"><code class="name flex">
+<span>def <span class="ident">undeploy</span></span>(<span>object_type: str, ref: str)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def undeploy(object_type: str, ref: str):
+
+    object_type, object_type_metadata = resolve_object_type(object_type)
+
+    url_ref = ref.replace(&#39;:&#39;, &#39;/&#39;)
+    response = requests.delete(f&#34;{KodexaPlatform.get_url()}/api/{object_type_metadata[&#39;plural&#39;]}/{url_ref}&#34;,
+                               headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(),
+                                        &#34;content-type&#34;: &#34;application/json&#34;})
+    if response.status_code == 200:
+        logger.info(f&#34;Undeployed {object_type_metadata[&#39;name&#39;]} {ref}&#34;)
+    else:
+        logger.error(response.text)
+        raise Exception(f&#34;Unable to undeploy {object_type_metadata[&#39;name&#39;]} {ref}&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.cloud.kodexa.PipelineMetadataBuilder"><code class="flex name class">
+<span>class <span class="ident">PipelineMetadataBuilder</span></span>
+<span>(</span><span>pipeline: Pipeline)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Build a metadata representation of the pipeline for passing to an instance of the
+Kodexa platform</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PipelineMetadataBuilder:
+    &#34;&#34;&#34;
+    Build a metadata representation of the pipeline for passing to an instance of the
+    Kodexa platform
+    &#34;&#34;&#34;
+
+    def __init__(self, pipeline: Pipeline):
+        self.pipeline = pipeline
+
+    def build_steps(self, pipeline_metadata: Dict):
+        pipeline_metadata.metadata.steps = []
+        pipeline_metadata.metadata.stores = []
+
+        for pipeline_store in self.pipeline.stores:
+
+            if isinstance(pipeline_store.store, RemoteDocumentStore):
+                pipeline_metadata.metadata.stores.append(
+                    {&#34;name&#34;: pipeline_store.name, &#34;ref&#34;: pipeline_store.store.get_ref(), &#34;storeType&#34;: &#34;DOCUMENT&#34;})
+            else:
+                raise Exception(&#34;Pipeline refers to a non-remote store, deployment of local stores is not supported&#34;)
+
+        for idx, step in enumerate(self.pipeline.steps):
+
+            step_meta = step.to_dict()
+            if step_meta[&#39;name&#39;] is None:
+                step_meta[&#39;name&#39;] = f&#34;Step {idx + 1}&#34;
+
+            if &#39;script&#39; in step_meta:
+                pipeline_metadata.metadata.steps.append({
+                    &#39;ref&#39;: &#39;kodexa/python-step&#39;,
+                    &#39;name&#39;: step_meta[&#39;name&#39;],
+                    &#39;enabled&#39;: True,
+                    &#39;condition&#39;: None,
+                    &#39;options&#39;: {
+                        &#39;function_name&#39;: step_meta[&#39;function&#39;],
+                        &#39;script&#39;: step_meta[&#39;script&#39;]
+                    }
+                })
+            else:
+                pipeline_metadata.metadata.steps.append(step_meta)
+
+        return pipeline_metadata</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.cloud.kodexa.PipelineMetadataBuilder.build_steps"><code class="name flex">
+<span>def <span class="ident">build_steps</span></span>(<span>self, pipeline_metadata: Dict)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_steps(self, pipeline_metadata: Dict):
+    pipeline_metadata.metadata.steps = []
+    pipeline_metadata.metadata.stores = []
+
+    for pipeline_store in self.pipeline.stores:
+
+        if isinstance(pipeline_store.store, RemoteDocumentStore):
+            pipeline_metadata.metadata.stores.append(
+                {&#34;name&#34;: pipeline_store.name, &#34;ref&#34;: pipeline_store.store.get_ref(), &#34;storeType&#34;: &#34;DOCUMENT&#34;})
+        else:
+            raise Exception(&#34;Pipeline refers to a non-remote store, deployment of local stores is not supported&#34;)
+
+    for idx, step in enumerate(self.pipeline.steps):
+
+        step_meta = step.to_dict()
+        if step_meta[&#39;name&#39;] is None:
+            step_meta[&#39;name&#39;] = f&#34;Step {idx + 1}&#34;
+
+        if &#39;script&#39; in step_meta:
+            pipeline_metadata.metadata.steps.append({
+                &#39;ref&#39;: &#39;kodexa/python-step&#39;,
+                &#39;name&#39;: step_meta[&#39;name&#39;],
+                &#39;enabled&#39;: True,
+                &#39;condition&#39;: None,
+                &#39;options&#39;: {
+                    &#39;function_name&#39;: step_meta[&#39;function&#39;],
+                    &#39;script&#39;: step_meta[&#39;script&#39;]
+                }
+            })
+        else:
+            pipeline_metadata.metadata.steps.append(step_meta)
+
+    return pipeline_metadata</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteAction"><code class="flex name class">
+<span>class <span class="ident">RemoteAction</span></span>
+<span>(</span><span>slug, version=None, attach_source=False, options=None, auth=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Allows you to interact with an action that has been deployed in the Kodexa platform</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RemoteAction:
+    &#34;&#34;&#34;
+    Allows you to interact with an action that has been deployed in the Kodexa platform
+    &#34;&#34;&#34;
+
+    def __init__(self, slug, version=None, attach_source=False, options=None, auth=None):
+        if auth is None:
+            auth = []
+        if options is None:
+            options = {}
+        self.slug = slug
+        self.version = version
+        self.attach_source = attach_source
+        self.options = options
+        self.auth = auth
+
+    def to_dict(self):
+        return {
+            &#39;ref&#39;: self.slug,
+            &#39;options&#39;: self.options
+        }
+
+    def get_name(self):
+        return f&#34;Remote Action ({self.slug})&#34;
+
+    def process(self, document, context):
+        cloud_session = RemoteSession(&#34;service&#34;, self.slug)
+        cloud_session.start()
+
+        logger.info(f&#34;Loading metadata for {self.slug}&#34;)
+        action_metadata = cloud_session.get_action_metadata(self.slug)
+
+        requires_source = False
+        if &#39;requiresSource&#39; in action_metadata[&#39;metadata&#39;]:
+            requires_source = action_metadata[&#39;metadata&#39;][&#39;requiresSource&#39;]
+
+        execution = cloud_session.execution_action(document, self.options,
+                                                   self.attach_source if self.attach_source else requires_source,
+                                                   context)
+
+        execution = cloud_session.wait_for_execution(execution)
+
+        result_document = cloud_session.get_output_document(execution)
+
+        context.context = execution.context
+
+        cloud_session.merge_stores(execution, context)
+
+        return result_document if result_document else document
+
+    def end_processing(self):
+
+        # TODO not yet implemented for remote steps
+        pass
+
+    def to_configuration(self):
+        &#34;&#34;&#34;
+        Returns a dictionary representing the configuration information for the step
+
+        :return: dictionary representing the configuration of the step
+        &#34;&#34;&#34;
+        return {
+            &#34;ref&#34;: self.slug,
+            &#34;options&#34;: self.options
+        }</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.cloud.kodexa.RemoteAction.end_processing"><code class="name flex">
+<span>def <span class="ident">end_processing</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def end_processing(self):
+
+    # TODO not yet implemented for remote steps
+    pass</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteAction.get_name"><code class="name flex">
+<span>def <span class="ident">get_name</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_name(self):
+    return f&#34;Remote Action ({self.slug})&#34;</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteAction.process"><code class="name flex">
+<span>def <span class="ident">process</span></span>(<span>self, document, context)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process(self, document, context):
+    cloud_session = RemoteSession(&#34;service&#34;, self.slug)
+    cloud_session.start()
+
+    logger.info(f&#34;Loading metadata for {self.slug}&#34;)
+    action_metadata = cloud_session.get_action_metadata(self.slug)
+
+    requires_source = False
+    if &#39;requiresSource&#39; in action_metadata[&#39;metadata&#39;]:
+        requires_source = action_metadata[&#39;metadata&#39;][&#39;requiresSource&#39;]
+
+    execution = cloud_session.execution_action(document, self.options,
+                                               self.attach_source if self.attach_source else requires_source,
+                                               context)
+
+    execution = cloud_session.wait_for_execution(execution)
+
+    result_document = cloud_session.get_output_document(execution)
+
+    context.context = execution.context
+
+    cloud_session.merge_stores(execution, context)
+
+    return result_document if result_document else document</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteAction.to_configuration"><code class="name flex">
+<span>def <span class="ident">to_configuration</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns a dictionary representing the configuration information for the step</p>
+<p>:return: dictionary representing the configuration of the step</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_configuration(self):
+    &#34;&#34;&#34;
+    Returns a dictionary representing the configuration information for the step
+
+    :return: dictionary representing the configuration of the step
+    &#34;&#34;&#34;
+    return {
+        &#34;ref&#34;: self.slug,
+        &#34;options&#34;: self.options
+    }</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteAction.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self):
+    return {
+        &#39;ref&#39;: self.slug,
+        &#39;options&#39;: self.options
+    }</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemotePipeline"><code class="flex name class">
+<span>class <span class="ident">RemotePipeline</span></span>
+<span>(</span><span>slug, connector, version=None, attach_source=True, parameters=None, auth=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RemotePipeline:
+    &#34;&#34;&#34;
+    Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform
+    &#34;&#34;&#34;
+
+    def __init__(self, slug, connector, version=None, attach_source=True, parameters=None, auth=None):
+        logger.info(f&#34;Initializing a new pipeline {slug}&#34;)
+
+        if isinstance(connector, Document):
+            self.connector = [connector]
+        else:
+            self.connector = connector
+        self.sink = None
+        self.context: PipelineContext = PipelineContext()
+
+        if auth is None:
+            auth = []
+        if parameters is None:
+            parameters = {}
+        self.slug = slug
+        self.version = version
+        self.attach_source = attach_source
+        self.parameters = parameters
+        self.auth = auth
+
+    def set_sink(self, sink):
+        &#34;&#34;&#34;
+        Set the sink you wish to use, note that it will replace any currently assigned
+        sink
+
+            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+            &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+
+        :param sink: the sink for the pipeline
+        &#34;&#34;&#34;
+        logger.info(f&#34;Setting sink {sink.get_name()} on {self.slug}&#34;)
+        self.sink = sink
+
+        return self
+
+    def run(self):
+        self.context.statistics = PipelineStatistics()
+
+        logger.info(f&#34;Starting remote pipeline {self.slug}&#34;)
+        cloud_session = RemoteSession(&#34;pipeline&#34;, self.slug)
+        cloud_session.start()
+
+        for document in self.connector:
+            logger.info(f&#34;Processing {document}&#34;)
+            execution = cloud_session.execution_action(document, self.parameters, self.attach_source, self.context)
+            execution = cloud_session.wait_for_execution(execution)
+
+            logger.info(&#34;Capturing output&#34;)
+            result_document = cloud_session.get_output_document(execution)
+            self.context.set_output_document(result_document)
+            cloud_session.merge_stores(execution, self.context)
+
+            self.context.statistics.processed_document(result_document)
+            self.context.context = execution.context
+            if self.sink:
+                logger.info(f&#34;Writing to sink {self.sink.get_name()}&#34;)
+                try:
+                    self.sink.sink(result_document)
+                except:
+                    if document:
+                        document.exceptions.append({
+                            &#34;step&#34;: self.sink.get_name(),
+                            &#34;exception&#34;: sys.exc_info()[0]
+                        })
+                    if self.context.stop_on_exception:
+                        raise
+
+        logger.info(f&#34;Completed pipeline {self.slug}&#34;)
+
+        return self.context
+
+    @staticmethod
+    def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; RemotePipeline:
+        &#34;&#34;&#34;
+        Build a new pipeline with the input being a document created from the given URL
+
+        :param slug: The slug for the remote pipeline
+        :param url: The URL ie. https://www.google.com
+        :param headers: A dictionary of headers
+        :return: A new instance of a remote pipeline
+        &#34;&#34;&#34;
+        return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
+
+    @staticmethod
+    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; RemotePipeline:
+        &#34;&#34;&#34;
+        Create a new pipeline using a file path as a source
+
+        :param slug: The slug for the remote pipeline
+        :param file_path: The path to the file
+        :param unpack: Unpack the file as a KDXA
+        :return: A new pipeline
+        :rtype: Pipeline
+        &#34;&#34;&#34;
+        return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
+
+    @staticmethod
+    def from_text(slug: str, text: str, *args, **kwargs) -&gt; RemotePipeline:
+        &#34;&#34;&#34;
+        Build a new pipeline and provide text as the basic to create a document
+
+        :param slug: The slug for the remote pipeline
+        :param text: Text to use to create document
+        :return: A new pipeline
+        :rtype: RemotePipeline
+        &#34;&#34;&#34;
+
+        # need to update kwargs for attach_source
+        kwargs.setdefault(&#39;attach_source&#39;, False)
+        return RemotePipeline(slug, Document.from_text(text), *args, **kwargs)
+
+    @staticmethod
+    def from_folder(slug: str, folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False,
+                    unpack: bool = False,
+                    relative: bool = False,
+                    caller_path: str = get_caller_dir()) -&gt; RemotePipeline:
+        &#34;&#34;&#34;
+        Create a pipeline that will run against a set of local files from a folder
+
+        :param slug: The slug for the remote pipeline
+        :param folder_path: The folder path
+        :param filename_filter: The filter for filename (i.e. *.pdf)
+        :param recursive: Should we look recursively in sub-directories (default False)
+        :param relative: Is the folder path relative to the caller (default False)
+        :param caller_path: The caller path (defaults to trying to work this out from the stack)
+        :param unpack: Unpack the file as a KDXA document
+        :return: A new pipeline
+        :rtype: RemotePipeline
+        &#34;&#34;&#34;
+        return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path,
+                                                    unpack=unpack))
+
+    def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
+        &#34;&#34;&#34;
+        Allows you to provide the sink store easily
+
+        This will wrap the store in a document store sink
+
+        :param document_store: document store to use
+        :param processing_mode: the processing mode (update or new)
+        :return: the pipeline
+        &#34;&#34;&#34;
+        from kodexa.sinks import DocumentStoreSink
+        self.set_sink(DocumentStoreSink(document_store))
+        return self</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.cloud.kodexa.RemotePipeline.from_file"><code class="name flex">
+<span>def <span class="ident">from_file</span></span>(<span>slug: str, file_path: str, unpack: bool = False, *args, **kwargs) ‑> <a title="kodexa.cloud.kodexa.RemotePipeline" href="#kodexa.cloud.kodexa.RemotePipeline">RemotePipeline</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new pipeline using a file path as a source</p>
+<p>:param slug: The slug for the remote pipeline
+:param file_path: The path to the file
+:param unpack: Unpack the file as a KDXA
+:return: A new pipeline
+:rtype: Pipeline</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; RemotePipeline:
+    &#34;&#34;&#34;
+    Create a new pipeline using a file path as a source
+
+    :param slug: The slug for the remote pipeline
+    :param file_path: The path to the file
+    :param unpack: Unpack the file as a KDXA
+    :return: A new pipeline
+    :rtype: Pipeline
+    &#34;&#34;&#34;
+    return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemotePipeline.from_folder"><code class="name flex">
+<span>def <span class="ident">from_folder</span></span>(<span>slug: str, folder_path: str, filename_filter: str = '*', recursive: bool = False, unpack: bool = False, relative: bool = False, caller_path: str = '/home/runner/work/kodexa/kodexa') ‑> <a title="kodexa.cloud.kodexa.RemotePipeline" href="#kodexa.cloud.kodexa.RemotePipeline">RemotePipeline</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a pipeline that will run against a set of local files from a folder</p>
+<p>:param slug: The slug for the remote pipeline
+:param folder_path: The folder path
+:param filename_filter: The filter for filename (i.e. *.pdf)
+:param recursive: Should we look recursively in sub-directories (default False)
+:param relative: Is the folder path relative to the caller (default False)
+:param caller_path: The caller path (defaults to trying to work this out from the stack)
+:param unpack: Unpack the file as a KDXA document
+:return: A new pipeline
+:rtype: RemotePipeline</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_folder(slug: str, folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False,
+                unpack: bool = False,
+                relative: bool = False,
+                caller_path: str = get_caller_dir()) -&gt; RemotePipeline:
+    &#34;&#34;&#34;
+    Create a pipeline that will run against a set of local files from a folder
+
+    :param slug: The slug for the remote pipeline
+    :param folder_path: The folder path
+    :param filename_filter: The filter for filename (i.e. *.pdf)
+    :param recursive: Should we look recursively in sub-directories (default False)
+    :param relative: Is the folder path relative to the caller (default False)
+    :param caller_path: The caller path (defaults to trying to work this out from the stack)
+    :param unpack: Unpack the file as a KDXA document
+    :return: A new pipeline
+    :rtype: RemotePipeline
+    &#34;&#34;&#34;
+    return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path,
+                                                unpack=unpack))</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemotePipeline.from_text"><code class="name flex">
+<span>def <span class="ident">from_text</span></span>(<span>slug: str, text: str, *args, **kwargs) ‑> <a title="kodexa.cloud.kodexa.RemotePipeline" href="#kodexa.cloud.kodexa.RemotePipeline">RemotePipeline</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Build a new pipeline and provide text as the basic to create a document</p>
+<p>:param slug: The slug for the remote pipeline
+:param text: Text to use to create document
+:return: A new pipeline
+:rtype: RemotePipeline</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_text(slug: str, text: str, *args, **kwargs) -&gt; RemotePipeline:
+    &#34;&#34;&#34;
+    Build a new pipeline and provide text as the basic to create a document
+
+    :param slug: The slug for the remote pipeline
+    :param text: Text to use to create document
+    :return: A new pipeline
+    :rtype: RemotePipeline
+    &#34;&#34;&#34;
+
+    # need to update kwargs for attach_source
+    kwargs.setdefault(&#39;attach_source&#39;, False)
+    return RemotePipeline(slug, Document.from_text(text), *args, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemotePipeline.from_url"><code class="name flex">
+<span>def <span class="ident">from_url</span></span>(<span>slug: str, url, headers=None, *args, **kwargs) ‑> <a title="kodexa.cloud.kodexa.RemotePipeline" href="#kodexa.cloud.kodexa.RemotePipeline">RemotePipeline</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Build a new pipeline with the input being a document created from the given URL</p>
+<p>:param slug: The slug for the remote pipeline
+:param url: The URL ie. <a href="https://www.google.com">https://www.google.com</a>
+:param headers: A dictionary of headers
+:return: A new instance of a remote pipeline</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; RemotePipeline:
+    &#34;&#34;&#34;
+    Build a new pipeline with the input being a document created from the given URL
+
+    :param slug: The slug for the remote pipeline
+    :param url: The URL ie. https://www.google.com
+    :param headers: A dictionary of headers
+    :return: A new instance of a remote pipeline
+    &#34;&#34;&#34;
+    return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.cloud.kodexa.RemotePipeline.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run(self):
+    self.context.statistics = PipelineStatistics()
+
+    logger.info(f&#34;Starting remote pipeline {self.slug}&#34;)
+    cloud_session = RemoteSession(&#34;pipeline&#34;, self.slug)
+    cloud_session.start()
+
+    for document in self.connector:
+        logger.info(f&#34;Processing {document}&#34;)
+        execution = cloud_session.execution_action(document, self.parameters, self.attach_source, self.context)
+        execution = cloud_session.wait_for_execution(execution)
+
+        logger.info(&#34;Capturing output&#34;)
+        result_document = cloud_session.get_output_document(execution)
+        self.context.set_output_document(result_document)
+        cloud_session.merge_stores(execution, self.context)
+
+        self.context.statistics.processed_document(result_document)
+        self.context.context = execution.context
+        if self.sink:
+            logger.info(f&#34;Writing to sink {self.sink.get_name()}&#34;)
+            try:
+                self.sink.sink(result_document)
+            except:
+                if document:
+                    document.exceptions.append({
+                        &#34;step&#34;: self.sink.get_name(),
+                        &#34;exception&#34;: sys.exc_info()[0]
+                    })
+                if self.context.stop_on_exception:
+                    raise
+
+    logger.info(f&#34;Completed pipeline {self.slug}&#34;)
+
+    return self.context</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemotePipeline.set_sink"><code class="name flex">
+<span>def <span class="ident">set_sink</span></span>(<span>self, sink)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the sink you wish to use, note that it will replace any currently assigned
+sink</p>
+<pre><code>&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+&gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+</code></pre>
+<p>:param sink: the sink for the pipeline</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_sink(self, sink):
+    &#34;&#34;&#34;
+    Set the sink you wish to use, note that it will replace any currently assigned
+    sink
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+        &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+
+    :param sink: the sink for the pipeline
+    &#34;&#34;&#34;
+    logger.info(f&#34;Setting sink {sink.get_name()} on {self.slug}&#34;)
+    self.sink = sink
+
+    return self</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemotePipeline.to_store"><code class="name flex">
+<span>def <span class="ident">to_store</span></span>(<span>self, document_store: DocumentStore, processing_mode: str = 'update')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Allows you to provide the sink store easily</p>
+<p>This will wrap the store in a document store sink</p>
+<p>:param document_store: document store to use
+:param processing_mode: the processing mode (update or new)
+:return: the pipeline</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
+    &#34;&#34;&#34;
+    Allows you to provide the sink store easily
+
+    This will wrap the store in a document store sink
+
+    :param document_store: document store to use
+    :param processing_mode: the processing mode (update or new)
+    :return: the pipeline
+    &#34;&#34;&#34;
+    from kodexa.sinks import DocumentStoreSink
+    self.set_sink(DocumentStoreSink(document_store))
+    return self</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteSession"><code class="flex name class">
+<span>class <span class="ident">RemoteSession</span></span>
+<span>(</span><span>session_type, slug)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A Session on the Kodexa platform for leveraging pipelines and services</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RemoteSession:
+    &#34;&#34;&#34;
+    A Session on the Kodexa platform for leveraging pipelines and services
+    &#34;&#34;&#34;
+
+    def __init__(self, session_type, slug):
+        self.session_type = session_type
+        self.slug = slug
+        self.cloud_session = None
+
+    def get_action_metadata(self, ref):
+        logger.debug(f&#34;Downloading metadata for action {ref}&#34;)
+        r = requests.get(f&#34;{KodexaPlatform.get_url()}/api/actions/{ref.replace(&#39;:&#39;, &#39;/&#39;)}&#34;,
+                         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+        if r.status_code == 401:
+            raise Exception(&#34;Your access token was not authorized&#34;)
+        elif r.status_code == 200:
+            return r.json()
+        else:
+            logger.error(r.text)
+            raise Exception(&#34;Unable to get action metadata, check your reference and platform settings&#34;)
+
+    def start(self):
+        logger.info(f&#34;Creating session {self.slug} ({KodexaPlatform.get_url()})&#34;)
+        r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions&#34;, params={self.session_type: self.slug},
+                          headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+
+        if r.status_code != 200:
+            logger.error(&#34;Unable to create session&#34;)
+            logger.error(r.text)
+            raise Exception(&#34;Unable to create a session, check your URL and access token&#34;)
+
+        self.cloud_session = Dict(json.loads(r.text))
+
+    def execution_action(self, document, options, attach_source, context):
+        files = {}
+        if attach_source:
+            logger.debug(&#34;Attaching source to call&#34;)
+            files[&#34;file&#34;] = get_source(document)
+            files[&#34;file_document&#34;] = document.to_msgpack()
+        else:
+            files[&#34;document&#34;] = document.to_msgpack()
+
+        data = {&#34;options&#34;: json.dumps(options), &#34;document_metadata_json&#34;: json.dumps(document.metadata),
+                &#34;context&#34;: json.dumps(context.context)}
+
+        logger.info(f&#34;Executing session {self.cloud_session.id}&#34;)
+        r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute&#34;,
+                          params={self.session_type: self.slug},
+                          data=data,
+                          headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()}, files=files)
+        try:
+            if r.status_code == 200:
+                execution = Dict(json.loads(r.text))
+            else:
+                logger.error(&#34;Execution creation failed [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+                raise Exception(&#34;Execution creation failed [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+        except JSONDecodeError:
+            logger.error(&#34;Unable to handle response [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+            raise
+
+        return execution
+
+    def wait_for_execution(self, execution):
+
+        status = execution.status
+        while execution.status == &#34;PENDING&#34; or execution.status == &#34;RUNNING&#34;:
+            r = requests.get(
+                f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}&#34;,
+                headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+            try:
+                execution = Dict(json.loads(r.text))
+            except JSONDecodeError:
+                logger.error(&#34;Unable to handle response [&#34; + r.text + &#34;]&#34;)
+                raise
+
+            if status != execution.status:
+                logger.info(f&#34;Status changed from {status} -&gt; {execution.status}&#34;)
+                status = execution.status
+
+            time.sleep(1)
+
+        if status == &#34;FAILED&#34;:
+            logger.error(&#34;Execution has failed&#34;)
+            for step in execution.steps:
+                if step.status == &#39;FAILED&#39;:
+                    logger.error(f&#34;Step {step.name} has failed. {step.exceptionDetails.message}.&#34;)
+
+                    if step.exceptionDetails.errorType == &#39;Validation&#39;:
+                        logger.error(&#34;Additional validation information has been provided:&#34;)
+                        for validation_error in step.exceptionDetails.validationErrors:
+                            logger.error(f&#34;- {validation_error.option} : {validation_error.message}&#34;)
+
+                    if step.exceptionDetails.help:
+                        logger.error(f&#34;Additional help is available:\n\n{step.exceptionDetails.help}&#34;)
+
+            logger.debug(execution)
+
+            raise Exception(f&#34;Processing has failed\nDetails: {step.exceptionDetails.help}&#34;)
+
+        return execution
+
+    def get_output_document(self, execution):
+        if execution.outputId:
+            logger.info(&#34;Downloading output document [{execution.outputId}]&#34;)
+            doc = requests.get(
+                f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}&#34;,
+                headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+            return Document.from_msgpack(doc.content)
+        else:
+            logger.info(&#34;No output document&#34;)
+            return None
+
+    def get_store(self, execution, store):
+        response = requests.get(
+            f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}&#34;,
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+        logger.debug(f&#34;Response from server [{response.text}]&#34;)
+        raw_store = Dict(json.loads(response.text))
+        return TableDataStore(raw_store.data.columns, raw_store.data.rows)
+
+    def merge_stores(self, execution, context: PipelineContext):
+        for store in execution.stores:
+            context.merge_store(store.name, self.get_store(execution, store))</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.cloud.kodexa.RemoteSession.execution_action"><code class="name flex">
+<span>def <span class="ident">execution_action</span></span>(<span>self, document, options, attach_source, context)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def execution_action(self, document, options, attach_source, context):
+    files = {}
+    if attach_source:
+        logger.debug(&#34;Attaching source to call&#34;)
+        files[&#34;file&#34;] = get_source(document)
+        files[&#34;file_document&#34;] = document.to_msgpack()
+    else:
+        files[&#34;document&#34;] = document.to_msgpack()
+
+    data = {&#34;options&#34;: json.dumps(options), &#34;document_metadata_json&#34;: json.dumps(document.metadata),
+            &#34;context&#34;: json.dumps(context.context)}
+
+    logger.info(f&#34;Executing session {self.cloud_session.id}&#34;)
+    r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute&#34;,
+                      params={self.session_type: self.slug},
+                      data=data,
+                      headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()}, files=files)
+    try:
+        if r.status_code == 200:
+            execution = Dict(json.loads(r.text))
+        else:
+            logger.error(&#34;Execution creation failed [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+            raise Exception(&#34;Execution creation failed [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+    except JSONDecodeError:
+        logger.error(&#34;Unable to handle response [&#34; + r.text + &#34;], response &#34; + str(r.status_code))
+        raise
+
+    return execution</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteSession.get_action_metadata"><code class="name flex">
+<span>def <span class="ident">get_action_metadata</span></span>(<span>self, ref)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_action_metadata(self, ref):
+    logger.debug(f&#34;Downloading metadata for action {ref}&#34;)
+    r = requests.get(f&#34;{KodexaPlatform.get_url()}/api/actions/{ref.replace(&#39;:&#39;, &#39;/&#39;)}&#34;,
+                     headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+    if r.status_code == 401:
+        raise Exception(&#34;Your access token was not authorized&#34;)
+    elif r.status_code == 200:
+        return r.json()
+    else:
+        logger.error(r.text)
+        raise Exception(&#34;Unable to get action metadata, check your reference and platform settings&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteSession.get_output_document"><code class="name flex">
+<span>def <span class="ident">get_output_document</span></span>(<span>self, execution)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_output_document(self, execution):
+    if execution.outputId:
+        logger.info(&#34;Downloading output document [{execution.outputId}]&#34;)
+        doc = requests.get(
+            f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}&#34;,
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+        return Document.from_msgpack(doc.content)
+    else:
+        logger.info(&#34;No output document&#34;)
+        return None</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteSession.get_store"><code class="name flex">
+<span>def <span class="ident">get_store</span></span>(<span>self, execution, store)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_store(self, execution, store):
+    response = requests.get(
+        f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}&#34;,
+        headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+    logger.debug(f&#34;Response from server [{response.text}]&#34;)
+    raw_store = Dict(json.loads(response.text))
+    return TableDataStore(raw_store.data.columns, raw_store.data.rows)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteSession.merge_stores"><code class="name flex">
+<span>def <span class="ident">merge_stores</span></span>(<span>self, execution, context: PipelineContext)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge_stores(self, execution, context: PipelineContext):
+    for store in execution.stores:
+        context.merge_store(store.name, self.get_store(execution, store))</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteSession.start"><code class="name flex">
+<span>def <span class="ident">start</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def start(self):
+    logger.info(f&#34;Creating session {self.slug} ({KodexaPlatform.get_url()})&#34;)
+    r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions&#34;, params={self.session_type: self.slug},
+                      headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+
+    if r.status_code != 200:
+        logger.error(&#34;Unable to create session&#34;)
+        logger.error(r.text)
+        raise Exception(&#34;Unable to create a session, check your URL and access token&#34;)
+
+    self.cloud_session = Dict(json.loads(r.text))</code></pre>
+</details>
+</dd>
+<dt id="kodexa.cloud.kodexa.RemoteSession.wait_for_execution"><code class="name flex">
+<span>def <span class="ident">wait_for_execution</span></span>(<span>self, execution)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wait_for_execution(self, execution):
+
+    status = execution.status
+    while execution.status == &#34;PENDING&#34; or execution.status == &#34;RUNNING&#34;:
+        r = requests.get(
+            f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}&#34;,
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+        try:
+            execution = Dict(json.loads(r.text))
+        except JSONDecodeError:
+            logger.error(&#34;Unable to handle response [&#34; + r.text + &#34;]&#34;)
+            raise
+
+        if status != execution.status:
+            logger.info(f&#34;Status changed from {status} -&gt; {execution.status}&#34;)
+            status = execution.status
+
+        time.sleep(1)
+
+    if status == &#34;FAILED&#34;:
+        logger.error(&#34;Execution has failed&#34;)
+        for step in execution.steps:
+            if step.status == &#39;FAILED&#39;:
+                logger.error(f&#34;Step {step.name} has failed. {step.exceptionDetails.message}.&#34;)
+
+                if step.exceptionDetails.errorType == &#39;Validation&#39;:
+                    logger.error(&#34;Additional validation information has been provided:&#34;)
+                    for validation_error in step.exceptionDetails.validationErrors:
+                        logger.error(f&#34;- {validation_error.option} : {validation_error.message}&#34;)
+
+                if step.exceptionDetails.help:
+                    logger.error(f&#34;Additional help is available:\n\n{step.exceptionDetails.help}&#34;)
+
+        logger.debug(execution)
+
+        raise Exception(f&#34;Processing has failed\nDetails: {step.exceptionDetails.help}&#34;)
+
+    return execution</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="kodexa.cloud" href="index.html">kodexa.cloud</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="kodexa.cloud.kodexa.get_config" href="#kodexa.cloud.kodexa.get_config">get_config</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.resolve_object_type" href="#kodexa.cloud.kodexa.resolve_object_type">resolve_object_type</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.save_config" href="#kodexa.cloud.kodexa.save_config">save_config</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="kodexa.cloud.kodexa.ExtensionHelper" href="#kodexa.cloud.kodexa.ExtensionHelper">ExtensionHelper</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.cloud.kodexa.ExtensionHelper.load_metadata" href="#kodexa.cloud.kodexa.ExtensionHelper.load_metadata">load_metadata</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.cloud.kodexa.KodexaPlatform" href="#kodexa.cloud.kodexa.KodexaPlatform">KodexaPlatform</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.delete" href="#kodexa.cloud.kodexa.KodexaPlatform.delete">delete</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.delete_object" href="#kodexa.cloud.kodexa.KodexaPlatform.delete_object">delete_object</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.deploy" href="#kodexa.cloud.kodexa.KodexaPlatform.deploy">deploy</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.deploy_extension" href="#kodexa.cloud.kodexa.KodexaPlatform.deploy_extension">deploy_extension</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.deploy_extension_from_uri" href="#kodexa.cloud.kodexa.KodexaPlatform.deploy_extension_from_uri">deploy_extension_from_uri</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.get" href="#kodexa.cloud.kodexa.KodexaPlatform.get">get</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.get_access_token" href="#kodexa.cloud.kodexa.KodexaPlatform.get_access_token">get_access_token</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.get_access_token_details" href="#kodexa.cloud.kodexa.KodexaPlatform.get_access_token_details">get_access_token_details</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.get_object" href="#kodexa.cloud.kodexa.KodexaPlatform.get_object">get_object</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.get_object_instance" href="#kodexa.cloud.kodexa.KodexaPlatform.get_object_instance">get_object_instance</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.get_server_info" href="#kodexa.cloud.kodexa.KodexaPlatform.get_server_info">get_server_info</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.get_url" href="#kodexa.cloud.kodexa.KodexaPlatform.get_url">get_url</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.list_objects" href="#kodexa.cloud.kodexa.KodexaPlatform.list_objects">list_objects</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.login" href="#kodexa.cloud.kodexa.KodexaPlatform.login">login</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.reindex" href="#kodexa.cloud.kodexa.KodexaPlatform.reindex">reindex</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.resolve_ref" href="#kodexa.cloud.kodexa.KodexaPlatform.resolve_ref">resolve_ref</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.set_access_token" href="#kodexa.cloud.kodexa.KodexaPlatform.set_access_token">set_access_token</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.set_url" href="#kodexa.cloud.kodexa.KodexaPlatform.set_url">set_url</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.KodexaPlatform.undeploy" href="#kodexa.cloud.kodexa.KodexaPlatform.undeploy">undeploy</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.cloud.kodexa.PipelineMetadataBuilder" href="#kodexa.cloud.kodexa.PipelineMetadataBuilder">PipelineMetadataBuilder</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.cloud.kodexa.PipelineMetadataBuilder.build_steps" href="#kodexa.cloud.kodexa.PipelineMetadataBuilder.build_steps">build_steps</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.cloud.kodexa.RemoteAction" href="#kodexa.cloud.kodexa.RemoteAction">RemoteAction</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.cloud.kodexa.RemoteAction.end_processing" href="#kodexa.cloud.kodexa.RemoteAction.end_processing">end_processing</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteAction.get_name" href="#kodexa.cloud.kodexa.RemoteAction.get_name">get_name</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteAction.process" href="#kodexa.cloud.kodexa.RemoteAction.process">process</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteAction.to_configuration" href="#kodexa.cloud.kodexa.RemoteAction.to_configuration">to_configuration</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteAction.to_dict" href="#kodexa.cloud.kodexa.RemoteAction.to_dict">to_dict</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.cloud.kodexa.RemotePipeline" href="#kodexa.cloud.kodexa.RemotePipeline">RemotePipeline</a></code></h4>
+<ul class="two-column">
+<li><code><a title="kodexa.cloud.kodexa.RemotePipeline.from_file" href="#kodexa.cloud.kodexa.RemotePipeline.from_file">from_file</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemotePipeline.from_folder" href="#kodexa.cloud.kodexa.RemotePipeline.from_folder">from_folder</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemotePipeline.from_text" href="#kodexa.cloud.kodexa.RemotePipeline.from_text">from_text</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemotePipeline.from_url" href="#kodexa.cloud.kodexa.RemotePipeline.from_url">from_url</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemotePipeline.run" href="#kodexa.cloud.kodexa.RemotePipeline.run">run</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemotePipeline.set_sink" href="#kodexa.cloud.kodexa.RemotePipeline.set_sink">set_sink</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemotePipeline.to_store" href="#kodexa.cloud.kodexa.RemotePipeline.to_store">to_store</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.cloud.kodexa.RemoteSession" href="#kodexa.cloud.kodexa.RemoteSession">RemoteSession</a></code></h4>
+<ul class="two-column">
+<li><code><a title="kodexa.cloud.kodexa.RemoteSession.execution_action" href="#kodexa.cloud.kodexa.RemoteSession.execution_action">execution_action</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteSession.get_action_metadata" href="#kodexa.cloud.kodexa.RemoteSession.get_action_metadata">get_action_metadata</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteSession.get_output_document" href="#kodexa.cloud.kodexa.RemoteSession.get_output_document">get_output_document</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteSession.get_store" href="#kodexa.cloud.kodexa.RemoteSession.get_store">get_store</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteSession.merge_stores" href="#kodexa.cloud.kodexa.RemoteSession.merge_stores">merge_stores</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteSession.start" href="#kodexa.cloud.kodexa.RemoteSession.start">start</a></code></li>
+<li><code><a title="kodexa.cloud.kodexa.RemoteSession.wait_for_execution" href="#kodexa.cloud.kodexa.RemoteSession.wait_for_execution">wait_for_execution</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>kodexa.cli.cli API documentation</title>
+<meta name="description" content="This is the entry point for the command-line interface (CLI) application …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>kodexa.cli.cli</code></h1>
+</header>
+<section id="section-intro">
+<p>This is the entry point for the command-line interface (CLI) application.</p>
+<p>Itcan be used as a handy facility for running the task from a command line.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To learn more about Click visit the
+<code>project website &lt;http://click.pocoo.org/5/&gt;</code><em>.
+There is also a very
+helpful <code>tutorial video &lt;https://www.youtube.com/watch?v=kNke39OZ2k0&gt;</code></em>.</p>
+<p>To learn more about running Luigi, visit the Luigi project's
+<code>Read-The-Docs &lt;http://luigi.readthedocs.io/en/stable/&gt;</code>_ page.</p>
+</div>
+<div class="admonition currentmodule">
+<p class="admonition-title">Currentmodule:&ensp;dharma_cli.cli</p>
+</div>
+<div class="admonition moduleauthor">
+<p class="admonition-title">Moduleauthor:&ensp;Kodexa, Inc <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#107;&#111;&#100;&#101;&#120;&#97;&#46;&#99;&#111;&#109;">&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#107;&#111;&#100;&#101;&#120;&#97;&#46;&#99;&#111;&#109;</a></p>
+</div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+&#34;&#34;&#34;
+This is the entry point for the command-line interface (CLI) application.
+
+Itcan be used as a handy facility for running the task from a command line.
+
+.. note::
+
+    To learn more about Click visit the
+    `project website &lt;http://click.pocoo.org/5/&gt;`_.  There is also a very
+    helpful `tutorial video &lt;https://www.youtube.com/watch?v=kNke39OZ2k0&gt;`_.
+
+    To learn more about running Luigi, visit the Luigi project&#39;s
+    `Read-The-Docs &lt;http://luigi.readthedocs.io/en/stable/&gt;`_ page.
+
+.. currentmodule:: dharma_cli.cli
+.. moduleauthor:: Kodexa, Inc &lt;support@kodexa.com&gt;
+&#34;&#34;&#34;
+import json
+import logging
+import os
+import os.path
+import tarfile
+from getpass import getpass
+
+import click
+from rich import print
+
+from kodexa.cli.documentation import generate_site
+from kodexa.cloud.kodexa import ExtensionHelper, KodexaPlatform
+
+LOGGING_LEVELS = {
+    0: logging.NOTSET,
+    1: logging.ERROR,
+    2: logging.WARN,
+    3: logging.INFO,
+    4: logging.DEBUG,
+}  #: a mapping of `verbose` option counts to logging levels
+
+
+class Info(object):
+    &#34;&#34;&#34;An information object to pass data between CLI functions.&#34;&#34;&#34;
+
+    def __init__(self):  # Note: This object must have an empty constructor.
+        &#34;&#34;&#34;Create a new instance.&#34;&#34;&#34;
+        self.verbose: int = 0
+
+
+# pass_info is a decorator for functions that pass &#39;Info&#39; objects.
+#: pylint: disable=invalid-name
+pass_info = click.make_pass_decorator(Info, ensure=True)
+
+
+# Change the options to below to suit the actual options for your task (or
+# tasks).
+@click.group()
+@click.option(&#34;--verbose&#34;, &#34;-v&#34;, count=True, help=&#34;Enable verbose output.&#34;)
+@pass_info
+def cli(info: Info, verbose: int):
+    &#34;&#34;&#34;Run Kodexa.&#34;&#34;&#34;
+    # Use the verbosity count to determine the logging level...
+    if verbose &gt; 0:
+        logging.basicConfig(
+            level=LOGGING_LEVELS[verbose]
+            if verbose in LOGGING_LEVELS
+            else logging.DEBUG
+        )
+        click.echo(
+            click.style(
+                f&#34;Verbose logging is enabled. &#34;
+                f&#34;(LEVEL={logging.getLogger().getEffectiveLevel()})&#34;,
+                fg=&#34;yellow&#34;,
+            )
+        )
+    info.verbose = verbose
+
+
+@click.option(&#39;--path&#39;, default=os.getcwd(), help=&#39;Path to folder containing kodexa.yml&#39;)
+@click.option(&#39;--url&#39;, default=KodexaPlatform.get_url(), help=&#39;The URL to the Kodexa server&#39;)
+@click.option(&#39;--org&#39;, help=&#39;The slug for the organization to deploy to&#39;)
+@click.option(&#39;--token&#39;, default=KodexaPlatform.get_access_token(), help=&#39;Access token&#39;)
+@cli.command()
+@pass_info
+def deploy(_: Info, path: str, url: str, org: str, token: str):
+    &#34;&#34;&#34;Deploy extension pack to a Kodexa platform instance&#34;&#34;&#34;
+
+    print(&#34;Starting deployment from path&#34;, path)
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+
+    if &#39;://&#39; in path:
+        print(&#34;Deploying from URI&#34;, path)
+        KodexaPlatform.deploy_extension_from_uri(path, org)
+    else:
+        print(&#34;Deploying local metadata from&#34;, path)
+        metadata = ExtensionHelper.load_metadata(path)
+        metadata[&#39;orgSlug&#39;] = org;
+        KodexaPlatform.deploy_extension(metadata)
+
+    print(&#34;Deployed extension pack :tada:&#34;)
+
+
+@cli.command()
+@click.argument(&#39;object_type&#39;)
+@click.argument(&#39;ref&#39;)
+@click.option(&#39;--url&#39;, default=KodexaPlatform.get_url(), help=&#39;The URL to the Kodexa server&#39;)
+@click.option(&#39;--token&#39;, default=KodexaPlatform.get_access_token(), help=&#39;Access token&#39;)
+@click.option(&#39;--path&#39;, default=None, help=&#39;JQ path to content you want&#39;)
+@pass_info
+def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = None):
+    &#34;&#34;&#34;List the instance of the object type&#34;&#34;&#34;
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+    KodexaPlatform.get(object_type, ref, path)
+
+
+@cli.command()
+@click.argument(&#39;object_type&#39;)
+@click.argument(&#39;ref&#39;)
+@click.option(&#39;--url&#39;, default=KodexaPlatform.get_url(), help=&#39;The URL to the Kodexa server&#39;)
+@click.option(&#39;--token&#39;, default=KodexaPlatform.get_access_token(), help=&#39;Access token&#39;)
+@pass_info
+def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
+    &#34;&#34;&#34;List the instance of the object type&#34;&#34;&#34;
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+    KodexaPlatform.reindex(object_type, ref)
+
+
+@cli.command()
+@pass_info
+@click.option(&#39;--python/--no-python&#39;, default=False, help=&#39;Print out the header for a Python file&#39;)
+def platform(_: Info, python: bool):
+    &#34;&#34;&#34;Get details of the instance of Kodexa you are using&#34;&#34;&#34;
+
+    platform_url = KodexaPlatform.get_url()
+
+    if platform_url is not None:
+        print(f&#34;Kodexa URL: {KodexaPlatform.get_url()}&#34;)
+        print(f&#34;Access Token: {KodexaPlatform.get_access_token()}&#34;)
+        kodexa_version = KodexaPlatform.get_server_info()
+        print(f&#34;Version: {kodexa_version[&#39;version&#39;]}&#34;)
+        print(f&#34;Release: {kodexa_version[&#39;release&#39;]}&#34;)
+        if python:
+            print(&#34;\nPython example:\n\n&#34;)
+            print(f&#34;from kodexa import *&#34;)
+            print(f&#34;KodexaPlatform.set_url(&#39;{KodexaPlatform.get_url()}&#39;)&#34;)
+            print(f&#34;KodexaPlatform.set_access_token(&#39;{KodexaPlatform.get_access_token()}&#39;)&#34;)
+    else:
+        print(&#34;Kodexa is not logged in&#34;)
+
+
+@cli.command()
+@click.argument(&#39;object_type&#39;)
+@click.argument(&#39;ref&#39;)
+@click.option(&#39;--url&#39;, default=KodexaPlatform.get_url(), help=&#39;The URL to the Kodexa server&#39;)
+@click.option(&#39;--token&#39;, default=KodexaPlatform.get_access_token(), help=&#39;Access token&#39;)
+@pass_info
+def delete(_: Info, object_type: str, ref: str, url: str, token: str):
+    &#34;&#34;&#34;Delete object from the platform&#34;&#34;&#34;
+
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+    KodexaPlatform.delete(object_type, ref)
+
+
+@cli.command()
+@click.option(&#39;--path&#39;, default=os.getcwd(), help=&#39;Path to folder container kodexa.yml&#39;)
+@pass_info
+def metadata(_: Info, path: str):
+    &#34;&#34;&#34;Load metadata&#34;&#34;&#34;
+    metadata = ExtensionHelper.load_metadata(path)
+    print(f&#34;Metadata loaded&#34;)
+
+
+@cli.command()
+@pass_info
+def login(_: Info):
+    &#34;&#34;&#34;
+    Logs into the specified platform environment using the email address and password provided,
+    then downloads and stores the personal access token (PAT) of the user.
+    Once successfully logged in, calls to remote actions, pipelines, and workflows will be made to the
+    platform that was set via this login function and will use the stored PAT for authentication.
+    &#34;&#34;&#34;
+    try:
+        kodexa_url = input(&#34;Enter the Kodexa URL (https://platform.kodexa.com): &#34;)
+        if kodexa_url == &#34;&#34;:
+            print(&#34;Using default as https://platform.kodexa.com&#34;)
+            kodexa_url = &#34;https://platform.kodexa.com&#34;
+        username = input(&#34;Enter your email: &#34;)
+        password = getpass(&#34;Enter your password: &#34;)
+    except Exception as error:
+        print(&#39;ERROR&#39;, error)
+    else:
+        KodexaPlatform.login(kodexa_url, username, password)
+
+
+@cli.command()
+@click.option(&#39;--path&#39;, default=os.getcwd(), help=&#39;Path to folder container kodexa.yml&#39;)
+@pass_info
+def document(_: Info, path: str):
+    &#34;&#34;&#34;Build markdown documentation for this extension&#34;&#34;&#34;
+    metadata = ExtensionHelper.load_metadata(path)
+    print(&#34;Metadata loaded&#34;)
+    from kodexa.cli.documentation import generate_documentation
+    generate_documentation(metadata)
+    print(&#34;Extension documentation has been successfully built :tada:&#34;)
+
+
+@cli.command()
+@click.option(&#39;--path&#39;, default=os.getcwd(), help=&#39;Path to folder container kodexa.yml (defaults to current)&#39;)
+@click.option(&#39;--output&#39;, default=os.getcwd() + &#34;/dist&#34;,
+              help=&#39;Path to the output folder (defaults to dist under current)&#39;)
+@click.option(&#39;--version&#39;, default=os.getenv(&#39;VERSION&#39;), help=&#39;Version number (defaults to 1.0.0)&#39;)
+@click.option(&#39;--site/--no-site&#39;, default=False, help=&#39;Generate website to serve extension&#39;)
+@click.option(&#39;--sitedir&#39;, default=&#39;site&#39;, help=&#39;Path to folder for site contents&#39;)
+@click.option(&#39;--url&#39;, default=&#39;http://www.example.com/&#39;, help=&#39;The base URL for the site links&#39;)
+@pass_info
+def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
+    &#34;&#34;&#34;Package the extension for Kodexa&#34;&#34;&#34;
+    metadata_obj = ExtensionHelper.load_metadata(path)
+    print(&#34;Preparing to pack&#34;)
+    try:
+        os.makedirs(output)
+    except OSError as e:
+        import errno
+        if e.errno != errno.EEXIST:
+            raise
+
+    metadata_obj[&#39;version&#39;] = version if version is not None else &#39;1.0.0&#39;
+
+    if &#39;source&#39; in metadata_obj and &#39;location&#39; in metadata_obj[&#39;source&#39;]:
+        metadata_obj[&#39;source&#39;][&#39;location&#39;] = metadata_obj[&#39;source&#39;][&#39;location&#39;].format(**metadata_obj)
+
+    versioned_metadata = os.path.join(output, f&#34;{metadata_obj[&#39;slug&#39;]}-{metadata_obj[&#39;version&#39;]}.json&#34;)
+
+    if site:
+        metadata_obj[&#39;source&#39;][&#39;location&#39;] = url + metadata_obj[
+            &#39;version&#39;] + &#39;/&#39; + f&#34;{metadata_obj[&#39;slug&#39;]}-{metadata_obj[&#39;version&#39;]}.tar.gz&#34;
+
+    unversioned_metadata = os.path.join(output, &#34;kodexa.json&#34;)
+    with open(versioned_metadata, &#39;w&#39;) as outfile:
+        json.dump(metadata_obj, outfile)
+
+    from shutil import copyfile
+    copyfile(versioned_metadata, unversioned_metadata)
+
+    output_filename = f&#34;{metadata_obj[&#39;slug&#39;]}-{metadata_obj[&#39;version&#39;]}.tar.gz&#34;
+    with tarfile.open(output_filename, &#34;w:gz&#34;) as tar:
+        tar.add(output, arcname=os.path.basename(output))
+
+    os.rename(output_filename, os.path.join(output, output_filename))
+
+    print(&#34;Extension has been packaged :tada:&#34;)
+
+    if site:
+        metadata_obj[&#39;json_location&#39;] = url + metadata_obj[
+            &#39;version&#39;] + &#39;/&#39; + f&#34;{metadata_obj[&#39;slug&#39;]}-{metadata_obj[&#39;version&#39;]}.json&#34;
+        generate_site(metadata=metadata_obj, base_dir=sitedir, output_filename=os.path.join(output, output_filename),
+                      url=url, output_json=versioned_metadata)
+        print(&#34;Extension site has been successfully built :tada:&#34;)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="kodexa.cli.cli.Info"><code class="flex name class">
+<span>class <span class="ident">Info</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>An information object to pass data between CLI functions.</p>
+<p>Create a new instance.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Info(object):
+    &#34;&#34;&#34;An information object to pass data between CLI functions.&#34;&#34;&#34;
+
+    def __init__(self):  # Note: This object must have an empty constructor.
+        &#34;&#34;&#34;Create a new instance.&#34;&#34;&#34;
+        self.verbose: int = 0</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="kodexa.cli" href="index.html">kodexa.cli</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="kodexa.cli.cli.Info" href="#kodexa.cli.cli.Info">Info</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

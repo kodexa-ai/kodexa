@@ -1,0 +1,1221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>kodexa.selectors.parserules API documentation</title>
+<meta name="description" content="XPath parsing rules …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>kodexa.selectors.parserules</code></h1>
+</header>
+<section id="section-intro">
+<p>XPath parsing rules.</p>
+<p>To understand how this module works, it is valuable to have a strong
+understanding of the <code>ply &lt;http://www.dabeaz.com/ply/&gt;</code> module.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;XPath parsing rules.
+
+To understand how this module works, it is valuable to have a strong
+understanding of the `ply &lt;http://www.dabeaz.com/ply/&gt;` module.
+&#34;&#34;&#34;
+
+from __future__ import unicode_literals
+from kodexa.selectors import ast
+from kodexa.selectors.lexrules import tokens
+
+precedence = (
+    (&#39;left&#39;, &#39;OR_OP&#39;),
+    (&#39;left&#39;, &#39;AND_OP&#39;),
+    (&#39;left&#39;, &#39;EQUAL_OP&#39;),
+    (&#39;left&#39;, &#39;REL_OP&#39;),
+    (&#39;left&#39;, &#39;PLUS_OP&#39;, &#39;MINUS_OP&#39;),
+    (&#39;left&#39;, &#39;MULT_OP&#39;, &#39;DIV_OP&#39;, &#39;MOD_OP&#39;),
+    (&#39;right&#39;, &#39;UMINUS_OP&#39;),
+    (&#39;left&#39;, &#39;UNION_OP&#39;),
+    (&#39;left&#39;, &#39;INTERSECT_OP&#39;),
+)
+
+
+#
+# basic expressions
+#
+
+def p_expr_boolean(p):
+    &#34;&#34;&#34;
+    Expr : Expr OR_OP Expr
+         | Expr AND_OP Expr
+         | Expr EQUAL_OP Expr
+         | Expr REL_OP Expr
+         | Expr PLUS_OP Expr
+         | Expr MINUS_OP Expr
+         | Expr MULT_OP Expr
+         | Expr DIV_OP Expr
+         | Expr MOD_OP Expr
+         | Expr UNION_OP Expr
+         | Expr INTERSECT_OP Expr
+    &#34;&#34;&#34;
+    p[0] = ast.BinaryExpression(p[1], p[2], p[3])
+
+
+def p_expr_unary(p):
+    &#34;&#34;&#34;
+    Expr : MINUS_OP Expr %prec UMINUS_OP
+    &#34;&#34;&#34;
+    p[0] = ast.UnaryExpression(p[1], p[2])
+
+
+def p_expr_pipeline(p):
+    &#34;&#34;&#34;
+    Expr : Expr PIPELINE_OP Expr
+    &#34;&#34;&#34;
+    p[0] = ast.PipelineExpression(p[1], p[2], p[3])
+
+
+#
+# path expressions
+#
+
+def p_path_expr_binary(p):
+    &#34;&#34;&#34;
+    Expr : FilterExpr PATH_SEP RelativeLocationPath
+         | FilterExpr ABBREV_PATH_SEP RelativeLocationPath
+    &#34;&#34;&#34;
+    p[0] = ast.BinaryExpression(p[1], p[2], p[3])
+
+
+def p_path_expr_unary(p):
+    &#34;&#34;&#34;
+    Expr : RelativeLocationPath
+         | AbsoluteLocationPath
+         | AbbreviatedAbsoluteLocationPath
+         | FilterExpr
+    &#34;&#34;&#34;
+    p[0] = p[1]
+
+
+#
+# paths
+#
+
+def p_absolute_location_path_rootonly(p):
+    &#34;&#34;&#34;
+    AbsoluteLocationPath : PATH_SEP
+    &#34;&#34;&#34;
+    p[0] = ast.AbsolutePath(p[1])
+
+
+def p_absolute_location_path_subpath(p):
+    &#34;&#34;&#34;
+    AbsoluteLocationPath : PATH_SEP RelativeLocationPath
+    &#34;&#34;&#34;
+    p[0] = ast.AbsolutePath(p[1], p[2])
+
+
+def p_abbreviated_absolute_location_path(p):
+    &#34;&#34;&#34;
+    AbbreviatedAbsoluteLocationPath : ABBREV_PATH_SEP RelativeLocationPath
+    &#34;&#34;&#34;
+    p[0] = ast.AbsolutePath(p[1], p[2])
+
+
+def p_relative_location_path_simple(p):
+    &#34;&#34;&#34;
+    RelativeLocationPath : Step
+    &#34;&#34;&#34;
+    p[0] = p[1]
+
+
+def p_relative_location_path_binary(p):
+    &#34;&#34;&#34;
+    RelativeLocationPath : RelativeLocationPath PATH_SEP Step
+                         | RelativeLocationPath ABBREV_PATH_SEP Step
+    &#34;&#34;&#34;
+    p[0] = ast.BinaryExpression(p[1], p[2], p[3])
+
+
+#
+# path steps
+#
+
+def p_step_nodetest(p):
+    &#34;&#34;&#34;
+    Step : NodeTest
+    &#34;&#34;&#34;
+    p[0] = ast.Step(None, p[1], [])
+
+
+def p_step_nodetest_predicates(p):
+    &#34;&#34;&#34;
+    Step : NodeTest PredicateList
+    &#34;&#34;&#34;
+    p[0] = ast.Step(None, p[1], p[2])
+
+
+def p_step_axis_nodetest(p):
+    &#34;&#34;&#34;
+    Step : AxisSpecifier NodeTest
+    &#34;&#34;&#34;
+    p[0] = ast.Step(p[1], p[2], [])
+
+
+def p_step_axis_nodetest_predicates(p):
+    &#34;&#34;&#34;
+    Step : AxisSpecifier NodeTest PredicateList
+    &#34;&#34;&#34;
+    p[0] = ast.Step(p[1], p[2], p[3])
+
+
+def p_step_abbrev(p):
+    &#34;&#34;&#34;
+    Step : ABBREV_STEP_SELF
+         | ABBREV_STEP_PARENT
+    &#34;&#34;&#34;
+    p[0] = ast.AbbreviatedStep(p[1])
+
+
+#
+# axis specifier
+#
+
+def p_axis_specifier_full(p):
+    &#34;&#34;&#34;
+    AxisSpecifier : AXISNAME AXIS_SEP
+    &#34;&#34;&#34;
+    p[0] = p[1]
+
+
+def p_axis_specifier_abbrev(p):
+    &#34;&#34;&#34;
+    AxisSpecifier : ABBREV_AXIS_AT
+    &#34;&#34;&#34;
+    p[0] = &#39;@&#39;
+
+
+#
+# node test
+#
+
+def p_node_test_name_test(p):
+    &#34;&#34;&#34;
+    NodeTest : NameTest
+    &#34;&#34;&#34;
+    p[0] = p[1]
+
+
+def p_node_test_type_simple(p):
+    &#34;&#34;&#34;
+    NodeTest : NODETYPE OPEN_PAREN CLOSE_PAREN
+    &#34;&#34;&#34;
+    # NOTE: Strictly speaking p[1] must come from a list of recognized
+    # NodeTypes. Since we don&#39;t actually do anything with them, we don&#39;t
+    # need to recognize them.
+    p[0] = ast.NodeType(p[1])
+
+
+def p_node_test_type_literal(p):
+    &#34;&#34;&#34;
+    NodeTest : NODETYPE OPEN_PAREN LITERAL CLOSE_PAREN
+    &#34;&#34;&#34;
+    # NOTE: Technically this only allows &#39;processing-instruction&#39; for p[1].
+    # We&#39;ll go light on that restriction since we don&#39;t actually need it for
+    # processing.
+    p[0] = ast.NodeType(p[1], p[3])
+
+
+#
+# name test
+#
+
+def p_name_test_star(p):
+    &#34;&#34;&#34;
+    NameTest : STAR_OP
+    &#34;&#34;&#34;
+    p[0] = ast.NameTest(None, p[1])
+
+
+def p_name_test_prefix_star(p):
+    &#34;&#34;&#34;
+    NameTest : NCNAME COLON STAR_OP
+    &#34;&#34;&#34;
+    p[0] = ast.NameTest(p[1], p[3])
+
+
+def p_name_test_qname(p):
+    &#34;&#34;&#34;
+    NameTest : QName
+    &#34;&#34;&#34;
+    qname = p[1]
+    p[0] = ast.NameTest(qname[0], qname[1])
+
+
+#
+# qname
+#
+
+def p_qname_prefixed(p):
+    &#34;&#34;&#34;
+    QName : NCNAME COLON NCNAME
+    &#34;&#34;&#34;
+    p[0] = (p[1], p[3])
+
+
+def p_qname_unprefixed(p):
+    &#34;&#34;&#34;
+    QName : NCNAME
+    &#34;&#34;&#34;
+    p[0] = (None, p[1])
+
+
+def p_funcqname_prefixed(p):
+    &#34;&#34;&#34;
+    FuncQName : NCNAME COLON FUNCNAME
+    &#34;&#34;&#34;
+    p[0] = (p[1], p[3])
+
+
+def p_funcqname_unprefixed(p):
+    &#34;&#34;&#34;
+    FuncQName : FUNCNAME
+    &#34;&#34;&#34;
+    p[0] = (None, p[1])
+
+
+#
+# filter expressions
+#
+
+def p_filter_expr_simple(p):
+    &#34;&#34;&#34;
+    FilterExpr : VariableReference
+               | LITERAL
+               | Number
+               | FunctionCall
+    &#34;&#34;&#34;
+    # FIXME: | FunctionCall moved so as not to conflict with NodeTest :
+    # FunctionCall
+    p[0] = p[1]
+
+
+def p_filter_expr_grouped(p):
+    &#34;&#34;&#34;
+    FilterExpr : OPEN_PAREN Expr CLOSE_PAREN
+    &#34;&#34;&#34;
+    p[0] = p[2]
+
+
+def p_filter_expr_predicate(p):
+    &#34;&#34;&#34;
+    FilterExpr : FilterExpr Predicate
+    &#34;&#34;&#34;
+    if not hasattr(p[1], &#39;append_predicate&#39;):
+        p[1] = ast.PredicatedExpression(p[1])
+    p[1].append_predicate(p[2])
+    p[0] = p[1]
+
+
+#
+# predicates
+#
+
+def p_predicate_list_single(p):
+    &#34;&#34;&#34;
+    PredicateList : Predicate
+    &#34;&#34;&#34;
+    p[0] = [p[1]]
+
+
+def p_predicate_list_recursive(p):
+    &#34;&#34;&#34;
+    PredicateList : PredicateList Predicate
+    &#34;&#34;&#34;
+    p[0] = p[1]
+    p[0].append(p[2])
+
+
+def p_predicate(p):
+    &#34;&#34;&#34;
+    Predicate : OPEN_BRACKET Expr CLOSE_BRACKET
+    &#34;&#34;&#34;
+    p[0] = p[2]
+
+
+#
+# variable
+#
+
+def p_variable_reference(p):
+    &#34;&#34;&#34;
+    VariableReference : DOLLAR QName
+    &#34;&#34;&#34;
+    p[0] = ast.VariableReference(p[2])
+
+
+#
+# number
+#
+
+def p_number(p):
+    &#34;&#34;&#34;
+    Number : FLOAT
+           | INTEGER
+    &#34;&#34;&#34;
+    p[0] = p[1]
+
+
+#
+# funcall
+#
+
+def p_function_call(p):
+    &#34;&#34;&#34;
+    FunctionCall : FuncQName FormalArguments
+    &#34;&#34;&#34;
+    # FIXME: This production also matches NodeType() or
+    # processing-instruction(&#34;foo&#34;), which are technically NodeTest
+    qname = p[1]
+    p[0] = ast.FunctionCall(qname[0], qname[1], p[2])
+
+
+def p_formal_arguments_empty(p):
+    &#34;&#34;&#34;
+    FormalArguments : OPEN_PAREN CLOSE_PAREN
+    &#34;&#34;&#34;
+    p[0] = []
+
+
+def p_formal_arguments_list(p):
+    &#34;&#34;&#34;
+    FormalArguments : OPEN_PAREN ArgumentList CLOSE_PAREN
+    &#34;&#34;&#34;
+    p[0] = p[2]
+
+
+def p_argument_list_single(p):
+    &#34;&#34;&#34;
+    ArgumentList : Expr
+    &#34;&#34;&#34;
+    p[0] = [p[1]]
+
+
+def p_argument_list_recursive(p):
+    &#34;&#34;&#34;
+    ArgumentList : ArgumentList COMMA Expr
+    &#34;&#34;&#34;
+    p[0] = p[1]
+    p[0].append(p[3])
+
+
+#
+# error handling
+#
+
+def p_error(p):
+    # In some cases, p could actually be None.
+    # However, stack trace should have enough information to identify the problem.
+    raise RuntimeError(&#34;Syntax error at &#39;%s&#39;&#34; % repr(p))</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="kodexa.selectors.parserules.p_abbreviated_absolute_location_path"><code class="name flex">
+<span>def <span class="ident">p_abbreviated_absolute_location_path</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AbbreviatedAbsoluteLocationPath : ABBREV_PATH_SEP RelativeLocationPath</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_abbreviated_absolute_location_path(p):
+    &#34;&#34;&#34;
+    AbbreviatedAbsoluteLocationPath : ABBREV_PATH_SEP RelativeLocationPath
+    &#34;&#34;&#34;
+    p[0] = ast.AbsolutePath(p[1], p[2])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_absolute_location_path_rootonly"><code class="name flex">
+<span>def <span class="ident">p_absolute_location_path_rootonly</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AbsoluteLocationPath : PATH_SEP</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_absolute_location_path_rootonly(p):
+    &#34;&#34;&#34;
+    AbsoluteLocationPath : PATH_SEP
+    &#34;&#34;&#34;
+    p[0] = ast.AbsolutePath(p[1])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_absolute_location_path_subpath"><code class="name flex">
+<span>def <span class="ident">p_absolute_location_path_subpath</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AbsoluteLocationPath : PATH_SEP RelativeLocationPath</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_absolute_location_path_subpath(p):
+    &#34;&#34;&#34;
+    AbsoluteLocationPath : PATH_SEP RelativeLocationPath
+    &#34;&#34;&#34;
+    p[0] = ast.AbsolutePath(p[1], p[2])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_argument_list_recursive"><code class="name flex">
+<span>def <span class="ident">p_argument_list_recursive</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ArgumentList : ArgumentList COMMA Expr</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_argument_list_recursive(p):
+    &#34;&#34;&#34;
+    ArgumentList : ArgumentList COMMA Expr
+    &#34;&#34;&#34;
+    p[0] = p[1]
+    p[0].append(p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_argument_list_single"><code class="name flex">
+<span>def <span class="ident">p_argument_list_single</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ArgumentList : Expr</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_argument_list_single(p):
+    &#34;&#34;&#34;
+    ArgumentList : Expr
+    &#34;&#34;&#34;
+    p[0] = [p[1]]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_axis_specifier_abbrev"><code class="name flex">
+<span>def <span class="ident">p_axis_specifier_abbrev</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AxisSpecifier : ABBREV_AXIS_AT</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_axis_specifier_abbrev(p):
+    &#34;&#34;&#34;
+    AxisSpecifier : ABBREV_AXIS_AT
+    &#34;&#34;&#34;
+    p[0] = &#39;@&#39;</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_axis_specifier_full"><code class="name flex">
+<span>def <span class="ident">p_axis_specifier_full</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>AxisSpecifier : AXISNAME AXIS_SEP</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_axis_specifier_full(p):
+    &#34;&#34;&#34;
+    AxisSpecifier : AXISNAME AXIS_SEP
+    &#34;&#34;&#34;
+    p[0] = p[1]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_error"><code class="name flex">
+<span>def <span class="ident">p_error</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_error(p):
+    # In some cases, p could actually be None.
+    # However, stack trace should have enough information to identify the problem.
+    raise RuntimeError(&#34;Syntax error at &#39;%s&#39;&#34; % repr(p))</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_expr_boolean"><code class="name flex">
+<span>def <span class="ident">p_expr_boolean</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Expr : Expr OR_OP Expr
+| Expr AND_OP Expr
+| Expr EQUAL_OP Expr
+| Expr REL_OP Expr
+| Expr PLUS_OP Expr
+| Expr MINUS_OP Expr
+| Expr MULT_OP Expr
+| Expr DIV_OP Expr
+| Expr MOD_OP Expr
+| Expr UNION_OP Expr
+| Expr INTERSECT_OP Expr</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_expr_boolean(p):
+    &#34;&#34;&#34;
+    Expr : Expr OR_OP Expr
+         | Expr AND_OP Expr
+         | Expr EQUAL_OP Expr
+         | Expr REL_OP Expr
+         | Expr PLUS_OP Expr
+         | Expr MINUS_OP Expr
+         | Expr MULT_OP Expr
+         | Expr DIV_OP Expr
+         | Expr MOD_OP Expr
+         | Expr UNION_OP Expr
+         | Expr INTERSECT_OP Expr
+    &#34;&#34;&#34;
+    p[0] = ast.BinaryExpression(p[1], p[2], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_expr_pipeline"><code class="name flex">
+<span>def <span class="ident">p_expr_pipeline</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Expr : Expr PIPELINE_OP Expr</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_expr_pipeline(p):
+    &#34;&#34;&#34;
+    Expr : Expr PIPELINE_OP Expr
+    &#34;&#34;&#34;
+    p[0] = ast.PipelineExpression(p[1], p[2], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_expr_unary"><code class="name flex">
+<span>def <span class="ident">p_expr_unary</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Expr : MINUS_OP Expr %prec UMINUS_OP</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_expr_unary(p):
+    &#34;&#34;&#34;
+    Expr : MINUS_OP Expr %prec UMINUS_OP
+    &#34;&#34;&#34;
+    p[0] = ast.UnaryExpression(p[1], p[2])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_filter_expr_grouped"><code class="name flex">
+<span>def <span class="ident">p_filter_expr_grouped</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FilterExpr : OPEN_PAREN Expr CLOSE_PAREN</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_filter_expr_grouped(p):
+    &#34;&#34;&#34;
+    FilterExpr : OPEN_PAREN Expr CLOSE_PAREN
+    &#34;&#34;&#34;
+    p[0] = p[2]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_filter_expr_predicate"><code class="name flex">
+<span>def <span class="ident">p_filter_expr_predicate</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FilterExpr : FilterExpr Predicate</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_filter_expr_predicate(p):
+    &#34;&#34;&#34;
+    FilterExpr : FilterExpr Predicate
+    &#34;&#34;&#34;
+    if not hasattr(p[1], &#39;append_predicate&#39;):
+        p[1] = ast.PredicatedExpression(p[1])
+    p[1].append_predicate(p[2])
+    p[0] = p[1]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_filter_expr_simple"><code class="name flex">
+<span>def <span class="ident">p_filter_expr_simple</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FilterExpr : VariableReference
+| LITERAL
+| Number
+| FunctionCall</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_filter_expr_simple(p):
+    &#34;&#34;&#34;
+    FilterExpr : VariableReference
+               | LITERAL
+               | Number
+               | FunctionCall
+    &#34;&#34;&#34;
+    # FIXME: | FunctionCall moved so as not to conflict with NodeTest :
+    # FunctionCall
+    p[0] = p[1]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_formal_arguments_empty"><code class="name flex">
+<span>def <span class="ident">p_formal_arguments_empty</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FormalArguments : OPEN_PAREN CLOSE_PAREN</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_formal_arguments_empty(p):
+    &#34;&#34;&#34;
+    FormalArguments : OPEN_PAREN CLOSE_PAREN
+    &#34;&#34;&#34;
+    p[0] = []</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_formal_arguments_list"><code class="name flex">
+<span>def <span class="ident">p_formal_arguments_list</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FormalArguments : OPEN_PAREN ArgumentList CLOSE_PAREN</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_formal_arguments_list(p):
+    &#34;&#34;&#34;
+    FormalArguments : OPEN_PAREN ArgumentList CLOSE_PAREN
+    &#34;&#34;&#34;
+    p[0] = p[2]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_funcqname_prefixed"><code class="name flex">
+<span>def <span class="ident">p_funcqname_prefixed</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FuncQName : NCNAME COLON FUNCNAME</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_funcqname_prefixed(p):
+    &#34;&#34;&#34;
+    FuncQName : NCNAME COLON FUNCNAME
+    &#34;&#34;&#34;
+    p[0] = (p[1], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_funcqname_unprefixed"><code class="name flex">
+<span>def <span class="ident">p_funcqname_unprefixed</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FuncQName : FUNCNAME</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_funcqname_unprefixed(p):
+    &#34;&#34;&#34;
+    FuncQName : FUNCNAME
+    &#34;&#34;&#34;
+    p[0] = (None, p[1])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_function_call"><code class="name flex">
+<span>def <span class="ident">p_function_call</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>FunctionCall : FuncQName FormalArguments</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_function_call(p):
+    &#34;&#34;&#34;
+    FunctionCall : FuncQName FormalArguments
+    &#34;&#34;&#34;
+    # FIXME: This production also matches NodeType() or
+    # processing-instruction(&#34;foo&#34;), which are technically NodeTest
+    qname = p[1]
+    p[0] = ast.FunctionCall(qname[0], qname[1], p[2])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_name_test_prefix_star"><code class="name flex">
+<span>def <span class="ident">p_name_test_prefix_star</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>NameTest : NCNAME COLON STAR_OP</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_name_test_prefix_star(p):
+    &#34;&#34;&#34;
+    NameTest : NCNAME COLON STAR_OP
+    &#34;&#34;&#34;
+    p[0] = ast.NameTest(p[1], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_name_test_qname"><code class="name flex">
+<span>def <span class="ident">p_name_test_qname</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>NameTest : QName</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_name_test_qname(p):
+    &#34;&#34;&#34;
+    NameTest : QName
+    &#34;&#34;&#34;
+    qname = p[1]
+    p[0] = ast.NameTest(qname[0], qname[1])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_name_test_star"><code class="name flex">
+<span>def <span class="ident">p_name_test_star</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>NameTest : STAR_OP</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_name_test_star(p):
+    &#34;&#34;&#34;
+    NameTest : STAR_OP
+    &#34;&#34;&#34;
+    p[0] = ast.NameTest(None, p[1])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_node_test_name_test"><code class="name flex">
+<span>def <span class="ident">p_node_test_name_test</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>NodeTest : NameTest</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_node_test_name_test(p):
+    &#34;&#34;&#34;
+    NodeTest : NameTest
+    &#34;&#34;&#34;
+    p[0] = p[1]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_node_test_type_literal"><code class="name flex">
+<span>def <span class="ident">p_node_test_type_literal</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>NodeTest : NODETYPE OPEN_PAREN LITERAL CLOSE_PAREN</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_node_test_type_literal(p):
+    &#34;&#34;&#34;
+    NodeTest : NODETYPE OPEN_PAREN LITERAL CLOSE_PAREN
+    &#34;&#34;&#34;
+    # NOTE: Technically this only allows &#39;processing-instruction&#39; for p[1].
+    # We&#39;ll go light on that restriction since we don&#39;t actually need it for
+    # processing.
+    p[0] = ast.NodeType(p[1], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_node_test_type_simple"><code class="name flex">
+<span>def <span class="ident">p_node_test_type_simple</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>NodeTest : NODETYPE OPEN_PAREN CLOSE_PAREN</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_node_test_type_simple(p):
+    &#34;&#34;&#34;
+    NodeTest : NODETYPE OPEN_PAREN CLOSE_PAREN
+    &#34;&#34;&#34;
+    # NOTE: Strictly speaking p[1] must come from a list of recognized
+    # NodeTypes. Since we don&#39;t actually do anything with them, we don&#39;t
+    # need to recognize them.
+    p[0] = ast.NodeType(p[1])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_number"><code class="name flex">
+<span>def <span class="ident">p_number</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Number : FLOAT
+| INTEGER</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_number(p):
+    &#34;&#34;&#34;
+    Number : FLOAT
+           | INTEGER
+    &#34;&#34;&#34;
+    p[0] = p[1]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_path_expr_binary"><code class="name flex">
+<span>def <span class="ident">p_path_expr_binary</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Expr : FilterExpr PATH_SEP RelativeLocationPath
+| FilterExpr ABBREV_PATH_SEP RelativeLocationPath</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_path_expr_binary(p):
+    &#34;&#34;&#34;
+    Expr : FilterExpr PATH_SEP RelativeLocationPath
+         | FilterExpr ABBREV_PATH_SEP RelativeLocationPath
+    &#34;&#34;&#34;
+    p[0] = ast.BinaryExpression(p[1], p[2], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_path_expr_unary"><code class="name flex">
+<span>def <span class="ident">p_path_expr_unary</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Expr : RelativeLocationPath
+| AbsoluteLocationPath
+| AbbreviatedAbsoluteLocationPath
+| FilterExpr</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_path_expr_unary(p):
+    &#34;&#34;&#34;
+    Expr : RelativeLocationPath
+         | AbsoluteLocationPath
+         | AbbreviatedAbsoluteLocationPath
+         | FilterExpr
+    &#34;&#34;&#34;
+    p[0] = p[1]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_predicate"><code class="name flex">
+<span>def <span class="ident">p_predicate</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Predicate : OPEN_BRACKET Expr CLOSE_BRACKET</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_predicate(p):
+    &#34;&#34;&#34;
+    Predicate : OPEN_BRACKET Expr CLOSE_BRACKET
+    &#34;&#34;&#34;
+    p[0] = p[2]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_predicate_list_recursive"><code class="name flex">
+<span>def <span class="ident">p_predicate_list_recursive</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>PredicateList : PredicateList Predicate</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_predicate_list_recursive(p):
+    &#34;&#34;&#34;
+    PredicateList : PredicateList Predicate
+    &#34;&#34;&#34;
+    p[0] = p[1]
+    p[0].append(p[2])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_predicate_list_single"><code class="name flex">
+<span>def <span class="ident">p_predicate_list_single</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>PredicateList : Predicate</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_predicate_list_single(p):
+    &#34;&#34;&#34;
+    PredicateList : Predicate
+    &#34;&#34;&#34;
+    p[0] = [p[1]]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_qname_prefixed"><code class="name flex">
+<span>def <span class="ident">p_qname_prefixed</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>QName : NCNAME COLON NCNAME</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_qname_prefixed(p):
+    &#34;&#34;&#34;
+    QName : NCNAME COLON NCNAME
+    &#34;&#34;&#34;
+    p[0] = (p[1], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_qname_unprefixed"><code class="name flex">
+<span>def <span class="ident">p_qname_unprefixed</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>QName : NCNAME</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_qname_unprefixed(p):
+    &#34;&#34;&#34;
+    QName : NCNAME
+    &#34;&#34;&#34;
+    p[0] = (None, p[1])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_relative_location_path_binary"><code class="name flex">
+<span>def <span class="ident">p_relative_location_path_binary</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>RelativeLocationPath : RelativeLocationPath PATH_SEP Step
+| RelativeLocationPath ABBREV_PATH_SEP Step</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_relative_location_path_binary(p):
+    &#34;&#34;&#34;
+    RelativeLocationPath : RelativeLocationPath PATH_SEP Step
+                         | RelativeLocationPath ABBREV_PATH_SEP Step
+    &#34;&#34;&#34;
+    p[0] = ast.BinaryExpression(p[1], p[2], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_relative_location_path_simple"><code class="name flex">
+<span>def <span class="ident">p_relative_location_path_simple</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>RelativeLocationPath : Step</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_relative_location_path_simple(p):
+    &#34;&#34;&#34;
+    RelativeLocationPath : Step
+    &#34;&#34;&#34;
+    p[0] = p[1]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_step_abbrev"><code class="name flex">
+<span>def <span class="ident">p_step_abbrev</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Step : ABBREV_STEP_SELF
+| ABBREV_STEP_PARENT</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_step_abbrev(p):
+    &#34;&#34;&#34;
+    Step : ABBREV_STEP_SELF
+         | ABBREV_STEP_PARENT
+    &#34;&#34;&#34;
+    p[0] = ast.AbbreviatedStep(p[1])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_step_axis_nodetest"><code class="name flex">
+<span>def <span class="ident">p_step_axis_nodetest</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Step : AxisSpecifier NodeTest</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_step_axis_nodetest(p):
+    &#34;&#34;&#34;
+    Step : AxisSpecifier NodeTest
+    &#34;&#34;&#34;
+    p[0] = ast.Step(p[1], p[2], [])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_step_axis_nodetest_predicates"><code class="name flex">
+<span>def <span class="ident">p_step_axis_nodetest_predicates</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Step : AxisSpecifier NodeTest PredicateList</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_step_axis_nodetest_predicates(p):
+    &#34;&#34;&#34;
+    Step : AxisSpecifier NodeTest PredicateList
+    &#34;&#34;&#34;
+    p[0] = ast.Step(p[1], p[2], p[3])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_step_nodetest"><code class="name flex">
+<span>def <span class="ident">p_step_nodetest</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Step : NodeTest</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_step_nodetest(p):
+    &#34;&#34;&#34;
+    Step : NodeTest
+    &#34;&#34;&#34;
+    p[0] = ast.Step(None, p[1], [])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_step_nodetest_predicates"><code class="name flex">
+<span>def <span class="ident">p_step_nodetest_predicates</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Step : NodeTest PredicateList</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_step_nodetest_predicates(p):
+    &#34;&#34;&#34;
+    Step : NodeTest PredicateList
+    &#34;&#34;&#34;
+    p[0] = ast.Step(None, p[1], p[2])</code></pre>
+</details>
+</dd>
+<dt id="kodexa.selectors.parserules.p_variable_reference"><code class="name flex">
+<span>def <span class="ident">p_variable_reference</span></span>(<span>p)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>VariableReference : DOLLAR QName</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def p_variable_reference(p):
+    &#34;&#34;&#34;
+    VariableReference : DOLLAR QName
+    &#34;&#34;&#34;
+    p[0] = ast.VariableReference(p[2])</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="kodexa.selectors" href="index.html">kodexa.selectors</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="kodexa.selectors.parserules.p_abbreviated_absolute_location_path" href="#kodexa.selectors.parserules.p_abbreviated_absolute_location_path">p_abbreviated_absolute_location_path</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_absolute_location_path_rootonly" href="#kodexa.selectors.parserules.p_absolute_location_path_rootonly">p_absolute_location_path_rootonly</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_absolute_location_path_subpath" href="#kodexa.selectors.parserules.p_absolute_location_path_subpath">p_absolute_location_path_subpath</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_argument_list_recursive" href="#kodexa.selectors.parserules.p_argument_list_recursive">p_argument_list_recursive</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_argument_list_single" href="#kodexa.selectors.parserules.p_argument_list_single">p_argument_list_single</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_axis_specifier_abbrev" href="#kodexa.selectors.parserules.p_axis_specifier_abbrev">p_axis_specifier_abbrev</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_axis_specifier_full" href="#kodexa.selectors.parserules.p_axis_specifier_full">p_axis_specifier_full</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_error" href="#kodexa.selectors.parserules.p_error">p_error</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_expr_boolean" href="#kodexa.selectors.parserules.p_expr_boolean">p_expr_boolean</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_expr_pipeline" href="#kodexa.selectors.parserules.p_expr_pipeline">p_expr_pipeline</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_expr_unary" href="#kodexa.selectors.parserules.p_expr_unary">p_expr_unary</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_filter_expr_grouped" href="#kodexa.selectors.parserules.p_filter_expr_grouped">p_filter_expr_grouped</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_filter_expr_predicate" href="#kodexa.selectors.parserules.p_filter_expr_predicate">p_filter_expr_predicate</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_filter_expr_simple" href="#kodexa.selectors.parserules.p_filter_expr_simple">p_filter_expr_simple</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_formal_arguments_empty" href="#kodexa.selectors.parserules.p_formal_arguments_empty">p_formal_arguments_empty</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_formal_arguments_list" href="#kodexa.selectors.parserules.p_formal_arguments_list">p_formal_arguments_list</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_funcqname_prefixed" href="#kodexa.selectors.parserules.p_funcqname_prefixed">p_funcqname_prefixed</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_funcqname_unprefixed" href="#kodexa.selectors.parserules.p_funcqname_unprefixed">p_funcqname_unprefixed</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_function_call" href="#kodexa.selectors.parserules.p_function_call">p_function_call</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_name_test_prefix_star" href="#kodexa.selectors.parserules.p_name_test_prefix_star">p_name_test_prefix_star</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_name_test_qname" href="#kodexa.selectors.parserules.p_name_test_qname">p_name_test_qname</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_name_test_star" href="#kodexa.selectors.parserules.p_name_test_star">p_name_test_star</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_node_test_name_test" href="#kodexa.selectors.parserules.p_node_test_name_test">p_node_test_name_test</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_node_test_type_literal" href="#kodexa.selectors.parserules.p_node_test_type_literal">p_node_test_type_literal</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_node_test_type_simple" href="#kodexa.selectors.parserules.p_node_test_type_simple">p_node_test_type_simple</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_number" href="#kodexa.selectors.parserules.p_number">p_number</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_path_expr_binary" href="#kodexa.selectors.parserules.p_path_expr_binary">p_path_expr_binary</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_path_expr_unary" href="#kodexa.selectors.parserules.p_path_expr_unary">p_path_expr_unary</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_predicate" href="#kodexa.selectors.parserules.p_predicate">p_predicate</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_predicate_list_recursive" href="#kodexa.selectors.parserules.p_predicate_list_recursive">p_predicate_list_recursive</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_predicate_list_single" href="#kodexa.selectors.parserules.p_predicate_list_single">p_predicate_list_single</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_qname_prefixed" href="#kodexa.selectors.parserules.p_qname_prefixed">p_qname_prefixed</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_qname_unprefixed" href="#kodexa.selectors.parserules.p_qname_unprefixed">p_qname_unprefixed</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_relative_location_path_binary" href="#kodexa.selectors.parserules.p_relative_location_path_binary">p_relative_location_path_binary</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_relative_location_path_simple" href="#kodexa.selectors.parserules.p_relative_location_path_simple">p_relative_location_path_simple</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_step_abbrev" href="#kodexa.selectors.parserules.p_step_abbrev">p_step_abbrev</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_step_axis_nodetest" href="#kodexa.selectors.parserules.p_step_axis_nodetest">p_step_axis_nodetest</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_step_axis_nodetest_predicates" href="#kodexa.selectors.parserules.p_step_axis_nodetest_predicates">p_step_axis_nodetest_predicates</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_step_nodetest" href="#kodexa.selectors.parserules.p_step_nodetest">p_step_nodetest</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_step_nodetest_predicates" href="#kodexa.selectors.parserules.p_step_nodetest_predicates">p_step_nodetest_predicates</a></code></li>
+<li><code><a title="kodexa.selectors.parserules.p_variable_reference" href="#kodexa.selectors.parserules.p_variable_reference">p_variable_reference</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
