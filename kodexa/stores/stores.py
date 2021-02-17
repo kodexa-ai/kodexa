@@ -5,7 +5,7 @@ from typing import List, Dict, Optional
 
 import requests
 
-from kodexa.model import Document, DocumentStore, RemoteStore, ModelStore, ContentObject, Store
+from kodexa.model import Document, DocumentStore, RemoteStore, ModelStore, ContentObject
 from kodexa.stores.local import LocalModelStore, TableDataStore
 
 logger = logging.getLogger('kodexa.stores')
@@ -123,98 +123,6 @@ class RemoteTableDataStore(RemoteStore):
         else:
             logger.error("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
             raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
-
-
-class TableDataStore(Store):
-    """
-    Stores data as a list of lists that can represent a table.
-
-    This is a good store when you are capturing nested or tabular data.
-
-    :param columns: a list of the column names (default to dynamic)
-    :param rows: initial set of rows (default to empty)
-
-    """
-
-    def __init__(self, columns=None, rows=None):
-        if rows is None:
-            rows = []
-        if columns is None:
-            columns = []
-        self.columns: List[str] = columns
-        self.rows: List[List] = rows
-
-        from kodexa.pipeline import PipelineContext
-
-        self.pipeline_context: Optional[PipelineContext] = None
-
-    """
-    Return the store as a dict for serialization
-    """
-
-    def to_dict(self):
-        """
-        Create a dictionary representing this TableDataStore's structure and content.
-
-            >>> table_data_store.to_dict()
-
-        :return: The properties of this TableDataStore structured as a dictionary.
-        :rtype: dict
-        """
-
-        return {
-            "type": "TABLE",
-            "data": {
-                "columns": self.columns,
-                "rows": self.rows
-            }
-        }
-
-    def clear(self):
-        self.rows = []
-
-    def to_df(self):
-        import pandas as pd
-
-        if not self.columns:
-            return pd.DataFrame(self.rows)
-        else:
-            return pd.DataFrame(self.rows, columns=self.columns)
-
-    def set_pipeline_context(self, pipeline_context):
-        self.pipeline_context = pipeline_context
-
-    def add(self, row):
-        """
-        Writes a row to the Data Store
-
-        :param row: the row (as a list) to add
-        """
-        self.rows.append(row)
-
-        if self.pipeline_context and self.pipeline_context.current_document:
-            current_document = self.pipeline_context.get_current_document()
-
-    def count(self):
-        """
-        Returns the number of rows in the store
-
-        :return: number of rows
-        """
-        return len(self.rows)
-
-    def merge(self, other_store):
-        """
-        Merge another table store into this store
-
-        :param other_store:
-        :return: the other store
-        """
-        self.rows = self.rows + other_store.rows
-
-    @classmethod
-    def from_dict(cls, store_dict):
-        return TableDataStore(columns=store_dict['data']['columns'], rows=store_dict['data']['rows'])
 
 
 class RemoteDictDataStore(RemoteStore):
