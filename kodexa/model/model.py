@@ -15,11 +15,21 @@ from kodexa.mixins import registry
 
 
 class ContentType(Enum):
+    """
+    Types of content object that are supported
+
+    """
     DOCUMENT = 'DOCUMENT'
     NATIVE = 'NATIVE'
 
 
 class ContentObject:
+    """
+    A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
+    a Kodexa document.
+
+    The content object allows us to capture metadata about the document or the native file without changing it
+    """
 
     def __init__(self, name="untitled", id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
                  store_ref=None, labels=None):
@@ -50,10 +60,18 @@ class ContentObject:
             'store_ref': self.store_ref
         }
 
+    @classmethod
+    def from_dict(cls, co_dict):
+        co = ContentObject(co_dict['name'])
+        co.id = co_dict['id']
+        co.labels = co_dict['labels']
+        co.metadata = co_dict['metadata']
+        co.content_type = co_dict['content_type']
+
 
 class Store:
     """
-    Base interface for Store
+    Base definition of a store in Kodexa (deprecated)
     """
 
     def get_name(self):
