@@ -324,21 +324,18 @@ class KodexaPlatform:
             object_url = 'stores'
             metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A document store' if metadata_object.description is None else metadata_object.description
-
             metadata_object.type = 'store'
             metadata_object.storeType = 'DOCUMENT'
         elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
             object_url = 'stores'
             metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A model store' if metadata_object.description is None else metadata_object.description
-
             metadata_object.type = 'store'
             metadata_object.storeType = 'MODEL'
         elif isinstance(kodexa_object, RemoteTableDataStore):
             object_url = 'stores'
             metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A table data store' if metadata_object.description is None else metadata_object.description
-
             metadata_object.type = 'store'
             metadata_object.storeType = 'TABLE'
         elif isinstance(kodexa_object, Workflow):
@@ -360,7 +357,7 @@ class KodexaPlatform:
             metadata_object.type = 'taxonomy'
             metadata_object.enabled = kodexa_object.enabled
             metadata_object.taxonomyType = kodexa_object.taxonomy_type
-            metadata_object.taxons = jsonpickle.decode(jsonpickle.encode(kodexa_object.taxons, unpicklable=False))
+            metadata_object.taxons = jsonpickle.decode(jsonpickle.encode([taxon.to_dict() for taxon in kodexa_object.taxons], unpicklable=False))
         elif isinstance(kodexa_object, Assistant):
             metadata_object.name = 'New Assistant Definition' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new assistant definition' if metadata_object.description is None else metadata_object.description
