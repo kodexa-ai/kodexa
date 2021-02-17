@@ -31,6 +31,11 @@ dirs = AppDirs("Kodexa", "Kodexa")
 
 
 def get_config():
+    """
+    Get the kodexa config object we use when you want to store your PAT locally
+
+    :return: the config as a dict
+    """
     path = os.path.join(dirs.user_config_dir, '.kodexa.json')
     if os.path.exists(path):
         with open(path, 'r') as outfile:
@@ -40,6 +45,12 @@ def get_config():
 
 
 def save_config(config_obj):
+    """
+    Saves the configuration dictionary for the user
+
+    :param config_obj:
+    :return:
+    """
     path = os.path.join(dirs.user_config_dir, '.kodexa.json')
     if not os.path.exists(os.path.dirname(path)):
         try:
@@ -115,6 +126,7 @@ DEFAULT_COLUMNS = {
     ]
 }
 
+
 OBJECT_TYPES = {
     "extensionPacks": {
         "name": "extension pack",
@@ -152,6 +164,12 @@ OBJECT_TYPES = {
 
 
 def resolve_object_type(obj_type):
+    """
+    Takes part of an object type (ie. pipelin) and then resolves the object type (pipelines)
+
+    :param obj_type: part of the object type
+    :return: The object type dict (if found)
+    """
     hits = []
     keys = []
     for target_type in OBJECT_TYPES.keys():
@@ -171,6 +189,11 @@ def resolve_object_type(obj_type):
 
 
 class KodexaPlatform:
+    """
+    The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
+    components
+
+    """
 
     @staticmethod
     def get_access_token():

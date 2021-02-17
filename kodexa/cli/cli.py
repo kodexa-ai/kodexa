@@ -2,21 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This is the entry point for the command-line interface (CLI) application.
+This is the Kodexa CLI, it can be used to allow you to work with an instance of the Kodexa platform.
 
-Itcan be used as a handy facility for running the task from a command line.
-
-.. note::
-
-    To learn more about Click visit the
-    `project website <http://click.pocoo.org/5/>`_.  There is also a very
-    helpful `tutorial video <https://www.youtube.com/watch?v=kNke39OZ2k0>`_.
-
-    To learn more about running Luigi, visit the Luigi project's
-    `Read-The-Docs <http://luigi.readthedocs.io/en/stable/>`_ page.
-
-.. currentmodule:: dharma_cli.cli
-.. moduleauthor:: Kodexa, Inc <support@kodexa.com>
+It supports interacting with the API, listing and viewing components.  Note it can also be used to login and logout
 """
 import json
 import logging
