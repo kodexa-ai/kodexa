@@ -52,49 +52,91 @@ logger = logging.getLogger(&#39;kodexa.pipeline&#39;)
 
 
 def new_id():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return str(uuid.uuid4()).replace(&#34;-&#34;, &#34;&#34;)
 
 
 class InMemoryContentProvider:
-    &#34;&#34;&#34;
-    A content provider is used to support getting content (documents or native) to
+    &#34;&#34;&#34;A content provider is used to support getting content (documents or native) to
     and from the pipeline
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self):
         self.content_objects = {}
 
     def get_content(self, content_object: ContentObject):
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return self.content_objects[content_object.id]
 
     def put_content(self, content_object: ContentObject, content):
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+          content: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.content_objects[content_object.id] = content
 
 
 class InMemoryStoreProvider:
-    &#34;&#34;&#34;
-    A store provider is used to support getting stores from the pipeline
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;A store provider is used to support getting stores from the pipeline&#34;&#34;&#34;
 
     def __init__(self):
         self.stores = {}
 
     def put_store(self, name: str, store: Store):
+        &#34;&#34;&#34;
+
+        Args:
+          name: str: 
+          store: Store: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.stores[name] = store
 
     def get_store(self, name):
+        &#34;&#34;&#34;
+
+        Args:
+          name: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return self.stores[name] if name in self.stores else None
 
     def get_store_names(self) -&gt; KeysView:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.stores.keys()
 
 
 class PipelineContext:
-    &#34;&#34;&#34;
-    Pipeline context is created when you create a pipeline and it provides a way to access information about the
+    &#34;&#34;&#34;Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
-
+    
     It also provides access to the &#39;stores&#39; that have been added to the pipeline
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, content_provider=None, store_provider=None,
@@ -122,66 +164,109 @@ class PipelineContext:
         self.document_store = None
 
     def get_context(self) -&gt; Dict:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.context
 
     def get_content_objects(self) -&gt; List[ContentObject]:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.content_objects
 
     def get_content(self, content_object: ContentObject):
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.content_provider.get_content(content_object)
 
     def put_content(self, content_object: ContentObject, content):
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+          content: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.content_provider.put_content(content_object, content)
 
     def add_store(self, name: str, store):
-        &#34;&#34;&#34;
-        Add a store with given name to the context
+        &#34;&#34;&#34;Add a store with given name to the context
 
-        :param name: the name to refer to the store with
-        :param store: the instance of the store
+        Args:
+          name: the name to refer to the store with
+          store: the instance of the store
+          name: str: 
+
+        Returns:
+
         &#34;&#34;&#34;
         self.store_provider.put_store(name, store)
 
     def get_store_names(self) -&gt; KeysView:
         &#34;&#34;&#34;
-        Return the list of store names in context
 
-        :return: the list of store names
+        Args:
+
+        Returns:
+          :return: the list of store names
+
         &#34;&#34;&#34;
         return self.store_provider.get_store_names()
 
     def set_current_document(self, current_document: Document):
-        &#34;&#34;&#34;
-        Set the Document that is currently being processed in the pipeline
+        &#34;&#34;&#34;Set the Document that is currently being processed in the pipeline
 
-        :param current_document: The current document
+        Args:
+          current_document: The current document
+          current_document: Document: 
+
+        Returns:
+
         &#34;&#34;&#34;
         self.current_document = current_document
 
     def get_current_document(self) -&gt; Document:
-        &#34;&#34;&#34;
-        Get the current document that is being processed in the pipeline
-
+        &#34;&#34;&#34;Get the current document that is being processed in the pipeline
+        
         :return: The current document, or None
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return self.current_document
 
     def set_output_document(self, output_document: Document):
-        &#34;&#34;&#34;
-        Set the output document from the pipeline
+        &#34;&#34;&#34;Set the output document from the pipeline
 
-        :param output_document: the final output document from the pipeline
-        :return: the final output document
+        Args:
+          output_document: the final output document from the pipeline
+          output_document: Document: 
+
+        Returns:
+          the final output document
+
         &#34;&#34;&#34;
         self.output_document = output_document
 
     def get_store(self, name: str, default: Store = None) -&gt; Store:
-        &#34;&#34;&#34;
-        Get a store with given name from the context
+        &#34;&#34;&#34;Get a store with given name from the context
 
-        :param name: the name to refer to the store with
-        :param default: optionally the default to create the store as if it isn&#39;t there
-        :return: the store, or None is not available
+        Args:
+          name: the name to refer to the store with
+          default: optionally the default to create the store as if it isn&#39;t there
+          name: str: 
+          default: Store:  (Default value = None)
+
+        Returns:
+          the store, or None is not available
+
         &#34;&#34;&#34;
         store = self.store_provider.get_store(name) if name in self.get_store_names() else None
 
@@ -192,6 +277,15 @@ class PipelineContext:
         return self.store_provider.get_store(name)
 
     def merge_store(self, name, store):
+        &#34;&#34;&#34;
+
+        Args:
+          name: 
+          store: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if name not in self.get_store_names():
             self.add_store(name, store)
         else:
@@ -199,11 +293,15 @@ class PipelineContext:
 
 
 class PipelineStep:
-    &#34;&#34;&#34;
-    The representation of a step within a step, which captures both the step itself and
+    &#34;&#34;&#34;The representation of a step within a step, which captures both the step itself and
     also the details around the step&#39;s use.
-
+    
     It is internally used by the Pipeline and is not a public API
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, step, enabled=False, condition=None, name=None, options=None, attach_source=False,
@@ -232,6 +330,7 @@ class PipelineStep:
             logger.info(f&#34;Adding new step {step.get_name()} to pipeline&#34;)
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         try:
             if str(type(self.step)) == &#34;&lt;class &#39;type&#39;&gt;&#34;:
                 raise Exception(&#34;You can not yet deploy a pipeline with a class instance style step&#34;)
@@ -258,6 +357,15 @@ class PipelineStep:
             raise Exception(&#34;All steps must implement to_dict() for deployment&#34;, e)
 
     def execute(self, context, document):
+        &#34;&#34;&#34;
+
+        Args:
+          context: 
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         start = time.perf_counter()
         if self.cache_path:
@@ -285,6 +393,15 @@ class PipelineStep:
                         import collections
 
                         def replace_params(opts, params):
+                            &#34;&#34;&#34;
+
+                            Args:
+                              opts: 
+                              params: 
+
+                            Returns:
+
+                            &#34;&#34;&#34;
                             if isinstance(opts, dict):
                                 for key, val in opts.items():
                                     opts[key] = replace_params(val, params)
@@ -348,6 +465,15 @@ class PipelineStep:
             return document
 
     def will_execute(self, context, document):
+        &#34;&#34;&#34;
+
+        Args:
+          context: 
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if not self.enabled:
             return False
 
@@ -361,11 +487,27 @@ class PipelineStep:
         return True
 
     def get_cache_name(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         file_name = document.source.original_filename \
             if document.source.original_filename is not None else document.uuid
         return f&#34;{self.cache_path}/{file_name}.kdxa&#34;
 
     def end_processing(self, context):
+        &#34;&#34;&#34;
+
+        Args:
+          context: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         try:
             self.step.end_processing(context)
         except:
@@ -373,18 +515,25 @@ class PipelineStep:
 
 
 class LabelStep(object):
-    &#34;&#34;&#34;
-    A simple step for handling the labelling for a document
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;A simple step for handling the labelling for a document&#34;&#34;&#34;
 
     def __init__(self, label: str, remove=False):
         self.label = label
         self.remove = remove
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return f&#34;Remove label {self.label}&#34; if self.remove else f&#34;Add label {self.label}&#34;
 
     def process(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if self.remove:
             document.remove_label(self.label)
         else:
@@ -393,6 +542,7 @@ class LabelStep(object):
 
 
 class PipelineStore:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, store: Store, extracted_labelled: bool = False):
         self.name = name
@@ -400,22 +550,32 @@ class PipelineStore:
         self.extract_labelled = extracted_labelled
 
     def extract(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         # TODO implement
         pass
 
 
 class Pipeline:
-    &#34;&#34;&#34;
-    A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
-
+    &#34;&#34;&#34;A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
+    
     When you create a Pipeline you must provide the connector that will be used to source the documents.
 
-        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+    Args:
+      connector: the connector that will be the starting point for the pipeline
+      name: the name of the pipeline (default &#39;Default&#39;)
+      stop_on_exception: Should the pipeline raise exceptions and stop (default True)
+      logging_level: The logging level of the pipeline (default INFO)
 
-    :param connector: the connector that will be the starting point for the pipeline
-    :param name: the name of the pipeline (default &#39;Default&#39;)
-    :param stop_on_exception: Should the pipeline raise exceptions and stop (default True)
-    :param logging_level: The logging level of the pipeline (default INFO)
+    Returns:
+
+    &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
     &#34;&#34;&#34;
     context: PipelineContext
 
@@ -437,33 +597,41 @@ class Pipeline:
         self.apply_lineage = apply_lineage
 
     def add_store(self, name: str, store: Store, extracted_labelled=False):
-        &#34;&#34;&#34;
-        Add the store to the pipeline so that it is available to the pipeline
+        &#34;&#34;&#34;Add the store to the pipeline so that it is available to the pipeline
 
-            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+        Args:
+          name: the name of the store (to refer to it)
+          store: the store that should be added
+          extracted_labelled: at the end of the pipeline we will extract the labelled data
+        to this store (Default value = False)
+          name: str: 
+          store: Store: 
+
+        Returns:
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
             &gt;&gt;&gt; pipeline.add_store(&#34;test-store&#34;, TableDataStore())
-
-        :param name: the name of the store (to refer to it)
-        :param store: the store that should be added
-        :param extracted_labelled: at the end of the pipeline we will extract the labelled data
-                                   to this store
         &#34;&#34;&#34;
         self.stores.append(PipelineStore(name, store, extracted_labelled))
         return self
 
     def add_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
                   parameterized=False, cache_path=None):
-        &#34;&#34;&#34;
-        Adds a label to the document
+        &#34;&#34;&#34;Adds a label to the document
 
-        :param label: label to add
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline&#39;s parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-        :return: the pipeline
+        Args:
+          label: label to add
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+          label: str: 
+
+        Returns:
+          the pipeline
+
         &#34;&#34;&#34;
         self.steps.append(
             PipelineStep(step=LabelStep(label), name=f&#34;Add label {label}&#34;, enabled=enabled, condition=condition,
@@ -473,17 +641,21 @@ class Pipeline:
 
     def remove_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
                      parameterized=False, cache_path=None):
-        &#34;&#34;&#34;
-        Adds a label to the document
+        &#34;&#34;&#34;Adds a label to the document
 
-        :param label: label to remove
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline&#39;s parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-        :return: the pipeline
+        Args:
+          label: label to remove
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+          label: str: 
+
+        Returns:
+          the pipeline
+
         &#34;&#34;&#34;
         self.steps.append(
             PipelineStep(step=LabelStep(label, remove=True), name=f&#34;Remove label {label}&#34;, enabled=enabled,
@@ -493,33 +665,36 @@ class Pipeline:
 
     def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
                  parameterized=False, cache_path=None):
-        &#34;&#34;&#34;
-        Add the given step to the current pipeline
-
-            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
-            &gt;&gt;&gt; pipeline.add_step(ExampleStep())
-
+        &#34;&#34;&#34;Add the given step to the current pipeline
+        
+        
         Note that it is also possible to add a function as a step, for example
+        
+        
+        If you are using remote actions on a server, or for deployment to a remote
+        pipeline you can also use a shorthand
 
+        Args:
+          step: the step to add
+          name: the name to use to describe the step (default None)
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+
+        Returns:
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+            &gt;&gt;&gt; pipeline.add_step(ExampleStep())
+        
             &gt;&gt;&gt; def my_function(doc):
             &gt;&gt;&gt;      doc.metadata.fishstick = &#39;foo&#39;
             &gt;&gt;&gt;      return doc
             &gt;&gt;&gt; pipeline.add_step(my_function)
-
-        If you are using remote actions on a server, or for deployment to a remote
-        pipeline you can also use a shorthand
-
+        
             &gt;&gt;&gt; pipeline.add_step(&#39;kodexa/html-parser&#39;,options={&#39;summarize&#39;:False})
-
-        :param step: the step to add
-        :param name: the name to use to describe the step (default None)
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline&#39;s parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-
         &#34;&#34;&#34;
         if options is None:
             options = {}
@@ -529,14 +704,16 @@ class Pipeline:
         return self
 
     def set_sink(self, sink):
-        &#34;&#34;&#34;
-        Set the sink you wish to use, note that it will replace any currently assigned
+        &#34;&#34;&#34;Set the sink you wish to use, note that it will replace any currently assigned
         sink
 
-            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
-            &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+        Args:
+          sink: the sink for the pipeline
 
-        :param sink: the sink for the pipeline
+        Returns:
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+            &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
         &#34;&#34;&#34;
         logger.info(f&#34;Setting sink {sink.get_name()} on {self.name}&#34;)
         self.sink = sink
@@ -544,26 +721,35 @@ class Pipeline:
         return self
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
-        &#34;&#34;&#34;
-        Allows you to provide the sink store easily
-
+        &#34;&#34;&#34;Allows you to provide the sink store easily
+        
         This will wrap the store in a document store sink
 
-        :param document_store: document store to use
-        :param processing_mode: the processing mode (update or new)
-        :return: the pipeline
+        Args:
+          document_store: document store to use
+          processing_mode: the processing mode (update or new)
+          document_store: DocumentStore: 
+          processing_mode: str:  (Default value = &#34;update&#34;)
+
+        Returns:
+          the pipeline
+
         &#34;&#34;&#34;
         from kodexa.sinks import DocumentStoreSink
         self.set_sink(DocumentStoreSink(document_store))
         return self
 
     def to_yaml(self):
-        &#34;&#34;&#34;
-        Will return the YAML representation of any actions that support conversion to YAML
-
+        &#34;&#34;&#34;Will return the YAML representation of any actions that support conversion to YAML
+        
         The YAML representation for RemoteAction&#39;s can be used for metadata only pipelines in the Kodexa Platform
-
+        
         :return: YAML representation
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
 
         configuration_steps = []
@@ -578,14 +764,19 @@ class Pipeline:
         return yaml.dump(configuration_steps)
 
     def run(self, parameters=None):
-        &#34;&#34;&#34;
-        Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
+        &#34;&#34;&#34;Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
+        
+        
+        :return: The context from the run
 
-            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+        Args:
+          parameters:  (Default value = None)
+
+        Returns:
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
             &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
             &gt;&gt;&gt; pipeline.run()
-
-        :return: The context from the run
         &#34;&#34;&#34;
         if parameters is None:
             parameters = {}
@@ -686,72 +877,107 @@ class Pipeline:
 
     @staticmethod
     def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
-        &#34;&#34;&#34;
-        Build a new pipeline with the input documents from a document store
+        &#34;&#34;&#34;Build a new pipeline with the input documents from a document store
 
-        :param store:DocumentStore The URL ie. https://www.google.com
-        :param subscription:str The subscription query to use
-        :return: A new instance of a pipeline
+        Args:
+          store: DocumentStore The URL ie. https://www.google.com
+          subscription: str The subscription query to use (Default value = None)
+          store: DocumentStore: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          A new instance of a pipeline
+
         &#34;&#34;&#34;
         return Pipeline(DocumentStoreConnector(store, subscription), *args, **kwargs)
 
     @staticmethod
     def from_url(url, headers=None, *args, **kwargs):
-        &#34;&#34;&#34;
-        Build a new pipeline with the input being a document created from the given URL
+        &#34;&#34;&#34;Build a new pipeline with the input being a document created from the given URL
 
-        :param url: The URL ie. https://www.google.com
-        :param headers: A dictionary of headers
-        :return: A new instance of a pipeline
+        Args:
+          url: The URL ie. https://www.google.com
+          headers: A dictionary of headers (Default value = None)
+          *args: 
+          **kwargs: 
+
+        Returns:
+          A new instance of a pipeline
+
         &#34;&#34;&#34;
         return Pipeline(Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
     def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
-        &#34;&#34;&#34;
-        Create a new pipeline using a file path as a source
-        :param file_path: The path to the file
-        :return: A new pipeline
-        :rtype: Pipeline
+        &#34;&#34;&#34;Create a new pipeline using a file path as a source
+
+        Args:
+          file_path: The path to the file
+          file_path: str: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         &#34;&#34;&#34;
         return Pipeline(Document.from_file(file_path), *args, **kwargs)
 
     @staticmethod
     def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
-        &#34;&#34;&#34;
-        Build a new pipeline and provide text as the basic to create a document
+        &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
-        :param text: Text to use to create document
-        :return: A new pipeline
-        :rtype: Pipeline
+        Args:
+          text: Text to use to create document
+          text: str: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         &#34;&#34;&#34;
         return Pipeline(Document.from_text(text), *args, **kwargs)
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False, relative: bool = False,
                     unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; Pipeline:
-        &#34;&#34;&#34;
-        Create a pipeline that will run against a set of local files from a folder
+        &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
-        :param folder_path: The folder path
-        :param filename_filter: The filter for filename (i.e. *.pdf)
-        :param recursive: Should we look recursively in sub-directories (default False)
-        :param relative: Is the folder path relative to the caller (default False)
-        :param caller_path: The caller path (defaults to trying to work this out from the stack)
-        :param unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-        :return: A new pipeline
-        :rtype: Pipeline
+        Args:
+          folder_path: The folder path
+          filename_filter: The filter for filename (i.e. *.pdf)
+          recursive: Should we look recursively in sub-directories (default False)
+          relative: Is the folder path relative to the caller (default False)
+          caller_path: The caller path (defaults to trying to work this out from the stack)
+          unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
+          folder_path: str: 
+          filename_filter: str:  (Default value = &#34;*&#34;)
+          recursive: bool:  (Default value = False)
+          relative: bool:  (Default value = False)
+          caller_path: str:  (Default value = get_caller_dir())
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         &#34;&#34;&#34;
         return Pipeline(FolderConnector(folder_path, filename_filter, recursive=recursive, relative=relative,
                                         caller_path=caller_path, unpack=unpack), *args, **kwargs)
 
 
 class PipelineStatistics:
-    &#34;&#34;&#34;
-    A set of statistics for the processed document
-
+    &#34;&#34;&#34;A set of statistics for the processed document
+    
     documents_processed
     document_exceptions
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -759,10 +985,13 @@ class PipelineStatistics:
         self.document_exceptions = 0
 
     def processed_document(self, document):
-        &#34;&#34;&#34;
-        Update statistics based on this document completing processing
+        &#34;&#34;&#34;Update statistics based on this document completing processing
 
-        :param document: the document that has been processed
+        Args:
+          document: the document that has been processed
+
+        Returns:
+
         &#34;&#34;&#34;
         self.documents_processed += 1
 
@@ -787,6 +1016,7 @@ class PipelineStatistics:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def new_id():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return str(uuid.uuid4()).replace(&#34;-&#34;, &#34;&#34;)</code></pre>
 </details>
 </dd>
@@ -800,24 +1030,47 @@ class PipelineStatistics:
 </code></dt>
 <dd>
 <div class="desc"><p>A content provider is used to support getting content (documents or native) to
-and from the pipeline</p></div>
+and from the pipeline</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class InMemoryContentProvider:
-    &#34;&#34;&#34;
-    A content provider is used to support getting content (documents or native) to
+    &#34;&#34;&#34;A content provider is used to support getting content (documents or native) to
     and from the pipeline
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self):
         self.content_objects = {}
 
     def get_content(self, content_object: ContentObject):
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return self.content_objects[content_object.id]
 
     def put_content(self, content_object: ContentObject, content):
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+          content: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.content_objects[content_object.id] = content</code></pre>
 </details>
 <h3>Methods</h3>
@@ -826,12 +1079,25 @@ and from the pipeline</p></div>
 <span>def <span class="ident">get_content</span></span>(<span>self, content_object: ContentObject)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>ContentObject: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_content(self, content_object: ContentObject):
+    &#34;&#34;&#34;
+
+    Args:
+      content_object: ContentObject: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     return self.content_objects[content_object.id]</code></pre>
 </details>
 </dd>
@@ -839,12 +1105,28 @@ and from the pipeline</p></div>
 <span>def <span class="ident">put_content</span></span>(<span>self, content_object: ContentObject, content)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>ContentObject: </dd>
+<dt><strong><code>content</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put_content(self, content_object: ContentObject, content):
+    &#34;&#34;&#34;
+
+    Args:
+      content_object: ContentObject: 
+      content: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     self.content_objects[content_object.id] = content</code></pre>
 </details>
 </dd>
@@ -860,20 +1142,36 @@ and from the pipeline</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class InMemoryStoreProvider:
-    &#34;&#34;&#34;
-    A store provider is used to support getting stores from the pipeline
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;A store provider is used to support getting stores from the pipeline&#34;&#34;&#34;
 
     def __init__(self):
         self.stores = {}
 
     def put_store(self, name: str, store: Store):
+        &#34;&#34;&#34;
+
+        Args:
+          name: str: 
+          store: Store: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.stores[name] = store
 
     def get_store(self, name):
+        &#34;&#34;&#34;
+
+        Args:
+          name: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return self.stores[name] if name in self.stores else None
 
     def get_store_names(self) -&gt; KeysView:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.stores.keys()</code></pre>
 </details>
 <h3>Methods</h3>
@@ -882,12 +1180,25 @@ and from the pipeline</p></div>
 <span>def <span class="ident">get_store</span></span>(<span>self, name)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_store(self, name):
+    &#34;&#34;&#34;
+
+    Args:
+      name: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     return self.stores[name] if name in self.stores else None</code></pre>
 </details>
 </dd>
@@ -901,6 +1212,7 @@ and from the pipeline</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_store_names(self) -&gt; KeysView:
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return self.stores.keys()</code></pre>
 </details>
 </dd>
@@ -908,12 +1220,28 @@ and from the pipeline</p></div>
 <span>def <span class="ident">put_store</span></span>(<span>self, name: str, store: Store)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>store</code></strong></dt>
+<dd>Store: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put_store(self, name: str, store: Store):
+    &#34;&#34;&#34;
+
+    Args:
+      name: str: 
+      store: Store: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     self.stores[name] = store</code></pre>
 </details>
 </dd>
@@ -930,18 +1258,25 @@ and from the pipeline</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class LabelStep(object):
-    &#34;&#34;&#34;
-    A simple step for handling the labelling for a document
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;A simple step for handling the labelling for a document&#34;&#34;&#34;
 
     def __init__(self, label: str, remove=False):
         self.label = label
         self.remove = remove
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return f&#34;Remove label {self.label}&#34; if self.remove else f&#34;Add label {self.label}&#34;
 
     def process(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if self.remove:
             document.remove_label(self.label)
         else:
@@ -960,6 +1295,7 @@ and from the pipeline</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_name(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return f&#34;Remove label {self.label}&#34; if self.remove else f&#34;Add label {self.label}&#34;</code></pre>
 </details>
 </dd>
@@ -967,12 +1303,25 @@ and from the pipeline</p></div>
 <span>def <span class="ident">process</span></span>(<span>self, document: Document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document: Document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if self.remove:
         document.remove_label(self.label)
     else:
@@ -989,28 +1338,38 @@ and from the pipeline</p></div>
 <dd>
 <div class="desc"><p>A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.</p>
 <p>When you create a Pipeline you must provide the connector that will be used to source the documents.</p>
-<pre><code>&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-</code></pre>
-<p>:param connector: the connector that will be the starting point for the pipeline
-:param name: the name of the pipeline (default 'Default')
-:param stop_on_exception: Should the pipeline raise exceptions and stop (default True)
-:param logging_level: The logging level of the pipeline (default INFO)</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>connector</code></strong></dt>
+<dd>the connector that will be the starting point for the pipeline</dd>
+<dt><strong><code>name</code></strong></dt>
+<dd>the name of the pipeline (default 'Default')</dd>
+<dt><strong><code>stop_on_exception</code></strong></dt>
+<dd>Should the pipeline raise exceptions and stop (default True)</dd>
+<dt><strong><code>logging_level</code></strong></dt>
+<dd>The logging level of the pipeline (default INFO)</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Pipeline:
-    &#34;&#34;&#34;
-    A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
-
+    &#34;&#34;&#34;A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
+    
     When you create a Pipeline you must provide the connector that will be used to source the documents.
 
-        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+    Args:
+      connector: the connector that will be the starting point for the pipeline
+      name: the name of the pipeline (default &#39;Default&#39;)
+      stop_on_exception: Should the pipeline raise exceptions and stop (default True)
+      logging_level: The logging level of the pipeline (default INFO)
 
-    :param connector: the connector that will be the starting point for the pipeline
-    :param name: the name of the pipeline (default &#39;Default&#39;)
-    :param stop_on_exception: Should the pipeline raise exceptions and stop (default True)
-    :param logging_level: The logging level of the pipeline (default INFO)
+    Returns:
+
+    &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
     &#34;&#34;&#34;
     context: PipelineContext
 
@@ -1032,33 +1391,41 @@ and from the pipeline</p></div>
         self.apply_lineage = apply_lineage
 
     def add_store(self, name: str, store: Store, extracted_labelled=False):
-        &#34;&#34;&#34;
-        Add the store to the pipeline so that it is available to the pipeline
+        &#34;&#34;&#34;Add the store to the pipeline so that it is available to the pipeline
 
-            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+        Args:
+          name: the name of the store (to refer to it)
+          store: the store that should be added
+          extracted_labelled: at the end of the pipeline we will extract the labelled data
+        to this store (Default value = False)
+          name: str: 
+          store: Store: 
+
+        Returns:
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
             &gt;&gt;&gt; pipeline.add_store(&#34;test-store&#34;, TableDataStore())
-
-        :param name: the name of the store (to refer to it)
-        :param store: the store that should be added
-        :param extracted_labelled: at the end of the pipeline we will extract the labelled data
-                                   to this store
         &#34;&#34;&#34;
         self.stores.append(PipelineStore(name, store, extracted_labelled))
         return self
 
     def add_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
                   parameterized=False, cache_path=None):
-        &#34;&#34;&#34;
-        Adds a label to the document
+        &#34;&#34;&#34;Adds a label to the document
 
-        :param label: label to add
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline&#39;s parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-        :return: the pipeline
+        Args:
+          label: label to add
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+          label: str: 
+
+        Returns:
+          the pipeline
+
         &#34;&#34;&#34;
         self.steps.append(
             PipelineStep(step=LabelStep(label), name=f&#34;Add label {label}&#34;, enabled=enabled, condition=condition,
@@ -1068,17 +1435,21 @@ and from the pipeline</p></div>
 
     def remove_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
                      parameterized=False, cache_path=None):
-        &#34;&#34;&#34;
-        Adds a label to the document
+        &#34;&#34;&#34;Adds a label to the document
 
-        :param label: label to remove
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline&#39;s parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-        :return: the pipeline
+        Args:
+          label: label to remove
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+          label: str: 
+
+        Returns:
+          the pipeline
+
         &#34;&#34;&#34;
         self.steps.append(
             PipelineStep(step=LabelStep(label, remove=True), name=f&#34;Remove label {label}&#34;, enabled=enabled,
@@ -1088,33 +1459,36 @@ and from the pipeline</p></div>
 
     def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
                  parameterized=False, cache_path=None):
-        &#34;&#34;&#34;
-        Add the given step to the current pipeline
-
-            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
-            &gt;&gt;&gt; pipeline.add_step(ExampleStep())
-
+        &#34;&#34;&#34;Add the given step to the current pipeline
+        
+        
         Note that it is also possible to add a function as a step, for example
+        
+        
+        If you are using remote actions on a server, or for deployment to a remote
+        pipeline you can also use a shorthand
 
+        Args:
+          step: the step to add
+          name: the name to use to describe the step (default None)
+          enabled: is the step enabled (default True)
+          condition: condition to evaluate before executing the step (default None)
+          options: options to be passed to the step if it is a simplified remote action (Default value = None)
+          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+          parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+
+        Returns:
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+            &gt;&gt;&gt; pipeline.add_step(ExampleStep())
+        
             &gt;&gt;&gt; def my_function(doc):
             &gt;&gt;&gt;      doc.metadata.fishstick = &#39;foo&#39;
             &gt;&gt;&gt;      return doc
             &gt;&gt;&gt; pipeline.add_step(my_function)
-
-        If you are using remote actions on a server, or for deployment to a remote
-        pipeline you can also use a shorthand
-
+        
             &gt;&gt;&gt; pipeline.add_step(&#39;kodexa/html-parser&#39;,options={&#39;summarize&#39;:False})
-
-        :param step: the step to add
-        :param name: the name to use to describe the step (default None)
-        :param enabled: is the step enabled (default True)
-        :param condition: condition to evaluate before executing the step (default None)
-        :param options: options to be passed to the step if it is a simplified remote action
-        :param attach_source: if step is simplified remote action this determines if we need to add the source
-        :param parameterized: apply the pipeline&#39;s parameters to the options
-        :param cache_path: cache the document locally, note this is only for local pipelines
-
         &#34;&#34;&#34;
         if options is None:
             options = {}
@@ -1124,14 +1498,16 @@ and from the pipeline</p></div>
         return self
 
     def set_sink(self, sink):
-        &#34;&#34;&#34;
-        Set the sink you wish to use, note that it will replace any currently assigned
+        &#34;&#34;&#34;Set the sink you wish to use, note that it will replace any currently assigned
         sink
 
-            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
-            &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+        Args:
+          sink: the sink for the pipeline
 
-        :param sink: the sink for the pipeline
+        Returns:
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+            &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
         &#34;&#34;&#34;
         logger.info(f&#34;Setting sink {sink.get_name()} on {self.name}&#34;)
         self.sink = sink
@@ -1139,26 +1515,35 @@ and from the pipeline</p></div>
         return self
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
-        &#34;&#34;&#34;
-        Allows you to provide the sink store easily
-
+        &#34;&#34;&#34;Allows you to provide the sink store easily
+        
         This will wrap the store in a document store sink
 
-        :param document_store: document store to use
-        :param processing_mode: the processing mode (update or new)
-        :return: the pipeline
+        Args:
+          document_store: document store to use
+          processing_mode: the processing mode (update or new)
+          document_store: DocumentStore: 
+          processing_mode: str:  (Default value = &#34;update&#34;)
+
+        Returns:
+          the pipeline
+
         &#34;&#34;&#34;
         from kodexa.sinks import DocumentStoreSink
         self.set_sink(DocumentStoreSink(document_store))
         return self
 
     def to_yaml(self):
-        &#34;&#34;&#34;
-        Will return the YAML representation of any actions that support conversion to YAML
-
+        &#34;&#34;&#34;Will return the YAML representation of any actions that support conversion to YAML
+        
         The YAML representation for RemoteAction&#39;s can be used for metadata only pipelines in the Kodexa Platform
-
+        
         :return: YAML representation
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
 
         configuration_steps = []
@@ -1173,14 +1558,19 @@ and from the pipeline</p></div>
         return yaml.dump(configuration_steps)
 
     def run(self, parameters=None):
-        &#34;&#34;&#34;
-        Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
+        &#34;&#34;&#34;Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
+        
+        
+        :return: The context from the run
 
-            &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+        Args:
+          parameters:  (Default value = None)
+
+        Returns:
+
+        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
             &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
             &gt;&gt;&gt; pipeline.run()
-
-        :return: The context from the run
         &#34;&#34;&#34;
         if parameters is None:
             parameters = {}
@@ -1281,61 +1671,92 @@ and from the pipeline</p></div>
 
     @staticmethod
     def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
-        &#34;&#34;&#34;
-        Build a new pipeline with the input documents from a document store
+        &#34;&#34;&#34;Build a new pipeline with the input documents from a document store
 
-        :param store:DocumentStore The URL ie. https://www.google.com
-        :param subscription:str The subscription query to use
-        :return: A new instance of a pipeline
+        Args:
+          store: DocumentStore The URL ie. https://www.google.com
+          subscription: str The subscription query to use (Default value = None)
+          store: DocumentStore: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          A new instance of a pipeline
+
         &#34;&#34;&#34;
         return Pipeline(DocumentStoreConnector(store, subscription), *args, **kwargs)
 
     @staticmethod
     def from_url(url, headers=None, *args, **kwargs):
-        &#34;&#34;&#34;
-        Build a new pipeline with the input being a document created from the given URL
+        &#34;&#34;&#34;Build a new pipeline with the input being a document created from the given URL
 
-        :param url: The URL ie. https://www.google.com
-        :param headers: A dictionary of headers
-        :return: A new instance of a pipeline
+        Args:
+          url: The URL ie. https://www.google.com
+          headers: A dictionary of headers (Default value = None)
+          *args: 
+          **kwargs: 
+
+        Returns:
+          A new instance of a pipeline
+
         &#34;&#34;&#34;
         return Pipeline(Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
     def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
-        &#34;&#34;&#34;
-        Create a new pipeline using a file path as a source
-        :param file_path: The path to the file
-        :return: A new pipeline
-        :rtype: Pipeline
+        &#34;&#34;&#34;Create a new pipeline using a file path as a source
+
+        Args:
+          file_path: The path to the file
+          file_path: str: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         &#34;&#34;&#34;
         return Pipeline(Document.from_file(file_path), *args, **kwargs)
 
     @staticmethod
     def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
-        &#34;&#34;&#34;
-        Build a new pipeline and provide text as the basic to create a document
+        &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
-        :param text: Text to use to create document
-        :return: A new pipeline
-        :rtype: Pipeline
+        Args:
+          text: Text to use to create document
+          text: str: 
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         &#34;&#34;&#34;
         return Pipeline(Document.from_text(text), *args, **kwargs)
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False, relative: bool = False,
                     unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; Pipeline:
-        &#34;&#34;&#34;
-        Create a pipeline that will run against a set of local files from a folder
+        &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
-        :param folder_path: The folder path
-        :param filename_filter: The filter for filename (i.e. *.pdf)
-        :param recursive: Should we look recursively in sub-directories (default False)
-        :param relative: Is the folder path relative to the caller (default False)
-        :param caller_path: The caller path (defaults to trying to work this out from the stack)
-        :param unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-        :return: A new pipeline
-        :rtype: Pipeline
+        Args:
+          folder_path: The folder path
+          filename_filter: The filter for filename (i.e. *.pdf)
+          recursive: Should we look recursively in sub-directories (default False)
+          relative: Is the folder path relative to the caller (default False)
+          caller_path: The caller path (defaults to trying to work this out from the stack)
+          unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
+          folder_path: str: 
+          filename_filter: str:  (Default value = &#34;*&#34;)
+          recursive: bool:  (Default value = False)
+          relative: bool:  (Default value = False)
+          caller_path: str:  (Default value = get_caller_dir())
+          *args: 
+          **kwargs: 
+
+        Returns:
+          Pipeline: A new pipeline
+
         &#34;&#34;&#34;
         return Pipeline(FolderConnector(folder_path, filename_filter, recursive=recursive, relative=relative,
                                         caller_path=caller_path, unpack=unpack), *args, **kwargs)</code></pre>
@@ -1353,21 +1774,40 @@ and from the pipeline</p></div>
 <span>def <span class="ident">from_file</span></span>(<span>file_path: str, *args, **kwargs) ‑> <a title="kodexa.pipeline.pipeline.Pipeline" href="#kodexa.pipeline.pipeline.Pipeline">Pipeline</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a new pipeline using a file path as a source
-:param file_path: The path to the file
-:return: A new pipeline
-:rtype: Pipeline</p></div>
+<div class="desc"><p>Create a new pipeline using a file path as a source</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>file_path</code></strong></dt>
+<dd>The path to the file</dd>
+<dt><strong><code>file_path</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>*args</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="kodexa.pipeline.pipeline.Pipeline" href="#kodexa.pipeline.pipeline.Pipeline">Pipeline</a></code></dt>
+<dd>A new pipeline</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
-    &#34;&#34;&#34;
-    Create a new pipeline using a file path as a source
-    :param file_path: The path to the file
-    :return: A new pipeline
-    :rtype: Pipeline
+    &#34;&#34;&#34;Create a new pipeline using a file path as a source
+
+    Args:
+      file_path: The path to the file
+      file_path: str: 
+      *args: 
+      **kwargs: 
+
+    Returns:
+      Pipeline: A new pipeline
+
     &#34;&#34;&#34;
     return Pipeline(Document.from_file(file_path), *args, **kwargs)</code></pre>
 </details>
@@ -1377,14 +1817,44 @@ def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
 </code></dt>
 <dd>
 <div class="desc"><p>Create a pipeline that will run against a set of local files from a folder</p>
-<p>:param folder_path: The folder path
-:param filename_filter: The filter for filename (i.e. *.pdf)
-:param recursive: Should we look recursively in sub-directories (default False)
-:param relative: Is the folder path relative to the caller (default False)
-:param caller_path: The caller path (defaults to trying to work this out from the stack)
-:param unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-:return: A new pipeline
-:rtype: Pipeline</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>folder_path</code></strong></dt>
+<dd>The folder path</dd>
+<dt><strong><code>filename_filter</code></strong></dt>
+<dd>The filter for filename (i.e. *.pdf)</dd>
+<dt><strong><code>recursive</code></strong></dt>
+<dd>Should we look recursively in sub-directories (default False)</dd>
+<dt><strong><code>relative</code></strong></dt>
+<dd>Is the folder path relative to the caller (default False)</dd>
+<dt><strong><code>caller_path</code></strong></dt>
+<dd>The caller path (defaults to trying to work this out from the stack)</dd>
+<dt><strong><code>unpack</code></strong></dt>
+<dd>Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)</dd>
+<dt><strong><code>folder_path</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>filename_filter</code></strong></dt>
+<dd>str:
+(Default value = "*")</dd>
+<dt><strong><code>recursive</code></strong></dt>
+<dd>bool:
+(Default value = False)</dd>
+<dt><strong><code>relative</code></strong></dt>
+<dd>bool:
+(Default value = False)</dd>
+<dt><strong><code>caller_path</code></strong></dt>
+<dd>str:
+(Default value = get_caller_dir())</dd>
+<dt><strong><code>*args</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="kodexa.pipeline.pipeline.Pipeline" href="#kodexa.pipeline.pipeline.Pipeline">Pipeline</a></code></dt>
+<dd>A new pipeline</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1392,17 +1862,26 @@ def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
 <pre><code class="python">@staticmethod
 def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False, relative: bool = False,
                 unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; Pipeline:
-    &#34;&#34;&#34;
-    Create a pipeline that will run against a set of local files from a folder
+    &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
-    :param folder_path: The folder path
-    :param filename_filter: The filter for filename (i.e. *.pdf)
-    :param recursive: Should we look recursively in sub-directories (default False)
-    :param relative: Is the folder path relative to the caller (default False)
-    :param caller_path: The caller path (defaults to trying to work this out from the stack)
-    :param unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-    :return: A new pipeline
-    :rtype: Pipeline
+    Args:
+      folder_path: The folder path
+      filename_filter: The filter for filename (i.e. *.pdf)
+      recursive: Should we look recursively in sub-directories (default False)
+      relative: Is the folder path relative to the caller (default False)
+      caller_path: The caller path (defaults to trying to work this out from the stack)
+      unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
+      folder_path: str: 
+      filename_filter: str:  (Default value = &#34;*&#34;)
+      recursive: bool:  (Default value = False)
+      relative: bool:  (Default value = False)
+      caller_path: str:  (Default value = get_caller_dir())
+      *args: 
+      **kwargs: 
+
+    Returns:
+      Pipeline: A new pipeline
+
     &#34;&#34;&#34;
     return Pipeline(FolderConnector(folder_path, filename_filter, recursive=recursive, relative=relative,
                                     caller_path=caller_path, unpack=unpack), *args, **kwargs)</code></pre>
@@ -1413,21 +1892,39 @@ def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive:
 </code></dt>
 <dd>
 <div class="desc"><p>Build a new pipeline with the input documents from a document store</p>
-<p>:param store:DocumentStore The URL ie. <a href="https://www.google.com">https://www.google.com</a>
-:param subscription:str The subscription query to use
-:return: A new instance of a pipeline</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>store</code></strong></dt>
+<dd>DocumentStore The URL ie. <a href="https://www.google.com">https://www.google.com</a></dd>
+<dt><strong><code>subscription</code></strong></dt>
+<dd>str The subscription query to use (Default value = None)</dd>
+<dt><strong><code>store</code></strong></dt>
+<dd>DocumentStore: </dd>
+<dt><strong><code>*args</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A new instance of a pipeline</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
-    &#34;&#34;&#34;
-    Build a new pipeline with the input documents from a document store
+    &#34;&#34;&#34;Build a new pipeline with the input documents from a document store
 
-    :param store:DocumentStore The URL ie. https://www.google.com
-    :param subscription:str The subscription query to use
-    :return: A new instance of a pipeline
+    Args:
+      store: DocumentStore The URL ie. https://www.google.com
+      subscription: str The subscription query to use (Default value = None)
+      store: DocumentStore: 
+      *args: 
+      **kwargs: 
+
+    Returns:
+      A new instance of a pipeline
+
     &#34;&#34;&#34;
     return Pipeline(DocumentStoreConnector(store, subscription), *args, **kwargs)</code></pre>
 </details>
@@ -1437,21 +1934,39 @@ def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
 </code></dt>
 <dd>
 <div class="desc"><p>Build a new pipeline and provide text as the basic to create a document</p>
-<p>:param text: Text to use to create document
-:return: A new pipeline
-:rtype: Pipeline</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>text</code></strong></dt>
+<dd>Text to use to create document</dd>
+<dt><strong><code>text</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>*args</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="kodexa.pipeline.pipeline.Pipeline" href="#kodexa.pipeline.pipeline.Pipeline">Pipeline</a></code></dt>
+<dd>A new pipeline</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
-    &#34;&#34;&#34;
-    Build a new pipeline and provide text as the basic to create a document
+    &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
-    :param text: Text to use to create document
-    :return: A new pipeline
-    :rtype: Pipeline
+    Args:
+      text: Text to use to create document
+      text: str: 
+      *args: 
+      **kwargs: 
+
+    Returns:
+      Pipeline: A new pipeline
+
     &#34;&#34;&#34;
     return Pipeline(Document.from_text(text), *args, **kwargs)</code></pre>
 </details>
@@ -1461,21 +1976,36 @@ def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
 </code></dt>
 <dd>
 <div class="desc"><p>Build a new pipeline with the input being a document created from the given URL</p>
-<p>:param url: The URL ie. <a href="https://www.google.com">https://www.google.com</a>
-:param headers: A dictionary of headers
-:return: A new instance of a pipeline</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>url</code></strong></dt>
+<dd>The URL ie. <a href="https://www.google.com">https://www.google.com</a></dd>
+<dt><strong><code>headers</code></strong></dt>
+<dd>A dictionary of headers (Default value = None)</dd>
+<dt><strong><code>*args</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A new instance of a pipeline</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_url(url, headers=None, *args, **kwargs):
-    &#34;&#34;&#34;
-    Build a new pipeline with the input being a document created from the given URL
+    &#34;&#34;&#34;Build a new pipeline with the input being a document created from the given URL
 
-    :param url: The URL ie. https://www.google.com
-    :param headers: A dictionary of headers
-    :return: A new instance of a pipeline
+    Args:
+      url: The URL ie. https://www.google.com
+      headers: A dictionary of headers (Default value = None)
+      *args: 
+      **kwargs: 
+
+    Returns:
+      A new instance of a pipeline
+
     &#34;&#34;&#34;
     return Pipeline(Document.from_url(url, headers), *args, **kwargs)</code></pre>
 </details>
@@ -1488,31 +2018,48 @@ def from_url(url, headers=None, *args, **kwargs):
 </code></dt>
 <dd>
 <div class="desc"><p>Adds a label to the document</p>
-<p>:param label: label to add
-:param enabled: is the step enabled (default True)
-:param condition: condition to evaluate before executing the step (default None)
-:param options: options to be passed to the step if it is a simplified remote action
-:param attach_source: if step is simplified remote action this determines if we need to add the source
-:param parameterized: apply the pipeline's parameters to the options
-:param cache_path: cache the document locally, note this is only for local pipelines
-:return: the pipeline</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>label</code></strong></dt>
+<dd>label to add</dd>
+<dt><strong><code>enabled</code></strong></dt>
+<dd>is the step enabled (default True)</dd>
+<dt><strong><code>condition</code></strong></dt>
+<dd>condition to evaluate before executing the step (default None)</dd>
+<dt><strong><code>options</code></strong></dt>
+<dd>options to be passed to the step if it is a simplified remote action (Default value = None)</dd>
+<dt><strong><code>attach_source</code></strong></dt>
+<dd>if step is simplified remote action this determines if we need to add the source (Default value = False)</dd>
+<dt><strong><code>parameterized</code></strong></dt>
+<dd>apply the pipeline's parameters to the options (Default value = False)</dd>
+<dt><strong><code>cache_path</code></strong></dt>
+<dd>cache the document locally, note this is only for local pipelines (Default value = None)</dd>
+<dt><strong><code>label</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>the pipeline</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
               parameterized=False, cache_path=None):
-    &#34;&#34;&#34;
-    Adds a label to the document
+    &#34;&#34;&#34;Adds a label to the document
 
-    :param label: label to add
-    :param enabled: is the step enabled (default True)
-    :param condition: condition to evaluate before executing the step (default None)
-    :param options: options to be passed to the step if it is a simplified remote action
-    :param attach_source: if step is simplified remote action this determines if we need to add the source
-    :param parameterized: apply the pipeline&#39;s parameters to the options
-    :param cache_path: cache the document locally, note this is only for local pipelines
-    :return: the pipeline
+    Args:
+      label: label to add
+      enabled: is the step enabled (default True)
+      condition: condition to evaluate before executing the step (default None)
+      options: options to be passed to the step if it is a simplified remote action (Default value = None)
+      attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+      parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+      cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+      label: str: 
+
+    Returns:
+      the pipeline
+
     &#34;&#34;&#34;
     self.steps.append(
         PipelineStep(step=LabelStep(label), name=f&#34;Add label {label}&#34;, enabled=enabled, condition=condition,
@@ -1526,60 +2073,75 @@ def from_url(url, headers=None, *args, **kwargs):
 </code></dt>
 <dd>
 <div class="desc"><p>Add the given step to the current pipeline</p>
-<pre><code>&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-&gt;&gt;&gt; pipeline.add_step(ExampleStep())
-</code></pre>
 <p>Note that it is also possible to add a function as a step, for example</p>
+<p>If you are using remote actions on a server, or for deployment to a remote
+pipeline you can also use a shorthand</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>step</code></strong></dt>
+<dd>the step to add</dd>
+<dt><strong><code>name</code></strong></dt>
+<dd>the name to use to describe the step (default None)</dd>
+<dt><strong><code>enabled</code></strong></dt>
+<dd>is the step enabled (default True)</dd>
+<dt><strong><code>condition</code></strong></dt>
+<dd>condition to evaluate before executing the step (default None)</dd>
+<dt><strong><code>options</code></strong></dt>
+<dd>options to be passed to the step if it is a simplified remote action (Default value = None)</dd>
+<dt><strong><code>attach_source</code></strong></dt>
+<dd>if step is simplified remote action this determines if we need to add the source (Default value = False)</dd>
+<dt><strong><code>parameterized</code></strong></dt>
+<dd>apply the pipeline's parameters to the options (Default value = False)</dd>
+<dt><strong><code>cache_path</code></strong></dt>
+<dd>cache the document locally, note this is only for local pipelines (Default value = None)</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+    &gt;&gt;&gt; pipeline.add_step(ExampleStep())
+</code></pre>
 <pre><code>&gt;&gt;&gt; def my_function(doc):
 &gt;&gt;&gt;      doc.metadata.fishstick = 'foo'
 &gt;&gt;&gt;      return doc
 &gt;&gt;&gt; pipeline.add_step(my_function)
-</code></pre>
-<p>If you are using remote actions on a server, or for deployment to a remote
-pipeline you can also use a shorthand</p>
-<pre><code>&gt;&gt;&gt; pipeline.add_step('kodexa/html-parser',options={'summarize':False})
-</code></pre>
-<p>:param step: the step to add
-:param name: the name to use to describe the step (default None)
-:param enabled: is the step enabled (default True)
-:param condition: condition to evaluate before executing the step (default None)
-:param options: options to be passed to the step if it is a simplified remote action
-:param attach_source: if step is simplified remote action this determines if we need to add the source
-:param parameterized: apply the pipeline's parameters to the options
-:param cache_path: cache the document locally, note this is only for local pipelines</p></div>
+
+&gt;&gt;&gt; pipeline.add_step('kodexa/html-parser',options={'summarize':False})
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
              parameterized=False, cache_path=None):
-    &#34;&#34;&#34;
-    Add the given step to the current pipeline
-
-        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
-        &gt;&gt;&gt; pipeline.add_step(ExampleStep())
-
+    &#34;&#34;&#34;Add the given step to the current pipeline
+    
+    
     Note that it is also possible to add a function as a step, for example
+    
+    
+    If you are using remote actions on a server, or for deployment to a remote
+    pipeline you can also use a shorthand
 
+    Args:
+      step: the step to add
+      name: the name to use to describe the step (default None)
+      enabled: is the step enabled (default True)
+      condition: condition to evaluate before executing the step (default None)
+      options: options to be passed to the step if it is a simplified remote action (Default value = None)
+      attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+      parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+      cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+
+    Returns:
+
+    &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+        &gt;&gt;&gt; pipeline.add_step(ExampleStep())
+    
         &gt;&gt;&gt; def my_function(doc):
         &gt;&gt;&gt;      doc.metadata.fishstick = &#39;foo&#39;
         &gt;&gt;&gt;      return doc
         &gt;&gt;&gt; pipeline.add_step(my_function)
-
-    If you are using remote actions on a server, or for deployment to a remote
-    pipeline you can also use a shorthand
-
+    
         &gt;&gt;&gt; pipeline.add_step(&#39;kodexa/html-parser&#39;,options={&#39;summarize&#39;:False})
-
-    :param step: the step to add
-    :param name: the name to use to describe the step (default None)
-    :param enabled: is the step enabled (default True)
-    :param condition: condition to evaluate before executing the step (default None)
-    :param options: options to be passed to the step if it is a simplified remote action
-    :param attach_source: if step is simplified remote action this determines if we need to add the source
-    :param parameterized: apply the pipeline&#39;s parameters to the options
-    :param cache_path: cache the document locally, note this is only for local pipelines
-
     &#34;&#34;&#34;
     if options is None:
         options = {}
@@ -1594,28 +2156,41 @@ pipeline you can also use a shorthand</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Add the store to the pipeline so that it is available to the pipeline</p>
-<pre><code>&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-&gt;&gt;&gt; pipeline.add_store("test-store", TableDataStore())
-</code></pre>
-<p>:param name: the name of the store (to refer to it)
-:param store: the store that should be added
-:param extracted_labelled: at the end of the pipeline we will extract the labelled data
-to this store</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>the name of the store (to refer to it)</dd>
+<dt><strong><code>store</code></strong></dt>
+<dd>the store that should be added</dd>
+<dt><strong><code>extracted_labelled</code></strong></dt>
+<dd>at the end of the pipeline we will extract the labelled data</dd>
+</dl>
+<p>to this store (Default value = False)
+name: str:
+store: Store: </p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+    &gt;&gt;&gt; pipeline.add_store(&quot;test-store&quot;, TableDataStore())
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_store(self, name: str, store: Store, extracted_labelled=False):
-    &#34;&#34;&#34;
-    Add the store to the pipeline so that it is available to the pipeline
+    &#34;&#34;&#34;Add the store to the pipeline so that it is available to the pipeline
 
-        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+    Args:
+      name: the name of the store (to refer to it)
+      store: the store that should be added
+      extracted_labelled: at the end of the pipeline we will extract the labelled data
+    to this store (Default value = False)
+      name: str: 
+      store: Store: 
+
+    Returns:
+
+    &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
         &gt;&gt;&gt; pipeline.add_store(&#34;test-store&#34;, TableDataStore())
-
-    :param name: the name of the store (to refer to it)
-    :param store: the store that should be added
-    :param extracted_labelled: at the end of the pipeline we will extract the labelled data
-                               to this store
     &#34;&#34;&#34;
     self.stores.append(PipelineStore(name, store, extracted_labelled))
     return self</code></pre>
@@ -1626,31 +2201,48 @@ to this store</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Adds a label to the document</p>
-<p>:param label: label to remove
-:param enabled: is the step enabled (default True)
-:param condition: condition to evaluate before executing the step (default None)
-:param options: options to be passed to the step if it is a simplified remote action
-:param attach_source: if step is simplified remote action this determines if we need to add the source
-:param parameterized: apply the pipeline's parameters to the options
-:param cache_path: cache the document locally, note this is only for local pipelines
-:return: the pipeline</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>label</code></strong></dt>
+<dd>label to remove</dd>
+<dt><strong><code>enabled</code></strong></dt>
+<dd>is the step enabled (default True)</dd>
+<dt><strong><code>condition</code></strong></dt>
+<dd>condition to evaluate before executing the step (default None)</dd>
+<dt><strong><code>options</code></strong></dt>
+<dd>options to be passed to the step if it is a simplified remote action (Default value = None)</dd>
+<dt><strong><code>attach_source</code></strong></dt>
+<dd>if step is simplified remote action this determines if we need to add the source (Default value = False)</dd>
+<dt><strong><code>parameterized</code></strong></dt>
+<dd>apply the pipeline's parameters to the options (Default value = False)</dd>
+<dt><strong><code>cache_path</code></strong></dt>
+<dd>cache the document locally, note this is only for local pipelines (Default value = None)</dd>
+<dt><strong><code>label</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>the pipeline</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def remove_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
                  parameterized=False, cache_path=None):
-    &#34;&#34;&#34;
-    Adds a label to the document
+    &#34;&#34;&#34;Adds a label to the document
 
-    :param label: label to remove
-    :param enabled: is the step enabled (default True)
-    :param condition: condition to evaluate before executing the step (default None)
-    :param options: options to be passed to the step if it is a simplified remote action
-    :param attach_source: if step is simplified remote action this determines if we need to add the source
-    :param parameterized: apply the pipeline&#39;s parameters to the options
-    :param cache_path: cache the document locally, note this is only for local pipelines
-    :return: the pipeline
+    Args:
+      label: label to remove
+      enabled: is the step enabled (default True)
+      condition: condition to evaluate before executing the step (default None)
+      options: options to be passed to the step if it is a simplified remote action (Default value = None)
+      attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
+      parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
+      cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
+      label: str: 
+
+    Returns:
+      the pipeline
+
     &#34;&#34;&#34;
     self.steps.append(
         PipelineStep(step=LabelStep(label, remove=True), name=f&#34;Remove label {label}&#34;, enabled=enabled,
@@ -1664,24 +2256,35 @@ to this store</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Run the current pipeline, note that you must have a sink in place to allow the pipeline to run</p>
-<pre><code>&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-&gt;&gt;&gt; pipeline.set_sink(ExampleSink())
-&gt;&gt;&gt; pipeline.run()
-</code></pre>
-<p>:return: The context from the run</p></div>
+<p>:return: The context from the run</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>parameters</code></strong></dt>
+<dd>(Default value = None)</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+    &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+    &gt;&gt;&gt; pipeline.run()
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def run(self, parameters=None):
-    &#34;&#34;&#34;
-    Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
+    &#34;&#34;&#34;Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
+    
+    
+    :return: The context from the run
 
-        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+    Args:
+      parameters:  (Default value = None)
+
+    Returns:
+
+    &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
         &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
         &gt;&gt;&gt; pipeline.run()
-
-    :return: The context from the run
     &#34;&#34;&#34;
     if parameters is None:
         parameters = {}
@@ -1787,23 +2390,30 @@ to this store</p></div>
 <dd>
 <div class="desc"><p>Set the sink you wish to use, note that it will replace any currently assigned
 sink</p>
-<pre><code>&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-&gt;&gt;&gt; pipeline.set_sink(ExampleSink())
-</code></pre>
-<p>:param sink: the sink for the pipeline</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sink</code></strong></dt>
+<dd>the sink for the pipeline</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+    &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_sink(self, sink):
-    &#34;&#34;&#34;
-    Set the sink you wish to use, note that it will replace any currently assigned
+    &#34;&#34;&#34;Set the sink you wish to use, note that it will replace any currently assigned
     sink
 
-        &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
-        &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
+    Args:
+      sink: the sink for the pipeline
 
-    :param sink: the sink for the pipeline
+    Returns:
+
+    &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
+        &gt;&gt;&gt; pipeline.set_sink(ExampleSink())
     &#34;&#34;&#34;
     logger.info(f&#34;Setting sink {sink.get_name()} on {self.name}&#34;)
     self.sink = sink
@@ -1817,22 +2427,38 @@ sink</p>
 <dd>
 <div class="desc"><p>Allows you to provide the sink store easily</p>
 <p>This will wrap the store in a document store sink</p>
-<p>:param document_store: document store to use
-:param processing_mode: the processing mode (update or new)
-:return: the pipeline</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document_store</code></strong></dt>
+<dd>document store to use</dd>
+<dt><strong><code>processing_mode</code></strong></dt>
+<dd>the processing mode (update or new)</dd>
+<dt><strong><code>document_store</code></strong></dt>
+<dd>DocumentStore: </dd>
+<dt><strong><code>processing_mode</code></strong></dt>
+<dd>str:
+(Default value = "update")</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>the pipeline</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
-    &#34;&#34;&#34;
-    Allows you to provide the sink store easily
-
+    &#34;&#34;&#34;Allows you to provide the sink store easily
+    
     This will wrap the store in a document store sink
 
-    :param document_store: document store to use
-    :param processing_mode: the processing mode (update or new)
-    :return: the pipeline
+    Args:
+      document_store: document store to use
+      processing_mode: the processing mode (update or new)
+      document_store: DocumentStore: 
+      processing_mode: str:  (Default value = &#34;update&#34;)
+
+    Returns:
+      the pipeline
+
     &#34;&#34;&#34;
     from kodexa.sinks import DocumentStoreSink
     self.set_sink(DocumentStoreSink(document_store))
@@ -1845,18 +2471,24 @@ sink</p>
 <dd>
 <div class="desc"><p>Will return the YAML representation of any actions that support conversion to YAML</p>
 <p>The YAML representation for RemoteAction's can be used for metadata only pipelines in the Kodexa Platform</p>
-<p>:return: YAML representation</p></div>
+<p>:return: YAML representation</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_yaml(self):
-    &#34;&#34;&#34;
-    Will return the YAML representation of any actions that support conversion to YAML
-
+    &#34;&#34;&#34;Will return the YAML representation of any actions that support conversion to YAML
+    
     The YAML representation for RemoteAction&#39;s can be used for metadata only pipelines in the Kodexa Platform
-
+    
     :return: YAML representation
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     configuration_steps = []
@@ -1881,17 +2513,23 @@ sink</p>
 <div class="desc"><p>Pipeline context is created when you create a pipeline and it provides a way to access information about the
 pipeline that is running.
 It can be made available to steps/functions so they can interact with it.</p>
-<p>It also provides access to the 'stores' that have been added to the pipeline</p></div>
+<p>It also provides access to the 'stores' that have been added to the pipeline</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class PipelineContext:
-    &#34;&#34;&#34;
-    Pipeline context is created when you create a pipeline and it provides a way to access information about the
+    &#34;&#34;&#34;Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
-
+    
     It also provides access to the &#39;stores&#39; that have been added to the pipeline
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, content_provider=None, store_provider=None,
@@ -1919,66 +2557,109 @@ It can be made available to steps/functions so they can interact with it.</p>
         self.document_store = None
 
     def get_context(self) -&gt; Dict:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.context
 
     def get_content_objects(self) -&gt; List[ContentObject]:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.content_objects
 
     def get_content(self, content_object: ContentObject):
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.content_provider.get_content(content_object)
 
     def put_content(self, content_object: ContentObject, content):
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+          content: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.content_provider.put_content(content_object, content)
 
     def add_store(self, name: str, store):
-        &#34;&#34;&#34;
-        Add a store with given name to the context
+        &#34;&#34;&#34;Add a store with given name to the context
 
-        :param name: the name to refer to the store with
-        :param store: the instance of the store
+        Args:
+          name: the name to refer to the store with
+          store: the instance of the store
+          name: str: 
+
+        Returns:
+
         &#34;&#34;&#34;
         self.store_provider.put_store(name, store)
 
     def get_store_names(self) -&gt; KeysView:
         &#34;&#34;&#34;
-        Return the list of store names in context
 
-        :return: the list of store names
+        Args:
+
+        Returns:
+          :return: the list of store names
+
         &#34;&#34;&#34;
         return self.store_provider.get_store_names()
 
     def set_current_document(self, current_document: Document):
-        &#34;&#34;&#34;
-        Set the Document that is currently being processed in the pipeline
+        &#34;&#34;&#34;Set the Document that is currently being processed in the pipeline
 
-        :param current_document: The current document
+        Args:
+          current_document: The current document
+          current_document: Document: 
+
+        Returns:
+
         &#34;&#34;&#34;
         self.current_document = current_document
 
     def get_current_document(self) -&gt; Document:
-        &#34;&#34;&#34;
-        Get the current document that is being processed in the pipeline
-
+        &#34;&#34;&#34;Get the current document that is being processed in the pipeline
+        
         :return: The current document, or None
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return self.current_document
 
     def set_output_document(self, output_document: Document):
-        &#34;&#34;&#34;
-        Set the output document from the pipeline
+        &#34;&#34;&#34;Set the output document from the pipeline
 
-        :param output_document: the final output document from the pipeline
-        :return: the final output document
+        Args:
+          output_document: the final output document from the pipeline
+          output_document: Document: 
+
+        Returns:
+          the final output document
+
         &#34;&#34;&#34;
         self.output_document = output_document
 
     def get_store(self, name: str, default: Store = None) -&gt; Store:
-        &#34;&#34;&#34;
-        Get a store with given name from the context
+        &#34;&#34;&#34;Get a store with given name from the context
 
-        :param name: the name to refer to the store with
-        :param default: optionally the default to create the store as if it isn&#39;t there
-        :return: the store, or None is not available
+        Args:
+          name: the name to refer to the store with
+          default: optionally the default to create the store as if it isn&#39;t there
+          name: str: 
+          default: Store:  (Default value = None)
+
+        Returns:
+          the store, or None is not available
+
         &#34;&#34;&#34;
         store = self.store_provider.get_store(name) if name in self.get_store_names() else None
 
@@ -1989,6 +2670,15 @@ It can be made available to steps/functions so they can interact with it.</p>
         return self.store_provider.get_store(name)
 
     def merge_store(self, name, store):
+        &#34;&#34;&#34;
+
+        Args:
+          name: 
+          store: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if name not in self.get_store_names():
             self.add_store(name, store)
         else:
@@ -2001,18 +2691,30 @@ It can be made available to steps/functions so they can interact with it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a store with given name to the context</p>
-<p>:param name: the name to refer to the store with
-:param store: the instance of the store</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>the name to refer to the store with</dd>
+<dt><strong><code>store</code></strong></dt>
+<dd>the instance of the store</dd>
+<dt><strong><code>name</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_store(self, name: str, store):
-    &#34;&#34;&#34;
-    Add a store with given name to the context
+    &#34;&#34;&#34;Add a store with given name to the context
 
-    :param name: the name to refer to the store with
-    :param store: the instance of the store
+    Args:
+      name: the name to refer to the store with
+      store: the instance of the store
+      name: str: 
+
+    Returns:
+
     &#34;&#34;&#34;
     self.store_provider.put_store(name, store)</code></pre>
 </details>
@@ -2021,12 +2723,25 @@ It can be made available to steps/functions so they can interact with it.</p>
 <span>def <span class="ident">get_content</span></span>(<span>self, content_object: ContentObject)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>ContentObject: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_content(self, content_object: ContentObject):
+    &#34;&#34;&#34;
+
+    Args:
+      content_object: ContentObject: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     self.content_provider.get_content(content_object)</code></pre>
 </details>
 </dd>
@@ -2040,6 +2755,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_content_objects(self) -&gt; List[ContentObject]:
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return self.content_objects</code></pre>
 </details>
 </dd>
@@ -2053,6 +2769,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_context(self) -&gt; Dict:
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return self.context</code></pre>
 </details>
 </dd>
@@ -2061,16 +2778,22 @@ It can be made available to steps/functions so they can interact with it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the current document that is being processed in the pipeline</p>
-<p>:return: The current document, or None</p></div>
+<p>:return: The current document, or None</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_current_document(self) -&gt; Document:
-    &#34;&#34;&#34;
-    Get the current document that is being processed in the pipeline
-
+    &#34;&#34;&#34;Get the current document that is being processed in the pipeline
+    
     :return: The current document, or None
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     return self.current_document</code></pre>
 </details>
@@ -2080,20 +2803,36 @@ It can be made available to steps/functions so they can interact with it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a store with given name from the context</p>
-<p>:param name: the name to refer to the store with
-:param default: optionally the default to create the store as if it isn't there
-:return: the store, or None is not available</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>the name to refer to the store with</dd>
+<dt><strong><code>default</code></strong></dt>
+<dd>optionally the default to create the store as if it isn't there</dd>
+<dt><strong><code>name</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>default</code></strong></dt>
+<dd>Store:
+(Default value = None)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>the store, or None is not available</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_store(self, name: str, default: Store = None) -&gt; Store:
-    &#34;&#34;&#34;
-    Get a store with given name from the context
+    &#34;&#34;&#34;Get a store with given name from the context
 
-    :param name: the name to refer to the store with
-    :param default: optionally the default to create the store as if it isn&#39;t there
-    :return: the store, or None is not available
+    Args:
+      name: the name to refer to the store with
+      default: optionally the default to create the store as if it isn&#39;t there
+      name: str: 
+      default: Store:  (Default value = None)
+
+    Returns:
+      the store, or None is not available
+
     &#34;&#34;&#34;
     store = self.store_provider.get_store(name) if name in self.get_store_names() else None
 
@@ -2108,7 +2847,8 @@ It can be made available to steps/functions so they can interact with it.</p>
 <span>def <span class="ident">get_store_names</span></span>(<span>self) ‑> collections.abc.KeysView</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return the list of store names in context</p>
+<div class="desc"><p>Args:</p>
+<h2 id="returns">Returns</h2>
 <p>:return: the list of store names</p></div>
 <details class="source">
 <summary>
@@ -2116,9 +2856,12 @@ It can be made available to steps/functions so they can interact with it.</p>
 </summary>
 <pre><code class="python">def get_store_names(self) -&gt; KeysView:
     &#34;&#34;&#34;
-    Return the list of store names in context
 
-    :return: the list of store names
+    Args:
+
+    Returns:
+      :return: the list of store names
+
     &#34;&#34;&#34;
     return self.store_provider.get_store_names()</code></pre>
 </details>
@@ -2127,12 +2870,28 @@ It can be made available to steps/functions so they can interact with it.</p>
 <span>def <span class="ident">merge_store</span></span>(<span>self, name, store)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>store</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def merge_store(self, name, store):
+    &#34;&#34;&#34;
+
+    Args:
+      name: 
+      store: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if name not in self.get_store_names():
         self.add_store(name, store)
     else:
@@ -2143,12 +2902,28 @@ It can be made available to steps/functions so they can interact with it.</p>
 <span>def <span class="ident">put_content</span></span>(<span>self, content_object: ContentObject, content)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>ContentObject: </dd>
+<dt><strong><code>content</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put_content(self, content_object: ContentObject, content):
+    &#34;&#34;&#34;
+
+    Args:
+      content_object: ContentObject: 
+      content: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     self.content_provider.put_content(content_object, content)</code></pre>
 </details>
 </dd>
@@ -2157,16 +2932,27 @@ It can be made available to steps/functions so they can interact with it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the Document that is currently being processed in the pipeline</p>
-<p>:param current_document: The current document</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_document</code></strong></dt>
+<dd>The current document</dd>
+<dt><strong><code>current_document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_current_document(self, current_document: Document):
-    &#34;&#34;&#34;
-    Set the Document that is currently being processed in the pipeline
+    &#34;&#34;&#34;Set the Document that is currently being processed in the pipeline
 
-    :param current_document: The current document
+    Args:
+      current_document: The current document
+      current_document: Document: 
+
+    Returns:
+
     &#34;&#34;&#34;
     self.current_document = current_document</code></pre>
 </details>
@@ -2176,18 +2962,29 @@ It can be made available to steps/functions so they can interact with it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the output document from the pipeline</p>
-<p>:param output_document: the final output document from the pipeline
-:return: the final output document</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>output_document</code></strong></dt>
+<dd>the final output document from the pipeline</dd>
+<dt><strong><code>output_document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>the final output document</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_output_document(self, output_document: Document):
-    &#34;&#34;&#34;
-    Set the output document from the pipeline
+    &#34;&#34;&#34;Set the output document from the pipeline
 
-    :param output_document: the final output document from the pipeline
-    :return: the final output document
+    Args:
+      output_document: the final output document from the pipeline
+      output_document: Document: 
+
+    Returns:
+      the final output document
+
     &#34;&#34;&#34;
     self.output_document = output_document</code></pre>
 </details>
@@ -2200,17 +2997,23 @@ It can be made available to steps/functions so they can interact with it.</p>
 <dd>
 <div class="desc"><p>A set of statistics for the processed document</p>
 <p>documents_processed
-document_exceptions</p></div>
+document_exceptions</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class PipelineStatistics:
-    &#34;&#34;&#34;
-    A set of statistics for the processed document
-
+    &#34;&#34;&#34;A set of statistics for the processed document
+    
     documents_processed
     document_exceptions
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -2218,10 +3021,13 @@ document_exceptions</p></div>
         self.document_exceptions = 0
 
     def processed_document(self, document):
-        &#34;&#34;&#34;
-        Update statistics based on this document completing processing
+        &#34;&#34;&#34;Update statistics based on this document completing processing
 
-        :param document: the document that has been processed
+        Args:
+          document: the document that has been processed
+
+        Returns:
+
         &#34;&#34;&#34;
         self.documents_processed += 1
 
@@ -2235,16 +3041,24 @@ document_exceptions</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Update statistics based on this document completing processing</p>
-<p>:param document: the document that has been processed</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>the document that has been processed</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def processed_document(self, document):
-    &#34;&#34;&#34;
-    Update statistics based on this document completing processing
+    &#34;&#34;&#34;Update statistics based on this document completing processing
 
-    :param document: the document that has been processed
+    Args:
+      document: the document that has been processed
+
+    Returns:
+
     &#34;&#34;&#34;
     self.documents_processed += 1
 
@@ -2261,17 +3075,23 @@ document_exceptions</p></div>
 <dd>
 <div class="desc"><p>The representation of a step within a step, which captures both the step itself and
 also the details around the step's use.</p>
-<p>It is internally used by the Pipeline and is not a public API</p></div>
+<p>It is internally used by the Pipeline and is not a public API</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class PipelineStep:
-    &#34;&#34;&#34;
-    The representation of a step within a step, which captures both the step itself and
+    &#34;&#34;&#34;The representation of a step within a step, which captures both the step itself and
     also the details around the step&#39;s use.
-
+    
     It is internally used by the Pipeline and is not a public API
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, step, enabled=False, condition=None, name=None, options=None, attach_source=False,
@@ -2300,6 +3120,7 @@ also the details around the step's use.</p>
             logger.info(f&#34;Adding new step {step.get_name()} to pipeline&#34;)
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         try:
             if str(type(self.step)) == &#34;&lt;class &#39;type&#39;&gt;&#34;:
                 raise Exception(&#34;You can not yet deploy a pipeline with a class instance style step&#34;)
@@ -2326,6 +3147,15 @@ also the details around the step's use.</p>
             raise Exception(&#34;All steps must implement to_dict() for deployment&#34;, e)
 
     def execute(self, context, document):
+        &#34;&#34;&#34;
+
+        Args:
+          context: 
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         start = time.perf_counter()
         if self.cache_path:
@@ -2353,6 +3183,15 @@ also the details around the step's use.</p>
                         import collections
 
                         def replace_params(opts, params):
+                            &#34;&#34;&#34;
+
+                            Args:
+                              opts: 
+                              params: 
+
+                            Returns:
+
+                            &#34;&#34;&#34;
                             if isinstance(opts, dict):
                                 for key, val in opts.items():
                                     opts[key] = replace_params(val, params)
@@ -2416,6 +3255,15 @@ also the details around the step's use.</p>
             return document
 
     def will_execute(self, context, document):
+        &#34;&#34;&#34;
+
+        Args:
+          context: 
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if not self.enabled:
             return False
 
@@ -2429,11 +3277,27 @@ also the details around the step's use.</p>
         return True
 
     def get_cache_name(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         file_name = document.source.original_filename \
             if document.source.original_filename is not None else document.uuid
         return f&#34;{self.cache_path}/{file_name}.kdxa&#34;
 
     def end_processing(self, context):
+        &#34;&#34;&#34;
+
+        Args:
+          context: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         try:
             self.step.end_processing(context)
         except:
@@ -2445,12 +3309,25 @@ also the details around the step's use.</p>
 <span>def <span class="ident">end_processing</span></span>(<span>self, context)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>context</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def end_processing(self, context):
+    &#34;&#34;&#34;
+
+    Args:
+      context: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     try:
         self.step.end_processing(context)
     except:
@@ -2461,12 +3338,28 @@ also the details around the step's use.</p>
 <span>def <span class="ident">execute</span></span>(<span>self, context, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>context</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def execute(self, context, document):
+    &#34;&#34;&#34;
+
+    Args:
+      context: 
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     start = time.perf_counter()
     if self.cache_path:
@@ -2494,6 +3387,15 @@ also the details around the step's use.</p>
                     import collections
 
                     def replace_params(opts, params):
+                        &#34;&#34;&#34;
+
+                        Args:
+                          opts: 
+                          params: 
+
+                        Returns:
+
+                        &#34;&#34;&#34;
                         if isinstance(opts, dict):
                             for key, val in opts.items():
                                 opts[key] = replace_params(val, params)
@@ -2561,12 +3463,25 @@ also the details around the step's use.</p>
 <span>def <span class="ident">get_cache_name</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_cache_name(self, document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     file_name = document.source.original_filename \
         if document.source.original_filename is not None else document.uuid
     return f&#34;{self.cache_path}/{file_name}.kdxa&#34;</code></pre>
@@ -2582,6 +3497,7 @@ also the details around the step's use.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     try:
         if str(type(self.step)) == &#34;&lt;class &#39;type&#39;&gt;&#34;:
             raise Exception(&#34;You can not yet deploy a pipeline with a class instance style step&#34;)
@@ -2612,12 +3528,28 @@ also the details around the step's use.</p>
 <span>def <span class="ident">will_execute</span></span>(<span>self, context, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>context</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def will_execute(self, context, document):
+    &#34;&#34;&#34;
+
+    Args:
+      context: 
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if not self.enabled:
         return False
 
@@ -2644,6 +3576,7 @@ also the details around the step's use.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class PipelineStore:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, store: Store, extracted_labelled: bool = False):
         self.name = name
@@ -2651,6 +3584,14 @@ also the details around the step's use.</p>
         self.extract_labelled = extracted_labelled
 
     def extract(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         # TODO implement
         pass</code></pre>
 </details>
@@ -2660,12 +3601,25 @@ also the details around the step's use.</p>
 <span>def <span class="ident">extract</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def extract(self, document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     # TODO implement
     pass</code></pre>
 </details>

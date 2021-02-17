@@ -36,6 +36,14 @@ registered_mixins: Dict[str, object] = {}
 
 
 def get_mixin(mixin):
+    &#34;&#34;&#34;
+
+    Args:
+      mixin: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if mixin in registered_mixins:
         return registered_mixins[mixin]
     else:
@@ -43,10 +51,27 @@ def get_mixin(mixin):
 
 
 def add_mixin(mixin):
+    &#34;&#34;&#34;
+
+    Args:
+      mixin: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     registered_mixins[mixin.get_name()] = mixin
 
 
 def apply_to_node(mixin_name, node):
+    &#34;&#34;&#34;
+
+    Args:
+      mixin_name: 
+      node: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if mixin_name in registered_mixins:
         registered_mixins[mixin_name].apply_to(node)
 
@@ -57,16 +82,42 @@ def apply_to_node(mixin_name, node):
 
 
 def apply_to_document(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     for mixin in document.get_mixins():
         add_mixin_to_document(mixin, document)
 
 
 def add_mixins_to_document_node(document, node):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+      node: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     for mixin in document.get_mixins():
         apply_to_node(mixin, node)
 
 
 def add_mixin_to_document(mixin, document):
+    &#34;&#34;&#34;
+
+    Args:
+      mixin: 
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if mixin not in document.get_mixins():
         document.get_mixins().append(mixin)
 
@@ -91,6 +142,14 @@ add_mixin(NavigationMixin())
 
 
 def get_renderers(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     renderers = {}
     for mixin in document.get_mixins():
         if mixin in registered_mixins:
@@ -111,12 +170,25 @@ def get_renderers(document):
 <span>def <span class="ident">add_mixin</span></span>(<span>mixin)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mixin</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_mixin(mixin):
+    &#34;&#34;&#34;
+
+    Args:
+      mixin: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     registered_mixins[mixin.get_name()] = mixin</code></pre>
 </details>
 </dd>
@@ -124,12 +196,28 @@ def get_renderers(document):
 <span>def <span class="ident">add_mixin_to_document</span></span>(<span>mixin, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mixin</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_mixin_to_document(mixin, document):
+    &#34;&#34;&#34;
+
+    Args:
+      mixin: 
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if mixin not in document.get_mixins():
         document.get_mixins().append(mixin)
 
@@ -152,12 +240,28 @@ def get_renderers(document):
 <span>def <span class="ident">add_mixins_to_document_node</span></span>(<span>document, node)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>node</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_mixins_to_document_node(document, node):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+      node: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     for mixin in document.get_mixins():
         apply_to_node(mixin, node)</code></pre>
 </details>
@@ -166,12 +270,25 @@ def get_renderers(document):
 <span>def <span class="ident">apply_to_document</span></span>(<span>document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def apply_to_document(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     for mixin in document.get_mixins():
         add_mixin_to_document(mixin, document)</code></pre>
 </details>
@@ -180,12 +297,28 @@ def get_renderers(document):
 <span>def <span class="ident">apply_to_node</span></span>(<span>mixin_name, node)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mixin_name</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>node</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def apply_to_node(mixin_name, node):
+    &#34;&#34;&#34;
+
+    Args:
+      mixin_name: 
+      node: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if mixin_name in registered_mixins:
         registered_mixins[mixin_name].apply_to(node)
 
@@ -199,12 +332,25 @@ def get_renderers(document):
 <span>def <span class="ident">get_mixin</span></span>(<span>mixin)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mixin</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_mixin(mixin):
+    &#34;&#34;&#34;
+
+    Args:
+      mixin: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if mixin in registered_mixins:
         return registered_mixins[mixin]
     else:
@@ -215,12 +361,25 @@ def get_renderers(document):
 <span>def <span class="ident">get_renderers</span></span>(<span>document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_renderers(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     renderers = {}
     for mixin in document.get_mixins():
         if mixin in registered_mixins:

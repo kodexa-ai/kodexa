@@ -45,6 +45,7 @@ logger = logging.getLogger(&#39;kodexa.connectors&#39;)
 
 
 def get_caller_dir():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     # get the caller&#39;s stack frame and extract its file path
     frame_info = inspect.stack()[3]
     filepath = frame_info.filename
@@ -56,9 +57,11 @@ def get_caller_dir():
 
 
 class FolderConnector:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;folder&#34;
 
     def __init__(self, path, file_filter=&#34;*&#34;, recursive=False, relative=False, caller_path=get_caller_dir(),
@@ -78,6 +81,14 @@ class FolderConnector:
 
     @staticmethod
     def get_source(document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return open(join(document.source.original_path, document.source.original_filename), &#39;rb&#39;)
 
     def __iter__(self):
@@ -121,9 +132,11 @@ class FolderConnector:
 
 
 class FileHandleConnector:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#39;file-handle&#39;
 
     def __init__(self, original_path):
@@ -133,6 +146,14 @@ class FileHandleConnector:
 
     @staticmethod
     def get_source(document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return open(document.source.original_path, &#39;rb&#39;)
 
     def __iter__(self):
@@ -155,9 +176,11 @@ class FileHandleConnector:
 
 
 class UrlConnector:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;url&#34;
 
     def __init__(self, original_path, headers=None):
@@ -170,6 +193,14 @@ class UrlConnector:
 
     @staticmethod
     def get_source(document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         # If we have an http URL then we should use requests, it is much
         # cleaner
@@ -210,16 +241,36 @@ registered_connectors: Dict[str, Type] = {}
 
 
 class CacheConnector:
-    &#34;&#34;&#34;
-    A Cache Connector can be used to inject caching of content
+    &#34;&#34;&#34;A Cache Connector can be used to inject caching of content
     in front of a connector, you must extend this type to implement
     a cache
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def is_cached(self, source: SourceMetadata):
+        &#34;&#34;&#34;
+
+        Args:
+          source: SourceMetadata: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return False
 
     def get_source(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         pass
 
 
@@ -229,25 +280,40 @@ registered_caches: List[CacheConnector] = []
 
 def get_connectors():
     &#34;&#34;&#34;
-    Return a list of the registered connectors
 
-    :return:
+    Args:
+
+    Returns:
+      :return:
+
     &#34;&#34;&#34;
     return registered_connectors.keys()
 
 
 def add_cache(cache_connector: CacheConnector):
-    &#34;&#34;&#34;
-    Register a cache connector, this can intercept a source request and
+    &#34;&#34;&#34;Register a cache connector, this can intercept a source request and
     determine if there is already an object in a cache that holds it
 
-    :param cache_connector:
-    :return:
+    Args:
+      cache_connector: return:
+      cache_connector: CacheConnector: 
+
+    Returns:
+
     &#34;&#34;&#34;
     registered_caches.append(cache_connector)
 
 
 def get_connector(connector: str, source: SourceMetadata):
+    &#34;&#34;&#34;
+
+    Args:
+      connector: str: 
+      source: SourceMetadata: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     # Adding support for cache connectors
     for cache_connector in registered_caches:
         if cache_connector.is_cached(source):
@@ -262,16 +328,33 @@ def get_connector(connector: str, source: SourceMetadata):
 
 
 def add_connector(connector):
+    &#34;&#34;&#34;
+
+    Args:
+      connector: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     registered_connectors[connector.get_name()] = connector
 
 
 def get_source(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     connector = get_connector(document.source.connector,
                               document.source)
     return connector.get_source(document)
 
 
 class DocumentStoreConnector(object):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, store: DocumentStore, subscription: str):
         self.store = store
@@ -280,6 +363,7 @@ class DocumentStoreConnector(object):
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;document-store&#34;
 
     def __iter__(self):
@@ -295,6 +379,14 @@ class DocumentStoreConnector(object):
 
     @staticmethod
     def get_source(document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import RemoteDocumentStore
         remote_document_store = RemoteDocumentStore(document.source.headers[&#39;ref&#39;])
         bytes = remote_document_store.get_source(document.source.headers[&#39;id&#39;])
@@ -323,19 +415,28 @@ add_connector(DocumentStoreConnector)</code></pre>
 <dd>
 <div class="desc"><p>Register a cache connector, this can intercept a source request and
 determine if there is already an object in a cache that holds it</p>
-<p>:param cache_connector:
-:return:</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cache_connector</code></strong></dt>
+<dd>return:</dd>
+<dt><strong><code>cache_connector</code></strong></dt>
+<dd>CacheConnector: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_cache(cache_connector: CacheConnector):
-    &#34;&#34;&#34;
-    Register a cache connector, this can intercept a source request and
+    &#34;&#34;&#34;Register a cache connector, this can intercept a source request and
     determine if there is already an object in a cache that holds it
 
-    :param cache_connector:
-    :return:
+    Args:
+      cache_connector: return:
+      cache_connector: CacheConnector: 
+
+    Returns:
+
     &#34;&#34;&#34;
     registered_caches.append(cache_connector)</code></pre>
 </details>
@@ -344,12 +445,25 @@ determine if there is already an object in a cache that holds it</p>
 <span>def <span class="ident">add_connector</span></span>(<span>connector)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>connector</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_connector(connector):
+    &#34;&#34;&#34;
+
+    Args:
+      connector: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     registered_connectors[connector.get_name()] = connector</code></pre>
 </details>
 </dd>
@@ -363,6 +477,7 @@ determine if there is already an object in a cache that holds it</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_caller_dir():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     # get the caller&#39;s stack frame and extract its file path
     frame_info = inspect.stack()[3]
     filepath = frame_info.filename
@@ -377,12 +492,28 @@ determine if there is already an object in a cache that holds it</p>
 <span>def <span class="ident">get_connector</span></span>(<span>connector: str, source: <a title="kodexa.model.model.SourceMetadata" href="../model/model.html#kodexa.model.model.SourceMetadata">SourceMetadata</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>connector</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>source</code></strong></dt>
+<dd>SourceMetadata: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_connector(connector: str, source: SourceMetadata):
+    &#34;&#34;&#34;
+
+    Args:
+      connector: str: 
+      source: SourceMetadata: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     # Adding support for cache connectors
     for cache_connector in registered_caches:
         if cache_connector.is_cached(source):
@@ -400,7 +531,8 @@ determine if there is already an object in a cache that holds it</p>
 <span>def <span class="ident">get_connectors</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a list of the registered connectors</p>
+<div class="desc"><p>Args:</p>
+<h2 id="returns">Returns</h2>
 <p>:return:</p></div>
 <details class="source">
 <summary>
@@ -408,9 +540,12 @@ determine if there is already an object in a cache that holds it</p>
 </summary>
 <pre><code class="python">def get_connectors():
     &#34;&#34;&#34;
-    Return a list of the registered connectors
 
-    :return:
+    Args:
+
+    Returns:
+      :return:
+
     &#34;&#34;&#34;
     return registered_connectors.keys()</code></pre>
 </details>
@@ -419,12 +554,25 @@ determine if there is already an object in a cache that holds it</p>
 <span>def <span class="ident">get_source</span></span>(<span>document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_source(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     connector = get_connector(document.source.connector,
                               document.source)
     return connector.get_source(document)</code></pre>
@@ -441,22 +589,44 @@ determine if there is already an object in a cache that holds it</p>
 <dd>
 <div class="desc"><p>A Cache Connector can be used to inject caching of content
 in front of a connector, you must extend this type to implement
-a cache</p></div>
+a cache</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class CacheConnector:
-    &#34;&#34;&#34;
-    A Cache Connector can be used to inject caching of content
+    &#34;&#34;&#34;A Cache Connector can be used to inject caching of content
     in front of a connector, you must extend this type to implement
     a cache
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def is_cached(self, source: SourceMetadata):
+        &#34;&#34;&#34;
+
+        Args:
+          source: SourceMetadata: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return False
 
     def get_source(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         pass</code></pre>
 </details>
 <h3>Methods</h3>
@@ -465,12 +635,25 @@ a cache</p></div>
 <span>def <span class="ident">get_source</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_source(self, document: Document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     pass</code></pre>
 </details>
 </dd>
@@ -478,12 +661,25 @@ a cache</p></div>
 <span>def <span class="ident">is_cached</span></span>(<span>self, source: <a title="kodexa.model.model.SourceMetadata" href="../model/model.html#kodexa.model.model.SourceMetadata">SourceMetadata</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>source</code></strong></dt>
+<dd>SourceMetadata: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def is_cached(self, source: SourceMetadata):
+    &#34;&#34;&#34;
+
+    Args:
+      source: SourceMetadata: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     return False</code></pre>
 </details>
 </dd>
@@ -500,6 +696,7 @@ a cache</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DocumentStoreConnector(object):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, store: DocumentStore, subscription: str):
         self.store = store
@@ -508,6 +705,7 @@ a cache</p></div>
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;document-store&#34;
 
     def __iter__(self):
@@ -523,6 +721,14 @@ a cache</p></div>
 
     @staticmethod
     def get_source(document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import RemoteDocumentStore
         remote_document_store = RemoteDocumentStore(document.source.headers[&#39;ref&#39;])
         bytes = remote_document_store.get_source(document.source.headers[&#39;id&#39;])
@@ -544,6 +750,7 @@ a cache</p></div>
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;document-store&#34;</code></pre>
 </details>
 </dd>
@@ -551,13 +758,26 @@ def get_name():
 <span>def <span class="ident">get_source</span></span>(<span>document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def get_source(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     from kodexa import RemoteDocumentStore
     remote_document_store = RemoteDocumentStore(document.source.headers[&#39;ref&#39;])
     bytes = remote_document_store.get_source(document.source.headers[&#39;id&#39;])
@@ -580,9 +800,11 @@ def get_source(document):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FileHandleConnector:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#39;file-handle&#39;
 
     def __init__(self, original_path):
@@ -592,6 +814,14 @@ def get_source(document):
 
     @staticmethod
     def get_source(document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return open(document.source.original_path, &#39;rb&#39;)
 
     def __iter__(self):
@@ -625,6 +855,7 @@ def get_source(document):
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#39;file-handle&#39;</code></pre>
 </details>
 </dd>
@@ -632,13 +863,26 @@ def get_name():
 <span>def <span class="ident">get_source</span></span>(<span>document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def get_source(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     return open(document.source.original_path, &#39;rb&#39;)</code></pre>
 </details>
 </dd>
@@ -655,9 +899,11 @@ def get_source(document):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FolderConnector:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;folder&#34;
 
     def __init__(self, path, file_filter=&#34;*&#34;, recursive=False, relative=False, caller_path=get_caller_dir(),
@@ -677,6 +923,14 @@ def get_source(document):
 
     @staticmethod
     def get_source(document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return open(join(document.source.original_path, document.source.original_filename), &#39;rb&#39;)
 
     def __iter__(self):
@@ -731,6 +985,7 @@ def get_source(document):
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;folder&#34;</code></pre>
 </details>
 </dd>
@@ -738,13 +993,26 @@ def get_name():
 <span>def <span class="ident">get_source</span></span>(<span>document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def get_source(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     return open(join(document.source.original_path, document.source.original_filename), &#39;rb&#39;)</code></pre>
 </details>
 </dd>
@@ -761,9 +1029,11 @@ def get_source(document):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class UrlConnector:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;url&#34;
 
     def __init__(self, original_path, headers=None):
@@ -776,6 +1046,14 @@ def get_source(document):
 
     @staticmethod
     def get_source(document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         # If we have an http URL then we should use requests, it is much
         # cleaner
@@ -823,6 +1101,7 @@ def get_source(document):
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;url&#34;</code></pre>
 </details>
 </dd>
@@ -830,13 +1109,26 @@ def get_name():
 <span>def <span class="ident">get_source</span></span>(<span>document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def get_source(document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     # If we have an http URL then we should use requests, it is much
     # cleaner

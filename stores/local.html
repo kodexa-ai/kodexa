@@ -35,12 +35,13 @@ from typing import List, Optional, Dict
 import jsonpickle
 
 from kodexa.model import DocumentFamily, DocumentStore, Document, ContentObject, ModelStore, Store
-from kodexa.model.document_families import ContentEvent, DocumentRelationship
+from kodexa.model.document_families import ContentEvent, DocumentTransition
 
 logger = logging.getLogger(&#39;kodexa.stores&#39;)
 
 
 class LocalDocumentStore(DocumentStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, store_path: str, force_initialize: bool = False, mode: str = &#39;ALL&#39;):
 
@@ -75,6 +76,7 @@ class LocalDocumentStore(DocumentStore):
         logger.info(f&#34;Found {len(self.metastore)} documents in {store_path}&#34;)
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Local Document Store&#34;
 
     def __iter__(self):
@@ -93,6 +95,15 @@ class LocalDocumentStore(DocumentStore):
         return content_object_reference
 
     def sink(self, document: Document, context):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+          context: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if context.document_family:
             self.put(context.document_family.path, document)
         else:
@@ -100,16 +111,34 @@ class LocalDocumentStore(DocumentStore):
                 self.put(document.source.original_filename, document)
 
     def get_ref(self) -&gt; str:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.store_path
 
     def register_listener(self, listener):
+        &#34;&#34;&#34;
+
+        Args:
+          listener: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.listeners.append(listener)
 
     def notify_listeners(self, content_event: ContentEvent):
+        &#34;&#34;&#34;
+
+        Args:
+          content_event: ContentEvent: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for listener in self.listeners:
             listener.process_event(content_event)
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;DOCUMENT&#34;,
             &#34;data&#34;: {
@@ -118,27 +147,39 @@ class LocalDocumentStore(DocumentStore):
         }
 
     def accept(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if self.mode == &#39;ALL&#39;:
             return True
         if self.mode == &#39;ONLY_NEW&#39;:
             return not self.exists(document)
 
     def read_metastore(self):
-        &#34;&#34;&#34;
-        Read the metadata store
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Read the metadata store&#34;&#34;&#34;
         self.metastore: List[Dict] = []
         with open(os.path.join(self.store_path, &#39;metastore.json&#39;)) as f:
             self.metastore = jsonpickle.decode(&#34;&#34;.join(f.readlines()))
 
     def write_metastore(self):
-        &#34;&#34;&#34;
-        Method to write the JSON store index back to store path
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Method to write the JSON store index back to store path&#34;&#34;&#34;
         with open(os.path.join(self.store_path, &#39;metastore.json&#39;), &#39;w&#39;) as f:
             f.write(jsonpickle.encode(self.metastore))
 
     def get_by_uuid(self, uuid: str) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+
+        Args:
+          uuid: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for family in self.metastore:
             for content_object in family.content_objects:
 
@@ -147,11 +188,14 @@ class LocalDocumentStore(DocumentStore):
         return None
 
     def get_by_path(self, path: str) -&gt; Optional[Document]:
-        &#34;&#34;&#34;
-        Return the latest document in the family at the given path
+        &#34;&#34;&#34;Return the latest document in the family at the given path
 
-        :param path:
-        :return:
+        Args:
+          path: return:
+          path: str: 
+
+        Returns:
+
         &#34;&#34;&#34;
         for family in self.metastore:
             if family.path == path:
@@ -161,18 +205,35 @@ class LocalDocumentStore(DocumentStore):
         return None
 
     def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
+        &#34;&#34;&#34;
+
+        Args:
+          path: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for family in self.metastore:
             if family.path == path:
                 return family
         return None
 
     def get_latest_document(self, path: str) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+
+        Args:
+          path: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for family in self.metastore:
             if family.path == path:
                 return self.get_document_by_content_object(family.content_objects[-1])
         return None
 
     def list_objects(self) -&gt; List[ContentObject]:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         co_list: List[ContentObject] = []
         for family in self.metastore:
             co_list.extend(family.content_objects)
@@ -180,28 +241,67 @@ class LocalDocumentStore(DocumentStore):
         return co_list
 
     def count(self) -&gt; int:
-        &#34;&#34;&#34;
-        Returns a count of the number of document families
-
+        &#34;&#34;&#34;Returns a count of the number of document families
+        
         :return:
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return len(self.metastore)
 
     def load_kdxa(self, path: str):
+        &#34;&#34;&#34;
+
+        Args:
+          path: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         document = Document.from_kdxa(path)
         self.put(document.uuid, document)
 
-    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentRelationship,
+    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentTransition,
                                        document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document_family_id: str: 
+          document_relationship: DocumentTransition:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.read_metastore()
         for family in self.metastore:
             if family.id == document_family_id:
                 family.add_document(document, document_relationship)
 
     def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
 
     def put(self, path: str, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          path: str: 
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         # We can only add a document if it doesn&#39;t already exist as a family
         if self.get_family_by_path(path) is None:
@@ -218,11 +318,14 @@ class LocalDocumentStore(DocumentStore):
         return self.get_family_by_path(path)
 
     def exists(self, document):
-        &#34;&#34;&#34;
-        Look to see if we have document with the same original path and original filename
+        &#34;&#34;&#34;Look to see if we have document with the same original path and original filename
 
-        :param document: document to check
-        :return: True if it is already in the document store
+        Args:
+          document: document to check
+
+        Returns:
+          True if it is already in the document store
+
         &#34;&#34;&#34;
 
         # Lets just work with original_filename?
@@ -234,6 +337,7 @@ class LocalDocumentStore(DocumentStore):
 
 
 class LocalModelStore(ModelStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, store_path: str, force_initialize=False):
         self.store_path = store_path
@@ -248,6 +352,7 @@ class LocalModelStore(ModelStore):
             path.mkdir(parents=True)
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;MODEL&#34;,
             &#34;data&#34;: {
@@ -256,25 +361,44 @@ class LocalModelStore(ModelStore):
         }
 
     def get(self, object_path: str):
+        &#34;&#34;&#34;
+
+        Args:
+          object_path: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if Path(os.path.join(self.store_path, object_path)).is_file():
             return open(os.path.join(self.store_path, object_path), &#39;rb&#39;)
         else:
             return None
 
     def put(self, object_path: str, content):
+        &#34;&#34;&#34;
+
+        Args:
+          object_path: str: 
+          content: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         path = Path(object_path)
         with open(os.path.join(self.store_path, path), &#39;wb&#39;) as object_file:
             object_file.write(content)
 
 
 class TableDataStore(Store):
-    &#34;&#34;&#34;
-    Stores data as a list of lists that can represent a table.
-
+    &#34;&#34;&#34;Stores data as a list of lists that can represent a table.
+    
     This is a good store when you are capturing nested or tabular data.
 
-    :param columns: a list of the column names (default to dynamic)
-    :param rows: initial set of rows (default to empty)
+    Args:
+      columns: a list of the column names (default to dynamic)
+      rows: initial set of rows (default to empty)
+
+    Returns:
 
     &#34;&#34;&#34;
 
@@ -296,13 +420,14 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     def to_dict(self):
-        &#34;&#34;&#34;
-        Create a dictionary representing this TableDataStore&#39;s structure and content.
+        &#34;&#34;&#34;Create a dictionary representing this TableDataStore&#39;s structure and content.
 
-            &gt;&gt;&gt; table_data_store.to_dict()
+        Args:
 
-        :return: The properties of this TableDataStore structured as a dictionary.
-        :rtype: dict
+        Returns:
+          dict: The properties of this TableDataStore structured as a dictionary.
+
+        &gt;&gt;&gt; table_data_store.to_dict()
         &#34;&#34;&#34;
 
         return {
@@ -314,9 +439,11 @@ class TableDataStore(Store):
         }
 
     def clear(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         self.rows = []
 
     def to_df(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         import pandas as pd
 
         if not self.columns:
@@ -325,35 +452,61 @@ class TableDataStore(Store):
             return pd.DataFrame(self.rows, columns=self.columns)
 
     def set_pipeline_context(self, pipeline_context):
+        &#34;&#34;&#34;
+
+        Args:
+          pipeline_context: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.pipeline_context = pipeline_context
 
     def add(self, row):
-        &#34;&#34;&#34;
-        Writes a row to the Data Store
+        &#34;&#34;&#34;Writes a row to the Data Store
 
-        :param row: the row (as a list) to add
+        Args:
+          row: the row (as a list) to add
+
+        Returns:
+
         &#34;&#34;&#34;
         self.rows.append(row)
 
     def count(self):
-        &#34;&#34;&#34;
-        Returns the number of rows in the store
-
+        &#34;&#34;&#34;Returns the number of rows in the store
+        
         :return: number of rows
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return len(self.rows)
 
     def merge(self, other_store):
-        &#34;&#34;&#34;
-        Merge another table store into this store
+        &#34;&#34;&#34;Merge another table store into this store
 
-        :param other_store:
-        :return: the other store
+        Args:
+          other_store: return: the other store
+
+        Returns:
+          the other store
+
         &#34;&#34;&#34;
         self.rows = self.rows + other_store.rows
 
     @classmethod
     def from_dict(cls, store_dict):
+        &#34;&#34;&#34;
+
+        Args:
+          store_dict: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return TableDataStore(columns=store_dict[&#39;data&#39;][&#39;columns&#39;], rows=store_dict[&#39;data&#39;][&#39;rows&#39;])</code></pre>
 </details>
 </section>
@@ -371,12 +524,13 @@ class TableDataStore(Store):
 <span>(</span><span>store_path: str, force_initialize: bool = False, mode: str = 'ALL')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A document store supports storing, listing and retrieving Kodexa documents and document families</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class LocalDocumentStore(DocumentStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, store_path: str, force_initialize: bool = False, mode: str = &#39;ALL&#39;):
 
@@ -411,6 +565,7 @@ class TableDataStore(Store):
         logger.info(f&#34;Found {len(self.metastore)} documents in {store_path}&#34;)
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Local Document Store&#34;
 
     def __iter__(self):
@@ -429,6 +584,15 @@ class TableDataStore(Store):
         return content_object_reference
 
     def sink(self, document: Document, context):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+          context: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if context.document_family:
             self.put(context.document_family.path, document)
         else:
@@ -436,16 +600,34 @@ class TableDataStore(Store):
                 self.put(document.source.original_filename, document)
 
     def get_ref(self) -&gt; str:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.store_path
 
     def register_listener(self, listener):
+        &#34;&#34;&#34;
+
+        Args:
+          listener: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.listeners.append(listener)
 
     def notify_listeners(self, content_event: ContentEvent):
+        &#34;&#34;&#34;
+
+        Args:
+          content_event: ContentEvent: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for listener in self.listeners:
             listener.process_event(content_event)
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;DOCUMENT&#34;,
             &#34;data&#34;: {
@@ -454,27 +636,39 @@ class TableDataStore(Store):
         }
 
     def accept(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if self.mode == &#39;ALL&#39;:
             return True
         if self.mode == &#39;ONLY_NEW&#39;:
             return not self.exists(document)
 
     def read_metastore(self):
-        &#34;&#34;&#34;
-        Read the metadata store
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Read the metadata store&#34;&#34;&#34;
         self.metastore: List[Dict] = []
         with open(os.path.join(self.store_path, &#39;metastore.json&#39;)) as f:
             self.metastore = jsonpickle.decode(&#34;&#34;.join(f.readlines()))
 
     def write_metastore(self):
-        &#34;&#34;&#34;
-        Method to write the JSON store index back to store path
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Method to write the JSON store index back to store path&#34;&#34;&#34;
         with open(os.path.join(self.store_path, &#39;metastore.json&#39;), &#39;w&#39;) as f:
             f.write(jsonpickle.encode(self.metastore))
 
     def get_by_uuid(self, uuid: str) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+
+        Args:
+          uuid: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for family in self.metastore:
             for content_object in family.content_objects:
 
@@ -483,11 +677,14 @@ class TableDataStore(Store):
         return None
 
     def get_by_path(self, path: str) -&gt; Optional[Document]:
-        &#34;&#34;&#34;
-        Return the latest document in the family at the given path
+        &#34;&#34;&#34;Return the latest document in the family at the given path
 
-        :param path:
-        :return:
+        Args:
+          path: return:
+          path: str: 
+
+        Returns:
+
         &#34;&#34;&#34;
         for family in self.metastore:
             if family.path == path:
@@ -497,18 +694,35 @@ class TableDataStore(Store):
         return None
 
     def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
+        &#34;&#34;&#34;
+
+        Args:
+          path: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for family in self.metastore:
             if family.path == path:
                 return family
         return None
 
     def get_latest_document(self, path: str) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+
+        Args:
+          path: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for family in self.metastore:
             if family.path == path:
                 return self.get_document_by_content_object(family.content_objects[-1])
         return None
 
     def list_objects(self) -&gt; List[ContentObject]:
+        &#34;&#34;&#34; &#34;&#34;&#34;
         co_list: List[ContentObject] = []
         for family in self.metastore:
             co_list.extend(family.content_objects)
@@ -516,28 +730,67 @@ class TableDataStore(Store):
         return co_list
 
     def count(self) -&gt; int:
-        &#34;&#34;&#34;
-        Returns a count of the number of document families
-
+        &#34;&#34;&#34;Returns a count of the number of document families
+        
         :return:
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return len(self.metastore)
 
     def load_kdxa(self, path: str):
+        &#34;&#34;&#34;
+
+        Args:
+          path: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         document = Document.from_kdxa(path)
         self.put(document.uuid, document)
 
-    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentRelationship,
+    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentTransition,
                                        document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document_family_id: str: 
+          document_relationship: DocumentTransition:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.read_metastore()
         for family in self.metastore:
             if family.id == document_family_id:
                 family.add_document(document, document_relationship)
 
     def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+        &#34;&#34;&#34;
+
+        Args:
+          content_object: ContentObject: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
 
     def put(self, path: str, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          path: str: 
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         # We can only add a document if it doesn&#39;t already exist as a family
         if self.get_family_by_path(path) is None:
@@ -554,11 +807,14 @@ class TableDataStore(Store):
         return self.get_family_by_path(path)
 
     def exists(self, document):
-        &#34;&#34;&#34;
-        Look to see if we have document with the same original path and original filename
+        &#34;&#34;&#34;Look to see if we have document with the same original path and original filename
 
-        :param document: document to check
-        :return: True if it is already in the document store
+        Args:
+          document: document to check
+
+        Returns:
+          True if it is already in the document store
+
         &#34;&#34;&#34;
 
         # Lets just work with original_filename?
@@ -574,21 +830,92 @@ class TableDataStore(Store):
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="kodexa.stores.local.LocalDocumentStore.accept"><code class="name flex">
+<span>def <span class="ident">accept</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def accept(self, document: Document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
+    if self.mode == &#39;ALL&#39;:
+        return True
+    if self.mode == &#39;ONLY_NEW&#39;:
+        return not self.exists(document)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.stores.local.LocalDocumentStore.add_related_document_to_family"><code class="name flex">
+<span>def <span class="ident">add_related_document_to_family</span></span>(<span>self, document_family_id: str, document_relationship: <a title="kodexa.model.document_families.DocumentTransition" href="../model/document_families.html#kodexa.model.document_families.DocumentTransition">DocumentTransition</a>, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document_family_id</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>document_relationship</code></strong></dt>
+<dd>DocumentTransition:</dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentTransition,
+                                   document: Document):
+    &#34;&#34;&#34;
+
+    Args:
+      document_family_id: str: 
+      document_relationship: DocumentTransition:
+      document: Document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
+    self.read_metastore()
+    for family in self.metastore:
+        if family.id == document_family_id:
+            family.add_document(document, document_relationship)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.count"><code class="name flex">
 <span>def <span class="ident">count</span></span>(<span>self) ‑> int</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns a count of the number of document families</p>
-<p>:return:</p></div>
+<p>:return:</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def count(self) -&gt; int:
-    &#34;&#34;&#34;
-    Returns a count of the number of document families
-
+    &#34;&#34;&#34;Returns a count of the number of document families
+    
     :return:
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     return len(self.metastore)</code></pre>
 </details>
@@ -598,18 +925,26 @@ class TableDataStore(Store):
 </code></dt>
 <dd>
 <div class="desc"><p>Look to see if we have document with the same original path and original filename</p>
-<p>:param document: document to check
-:return: True if it is already in the document store</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>document to check</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if it is already in the document store</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def exists(self, document):
-    &#34;&#34;&#34;
-    Look to see if we have document with the same original path and original filename
+    &#34;&#34;&#34;Look to see if we have document with the same original path and original filename
 
-    :param document: document to check
-    :return: True if it is already in the document store
+    Args:
+      document: document to check
+
+    Returns:
+      True if it is already in the document store
+
     &#34;&#34;&#34;
 
     # Lets just work with original_filename?
@@ -625,18 +960,27 @@ class TableDataStore(Store):
 </code></dt>
 <dd>
 <div class="desc"><p>Return the latest document in the family at the given path</p>
-<p>:param path:
-:return:</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>return:</dd>
+<dt><strong><code>path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_by_path(self, path: str) -&gt; Optional[Document]:
-    &#34;&#34;&#34;
-    Return the latest document in the family at the given path
+    &#34;&#34;&#34;Return the latest document in the family at the given path
 
-    :param path:
-    :return:
+    Args:
+      path: return:
+      path: str: 
+
+    Returns:
+
     &#34;&#34;&#34;
     for family in self.metastore:
         if family.path == path:
@@ -646,16 +990,86 @@ class TableDataStore(Store):
     return None</code></pre>
 </details>
 </dd>
+<dt id="kodexa.stores.local.LocalDocumentStore.get_by_uuid"><code class="name flex">
+<span>def <span class="ident">get_by_uuid</span></span>(<span>self, uuid: str) ‑> Union[<a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, NoneType]</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>uuid</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_by_uuid(self, uuid: str) -&gt; Optional[Document]:
+    &#34;&#34;&#34;
+
+    Args:
+      uuid: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
+    for family in self.metastore:
+        for content_object in family.content_objects:
+
+            if content_object.id == uuid:
+                return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="kodexa.stores.local.LocalDocumentStore.get_document_by_content_object"><code class="name flex">
+<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>) ‑> <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a></span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>ContentObject: </dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+    &#34;&#34;&#34;
+
+    Args:
+      content_object: ContentObject: 
+
+    Returns:
+
+    &#34;&#34;&#34;
+    return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.get_family_by_path"><code class="name flex">
 <span>def <span class="ident">get_family_by_path</span></span>(<span>self, path: str) ‑> Union[<a title="kodexa.model.document_families.DocumentFamily" href="../model/document_families.html#kodexa.model.document_families.DocumentFamily">DocumentFamily</a>, NoneType]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
+    &#34;&#34;&#34;
+
+    Args:
+      path: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     for family in self.metastore:
         if family.path == path:
             return family
@@ -666,12 +1080,25 @@ class TableDataStore(Store):
 <span>def <span class="ident">get_latest_document</span></span>(<span>self, path: str) ‑> Union[<a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, NoneType]</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_latest_document(self, path: str) -&gt; Optional[Document]:
+    &#34;&#34;&#34;
+
+    Args:
+      path: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     for family in self.metastore:
         if family.path == path:
             return self.get_document_by_content_object(family.content_objects[-1])
@@ -688,6 +1115,7 @@ class TableDataStore(Store):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_name(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;Local Document Store&#34;</code></pre>
 </details>
 </dd>
@@ -695,12 +1123,25 @@ class TableDataStore(Store):
 <span>def <span class="ident">load_kdxa</span></span>(<span>self, path: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def load_kdxa(self, path: str):
+    &#34;&#34;&#34;
+
+    Args:
+      path: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     document = Document.from_kdxa(path)
     self.put(document.uuid, document)</code></pre>
 </details>
@@ -709,14 +1150,69 @@ class TableDataStore(Store):
 <span>def <span class="ident">notify_listeners</span></span>(<span>self, content_event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_event</code></strong></dt>
+<dd>ContentEvent: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def notify_listeners(self, content_event: ContentEvent):
+    &#34;&#34;&#34;
+
+    Args:
+      content_event: ContentEvent: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     for listener in self.listeners:
         listener.process_event(content_event)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.stores.local.LocalDocumentStore.put"><code class="name flex">
+<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def put(self, path: str, document: Document):
+    &#34;&#34;&#34;
+
+    Args:
+      path: str: 
+      document: Document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
+
+    # We can only add a document if it doesn&#39;t already exist as a family
+    if self.get_family_by_path(path) is None:
+        new_document_family = DocumentFamily(path, self.get_ref())
+        new_event = new_document_family.add_document(document)
+        document.to_kdxa(os.path.join(self.store_path, new_event.content_object.id) + &#34;.kdxa&#34;)
+
+        self.metastore.append(new_document_family)
+        self.write_metastore()
+
+        # Notify the listeners
+        self.notify_listeners(new_event)
+
+    return self.get_family_by_path(path)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.read_metastore"><code class="name flex">
@@ -729,24 +1225,64 @@ class TableDataStore(Store):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def read_metastore(self):
-    &#34;&#34;&#34;
-    Read the metadata store
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Read the metadata store&#34;&#34;&#34;
     self.metastore: List[Dict] = []
     with open(os.path.join(self.store_path, &#39;metastore.json&#39;)) as f:
         self.metastore = jsonpickle.decode(&#34;&#34;.join(f.readlines()))</code></pre>
+</details>
+</dd>
+<dt id="kodexa.stores.local.LocalDocumentStore.register_listener"><code class="name flex">
+<span>def <span class="ident">register_listener</span></span>(<span>self, listener)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>listener</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register_listener(self, listener):
+    &#34;&#34;&#34;
+
+    Args:
+      listener: 
+
+    Returns:
+
+    &#34;&#34;&#34;
+    self.listeners.append(listener)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.sink"><code class="name flex">
 <span>def <span class="ident">sink</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, context)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def sink(self, document: Document, context):
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document: 
+      context: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if context.document_family:
         self.put(context.document_family.path, document)
     else:
@@ -764,6 +1300,7 @@ class TableDataStore(Store):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return {
         &#34;type&#34;: &#34;DOCUMENT&#34;,
         &#34;data&#34;: {
@@ -782,9 +1319,7 @@ class TableDataStore(Store):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def write_metastore(self):
-    &#34;&#34;&#34;
-    Method to write the JSON store index back to store path
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Method to write the JSON store index back to store path&#34;&#34;&#34;
     with open(os.path.join(self.store_path, &#39;metastore.json&#39;), &#39;w&#39;) as f:
         f.write(jsonpickle.encode(self.metastore))</code></pre>
 </details>
@@ -794,15 +1329,11 @@ class TableDataStore(Store):
 <ul class="hlist">
 <li><code><b><a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a></b></code>:
 <ul class="hlist">
-<li><code><a title="kodexa.model.model.DocumentStore.accept" href="../model/model.html#kodexa.model.model.DocumentStore.accept">accept</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.add_related_document_to_family" href="../model/model.html#kodexa.model.model.DocumentStore.add_related_document_to_family">add_related_document_to_family</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.get_by_uuid" href="../model/model.html#kodexa.model.model.DocumentStore.get_by_uuid">get_by_uuid</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="../model/model.html#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.list" href="../model/model.html#kodexa.model.model.DocumentStore.list">list</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.list_objects" href="../model/model.html#kodexa.model.model.DocumentStore.list_objects">list_objects</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.put" href="../model/model.html#kodexa.model.model.DocumentStore.put">put</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="../model/model.html#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.query" href="../model/model.html#kodexa.model.model.DocumentStore.query">query</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.query_objects" href="../model/model.html#kodexa.model.model.DocumentStore.query_objects">query_objects</a></code></li>
 </ul>
 </li>
 </ul>
@@ -812,12 +1343,13 @@ class TableDataStore(Store):
 <span>(</span><span>store_path: str, force_initialize=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A model store supports storing and retrieving of a ML models</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class LocalModelStore(ModelStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, store_path: str, force_initialize=False):
         self.store_path = store_path
@@ -832,6 +1364,7 @@ class TableDataStore(Store):
             path.mkdir(parents=True)
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;MODEL&#34;,
             &#34;data&#34;: {
@@ -840,12 +1373,29 @@ class TableDataStore(Store):
         }
 
     def get(self, object_path: str):
+        &#34;&#34;&#34;
+
+        Args:
+          object_path: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if Path(os.path.join(self.store_path, object_path)).is_file():
             return open(os.path.join(self.store_path, object_path), &#39;rb&#39;)
         else:
             return None
 
     def put(self, object_path: str, content):
+        &#34;&#34;&#34;
+
+        Args:
+          object_path: str: 
+          content: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         path = Path(object_path)
         with open(os.path.join(self.store_path, path), &#39;wb&#39;) as object_file:
             object_file.write(content)</code></pre>
@@ -856,16 +1406,61 @@ class TableDataStore(Store):
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="kodexa.stores.local.LocalModelStore.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, object_path: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>object_path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get(self, object_path: str):
+    &#34;&#34;&#34;
+
+    Args:
+      object_path: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
+    if Path(os.path.join(self.store_path, object_path)).is_file():
+        return open(os.path.join(self.store_path, object_path), &#39;rb&#39;)
+    else:
+        return None</code></pre>
+</details>
+</dd>
 <dt id="kodexa.stores.local.LocalModelStore.put"><code class="name flex">
 <span>def <span class="ident">put</span></span>(<span>self, object_path: str, content)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>object_path</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>content</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put(self, object_path: str, content):
+    &#34;&#34;&#34;
+
+    Args:
+      object_path: str: 
+      content: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     path = Path(object_path)
     with open(os.path.join(self.store_path, path), &#39;wb&#39;) as object_file:
         object_file.write(content)</code></pre>
@@ -881,6 +1476,7 @@ class TableDataStore(Store):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return {
         &#34;type&#34;: &#34;MODEL&#34;,
         &#34;data&#34;: {
@@ -890,14 +1486,6 @@ class TableDataStore(Store):
 </details>
 </dd>
 </dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="kodexa.model.model.ModelStore" href="../model/model.html#kodexa.model.model.ModelStore">ModelStore</a></b></code>:
-<ul class="hlist">
-<li><code><a title="kodexa.model.model.ModelStore.get" href="../model/model.html#kodexa.model.model.ModelStore.get">get</a></code></li>
-</ul>
-</li>
-</ul>
 </dd>
 <dt id="kodexa.stores.local.TableDataStore"><code class="flex name class">
 <span>class <span class="ident">TableDataStore</span></span>
@@ -906,20 +1494,28 @@ class TableDataStore(Store):
 <dd>
 <div class="desc"><p>Stores data as a list of lists that can represent a table.</p>
 <p>This is a good store when you are capturing nested or tabular data.</p>
-<p>:param columns: a list of the column names (default to dynamic)
-:param rows: initial set of rows (default to empty)</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>columns</code></strong></dt>
+<dd>a list of the column names (default to dynamic)</dd>
+<dt><strong><code>rows</code></strong></dt>
+<dd>initial set of rows (default to empty)</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class TableDataStore(Store):
-    &#34;&#34;&#34;
-    Stores data as a list of lists that can represent a table.
-
+    &#34;&#34;&#34;Stores data as a list of lists that can represent a table.
+    
     This is a good store when you are capturing nested or tabular data.
 
-    :param columns: a list of the column names (default to dynamic)
-    :param rows: initial set of rows (default to empty)
+    Args:
+      columns: a list of the column names (default to dynamic)
+      rows: initial set of rows (default to empty)
+
+    Returns:
 
     &#34;&#34;&#34;
 
@@ -941,13 +1537,14 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     def to_dict(self):
-        &#34;&#34;&#34;
-        Create a dictionary representing this TableDataStore&#39;s structure and content.
+        &#34;&#34;&#34;Create a dictionary representing this TableDataStore&#39;s structure and content.
 
-            &gt;&gt;&gt; table_data_store.to_dict()
+        Args:
 
-        :return: The properties of this TableDataStore structured as a dictionary.
-        :rtype: dict
+        Returns:
+          dict: The properties of this TableDataStore structured as a dictionary.
+
+        &gt;&gt;&gt; table_data_store.to_dict()
         &#34;&#34;&#34;
 
         return {
@@ -959,9 +1556,11 @@ class TableDataStore(Store):
         }
 
     def clear(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         self.rows = []
 
     def to_df(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         import pandas as pd
 
         if not self.columns:
@@ -970,35 +1569,61 @@ class TableDataStore(Store):
             return pd.DataFrame(self.rows, columns=self.columns)
 
     def set_pipeline_context(self, pipeline_context):
+        &#34;&#34;&#34;
+
+        Args:
+          pipeline_context: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.pipeline_context = pipeline_context
 
     def add(self, row):
-        &#34;&#34;&#34;
-        Writes a row to the Data Store
+        &#34;&#34;&#34;Writes a row to the Data Store
 
-        :param row: the row (as a list) to add
+        Args:
+          row: the row (as a list) to add
+
+        Returns:
+
         &#34;&#34;&#34;
         self.rows.append(row)
 
     def count(self):
-        &#34;&#34;&#34;
-        Returns the number of rows in the store
-
+        &#34;&#34;&#34;Returns the number of rows in the store
+        
         :return: number of rows
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return len(self.rows)
 
     def merge(self, other_store):
-        &#34;&#34;&#34;
-        Merge another table store into this store
+        &#34;&#34;&#34;Merge another table store into this store
 
-        :param other_store:
-        :return: the other store
+        Args:
+          other_store: return: the other store
+
+        Returns:
+          the other store
+
         &#34;&#34;&#34;
         self.rows = self.rows + other_store.rows
 
     @classmethod
     def from_dict(cls, store_dict):
+        &#34;&#34;&#34;
+
+        Args:
+          store_dict: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return TableDataStore(columns=store_dict[&#39;data&#39;][&#39;columns&#39;], rows=store_dict[&#39;data&#39;][&#39;rows&#39;])</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1011,13 +1636,26 @@ class TableDataStore(Store):
 <span>def <span class="ident">from_dict</span></span>(<span>store_dict)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>store_dict</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
 def from_dict(cls, store_dict):
+    &#34;&#34;&#34;
+
+    Args:
+      store_dict: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     return TableDataStore(columns=store_dict[&#39;data&#39;][&#39;columns&#39;], rows=store_dict[&#39;data&#39;][&#39;rows&#39;])</code></pre>
 </details>
 </dd>
@@ -1029,16 +1667,24 @@ def from_dict(cls, store_dict):
 </code></dt>
 <dd>
 <div class="desc"><p>Writes a row to the Data Store</p>
-<p>:param row: the row (as a list) to add</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>row</code></strong></dt>
+<dd>the row (as a list) to add</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add(self, row):
-    &#34;&#34;&#34;
-    Writes a row to the Data Store
+    &#34;&#34;&#34;Writes a row to the Data Store
 
-    :param row: the row (as a list) to add
+    Args:
+      row: the row (as a list) to add
+
+    Returns:
+
     &#34;&#34;&#34;
     self.rows.append(row)</code></pre>
 </details>
@@ -1053,6 +1699,7 @@ def from_dict(cls, store_dict):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def clear(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     self.rows = []</code></pre>
 </details>
 </dd>
@@ -1061,16 +1708,22 @@ def from_dict(cls, store_dict):
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the number of rows in the store</p>
-<p>:return: number of rows</p></div>
+<p>:return: number of rows</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def count(self):
-    &#34;&#34;&#34;
-    Returns the number of rows in the store
-
+    &#34;&#34;&#34;Returns the number of rows in the store
+    
     :return: number of rows
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     return len(self.rows)</code></pre>
 </details>
@@ -1080,33 +1733,28 @@ def from_dict(cls, store_dict):
 </code></dt>
 <dd>
 <div class="desc"><p>Merge another table store into this store</p>
-<p>:param other_store:
-:return: the other store</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>other_store</code></strong></dt>
+<dd>return: the other store</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>the other store</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def merge(self, other_store):
-    &#34;&#34;&#34;
-    Merge another table store into this store
+    &#34;&#34;&#34;Merge another table store into this store
 
-    :param other_store:
-    :return: the other store
+    Args:
+      other_store: return: the other store
+
+    Returns:
+      the other store
+
     &#34;&#34;&#34;
     self.rows = self.rows + other_store.rows</code></pre>
-</details>
-</dd>
-<dt id="kodexa.stores.local.TableDataStore.set_pipeline_context"><code class="name flex">
-<span>def <span class="ident">set_pipeline_context</span></span>(<span>self, pipeline_context)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_pipeline_context(self, pipeline_context):
-    self.pipeline_context = pipeline_context</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.local.TableDataStore.to_df"><code class="name flex">
@@ -1119,6 +1767,7 @@ def from_dict(cls, store_dict):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_df(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     import pandas as pd
 
     if not self.columns:
@@ -1132,22 +1781,27 @@ def from_dict(cls, store_dict):
 </code></dt>
 <dd>
 <div class="desc"><p>Create a dictionary representing this TableDataStore's structure and content.</p>
-<pre><code>&gt;&gt;&gt; table_data_store.to_dict()
-</code></pre>
-<p>:return: The properties of this TableDataStore structured as a dictionary.
-:rtype: dict</p></div>
+<p>Args:</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>The properties of this TableDataStore structured as a dictionary.</dd>
+</dl>
+<pre><code class="language-python-repl">&gt;&gt;&gt; table_data_store.to_dict()
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
-    &#34;&#34;&#34;
-    Create a dictionary representing this TableDataStore&#39;s structure and content.
+    &#34;&#34;&#34;Create a dictionary representing this TableDataStore&#39;s structure and content.
 
-        &gt;&gt;&gt; table_data_store.to_dict()
+    Args:
 
-    :return: The properties of this TableDataStore structured as a dictionary.
-    :rtype: dict
+    Returns:
+      dict: The properties of this TableDataStore structured as a dictionary.
+
+    &gt;&gt;&gt; table_data_store.to_dict()
     &#34;&#34;&#34;
 
     return {
@@ -1160,6 +1814,14 @@ def from_dict(cls, store_dict):
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="kodexa.model.model.Store" href="../model/model.html#kodexa.model.model.Store">Store</a></b></code>:
+<ul class="hlist">
+<li><code><a title="kodexa.model.model.Store.set_pipeline_context" href="../model/model.html#kodexa.model.model.Store.set_pipeline_context">set_pipeline_context</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -1179,16 +1841,22 @@ def from_dict(cls, store_dict):
 <ul>
 <li>
 <h4><code><a title="kodexa.stores.local.LocalDocumentStore" href="#kodexa.stores.local.LocalDocumentStore">LocalDocumentStore</a></code></h4>
-<ul class="two-column">
+<ul class="">
+<li><code><a title="kodexa.stores.local.LocalDocumentStore.accept" href="#kodexa.stores.local.LocalDocumentStore.accept">accept</a></code></li>
+<li><code><a title="kodexa.stores.local.LocalDocumentStore.add_related_document_to_family" href="#kodexa.stores.local.LocalDocumentStore.add_related_document_to_family">add_related_document_to_family</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.count" href="#kodexa.stores.local.LocalDocumentStore.count">count</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.exists" href="#kodexa.stores.local.LocalDocumentStore.exists">exists</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_by_path" href="#kodexa.stores.local.LocalDocumentStore.get_by_path">get_by_path</a></code></li>
+<li><code><a title="kodexa.stores.local.LocalDocumentStore.get_by_uuid" href="#kodexa.stores.local.LocalDocumentStore.get_by_uuid">get_by_uuid</a></code></li>
+<li><code><a title="kodexa.stores.local.LocalDocumentStore.get_document_by_content_object" href="#kodexa.stores.local.LocalDocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_family_by_path" href="#kodexa.stores.local.LocalDocumentStore.get_family_by_path">get_family_by_path</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_latest_document" href="#kodexa.stores.local.LocalDocumentStore.get_latest_document">get_latest_document</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_name" href="#kodexa.stores.local.LocalDocumentStore.get_name">get_name</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.load_kdxa" href="#kodexa.stores.local.LocalDocumentStore.load_kdxa">load_kdxa</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.notify_listeners" href="#kodexa.stores.local.LocalDocumentStore.notify_listeners">notify_listeners</a></code></li>
+<li><code><a title="kodexa.stores.local.LocalDocumentStore.put" href="#kodexa.stores.local.LocalDocumentStore.put">put</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.read_metastore" href="#kodexa.stores.local.LocalDocumentStore.read_metastore">read_metastore</a></code></li>
+<li><code><a title="kodexa.stores.local.LocalDocumentStore.register_listener" href="#kodexa.stores.local.LocalDocumentStore.register_listener">register_listener</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.sink" href="#kodexa.stores.local.LocalDocumentStore.sink">sink</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.to_dict" href="#kodexa.stores.local.LocalDocumentStore.to_dict">to_dict</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.write_metastore" href="#kodexa.stores.local.LocalDocumentStore.write_metastore">write_metastore</a></code></li>
@@ -1197,19 +1865,19 @@ def from_dict(cls, store_dict):
 <li>
 <h4><code><a title="kodexa.stores.local.LocalModelStore" href="#kodexa.stores.local.LocalModelStore">LocalModelStore</a></code></h4>
 <ul class="">
+<li><code><a title="kodexa.stores.local.LocalModelStore.get" href="#kodexa.stores.local.LocalModelStore.get">get</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalModelStore.put" href="#kodexa.stores.local.LocalModelStore.put">put</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalModelStore.to_dict" href="#kodexa.stores.local.LocalModelStore.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="kodexa.stores.local.TableDataStore" href="#kodexa.stores.local.TableDataStore">TableDataStore</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="kodexa.stores.local.TableDataStore.add" href="#kodexa.stores.local.TableDataStore.add">add</a></code></li>
 <li><code><a title="kodexa.stores.local.TableDataStore.clear" href="#kodexa.stores.local.TableDataStore.clear">clear</a></code></li>
 <li><code><a title="kodexa.stores.local.TableDataStore.count" href="#kodexa.stores.local.TableDataStore.count">count</a></code></li>
 <li><code><a title="kodexa.stores.local.TableDataStore.from_dict" href="#kodexa.stores.local.TableDataStore.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.stores.local.TableDataStore.merge" href="#kodexa.stores.local.TableDataStore.merge">merge</a></code></li>
-<li><code><a title="kodexa.stores.local.TableDataStore.set_pipeline_context" href="#kodexa.stores.local.TableDataStore.set_pipeline_context">set_pipeline_context</a></code></li>
 <li><code><a title="kodexa.stores.local.TableDataStore.to_df" href="#kodexa.stores.local.TableDataStore.to_df">to_df</a></code></li>
 <li><code><a title="kodexa.stores.local.TableDataStore.to_dict" href="#kodexa.stores.local.TableDataStore.to_dict">to_dict</a></code></li>
 </ul>

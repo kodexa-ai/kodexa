@@ -32,9 +32,13 @@ from kodexa import Document
 
 
 class InMemoryDocumentSink:
-    &#34;&#34;&#34;
-    An in-memory document sink can be used for testing where you want to capture a set of the documents as basic
+    &#34;&#34;&#34;An in-memory document sink can be used for testing where you want to capture a set of the documents as basic
     list in-memory and then access them
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -42,33 +46,46 @@ class InMemoryDocumentSink:
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;In-Memory Document&#34;
 
     def accept(self, document: Document):
-        &#34;&#34;&#34;
-        Determines whether the store will accept this document
-
+        &#34;&#34;&#34;Determines whether the store will accept this document
+        
         This can be used to look at the metadata to determine if the sink already has
         the content and therefore doesn&#39;t need it again
 
-        :param document:
-        :return: True if the sink will accept the document
+        Args:
+          document: return: True if the sink will accept the document
+          document: Document: 
+
+        Returns:
+          True if the sink will accept the document
+
         &#34;&#34;&#34;
         return True
 
     def sink(self, document: Document):
-        &#34;&#34;&#34;
-        Adds the document to the sink
+        &#34;&#34;&#34;Adds the document to the sink
 
-        :param document: document to add
+        Args:
+          document: document to add
+          document: Document: 
+
+        Returns:
+
         &#34;&#34;&#34;
         self.documents.append(document)
 
     def get_document(self, index: int) -&gt; Document:
-        &#34;&#34;&#34;
-        Get document at given index
+        &#34;&#34;&#34;Get document at given index
 
-        :param index: index to get the document at
+        Args:
+          index: index to get the document at
+          index: int: 
+
+        Returns:
+
         &#34;&#34;&#34;
         return self.documents[index]</code></pre>
 </details>
@@ -87,15 +104,21 @@ class InMemoryDocumentSink:
 </code></dt>
 <dd>
 <div class="desc"><p>An in-memory document sink can be used for testing where you want to capture a set of the documents as basic
-list in-memory and then access them</p></div>
+list in-memory and then access them</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class InMemoryDocumentSink:
-    &#34;&#34;&#34;
-    An in-memory document sink can be used for testing where you want to capture a set of the documents as basic
+    &#34;&#34;&#34;An in-memory document sink can be used for testing where you want to capture a set of the documents as basic
     list in-memory and then access them
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self):
@@ -103,33 +126,46 @@ list in-memory and then access them</p></div>
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;In-Memory Document&#34;
 
     def accept(self, document: Document):
-        &#34;&#34;&#34;
-        Determines whether the store will accept this document
-
+        &#34;&#34;&#34;Determines whether the store will accept this document
+        
         This can be used to look at the metadata to determine if the sink already has
         the content and therefore doesn&#39;t need it again
 
-        :param document:
-        :return: True if the sink will accept the document
+        Args:
+          document: return: True if the sink will accept the document
+          document: Document: 
+
+        Returns:
+          True if the sink will accept the document
+
         &#34;&#34;&#34;
         return True
 
     def sink(self, document: Document):
-        &#34;&#34;&#34;
-        Adds the document to the sink
+        &#34;&#34;&#34;Adds the document to the sink
 
-        :param document: document to add
+        Args:
+          document: document to add
+          document: Document: 
+
+        Returns:
+
         &#34;&#34;&#34;
         self.documents.append(document)
 
     def get_document(self, index: int) -&gt; Document:
-        &#34;&#34;&#34;
-        Get document at given index
+        &#34;&#34;&#34;Get document at given index
 
-        :param index: index to get the document at
+        Args:
+          index: index to get the document at
+          index: int: 
+
+        Returns:
+
         &#34;&#34;&#34;
         return self.documents[index]</code></pre>
 </details>
@@ -146,6 +182,7 @@ list in-memory and then access them</p></div>
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;In-Memory Document&#34;</code></pre>
 </details>
 </dd>
@@ -159,21 +196,32 @@ def get_name():
 <div class="desc"><p>Determines whether the store will accept this document</p>
 <p>This can be used to look at the metadata to determine if the sink already has
 the content and therefore doesn't need it again</p>
-<p>:param document:
-:return: True if the sink will accept the document</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>return: True if the sink will accept the document</dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if the sink will accept the document</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def accept(self, document: Document):
-    &#34;&#34;&#34;
-    Determines whether the store will accept this document
-
+    &#34;&#34;&#34;Determines whether the store will accept this document
+    
     This can be used to look at the metadata to determine if the sink already has
     the content and therefore doesn&#39;t need it again
 
-    :param document:
-    :return: True if the sink will accept the document
+    Args:
+      document: return: True if the sink will accept the document
+      document: Document: 
+
+    Returns:
+      True if the sink will accept the document
+
     &#34;&#34;&#34;
     return True</code></pre>
 </details>
@@ -183,16 +231,27 @@ the content and therefore doesn't need it again</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Get document at given index</p>
-<p>:param index: index to get the document at</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>index</code></strong></dt>
+<dd>index to get the document at</dd>
+<dt><strong><code>index</code></strong></dt>
+<dd>int: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_document(self, index: int) -&gt; Document:
-    &#34;&#34;&#34;
-    Get document at given index
+    &#34;&#34;&#34;Get document at given index
 
-    :param index: index to get the document at
+    Args:
+      index: index to get the document at
+      index: int: 
+
+    Returns:
+
     &#34;&#34;&#34;
     return self.documents[index]</code></pre>
 </details>
@@ -202,16 +261,27 @@ the content and therefore doesn't need it again</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Adds the document to the sink</p>
-<p>:param document: document to add</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>document to add</dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def sink(self, document: Document):
-    &#34;&#34;&#34;
-    Adds the document to the sink
+    &#34;&#34;&#34;Adds the document to the sink
 
-    :param document: document to add
+    Args:
+      document: document to add
+      document: Document: 
+
+    Returns:
+
     &#34;&#34;&#34;
     self.documents.append(document)</code></pre>
 </details>

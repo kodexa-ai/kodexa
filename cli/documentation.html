@@ -36,19 +36,27 @@ from addict import Dict
 
 
 def get_path():
-    &#34;&#34;&#34;
-    Gets the path of the documentation
-
+    &#34;&#34;&#34;Gets the path of the documentation
+    
     :return: the path of this module file
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     return os.path.abspath(__file__)
 
 
 def get_template_env():
-    &#34;&#34;&#34;
-    Get the Jinja2 template environmnet
-
+    &#34;&#34;&#34;Get the Jinja2 template environmnet
+    
     :return:
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     cli_path = os.path.dirname(get_path())
     package_location = os.path.join(cli_path, &#34;templates&#34;)
@@ -57,11 +65,11 @@ def get_template_env():
 
 
 def generate_documentation(metadata):
-    &#34;&#34;&#34;
-    Given the metadata object from a kodexa.yml generate the documentation
+    &#34;&#34;&#34;Given the metadata object from a kodexa.yml generate the documentation
 
-    :param metadata:
-    :return:
+    Args:
+      metadata:Dict: A dictionary of the metadata
+
     &#34;&#34;&#34;
     os.makedirs(&#39;docs&#39;, exist_ok=True)
     for service in metadata.services:
@@ -79,6 +87,16 @@ def generate_documentation(metadata):
 
 
 def write_template(template, output_location, metadata, service=None):
+    &#34;&#34;&#34;
+    Write the given template out to a file
+
+    Args:
+      template: the name of the template
+      output_location: the location to write the output
+      metadata: the metadata object to use in the template
+      service: the service object  (Default value = None)
+
+    &#34;&#34;&#34;
     if service is None:
         service = {}
     template = get_template_env().get_template(template)
@@ -88,6 +106,17 @@ def write_template(template, output_location, metadata, service=None):
 
 
 def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str, output_json: str):
+    &#34;&#34;&#34;
+    Generate web site for given extension pack metadata
+
+    Args:
+      metadata: Dict: the metadata for the extension pack
+      base_dir: str: the base directory for the site
+      output_filename: str: output filename
+      url: str: The base URL where the site will be published
+      output_json: str: the output path for the JSON extension pack (used when deploying)
+
+    &#34;&#34;&#34;
     import os
     try:
         os.makedirs(os.path.join(base_dir, metadata[&#39;version&#39;]))
@@ -132,18 +161,18 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
 </code></dt>
 <dd>
 <div class="desc"><p>Given the metadata object from a kodexa.yml generate the documentation</p>
-<p>:param metadata:
-:return:</p></div>
+<h2 id="args">Args</h2>
+<p>metadata:Dict: A dictionary of the metadata</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def generate_documentation(metadata):
-    &#34;&#34;&#34;
-    Given the metadata object from a kodexa.yml generate the documentation
+    &#34;&#34;&#34;Given the metadata object from a kodexa.yml generate the documentation
 
-    :param metadata:
-    :return:
+    Args:
+      metadata:Dict: A dictionary of the metadata
+
     &#34;&#34;&#34;
     os.makedirs(&#39;docs&#39;, exist_ok=True)
     for service in metadata.services:
@@ -164,12 +193,36 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
 <span>def <span class="ident">generate_site</span></span>(<span>metadata: addict.addict.Dict, base_dir: str, output_filename: str, url: str, output_json: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Generate web site for given extension pack metadata</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>metadata</code></strong></dt>
+<dd>Dict: the metadata for the extension pack</dd>
+<dt><strong><code>base_dir</code></strong></dt>
+<dd>str: the base directory for the site</dd>
+<dt><strong><code>output_filename</code></strong></dt>
+<dd>str: output filename</dd>
+<dt><strong><code>url</code></strong></dt>
+<dd>str: The base URL where the site will be published</dd>
+<dt><strong><code>output_json</code></strong></dt>
+<dd>str: the output path for the JSON extension pack (used when deploying)</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str, output_json: str):
+    &#34;&#34;&#34;
+    Generate web site for given extension pack metadata
+
+    Args:
+      metadata: Dict: the metadata for the extension pack
+      base_dir: str: the base directory for the site
+      output_filename: str: output filename
+      url: str: The base URL where the site will be published
+      output_json: str: the output path for the JSON extension pack (used when deploying)
+
+    &#34;&#34;&#34;
     import os
     try:
         os.makedirs(os.path.join(base_dir, metadata[&#39;version&#39;]))
@@ -207,16 +260,22 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
 </code></dt>
 <dd>
 <div class="desc"><p>Gets the path of the documentation</p>
-<p>:return: the path of this module file</p></div>
+<p>:return: the path of this module file</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_path():
-    &#34;&#34;&#34;
-    Gets the path of the documentation
-
+    &#34;&#34;&#34;Gets the path of the documentation
+    
     :return: the path of this module file
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     return os.path.abspath(__file__)</code></pre>
 </details>
@@ -226,16 +285,22 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
 </code></dt>
 <dd>
 <div class="desc"><p>Get the Jinja2 template environmnet</p>
-<p>:return:</p></div>
+<p>:return:</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_template_env():
-    &#34;&#34;&#34;
-    Get the Jinja2 template environmnet
-
+    &#34;&#34;&#34;Get the Jinja2 template environmnet
+    
     :return:
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     cli_path = os.path.dirname(get_path())
     package_location = os.path.join(cli_path, &#34;templates&#34;)
@@ -247,12 +312,34 @@ def generate_site(metadata: Dict, base_dir: str, output_filename: str, url: str,
 <span>def <span class="ident">write_template</span></span>(<span>template, output_location, metadata, service=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Write the given template out to a file</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>template</code></strong></dt>
+<dd>the name of the template</dd>
+<dt><strong><code>output_location</code></strong></dt>
+<dd>the location to write the output</dd>
+<dt><strong><code>metadata</code></strong></dt>
+<dd>the metadata object to use in the template</dd>
+<dt><strong><code>service</code></strong></dt>
+<dd>the service object
+(Default value = None)</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def write_template(template, output_location, metadata, service=None):
+    &#34;&#34;&#34;
+    Write the given template out to a file
+
+    Args:
+      template: the name of the template
+      output_location: the location to write the output
+      metadata: the metadata object to use in the template
+      service: the service object  (Default value = None)
+
+    &#34;&#34;&#34;
     if service is None:
         service = {}
     template = get_template_env().get_template(template)

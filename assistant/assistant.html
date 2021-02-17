@@ -33,33 +33,46 @@ from kodexa.pipeline import Pipeline
 
 
 class AssistantContext:
-    &#34;&#34;&#34;
-    The Assistant Context provides a way to interact with additional services and capabilities
+    &#34;&#34;&#34;The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     pass
 
 
 class Assistant:
-    &#34;&#34;&#34;
-    An assistant is a rich-API to allow you to work with a reactive content store or with an end user
+    &#34;&#34;&#34;An assistant is a rich-API to allow you to work with a reactive content store or with an end user
     that is working with set of content
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
-        &#34;&#34;&#34;
-        The assistant will need to examine the event to determine if it wants to respond
-
+        &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
+        
         The event will focus on a specific content object (that will be stored and available).  Based on the
         metadata from the content object the assistant can then return one or more pipelines that it wishes
         to execute.
-
+        
         This pipelines will be run asynchronously and the result of the pipelines might well
         return as another event for the assistant
 
-        :param event: the content event to react to
-        :param context: the assistant context
-        :return: a list of pipelines that you wish to execute
+        Args:
+          event: the content event to react to
+          context: the assistant context
+          event: ContentEvent: 
+          context: AssistantContext:  (Default value = None)
+
+        Returns:
+          a list of pipelines that you wish to execute
+
         &#34;&#34;&#34;
 
         pass</code></pre>
@@ -79,31 +92,42 @@ class Assistant:
 </code></dt>
 <dd>
 <div class="desc"><p>An assistant is a rich-API to allow you to work with a reactive content store or with an end user
-that is working with set of content</p></div>
+that is working with set of content</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Assistant:
-    &#34;&#34;&#34;
-    An assistant is a rich-API to allow you to work with a reactive content store or with an end user
+    &#34;&#34;&#34;An assistant is a rich-API to allow you to work with a reactive content store or with an end user
     that is working with set of content
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
-        &#34;&#34;&#34;
-        The assistant will need to examine the event to determine if it wants to respond
-
+        &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
+        
         The event will focus on a specific content object (that will be stored and available).  Based on the
         metadata from the content object the assistant can then return one or more pipelines that it wishes
         to execute.
-
+        
         This pipelines will be run asynchronously and the result of the pipelines might well
         return as another event for the assistant
 
-        :param event: the content event to react to
-        :param context: the assistant context
-        :return: a list of pipelines that you wish to execute
+        Args:
+          event: the content event to react to
+          context: the assistant context
+          event: ContentEvent: 
+          context: AssistantContext:  (Default value = None)
+
+        Returns:
+          a list of pipelines that you wish to execute
+
         &#34;&#34;&#34;
 
         pass</code></pre>
@@ -125,27 +149,43 @@ metadata from the content object the assistant can then return one or more pipel
 to execute.</p>
 <p>This pipelines will be run asynchronously and the result of the pipelines might well
 return as another event for the assistant</p>
-<p>:param event: the content event to react to
-:param context: the assistant context
-:return: a list of pipelines that you wish to execute</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>event</code></strong></dt>
+<dd>the content event to react to</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>the assistant context</dd>
+<dt><strong><code>event</code></strong></dt>
+<dd>ContentEvent: </dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>AssistantContext:
+(Default value = None)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>a list of pipelines that you wish to execute</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
-    &#34;&#34;&#34;
-    The assistant will need to examine the event to determine if it wants to respond
-
+    &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
+    
     The event will focus on a specific content object (that will be stored and available).  Based on the
     metadata from the content object the assistant can then return one or more pipelines that it wishes
     to execute.
-
+    
     This pipelines will be run asynchronously and the result of the pipelines might well
     return as another event for the assistant
 
-    :param event: the content event to react to
-    :param context: the assistant context
-    :return: a list of pipelines that you wish to execute
+    Args:
+      event: the content event to react to
+      context: the assistant context
+      event: ContentEvent: 
+      context: AssistantContext:  (Default value = None)
+
+    Returns:
+      a list of pipelines that you wish to execute
+
     &#34;&#34;&#34;
 
     pass</code></pre>
@@ -158,15 +198,21 @@ return as another event for the assistant</p>
 </code></dt>
 <dd>
 <div class="desc"><p>The Assistant Context provides a way to interact with additional services and capabilities
-while processing an event</p></div>
+while processing an event</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class AssistantContext:
-    &#34;&#34;&#34;
-    The Assistant Context provides a way to interact with additional services and capabilities
+    &#34;&#34;&#34;The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     pass</code></pre>
 </details>

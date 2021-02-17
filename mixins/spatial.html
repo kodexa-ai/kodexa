@@ -30,65 +30,69 @@
 
 
 def set_statistics(self, statistics):
-    &#34;&#34;&#34;
-    Set the spatial statistics for this node
+    &#34;&#34;&#34;Set the spatial statistics for this node
 
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_statistics(NodeStatistics())
+    Args:
+      statistics: the statistics object
 
-    :param statistics: the statistics object
+    Returns:
 
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_statistics(NodeStatistics())
     &#34;&#34;&#34;
     self.add_feature(&#34;spatial&#34;, &#34;statistics&#34;, statistics)
 
 
 def get_statistics(self):
-    &#34;&#34;&#34;
-    Get the spatial statistics for this node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
-        &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
-
+    &#34;&#34;&#34;Get the spatial statistics for this node
+    
+    
     :return: the statistics object (or None if not set)
 
+    Args:
 
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
+        &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
     &#34;&#34;&#34;
     return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)
 
 
 def set_bbox(self, bbox):
-    &#34;&#34;&#34;
-    Set the bounding box for the node, this is structured as:
-
+    &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
+    
     [x1,y1,x2,y2]
 
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_bbox([10,20,50,100])
+    Args:
+      bbox: the bounding box array
 
-    :param bbox: the bounding box array
+    Returns:
 
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_bbox([10,20,50,100])
     &#34;&#34;&#34;
     self.set_feature(&#34;spatial&#34;, &#34;bbox&#34;, bbox)
 
 
 def get_bbox(self):
-    &#34;&#34;&#34;
-    Get the bounding box for the node, this is structured as:
-
+    &#34;&#34;&#34;Get the bounding box for the node, this is structured as:
+    
     [x1,y1,x2,y2]
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_bbox()
-        [10,20,50,100]
-
+    
+    
     :return: the bounding box array
 
+    Args:
 
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_bbox()
+        [10,20,50,100]
     &#34;&#34;&#34;
     return self.get_feature_value(&#34;spatial&#34;, &#34;bbox&#34;)
 
 
 def set_bbox_from_children(self):
-    &#34;&#34;&#34;
-    Set the bounding box for this node based on its children
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Set the bounding box for this node based on its children&#34;&#34;&#34;
 
     x_min = None
     x_max = None
@@ -112,41 +116,46 @@ def set_bbox_from_children(self):
 
 
 def set_rotate(self, rotate):
-    &#34;&#34;&#34;
-    Set the rotate of the node
+    &#34;&#34;&#34;Set the rotate of the node
 
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_rotate(90)
+    Args:
+      rotate: the rotation of the node
 
-    :param rotate the rotation of the node
+    Returns:
 
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_rotate(90)
     &#34;&#34;&#34;
     self.add_feature(&#34;spatial&#34;, &#34;rotate&#34;, rotate)
 
 
 def get_rotate(self):
-    &#34;&#34;&#34;
-    Get the rotate of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_rotate()
-        90
-
+    &#34;&#34;&#34;Get the rotate of the node
+    
+    
     :return: the rotation of the node
 
+    Args:
 
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_rotate()
+        90
     &#34;&#34;&#34;
     return self.get_feature_value(&#34;spatial&#34;, &#34;rotate&#34;)
 
 
 def get_x(self):
-    &#34;&#34;&#34;
-    Get the X position of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_x()
-        10
-
+    &#34;&#34;&#34;Get the X position of the node
+    
+    
     :return: the X position of the node
 
+    Args:
 
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_x()
+        10
     &#34;&#34;&#34;
     self_bbox = self.get_bbox()
     if self_bbox:
@@ -156,13 +165,17 @@ def get_x(self):
 
 
 def get_y(self):
-    &#34;&#34;&#34;
-    Get the Y position of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_y()
-        90
-
+    &#34;&#34;&#34;Get the Y position of the node
+    
+    
     :return: the Y position of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_y()
+        90
     &#34;&#34;&#34;
     self_bbox = self.get_bbox()
     if self_bbox:
@@ -172,13 +185,17 @@ def get_y(self):
 
 
 def get_width(self):
-    &#34;&#34;&#34;
-    Get the width of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_width()
-        70
-
+    &#34;&#34;&#34;Get the width of the node
+    
+    
     :return: the width of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_width()
+        70
     &#34;&#34;&#34;
     self_bbox = self.get_bbox()
     if self_bbox:
@@ -188,13 +205,17 @@ def get_width(self):
 
 
 def get_height(self):
-    &#34;&#34;&#34;
-    Get the height of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_height()
-        40
-
+    &#34;&#34;&#34;Get the height of the node
+    
+    
     :return: the height of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_height()
+        40
     &#34;&#34;&#34;
     self_bbox = self.get_bbox()
     if self_bbox:
@@ -204,17 +225,28 @@ def get_height(self):
 
 
 class SpatialMixin:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;spatial&#34;
 
     @staticmethod
     def get_dependencies():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return [&#39;core&#39;]
 
     @staticmethod
     def apply_to(node):
+        &#34;&#34;&#34;
+
+        Args:
+          node: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         add_method_to_node(set_statistics, node)
         add_method_to_node(get_statistics, node)
         add_method_to_node(set_bbox, node)
@@ -241,26 +273,30 @@ class SpatialMixin:
 <dd>
 <div class="desc"><p>Get the bounding box for the node, this is structured as:</p>
 <p>[x1,y1,x2,y2]</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].get_bbox()
-[10,20,50,100]
-</code></pre>
-<p>:return: the bounding box array</p></div>
+<p>:return: the bounding box array</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_bbox()
+    [10,20,50,100]
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_bbox(self):
-    &#34;&#34;&#34;
-    Get the bounding box for the node, this is structured as:
-
+    &#34;&#34;&#34;Get the bounding box for the node, this is structured as:
+    
     [x1,y1,x2,y2]
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_bbox()
-        [10,20,50,100]
-
+    
+    
     :return: the bounding box array
 
+    Args:
 
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_bbox()
+        [10,20,50,100]
     &#34;&#34;&#34;
     return self.get_feature_value(&#34;spatial&#34;, &#34;bbox&#34;)</code></pre>
 </details>
@@ -270,22 +306,28 @@ class SpatialMixin:
 </code></dt>
 <dd>
 <div class="desc"><p>Get the height of the node</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].get_height()
-40
-</code></pre>
-<p>:return: the height of the node</p></div>
+<p>:return: the height of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_height()
+    40
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_height(self):
-    &#34;&#34;&#34;
-    Get the height of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_height()
-        40
-
+    &#34;&#34;&#34;Get the height of the node
+    
+    
     :return: the height of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_height()
+        40
     &#34;&#34;&#34;
     self_bbox = self.get_bbox()
     if self_bbox:
@@ -299,24 +341,28 @@ class SpatialMixin:
 </code></dt>
 <dd>
 <div class="desc"><p>Get the rotate of the node</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].get_rotate()
-90
-</code></pre>
-<p>:return: the rotation of the node</p></div>
+<p>:return: the rotation of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_rotate()
+    90
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_rotate(self):
-    &#34;&#34;&#34;
-    Get the rotate of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_rotate()
-        90
-
+    &#34;&#34;&#34;Get the rotate of the node
+    
+    
     :return: the rotation of the node
 
+    Args:
 
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_rotate()
+        90
     &#34;&#34;&#34;
     return self.get_feature_value(&#34;spatial&#34;, &#34;rotate&#34;)</code></pre>
 </details>
@@ -326,24 +372,28 @@ class SpatialMixin:
 </code></dt>
 <dd>
 <div class="desc"><p>Get the spatial statistics for this node</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].get_statistics()
-&lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
-</code></pre>
-<p>:return: the statistics object (or None if not set)</p></div>
+<p>:return: the statistics object (or None if not set)</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_statistics()
+    &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_statistics(self):
-    &#34;&#34;&#34;
-    Get the spatial statistics for this node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
-        &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
-
+    &#34;&#34;&#34;Get the spatial statistics for this node
+    
+    
     :return: the statistics object (or None if not set)
 
+    Args:
 
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
+        &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
     &#34;&#34;&#34;
     return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)</code></pre>
 </details>
@@ -353,22 +403,28 @@ class SpatialMixin:
 </code></dt>
 <dd>
 <div class="desc"><p>Get the width of the node</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].get_width()
-70
-</code></pre>
-<p>:return: the width of the node</p></div>
+<p>:return: the width of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_width()
+    70
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_width(self):
-    &#34;&#34;&#34;
-    Get the width of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_width()
-        70
-
+    &#34;&#34;&#34;Get the width of the node
+    
+    
     :return: the width of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_width()
+        70
     &#34;&#34;&#34;
     self_bbox = self.get_bbox()
     if self_bbox:
@@ -382,24 +438,28 @@ class SpatialMixin:
 </code></dt>
 <dd>
 <div class="desc"><p>Get the X position of the node</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].get_x()
-10
-</code></pre>
-<p>:return: the X position of the node</p></div>
+<p>:return: the X position of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_x()
+    10
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_x(self):
-    &#34;&#34;&#34;
-    Get the X position of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_x()
-        10
-
+    &#34;&#34;&#34;Get the X position of the node
+    
+    
     :return: the X position of the node
 
+    Args:
 
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_x()
+        10
     &#34;&#34;&#34;
     self_bbox = self.get_bbox()
     if self_bbox:
@@ -413,22 +473,28 @@ class SpatialMixin:
 </code></dt>
 <dd>
 <div class="desc"><p>Get the Y position of the node</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].get_y()
-90
-</code></pre>
-<p>:return: the Y position of the node</p></div>
+<p>:return: the Y position of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_y()
+    90
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_y(self):
-    &#34;&#34;&#34;
-    Get the Y position of the node
-
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_y()
-        90
-
+    &#34;&#34;&#34;Get the Y position of the node
+    
+    
     :return: the Y position of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_y()
+        90
     &#34;&#34;&#34;
     self_bbox = self.get_bbox()
     if self_bbox:
@@ -443,23 +509,29 @@ class SpatialMixin:
 <dd>
 <div class="desc"><p>Set the bounding box for the node, this is structured as:</p>
 <p>[x1,y1,x2,y2]</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].set_bbox([10,20,50,100])
-</code></pre>
-<p>:param bbox: the bounding box array</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>bbox</code></strong></dt>
+<dd>the bounding box array</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].set_bbox([10,20,50,100])
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_bbox(self, bbox):
-    &#34;&#34;&#34;
-    Set the bounding box for the node, this is structured as:
-
+    &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
+    
     [x1,y1,x2,y2]
 
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_bbox([10,20,50,100])
+    Args:
+      bbox: the bounding box array
 
-    :param bbox: the bounding box array
+    Returns:
 
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_bbox([10,20,50,100])
     &#34;&#34;&#34;
     self.set_feature(&#34;spatial&#34;, &#34;bbox&#34;, bbox)</code></pre>
 </details>
@@ -474,9 +546,7 @@ class SpatialMixin:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_bbox_from_children(self):
-    &#34;&#34;&#34;
-    Set the bounding box for this node based on its children
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Set the bounding box for this node based on its children&#34;&#34;&#34;
 
     x_min = None
     x_max = None
@@ -504,21 +574,27 @@ class SpatialMixin:
 </code></dt>
 <dd>
 <div class="desc"><p>Set the rotate of the node</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].set_rotate(90)
-</code></pre>
-<p>:param rotate the rotation of the node</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>rotate</code></strong></dt>
+<dd>the rotation of the node</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].set_rotate(90)
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_rotate(self, rotate):
-    &#34;&#34;&#34;
-    Set the rotate of the node
+    &#34;&#34;&#34;Set the rotate of the node
 
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_rotate(90)
+    Args:
+      rotate: the rotation of the node
 
-    :param rotate the rotation of the node
+    Returns:
 
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_rotate(90)
     &#34;&#34;&#34;
     self.add_feature(&#34;spatial&#34;, &#34;rotate&#34;, rotate)</code></pre>
 </details>
@@ -528,21 +604,27 @@ class SpatialMixin:
 </code></dt>
 <dd>
 <div class="desc"><p>Set the spatial statistics for this node</p>
-<pre><code>&gt;&gt;&gt; document.select.('//page')[0].set_statistics(NodeStatistics())
-</code></pre>
-<p>:param statistics: the statistics object</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>statistics</code></strong></dt>
+<dd>the statistics object</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].set_statistics(NodeStatistics())
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def set_statistics(self, statistics):
-    &#34;&#34;&#34;
-    Set the spatial statistics for this node
+    &#34;&#34;&#34;Set the spatial statistics for this node
 
-        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_statistics(NodeStatistics())
+    Args:
+      statistics: the statistics object
 
-    :param statistics: the statistics object
+    Returns:
 
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_statistics(NodeStatistics())
     &#34;&#34;&#34;
     self.add_feature(&#34;spatial&#34;, &#34;statistics&#34;, statistics)</code></pre>
 </details>
@@ -562,17 +644,28 @@ class SpatialMixin:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SpatialMixin:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;spatial&#34;
 
     @staticmethod
     def get_dependencies():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return [&#39;core&#39;]
 
     @staticmethod
     def apply_to(node):
+        &#34;&#34;&#34;
+
+        Args:
+          node: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         add_method_to_node(set_statistics, node)
         add_method_to_node(get_statistics, node)
         add_method_to_node(set_bbox, node)
@@ -591,13 +684,26 @@ class SpatialMixin:
 <span>def <span class="ident">apply_to</span></span>(<span>node)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>node</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def apply_to(node):
+    &#34;&#34;&#34;
+
+    Args:
+      node: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     add_method_to_node(set_statistics, node)
     add_method_to_node(get_statistics, node)
     add_method_to_node(set_bbox, node)
@@ -622,6 +728,7 @@ def apply_to(node):
 </summary>
 <pre><code class="python">@staticmethod
 def get_dependencies():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return [&#39;core&#39;]</code></pre>
 </details>
 </dd>
@@ -636,6 +743,7 @@ def get_dependencies():
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;spatial&#34;</code></pre>
 </details>
 </dd>

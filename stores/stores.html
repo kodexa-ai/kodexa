@@ -40,21 +40,39 @@ logger = logging.getLogger(&#39;kodexa.stores&#39;)
 
 
 class RemoteTableDataStore(RemoteStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, ref: str, columns: List[str] = []):
         self.ref = ref
         self.columns = columns
 
     def get_ref(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
     def get_table_df(self, table: str):
+        &#34;&#34;&#34;
+
+        Args:
+          table: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         import pandas as pd
 
         table_result = self.get_table(table)
         return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])
 
     def get_table(self, table: str):
+        &#34;&#34;&#34;
+
+        Args:
+          table: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         # We need to get the first set of rows,
         rows: List = []
@@ -94,6 +112,16 @@ class RemoteTableDataStore(RemoteStore):
         }
 
     def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
+        &#34;&#34;&#34;
+
+        Args:
+          table: str: 
+          page_number: int:  (Default value = 1)
+          page_size:  (Default value = 5000)
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
         url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;
@@ -114,6 +142,14 @@ class RemoteTableDataStore(RemoteStore):
                 rows_response.status_code))
 
     def add_rows(self, rows):
+        &#34;&#34;&#34;
+
+        Args:
+          rows: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
         url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;
@@ -130,6 +166,14 @@ class RemoteTableDataStore(RemoteStore):
             raise Exception(&#34;Unable to post rows to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
     def add(self, row):
+        &#34;&#34;&#34;
+
+        Args:
+          row: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
         url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;
@@ -154,18 +198,23 @@ class RemoteTableDataStore(RemoteStore):
 
 
 class RemoteDictDataStore(RemoteStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, ref: str):
         self.ref: str = ref
 
     def get_ref(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
     def add(self, dict):
-        &#34;&#34;&#34;
-        Writes a dict to the Data Store
+        &#34;&#34;&#34;Writes a dict to the Data Store
 
-        :param dict: the dict to add to the store
+        Args:
+          dict: the dict to add to the store
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
@@ -183,22 +232,26 @@ class RemoteDictDataStore(RemoteStore):
 
 
 class DataStoreHelper:
-    &#34;&#34;&#34;
-    A small helper that can convert a dictionary back into a store
+    &#34;&#34;&#34;A small helper that can convert a dictionary back into a store
     type
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     @staticmethod
     def from_dict(dict):
-        &#34;&#34;&#34;
-        Build a new TableDataStore or DictDataStore from a dictionary.
+        &#34;&#34;&#34;Build a new TableDataStore or DictDataStore from a dictionary.
 
-            &gt;&gt;&gt; Document.from_dict(doc_dict)
+        Args:
+          dict: doc_dict: A dictionary representation of a Kodexa Document.
 
-        :param dict doc_dict: A dictionary representation of a Kodexa Document.
+        Returns:
+          TableDataStore, DictDataStore, or None: A TableDataStore or DictDataStore - driven from &#39;type&#39; in doc_dict.  If &#39;type&#39; is not present or does not align with one of these two types, None is returend.
 
-        :return: A TableDataStore or DictDataStore - driven from &#39;type&#39; in doc_dict.  If &#39;type&#39; is not present or does not align with one of these two types, None is returend.
-        :rtype: TableDataStore, DictDataStore, or None
+        &gt;&gt;&gt; Document.from_dict(doc_dict)
         &#34;&#34;&#34;
 
         if &#39;type&#39; in dict:
@@ -225,6 +278,7 @@ class DataStoreHelper:
 
 
 class RemoteDocumentStore(DocumentStore, RemoteStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, ref: str, query: str = &#34;*&#34;):
         self.ref: str = ref
@@ -233,33 +287,46 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         self.query_string: str = query
 
     def get_name(self):
-        &#34;&#34;&#34;
-        The name of the connector
-
+        &#34;&#34;&#34;The name of the connector
+        
         :return: &#39;document-store&#39;
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return &#34;document-store&#34;
 
     def get_ref(self) -&gt; str:
-        &#34;&#34;&#34;
-        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
+        &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+        
         :return: The reference
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return self.ref
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;DOCUMENT&#34;,
             &#34;ref&#34;: self.ref
         }
 
     def get(self, document_id: str) -&gt; Optional[Document]:
-        &#34;&#34;&#34;
-        Get the document from the remote store using the document&#39;s ID
+        &#34;&#34;&#34;Get the document from the remote store using the document&#39;s ID
 
-        :param document_id: the ID of the document
-        :return: Optionally the document, if the document is not found we will return None
+        Args:
+          document_id: the ID of the document
+          document_id: str: 
+
+        Returns:
+          Optionally the document, if the document is not found we will return None
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
@@ -277,11 +344,15 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
     def get_source(self, document_id: str):
-        &#34;&#34;&#34;
-        Gets the source for a given document ID from the document store, as per the connector protocol
+        &#34;&#34;&#34;Gets the source for a given document ID from the document store, as per the connector protocol
 
-        :param document_id: document id for which you what the source
-        :return: either the source content (byte-array) or None if the document doesn&#39;t exist
+        Args:
+          document_id: document id for which you what the source
+          document_id: str: 
+
+        Returns:
+          either the source content (byte-array) or None if the document doesn&#39;t exist
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
@@ -301,10 +372,14 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
     def delete(self, document_id: str):
-        &#34;&#34;&#34;
-        Delete the document with this document ID from the remote document store
+        &#34;&#34;&#34;Delete the document with this document ID from the remote document store
 
-        :param document_id: the ID of the document to delete
+        Args:
+          document_id: the ID of the document to delete
+          document_id: str: 
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         delete_document_response = requests.delete(
@@ -320,11 +395,14 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 delete_document_response.status_code))
 
     def get_by_path(self, path) -&gt; Optional[Document]:
-        &#34;&#34;&#34;
-        Return the latest representation document at a given path
+        &#34;&#34;&#34;Return the latest representation document at a given path
 
-        :param path: the path (i.e. /my-folder/file.pdf)
-        :return: The latest document representation for that path
+        Args:
+          path: the path (i.e. /my-folder/file.pdf)
+
+        Returns:
+          The latest document representation for that path
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
@@ -342,14 +420,18 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception(msg)
 
     def put_native(self, path: str, content, force_replace=False):
-        &#34;&#34;&#34;
-        Push content directly, this will create both a native object in the store and also a
+        &#34;&#34;&#34;Push content directly, this will create both a native object in the store and also a
         related Document that refers to it.
 
-        :param path: the path where you want to put the native content
-        :param content: the binary content for the native file
-        :param force_replace: replace the content at this path completely
-        :return: None
+        Args:
+          path: the path where you want to put the native content
+          content: the binary content for the native file
+          force_replace: replace the content at this path completely (Default value = False)
+          path: str: 
+
+        Returns:
+          None
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         try:
@@ -379,14 +461,19 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise
 
     def put(self, path: str, document: Document, force_replace=False):
-        &#34;&#34;&#34;
-        Put the document into the document store at the given path, note that if there is already a document
+        &#34;&#34;&#34;Put the document into the document store at the given path, note that if there is already a document
         at this path then the lineage UUID for this document must related to one of the documents the documents
         that are held at that path
 
-        :param path: the path to the document to use
-        :param document: the document
-        :param force_replace: this will remove all the representations of the document at this path and replace it with this one
+        Args:
+          path: the path to the document to use
+          document: the document
+          force_replace: this will remove all the representations of the document at this path and replace it with this one (Default value = False)
+          path: str: 
+          document: Document: 
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         try:
@@ -415,6 +502,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise
 
     def get_next_objects(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         content_objects_response = requests.get(
             f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
@@ -428,13 +516,17 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             self.objects = content_objects_response.json()[&#39;content&#39;]
 
     def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;
-        Query the documents in the given document store and a list of the document metadata matches
+        &#34;&#34;&#34;Query the documents in the given document store and a list of the document metadata matches
 
-        :param sort_direction: the sort direction (either asc - ascending or desc - descending)
-        :param sort_by: the name of the metadata field to sort by (ie. createdDate)
-        :param query: A lucene style query for the metadata in the document store
-        :return: A list of content objects
+        Args:
+          sort_direction: the sort direction (either asc - ascending or desc - descending) (Default value = &#39;asc&#39;)
+          sort_by: the name of the metadata field to sort by (ie. createdDate) (Default value = None)
+          query: A lucene style query for the metadata in the document store
+          query: str: 
+
+        Returns:
+          A list of content objects
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         params = {&#39;query&#39;: query}
@@ -457,10 +549,14 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         return results
 
     def list_objects(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;
-        List the objects in the remote document store
-
+        &#34;&#34;&#34;List the objects in the remote document store
+        
         :return: a list of the dictionaries containing the metadata for the documents in the store
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         list_content = requests.get(
@@ -495,8 +591,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
 
 class RemoteModelStore(ModelStore, RemoteStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;MODEL&#34;,
             &#34;ref&#34;: self.ref
@@ -506,19 +604,27 @@ class RemoteModelStore(ModelStore, RemoteStore):
         self.ref = ref
 
     def get_ref(self) -&gt; str:
-        &#34;&#34;&#34;
-        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
+        &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+        
         :return: The reference
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return self.ref
 
     def delete(self, object_path: str):
-        &#34;&#34;&#34;
-        Delete the content stored in the model store at the given path
+        &#34;&#34;&#34;Delete the content stored in the model store at the given path
 
-        :param object_path: the path to the content (ie. mymodel.dat)
-        :return: True if deleted, False if there was no file at the path
+        Args:
+          object_path: the path to the content (ie. mymodel.dat)
+          object_path: str: 
+
+        Returns:
+          True if deleted, False if there was no file at the path
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
@@ -536,11 +642,15 @@ class RemoteModelStore(ModelStore, RemoteStore):
             raise Exception(msg)
 
     def get(self, object_path: str):
-        &#34;&#34;&#34;
-        Get the bytes for the object at the given path, will return None if there is no object there
+        &#34;&#34;&#34;Get the bytes for the object at the given path, will return None if there is no object there
 
-        :param object_path: the object path
-        :return: the bytes or None is nothing is at the path
+        Args:
+          object_path: the object path
+          object_path: str: 
+
+        Returns:
+          the bytes or None is nothing is at the path
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
@@ -556,12 +666,16 @@ class RemoteModelStore(ModelStore, RemoteStore):
             raise Exception(msg)
 
     def put(self, path: str, content, force_replace=False):
-        &#34;&#34;&#34;
-        Put the content into the model store at the given path
+        &#34;&#34;&#34;Put the content into the model store at the given path
 
-        :param path: The path you wish to put the content at
-        :param content: The content for that object
-        :param force_replace: overwrite the existing object if it is there (defaulted to False)
+        Args:
+          path: The path you wish to put the content at
+          content: The content for that object
+          force_replace: overwrite the existing object if it is there (defaulted to False)
+          path: str: 
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
@@ -608,28 +722,34 @@ class RemoteModelStore(ModelStore, RemoteStore):
 </code></dt>
 <dd>
 <div class="desc"><p>A small helper that can convert a dictionary back into a store
-type</p></div>
+type</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DataStoreHelper:
-    &#34;&#34;&#34;
-    A small helper that can convert a dictionary back into a store
+    &#34;&#34;&#34;A small helper that can convert a dictionary back into a store
     type
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     @staticmethod
     def from_dict(dict):
-        &#34;&#34;&#34;
-        Build a new TableDataStore or DictDataStore from a dictionary.
+        &#34;&#34;&#34;Build a new TableDataStore or DictDataStore from a dictionary.
 
-            &gt;&gt;&gt; Document.from_dict(doc_dict)
+        Args:
+          dict: doc_dict: A dictionary representation of a Kodexa Document.
 
-        :param dict doc_dict: A dictionary representation of a Kodexa Document.
+        Returns:
+          TableDataStore, DictDataStore, or None: A TableDataStore or DictDataStore - driven from &#39;type&#39; in doc_dict.  If &#39;type&#39; is not present or does not align with one of these two types, None is returend.
 
-        :return: A TableDataStore or DictDataStore - driven from &#39;type&#39; in doc_dict.  If &#39;type&#39; is not present or does not align with one of these two types, None is returend.
-        :rtype: TableDataStore, DictDataStore, or None
+        &gt;&gt;&gt; Document.from_dict(doc_dict)
         &#34;&#34;&#34;
 
         if &#39;type&#39; in dict:
@@ -661,27 +781,34 @@ type</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Build a new TableDataStore or DictDataStore from a dictionary.</p>
-<pre><code>&gt;&gt;&gt; Document.from_dict(doc_dict)
-</code></pre>
-<p>:param dict doc_dict: A dictionary representation of a Kodexa Document.</p>
-<p>:return: A TableDataStore or DictDataStore - driven from 'type' in doc_dict.
-If 'type' is not present or does not align with one of these two types, None is returend.
-:rtype: TableDataStore, DictDataStore, or None</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict</code></strong></dt>
+<dd>doc_dict: A dictionary representation of a Kodexa Document.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>TableDataStore, DictDataStore,</code> or <code>None</code></dt>
+<dd>A TableDataStore or DictDataStore - driven from 'type' in doc_dict.
+If 'type' is not present or does not align with one of these two types, None is returend.</dd>
+</dl>
+<pre><code class="language-python-repl">&gt;&gt;&gt; Document.from_dict(doc_dict)
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_dict(dict):
-    &#34;&#34;&#34;
-    Build a new TableDataStore or DictDataStore from a dictionary.
+    &#34;&#34;&#34;Build a new TableDataStore or DictDataStore from a dictionary.
 
-        &gt;&gt;&gt; Document.from_dict(doc_dict)
+    Args:
+      dict: doc_dict: A dictionary representation of a Kodexa Document.
 
-    :param dict doc_dict: A dictionary representation of a Kodexa Document.
+    Returns:
+      TableDataStore, DictDataStore, or None: A TableDataStore or DictDataStore - driven from &#39;type&#39; in doc_dict.  If &#39;type&#39; is not present or does not align with one of these two types, None is returend.
 
-    :return: A TableDataStore or DictDataStore - driven from &#39;type&#39; in doc_dict.  If &#39;type&#39; is not present or does not align with one of these two types, None is returend.
-    :rtype: TableDataStore, DictDataStore, or None
+    &gt;&gt;&gt; Document.from_dict(doc_dict)
     &#34;&#34;&#34;
 
     if &#39;type&#39; in dict:
@@ -714,25 +841,29 @@ def from_dict(dict):
 <span>(</span><span>ref: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A remote store is one that refers to a Kodexa platform
-instance</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class RemoteDictDataStore(RemoteStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, ref: str):
         self.ref: str = ref
 
     def get_ref(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
     def add(self, dict):
-        &#34;&#34;&#34;
-        Writes a dict to the Data Store
+        &#34;&#34;&#34;Writes a dict to the Data Store
 
-        :param dict: the dict to add to the store
+        Args:
+          dict: the dict to add to the store
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
@@ -759,16 +890,24 @@ instance</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Writes a dict to the Data Store</p>
-<p>:param dict: the dict to add to the store</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict</code></strong></dt>
+<dd>the dict to add to the store</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add(self, dict):
-    &#34;&#34;&#34;
-    Writes a dict to the Data Store
+    &#34;&#34;&#34;Writes a dict to the Data Store
 
-    :param dict: the dict to add to the store
+    Args:
+      dict: the dict to add to the store
+
+    Returns:
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
 
@@ -801,12 +940,13 @@ instance</p></div>
 <span>(</span><span>ref: str, query: str = '*')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A document store supports storing, listing and retrieving Kodexa documents and document families</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class RemoteDocumentStore(DocumentStore, RemoteStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, ref: str, query: str = &#34;*&#34;):
         self.ref: str = ref
@@ -815,33 +955,46 @@ instance</p></div>
         self.query_string: str = query
 
     def get_name(self):
-        &#34;&#34;&#34;
-        The name of the connector
-
+        &#34;&#34;&#34;The name of the connector
+        
         :return: &#39;document-store&#39;
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return &#34;document-store&#34;
 
     def get_ref(self) -&gt; str:
-        &#34;&#34;&#34;
-        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
+        &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+        
         :return: The reference
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return self.ref
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;DOCUMENT&#34;,
             &#34;ref&#34;: self.ref
         }
 
     def get(self, document_id: str) -&gt; Optional[Document]:
-        &#34;&#34;&#34;
-        Get the document from the remote store using the document&#39;s ID
+        &#34;&#34;&#34;Get the document from the remote store using the document&#39;s ID
 
-        :param document_id: the ID of the document
-        :return: Optionally the document, if the document is not found we will return None
+        Args:
+          document_id: the ID of the document
+          document_id: str: 
+
+        Returns:
+          Optionally the document, if the document is not found we will return None
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
@@ -859,11 +1012,15 @@ instance</p></div>
             raise Exception(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
     def get_source(self, document_id: str):
-        &#34;&#34;&#34;
-        Gets the source for a given document ID from the document store, as per the connector protocol
+        &#34;&#34;&#34;Gets the source for a given document ID from the document store, as per the connector protocol
 
-        :param document_id: document id for which you what the source
-        :return: either the source content (byte-array) or None if the document doesn&#39;t exist
+        Args:
+          document_id: document id for which you what the source
+          document_id: str: 
+
+        Returns:
+          either the source content (byte-array) or None if the document doesn&#39;t exist
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
@@ -883,10 +1040,14 @@ instance</p></div>
             raise Exception(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
     def delete(self, document_id: str):
-        &#34;&#34;&#34;
-        Delete the document with this document ID from the remote document store
+        &#34;&#34;&#34;Delete the document with this document ID from the remote document store
 
-        :param document_id: the ID of the document to delete
+        Args:
+          document_id: the ID of the document to delete
+          document_id: str: 
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         delete_document_response = requests.delete(
@@ -902,11 +1063,14 @@ instance</p></div>
                 delete_document_response.status_code))
 
     def get_by_path(self, path) -&gt; Optional[Document]:
-        &#34;&#34;&#34;
-        Return the latest representation document at a given path
+        &#34;&#34;&#34;Return the latest representation document at a given path
 
-        :param path: the path (i.e. /my-folder/file.pdf)
-        :return: The latest document representation for that path
+        Args:
+          path: the path (i.e. /my-folder/file.pdf)
+
+        Returns:
+          The latest document representation for that path
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
@@ -924,14 +1088,18 @@ instance</p></div>
             raise Exception(msg)
 
     def put_native(self, path: str, content, force_replace=False):
-        &#34;&#34;&#34;
-        Push content directly, this will create both a native object in the store and also a
+        &#34;&#34;&#34;Push content directly, this will create both a native object in the store and also a
         related Document that refers to it.
 
-        :param path: the path where you want to put the native content
-        :param content: the binary content for the native file
-        :param force_replace: replace the content at this path completely
-        :return: None
+        Args:
+          path: the path where you want to put the native content
+          content: the binary content for the native file
+          force_replace: replace the content at this path completely (Default value = False)
+          path: str: 
+
+        Returns:
+          None
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         try:
@@ -961,14 +1129,19 @@ instance</p></div>
             raise
 
     def put(self, path: str, document: Document, force_replace=False):
-        &#34;&#34;&#34;
-        Put the document into the document store at the given path, note that if there is already a document
+        &#34;&#34;&#34;Put the document into the document store at the given path, note that if there is already a document
         at this path then the lineage UUID for this document must related to one of the documents the documents
         that are held at that path
 
-        :param path: the path to the document to use
-        :param document: the document
-        :param force_replace: this will remove all the representations of the document at this path and replace it with this one
+        Args:
+          path: the path to the document to use
+          document: the document
+          force_replace: this will remove all the representations of the document at this path and replace it with this one (Default value = False)
+          path: str: 
+          document: Document: 
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         try:
@@ -997,6 +1170,7 @@ instance</p></div>
             raise
 
     def get_next_objects(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         content_objects_response = requests.get(
             f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
@@ -1010,13 +1184,17 @@ instance</p></div>
             self.objects = content_objects_response.json()[&#39;content&#39;]
 
     def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;
-        Query the documents in the given document store and a list of the document metadata matches
+        &#34;&#34;&#34;Query the documents in the given document store and a list of the document metadata matches
 
-        :param sort_direction: the sort direction (either asc - ascending or desc - descending)
-        :param sort_by: the name of the metadata field to sort by (ie. createdDate)
-        :param query: A lucene style query for the metadata in the document store
-        :return: A list of content objects
+        Args:
+          sort_direction: the sort direction (either asc - ascending or desc - descending) (Default value = &#39;asc&#39;)
+          sort_by: the name of the metadata field to sort by (ie. createdDate) (Default value = None)
+          query: A lucene style query for the metadata in the document store
+          query: str: 
+
+        Returns:
+          A list of content objects
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         params = {&#39;query&#39;: query}
@@ -1039,10 +1217,14 @@ instance</p></div>
         return results
 
     def list_objects(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;
-        List the objects in the remote document store
-
+        &#34;&#34;&#34;List the objects in the remote document store
+        
         :return: a list of the dictionaries containing the metadata for the documents in the store
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         list_content = requests.get(
@@ -1087,16 +1269,27 @@ instance</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Delete the document with this document ID from the remote document store</p>
-<p>:param document_id: the ID of the document to delete</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document_id</code></strong></dt>
+<dd>the ID of the document to delete</dd>
+<dt><strong><code>document_id</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def delete(self, document_id: str):
-    &#34;&#34;&#34;
-    Delete the document with this document ID from the remote document store
+    &#34;&#34;&#34;Delete the document with this document ID from the remote document store
 
-    :param document_id: the ID of the document to delete
+    Args:
+      document_id: the ID of the document to delete
+      document_id: str: 
+
+    Returns:
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     delete_document_response = requests.delete(
@@ -1117,18 +1310,29 @@ instance</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the document from the remote store using the document's ID</p>
-<p>:param document_id: the ID of the document
-:return: Optionally the document, if the document is not found we will return None</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document_id</code></strong></dt>
+<dd>the ID of the document</dd>
+<dt><strong><code>document_id</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Optionally the document, if the document is not found we will return None</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(self, document_id: str) -&gt; Optional[Document]:
-    &#34;&#34;&#34;
-    Get the document from the remote store using the document&#39;s ID
+    &#34;&#34;&#34;Get the document from the remote store using the document&#39;s ID
 
-    :param document_id: the ID of the document
-    :return: Optionally the document, if the document is not found we will return None
+    Args:
+      document_id: the ID of the document
+      document_id: str: 
+
+    Returns:
+      Optionally the document, if the document is not found we will return None
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
 
@@ -1151,18 +1355,26 @@ instance</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Return the latest representation document at a given path</p>
-<p>:param path: the path (i.e. /my-folder/file.pdf)
-:return: The latest document representation for that path</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>the path (i.e. /my-folder/file.pdf)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The latest document representation for that path</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_by_path(self, path) -&gt; Optional[Document]:
-    &#34;&#34;&#34;
-    Return the latest representation document at a given path
+    &#34;&#34;&#34;Return the latest representation document at a given path
 
-    :param path: the path (i.e. /my-folder/file.pdf)
-    :return: The latest document representation for that path
+    Args:
+      path: the path (i.e. /my-folder/file.pdf)
+
+    Returns:
+      The latest document representation for that path
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     import requests
@@ -1185,16 +1397,22 @@ instance</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>The name of the connector</p>
-<p>:return: 'document-store'</p></div>
+<p>:return: 'document-store'</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_name(self):
-    &#34;&#34;&#34;
-    The name of the connector
-
+    &#34;&#34;&#34;The name of the connector
+    
     :return: &#39;document-store&#39;
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     return &#34;document-store&#34;</code></pre>
 </details>
@@ -1209,6 +1427,7 @@ instance</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_next_objects(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     content_objects_response = requests.get(
         f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
@@ -1227,16 +1446,22 @@ instance</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)</p>
-<p>:return: The reference</p></div>
+<p>:return: The reference</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_ref(self) -&gt; str:
-    &#34;&#34;&#34;
-    Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
+    &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+    
     :return: The reference
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     return self.ref</code></pre>
 </details>
@@ -1246,18 +1471,29 @@ instance</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Gets the source for a given document ID from the document store, as per the connector protocol</p>
-<p>:param document_id: document id for which you what the source
-:return: either the source content (byte-array) or None if the document doesn't exist</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document_id</code></strong></dt>
+<dd>document id for which you what the source</dd>
+<dt><strong><code>document_id</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>either the source content (byte-array) or None if the document doesn't exist</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_source(self, document_id: str):
-    &#34;&#34;&#34;
-    Gets the source for a given document ID from the document store, as per the connector protocol
+    &#34;&#34;&#34;Gets the source for a given document ID from the document store, as per the connector protocol
 
-    :param document_id: document id for which you what the source
-    :return: either the source content (byte-array) or None if the document doesn&#39;t exist
+    Args:
+      document_id: document id for which you what the source
+      document_id: str: 
+
+    Returns:
+      either the source content (byte-array) or None if the document doesn&#39;t exist
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
 
@@ -1282,16 +1518,22 @@ instance</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>List the objects in the remote document store</p>
-<p>:return: a list of the dictionaries containing the metadata for the documents in the store</p></div>
+<p>:return: a list of the dictionaries containing the metadata for the documents in the store</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def list_objects(self) -&gt; List[ContentObject]:
-    &#34;&#34;&#34;
-    List the objects in the remote document store
-
+    &#34;&#34;&#34;List the objects in the remote document store
+    
     :return: a list of the dictionaries containing the metadata for the documents in the store
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     list_content = requests.get(
@@ -1314,22 +1556,38 @@ instance</p></div>
 <div class="desc"><p>Put the document into the document store at the given path, note that if there is already a document
 at this path then the lineage UUID for this document must related to one of the documents the documents
 that are held at that path</p>
-<p>:param path: the path to the document to use
-:param document: the document
-:param force_replace: this will remove all the representations of the document at this path and replace it with this one</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>the path to the document to use</dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>the document</dd>
+<dt><strong><code>force_replace</code></strong></dt>
+<dd>this will remove all the representations of the document at this path and replace it with this one (Default value = False)</dd>
+<dt><strong><code>path</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put(self, path: str, document: Document, force_replace=False):
-    &#34;&#34;&#34;
-    Put the document into the document store at the given path, note that if there is already a document
+    &#34;&#34;&#34;Put the document into the document store at the given path, note that if there is already a document
     at this path then the lineage UUID for this document must related to one of the documents the documents
     that are held at that path
 
-    :param path: the path to the document to use
-    :param document: the document
-    :param force_replace: this will remove all the representations of the document at this path and replace it with this one
+    Args:
+      path: the path to the document to use
+      document: the document
+      force_replace: this will remove all the representations of the document at this path and replace it with this one (Default value = False)
+      path: str: 
+      document: Document: 
+
+    Returns:
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     try:
@@ -1364,23 +1622,36 @@ that are held at that path</p>
 <dd>
 <div class="desc"><p>Push content directly, this will create both a native object in the store and also a
 related Document that refers to it.</p>
-<p>:param path: the path where you want to put the native content
-:param content: the binary content for the native file
-:param force_replace: replace the content at this path completely
-:return: None</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>the path where you want to put the native content</dd>
+<dt><strong><code>content</code></strong></dt>
+<dd>the binary content for the native file</dd>
+<dt><strong><code>force_replace</code></strong></dt>
+<dd>replace the content at this path completely (Default value = False)</dd>
+<dt><strong><code>path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>None</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put_native(self, path: str, content, force_replace=False):
-    &#34;&#34;&#34;
-    Push content directly, this will create both a native object in the store and also a
+    &#34;&#34;&#34;Push content directly, this will create both a native object in the store and also a
     related Document that refers to it.
 
-    :param path: the path where you want to put the native content
-    :param content: the binary content for the native file
-    :param force_replace: replace the content at this path completely
-    :return: None
+    Args:
+      path: the path where you want to put the native content
+      content: the binary content for the native file
+      force_replace: replace the content at this path completely (Default value = False)
+      path: str: 
+
+    Returns:
+      None
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     try:
@@ -1415,22 +1686,35 @@ related Document that refers to it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Query the documents in the given document store and a list of the document metadata matches</p>
-<p>:param sort_direction: the sort direction (either asc - ascending or desc - descending)
-:param sort_by: the name of the metadata field to sort by (ie. createdDate)
-:param query: A lucene style query for the metadata in the document store
-:return: A list of content objects</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>sort_direction</code></strong></dt>
+<dd>the sort direction (either asc - ascending or desc - descending) (Default value = 'asc')</dd>
+<dt><strong><code>sort_by</code></strong></dt>
+<dd>the name of the metadata field to sort by (ie. createdDate) (Default value = None)</dd>
+<dt><strong><code>query</code></strong></dt>
+<dd>A lucene style query for the metadata in the document store</dd>
+<dt><strong><code>query</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A list of content objects</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def query_objects(self, query: str, sort_by=None, sort_direction=&#39;asc&#39;) -&gt; List[ContentObject]:
-    &#34;&#34;&#34;
-    Query the documents in the given document store and a list of the document metadata matches
+    &#34;&#34;&#34;Query the documents in the given document store and a list of the document metadata matches
 
-    :param sort_direction: the sort direction (either asc - ascending or desc - descending)
-    :param sort_by: the name of the metadata field to sort by (ie. createdDate)
-    :param query: A lucene style query for the metadata in the document store
-    :return: A list of content objects
+    Args:
+      sort_direction: the sort direction (either asc - ascending or desc - descending) (Default value = &#39;asc&#39;)
+      sort_by: the name of the metadata field to sort by (ie. createdDate) (Default value = None)
+      query: A lucene style query for the metadata in the document store
+      query: str: 
+
+    Returns:
+      A list of content objects
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     params = {&#39;query&#39;: query}
@@ -1463,6 +1747,7 @@ related Document that refers to it.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return {
         &#34;type&#34;: &#34;DOCUMENT&#34;,
         &#34;ref&#34;: self.ref
@@ -1480,6 +1765,7 @@ related Document that refers to it.</p>
 <li><code><a title="kodexa.model.model.DocumentStore.get_by_uuid" href="../model/model.html#kodexa.model.model.DocumentStore.get_by_uuid">get_by_uuid</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.list" href="../model/model.html#kodexa.model.model.DocumentStore.list">list</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.query" href="../model/model.html#kodexa.model.model.DocumentStore.query">query</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="../model/model.html#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
 </ul>
 </li>
@@ -1495,14 +1781,16 @@ related Document that refers to it.</p>
 <span>(</span><span>ref: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A model store supports storing and retrieving of a ML models</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class RemoteModelStore(ModelStore, RemoteStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;MODEL&#34;,
             &#34;ref&#34;: self.ref
@@ -1512,19 +1800,27 @@ related Document that refers to it.</p>
         self.ref = ref
 
     def get_ref(self) -&gt; str:
-        &#34;&#34;&#34;
-        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
+        &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
+        
         :return: The reference
+
+        Args:
+
+        Returns:
+
         &#34;&#34;&#34;
         return self.ref
 
     def delete(self, object_path: str):
-        &#34;&#34;&#34;
-        Delete the content stored in the model store at the given path
+        &#34;&#34;&#34;Delete the content stored in the model store at the given path
 
-        :param object_path: the path to the content (ie. mymodel.dat)
-        :return: True if deleted, False if there was no file at the path
+        Args:
+          object_path: the path to the content (ie. mymodel.dat)
+          object_path: str: 
+
+        Returns:
+          True if deleted, False if there was no file at the path
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
@@ -1542,11 +1838,15 @@ related Document that refers to it.</p>
             raise Exception(msg)
 
     def get(self, object_path: str):
-        &#34;&#34;&#34;
-        Get the bytes for the object at the given path, will return None if there is no object there
+        &#34;&#34;&#34;Get the bytes for the object at the given path, will return None if there is no object there
 
-        :param object_path: the object path
-        :return: the bytes or None is nothing is at the path
+        Args:
+          object_path: the object path
+          object_path: str: 
+
+        Returns:
+          the bytes or None is nothing is at the path
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
@@ -1562,12 +1862,16 @@ related Document that refers to it.</p>
             raise Exception(msg)
 
     def put(self, path: str, content, force_replace=False):
-        &#34;&#34;&#34;
-        Put the content into the model store at the given path
+        &#34;&#34;&#34;Put the content into the model store at the given path
 
-        :param path: The path you wish to put the content at
-        :param content: The content for that object
-        :param force_replace: overwrite the existing object if it is there (defaulted to False)
+        Args:
+          path: The path you wish to put the content at
+          content: The content for that object
+          force_replace: overwrite the existing object if it is there (defaulted to False)
+          path: str: 
+
+        Returns:
+
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
@@ -1611,18 +1915,29 @@ related Document that refers to it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Delete the content stored in the model store at the given path</p>
-<p>:param object_path: the path to the content (ie. mymodel.dat)
-:return: True if deleted, False if there was no file at the path</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>object_path</code></strong></dt>
+<dd>the path to the content (ie. mymodel.dat)</dd>
+<dt><strong><code>object_path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if deleted, False if there was no file at the path</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def delete(self, object_path: str):
-    &#34;&#34;&#34;
-    Delete the content stored in the model store at the given path
+    &#34;&#34;&#34;Delete the content stored in the model store at the given path
 
-    :param object_path: the path to the content (ie. mymodel.dat)
-    :return: True if deleted, False if there was no file at the path
+    Args:
+      object_path: the path to the content (ie. mymodel.dat)
+      object_path: str: 
+
+    Returns:
+      True if deleted, False if there was no file at the path
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     import requests
@@ -1645,18 +1960,29 @@ related Document that refers to it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the bytes for the object at the given path, will return None if there is no object there</p>
-<p>:param object_path: the object path
-:return: the bytes or None is nothing is at the path</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>object_path</code></strong></dt>
+<dd>the object path</dd>
+<dt><strong><code>object_path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>the bytes or None is nothing is at the path</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(self, object_path: str):
-    &#34;&#34;&#34;
-    Get the bytes for the object at the given path, will return None if there is no object there
+    &#34;&#34;&#34;Get the bytes for the object at the given path, will return None if there is no object there
 
-    :param object_path: the object path
-    :return: the bytes or None is nothing is at the path
+    Args:
+      object_path: the object path
+      object_path: str: 
+
+    Returns:
+      the bytes or None is nothing is at the path
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     import requests
@@ -1677,20 +2003,33 @@ related Document that refers to it.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Put the content into the model store at the given path</p>
-<p>:param path: The path you wish to put the content at
-:param content: The content for that object
-:param force_replace: overwrite the existing object if it is there (defaulted to False)</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>The path you wish to put the content at</dd>
+<dt><strong><code>content</code></strong></dt>
+<dd>The content for that object</dd>
+<dt><strong><code>force_replace</code></strong></dt>
+<dd>overwrite the existing object if it is there (defaulted to False)</dd>
+<dt><strong><code>path</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put(self, path: str, content, force_replace=False):
-    &#34;&#34;&#34;
-    Put the content into the model store at the given path
+    &#34;&#34;&#34;Put the content into the model store at the given path
 
-    :param path: The path you wish to put the content at
-    :param content: The content for that object
-    :param force_replace: overwrite the existing object if it is there (defaulted to False)
+    Args:
+      path: The path you wish to put the content at
+      content: The content for that object
+      force_replace: overwrite the existing object if it is there (defaulted to False)
+      path: str: 
+
+    Returns:
+
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     import requests
@@ -1733,6 +2072,7 @@ related Document that refers to it.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return {
         &#34;type&#34;: &#34;MODEL&#34;,
         &#34;ref&#34;: self.ref
@@ -1755,28 +2095,45 @@ related Document that refers to it.</p>
 <span>(</span><span>ref: str, columns: List[str] = [])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A remote store is one that refers to a Kodexa platform
-instance</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class RemoteTableDataStore(RemoteStore):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, ref: str, columns: List[str] = []):
         self.ref = ref
         self.columns = columns
 
     def get_ref(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
     def get_table_df(self, table: str):
+        &#34;&#34;&#34;
+
+        Args:
+          table: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         import pandas as pd
 
         table_result = self.get_table(table)
         return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])
 
     def get_table(self, table: str):
+        &#34;&#34;&#34;
+
+        Args:
+          table: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         # We need to get the first set of rows,
         rows: List = []
@@ -1816,6 +2173,16 @@ instance</p></div>
         }
 
     def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
+        &#34;&#34;&#34;
+
+        Args:
+          table: str: 
+          page_number: int:  (Default value = 1)
+          page_size:  (Default value = 5000)
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
         url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;
@@ -1836,6 +2203,14 @@ instance</p></div>
                 rows_response.status_code))
 
     def add_rows(self, rows):
+        &#34;&#34;&#34;
+
+        Args:
+          rows: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
         url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;
@@ -1852,6 +2227,14 @@ instance</p></div>
             raise Exception(&#34;Unable to post rows to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
     def add(self, row):
+        &#34;&#34;&#34;
+
+        Args:
+          row: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
         url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;
@@ -1884,12 +2267,25 @@ instance</p></div>
 <span>def <span class="ident">add</span></span>(<span>self, row)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>row</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add(self, row):
+    &#34;&#34;&#34;
+
+    Args:
+      row: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     from kodexa import KodexaPlatform
 
     url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;
@@ -1917,12 +2313,25 @@ instance</p></div>
 <span>def <span class="ident">add_rows</span></span>(<span>self, rows)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>rows</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_rows(self, rows):
+    &#34;&#34;&#34;
+
+    Args:
+      rows: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     from kodexa import KodexaPlatform
 
     url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;
@@ -1943,12 +2352,25 @@ instance</p></div>
 <span>def <span class="ident">get_table</span></span>(<span>self, table: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>table</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_table(self, table: str):
+    &#34;&#34;&#34;
+
+    Args:
+      table: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     # We need to get the first set of rows,
     rows: List = []
@@ -1992,12 +2414,25 @@ instance</p></div>
 <span>def <span class="ident">get_table_df</span></span>(<span>self, table: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>table</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_table_df(self, table: str):
+    &#34;&#34;&#34;
+
+    Args:
+      table: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     import pandas as pd
 
     table_result = self.get_table(table)
@@ -2008,12 +2443,32 @@ instance</p></div>
 <span>def <span class="ident">get_table_page_request</span></span>(<span>self, table: str, page_number: int = 1, page_size=5000)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>table</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>page_number</code></strong></dt>
+<dd>int:
+(Default value = 1)</dd>
+<dt><strong><code>page_size</code></strong></dt>
+<dd>(Default value = 5000)</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
+    &#34;&#34;&#34;
+
+    Args:
+      table: str: 
+      page_number: int:  (Default value = 1)
+      page_size:  (Default value = 5000)
+
+    Returns:
+
+    &#34;&#34;&#34;
     from kodexa import KodexaPlatform
 
     url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/rows&#34;

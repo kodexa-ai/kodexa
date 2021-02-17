@@ -31,47 +31,73 @@ from kodexa.stores.stores import DocumentStore
 
 
 class DocumentStoreSink:
-    &#34;&#34;&#34;
-    A sink that writes to the underlying store
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;A sink that writes to the underlying store&#34;&#34;&#34;
 
     def __init__(self, document_store: DocumentStore):
         self.document_store = document_store
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Store Sink&#34;
 
     def sink(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if document.source.original_path is not None and document.source.original_filename is not None:
             self.document_store.put(document.source.original_path + &#34;/&#34; + document.source.original_filename, document)
         else:
             self.document_store.put(document.uuid, document)
 
     def accept(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return self.document_store.accept(document)
 
 
 class FolderSink:
-    &#34;&#34;&#34;
-    A folder sink that stores the documents in KDXA format
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;A folder sink that stores the documents in KDXA format&#34;&#34;&#34;
 
     def __init__(self, path=None):
         self.path = &#34;./&#34; if path is None else path + &#34;/&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Folder&#34;
 
     def accept(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return True
 
     def sink(self, document: Document):
-        &#34;&#34;&#34;
-        Adds the document to the sink
+        &#34;&#34;&#34;Adds the document to the sink
 
-        :param document: document to add
+        Args:
+          document: document to add
+          document: Document: 
+
+        Returns:
+
         &#34;&#34;&#34;
         file_name = document.source.original_filename \
             if document.source.original_filename is not None else document.uuid
@@ -98,24 +124,39 @@ class FolderSink:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DocumentStoreSink:
-    &#34;&#34;&#34;
-    A sink that writes to the underlying store
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;A sink that writes to the underlying store&#34;&#34;&#34;
 
     def __init__(self, document_store: DocumentStore):
         self.document_store = document_store
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Store Sink&#34;
 
     def sink(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if document.source.original_path is not None and document.source.original_filename is not None:
             self.document_store.put(document.source.original_path + &#34;/&#34; + document.source.original_filename, document)
         else:
             self.document_store.put(document.uuid, document)
 
     def accept(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return self.document_store.accept(document)</code></pre>
 </details>
 <h3>Static methods</h3>
@@ -131,6 +172,7 @@ class FolderSink:
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;Store Sink&#34;</code></pre>
 </details>
 </dd>
@@ -141,12 +183,25 @@ def get_name():
 <span>def <span class="ident">accept</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def accept(self, document: Document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     return self.document_store.accept(document)</code></pre>
 </details>
 </dd>
@@ -154,12 +209,25 @@ def get_name():
 <span>def <span class="ident">sink</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def sink(self, document: Document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if document.source.original_path is not None and document.source.original_filename is not None:
         self.document_store.put(document.source.original_path + &#34;/&#34; + document.source.original_filename, document)
     else:
@@ -179,25 +247,36 @@ def get_name():
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FolderSink:
-    &#34;&#34;&#34;
-    A folder sink that stores the documents in KDXA format
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;A folder sink that stores the documents in KDXA format&#34;&#34;&#34;
 
     def __init__(self, path=None):
         self.path = &#34;./&#34; if path is None else path + &#34;/&#34;
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Folder&#34;
 
     def accept(self, document: Document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         return True
 
     def sink(self, document: Document):
-        &#34;&#34;&#34;
-        Adds the document to the sink
+        &#34;&#34;&#34;Adds the document to the sink
 
-        :param document: document to add
+        Args:
+          document: document to add
+          document: Document: 
+
+        Returns:
+
         &#34;&#34;&#34;
         file_name = document.source.original_filename \
             if document.source.original_filename is not None else document.uuid
@@ -216,6 +295,7 @@ def get_name():
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;Folder&#34;</code></pre>
 </details>
 </dd>
@@ -226,12 +306,25 @@ def get_name():
 <span>def <span class="ident">accept</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def accept(self, document: Document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     return True</code></pre>
 </details>
 </dd>
@@ -240,16 +333,27 @@ def get_name():
 </code></dt>
 <dd>
 <div class="desc"><p>Adds the document to the sink</p>
-<p>:param document: document to add</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>document to add</dd>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def sink(self, document: Document):
-    &#34;&#34;&#34;
-    Adds the document to the sink
+    &#34;&#34;&#34;Adds the document to the sink
 
-    :param document: document to add
+    Args:
+      document: document to add
+      document: Document: 
+
+    Returns:
+
     &#34;&#34;&#34;
     file_name = document.source.original_filename \
         if document.source.original_filename is not None else document.uuid

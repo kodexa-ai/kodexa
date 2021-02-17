@@ -33,17 +33,29 @@ from kodexa.model.document_families import ContentEvent
 
 
 class TestAction:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, cheese: str = None):
         self.cheese = cheese
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Hello&#34;
 
 
 class TestAssistant(Assistant):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+        &#34;&#34;&#34;
+
+        Args:
+          event: ContentEvent: 
+          context: AssistantContext:  (Default value = None)
+
+        Returns:
+
+        &#34;&#34;&#34;
         # This is just an example of an assistant
         # basically we are just going to return a pipeline that
         # adds a label to the document - creating a new version
@@ -74,11 +86,13 @@ class TestAssistant(Assistant):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class TestAction:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, cheese: str = None):
         self.cheese = cheese
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Hello&#34;</code></pre>
 </details>
 <h3>Methods</h3>
@@ -93,6 +107,7 @@ class TestAssistant(Assistant):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_name(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;Hello&#34;</code></pre>
 </details>
 </dd>
@@ -102,15 +117,24 @@ class TestAssistant(Assistant):
 <span>class <span class="ident">TestAssistant</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>An assistant is a rich-API to allow you to work with a reactive content store or with an end user
-that is working with set of content</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class TestAssistant(Assistant):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+        &#34;&#34;&#34;
+
+        Args:
+          event: ContentEvent: 
+          context: AssistantContext:  (Default value = None)
+
+        Returns:
+
+        &#34;&#34;&#34;
         # This is just an example of an assistant
         # basically we are just going to return a pipeline that
         # adds a label to the document - creating a new version
@@ -124,14 +148,46 @@ that is working with set of content</p></div>
 <ul class="hlist">
 <li><a title="kodexa.assistant.assistant.Assistant" href="../assistant/assistant.html#kodexa.assistant.assistant.Assistant">Assistant</a></li>
 </ul>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="kodexa.assistant.assistant.Assistant" href="../assistant/assistant.html#kodexa.assistant.assistant.Assistant">Assistant</a></b></code>:
-<ul class="hlist">
-<li><code><a title="kodexa.assistant.assistant.Assistant.process_event" href="../assistant/assistant.html#kodexa.assistant.assistant.Assistant.process_event">process_event</a></code></li>
-</ul>
-</li>
-</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.testing.test_components.TestAssistant.process_event"><code class="name flex">
+<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> List[<a title="kodexa.pipeline.pipeline.Pipeline" href="../pipeline/pipeline.html#kodexa.pipeline.pipeline.Pipeline">Pipeline</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>event</code></strong></dt>
+<dd>ContentEvent: </dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>AssistantContext:
+(Default value = None)</dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+    &#34;&#34;&#34;
+
+    Args:
+      event: ContentEvent: 
+      context: AssistantContext:  (Default value = None)
+
+    Returns:
+
+    &#34;&#34;&#34;
+    # This is just an example of an assistant
+    # basically we are just going to return a pipeline that
+    # adds a label to the document - creating a new version
+
+    pipeline = Pipeline()
+    pipeline.add_label(&#39;hello&#39;)
+
+    return [pipeline]</code></pre>
+</details>
+</dd>
+</dl>
 </dd>
 </dl>
 </section>
@@ -157,6 +213,9 @@ that is working with set of content</p></div>
 </li>
 <li>
 <h4><code><a title="kodexa.testing.test_components.TestAssistant" href="#kodexa.testing.test_components.TestAssistant">TestAssistant</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.testing.test_components.TestAssistant.process_event" href="#kodexa.testing.test_components.TestAssistant.process_event">process_event</a></code></li>
+</ul>
 </li>
 </ul>
 </li>

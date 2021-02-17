@@ -42,36 +42,58 @@ class ContentEventType(Enum):
 
 
 class ContentEvent:
-    &#34;&#34;&#34;
-    A content event represents a change, update or deletion that has occurred in a document family
+    &#34;&#34;&#34;A content event represents a change, update or deletion that has occurred in a document family
     in a store, and can be relayed for a reaction
     &#34;&#34;&#34;
 
     def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
+        &#34;&#34;&#34;
+        Initialize a content event
+        Args:
+            content_object: the content object on which the event occurred
+            event_type: the type of event
+            document_family: the document family to which the object belongs
+        &#34;&#34;&#34;
         self.content_object = content_object
         self.event_type = event_type
         self.document_family: DocumentFamily = document_family
 
 
 class DocumentActor:
-    &#34;&#34;&#34;
-    A document actor is something that can create a new document in a family and is
-    part of the document relationship
+    &#34;&#34;&#34;A document actor is something that can create a new document in a family and is
+    part of the document transition
     &#34;&#34;&#34;
 
     def __init__(self, actor_id: str, actor_type: str):
+        &#34;&#34;&#34;
+        Initialize a document actor
+
+        Args:
+            actor_id: the ID of the actor (this typically has meaning within the scope of the actor type)
+            actor_type: the type of actor
+        &#34;&#34;&#34;
         self.actor_id = actor_id
         self.actor_type = actor_type
 
 
-class DocumentRelationship:
+class DocumentTransition:
     &#34;&#34;&#34;
-    A document relationship represents a link between two documents
+    A document transition represents a link between two documents and tries to capture the actor that was involved
+    in the transition as well at the type of transition that exists
     &#34;&#34;&#34;
 
     def __init__(self, relationship_type: str, source_content_object_id: str,
                  destination_content_object_id: Optional[str],
                  actor: DocumentActor = None):
+        &#34;&#34;&#34;
+        Create a document transition
+
+        Args:
+            relationship_type: the type of relationship the transition created
+            source_content_object_id: the ID of the source content object
+            destination_content_object_id: the ID of the destination content object
+            actor:DocumentActor: the actor (Defaults to None)
+        &#34;&#34;&#34;
         self.relationship_type = relationship_type
         self.source_content_object_id = source_content_object_id
         self.destination_content_object_id = destination_content_object_id
@@ -79,12 +101,12 @@ class DocumentRelationship:
 
 
 class DocumentFamily:
-    &#34;&#34;&#34;
-    A document family represents a collection of related documents which together represent different views of the same
+    &#34;&#34;&#34;A document family represents a collection of related documents which together represent different views of the same
     source material
-
+    
     This approach allows parsed representations to he linked to native, derived representations, labelled etc all to be
     part of a family of content views that can be used together to understand the document and its content
+
     &#34;&#34;&#34;
 
     def __init__(self, path: str, store_ref: str):
@@ -96,12 +118,21 @@ class DocumentFamily:
         :param store_ref: the reference to the store holding this family
         &#34;&#34;&#34;
         self.id: str = str(uuid.uuid4())
-        self.relationships: List[DocumentRelationship] = []
+        self.transitions: List[DocumentTransition] = []
         self.content_objects: List[ContentObject] = []
         self.path = path
         self.store_ref = store_ref
 
-    def add_document(self, document: Document, relationship: DocumentRelationship = None) -&gt; ContentEvent:
+    def add_document(self, document: Document, transition: DocumentTransition = None) -&gt; ContentEvent:
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+          transition: DocumentTransition:  (Default value = None)
+
+        Returns:
+
+        &#34;&#34;&#34;
         new_content_object = ContentObject()
         new_content_object.store_ref = self.store_ref
         new_content_object.content_type = ContentType.DOCUMENT
@@ -110,34 +141,38 @@ class DocumentFamily:
 
         self.content_objects.append(new_content_object)
 
-        if relationship is not None:
-            relationship.destination_content_object_id = new_content_object.id
-            self.relationships.append(relationship)
+        if transition is not None:
+            transition.destination_content_object_id = new_content_object.id
+            self.transitions.append(transition)
 
         new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
         return new_event
 
     def get_latest_content(self) -&gt; ContentObject:
-        &#34;&#34;&#34;
-        Returns the latest content object that we have in place
+        &#34;&#34;&#34;Returns the latest content object that we have in place
 
-        :return:
+        Returns:
+            The latest content object in the family
         &#34;&#34;&#34;
         return self.content_objects[-1]
 
     def get_content_objects(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;
-        Returns all the content objects in the family
+        &#34;&#34;&#34;Returns all the content objects in the family
 
-        :return: a list of the content objects
+        Returns:
+            a list of the content objects
+
+
         &#34;&#34;&#34;
         return self.content_objects
 
     def get_document_count(self) -&gt; int:
         &#34;&#34;&#34;
-        Return the number of documents in the family
+        Count of content objects in the family
 
-        :return: number of documents in the family
+        Returns:
+          number of documents in the family
+
         &#34;&#34;&#34;
         return len(self.content_objects)</code></pre>
 </details>
@@ -157,18 +192,34 @@ class DocumentFamily:
 </code></dt>
 <dd>
 <div class="desc"><p>A content event represents a change, update or deletion that has occurred in a document family
-in a store, and can be relayed for a reaction</p></div>
+in a store, and can be relayed for a reaction</p>
+<p>Initialize a content event</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>the content object on which the event occurred</dd>
+<dt><strong><code>event_type</code></strong></dt>
+<dd>the type of event</dd>
+<dt><strong><code>document_family</code></strong></dt>
+<dd>the document family to which the object belongs</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ContentEvent:
-    &#34;&#34;&#34;
-    A content event represents a change, update or deletion that has occurred in a document family
+    &#34;&#34;&#34;A content event represents a change, update or deletion that has occurred in a document family
     in a store, and can be relayed for a reaction
     &#34;&#34;&#34;
 
     def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
+        &#34;&#34;&#34;
+        Initialize a content event
+        Args:
+            content_object: the content object on which the event occurred
+            event_type: the type of event
+            document_family: the document family to which the object belongs
+        &#34;&#34;&#34;
         self.content_object = content_object
         self.event_type = event_type
         self.document_family: DocumentFamily = document_family</code></pre>
@@ -213,18 +264,32 @@ in a store, and can be relayed for a reaction</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>A document actor is something that can create a new document in a family and is
-part of the document relationship</p></div>
+part of the document transition</p>
+<p>Initialize a document actor</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>actor_id</code></strong></dt>
+<dd>the ID of the actor (this typically has meaning within the scope of the actor type)</dd>
+<dt><strong><code>actor_type</code></strong></dt>
+<dd>the type of actor</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DocumentActor:
-    &#34;&#34;&#34;
-    A document actor is something that can create a new document in a family and is
-    part of the document relationship
+    &#34;&#34;&#34;A document actor is something that can create a new document in a family and is
+    part of the document transition
     &#34;&#34;&#34;
 
     def __init__(self, actor_id: str, actor_type: str):
+        &#34;&#34;&#34;
+        Initialize a document actor
+
+        Args:
+            actor_id: the ID of the actor (this typically has meaning within the scope of the actor type)
+            actor_type: the type of actor
+        &#34;&#34;&#34;
         self.actor_id = actor_id
         self.actor_type = actor_type</code></pre>
 </details>
@@ -247,12 +312,12 @@ document as its first entry</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DocumentFamily:
-    &#34;&#34;&#34;
-    A document family represents a collection of related documents which together represent different views of the same
+    &#34;&#34;&#34;A document family represents a collection of related documents which together represent different views of the same
     source material
-
+    
     This approach allows parsed representations to he linked to native, derived representations, labelled etc all to be
     part of a family of content views that can be used together to understand the document and its content
+
     &#34;&#34;&#34;
 
     def __init__(self, path: str, store_ref: str):
@@ -264,12 +329,21 @@ document as its first entry</p>
         :param store_ref: the reference to the store holding this family
         &#34;&#34;&#34;
         self.id: str = str(uuid.uuid4())
-        self.relationships: List[DocumentRelationship] = []
+        self.transitions: List[DocumentTransition] = []
         self.content_objects: List[ContentObject] = []
         self.path = path
         self.store_ref = store_ref
 
-    def add_document(self, document: Document, relationship: DocumentRelationship = None) -&gt; ContentEvent:
+    def add_document(self, document: Document, transition: DocumentTransition = None) -&gt; ContentEvent:
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document: 
+          transition: DocumentTransition:  (Default value = None)
+
+        Returns:
+
+        &#34;&#34;&#34;
         new_content_object = ContentObject()
         new_content_object.store_ref = self.store_ref
         new_content_object.content_type = ContentType.DOCUMENT
@@ -278,49 +352,70 @@ document as its first entry</p>
 
         self.content_objects.append(new_content_object)
 
-        if relationship is not None:
-            relationship.destination_content_object_id = new_content_object.id
-            self.relationships.append(relationship)
+        if transition is not None:
+            transition.destination_content_object_id = new_content_object.id
+            self.transitions.append(transition)
 
         new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
         return new_event
 
     def get_latest_content(self) -&gt; ContentObject:
-        &#34;&#34;&#34;
-        Returns the latest content object that we have in place
+        &#34;&#34;&#34;Returns the latest content object that we have in place
 
-        :return:
+        Returns:
+            The latest content object in the family
         &#34;&#34;&#34;
         return self.content_objects[-1]
 
     def get_content_objects(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;
-        Returns all the content objects in the family
+        &#34;&#34;&#34;Returns all the content objects in the family
 
-        :return: a list of the content objects
+        Returns:
+            a list of the content objects
+
+
         &#34;&#34;&#34;
         return self.content_objects
 
     def get_document_count(self) -&gt; int:
         &#34;&#34;&#34;
-        Return the number of documents in the family
+        Count of content objects in the family
 
-        :return: number of documents in the family
+        Returns:
+          number of documents in the family
+
         &#34;&#34;&#34;
         return len(self.content_objects)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.model.document_families.DocumentFamily.add_document"><code class="name flex">
-<span>def <span class="ident">add_document</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="model.html#kodexa.model.model.Document">Document</a>, relationship: <a title="kodexa.model.document_families.DocumentRelationship" href="#kodexa.model.document_families.DocumentRelationship">DocumentRelationship</a> = None) ‑> <a title="kodexa.model.document_families.ContentEvent" href="#kodexa.model.document_families.ContentEvent">ContentEvent</a></span>
+<span>def <span class="ident">add_document</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="model.html#kodexa.model.model.Document">Document</a>, transition: <a title="kodexa.model.document_families.DocumentTransition" href="#kodexa.model.document_families.DocumentTransition">DocumentTransition</a> = None) ‑> <a title="kodexa.model.document_families.ContentEvent" href="#kodexa.model.document_families.ContentEvent">ContentEvent</a></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document: </dd>
+<dt><strong><code>transition</code></strong></dt>
+<dd>DocumentTransition:
+(Default value = None)</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_document(self, document: Document, relationship: DocumentRelationship = None) -&gt; ContentEvent:
+<pre><code class="python">def add_document(self, document: Document, transition: DocumentTransition = None) -&gt; ContentEvent:
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document: 
+      transition: DocumentTransition:  (Default value = None)
+
+    Returns:
+
+    &#34;&#34;&#34;
     new_content_object = ContentObject()
     new_content_object.store_ref = self.store_ref
     new_content_object.content_type = ContentType.DOCUMENT
@@ -329,9 +424,9 @@ document as its first entry</p>
 
     self.content_objects.append(new_content_object)
 
-    if relationship is not None:
-        relationship.destination_content_object_id = new_content_object.id
-        self.relationships.append(relationship)
+    if transition is not None:
+        transition.destination_content_object_id = new_content_object.id
+        self.transitions.append(transition)
 
     new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
     return new_event</code></pre>
@@ -342,16 +437,19 @@ document as its first entry</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns all the content objects in the family</p>
-<p>:return: a list of the content objects</p></div>
+<h2 id="returns">Returns</h2>
+<p>a list of the content objects</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_content_objects(self) -&gt; List[ContentObject]:
-    &#34;&#34;&#34;
-    Returns all the content objects in the family
+    &#34;&#34;&#34;Returns all the content objects in the family
 
-    :return: a list of the content objects
+    Returns:
+        a list of the content objects
+
+
     &#34;&#34;&#34;
     return self.content_objects</code></pre>
 </details>
@@ -360,17 +458,20 @@ document as its first entry</p>
 <span>def <span class="ident">get_document_count</span></span>(<span>self) ‑> int</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return the number of documents in the family</p>
-<p>:return: number of documents in the family</p></div>
+<div class="desc"><p>Count of content objects in the family</p>
+<h2 id="returns">Returns</h2>
+<p>number of documents in the family</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_document_count(self) -&gt; int:
     &#34;&#34;&#34;
-    Return the number of documents in the family
+    Count of content objects in the family
 
-    :return: number of documents in the family
+    Returns:
+      number of documents in the family
+
     &#34;&#34;&#34;
     return len(self.content_objects)</code></pre>
 </details>
@@ -380,40 +481,63 @@ document as its first entry</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the latest content object that we have in place</p>
-<p>:return:</p></div>
+<h2 id="returns">Returns</h2>
+<p>The latest content object in the family</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_latest_content(self) -&gt; ContentObject:
-    &#34;&#34;&#34;
-    Returns the latest content object that we have in place
+    &#34;&#34;&#34;Returns the latest content object that we have in place
 
-    :return:
+    Returns:
+        The latest content object in the family
     &#34;&#34;&#34;
     return self.content_objects[-1]</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="kodexa.model.document_families.DocumentRelationship"><code class="flex name class">
-<span>class <span class="ident">DocumentRelationship</span></span>
+<dt id="kodexa.model.document_families.DocumentTransition"><code class="flex name class">
+<span>class <span class="ident">DocumentTransition</span></span>
 <span>(</span><span>relationship_type: str, source_content_object_id: str, destination_content_object_id: Union[str, NoneType], actor: <a title="kodexa.model.document_families.DocumentActor" href="#kodexa.model.document_families.DocumentActor">DocumentActor</a> = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A document relationship represents a link between two documents</p></div>
+<div class="desc"><p>A document transition represents a link between two documents and tries to capture the actor that was involved
+in the transition as well at the type of transition that exists</p>
+<p>Create a document transition</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>relationship_type</code></strong></dt>
+<dd>the type of relationship the transition created</dd>
+<dt><strong><code>source_content_object_id</code></strong></dt>
+<dd>the ID of the source content object</dd>
+<dt><strong><code>destination_content_object_id</code></strong></dt>
+<dd>the ID of the destination content object</dd>
+</dl>
+<p>actor:DocumentActor: the actor (Defaults to None)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class DocumentRelationship:
+<pre><code class="python">class DocumentTransition:
     &#34;&#34;&#34;
-    A document relationship represents a link between two documents
+    A document transition represents a link between two documents and tries to capture the actor that was involved
+    in the transition as well at the type of transition that exists
     &#34;&#34;&#34;
 
     def __init__(self, relationship_type: str, source_content_object_id: str,
                  destination_content_object_id: Optional[str],
                  actor: DocumentActor = None):
+        &#34;&#34;&#34;
+        Create a document transition
+
+        Args:
+            relationship_type: the type of relationship the transition created
+            source_content_object_id: the ID of the source content object
+            destination_content_object_id: the ID of the destination content object
+            actor:DocumentActor: the actor (Defaults to None)
+        &#34;&#34;&#34;
         self.relationship_type = relationship_type
         self.source_content_object_id = source_content_object_id
         self.destination_content_object_id = destination_content_object_id
@@ -459,7 +583,7 @@ document as its first entry</p>
 </ul>
 </li>
 <li>
-<h4><code><a title="kodexa.model.document_families.DocumentRelationship" href="#kodexa.model.document_families.DocumentRelationship">DocumentRelationship</a></code></h4>
+<h4><code><a title="kodexa.model.document_families.DocumentTransition" href="#kodexa.model.document_families.DocumentTransition">DocumentTransition</a></code></h4>
 </li>
 </ul>
 </li>

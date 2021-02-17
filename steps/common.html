@@ -31,6 +31,7 @@ from kodexa.stores import TableDataStore
 
 
 class KodexaProcessingException(Exception):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, message, description, advice=None, documentation_url=None):
         self.description = description
@@ -44,12 +45,16 @@ class KodexaProcessingException(Exception):
 
 
 class NodeTagger:
-    &#34;&#34;&#34;
-    A node tagger allows you to provide a type and content regular expression and then
+    &#34;&#34;&#34;A node tagger allows you to provide a type and content regular expression and then
     tag content in all matching nodes.
-
+    
     It allows for multiple matching groups to be defined, also the ability to use all content
     and also just tag the node (ignoring the matching groups)
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, selector, tag_to_apply, content_re=&#34;.*&#34;, use_all_content=True, node_only=False,
@@ -62,9 +67,18 @@ class NodeTagger:
         self.node_tag_uuid = node_tag_uuid
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return f&#34;Node Tagger [selector=&#39;{self.selector}&#39; use_all_content=&#39;{self.use_all_content}&#39;]&#34;
 
     def process(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                                   use_all_content=self.use_all_content,
                                   node_only=self.node_only, tag_uuid=self.node_tag_uuid)
@@ -73,9 +87,13 @@ class NodeTagger:
 
 
 class NodeTagCopy:
-    &#34;&#34;&#34;
-    The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
+    &#34;&#34;&#34;The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
     If a tag with the &#39;existing_tag_name&#39; does not exist on a selected node, no action is taken for that node.
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, selector, existing_tag_name, new_tag_name):
@@ -84,20 +102,32 @@ class NodeTagCopy:
         self.new_tag_name = new_tag_name
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return f&#34;Node Tag Copy [selector=&#39;{self.selector}&#39; existing_tag_name=&#39;{self.existing_tag_name} new_tag_name={self.new_tag_name}&#39;]&#34;
 
     def process(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
                                        new_tag_name=self.new_tag_name)
         return document
 
 
 class TextParser:
-    &#34;&#34;&#34;
-    Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root&#39;s child nodes (controlled by lines_as_child_nodes).
-    
-    :param encoding: str  The encoding that should be used when attempting to decode data  (default &#39;utf-8&#39;)
-    :param lines_as_child_nodes:bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
+    &#34;&#34;&#34;Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root&#39;s child nodes (controlled by lines_as_child_nodes).
+
+    Args:
+      encoding: str  The encoding that should be used when attempting to decode data  (default &#39;utf-8&#39;)
+      lines_as_child_nodes: bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, encoding=&#34;utf-8&#34;, lines_as_child_nodes=False):
@@ -106,9 +136,18 @@ class TextParser:
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Text Parser&#34;
 
     def decode_text(self, data):
+        &#34;&#34;&#34;
+
+        Args:
+          data: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         try:
             data = data.decode(self.encoding)
         except (UnicodeDecodeError, AttributeError):
@@ -116,6 +155,14 @@ class TextParser:
         return data
 
     def process(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         with get_source(document) as fh:
 
             if self.lines_as_child_nodes:
@@ -136,9 +183,13 @@ class TextParser:
 
 
 class RollupTransformer:
-    &#34;&#34;&#34;
-    The rollup step allows you to decide how you want to collapse content in a document by removing nodes
+    &#34;&#34;&#34;The rollup step allows you to decide how you want to collapse content in a document by removing nodes
     while maintaining content and features as needed
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, collapse_type_res=None, reindex: bool = True, selector: str = &#34;.&#34;,
@@ -152,9 +203,18 @@ class RollupTransformer:
         self.get_all_content = get_all_content
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Rollup Transformer&#34;
 
     def process(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         if document.get_root():
             # Select those nodes that we want to do the &#39;rollup&#39; in
@@ -221,6 +281,15 @@ class RollupTransformer:
         return document
 
     def is_node_in_list(self, node, node_ids):
+        &#34;&#34;&#34;
+
+        Args:
+          node: 
+          node_ids: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if node.uuid in node_ids:
             return True
 
@@ -231,9 +300,7 @@ class RollupTransformer:
 
 
 class TagsToKeyValuePairExtractor:
-    &#34;&#34;&#34;
-    Extract all the tags from a document into a key/value pair table store
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Extract all the tags from a document into a key/value pair table store&#34;&#34;&#34;
 
     def __init__(self, store_name, include=[], exclude=[], include_node_content=True):
         self.store_name = store_name
@@ -243,15 +310,26 @@ class TagsToKeyValuePairExtractor:
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Extract Tags to Key/Value&#34;
 
     def get_default_store(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         if self.include_node_content:
             return TableDataStore(columns=[&#39;tag&#39;, &#39;tagged_content&#39;, &#39;node_content&#39;])
         else:
             return TableDataStore(columns=[&#39;tag&#39;, &#39;tagged_content&#39;])
 
     def process(self, document, context):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+          context: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         table_store = context.get_store(self.store_name, self.get_default_store())
 
@@ -261,6 +339,15 @@ class TagsToKeyValuePairExtractor:
         return document
 
     def process_node(self, table_store, node):
+        &#34;&#34;&#34;
+
+        Args:
+          table_store: 
+          node: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for feature in node.get_features():
             if feature.feature_type == &#39;tag&#39; \
                     and (feature.name in self.include or len(self.include) == 0) \
@@ -292,12 +379,13 @@ class TagsToKeyValuePairExtractor:
 <span>(</span><span>message, description, advice=None, documentation_url=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Common base class for all non-exit exceptions.</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class KodexaProcessingException(Exception):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, message, description, advice=None, documentation_url=None):
         self.description = description
@@ -321,15 +409,21 @@ class TagsToKeyValuePairExtractor:
 </code></dt>
 <dd>
 <div class="desc"><p>The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
-If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.</p></div>
+If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class NodeTagCopy:
-    &#34;&#34;&#34;
-    The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
+    &#34;&#34;&#34;The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
     If a tag with the &#39;existing_tag_name&#39; does not exist on a selected node, no action is taken for that node.
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, selector, existing_tag_name, new_tag_name):
@@ -338,9 +432,18 @@ If a tag with the 'existing_tag_name' does not exist on a selected node, no acti
         self.new_tag_name = new_tag_name
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return f&#34;Node Tag Copy [selector=&#39;{self.selector}&#39; existing_tag_name=&#39;{self.existing_tag_name} new_tag_name={self.new_tag_name}&#39;]&#34;
 
     def process(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
                                        new_tag_name=self.new_tag_name)
         return document</code></pre>
@@ -357,6 +460,7 @@ If a tag with the 'existing_tag_name' does not exist on a selected node, no acti
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_name(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return f&#34;Node Tag Copy [selector=&#39;{self.selector}&#39; existing_tag_name=&#39;{self.existing_tag_name} new_tag_name={self.new_tag_name}&#39;]&#34;</code></pre>
 </details>
 </dd>
@@ -364,12 +468,25 @@ If a tag with the 'existing_tag_name' does not exist on a selected node, no acti
 <span>def <span class="ident">process</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
                                    new_tag_name=self.new_tag_name)
     return document</code></pre>
@@ -385,18 +502,24 @@ If a tag with the 'existing_tag_name' does not exist on a selected node, no acti
 <div class="desc"><p>A node tagger allows you to provide a type and content regular expression and then
 tag content in all matching nodes.</p>
 <p>It allows for multiple matching groups to be defined, also the ability to use all content
-and also just tag the node (ignoring the matching groups)</p></div>
+and also just tag the node (ignoring the matching groups)</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class NodeTagger:
-    &#34;&#34;&#34;
-    A node tagger allows you to provide a type and content regular expression and then
+    &#34;&#34;&#34;A node tagger allows you to provide a type and content regular expression and then
     tag content in all matching nodes.
-
+    
     It allows for multiple matching groups to be defined, also the ability to use all content
     and also just tag the node (ignoring the matching groups)
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, selector, tag_to_apply, content_re=&#34;.*&#34;, use_all_content=True, node_only=False,
@@ -409,9 +532,18 @@ and also just tag the node (ignoring the matching groups)</p></div>
         self.node_tag_uuid = node_tag_uuid
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return f&#34;Node Tagger [selector=&#39;{self.selector}&#39; use_all_content=&#39;{self.use_all_content}&#39;]&#34;
 
     def process(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                                   use_all_content=self.use_all_content,
                                   node_only=self.node_only, tag_uuid=self.node_tag_uuid)
@@ -430,6 +562,7 @@ and also just tag the node (ignoring the matching groups)</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_name(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return f&#34;Node Tagger [selector=&#39;{self.selector}&#39; use_all_content=&#39;{self.use_all_content}&#39;]&#34;</code></pre>
 </details>
 </dd>
@@ -437,12 +570,25 @@ and also just tag the node (ignoring the matching groups)</p></div>
 <span>def <span class="ident">process</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                               use_all_content=self.use_all_content,
                               node_only=self.node_only, tag_uuid=self.node_tag_uuid)
@@ -458,15 +604,21 @@ and also just tag the node (ignoring the matching groups)</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>The rollup step allows you to decide how you want to collapse content in a document by removing nodes
-while maintaining content and features as needed</p></div>
+while maintaining content and features as needed</p>
+<p>Args:</p>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class RollupTransformer:
-    &#34;&#34;&#34;
-    The rollup step allows you to decide how you want to collapse content in a document by removing nodes
+    &#34;&#34;&#34;The rollup step allows you to decide how you want to collapse content in a document by removing nodes
     while maintaining content and features as needed
+
+    Args:
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, collapse_type_res=None, reindex: bool = True, selector: str = &#34;.&#34;,
@@ -480,9 +632,18 @@ while maintaining content and features as needed</p></div>
         self.get_all_content = get_all_content
 
     def get_name(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Rollup Transformer&#34;
 
     def process(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         if document.get_root():
             # Select those nodes that we want to do the &#39;rollup&#39; in
@@ -549,6 +710,15 @@ while maintaining content and features as needed</p></div>
         return document
 
     def is_node_in_list(self, node, node_ids):
+        &#34;&#34;&#34;
+
+        Args:
+          node: 
+          node_ids: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         if node.uuid in node_ids:
             return True
 
@@ -569,6 +739,7 @@ while maintaining content and features as needed</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_name(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;Rollup Transformer&#34;</code></pre>
 </details>
 </dd>
@@ -576,12 +747,28 @@ while maintaining content and features as needed</p></div>
 <span>def <span class="ident">is_node_in_list</span></span>(<span>self, node, node_ids)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>node</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>node_ids</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def is_node_in_list(self, node, node_ids):
+    &#34;&#34;&#34;
+
+    Args:
+      node: 
+      node_ids: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     if node.uuid in node_ids:
         return True
 
@@ -595,12 +782,25 @@ while maintaining content and features as needed</p></div>
 <span>def <span class="ident">process</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     if document.get_root():
         # Select those nodes that we want to do the &#39;rollup&#39; in
@@ -680,9 +880,7 @@ while maintaining content and features as needed</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class TagsToKeyValuePairExtractor:
-    &#34;&#34;&#34;
-    Extract all the tags from a document into a key/value pair table store
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Extract all the tags from a document into a key/value pair table store&#34;&#34;&#34;
 
     def __init__(self, store_name, include=[], exclude=[], include_node_content=True):
         self.store_name = store_name
@@ -692,15 +890,26 @@ while maintaining content and features as needed</p></div>
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Extract Tags to Key/Value&#34;
 
     def get_default_store(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         if self.include_node_content:
             return TableDataStore(columns=[&#39;tag&#39;, &#39;tagged_content&#39;, &#39;node_content&#39;])
         else:
             return TableDataStore(columns=[&#39;tag&#39;, &#39;tagged_content&#39;])
 
     def process(self, document, context):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+          context: 
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         table_store = context.get_store(self.store_name, self.get_default_store())
 
@@ -710,6 +919,15 @@ while maintaining content and features as needed</p></div>
         return document
 
     def process_node(self, table_store, node):
+        &#34;&#34;&#34;
+
+        Args:
+          table_store: 
+          node: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         for feature in node.get_features():
             if feature.feature_type == &#39;tag&#39; \
                     and (feature.name in self.include or len(self.include) == 0) \
@@ -739,6 +957,7 @@ while maintaining content and features as needed</p></div>
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;Extract Tags to Key/Value&#34;</code></pre>
 </details>
 </dd>
@@ -755,6 +974,7 @@ def get_name():
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_default_store(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     if self.include_node_content:
         return TableDataStore(columns=[&#39;tag&#39;, &#39;tagged_content&#39;, &#39;node_content&#39;])
     else:
@@ -765,12 +985,28 @@ def get_name():
 <span>def <span class="ident">process</span></span>(<span>self, document, context)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document, context):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+      context: 
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     table_store = context.get_store(self.store_name, self.get_default_store())
 
@@ -784,12 +1020,28 @@ def get_name():
 <span>def <span class="ident">process_node</span></span>(<span>self, table_store, node)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>table_store</code></strong></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>node</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process_node(self, table_store, node):
+    &#34;&#34;&#34;
+
+    Args:
+      table_store: 
+      node: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     for feature in node.get_features():
         if feature.feature_type == &#39;tag&#39; \
                 and (feature.name in self.include or len(self.include) == 0) \
@@ -816,22 +1068,31 @@ def get_name():
 <dd>
 <div class="desc"><p>Parser to load a source file as a text document.
 The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes).</p>
-<p>:param encoding: str
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>encoding</code></strong></dt>
+<dd>str
 The encoding that should be used when attempting to decode data
-(default 'utf-8')
-:param lines_as_child_nodes:bool
+(default 'utf-8')</dd>
+<dt><strong><code>lines_as_child_nodes</code></strong></dt>
+<dd>bool
 If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.
-(default False)</p></div>
+(default False)</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class TextParser:
-    &#34;&#34;&#34;
-    Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root&#39;s child nodes (controlled by lines_as_child_nodes).
-    
-    :param encoding: str  The encoding that should be used when attempting to decode data  (default &#39;utf-8&#39;)
-    :param lines_as_child_nodes:bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
+    &#34;&#34;&#34;Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root&#39;s child nodes (controlled by lines_as_child_nodes).
+
+    Args:
+      encoding: str  The encoding that should be used when attempting to decode data  (default &#39;utf-8&#39;)
+      lines_as_child_nodes: bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
+
+    Returns:
+
     &#34;&#34;&#34;
 
     def __init__(self, encoding=&#34;utf-8&#34;, lines_as_child_nodes=False):
@@ -840,9 +1101,18 @@ If True, the lines of the file will be set as children of the root ContentNode; 
 
     @staticmethod
     def get_name():
+        &#34;&#34;&#34; &#34;&#34;&#34;
         return &#34;Text Parser&#34;
 
     def decode_text(self, data):
+        &#34;&#34;&#34;
+
+        Args:
+          data: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         try:
             data = data.decode(self.encoding)
         except (UnicodeDecodeError, AttributeError):
@@ -850,6 +1120,14 @@ If True, the lines of the file will be set as children of the root ContentNode; 
         return data
 
     def process(self, document):
+        &#34;&#34;&#34;
+
+        Args:
+          document: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         with get_source(document) as fh:
 
             if self.lines_as_child_nodes:
@@ -881,6 +1159,7 @@ If True, the lines of the file will be set as children of the root ContentNode; 
 </summary>
 <pre><code class="python">@staticmethod
 def get_name():
+    &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;Text Parser&#34;</code></pre>
 </details>
 </dd>
@@ -891,12 +1170,25 @@ def get_name():
 <span>def <span class="ident">decode_text</span></span>(<span>self, data)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def decode_text(self, data):
+    &#34;&#34;&#34;
+
+    Args:
+      data: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     try:
         data = data.decode(self.encoding)
     except (UnicodeDecodeError, AttributeError):
@@ -908,12 +1200,25 @@ def get_name():
 <span>def <span class="ident">process</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document):
+    &#34;&#34;&#34;
+
+    Args:
+      document: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     with get_source(document) as fh:
 
         if self.lines_as_child_nodes:

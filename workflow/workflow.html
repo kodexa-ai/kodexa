@@ -30,6 +30,7 @@
 
 
 class WorkflowStore:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, ref: str):
         self.name: str = name
@@ -37,6 +38,7 @@ class WorkflowStore:
 
 
 class WorkflowConnector:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, ref: str, subscription: str = &#34;true&#34;, target: Optional[str] = None, options=None,
                  download=False):
@@ -51,10 +53,12 @@ class WorkflowConnector:
 
 
 class WorkflowSchedule:
+    &#34;&#34;&#34; &#34;&#34;&#34;
     pass
 
 
 class CronSchedule(WorkflowSchedule):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, cron: str):
         self.type: str = &#39;cron&#39;
@@ -63,6 +67,7 @@ class CronSchedule(WorkflowSchedule):
 
         
 class WebSchedule(WorkflowSchedule):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str):
         self.type: str = &#39;web&#39;
@@ -70,6 +75,7 @@ class WebSchedule(WorkflowSchedule):
 
 
 class StorePublisher:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, target_store: str, taxonomies: List[str]):
         self.targetStore = target_store
@@ -77,6 +83,7 @@ class StorePublisher:
 
 
 class WorkflowPipeline:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, ref: str, subscription: str, target: str = None, parameters=None, publishers=None):
         if parameters is None:
@@ -94,6 +101,7 @@ class WorkflowPipeline:
 
 
 class Workflow:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, access_token: str, active=True):
         self.stores: List[WorkflowStore] = []
@@ -104,17 +112,60 @@ class Workflow:
         self.active = active
 
     def add_store(self, name: str, ref: str):
+        &#34;&#34;&#34;
+
+        Args:
+          name: str: 
+          ref: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.stores.append(WorkflowStore(name, ref))
 
     def add_schedule(self, schedule: WorkflowSchedule):
+        &#34;&#34;&#34;
+
+        Args:
+          schedule: WorkflowSchedule: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.schedules.append(schedule)
 
     def add_connector(self, name: str, ref: str, subscription: str = &#34;true&#34;, target: str = None, options=None,
                       download=False):
+        &#34;&#34;&#34;
+
+        Args:
+          name: str: 
+          ref: str: 
+          subscription: str:  (Default value = &#34;true&#34;)
+          target: str:  (Default value = None)
+          options:  (Default value = None)
+          download:  (Default value = False)
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.connectors.append(WorkflowConnector(name, ref, subscription, target, options, download))
 
     def add_pipeline(self, name: str, ref: str, subscription: str = &#34;true&#34;, target: str = None, parameters=None,
                      publishers=None):
+        &#34;&#34;&#34;
+
+        Args:
+          name: str: 
+          ref: str: 
+          subscription: str:  (Default value = &#34;true&#34;)
+          target: str:  (Default value = None)
+          parameters:  (Default value = None)
+          publishers:  (Default value = None)
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.pipelines.append(WorkflowPipeline(name, ref, subscription, target, parameters, publishers))</code></pre>
 </details>
 </section>
@@ -138,6 +189,7 @@ class Workflow:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class CronSchedule(WorkflowSchedule):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, cron: str):
         self.type: str = &#39;cron&#39;
@@ -160,6 +212,7 @@ class Workflow:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class StorePublisher:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, target_store: str, taxonomies: List[str]):
         self.targetStore = target_store
@@ -177,6 +230,7 @@ class Workflow:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class WebSchedule(WorkflowSchedule):
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str):
         self.type: str = &#39;web&#39;
@@ -198,6 +252,7 @@ class Workflow:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Workflow:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, access_token: str, active=True):
         self.stores: List[WorkflowStore] = []
@@ -208,17 +263,60 @@ class Workflow:
         self.active = active
 
     def add_store(self, name: str, ref: str):
+        &#34;&#34;&#34;
+
+        Args:
+          name: str: 
+          ref: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.stores.append(WorkflowStore(name, ref))
 
     def add_schedule(self, schedule: WorkflowSchedule):
+        &#34;&#34;&#34;
+
+        Args:
+          schedule: WorkflowSchedule: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.schedules.append(schedule)
 
     def add_connector(self, name: str, ref: str, subscription: str = &#34;true&#34;, target: str = None, options=None,
                       download=False):
+        &#34;&#34;&#34;
+
+        Args:
+          name: str: 
+          ref: str: 
+          subscription: str:  (Default value = &#34;true&#34;)
+          target: str:  (Default value = None)
+          options:  (Default value = None)
+          download:  (Default value = False)
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.connectors.append(WorkflowConnector(name, ref, subscription, target, options, download))
 
     def add_pipeline(self, name: str, ref: str, subscription: str = &#34;true&#34;, target: str = None, parameters=None,
                      publishers=None):
+        &#34;&#34;&#34;
+
+        Args:
+          name: str: 
+          ref: str: 
+          subscription: str:  (Default value = &#34;true&#34;)
+          target: str:  (Default value = None)
+          parameters:  (Default value = None)
+          publishers:  (Default value = None)
+
+        Returns:
+
+        &#34;&#34;&#34;
         self.pipelines.append(WorkflowPipeline(name, ref, subscription, target, parameters, publishers))</code></pre>
 </details>
 <h3>Methods</h3>
@@ -227,13 +325,43 @@ class Workflow:
 <span>def <span class="ident">add_connector</span></span>(<span>self, name: str, ref: str, subscription: str = 'true', target: str = None, options=None, download=False)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>ref</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>subscription</code></strong></dt>
+<dd>str:
+(Default value = "true")</dd>
+<dt><strong><code>target</code></strong></dt>
+<dd>str:
+(Default value = None)</dd>
+<dt><strong><code>options</code></strong></dt>
+<dd>(Default value = None)</dd>
+<dt><strong><code>download</code></strong></dt>
+<dd>(Default value = False)</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_connector(self, name: str, ref: str, subscription: str = &#34;true&#34;, target: str = None, options=None,
                   download=False):
+    &#34;&#34;&#34;
+
+    Args:
+      name: str: 
+      ref: str: 
+      subscription: str:  (Default value = &#34;true&#34;)
+      target: str:  (Default value = None)
+      options:  (Default value = None)
+      download:  (Default value = False)
+
+    Returns:
+
+    &#34;&#34;&#34;
     self.connectors.append(WorkflowConnector(name, ref, subscription, target, options, download))</code></pre>
 </details>
 </dd>
@@ -241,13 +369,43 @@ class Workflow:
 <span>def <span class="ident">add_pipeline</span></span>(<span>self, name: str, ref: str, subscription: str = 'true', target: str = None, parameters=None, publishers=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>ref</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>subscription</code></strong></dt>
+<dd>str:
+(Default value = "true")</dd>
+<dt><strong><code>target</code></strong></dt>
+<dd>str:
+(Default value = None)</dd>
+<dt><strong><code>parameters</code></strong></dt>
+<dd>(Default value = None)</dd>
+<dt><strong><code>publishers</code></strong></dt>
+<dd>(Default value = None)</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_pipeline(self, name: str, ref: str, subscription: str = &#34;true&#34;, target: str = None, parameters=None,
                  publishers=None):
+    &#34;&#34;&#34;
+
+    Args:
+      name: str: 
+      ref: str: 
+      subscription: str:  (Default value = &#34;true&#34;)
+      target: str:  (Default value = None)
+      parameters:  (Default value = None)
+      publishers:  (Default value = None)
+
+    Returns:
+
+    &#34;&#34;&#34;
     self.pipelines.append(WorkflowPipeline(name, ref, subscription, target, parameters, publishers))</code></pre>
 </details>
 </dd>
@@ -255,12 +413,25 @@ class Workflow:
 <span>def <span class="ident">add_schedule</span></span>(<span>self, schedule: <a title="kodexa.workflow.workflow.WorkflowSchedule" href="#kodexa.workflow.workflow.WorkflowSchedule">WorkflowSchedule</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>schedule</code></strong></dt>
+<dd>WorkflowSchedule: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_schedule(self, schedule: WorkflowSchedule):
+    &#34;&#34;&#34;
+
+    Args:
+      schedule: WorkflowSchedule: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     self.schedules.append(schedule)</code></pre>
 </details>
 </dd>
@@ -268,12 +439,28 @@ class Workflow:
 <span>def <span class="ident">add_store</span></span>(<span>self, name: str, ref: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>ref</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def add_store(self, name: str, ref: str):
+    &#34;&#34;&#34;
+
+    Args:
+      name: str: 
+      ref: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     self.stores.append(WorkflowStore(name, ref))</code></pre>
 </details>
 </dd>
@@ -290,6 +477,7 @@ class Workflow:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class WorkflowConnector:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, ref: str, subscription: str = &#34;true&#34;, target: Optional[str] = None, options=None,
                  download=False):
@@ -314,6 +502,7 @@ class Workflow:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class WorkflowPipeline:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, ref: str, subscription: str, target: str = None, parameters=None, publishers=None):
         if parameters is None:
@@ -340,6 +529,7 @@ class Workflow:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class WorkflowSchedule:
+    &#34;&#34;&#34; &#34;&#34;&#34;
     pass</code></pre>
 </details>
 <h3>Subclasses</h3>
@@ -359,6 +549,7 @@ class Workflow:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class WorkflowStore:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, name: str, ref: str):
         self.name: str = name

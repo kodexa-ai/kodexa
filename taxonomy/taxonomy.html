@@ -32,6 +32,7 @@ from typing import List, Optional
 
 
 class Taxon:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                  value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
@@ -54,6 +55,14 @@ class Taxon:
 
     @staticmethod
     def from_dict(dict_taxon):
+        &#34;&#34;&#34;
+
+        Args:
+          dict_taxon: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         new_taxon = Taxon(label=dict_taxon.get(&#39;label&#39;, None), name=dict_taxon[&#39;name&#39;], id=dict_taxon.get(&#39;id&#39;, None),
                           color=dict_taxon.get(&#39;color&#39;, None), node_types=dict_taxon.get(&#39;nodeTypes&#39;, None),
                           options=dict_taxon.get(&#39;options&#39;, None), enabled=dict_taxon.get(&#39;enabled&#39;, False),
@@ -68,6 +77,7 @@ class Taxon:
         return new_taxon
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         dict = {&#39;id&#39;: self.id, &#39;name&#39;: self.name, &#39;color&#39;: self.color, &#39;valuePath&#39;: self.value_path,
                 &#39;label&#39;: self.label, &#39;nodeTypes&#39;: self.node_types, &#39;options&#39;: self.options, &#39;enabled&#39;: self.enabled,
                 &#39;dataPath&#39;: self.data_path, &#39;metadataPath&#39;: self.metadata_path, &#39;children&#39;: []}
@@ -79,6 +89,7 @@ class Taxon:
 
 
 class Taxonomy:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, taxonomy_type=&#39;CONTENT&#39;, enabled: bool = True, ref: str = &#34;&#34;):
         self.taxons: List[Taxon] = []
@@ -89,6 +100,23 @@ class Taxonomy:
     def add_taxon(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                   value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
                   metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
+        &#34;&#34;&#34;
+
+        Args:
+          label: str: 
+          name: str: 
+          id: Optional[str]:  (Default value = None)
+          color: Optional[str]:  (Default value = None)
+          value_path: Optional[str]:  (Default value = None)
+          data_path: Optional[str]:  (Default value = None)
+          options: List:  (Default value = None)
+          metadata_path: Optional[str]:  (Default value = None)
+          node_types: List:  (Default value = None)
+          enabled: bool:  (Default value = True)
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         new_taxon = Taxon(label, name, id=id, color=color, value_path=value_path, data_path=data_path, 
                           options=options, metadata_path=metadata_path, node_types=node_types, enabled=enabled)
@@ -98,6 +126,14 @@ class Taxonomy:
 
     @staticmethod
     def from_dict(dict_taxonomy):
+        &#34;&#34;&#34;
+
+        Args:
+          dict_taxonomy: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         new_taxonomy = Taxonomy(ref=dict_taxonomy[&#39;ref&#39;], enabled=dict_taxonomy[&#39;enabled&#39;],
                                 taxonomy_type=dict_taxonomy[&#39;taxonomyType&#39;])
 
@@ -108,6 +144,7 @@ class Taxonomy:
         return new_taxonomy
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         dict = {&#39;taxonomyType&#39;: self.taxonomy_type, &#39;enabled&#39;: self.enabled, &#39;ref&#39;: self.ref, &#39;taxons&#39;: []}
 
         for child in self.taxons:
@@ -117,9 +154,18 @@ class Taxonomy:
 
 
 class RemoteTaxonomy:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get(ref: str):
+        &#34;&#34;&#34;
+
+        Args:
+          ref: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         url = f&#34;{KodexaPlatform.get_url()}/api/taxonomies/{ref.replace(&#39;:&#39;, &#39;/&#39;)}&#34;
 
@@ -150,9 +196,18 @@ class RemoteTaxonomy:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class RemoteTaxonomy:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     @staticmethod
     def get(ref: str):
+        &#34;&#34;&#34;
+
+        Args:
+          ref: str: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         url = f&#34;{KodexaPlatform.get_url()}/api/taxonomies/{ref.replace(&#39;:&#39;, &#39;/&#39;)}&#34;
 
@@ -169,13 +224,26 @@ class RemoteTaxonomy:
 <span>def <span class="ident">get</span></span>(<span>ref: str)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ref</code></strong></dt>
+<dd>str: </dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def get(ref: str):
+    &#34;&#34;&#34;
+
+    Args:
+      ref: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     url = f&#34;{KodexaPlatform.get_url()}/api/taxonomies/{ref.replace(&#39;:&#39;, &#39;/&#39;)}&#34;
 
@@ -200,6 +268,7 @@ def get(ref: str):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Taxon:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                  value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
@@ -222,6 +291,14 @@ def get(ref: str):
 
     @staticmethod
     def from_dict(dict_taxon):
+        &#34;&#34;&#34;
+
+        Args:
+          dict_taxon: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         new_taxon = Taxon(label=dict_taxon.get(&#39;label&#39;, None), name=dict_taxon[&#39;name&#39;], id=dict_taxon.get(&#39;id&#39;, None),
                           color=dict_taxon.get(&#39;color&#39;, None), node_types=dict_taxon.get(&#39;nodeTypes&#39;, None),
                           options=dict_taxon.get(&#39;options&#39;, None), enabled=dict_taxon.get(&#39;enabled&#39;, False),
@@ -236,6 +313,7 @@ def get(ref: str):
         return new_taxon
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         dict = {&#39;id&#39;: self.id, &#39;name&#39;: self.name, &#39;color&#39;: self.color, &#39;valuePath&#39;: self.value_path,
                 &#39;label&#39;: self.label, &#39;nodeTypes&#39;: self.node_types, &#39;options&#39;: self.options, &#39;enabled&#39;: self.enabled,
                 &#39;dataPath&#39;: self.data_path, &#39;metadataPath&#39;: self.metadata_path, &#39;children&#39;: []}
@@ -251,13 +329,26 @@ def get(ref: str):
 <span>def <span class="ident">from_dict</span></span>(<span>dict_taxon)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict_taxon</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_dict(dict_taxon):
+    &#34;&#34;&#34;
+
+    Args:
+      dict_taxon: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     new_taxon = Taxon(label=dict_taxon.get(&#39;label&#39;, None), name=dict_taxon[&#39;name&#39;], id=dict_taxon.get(&#39;id&#39;, None),
                       color=dict_taxon.get(&#39;color&#39;, None), node_types=dict_taxon.get(&#39;nodeTypes&#39;, None),
                       options=dict_taxon.get(&#39;options&#39;, None), enabled=dict_taxon.get(&#39;enabled&#39;, False),
@@ -285,6 +376,7 @@ def from_dict(dict_taxon):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     dict = {&#39;id&#39;: self.id, &#39;name&#39;: self.name, &#39;color&#39;: self.color, &#39;valuePath&#39;: self.value_path,
             &#39;label&#39;: self.label, &#39;nodeTypes&#39;: self.node_types, &#39;options&#39;: self.options, &#39;enabled&#39;: self.enabled,
             &#39;dataPath&#39;: self.data_path, &#39;metadataPath&#39;: self.metadata_path, &#39;children&#39;: []}
@@ -308,6 +400,7 @@ def from_dict(dict_taxon):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Taxonomy:
+    &#34;&#34;&#34; &#34;&#34;&#34;
 
     def __init__(self, taxonomy_type=&#39;CONTENT&#39;, enabled: bool = True, ref: str = &#34;&#34;):
         self.taxons: List[Taxon] = []
@@ -318,6 +411,23 @@ def from_dict(dict_taxon):
     def add_taxon(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                   value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
                   metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
+        &#34;&#34;&#34;
+
+        Args:
+          label: str: 
+          name: str: 
+          id: Optional[str]:  (Default value = None)
+          color: Optional[str]:  (Default value = None)
+          value_path: Optional[str]:  (Default value = None)
+          data_path: Optional[str]:  (Default value = None)
+          options: List:  (Default value = None)
+          metadata_path: Optional[str]:  (Default value = None)
+          node_types: List:  (Default value = None)
+          enabled: bool:  (Default value = True)
+
+        Returns:
+
+        &#34;&#34;&#34;
 
         new_taxon = Taxon(label, name, id=id, color=color, value_path=value_path, data_path=data_path, 
                           options=options, metadata_path=metadata_path, node_types=node_types, enabled=enabled)
@@ -327,6 +437,14 @@ def from_dict(dict_taxon):
 
     @staticmethod
     def from_dict(dict_taxonomy):
+        &#34;&#34;&#34;
+
+        Args:
+          dict_taxonomy: 
+
+        Returns:
+
+        &#34;&#34;&#34;
         new_taxonomy = Taxonomy(ref=dict_taxonomy[&#39;ref&#39;], enabled=dict_taxonomy[&#39;enabled&#39;],
                                 taxonomy_type=dict_taxonomy[&#39;taxonomyType&#39;])
 
@@ -337,6 +455,7 @@ def from_dict(dict_taxon):
         return new_taxonomy
 
     def to_dict(self):
+        &#34;&#34;&#34; &#34;&#34;&#34;
         dict = {&#39;taxonomyType&#39;: self.taxonomy_type, &#39;enabled&#39;: self.enabled, &#39;ref&#39;: self.ref, &#39;taxons&#39;: []}
 
         for child in self.taxons:
@@ -350,13 +469,26 @@ def from_dict(dict_taxon):
 <span>def <span class="ident">from_dict</span></span>(<span>dict_taxonomy)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dict_taxonomy</code></strong></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_dict(dict_taxonomy):
+    &#34;&#34;&#34;
+
+    Args:
+      dict_taxonomy: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     new_taxonomy = Taxonomy(ref=dict_taxonomy[&#39;ref&#39;], enabled=dict_taxonomy[&#39;enabled&#39;],
                             taxonomy_type=dict_taxonomy[&#39;taxonomyType&#39;])
 
@@ -374,7 +506,38 @@ def from_dict(dict_taxonomy):
 <span>def <span class="ident">add_taxon</span></span>(<span>self, label: str, name: str, id: Union[str, NoneType] = None, color: Union[str, NoneType] = None, value_path: Union[str, NoneType] = None, data_path: Union[str, NoneType] = None, options: List = None, metadata_path: Union[str, NoneType] = None, node_types: List = None, enabled: bool = True)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>label</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>name</code></strong></dt>
+<dd>str: </dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>Optional[str]:
+(Default value = None)</dd>
+<dt><strong><code>color</code></strong></dt>
+<dd>Optional[str]:
+(Default value = None)</dd>
+<dt><strong><code>value_path</code></strong></dt>
+<dd>Optional[str]:
+(Default value = None)</dd>
+<dt><strong><code>data_path</code></strong></dt>
+<dd>Optional[str]:
+(Default value = None)</dd>
+<dt><strong><code>options</code></strong></dt>
+<dd>List:
+(Default value = None)</dd>
+<dt><strong><code>metadata_path</code></strong></dt>
+<dd>Optional[str]:
+(Default value = None)</dd>
+<dt><strong><code>node_types</code></strong></dt>
+<dd>List:
+(Default value = None)</dd>
+<dt><strong><code>enabled</code></strong></dt>
+<dd>bool:
+(Default value = True)</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -382,6 +545,23 @@ def from_dict(dict_taxonomy):
 <pre><code class="python">def add_taxon(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
               value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
               metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
+    &#34;&#34;&#34;
+
+    Args:
+      label: str: 
+      name: str: 
+      id: Optional[str]:  (Default value = None)
+      color: Optional[str]:  (Default value = None)
+      value_path: Optional[str]:  (Default value = None)
+      data_path: Optional[str]:  (Default value = None)
+      options: List:  (Default value = None)
+      metadata_path: Optional[str]:  (Default value = None)
+      node_types: List:  (Default value = None)
+      enabled: bool:  (Default value = True)
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     new_taxon = Taxon(label, name, id=id, color=color, value_path=value_path, data_path=data_path, 
                       options=options, metadata_path=metadata_path, node_types=node_types, enabled=enabled)
@@ -400,6 +580,7 @@ def from_dict(dict_taxonomy):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
+    &#34;&#34;&#34; &#34;&#34;&#34;
     dict = {&#39;taxonomyType&#39;: self.taxonomy_type, &#39;enabled&#39;: self.enabled, &#39;ref&#39;: self.ref, &#39;taxons&#39;: []}
 
     for child in self.taxons:

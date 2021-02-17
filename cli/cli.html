@@ -78,7 +78,15 @@ pass_info = click.make_pass_decorator(Info, ensure=True)
 @click.option(&#34;--verbose&#34;, &#34;-v&#34;, count=True, help=&#34;Enable verbose output.&#34;)
 @pass_info
 def cli(info: Info, verbose: int):
-    &#34;&#34;&#34;Run Kodexa.&#34;&#34;&#34;
+    &#34;&#34;&#34;Run Kodexa.
+
+    Args:
+      info: Info: 
+      verbose: int: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     # Use the verbosity count to determine the logging level...
     if verbose &gt; 0:
         logging.basicConfig(
@@ -103,7 +111,18 @@ def cli(info: Info, verbose: int):
 @cli.command()
 @pass_info
 def deploy(_: Info, path: str, url: str, org: str, token: str):
-    &#34;&#34;&#34;Deploy extension pack to a Kodexa platform instance&#34;&#34;&#34;
+    &#34;&#34;&#34;Deploy extension pack to a Kodexa platform instance
+
+    Args:
+      _: Info: 
+      path: str: 
+      url: str: 
+      org: str: 
+      token: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     print(&#34;Starting deployment from path&#34;, path)
     KodexaPlatform.set_url(url)
@@ -129,7 +148,19 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 @click.option(&#39;--path&#39;, default=None, help=&#39;JQ path to content you want&#39;)
 @pass_info
 def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = None):
-    &#34;&#34;&#34;List the instance of the object type&#34;&#34;&#34;
+    &#34;&#34;&#34;List the instance of the object type
+
+    Args:
+      _: Info: 
+      object_type: str: 
+      ref: str: 
+      url: str: 
+      token: str: 
+      path: str:  (Default value = None)
+
+    Returns:
+
+    &#34;&#34;&#34;
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.get(object_type, ref, path)
@@ -142,7 +173,18 @@ def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = N
 @click.option(&#39;--token&#39;, default=KodexaPlatform.get_access_token(), help=&#39;Access token&#39;)
 @pass_info
 def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
-    &#34;&#34;&#34;List the instance of the object type&#34;&#34;&#34;
+    &#34;&#34;&#34;List the instance of the object type
+
+    Args:
+      _: Info: 
+      object_type: str: 
+      ref: str: 
+      url: str: 
+      token: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.reindex(object_type, ref)
@@ -152,7 +194,15 @@ def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
 @pass_info
 @click.option(&#39;--python/--no-python&#39;, default=False, help=&#39;Print out the header for a Python file&#39;)
 def platform(_: Info, python: bool):
-    &#34;&#34;&#34;Get details of the instance of Kodexa you are using&#34;&#34;&#34;
+    &#34;&#34;&#34;Get details of the instance of Kodexa you are using
+
+    Args:
+      _: Info: 
+      python: bool: 
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     platform_url = KodexaPlatform.get_url()
 
@@ -178,7 +228,18 @@ def platform(_: Info, python: bool):
 @click.option(&#39;--token&#39;, default=KodexaPlatform.get_access_token(), help=&#39;Access token&#39;)
 @pass_info
 def delete(_: Info, object_type: str, ref: str, url: str, token: str):
-    &#34;&#34;&#34;Delete object from the platform&#34;&#34;&#34;
+    &#34;&#34;&#34;Delete object from the platform
+
+    Args:
+      _: Info: 
+      object_type: str: 
+      ref: str: 
+      url: str: 
+      token: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
 
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
@@ -189,7 +250,15 @@ def delete(_: Info, object_type: str, ref: str, url: str, token: str):
 @click.option(&#39;--path&#39;, default=os.getcwd(), help=&#39;Path to folder container kodexa.yml&#39;)
 @pass_info
 def metadata(_: Info, path: str):
-    &#34;&#34;&#34;Load metadata&#34;&#34;&#34;
+    &#34;&#34;&#34;Load metadata
+
+    Args:
+      _: Info: 
+      path: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     metadata = ExtensionHelper.load_metadata(path)
     print(f&#34;Metadata loaded&#34;)
 
@@ -197,11 +266,16 @@ def metadata(_: Info, path: str):
 @cli.command()
 @pass_info
 def login(_: Info):
-    &#34;&#34;&#34;
-    Logs into the specified platform environment using the email address and password provided,
+    &#34;&#34;&#34;Logs into the specified platform environment using the email address and password provided,
     then downloads and stores the personal access token (PAT) of the user.
     Once successfully logged in, calls to remote actions, pipelines, and workflows will be made to the
     platform that was set via this login function and will use the stored PAT for authentication.
+
+    Args:
+      _: Info: 
+
+    Returns:
+
     &#34;&#34;&#34;
     try:
         kodexa_url = input(&#34;Enter the Kodexa URL (https://platform.kodexa.com): &#34;)
@@ -220,7 +294,15 @@ def login(_: Info):
 @click.option(&#39;--path&#39;, default=os.getcwd(), help=&#39;Path to folder container kodexa.yml&#39;)
 @pass_info
 def document(_: Info, path: str):
-    &#34;&#34;&#34;Build markdown documentation for this extension&#34;&#34;&#34;
+    &#34;&#34;&#34;Build markdown documentation for this extension
+
+    Args:
+      _: Info: 
+      path: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     metadata = ExtensionHelper.load_metadata(path)
     print(&#34;Metadata loaded&#34;)
     from kodexa.cli.documentation import generate_documentation
@@ -238,7 +320,20 @@ def document(_: Info, path: str):
 @click.option(&#39;--url&#39;, default=&#39;http://www.example.com/&#39;, help=&#39;The base URL for the site links&#39;)
 @pass_info
 def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
-    &#34;&#34;&#34;Package the extension for Kodexa&#34;&#34;&#34;
+    &#34;&#34;&#34;Package the extension for Kodexa
+
+    Args:
+      _: Info: 
+      path: str: 
+      output: str: 
+      version: str: 
+      site: bool: 
+      sitedir: str: 
+      url: str: 
+
+    Returns:
+
+    &#34;&#34;&#34;
     metadata_obj = ExtensionHelper.load_metadata(path)
     print(&#34;Preparing to pack&#34;)
     try:
