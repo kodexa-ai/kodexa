@@ -399,14 +399,14 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         else:
             self.objects = content_objects_response.json()['content']
 
-    def query_objects(self, query: str, sort_by=None, sort_direction='asc') -> List[Dict]:
+    def query_objects(self, query: str, sort_by=None, sort_direction='asc') -> List[ContentObject]:
         """
         Query the documents in the given document store and a list of the document metadata matches
 
         :param sort_direction: the sort direction (either asc - ascending or desc - descending)
         :param sort_by: the name of the metadata field to sort by (ie. createdDate)
         :param query: A lucene style query for the metadata in the document store
-        :return: A list of dictionaries containing the metadata for the documents
+        :return: A list of content objects
         """
         from kodexa import KodexaPlatform
         params = {'query': query}
@@ -423,7 +423,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         if list_content.status_code != 200:
             raise Exception(
                 f"Exception occurred while trying to fetch objects [{list_content.status_code}]")
-        return list_content.json()['content']
+        results: List[ContentObject] = []
+        for co_dict in list_content.json()['content']:
+            results.append(ContentObject.from_dict(co_dict))
+        return results
 
     def list_objects(self) -> List[ContentObject]:
         """
@@ -439,9 +442,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception(
                 f"Exception occurred while trying to fetch objects [{list_content.status_code}]")
 
-        # TODO serialization
-
-        return list_content.json()['content']
+        results: List[ContentObject] = []
+        for co_dict in list_content.json()['content']:
+            results.append(ContentObject.from_dict(co_dict))
+        return results
 
     def __iter__(self):
         return self
