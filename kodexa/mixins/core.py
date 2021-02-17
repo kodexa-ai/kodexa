@@ -1,3 +1,7 @@
+"""
+The core mixin
+"""
+
 class CoreMixin:
 
     @staticmethod

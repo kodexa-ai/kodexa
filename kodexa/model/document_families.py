@@ -18,14 +18,24 @@ class ContentEvent:
         self.document_family: DocumentFamily = document_family
 
 
+class DocumentActor:
+    """
+    A document actor is something that can create a new document in a family and is
+    part of the document relationship
+    """
+
+    def __init__(self, actor_id: str, actor_type: str):
+        self.actor_id = actor_id
+        self.actor_type = actor_type
+
+
 class DocumentRelationship:
     """
     A document relationship represents a link between two documents
     """
 
-    def __init__(self, relationship_type, source_content_object_id, destination_content_object_id, actor=None):
-        if actor is None:
-            actor = {}
+    def __init__(self, relationship_type:str, source_content_object_id:str, destination_content_object_id:str,
+                 actor: DocumentActor = None):
         self.relationship_type = relationship_type
         self.source_content_object_id = source_content_object_id
         self.destination_content_object_id = destination_content_object_id
