@@ -2,7 +2,7 @@
     Kodexa is a Python framework to enable flexible data engineering with semi-structured and unstructured documents and
     data.
 """
-from .assistant import Assistant
+from .assistant import Assistant, AssistantContext
 from .cloud import RemoteSession, RemotePipeline, RemoteAction, KodexaPlatform
 from .connectors import FolderConnector, FileHandleConnector, UrlConnector, registered_connectors, get_connectors, \
     get_connector, add_connector, get_source
