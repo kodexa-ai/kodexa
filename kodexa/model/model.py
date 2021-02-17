@@ -1758,9 +1758,16 @@ class Document(object):
 
 
 class DocumentStore:
-    """A document store supports storing, listing and retrieving Kodexa documents and document families"""
+    """
+    A document store supports storing, listing and retrieving Kodexa documents and document families
+    """
 
     def get_ref(self) -> str:
+        """
+        Returns the reference (org-slug/store-slug:version)
+
+        :return: the reference
+        """
         pass
 
     def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
@@ -1782,23 +1789,60 @@ class DocumentStore:
 
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                        document: Document):
+        """
+        Add a document to a family as a new relationship
+
+        :param document_family_id: the ID for the document family
+        :param document_relationship: the document relationship
+        :param document: the document
+        :return: None
+        """
         pass
 
     def get_document_by_content_object(self, content_object: ContentObject) -> Document:
+        """
+        Get a document for a given content object
+
+        :param content_object: the content object
+        :return: the Document
+        """
         pass
 
-    def list(self):
+    def list(self) -> List[ContentObject]:
+        """
+        Print out a table listing the content objects in the store
+
+        :return: The list of content objects
+        """
         objects = self.list_objects()
         self._draw_table(objects)
+        return objects
 
     def query(self, query: str = "*"):
         objects = self.query_objects(query)
         self._draw_table(objects)
 
     def register_listener(self, listener):
+        """
+        Register a listener to this store.
+
+        A store listener must have the method
+
+            process_event(content_event:ContentEvent)
+
+
+        :param listener: the listener to register
+        :return: None
+        """
         pass
 
     def _draw_table(self, objects):
+        """
+        Internal method to draw a table
+
+        :param objects:
+        :return:
+        """
         from rich.table import Table
         from rich import print
 
@@ -1816,16 +1860,38 @@ class DocumentStore:
 
         print(table)
 
-    def query_objects(self, query: str) -> List[Dict]:
+    def query_objects(self, query: str) -> List[ContentObject]:
         pass
 
     def put(self, path: str, document: Document):
+        """
+        Puts a new document in the store with the given path.
+
+        There mustn't be a family in the path, this method will create a new family based around the
+        document
+
+        :param path: the path you wish to add the document in the store
+        :param document: the document
+        :return:
+        """
         pass
 
     def count(self) -> int:
+        """
+        The number of document families in the store
+
+        :return: the count of families
+        """
         return 0
 
     def accept(self, document: Document):
+        """
+        Determine if the store will accept this document.  This would typically mean that the store does
+        not yet have a document at the derived family path
+
+        :param document: the document to check
+        :return: True if there is no current family at derived path, False is there is one
+        """
         return True
 
 
@@ -1833,6 +1899,12 @@ class ModelStore:
     """A model store supports storing and retrieving of a ML models"""
 
     def get(self, path: str):
+        """
+        Returns the bytes object for the given path (or None is there nothing at that path)
+
+        :param path: the path to get content from
+        :return: Bytes or None is there is nothing at the path
+        """
         pass
 
     def put(self, path: str, content):
