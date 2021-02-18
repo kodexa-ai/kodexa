@@ -1,5 +1,3 @@
-from typing import List
-
 from kodexa import Assistant, AssistantContext, AssistantResponse, Pipeline
 from kodexa.model.document_families import ContentEvent
 
@@ -18,7 +16,7 @@ class TestAction:
 class TestAssistant(Assistant):
     """ """
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -> List[Pipeline]:
+    def process_event(self, event: ContentEvent, context: AssistantContext = None) -> AssistantResponse:
         """
 
         Args:
