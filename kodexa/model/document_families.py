@@ -31,8 +31,11 @@ class ContentEvent:
             document_family: the document family to which the object belongs
         """
         self.content_object = content_object
+        """The content object that raised the event"""
         self.event_type = event_type
+        """The event type"""
         self.document_family: DocumentFamily = document_family
+        """The document family containing the content object"""
 
 
 class DocumentActor:
@@ -49,7 +52,9 @@ class DocumentActor:
             actor_type: the type of actor
         """
         self.actor_id = actor_id
+        """The ID of the actor (based on the type)"""
         self.actor_type = actor_type
+        """The type of actor"""
 
 
 class DocumentTransition:

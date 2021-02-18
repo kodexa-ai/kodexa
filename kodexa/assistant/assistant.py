@@ -37,11 +37,6 @@ class AssistantResponse:
 class Assistant:
     """An assistant is a rich-API to allow you to work with a reactive content store or with an end user
     that is working with set of content
-
-    Args:
-
-    Returns:
-
     """
 
     def process_event(self, event: ContentEvent, context: AssistantContext = None) -> AssistantResponse:
