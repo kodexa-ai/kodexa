@@ -1,3 +1,9 @@
+"""
+Local stores implement the API for a store in Kodexa but allow you to work in an offline model.
+
+This is useful for unit testing or working locally.
+"""
+
 import logging
 import os
 import shutil

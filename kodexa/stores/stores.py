@@ -1,11 +1,15 @@
+"""
+Remote stores allow you to interact with an instance of the Kodexa platform
+"""
+
 import json
 import logging
 from json import JSONDecodeError
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 import requests
 
-from kodexa.model import Document, DocumentStore, RemoteStore, ModelStore, ContentObject
+from kodexa.model import ContentObject, Document, DocumentStore, ModelStore, RemoteStore
 from kodexa.stores.local import LocalModelStore, TableDataStore
 
 logger = logging.getLogger('kodexa.stores')
@@ -563,7 +567,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
 
 class RemoteModelStore(ModelStore, RemoteStore):
-    """ """
+    """
+    A remote model store allows you to store artifacts from your model
+    """
 
     def to_dict(self):
         """ """
@@ -576,14 +582,11 @@ class RemoteModelStore(ModelStore, RemoteStore):
         self.ref = ref
 
     def get_ref(self) -> str:
-        """Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-        
-        :return: The reference
-
-        Args:
+        """
+        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
         Returns:
-
+            The reference to the store
         """
         return self.ref
 
