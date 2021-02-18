@@ -60,8 +60,11 @@ class ContentEvent:
             document_family: the document family to which the object belongs
         &#34;&#34;&#34;
         self.content_object = content_object
+        &#34;&#34;&#34;The content object that raised the event&#34;&#34;&#34;
         self.event_type = event_type
+        &#34;&#34;&#34;The event type&#34;&#34;&#34;
         self.document_family: DocumentFamily = document_family
+        &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;
 
 
 class DocumentActor:
@@ -78,7 +81,9 @@ class DocumentActor:
             actor_type: the type of actor
         &#34;&#34;&#34;
         self.actor_id = actor_id
+        &#34;&#34;&#34;The ID of the actor (based on the type)&#34;&#34;&#34;
         self.actor_type = actor_type
+        &#34;&#34;&#34;The type of actor&#34;&#34;&#34;
 
 
 class DocumentTransition:
@@ -226,9 +231,27 @@ in a store, and can be relayed for a reaction</p>
             document_family: the document family to which the object belongs
         &#34;&#34;&#34;
         self.content_object = content_object
+        &#34;&#34;&#34;The content object that raised the event&#34;&#34;&#34;
         self.event_type = event_type
-        self.document_family: DocumentFamily = document_family</code></pre>
+        &#34;&#34;&#34;The event type&#34;&#34;&#34;
+        self.document_family: DocumentFamily = document_family
+        &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.document_families.ContentEvent.content_object"><code class="name">var <span class="ident">content_object</span></code></dt>
+<dd>
+<div class="desc"><p>The content object that raised the event</p></div>
+</dd>
+<dt id="kodexa.model.document_families.ContentEvent.document_family"><code class="name">var <span class="ident">document_family</span></code></dt>
+<dd>
+<div class="desc"><p>The document family containing the content object</p></div>
+</dd>
+<dt id="kodexa.model.document_families.ContentEvent.event_type"><code class="name">var <span class="ident">event_type</span></code></dt>
+<dd>
+<div class="desc"><p>The event type</p></div>
+</dd>
+</dl>
 </dd>
 <dt id="kodexa.model.document_families.ContentEventType"><code class="flex name class">
 <span>class <span class="ident">ContentEventType</span></span>
@@ -296,8 +319,21 @@ part of the document transition</p>
             actor_type: the type of actor
         &#34;&#34;&#34;
         self.actor_id = actor_id
-        self.actor_type = actor_type</code></pre>
+        &#34;&#34;&#34;The ID of the actor (based on the type)&#34;&#34;&#34;
+        self.actor_type = actor_type
+        &#34;&#34;&#34;The type of actor&#34;&#34;&#34;</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.document_families.DocumentActor.actor_id"><code class="name">var <span class="ident">actor_id</span></code></dt>
+<dd>
+<div class="desc"><p>The ID of the actor (based on the type)</p></div>
+</dd>
+<dt id="kodexa.model.document_families.DocumentActor.actor_type"><code class="name">var <span class="ident">actor_type</span></code></dt>
+<dd>
+<div class="desc"><p>The type of actor</p></div>
+</dd>
+</dl>
 </dd>
 <dt id="kodexa.model.document_families.DocumentFamily"><code class="flex name class">
 <span>class <span class="ident">DocumentFamily</span></span>
@@ -567,6 +603,11 @@ in the transition as well at the type of transition that exists</p>
 <ul>
 <li>
 <h4><code><a title="kodexa.model.document_families.ContentEvent" href="#kodexa.model.document_families.ContentEvent">ContentEvent</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.document_families.ContentEvent.content_object" href="#kodexa.model.document_families.ContentEvent.content_object">content_object</a></code></li>
+<li><code><a title="kodexa.model.document_families.ContentEvent.document_family" href="#kodexa.model.document_families.ContentEvent.document_family">document_family</a></code></li>
+<li><code><a title="kodexa.model.document_families.ContentEvent.event_type" href="#kodexa.model.document_families.ContentEvent.event_type">event_type</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="kodexa.model.document_families.ContentEventType" href="#kodexa.model.document_families.ContentEventType">ContentEventType</a></code></h4>
@@ -577,6 +618,10 @@ in the transition as well at the type of transition that exists</p>
 </li>
 <li>
 <h4><code><a title="kodexa.model.document_families.DocumentActor" href="#kodexa.model.document_families.DocumentActor">DocumentActor</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.document_families.DocumentActor.actor_id" href="#kodexa.model.document_families.DocumentActor.actor_id">actor_id</a></code></li>
+<li><code><a title="kodexa.model.document_families.DocumentActor.actor_type" href="#kodexa.model.document_families.DocumentActor.actor_type">actor_type</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="kodexa.model.document_families.DocumentFamily" href="#kodexa.model.document_families.DocumentFamily">DocumentFamily</a></code></h4>
