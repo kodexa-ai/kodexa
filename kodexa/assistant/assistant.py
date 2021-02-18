@@ -31,6 +31,7 @@ class AssistantResponse:
                        event was raised
         """
         self.pipelines = pipelines
+        """The list of pipelines that you wish to have executed against the content object from the event"""
 
 
 class Assistant:
