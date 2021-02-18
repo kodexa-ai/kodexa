@@ -34,7 +34,6 @@ Provides the high-level classes and definition for an Assistant that can be impl
 instance of the Kodexa platform
 &#34;&#34;&#34;
 
-
 from typing import List
 
 from kodexa.model.document_families import ContentEvent
@@ -44,13 +43,25 @@ from kodexa.pipeline import Pipeline
 class AssistantContext:
     &#34;&#34;&#34;The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
     pass
+
+
+class AssistantResponse:
+    &#34;&#34;&#34;
+    An assistant response allows you to provide the response from an assistant to a specific
+    event.
+    &#34;&#34;&#34;
+
+    def __init__(self, pipelines: List[Pipeline]):
+        &#34;&#34;&#34;
+        Initialize the response from the assistant
+
+        Args:
+            pipelines: zero or more pipelines that you want executed on the content object for which the
+                       event was raised
+        &#34;&#34;&#34;
+        self.pipelines = pipelines
 
 
 class Assistant:
@@ -63,12 +74,12 @@ class Assistant:
 
     &#34;&#34;&#34;
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
         
         The event will focus on a specific content object (that will be stored and available).  Based on the
-        metadata from the content object the assistant can then return one or more pipelines that it wishes
-        to execute.
+        metadata from the content object the assistant can then return a response which can include zero or more
+        pipelines that it wishes to execute.
         
         This pipelines will be run asynchronously and the result of the pipelines might well
         return as another event for the assistant
@@ -80,7 +91,7 @@ class Assistant:
           context: AssistantContext:  (Default value = None)
 
         Returns:
-          a list of pipelines that you wish to execute
+          AssistantResponse: the response to the event
 
         &#34;&#34;&#34;
 
@@ -118,12 +129,12 @@ that is working with set of content</p>
 
     &#34;&#34;&#34;
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
         
         The event will focus on a specific content object (that will be stored and available).  Based on the
-        metadata from the content object the assistant can then return one or more pipelines that it wishes
-        to execute.
+        metadata from the content object the assistant can then return a response which can include zero or more
+        pipelines that it wishes to execute.
         
         This pipelines will be run asynchronously and the result of the pipelines might well
         return as another event for the assistant
@@ -135,7 +146,7 @@ that is working with set of content</p>
           context: AssistantContext:  (Default value = None)
 
         Returns:
-          a list of pipelines that you wish to execute
+          AssistantResponse: the response to the event
 
         &#34;&#34;&#34;
 
@@ -148,14 +159,14 @@ that is working with set of content</p>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.assistant.assistant.Assistant.process_event"><code class="name flex">
-<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> List[<a title="kodexa.pipeline.pipeline.Pipeline" href="../pipeline/pipeline.html#kodexa.pipeline.pipeline.Pipeline">Pipeline</a>]</span>
+<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>The assistant will need to examine the event to determine if it wants to respond</p>
 <p>The event will focus on a specific content object (that will be stored and available).
 Based on the
-metadata from the content object the assistant can then return one or more pipelines that it wishes
-to execute.</p>
+metadata from the content object the assistant can then return a response which can include zero or more
+pipelines that it wishes to execute.</p>
 <p>This pipelines will be run asynchronously and the result of the pipelines might well
 return as another event for the assistant</p>
 <h2 id="args">Args</h2>
@@ -171,17 +182,20 @@ return as another event for the assistant</p>
 (Default value = None)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>a list of pipelines that you wish to execute</p></div>
+<dl>
+<dt><code><a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></code></dt>
+<dd>the response to the event</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+<pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
     &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
     
     The event will focus on a specific content object (that will be stored and available).  Based on the
-    metadata from the content object the assistant can then return one or more pipelines that it wishes
-    to execute.
+    metadata from the content object the assistant can then return a response which can include zero or more
+    pipelines that it wishes to execute.
     
     This pipelines will be run asynchronously and the result of the pipelines might well
     return as another event for the assistant
@@ -193,7 +207,7 @@ return as another event for the assistant</p>
       context: AssistantContext:  (Default value = None)
 
     Returns:
-      a list of pipelines that you wish to execute
+      AssistantResponse: the response to the event
 
     &#34;&#34;&#34;
 
@@ -207,9 +221,7 @@ return as another event for the assistant</p>
 </code></dt>
 <dd>
 <div class="desc"><p>The Assistant Context provides a way to interact with additional services and capabilities
-while processing an event</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+while processing an event</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -217,13 +229,43 @@ while processing an event</p>
 <pre><code class="python">class AssistantContext:
     &#34;&#34;&#34;The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
     pass</code></pre>
+</details>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantResponse"><code class="flex name class">
+<span>class <span class="ident">AssistantResponse</span></span>
+<span>(</span><span>pipelines: List[<a title="kodexa.pipeline.pipeline.Pipeline" href="../pipeline/pipeline.html#kodexa.pipeline.pipeline.Pipeline">Pipeline</a>])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An assistant response allows you to provide the response from an assistant to a specific
+event.</p>
+<p>Initialize the response from the assistant</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pipelines</code></strong></dt>
+<dd>zero or more pipelines that you want executed on the content object for which the
+event was raised</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AssistantResponse:
+    &#34;&#34;&#34;
+    An assistant response allows you to provide the response from an assistant to a specific
+    event.
+    &#34;&#34;&#34;
+
+    def __init__(self, pipelines: List[Pipeline]):
+        &#34;&#34;&#34;
+        Initialize the response from the assistant
+
+        Args:
+            pipelines: zero or more pipelines that you want executed on the content object for which the
+                       event was raised
+        &#34;&#34;&#34;
+        self.pipelines = pipelines</code></pre>
 </details>
 </dd>
 </dl>
@@ -250,6 +292,9 @@ while processing an event</p>
 </li>
 <li>
 <h4><code><a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a></code></h4>
+</li>
+<li>
+<h4><code><a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></code></h4>
 </li>
 </ul>
 </li>

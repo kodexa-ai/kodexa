@@ -29,13 +29,13 @@
 <pre><code class="python">import errno
 import importlib
 import logging
-from typing import cast, List
+from typing import List, cast
 
 from addict import Dict, addict
 
-from kodexa import LocalDocumentStore, Assistant
-from kodexa import PipelineContext, TableDataStore, Document, ContentNode
-from kodexa.model.document_families import ContentEvent, DocumentTransition, DocumentActor
+from kodexa import Assistant, AssistantResponse, LocalDocumentStore
+from kodexa import ContentNode, Document, PipelineContext, TableDataStore
+from kodexa.model.document_families import ContentEvent, DocumentActor, DocumentTransition
 from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger(&#39;kodexa.testing&#39;)
@@ -249,6 +249,7 @@ class AssistantTestHarness:
     &gt;&gt;&gt; harness = util.get_assistant(&#34;my-assistant&#34;, stores=[my_local_store])
 
     &#34;&#34;&#34;
+
     def __init__(self, assistant: Assistant, stores: List[DocumentStore]):
         &#34;&#34;&#34;
         Initialize the test harness
@@ -278,12 +279,12 @@ class AssistantTestHarness:
 
         &#34;&#34;&#34;
 
-        pipelines = self.assistant.process_event(event)
+        response: AssistantResponse = self.assistant.process_event(event)
 
         # We need to get the document down
         store = self.get_store(event)
 
-        for pipeline in pipelines:
+        for pipeline in response.pipelines:
             pipeline.connector = [store.get_document_by_content_object(event.content_object)]
             pipeline_context = pipeline.run()
 
@@ -802,6 +803,7 @@ to compare the data (usually in a test)</p>
     &gt;&gt;&gt; harness = util.get_assistant(&#34;my-assistant&#34;, stores=[my_local_store])
 
     &#34;&#34;&#34;
+
     def __init__(self, assistant: Assistant, stores: List[DocumentStore]):
         &#34;&#34;&#34;
         Initialize the test harness
@@ -831,12 +833,12 @@ to compare the data (usually in a test)</p>
 
         &#34;&#34;&#34;
 
-        pipelines = self.assistant.process_event(event)
+        response: AssistantResponse = self.assistant.process_event(event)
 
         # We need to get the document down
         store = self.get_store(event)
 
-        for pipeline in pipelines:
+        for pipeline in response.pipelines:
             pipeline.connector = [store.get_document_by_content_object(event.content_object)]
             pipeline_context = pipeline.run()
 
@@ -955,12 +957,12 @@ through them in turn (note in the platform this might be in parallel)</p>
 
     &#34;&#34;&#34;
 
-    pipelines = self.assistant.process_event(event)
+    response: AssistantResponse = self.assistant.process_event(event)
 
     # We need to get the document down
     store = self.get_store(event)
 
-    for pipeline in pipelines:
+    for pipeline in response.pipelines:
         pipeline.connector = [store.get_document_by_content_object(event.content_object)]
         pipeline_context = pipeline.run()
 

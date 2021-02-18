@@ -26,9 +26,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from typing import List
-
-from kodexa import Assistant, Pipeline, AssistantContext
+<pre><code class="python">from kodexa import Assistant, AssistantContext, AssistantResponse, Pipeline
 from kodexa.model.document_families import ContentEvent
 
 
@@ -46,7 +44,7 @@ class TestAction:
 class TestAssistant(Assistant):
     &#34;&#34;&#34; &#34;&#34;&#34;
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
         &#34;&#34;&#34;
 
         Args:
@@ -63,7 +61,7 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label(&#39;hello&#39;)
 
-        return [pipeline]</code></pre>
+        return AssistantResponse([pipeline])</code></pre>
 </details>
 </section>
 <section>
@@ -125,7 +123,7 @@ class TestAssistant(Assistant):
 <pre><code class="python">class TestAssistant(Assistant):
     &#34;&#34;&#34; &#34;&#34;&#34;
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
         &#34;&#34;&#34;
 
         Args:
@@ -142,7 +140,7 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label(&#39;hello&#39;)
 
-        return [pipeline]</code></pre>
+        return AssistantResponse([pipeline])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -151,7 +149,7 @@ class TestAssistant(Assistant):
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.testing.test_components.TestAssistant.process_event"><code class="name flex">
-<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> List[<a title="kodexa.pipeline.pipeline.Pipeline" href="../pipeline/pipeline.html#kodexa.pipeline.pipeline.Pipeline">Pipeline</a>]</span>
+<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -167,7 +165,7 @@ class TestAssistant(Assistant):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; List[Pipeline]:
+<pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
     &#34;&#34;&#34;
 
     Args:
@@ -184,7 +182,7 @@ class TestAssistant(Assistant):
     pipeline = Pipeline()
     pipeline.add_label(&#39;hello&#39;)
 
-    return [pipeline]</code></pre>
+    return AssistantResponse([pipeline])</code></pre>
 </details>
 </dd>
 </dl>
