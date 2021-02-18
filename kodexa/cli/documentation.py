@@ -1,3 +1,7 @@
+"""
+Utilities to support generating documentation based on the metadata in a kodexa.yml
+"""
+
 import errno
 import json
 import os

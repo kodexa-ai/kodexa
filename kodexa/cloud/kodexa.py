@@ -1,3 +1,9 @@
+"""
+Provides classes and utilities to allow you to interact with an instance of the Kodexa
+platform.
+"""
+
+
 from __future__ import annotations
 
 import errno

@@ -1,3 +1,8 @@
+"""
+Utilities and base implementation of Connectors that allow a document to access a source native file or
+stream upon which the document is based or derived.
+"""
+
 import fnmatch
 import inspect
 import io

@@ -1,3 +1,7 @@
+"""
+The core model provides definitions for all the base objects in the Kodexa Content Model
+"""
+
 import dataclasses
 import inspect
 import itertools
