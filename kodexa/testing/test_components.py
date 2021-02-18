@@ -1,6 +1,6 @@
 from typing import List
 
-from kodexa import Assistant, Pipeline, AssistantContext
+from kodexa import Assistant, AssistantContext, AssistantResponse, Pipeline
 from kodexa.model.document_families import ContentEvent
 
 
@@ -35,4 +35,4 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label('hello')
 
-        return [pipeline]
+        return AssistantResponse([pipeline])

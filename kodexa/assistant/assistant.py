@@ -3,7 +3,6 @@ Provides the high-level classes and definition for an Assistant that can be impl
 instance of the Kodexa platform
 """
 
-
 from typing import List
 
 from kodexa.model.document_families import ContentEvent
@@ -13,13 +12,25 @@ from kodexa.pipeline import Pipeline
 class AssistantContext:
     """The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
-
-    Args:
-
-    Returns:
-
     """
     pass
+
+
+class AssistantResponse:
+    """
+    An assistant response allows you to provide the response from an assistant to a specific
+    event.
+    """
+
+    def __init__(self, pipelines: List[Pipeline]):
+        """
+        Initialize the response from the assistant
+
+        Args:
+            pipelines: zero or more pipelines that you want executed on the content object for which the
+                       event was raised
+        """
+        self.pipelines = pipelines
 
 
 class Assistant:
@@ -32,12 +43,12 @@ class Assistant:
 
     """
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -> List[Pipeline]:
+    def process_event(self, event: ContentEvent, context: AssistantContext = None) -> AssistantResponse:
         """The assistant will need to examine the event to determine if it wants to respond
         
         The event will focus on a specific content object (that will be stored and available).  Based on the
-        metadata from the content object the assistant can then return one or more pipelines that it wishes
-        to execute.
+        metadata from the content object the assistant can then return a response which can include zero or more
+        pipelines that it wishes to execute.
         
         This pipelines will be run asynchronously and the result of the pipelines might well
         return as another event for the assistant
@@ -49,7 +60,7 @@ class Assistant:
           context: AssistantContext:  (Default value = None)
 
         Returns:
-          a list of pipelines that you wish to execute
+          AssistantResponse: the response to the event
 
         """
 

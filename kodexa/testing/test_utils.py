@@ -1,13 +1,13 @@
 import errno
 import importlib
 import logging
-from typing import cast, List
+from typing import List, cast
 
 from addict import Dict, addict
 
-from kodexa import LocalDocumentStore, Assistant
-from kodexa import PipelineContext, TableDataStore, Document, ContentNode
-from kodexa.model.document_families import ContentEvent, DocumentTransition, DocumentActor
+from kodexa import Assistant, AssistantResponse, LocalDocumentStore
+from kodexa import ContentNode, Document, PipelineContext, TableDataStore
+from kodexa.model.document_families import ContentEvent, DocumentActor, DocumentTransition
 from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger('kodexa.testing')
@@ -221,6 +221,7 @@ class AssistantTestHarness:
     >>> harness = util.get_assistant("my-assistant", stores=[my_local_store])
 
     """
+
     def __init__(self, assistant: Assistant, stores: List[DocumentStore]):
         """
         Initialize the test harness
@@ -250,12 +251,12 @@ class AssistantTestHarness:
 
         """
 
-        pipelines = self.assistant.process_event(event)
+        response: AssistantResponse = self.assistant.process_event(event)
 
         # We need to get the document down
         store = self.get_store(event)
 
-        for pipeline in pipelines:
+        for pipeline in response.pipelines:
             pipeline.connector = [store.get_document_by_content_object(event.content_object)]
             pipeline_context = pipeline.run()
 
