@@ -71,23 +71,28 @@ def save_config(config_obj):
 class PipelineMetadataBuilder:
     """Build a metadata representation of the pipeline for passing to an instance of the
     Kodexa platform
-
-    Args:
-
-    Returns:
-
     """
 
     def __init__(self, pipeline: Pipeline):
+        """
+        Initialize the pipeline builder based on the given pipeline
+
+        Args:
+            pipeline:
+        """
         self.pipeline = pipeline
 
     def build_steps(self, pipeline_metadata: Dict):
         """
+        Build up the pipeline metadata definition (extending the argument) based on the pipeline.
+
+        This will create a serializable representation of the pipeline that we can send to a Kodexa platform
+        instance for execution
 
         Args:
-          pipeline_metadata: Dict: 
+          pipeline_metadata: Dict: The dictionary that will hold the metadata represenation of the pipeline
 
-        Returns:
+        Returns: The updated pipeline_metadata
 
         """
         pipeline_metadata.metadata.steps = []
@@ -213,60 +218,81 @@ class KodexaPlatform:
     """The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
     components
 
-    Args:
+    Note it also can be used to get your access token and Kodexa platform URL using:
 
-    Returns:
+    * A user config file if available
+    * Environment variables (KODEXA_ACCESS_TOKEN and KODEXA_URL)
 
     """
 
     @staticmethod
-    def get_access_token():
-        """ """
+    def get_access_token() -> str:
+        """
+        Returns the access token
+
+        >>> access_token = KodexaPlatform.get_access_token()
+
+        Returns: The access token if it is defined in the user config store, or as an environment variable
+
+        """
         kodexa_config = get_config()
         access_token = os.getenv('KODEXA_ACCESS_TOKEN')
         return access_token if access_token is not None else kodexa_config['access_token']
 
     @staticmethod
-    def get_url():
-        """ """
+    def get_url() -> str:
+        """
+        Returns the URL to use to access a Kodexa Platform
+
+        The URL should be in the form https://my-server.my-company.com
+
+        >>> access_token = KodexaPlatform.get_url()
+
+        Returns: The URL if it is defined in the user config store, or as an environment variable
+
+        """
         kodexa_config = get_config()
         env_url = os.getenv('KODEXA_URL', None)
         return env_url if env_url is not None else kodexa_config['url']
 
     @staticmethod
-    def set_access_token(access_token):
+    def set_access_token(access_token:str):
         """
+        Set to override the access token to use, not that this does not impact your user config stored
+        value
 
         Args:
-          access_token: 
+          access_token:str: The new access token
 
-        Returns:
+        Returns: None
 
         """
         if access_token is not None:
             os.environ["KODEXA_ACCESS_TOKEN"] = access_token
 
     @staticmethod
-    def set_url(url):
+    def set_url(url:str):
         """
+        Set to override the URL to use, not that this does not impact your user config stored
+        value
 
         Args:
-          url: 
+          url:str: The new URL
 
-        Returns:
+        Returns: None
 
         """
         if url is not None:
             os.environ["KODEXA_URL"] = url
 
-    """
-    The deployer allows you to take a locally build Pipeline and then push that pipeline
-    to a Kodexa platform instance
-    """
-
     @staticmethod
-    def get_access_token_details():
-        """ """
+    def get_access_token_details() -> Dict:
+        """
+        Pull the access token details (including a list of the available organizations)
+
+        Returns: Dict: details of the access token
+
+        """
         response = requests.get(
             f"{KodexaPlatform.get_url()}/api/account/accessToken",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
