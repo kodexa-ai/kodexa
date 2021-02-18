@@ -1,3 +1,9 @@
+"""
+Provides the high-level classes and definition for an Assistant that can be implemented in Kodexa and run on an
+instance of the Kodexa platform
+"""
+
+
 from typing import List
 
 from kodexa.model.document_families import ContentEvent

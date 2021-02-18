@@ -1,3 +1,7 @@
+"""
+Provides the implementation of a content event and document family
+"""
+
 import uuid
 from enum import Enum
 from typing import List, Optional
