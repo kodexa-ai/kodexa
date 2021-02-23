@@ -1,7 +1,7 @@
 """
 The core model provides definitions for all the base objects in the Kodexa Content Model
 """
-
+import abc
 import dataclasses
 import inspect
 import itertools
@@ -10,11 +10,12 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
 
+from kodexa import DocumentFamily
 from kodexa.mixins import registry
 
 
@@ -27,7 +28,7 @@ class ContentType(Enum):
 class ContentObject:
     """A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
     a Kodexa document.
-    
+
     The content object allows us to capture metadata about the document or the native file without changing it
 
     Args:
@@ -64,7 +65,7 @@ class ContentObject:
 
     def to_dict(self):
         """Convert the content object to a dictionary
-        
+
         :return: dictionary
 
         Args:
@@ -85,11 +86,11 @@ class ContentObject:
     @classmethod
     def from_dict(cls, co_dict):
         """Create a content object from a dictionary
-        
+
         :return: A content object
 
         Args:
-          co_dict: 
+          co_dict:
 
         Returns:
 
@@ -112,7 +113,7 @@ class Store:
         """
 
         Args:
-          other_store: 
+          other_store:
 
         Returns:
 
@@ -127,7 +128,7 @@ class Store:
         """
 
         Args:
-          pipeline_context: 
+          pipeline_context:
 
         Returns:
 
@@ -144,7 +145,7 @@ class RemoteStore:
 
     def get_ref(self) -> str:
         """Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-        
+
         :return: The reference
 
         Args:
@@ -212,9 +213,9 @@ class Traverse(Enum):
 class ContentNode(object):
     """A Content Node identifies a section of the document containing logical
     grouping of information.
-    
+
     The node will have content and can include any number of features.
-    
+
     You should always create a node using the Document's create_node method to
     ensure that the correct mixins are applied.
 
@@ -225,7 +226,7 @@ class ContentNode(object):
     >>> new_page = document.create_node(node_type='page', content='This is page 1')
     <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
     >>> current_content_node.add_child(new_page)
-    
+
     or
 
     Args:
@@ -295,8 +296,8 @@ class ContentNode(object):
         Args:
           Document: document: The Kodexa document from which the new ContentNode will be created (not added).
           dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
-          document: 
-          content_node_dict: Dict: 
+          document:
+          content_node_dict: Dict:
 
         Returns:
           ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
@@ -356,7 +357,7 @@ class ContentNode(object):
         Args:
           ContentNode: child: The node that will be added as a child of this node
           index(int, optional, optional): The index at which this child node should be added; defaults to None.  If None, index is set as the count of child node elements.
-          child: 
+          child:
 
         Returns:
 
@@ -390,9 +391,9 @@ class ContentNode(object):
           str: feature_type: The type of feature to be added to the node.
           str: name: The name of the feature.
           Any: value: The value of the feature.
-          feature_type: 
-          name: 
-          value: 
+          feature_type:
+          name:
+          value:
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode
@@ -406,7 +407,7 @@ class ContentNode(object):
 
     def add_feature(self, feature_type, name, value, single=True, serialized=False):
         """Add a new feature to this ContentNode.
-        
+
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
         Args:
@@ -415,9 +416,9 @@ class ContentNode(object):
           Any: value: The value of the feature.
           single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
           serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-          feature_type: 
-          name: 
-          value: 
+          feature_type:
+          name:
+          value:
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -442,7 +443,7 @@ class ContentNode(object):
                         exclude_nodes: Optional[List] = None):
         """Delete the children of this node, you can either supply a list of the nodes to delete
            or the nodes to exclude from the delete, if neither are supplied then we delete all the children.
-        
+
            Note there is precedence in place, if you have provided a list of nodes to delete then the nodes
            to exclude is ignored.
 
@@ -482,8 +483,8 @@ class ContentNode(object):
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           ContentFeature or None: The feature with the specified type & name.  If no feature is found, None is returned.
@@ -498,7 +499,7 @@ class ContentNode(object):
 
         Args:
           str: feature_type: The type of the feature.
-          feature_type: 
+          feature_type:
 
         Returns:
           list[ContentFeature]: A list of feature with the specified type.  If no features are found, an empty list is returned.
@@ -514,8 +515,8 @@ class ContentNode(object):
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           bool: True if the feature is present; else, False.
@@ -542,8 +543,8 @@ class ContentNode(object):
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
 
@@ -559,8 +560,8 @@ class ContentNode(object):
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
@@ -601,21 +602,21 @@ class ContentNode(object):
 
     def select(self, selector, variables=None):
         """Select and return the child nodes of this node that match the selector value.
-        
-        
+
+
         or
 
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           list[ContentNode]: A list of the matching content nodes.  If no matches are found, the list will be empty.
 
         >>> document.get_root().select('.')
            [ContentNode]
-        
+
         >>> document.get_root().select('//*[hasTag($tagName)]', {"tagName": "div"})
            [ContentNode]
         """
@@ -628,24 +629,24 @@ class ContentNode(object):
     def select_as_node(self, selector, variables=None):
         """Select and return the child nodes of this content node that match the selector value.
         Matching nodes will be returned as the children of a new proxy content node.
-        
+
         Note this doesn't impact this content node's children.  They are not adopted by the proxy node,
         therefore their parents remain intact.
-        
-        
+
+
         or
 
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           ContentNode: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
 
         >>> document.content_node.select_as_node('//line')
            ContentNode
-        
+
         >>> document.get_root().select_as_node('//*[hasTag($tagName)]', {"tagName": "div"})
            ContentNode
         """
@@ -676,14 +677,14 @@ class ContentNode(object):
 
     def move_child_to_parent(self, target_child, target_parent):
         """This will move the target_child, which must be a child of the node, to a new parent.
-        
+
         It will be added to the end of the parent
 
         Args:
           ContentNode: target_child: The child node that will be moved to a new parent node (target_parent).
           ContentNode: target_parent: The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
-          target_child: 
-          target_parent: 
+          target_child:
+          target_parent:
 
         Returns:
 
@@ -703,7 +704,7 @@ class ContentNode(object):
         Args:
           list: ContentNode] children: A list of ContentNodes that will be added to the end of this node's children collection
           bool: replace: If True, will remove all current children and replace them with the new list; defaults to True
-          children: 
+          children:
           replace:  (Default value = False)
 
         Returns:
@@ -726,7 +727,7 @@ class ContentNode(object):
 
         Args:
           str: tag_name: The name of the tag that should be removed.
-          tag_name: 
+          tag_name:
 
         Returns:
 
@@ -782,7 +783,7 @@ class ContentNode(object):
 
         Args:
           ContentNode: end_node: The node to end at
-          end_node: 
+          end_node:
 
         Returns:
           list[ContentNode]: A list of sibling nodes between this node and the end_node.
@@ -806,8 +807,8 @@ class ContentNode(object):
           ContentNode: end_node: The node to end with
           str: tag_to_apply: The tag name that will be applied to each node
           str: tag_uuid: The tag uuid used if you want to group them
-          end_node: 
-          tag_to_apply: 
+          end_node:
+          tag_to_apply:
           tag_uuid: str:  (Default value = None)
 
         Returns:
@@ -871,8 +872,8 @@ class ContentNode(object):
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None):
         """This will tag (see Feature Tagging) the expression groups identified by the regular expression.
-        
-        
+
+
         Note that if you use the flag use_all_content then node_only will default to True if not set, else it
         will default to False
 
@@ -909,7 +910,7 @@ class ContentNode(object):
             """
 
             Args:
-              tag_uuid: 
+              tag_uuid:
 
             Returns:
 
@@ -923,11 +924,11 @@ class ContentNode(object):
             """
 
             Args:
-              node_to_check: 
-              start: 
-              end: 
-              node_data: 
-              tag_uuid: 
+              node_to_check:
+              start:
+              end:
+              node_data:
+              tag_uuid:
 
             Returns:
 
@@ -1002,8 +1003,8 @@ class ContentNode(object):
 
     def get_tags(self):
         """Returns a list of the names of the tags on the given node
-        
-        
+
+
         :return: A list of the tag name
 
         Args:
@@ -1043,7 +1044,7 @@ class ContentNode(object):
           tag_name: tag name
           include_children: include the children of this node
           value_separator: the string to be used to join related tag values
-          tag_name: str: 
+          tag_name: str:
           include_children: bool:  (Default value = False)
           value_separator: str:  (Default value = ' ')
 
@@ -1056,8 +1057,8 @@ class ContentNode(object):
             """
 
             Args:
-              group_dict: 
-              feature_val: 
+              group_dict:
+              feature_val:
 
             Returns:
 
@@ -1149,7 +1150,7 @@ class ContentNode(object):
 
         Args:
           str: tag: The name of the tag.
-          tag: 
+          tag:
 
         Returns:
           bool: True if node has a tag by the specified name; else, False;
@@ -1198,9 +1199,9 @@ class ContentNode(object):
           Any: value: The feature value.
           direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
           instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
-          feature_type: 
-          feature_name: 
-          value: 
+          feature_type:
+          feature_name:
+          value:
 
         Returns:
           ContentNode or None: Matching node (if found), or None.
@@ -1224,9 +1225,9 @@ class ContentNode(object):
           str: feature_name: The feature name.
           Any: value: The feature value.
           direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-          feature_type: 
-          feature_name: 
-          value: 
+          feature_type:
+          feature_name:
+          value:
 
         Returns:
           list[ContentNode]: list of the matching content nodes
@@ -1296,14 +1297,14 @@ class ContentNode(object):
     def get_node_at_index(self, index):
         """Returns the child node at the specified index. If the specified index is outside the first (0), or
         last child's index, None is returned.
-        
+
         Note:  documents allow for sparse representation and child nodes may not have consecutive index numbers.
         If there isn't a child node at the specfied index, a 'virtual' node will be returned.  This 'virtual' node
         will have the node type of its nearest sibling and will have an index value, but will have no features or content.
 
         Args:
           int: index: The index (zero-based) for the child node.
-          index: 
+          index:
 
         Returns:
           ContentNode or None: Node at index, or None if the index is outside the boundaries of child nodes.
@@ -1364,7 +1365,7 @@ class ContentNode(object):
 
     def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=True):
         """Returns the next sibling content node.
-        
+
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
@@ -1395,7 +1396,7 @@ class ContentNode(object):
 
     def previous_node(self, node_type_re='.*', skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
         """Returns the previous sibling content node.
-        
+
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the previous node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
@@ -1468,12 +1469,12 @@ class ContentNode(object):
         regular expressions using compiled expressions
 
         Args:
-          value_re_compiled: 
-          node_type_re_compiled: 
-          direction: 
-          tag_name: 
-          tag_name_compiled: 
-          use_all_content: 
+          value_re_compiled:
+          node_type_re_compiled:
+          direction:
+          tag_name:
+          tag_name_compiled:
+          use_all_content:
 
         Returns:
 
@@ -1571,7 +1572,7 @@ class SourceMetadata:
         """
 
         Args:
-          env: 
+          env:
 
         Returns:
 
@@ -1619,7 +1620,7 @@ class Document(object):
 
         Args:
           label: str Label to add
-          label: str: 
+          label: str:
 
         Returns:
           the document
@@ -1635,7 +1636,7 @@ class Document(object):
 
         Args:
           label: str Label to remove
-          label: str: 
+          label: str:
 
         Returns:
           the document
@@ -1678,7 +1679,7 @@ class Document(object):
 
         Args:
           file_path: the path to the mdoc you wish to create
-          file_path: str: 
+          file_path: str:
 
         Returns:
 
@@ -1734,7 +1735,7 @@ class Document(object):
             """
 
             Args:
-              d: 
+              d:
 
             Returns:
 
@@ -1766,7 +1767,7 @@ class Document(object):
 
         Args:
           dict: doc_dict: A dictionary representation of a Kodexa Document.
-          doc_dict: 
+          doc_dict:
 
         Returns:
           Document: A complete Kodexa Document
@@ -1800,7 +1801,7 @@ class Document(object):
 
         Args:
           str: json_string: A JSON string representation of a Kodexa Document
-          json_string: 
+          json_string:
 
         Returns:
           Document: A complete Kodexa Document
@@ -1833,7 +1834,7 @@ class Document(object):
         the node has the mixin appled.
 
         Args:
-          mixin: 
+          mixin:
 
         Returns:
 
@@ -1854,7 +1855,7 @@ class Document(object):
         'Virtual' nodes are synthesized as necessary to fill gaps in between non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
           ContentNode: parent: The parent for this newly created node; default is None;
           int: index: The index property to be set on this node; default is 0;
-          node_type: str: 
+          node_type: str:
           content: Optional[str]:  (Default value = None)
           virtual: bool:  (Default value = False)
           parent: ContentNode:  (Default value = None)
@@ -1909,7 +1910,7 @@ class Document(object):
         Args:
           str: url: The URL to which the new Document is connected.
           dict: headers: Headers that should be used when reading from the URL
-          url: 
+          url:
           headers:  (Default value = None)
 
         Returns:
@@ -1934,7 +1935,7 @@ class Document(object):
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
@@ -1986,11 +1987,14 @@ class Document(object):
 
 
 class DocumentStore:
-    """A document store supports storing, listing and retrieving Kodexa documents and document families"""
+    """
+    A document store supports storing, listing and retrieving Kodexa documents and document families
+    """
 
+    @abc.abstractmethod
     def get_ref(self) -> str:
         """Returns the reference (org-slug/store-slug:version)
-        
+
         :return: the reference
 
         Args:
@@ -1998,24 +2002,26 @@ class DocumentStore:
         Returns:
 
         """
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
         """Get a Document based on the ID of the ContentObject
 
         Args:
           uuid_value: the ID of the ContentObject
-          uuid_value: str: 
+          uuid_value: str:
 
         Returns:
           A document (or None if not found)
 
         """
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def list_objects(self) -> List[ContentObject]:
         """List the content objects in the store
-        
+
         :return: a list of the content objects
 
         Args:
@@ -2023,8 +2029,9 @@ class DocumentStore:
         Returns:
 
         """
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                        document: Document):
         """Add a document to a family as a new transition
@@ -2033,31 +2040,32 @@ class DocumentStore:
           document_family_id: the ID for the document family
           document_relationship: the document transition
           document: the document
-          document_family_id: str: 
-          document: Document: 
+          document_family_id: str:
+          document: Document:
 
         Returns:
           None
 
         """
-        pass
+        raise NotImplementedError
 
-    def get_document_by_content_object(self, content_object: ContentObject) -> Document:
+    @abc.abstractmethod
+    def get_document_by_content_object(self, content_object: ContentObject) -> Optional[Document]:
         """Get a document for a given content object
 
         Args:
           content_object: the content object
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
-          the Document
+          the Document (or None if not found)
 
         """
-        pass
+        raise NotImplementedError
 
     def list(self) -> List[ContentObject]:
         """Print out a table listing the content objects in the store
-        
+
         :return: The list of content objects
 
         Args:
@@ -2081,11 +2089,12 @@ class DocumentStore:
         objects = self.query_objects(query)
         self._draw_table(objects)
 
+    @abc.abstractmethod
     def register_listener(self, listener):
         """Register a listener to this store.
-        
+
         A store listener must have the method
-        
+
             process_event(content_event:ContentEvent)
 
         Args:
@@ -2095,7 +2104,7 @@ class DocumentStore:
           None
 
         """
-        pass
+        raise NotImplementedError
 
     def _draw_table(self, objects):
         """Internal method to draw a table
@@ -2123,37 +2132,54 @@ class DocumentStore:
 
         print(table)
 
+    @abc.abstractmethod
     def query_objects(self, query: str) -> List[ContentObject]:
         """
 
         Args:
-          query: str: 
+          query: str:
 
         Returns:
 
         """
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def put(self, path: str, document: Document):
         """Puts a new document in the store with the given path.
-        
+
         There mustn't be a family in the path, this method will create a new family based around the
         document
 
         Args:
           path: the path you wish to add the document in the store
           document: the document
-          path: str: 
-          document: Document: 
+          path: str:
+          document: Document:
 
         Returns:
 
         """
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
+    def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
+        """
+        Returns the document family (or None is not available) for a specific path in the store
+
+        Args:
+            path:str the path within the store
+
+        Returns:
+            The document family, or None is no family exists at that path
+
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def count(self) -> int:
         """The number of document families in the store
-        
+
         :return: the count of families
 
         Args:
@@ -2161,7 +2187,7 @@ class DocumentStore:
         Returns:
 
         """
-        return 0
+        raise NotImplementedError
 
     def accept(self, document: Document):
         """Determine if the store will accept this document.  This would typically mean that the store does
@@ -2169,7 +2195,7 @@ class DocumentStore:
 
         Args:
           document: the document to check
-          document: Document: 
+          document: Document:
 
         Returns:
           True if there is no current family at derived path, False is there is one
@@ -2186,7 +2212,7 @@ class ModelStore:
 
         Args:
           path: the path to get content from
-          path: str: 
+          path: str:
 
         Returns:
           Bytes or None is there is nothing at the path
@@ -2198,8 +2224,8 @@ class ModelStore:
         """
 
         Args:
-          path: str: 
-          content: 
+          path: str:
+          content:
 
         Returns:
 

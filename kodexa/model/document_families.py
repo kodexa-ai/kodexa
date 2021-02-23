@@ -9,6 +9,16 @@ from typing import List, Optional
 from kodexa.model.model import ContentObject, ContentType, Document
 
 
+class TransitionType(Enum):
+    """
+    The type of transition
+    """
+    DERIVED = 'DERIVED'
+    """A transition that derived a new document"""
+    FRAGMENT = 'FRAGMENT'
+    """A transition that placed a fragment of the document in another document"""
+
+
 class ContentEventType(Enum):
     """
     The type of event that occurred on the content
@@ -63,28 +73,46 @@ class DocumentTransition:
     in the transition as well at the type of transition that exists
     """
 
-    def __init__(self, relationship_type: str, source_content_object_id: str,
-                 destination_content_object_id: Optional[str],
-                 actor: DocumentActor = None):
+    def __init__(self, transition_type: TransitionType, source_content_object_id: str,
+                 destination_content_object_id: Optional[str] = None,
+                 actor: Optional[DocumentActor] = None):
         """
         Create a document transition
 
         Args:
-            relationship_type: the type of relationship the transition created
-            source_content_object_id: the ID of the source content object
-            destination_content_object_id: the ID of the destination content object
-            actor:DocumentActor: the actor (Defaults to None)
+            transition_type:TransitionType: the type of transition
+            source_content_object_id:str: the ID of the source content object
+            destination_content_object_id:Optional[str] the ID of the destination content object
+            actor:Optional[DocumentActor]: the actor (Defaults to None)
         """
-        self.relationship_type = relationship_type
+        self.transition_type = transition_type
+        """The type of transition"""
         self.source_content_object_id = source_content_object_id
+        """The ID of the source content object"""
         self.destination_content_object_id = destination_content_object_id
+        """The ID of the destination content object"""
         self.actor = actor
+        """The actor in the transition"""
+
+    @classmethod
+    def from_dict(cls, transition_dict):
+        """
+        Converts a dictionary from a REST call back into a DocumentTransition
+        Args:
+            transition_dict: Dictionary
+
+        Returns: A document transition
+
+        """
+        transition = DocumentTransition(transition_dict['transitionType'], transition_dict['sourceContentObjectId'],
+                                        transition_dict['destinationContentObjectId'])
+        return transition
 
 
 class DocumentFamily:
     """A document family represents a collection of related documents which together represent different views of the same
     source material
-    
+
     This approach allows parsed representations to he linked to native, derived representations, labelled etc all to be
     part of a family of content views that can be used together to understand the document and its content
 
@@ -104,11 +132,11 @@ class DocumentFamily:
         self.path = path
         self.store_ref = store_ref
 
-    def add_document(self, document: Document, transition: DocumentTransition = None) -> ContentEvent:
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
         """
 
         Args:
-          document: Document: 
+          document: Document:
           transition: DocumentTransition:  (Default value = None)
 
         Returns:
@@ -156,3 +184,23 @@ class DocumentFamily:
 
         """
         return len(self.content_objects)
+
+    @classmethod
+    def from_dict(cls, family_dict: dict):
+        """
+        Convert a dictionary from a REST call into the Document Family
+
+        Args:
+            param: the document family object as a dictionary
+
+        Returns:
+            An instance of the document family
+        """
+        document_family = DocumentFamily(family_dict['path'], family_dict['storeRef'])
+        document_family.id = family_dict['id']
+        document_family.content_objects = []
+        for co_dict in family_dict['contentObjects']:
+            document_family.content_objects.append(ContentObject.from_dict(co_dict))
+        for transition_dict in family_dict['documentTransitions']:
+            document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
+        return document_family

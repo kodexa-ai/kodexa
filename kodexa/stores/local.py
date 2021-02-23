@@ -242,13 +242,13 @@ class LocalDocumentStore(DocumentStore):
         document = Document.from_kdxa(path)
         self.put(document.uuid, document)
 
-    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentTransition,
+    def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                        document: Document):
         """
 
         Args:
           document_family_id: str: 
-          document_relationship: DocumentTransition:
+          transition: DocumentTransition:
           document: Document: 
 
         Returns:
@@ -257,7 +257,7 @@ class LocalDocumentStore(DocumentStore):
         self.read_metastore()
         for family in self.metastore:
             if family.id == document_family_id:
-                family.add_document(document, document_relationship)
+                family.add_document(document, transition)
 
     def get_document_by_content_object(self, content_object: ContentObject) -> Document:
         """

@@ -1,7 +1,6 @@
 # Kodexa
 
 ![Build](https://github.com/kodexa-ai/kodexa/workflows/Python%20Package%20Using%20Anaconda/badge.svg)
-![https://docs.readthedocs.io/en/latest/?badge=latest](https://readthedocs.org/projects/docs/badge/?version=latest) 
 [![Slack](https://slack.kodexa.com/badge.svg?version)](https://slack.kodexa.com/)
 
 
@@ -9,7 +8,7 @@ The Kodexa Content Framework framework is designed to allow you to work with a w
 
 ## Documentation & Examples
 
-Documentation is available at [ReadTheDocs](https://kodexa-kodexa.readthedocs-hosted.com/en/latest/)
+Documentation is available on [Github](https://python.kodexa.com)
 
 For more information on how to use Kodexa see https://developer.kodexa.com/developers/clients/python
 
