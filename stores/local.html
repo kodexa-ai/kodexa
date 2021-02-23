@@ -38,12 +38,12 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import jsonpickle
 
-from kodexa.model import DocumentFamily, DocumentStore, Document, ContentObject, ModelStore, Store
-from kodexa.model.document_families import ContentEvent, DocumentTransition
+from kodexa.model import ContentEvent, ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, \
+    ModelStore, Store
 
 logger = logging.getLogger(&#39;kodexa.stores&#39;)
 
@@ -106,8 +106,8 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          document: Document: 
-          context: 
+          document: Document:
+          context:
 
         Returns:
 
@@ -126,7 +126,7 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          listener: 
+          listener:
 
         Returns:
 
@@ -137,7 +137,7 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          content_event: ContentEvent: 
+          content_event: ContentEvent:
 
         Returns:
 
@@ -158,7 +158,7 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -183,7 +183,7 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          uuid: str: 
+          uuid: str:
 
         Returns:
 
@@ -200,7 +200,7 @@ class LocalDocumentStore(DocumentStore):
 
         Args:
           path: return:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -216,7 +216,7 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -230,7 +230,7 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -250,7 +250,7 @@ class LocalDocumentStore(DocumentStore):
 
     def count(self) -&gt; int:
         &#34;&#34;&#34;Returns a count of the number of document families
-        
+
         :return:
 
         Args:
@@ -264,7 +264,7 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -272,14 +272,14 @@ class LocalDocumentStore(DocumentStore):
         document = Document.from_kdxa(path)
         self.put(document.uuid, document)
 
-    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentTransition,
+    def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                        document: Document):
         &#34;&#34;&#34;
 
         Args:
-          document_family_id: str: 
-          document_relationship: DocumentTransition:
-          document: Document: 
+          document_family_id: str:
+          transition: DocumentTransition:
+          document: Document:
 
         Returns:
 
@@ -287,13 +287,13 @@ class LocalDocumentStore(DocumentStore):
         self.read_metastore()
         for family in self.metastore:
             if family.id == document_family_id:
-                family.add_document(document, document_relationship)
+                family.add_document(document, transition)
 
     def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -304,8 +304,8 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
-          document: Document: 
+          path: str:
+          document: Document:
 
         Returns:
 
@@ -372,7 +372,7 @@ class LocalModelStore(ModelStore):
         &#34;&#34;&#34;
 
         Args:
-          object_path: str: 
+          object_path: str:
 
         Returns:
 
@@ -386,8 +386,8 @@ class LocalModelStore(ModelStore):
         &#34;&#34;&#34;
 
         Args:
-          object_path: str: 
-          content: 
+          object_path: str:
+          content:
 
         Returns:
 
@@ -399,7 +399,7 @@ class LocalModelStore(ModelStore):
 
 class TableDataStore(Store):
     &#34;&#34;&#34;Stores data as a list of lists that can represent a table.
-    
+
     This is a good store when you are capturing nested or tabular data.
 
     Args:
@@ -463,7 +463,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          pipeline_context: 
+          pipeline_context:
 
         Returns:
 
@@ -483,7 +483,7 @@ class TableDataStore(Store):
 
     def count(self):
         &#34;&#34;&#34;Returns the number of rows in the store
-        
+
         :return: number of rows
 
         Args:
@@ -510,7 +510,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          store_dict: 
+          store_dict:
 
         Returns:
 
@@ -595,8 +595,8 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          document: Document: 
-          context: 
+          document: Document:
+          context:
 
         Returns:
 
@@ -615,7 +615,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          listener: 
+          listener:
 
         Returns:
 
@@ -626,7 +626,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          content_event: ContentEvent: 
+          content_event: ContentEvent:
 
         Returns:
 
@@ -647,7 +647,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -672,7 +672,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          uuid: str: 
+          uuid: str:
 
         Returns:
 
@@ -689,7 +689,7 @@ class TableDataStore(Store):
 
         Args:
           path: return:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -705,7 +705,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -719,7 +719,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -739,7 +739,7 @@ class TableDataStore(Store):
 
     def count(self) -&gt; int:
         &#34;&#34;&#34;Returns a count of the number of document families
-        
+
         :return:
 
         Args:
@@ -753,7 +753,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -761,14 +761,14 @@ class TableDataStore(Store):
         document = Document.from_kdxa(path)
         self.put(document.uuid, document)
 
-    def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentTransition,
+    def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                        document: Document):
         &#34;&#34;&#34;
 
         Args:
-          document_family_id: str: 
-          document_relationship: DocumentTransition:
-          document: Document: 
+          document_family_id: str:
+          transition: DocumentTransition:
+          document: Document:
 
         Returns:
 
@@ -776,13 +776,13 @@ class TableDataStore(Store):
         self.read_metastore()
         for family in self.metastore:
             if family.id == document_family_id:
-                family.add_document(document, document_relationship)
+                family.add_document(document, transition)
 
     def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -793,8 +793,8 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
-          document: Document: 
+          path: str:
+          document: Document:
 
         Returns:
 
@@ -845,7 +845,7 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -856,7 +856,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      document: Document: 
+      document: Document:
 
     Returns:
 
@@ -868,31 +868,31 @@ class TableDataStore(Store):
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.add_related_document_to_family"><code class="name flex">
-<span>def <span class="ident">add_related_document_to_family</span></span>(<span>self, document_family_id: str, document_relationship: <a title="kodexa.model.document_families.DocumentTransition" href="../model/document_families.html#kodexa.model.document_families.DocumentTransition">DocumentTransition</a>, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
+<span>def <span class="ident">add_related_document_to_family</span></span>(<span>self, document_family_id: str, transition: <a title="kodexa.model.model.DocumentTransition" href="../model/model.html#kodexa.model.model.DocumentTransition">DocumentTransition</a>, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>document_family_id</code></strong></dt>
-<dd>str: </dd>
-<dt><strong><code>document_relationship</code></strong></dt>
+<dd>str:</dd>
+<dt><strong><code>transition</code></strong></dt>
 <dd>DocumentTransition:</dd>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_related_document_to_family(self, document_family_id: str, document_relationship: DocumentTransition,
+<pre><code class="python">def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                    document: Document):
     &#34;&#34;&#34;
 
     Args:
-      document_family_id: str: 
-      document_relationship: DocumentTransition:
-      document: Document: 
+      document_family_id: str:
+      transition: DocumentTransition:
+      document: Document:
 
     Returns:
 
@@ -900,7 +900,7 @@ class TableDataStore(Store):
     self.read_metastore()
     for family in self.metastore:
         if family.id == document_family_id:
-            family.add_document(document, document_relationship)</code></pre>
+            family.add_document(document, transition)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.count"><code class="name flex">
@@ -917,7 +917,7 @@ class TableDataStore(Store):
 </summary>
 <pre><code class="python">def count(self) -&gt; int:
     &#34;&#34;&#34;Returns a count of the number of document families
-    
+
     :return:
 
     Args:
@@ -973,7 +973,7 @@ class TableDataStore(Store):
 <dt><strong><code>path</code></strong></dt>
 <dd>return:</dd>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -985,7 +985,7 @@ class TableDataStore(Store):
 
     Args:
       path: return:
-      path: str: 
+      path: str:
 
     Returns:
 
@@ -1005,7 +1005,7 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>uuid</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1016,7 +1016,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      uuid: str: 
+      uuid: str:
 
     Returns:
 
@@ -1036,7 +1036,7 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>content_object</code></strong></dt>
-<dd>ContentObject: </dd>
+<dd>ContentObject:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1047,7 +1047,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      content_object: ContentObject: 
+      content_object: ContentObject:
 
     Returns:
 
@@ -1056,13 +1056,13 @@ class TableDataStore(Store):
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.get_family_by_path"><code class="name flex">
-<span>def <span class="ident">get_family_by_path</span></span>(<span>self, path: str) ‑> Union[<a title="kodexa.model.document_families.DocumentFamily" href="../model/document_families.html#kodexa.model.document_families.DocumentFamily">DocumentFamily</a>, NoneType]</span>
+<span>def <span class="ident">get_family_by_path</span></span>(<span>self, path: str) ‑> Union[<a title="kodexa.model.model.DocumentFamily" href="../model/model.html#kodexa.model.model.DocumentFamily">DocumentFamily</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1073,7 +1073,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      path: str: 
+      path: str:
 
     Returns:
 
@@ -1091,7 +1091,7 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1102,7 +1102,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      path: str: 
+      path: str:
 
     Returns:
 
@@ -1134,7 +1134,7 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1145,7 +1145,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      path: str: 
+      path: str:
 
     Returns:
 
@@ -1155,13 +1155,13 @@ class TableDataStore(Store):
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.notify_listeners"><code class="name flex">
-<span>def <span class="ident">notify_listeners</span></span>(<span>self, content_event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>)</span>
+<span>def <span class="ident">notify_listeners</span></span>(<span>self, content_event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>content_event</code></strong></dt>
-<dd>ContentEvent: </dd>
+<dd>ContentEvent:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1172,7 +1172,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      content_event: ContentEvent: 
+      content_event: ContentEvent:
 
     Returns:
 
@@ -1188,9 +1188,9 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1201,8 +1201,8 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      path: str: 
-      document: Document: 
+      path: str:
+      document: Document:
 
     Returns:
 
@@ -1244,11 +1244,8 @@ class TableDataStore(Store):
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>listener</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>listener:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1257,7 +1254,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      listener: 
+      listener:
 
     Returns:
 
@@ -1272,11 +1269,10 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
-<dt><strong><code>context</code></strong></dt>
-<dd>&nbsp;</dd>
+<dd>Document:</dd>
 </dl>
-<p>Returns:</p></div>
+<p>context:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1285,8 +1281,8 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      document: Document: 
-      context: 
+      document: Document:
+      context:
 
     Returns:
 
@@ -1384,7 +1380,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          object_path: str: 
+          object_path: str:
 
         Returns:
 
@@ -1398,8 +1394,8 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          object_path: str: 
-          content: 
+          object_path: str:
+          content:
 
         Returns:
 
@@ -1421,7 +1417,7 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>object_path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1432,7 +1428,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      object_path: str: 
+      object_path: str:
 
     Returns:
 
@@ -1450,11 +1446,10 @@ class TableDataStore(Store):
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>object_path</code></strong></dt>
-<dd>str: </dd>
-<dt><strong><code>content</code></strong></dt>
-<dd>&nbsp;</dd>
+<dd>str:</dd>
 </dl>
-<p>Returns:</p></div>
+<p>content:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1463,8 +1458,8 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
 
     Args:
-      object_path: str: 
-      content: 
+      object_path: str:
+      content:
 
     Returns:
 
@@ -1516,7 +1511,7 @@ class TableDataStore(Store):
 </summary>
 <pre><code class="python">class TableDataStore(Store):
     &#34;&#34;&#34;Stores data as a list of lists that can represent a table.
-    
+
     This is a good store when you are capturing nested or tabular data.
 
     Args:
@@ -1580,7 +1575,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          pipeline_context: 
+          pipeline_context:
 
         Returns:
 
@@ -1600,7 +1595,7 @@ class TableDataStore(Store):
 
     def count(self):
         &#34;&#34;&#34;Returns the number of rows in the store
-        
+
         :return: number of rows
 
         Args:
@@ -1627,7 +1622,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
 
         Args:
-          store_dict: 
+          store_dict:
 
         Returns:
 
@@ -1645,11 +1640,8 @@ class TableDataStore(Store):
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>store_dict</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>store_dict:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1659,7 +1651,7 @@ def from_dict(cls, store_dict):
     &#34;&#34;&#34;
 
     Args:
-      store_dict: 
+      store_dict:
 
     Returns:
 
@@ -1725,7 +1717,7 @@ def from_dict(cls, store_dict):
 </summary>
 <pre><code class="python">def count(self):
     &#34;&#34;&#34;Returns the number of rows in the store
-    
+
     :return: number of rows
 
     Args:

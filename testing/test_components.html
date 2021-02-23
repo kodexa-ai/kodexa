@@ -26,8 +26,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from kodexa import Assistant, AssistantContext, AssistantResponse, Pipeline
-from kodexa.model.document_families import ContentEvent
+<pre><code class="python">from kodexa import Assistant, AssistantContext, AssistantResponse, ContentEvent, Pipeline
 
 
 class TestAction:
@@ -48,7 +47,7 @@ class TestAssistant(Assistant):
         &#34;&#34;&#34;
 
         Args:
-          event: ContentEvent: 
+          event: ContentEvent:
           context: AssistantContext:  (Default value = None)
 
         Returns:
@@ -127,7 +126,7 @@ class TestAssistant(Assistant):
         &#34;&#34;&#34;
 
         Args:
-          event: ContentEvent: 
+          event: ContentEvent:
           context: AssistantContext:  (Default value = None)
 
         Returns:
@@ -149,13 +148,13 @@ class TestAssistant(Assistant):
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.testing.test_components.TestAssistant.process_event"><code class="name flex">
-<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
+<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>event</code></strong></dt>
-<dd>ContentEvent: </dd>
+<dd>ContentEvent:</dd>
 <dt><strong><code>context</code></strong></dt>
 <dd>AssistantContext:
 (Default value = None)</dd>
@@ -169,7 +168,7 @@ class TestAssistant(Assistant):
     &#34;&#34;&#34;
 
     Args:
-      event: ContentEvent: 
+      event: ContentEvent:
       context: AssistantContext:  (Default value = None)
 
     Returns:

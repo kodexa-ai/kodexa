@@ -38,7 +38,7 @@ from typing import Dict, List, Optional
 
 import requests
 
-from kodexa.model import ContentObject, Document, DocumentStore, ModelStore, RemoteStore
+from kodexa.model import ContentObject, Document, DocumentFamily, DocumentStore, ModelStore, RemoteStore
 from kodexa.stores.local import LocalModelStore, TableDataStore
 
 logger = logging.getLogger(&#39;kodexa.stores&#39;)
@@ -47,7 +47,9 @@ logger = logging.getLogger(&#39;kodexa.stores&#39;)
 class RemoteTableDataStore(RemoteStore):
     &#34;&#34;&#34; &#34;&#34;&#34;
 
-    def __init__(self, ref: str, columns: List[str] = []):
+    def __init__(self, ref: str, columns=None):
+        if columns is None:
+            columns = []
         self.ref = ref
         self.columns = columns
 
@@ -59,7 +61,7 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34;
 
         Args:
-          table: str: 
+          table: str:
 
         Returns:
 
@@ -73,7 +75,7 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34;
 
         Args:
-          table: str: 
+          table: str:
 
         Returns:
 
@@ -120,7 +122,7 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34;
 
         Args:
-          table: str: 
+          table: str:
           page_number: int:  (Default value = 1)
           page_size:  (Default value = 5000)
 
@@ -150,7 +152,7 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34;
 
         Args:
-          rows: 
+          rows:
 
         Returns:
 
@@ -174,7 +176,7 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34;
 
         Args:
-          row: 
+          row:
 
         Returns:
 
@@ -200,40 +202,6 @@ class RemoteTableDataStore(RemoteStore):
         else:
             logger.error(&#34;Unable to post rows to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
             raise Exception(&#34;Unable to post rows to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
-
-
-class RemoteDictDataStore(RemoteStore):
-    &#34;&#34;&#34; &#34;&#34;&#34;
-
-    def __init__(self, ref: str):
-        self.ref: str = ref
-
-    def get_ref(self):
-        &#34;&#34;&#34; &#34;&#34;&#34;
-        return self.ref
-
-    def add(self, dict):
-        &#34;&#34;&#34;Writes a dict to the Data Store
-
-        Args:
-          dict: the dict to add to the store
-
-        Returns:
-
-        &#34;&#34;&#34;
-        from kodexa import KodexaPlatform
-
-        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/dictionaries&#34;
-        logger.debug(f&#34;Uploading dictionaries to store {url}&#34;)
-        doc = requests.post(
-            url,
-            [{&#39;data&#39;: dict}],
-            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
-        if doc.status_code == 200:
-            return
-        else:
-            logger.error(&#34;Unable to post dict to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
-            raise Exception(&#34;Unable to post dict to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
 
 class DataStoreHelper:
@@ -278,12 +246,15 @@ class DataStoreHelper:
             else:
                 return None
         else:
-            logger.info(f&#34;Unknown store&#34;)
+            logger.info(&#34;Unknown store&#34;)
             return None
 
 
 class RemoteDocumentStore(DocumentStore, RemoteStore):
-    &#34;&#34;&#34; &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    Remote Document Stores provide you with all the capabilities of Document storage and relationships
+    in an instance of the Kodexa platform
+    &#34;&#34;&#34;
 
     def __init__(self, ref: str, query: str = &#34;*&#34;):
         self.ref: str = ref
@@ -291,21 +262,81 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         self.page = 1
         self.query_string: str = query
 
-    def get_name(self):
-        &#34;&#34;&#34;The name of the connector
-        
-        :return: &#39;document-store&#39;
+    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+        Returns (if found) an instance of the Kodexa document based on the content object
 
         Args:
+            content_object: The content object you are looking for the document for
 
         Returns:
+            Document or None if not found
+        &#34;&#34;&#34;
+        return self.get(content_object.id)
+
+    def register_listener(self, listener):
+        &#34;&#34;&#34;
+        You can not register a listener with a remote document store
+
+        Args:
+            listener: The listener you wish to register
+
+        Returns:
+            NotImplementedError
 
         &#34;&#34;&#34;
-        return &#34;document-store&#34;
+        raise NotImplementedError
+
+    def count(self) -&gt; int:
+        &#34;&#34;&#34;
+        A count of the document families in the store
+
+        Returns:
+          A count of the documents in the store
+
+        &#34;&#34;&#34;
+        from kodexa import KodexaPlatform
+
+        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;
+        logger.info(f&#34;Downloading source from {url}&#34;)
+
+        count_response = requests.get(
+            url,
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+
+        if count_response.status_code == 200:
+            return count_response.json()[&#39;totalElements&#39;]
+        elif count_response.status_code == 404:
+            return 0
+        else:
+            msg = &#34;Get document failed [&#34; + count_response.text + &#34;], response &#34; + str(count_response.status_code)
+            logger.error(msg)
+            raise Exception(msg)
+
+    def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+        Returns a document (if present) by the UUID (which should match the ID of the content object)
+
+        Args:
+            uuid_value: of the document which should match the content object ID
+
+        Returns:
+            A document, or None if not found
+        &#34;&#34;&#34;
+        return self.get(uuid_value)
+
+    def get_name(self):
+        &#34;&#34;&#34;The name of the connector
+
+        Returns:
+            The name of the document store
+
+        &#34;&#34;&#34;
+        return self.get_ref()
 
     def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-        
+
         :return: The reference
 
         Args:
@@ -316,18 +347,23 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         return self.ref
 
     def to_dict(self):
-        &#34;&#34;&#34; &#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Convert the document store to its metadata dictionary
+
+        Returns:
+            A dictionary representing the metadata for the store
+        &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;DOCUMENT&#34;,
             &#34;ref&#34;: self.ref
         }
 
-    def get(self, document_id: str) -&gt; Optional[Document]:
-        &#34;&#34;&#34;Get the document from the remote store using the document&#39;s ID
+    def get(self, content_object_id: str) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+        Get the document from the remote store using the content object&#39;s ID
 
         Args:
-          document_id: the ID of the document
-          document_id: str: 
+          content_object_id:str the ID of the content object
 
         Returns:
           Optionally the document, if the document is not found we will return None
@@ -335,7 +371,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
-        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{document_id}/content&#34;
+        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{content_object_id}/content&#34;
         logger.info(f&#34;Downloading document from {url}&#34;)
         doc = requests.get(
             url,
@@ -348,12 +384,12 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.error(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
             raise Exception(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
-    def get_source(self, document_id: str):
-        &#34;&#34;&#34;Gets the source for a given document ID from the document store, as per the connector protocol
+    def get_source(self, content_object_id: str):
+        &#34;&#34;&#34;
+        Gets the source for a given content object ID from the document store, as per the connector protocol
 
         Args:
-          document_id: document id for which you what the source
-          document_id: str: 
+          content_object_id:str content_object_id for which you what the source (native)
 
         Returns:
           either the source content (byte-array) or None if the document doesn&#39;t exist
@@ -361,7 +397,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
-        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{document_id}/content&#34;
+        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{content_object_id}/content&#34;
         logger.info(f&#34;Downloading source from {url}&#34;)
 
         doc = requests.get(
@@ -377,11 +413,11 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise Exception(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
     def delete(self, document_id: str):
-        &#34;&#34;&#34;Delete the document with this document ID from the remote document store
+        &#34;&#34;&#34;
+        Delete the document with this document ID from the remote document store
 
         Args:
-          document_id: the ID of the document to delete
-          document_id: str: 
+          document_id: str: the ID of the document to delete
 
         Returns:
 
@@ -400,7 +436,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 delete_document_response.status_code))
 
     def get_by_path(self, path) -&gt; Optional[Document]:
-        &#34;&#34;&#34;Return the latest representation document at a given path
+        &#34;&#34;&#34;
+        Return the latest representation document at a given path
 
         Args:
           path: the path (i.e. /my-folder/file.pdf)
@@ -424,24 +461,22 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.error(msg)
             raise Exception(msg)
 
-    def put_native(self, path: str, content, force_replace=False):
-        &#34;&#34;&#34;Push content directly, this will create both a native object in the store and also a
+    def put_native(self, path: str, content, force_replace=False) -&gt; ContentObject:
+        &#34;&#34;&#34;
+        Push content directly, this will create both a native object in the store and also a
         related Document that refers to it.
 
         Args:
-          path: the path where you want to put the native content
+          path:str the path where you want to put the native content
           content: the binary content for the native file
           force_replace: replace the content at this path completely (Default value = False)
-          path: str: 
 
         Returns:
-          None
+          The content object that was created
 
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         try:
-            import io
-
             logger.info(f&#34;Putting document with path {path}&#34;)
 
             files = {&#34;file&#34;: content}
@@ -452,21 +487,19 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 files=files, data=data)
 
             if content_object_response.status_code == 200:
-                from addict import Dict
-                content_object = Dict(json.loads(content_object_response.text))
-                return content_object
+                return ContentObject.from_dict(content_object_response.json())
             else:
                 logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                     content_object_response.status_code))
                 raise Exception(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                     content_object_response.status_code))
         except JSONDecodeError:
-            logger.error(
-                f&#34;Unable to decode the JSON response&#34;)
+            logger.error(&#34;Unable to decode the JSON response&#34;)
             raise
 
-    def put(self, path: str, document: Document, force_replace=False):
-        &#34;&#34;&#34;Put the document into the document store at the given path, note that if there is already a document
+    def put(self, path: str, document: Document, force_replace=False) -&gt; DocumentFamily:
+        &#34;&#34;&#34;
+        Put the document into the document store at the given path, note that if there is already a document
         at this path then the lineage UUID for this document must related to one of the documents the documents
         that are held at that path
 
@@ -474,16 +507,14 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
           path: the path to the document to use
           document: the document
           force_replace: this will remove all the representations of the document at this path and replace it with this one (Default value = False)
-          path: str: 
-          document: Document: 
+          path: str:
+          document: Document:
 
         Returns:
-
+            ContentObject: the content object
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         try:
-            import io
-
             logger.info(f&#34;Putting document with path {path}&#34;)
 
             files = {&#34;document&#34;: document.to_msgpack()}
@@ -496,6 +527,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             if content_object_response.status_code == 200:
                 from addict import Dict
                 content_object = Dict(json.loads(content_object_response.text))
+                return ContentObject.from_dict(content_object)
             else:
                 logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                     content_object_response.status_code))
@@ -503,7 +535,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                     content_object_response.status_code))
         except JSONDecodeError:
             logger.error(
-                f&#34;Unable to decode the JSON response&#34;)
+                &#34;Unable to decode the JSON response&#34;)
             raise
 
     def get_next_objects(self):
@@ -527,7 +559,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
           sort_direction: the sort direction (either asc - ascending or desc - descending) (Default value = &#39;asc&#39;)
           sort_by: the name of the metadata field to sort by (ie. createdDate) (Default value = None)
           query: A lucene style query for the metadata in the document store
-          query: str: 
+          query: str:
 
         Returns:
           A list of content objects
@@ -554,8 +586,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         return results
 
     def list_objects(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;List the objects in the remote document store
-        
+        &#34;&#34;&#34;
+        List the objects in the remote document store
+
         :return: a list of the dictionaries containing the metadata for the documents in the store
 
         Args:
@@ -594,6 +627,40 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
             raise StopIteration
 
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
+        from kodexa import KodexaPlatform
+        import requests
+        resp = requests.get(
+            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/fs/{path}&#34;,
+            params={&#39;meta&#39;: True},
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return DocumentFamily.from_dict(resp.json())
+        if resp.status_code == 404:
+            return None
+        else:
+            msg = f&#34;Unable to get file from store at given path - {resp.text} - status : {resp.status_code}&#34;
+            logger.error(msg)
+            raise Exception(msg)
+
+    def add_related_document_to_family(self, document_family_id: str, document_relationship,
+                                       document: Document):
+        &#34;&#34;&#34;Add a document to a family as a new transition
+
+        Args:
+          document_family_id: the ID for the document family
+          document_relationship: the document transition
+          document: the document
+          document_family_id: str:
+          document: Document:
+
+        Returns:
+          None
+
+        &#34;&#34;&#34;
+        pass
+
 
 class RemoteModelStore(ModelStore, RemoteStore):
     &#34;&#34;&#34;
@@ -624,7 +691,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
 
         Args:
           object_path: the path to the content (ie. mymodel.dat)
-          object_path: str: 
+          object_path: str:
 
         Returns:
           True if deleted, False if there was no file at the path
@@ -650,7 +717,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
 
         Args:
           object_path: the object path
-          object_path: str: 
+          object_path: str:
 
         Returns:
           the bytes or None is nothing is at the path
@@ -669,14 +736,14 @@ class RemoteModelStore(ModelStore, RemoteStore):
             logger.error(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content, force_replace=False):
+    def put(self, path: str, content, force_replace=False) -&gt; ContentObject:
         &#34;&#34;&#34;Put the content into the model store at the given path
 
         Args:
           path: The path you wish to put the content at
           content: The content for that object
           force_replace: overwrite the existing object if it is there (defaulted to False)
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -684,8 +751,6 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         try:
-            import io
-
             files = {&#34;file&#34;: content}
             data = {&#34;path&#34;: path, &#34;forceReplace&#34;: force_replace}
             content_object_response = requests.post(
@@ -694,21 +759,21 @@ class RemoteModelStore(ModelStore, RemoteStore):
                 files=files, data=data)
 
             if content_object_response.status_code == 200:
-                from addict import Dict
-                content_object = Dict(json.loads(content_object_response.text))
+                return ContentObject.from_dict(content_object_response.json())
             elif content_object_response.status_code == 400:
                 from addict import Dict
                 bad_request = Dict(json.loads(content_object_response.text))
                 for error_key in bad_request.errors.keys():
                     print(bad_request.errors[error_key] + &#34; (&#34; + error_key + &#34;)&#34;)
+                raise Exception(&#34;Invalid request&#34;)
             else:
-                logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
-                    content_object_response.status_code))
-                raise Exception(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
-                    content_object_response.status_code))
+                msg = &#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
+                    content_object_response.status_code)
+                logger.error(msg)
+                raise Exception(msg)
         except JSONDecodeError:
             logger.error(
-                f&#34;Unable to JSON decode the response?&#34;)
+                &#34;Unable to JSON decode the response?&#34;)
             raise</code></pre>
 </details>
 </section>
@@ -775,7 +840,7 @@ type</p>
             else:
                 return None
         else:
-            logger.info(f&#34;Unknown store&#34;)
+            logger.info(&#34;Unknown store&#34;)
             return None</code></pre>
 </details>
 <h3>Static methods</h3>
@@ -834,123 +899,28 @@ def from_dict(dict):
         else:
             return None
     else:
-        logger.info(f&#34;Unknown store&#34;)
+        logger.info(&#34;Unknown store&#34;)
         return None</code></pre>
 </details>
 </dd>
 </dl>
-</dd>
-<dt id="kodexa.stores.stores.RemoteDictDataStore"><code class="flex name class">
-<span>class <span class="ident">RemoteDictDataStore</span></span>
-<span>(</span><span>ref: str)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class RemoteDictDataStore(RemoteStore):
-    &#34;&#34;&#34; &#34;&#34;&#34;
-
-    def __init__(self, ref: str):
-        self.ref: str = ref
-
-    def get_ref(self):
-        &#34;&#34;&#34; &#34;&#34;&#34;
-        return self.ref
-
-    def add(self, dict):
-        &#34;&#34;&#34;Writes a dict to the Data Store
-
-        Args:
-          dict: the dict to add to the store
-
-        Returns:
-
-        &#34;&#34;&#34;
-        from kodexa import KodexaPlatform
-
-        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/dictionaries&#34;
-        logger.debug(f&#34;Uploading dictionaries to store {url}&#34;)
-        doc = requests.post(
-            url,
-            [{&#39;data&#39;: dict}],
-            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
-        if doc.status_code == 200:
-            return
-        else:
-            logger.error(&#34;Unable to post dict to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
-            raise Exception(&#34;Unable to post dict to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li><a title="kodexa.model.model.RemoteStore" href="../model/model.html#kodexa.model.model.RemoteStore">RemoteStore</a></li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="kodexa.stores.stores.RemoteDictDataStore.add"><code class="name flex">
-<span>def <span class="ident">add</span></span>(<span>self, dict)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Writes a dict to the Data Store</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>dict</code></strong></dt>
-<dd>the dict to add to the store</dd>
-</dl>
-<p>Returns:</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add(self, dict):
-    &#34;&#34;&#34;Writes a dict to the Data Store
-
-    Args:
-      dict: the dict to add to the store
-
-    Returns:
-
-    &#34;&#34;&#34;
-    from kodexa import KodexaPlatform
-
-    url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/dictionaries&#34;
-    logger.debug(f&#34;Uploading dictionaries to store {url}&#34;)
-    doc = requests.post(
-        url,
-        [{&#39;data&#39;: dict}],
-        headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
-    if doc.status_code == 200:
-        return
-    else:
-        logger.error(&#34;Unable to post dict to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
-        raise Exception(&#34;Unable to post dict to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="kodexa.model.model.RemoteStore" href="../model/model.html#kodexa.model.model.RemoteStore">RemoteStore</a></b></code>:
-<ul class="hlist">
-<li><code><a title="kodexa.model.model.RemoteStore.delete_contents" href="../model/model.html#kodexa.model.model.RemoteStore.delete_contents">delete_contents</a></code></li>
-<li><code><a title="kodexa.model.model.RemoteStore.get_ref" href="../model/model.html#kodexa.model.model.RemoteStore.get_ref">get_ref</a></code></li>
-</ul>
-</li>
-</ul>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore"><code class="flex name class">
 <span>class <span class="ident">RemoteDocumentStore</span></span>
 <span>(</span><span>ref: str, query: str = '*')</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Remote Document Stores provide you with all the capabilities of Document storage and relationships
+in an instance of the Kodexa platform</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class RemoteDocumentStore(DocumentStore, RemoteStore):
-    &#34;&#34;&#34; &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    Remote Document Stores provide you with all the capabilities of Document storage and relationships
+    in an instance of the Kodexa platform
+    &#34;&#34;&#34;
 
     def __init__(self, ref: str, query: str = &#34;*&#34;):
         self.ref: str = ref
@@ -958,21 +928,81 @@ def from_dict(dict):
         self.page = 1
         self.query_string: str = query
 
-    def get_name(self):
-        &#34;&#34;&#34;The name of the connector
-        
-        :return: &#39;document-store&#39;
+    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+        Returns (if found) an instance of the Kodexa document based on the content object
 
         Args:
+            content_object: The content object you are looking for the document for
 
         Returns:
+            Document or None if not found
+        &#34;&#34;&#34;
+        return self.get(content_object.id)
+
+    def register_listener(self, listener):
+        &#34;&#34;&#34;
+        You can not register a listener with a remote document store
+
+        Args:
+            listener: The listener you wish to register
+
+        Returns:
+            NotImplementedError
 
         &#34;&#34;&#34;
-        return &#34;document-store&#34;
+        raise NotImplementedError
+
+    def count(self) -&gt; int:
+        &#34;&#34;&#34;
+        A count of the document families in the store
+
+        Returns:
+          A count of the documents in the store
+
+        &#34;&#34;&#34;
+        from kodexa import KodexaPlatform
+
+        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;
+        logger.info(f&#34;Downloading source from {url}&#34;)
+
+        count_response = requests.get(
+            url,
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+
+        if count_response.status_code == 200:
+            return count_response.json()[&#39;totalElements&#39;]
+        elif count_response.status_code == 404:
+            return 0
+        else:
+            msg = &#34;Get document failed [&#34; + count_response.text + &#34;], response &#34; + str(count_response.status_code)
+            logger.error(msg)
+            raise Exception(msg)
+
+    def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+        Returns a document (if present) by the UUID (which should match the ID of the content object)
+
+        Args:
+            uuid_value: of the document which should match the content object ID
+
+        Returns:
+            A document, or None if not found
+        &#34;&#34;&#34;
+        return self.get(uuid_value)
+
+    def get_name(self):
+        &#34;&#34;&#34;The name of the connector
+
+        Returns:
+            The name of the document store
+
+        &#34;&#34;&#34;
+        return self.get_ref()
 
     def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-        
+
         :return: The reference
 
         Args:
@@ -983,18 +1013,23 @@ def from_dict(dict):
         return self.ref
 
     def to_dict(self):
-        &#34;&#34;&#34; &#34;&#34;&#34;
+        &#34;&#34;&#34;
+        Convert the document store to its metadata dictionary
+
+        Returns:
+            A dictionary representing the metadata for the store
+        &#34;&#34;&#34;
         return {
             &#34;type&#34;: &#34;DOCUMENT&#34;,
             &#34;ref&#34;: self.ref
         }
 
-    def get(self, document_id: str) -&gt; Optional[Document]:
-        &#34;&#34;&#34;Get the document from the remote store using the document&#39;s ID
+    def get(self, content_object_id: str) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+        Get the document from the remote store using the content object&#39;s ID
 
         Args:
-          document_id: the ID of the document
-          document_id: str: 
+          content_object_id:str the ID of the content object
 
         Returns:
           Optionally the document, if the document is not found we will return None
@@ -1002,7 +1037,7 @@ def from_dict(dict):
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
-        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{document_id}/content&#34;
+        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{content_object_id}/content&#34;
         logger.info(f&#34;Downloading document from {url}&#34;)
         doc = requests.get(
             url,
@@ -1015,12 +1050,12 @@ def from_dict(dict):
             logger.error(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
             raise Exception(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
-    def get_source(self, document_id: str):
-        &#34;&#34;&#34;Gets the source for a given document ID from the document store, as per the connector protocol
+    def get_source(self, content_object_id: str):
+        &#34;&#34;&#34;
+        Gets the source for a given content object ID from the document store, as per the connector protocol
 
         Args:
-          document_id: document id for which you what the source
-          document_id: str: 
+          content_object_id:str content_object_id for which you what the source (native)
 
         Returns:
           either the source content (byte-array) or None if the document doesn&#39;t exist
@@ -1028,7 +1063,7 @@ def from_dict(dict):
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
 
-        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{document_id}/content&#34;
+        url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{content_object_id}/content&#34;
         logger.info(f&#34;Downloading source from {url}&#34;)
 
         doc = requests.get(
@@ -1044,11 +1079,11 @@ def from_dict(dict):
             raise Exception(&#34;Get document failed [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))
 
     def delete(self, document_id: str):
-        &#34;&#34;&#34;Delete the document with this document ID from the remote document store
+        &#34;&#34;&#34;
+        Delete the document with this document ID from the remote document store
 
         Args:
-          document_id: the ID of the document to delete
-          document_id: str: 
+          document_id: str: the ID of the document to delete
 
         Returns:
 
@@ -1067,7 +1102,8 @@ def from_dict(dict):
                 delete_document_response.status_code))
 
     def get_by_path(self, path) -&gt; Optional[Document]:
-        &#34;&#34;&#34;Return the latest representation document at a given path
+        &#34;&#34;&#34;
+        Return the latest representation document at a given path
 
         Args:
           path: the path (i.e. /my-folder/file.pdf)
@@ -1091,24 +1127,22 @@ def from_dict(dict):
             logger.error(msg)
             raise Exception(msg)
 
-    def put_native(self, path: str, content, force_replace=False):
-        &#34;&#34;&#34;Push content directly, this will create both a native object in the store and also a
+    def put_native(self, path: str, content, force_replace=False) -&gt; ContentObject:
+        &#34;&#34;&#34;
+        Push content directly, this will create both a native object in the store and also a
         related Document that refers to it.
 
         Args:
-          path: the path where you want to put the native content
+          path:str the path where you want to put the native content
           content: the binary content for the native file
           force_replace: replace the content at this path completely (Default value = False)
-          path: str: 
 
         Returns:
-          None
+          The content object that was created
 
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         try:
-            import io
-
             logger.info(f&#34;Putting document with path {path}&#34;)
 
             files = {&#34;file&#34;: content}
@@ -1119,21 +1153,19 @@ def from_dict(dict):
                 files=files, data=data)
 
             if content_object_response.status_code == 200:
-                from addict import Dict
-                content_object = Dict(json.loads(content_object_response.text))
-                return content_object
+                return ContentObject.from_dict(content_object_response.json())
             else:
                 logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                     content_object_response.status_code))
                 raise Exception(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                     content_object_response.status_code))
         except JSONDecodeError:
-            logger.error(
-                f&#34;Unable to decode the JSON response&#34;)
+            logger.error(&#34;Unable to decode the JSON response&#34;)
             raise
 
-    def put(self, path: str, document: Document, force_replace=False):
-        &#34;&#34;&#34;Put the document into the document store at the given path, note that if there is already a document
+    def put(self, path: str, document: Document, force_replace=False) -&gt; DocumentFamily:
+        &#34;&#34;&#34;
+        Put the document into the document store at the given path, note that if there is already a document
         at this path then the lineage UUID for this document must related to one of the documents the documents
         that are held at that path
 
@@ -1141,16 +1173,14 @@ def from_dict(dict):
           path: the path to the document to use
           document: the document
           force_replace: this will remove all the representations of the document at this path and replace it with this one (Default value = False)
-          path: str: 
-          document: Document: 
+          path: str:
+          document: Document:
 
         Returns:
-
+            ContentObject: the content object
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         try:
-            import io
-
             logger.info(f&#34;Putting document with path {path}&#34;)
 
             files = {&#34;document&#34;: document.to_msgpack()}
@@ -1163,6 +1193,7 @@ def from_dict(dict):
             if content_object_response.status_code == 200:
                 from addict import Dict
                 content_object = Dict(json.loads(content_object_response.text))
+                return ContentObject.from_dict(content_object)
             else:
                 logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                     content_object_response.status_code))
@@ -1170,7 +1201,7 @@ def from_dict(dict):
                     content_object_response.status_code))
         except JSONDecodeError:
             logger.error(
-                f&#34;Unable to decode the JSON response&#34;)
+                &#34;Unable to decode the JSON response&#34;)
             raise
 
     def get_next_objects(self):
@@ -1194,7 +1225,7 @@ def from_dict(dict):
           sort_direction: the sort direction (either asc - ascending or desc - descending) (Default value = &#39;asc&#39;)
           sort_by: the name of the metadata field to sort by (ie. createdDate) (Default value = None)
           query: A lucene style query for the metadata in the document store
-          query: str: 
+          query: str:
 
         Returns:
           A list of content objects
@@ -1221,8 +1252,9 @@ def from_dict(dict):
         return results
 
     def list_objects(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;List the objects in the remote document store
-        
+        &#34;&#34;&#34;
+        List the objects in the remote document store
+
         :return: a list of the dictionaries containing the metadata for the documents in the store
 
         Args:
@@ -1259,7 +1291,41 @@ def from_dict(dict):
             if content_object[&#39;content_type&#39;] == &#34;DOCUMENT&#34;:
                 return self.get(content_object[&#39;id&#39;])
 
-            raise StopIteration</code></pre>
+            raise StopIteration
+
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
+        from kodexa import KodexaPlatform
+        import requests
+        resp = requests.get(
+            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/fs/{path}&#34;,
+            params={&#39;meta&#39;: True},
+            headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return DocumentFamily.from_dict(resp.json())
+        if resp.status_code == 404:
+            return None
+        else:
+            msg = f&#34;Unable to get file from store at given path - {resp.text} - status : {resp.status_code}&#34;
+            logger.error(msg)
+            raise Exception(msg)
+
+    def add_related_document_to_family(self, document_family_id: str, document_relationship,
+                                       document: Document):
+        &#34;&#34;&#34;Add a document to a family as a new transition
+
+        Args:
+          document_family_id: the ID for the document family
+          document_relationship: the document transition
+          document: the document
+          document_family_id: str:
+          document: Document:
+
+        Returns:
+          None
+
+        &#34;&#34;&#34;
+        pass</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1268,6 +1334,44 @@ def from_dict(dict):
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="kodexa.stores.stores.RemoteDocumentStore.count"><code class="name flex">
+<span>def <span class="ident">count</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A count of the document families in the store</p>
+<h2 id="returns">Returns</h2>
+<p>A count of the documents in the store</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def count(self) -&gt; int:
+    &#34;&#34;&#34;
+    A count of the document families in the store
+
+    Returns:
+      A count of the documents in the store
+
+    &#34;&#34;&#34;
+    from kodexa import KodexaPlatform
+
+    url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;
+    logger.info(f&#34;Downloading source from {url}&#34;)
+
+    count_response = requests.get(
+        url,
+        headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
+
+    if count_response.status_code == 200:
+        return count_response.json()[&#39;totalElements&#39;]
+    elif count_response.status_code == 404:
+        return 0
+    else:
+        msg = &#34;Get document failed [&#34; + count_response.text + &#34;], response &#34; + str(count_response.status_code)
+        logger.error(msg)
+        raise Exception(msg)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.delete"><code class="name flex">
 <span>def <span class="ident">delete</span></span>(<span>self, document_id: str)</span>
 </code></dt>
@@ -1276,9 +1380,7 @@ def from_dict(dict):
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>document_id</code></strong></dt>
-<dd>the ID of the document to delete</dd>
-<dt><strong><code>document_id</code></strong></dt>
-<dd>str: </dd>
+<dd>str: the ID of the document to delete</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1286,11 +1388,11 @@ def from_dict(dict):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def delete(self, document_id: str):
-    &#34;&#34;&#34;Delete the document with this document ID from the remote document store
+    &#34;&#34;&#34;
+    Delete the document with this document ID from the remote document store
 
     Args:
-      document_id: the ID of the document to delete
-      document_id: str: 
+      document_id: str: the ID of the document to delete
 
     Returns:
 
@@ -1310,29 +1412,24 @@ def from_dict(dict):
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, document_id: str) ‑> Union[<a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, NoneType]</span>
+<span>def <span class="ident">get</span></span>(<span>self, content_object_id: str) ‑> Union[<a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, NoneType]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the document from the remote store using the document's ID</p>
+<div class="desc"><p>Get the document from the remote store using the content object's ID</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document_id</code></strong></dt>
-<dd>the ID of the document</dd>
-<dt><strong><code>document_id</code></strong></dt>
-<dd>str: </dd>
-</dl>
+<p>content_object_id:str the ID of the content object</p>
 <h2 id="returns">Returns</h2>
 <p>Optionally the document, if the document is not found we will return None</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get(self, document_id: str) -&gt; Optional[Document]:
-    &#34;&#34;&#34;Get the document from the remote store using the document&#39;s ID
+<pre><code class="python">def get(self, content_object_id: str) -&gt; Optional[Document]:
+    &#34;&#34;&#34;
+    Get the document from the remote store using the content object&#39;s ID
 
     Args:
-      document_id: the ID of the document
-      document_id: str: 
+      content_object_id:str the ID of the content object
 
     Returns:
       Optionally the document, if the document is not found we will return None
@@ -1340,7 +1437,7 @@ def from_dict(dict):
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
 
-    url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{document_id}/content&#34;
+    url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{content_object_id}/content&#34;
     logger.info(f&#34;Downloading document from {url}&#34;)
     doc = requests.get(
         url,
@@ -1371,7 +1468,8 @@ def from_dict(dict):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_by_path(self, path) -&gt; Optional[Document]:
-    &#34;&#34;&#34;Return the latest representation document at a given path
+    &#34;&#34;&#34;
+    Return the latest representation document at a given path
 
     Args:
       path: the path (i.e. /my-folder/file.pdf)
@@ -1396,29 +1494,83 @@ def from_dict(dict):
         raise Exception(msg)</code></pre>
 </details>
 </dd>
+<dt id="kodexa.stores.stores.RemoteDocumentStore.get_by_uuid"><code class="name flex">
+<span>def <span class="ident">get_by_uuid</span></span>(<span>self, uuid_value: str) ‑> Union[<a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, NoneType]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns a document (if present) by the UUID (which should match the ID of the content object)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>uuid_value</code></strong></dt>
+<dd>of the document which should match the content object ID</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A document, or None if not found</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
+    &#34;&#34;&#34;
+    Returns a document (if present) by the UUID (which should match the ID of the content object)
+
+    Args:
+        uuid_value: of the document which should match the content object ID
+
+    Returns:
+        A document, or None if not found
+    &#34;&#34;&#34;
+    return self.get(uuid_value)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.stores.stores.RemoteDocumentStore.get_document_by_content_object"><code class="name flex">
+<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>) ‑> Union[<a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, NoneType]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns (if found) an instance of the Kodexa document based on the content object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>The content object you are looking for the document for</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Document or None if not found</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
+    &#34;&#34;&#34;
+    Returns (if found) an instance of the Kodexa document based on the content object
+
+    Args:
+        content_object: The content object you are looking for the document for
+
+    Returns:
+        Document or None if not found
+    &#34;&#34;&#34;
+    return self.get(content_object.id)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.get_name"><code class="name flex">
 <span>def <span class="ident">get_name</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The name of the connector</p>
-<p>:return: 'document-store'</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>The name of the document store</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_name(self):
     &#34;&#34;&#34;The name of the connector
-    
-    :return: &#39;document-store&#39;
-
-    Args:
 
     Returns:
+        The name of the document store
 
     &#34;&#34;&#34;
-    return &#34;document-store&#34;</code></pre>
+    return self.get_ref()</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.get_next_objects"><code class="name flex">
@@ -1459,7 +1611,7 @@ def from_dict(dict):
 </summary>
 <pre><code class="python">def get_ref(self) -&gt; str:
     &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-    
+
     :return: The reference
 
     Args:
@@ -1471,29 +1623,24 @@ def from_dict(dict):
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.get_source"><code class="name flex">
-<span>def <span class="ident">get_source</span></span>(<span>self, document_id: str)</span>
+<span>def <span class="ident">get_source</span></span>(<span>self, content_object_id: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Gets the source for a given document ID from the document store, as per the connector protocol</p>
+<div class="desc"><p>Gets the source for a given content object ID from the document store, as per the connector protocol</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document_id</code></strong></dt>
-<dd>document id for which you what the source</dd>
-<dt><strong><code>document_id</code></strong></dt>
-<dd>str: </dd>
-</dl>
+<p>content_object_id:str content_object_id for which you what the source (native)</p>
 <h2 id="returns">Returns</h2>
 <p>either the source content (byte-array) or None if the document doesn't exist</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_source(self, document_id: str):
-    &#34;&#34;&#34;Gets the source for a given document ID from the document store, as per the connector protocol
+<pre><code class="python">def get_source(self, content_object_id: str):
+    &#34;&#34;&#34;
+    Gets the source for a given content object ID from the document store, as per the connector protocol
 
     Args:
-      document_id: document id for which you what the source
-      document_id: str: 
+      content_object_id:str content_object_id for which you what the source (native)
 
     Returns:
       either the source content (byte-array) or None if the document doesn&#39;t exist
@@ -1501,7 +1648,7 @@ def from_dict(dict):
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
 
-    url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{document_id}/content&#34;
+    url = f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents/{content_object_id}/content&#34;
     logger.info(f&#34;Downloading source from {url}&#34;)
 
     doc = requests.get(
@@ -1530,8 +1677,9 @@ def from_dict(dict):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def list_objects(self) -&gt; List[ContentObject]:
-    &#34;&#34;&#34;List the objects in the remote document store
-    
+    &#34;&#34;&#34;
+    List the objects in the remote document store
+
     :return: a list of the dictionaries containing the metadata for the documents in the store
 
     Args:
@@ -1554,7 +1702,7 @@ def from_dict(dict):
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, force_replace=False)</span>
+<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, force_replace=False) ‑> <a title="kodexa.model.model.DocumentFamily" href="../model/model.html#kodexa.model.model.DocumentFamily">DocumentFamily</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Put the document into the document store at the given path, note that if there is already a document
@@ -1569,17 +1717,22 @@ that are held at that path</p>
 <dt><strong><code>force_replace</code></strong></dt>
 <dd>this will remove all the representations of the document at this path and replace it with this one (Default value = False)</dd>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ContentObject</code></dt>
+<dd>the content object</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, document: Document, force_replace=False):
-    &#34;&#34;&#34;Put the document into the document store at the given path, note that if there is already a document
+<pre><code class="python">def put(self, path: str, document: Document, force_replace=False) -&gt; DocumentFamily:
+    &#34;&#34;&#34;
+    Put the document into the document store at the given path, note that if there is already a document
     at this path then the lineage UUID for this document must related to one of the documents the documents
     that are held at that path
 
@@ -1587,16 +1740,14 @@ that are held at that path</p>
       path: the path to the document to use
       document: the document
       force_replace: this will remove all the representations of the document at this path and replace it with this one (Default value = False)
-      path: str: 
-      document: Document: 
+      path: str:
+      document: Document:
 
     Returns:
-
+        ContentObject: the content object
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     try:
-        import io
-
         logger.info(f&#34;Putting document with path {path}&#34;)
 
         files = {&#34;document&#34;: document.to_msgpack()}
@@ -1609,6 +1760,7 @@ that are held at that path</p>
         if content_object_response.status_code == 200:
             from addict import Dict
             content_object = Dict(json.loads(content_object_response.text))
+            return ContentObject.from_dict(content_object)
         else:
             logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                 content_object_response.status_code))
@@ -1616,51 +1768,46 @@ that are held at that path</p>
                 content_object_response.status_code))
     except JSONDecodeError:
         logger.error(
-            f&#34;Unable to decode the JSON response&#34;)
+            &#34;Unable to decode the JSON response&#34;)
         raise</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.put_native"><code class="name flex">
-<span>def <span class="ident">put_native</span></span>(<span>self, path: str, content, force_replace=False)</span>
+<span>def <span class="ident">put_native</span></span>(<span>self, path: str, content, force_replace=False) ‑> <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Push content directly, this will create both a native object in the store and also a
 related Document that refers to it.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>path</code></strong></dt>
-<dd>the path where you want to put the native content</dd>
+<dt>path:str the path where you want to put the native content</dt>
 <dt><strong><code>content</code></strong></dt>
 <dd>the binary content for the native file</dd>
 <dt><strong><code>force_replace</code></strong></dt>
 <dd>replace the content at this path completely (Default value = False)</dd>
-<dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>None</p></div>
+<p>The content object that was created</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put_native(self, path: str, content, force_replace=False):
-    &#34;&#34;&#34;Push content directly, this will create both a native object in the store and also a
+<pre><code class="python">def put_native(self, path: str, content, force_replace=False) -&gt; ContentObject:
+    &#34;&#34;&#34;
+    Push content directly, this will create both a native object in the store and also a
     related Document that refers to it.
 
     Args:
-      path: the path where you want to put the native content
+      path:str the path where you want to put the native content
       content: the binary content for the native file
       force_replace: replace the content at this path completely (Default value = False)
-      path: str: 
 
     Returns:
-      None
+      The content object that was created
 
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     try:
-        import io
-
         logger.info(f&#34;Putting document with path {path}&#34;)
 
         files = {&#34;file&#34;: content}
@@ -1671,17 +1818,14 @@ related Document that refers to it.</p>
             files=files, data=data)
 
         if content_object_response.status_code == 200:
-            from addict import Dict
-            content_object = Dict(json.loads(content_object_response.text))
-            return content_object
+            return ContentObject.from_dict(content_object_response.json())
         else:
             logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                 content_object_response.status_code))
             raise Exception(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
                 content_object_response.status_code))
     except JSONDecodeError:
-        logger.error(
-            f&#34;Unable to decode the JSON response&#34;)
+        logger.error(&#34;Unable to decode the JSON response&#34;)
         raise</code></pre>
 </details>
 </dd>
@@ -1699,7 +1843,7 @@ related Document that refers to it.</p>
 <dt><strong><code>query</code></strong></dt>
 <dd>A lucene style query for the metadata in the document store</dd>
 <dt><strong><code>query</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>A list of content objects</p></div>
@@ -1714,7 +1858,7 @@ related Document that refers to it.</p>
       sort_direction: the sort direction (either asc - ascending or desc - descending) (Default value = &#39;asc&#39;)
       sort_by: the name of the metadata field to sort by (ie. createdDate) (Default value = None)
       query: A lucene style query for the metadata in the document store
-      query: str: 
+      query: str:
 
     Returns:
       A list of content objects
@@ -1741,17 +1885,54 @@ related Document that refers to it.</p>
     return results</code></pre>
 </details>
 </dd>
+<dt id="kodexa.stores.stores.RemoteDocumentStore.register_listener"><code class="name flex">
+<span>def <span class="ident">register_listener</span></span>(<span>self, listener)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>You can not register a listener with a remote document store</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>listener</code></strong></dt>
+<dd>The listener you wish to register</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>NotImplementedError</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def register_listener(self, listener):
+    &#34;&#34;&#34;
+    You can not register a listener with a remote document store
+
+    Args:
+        listener: The listener you wish to register
+
+    Returns:
+        NotImplementedError
+
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
 <dt id="kodexa.stores.stores.RemoteDocumentStore.to_dict"><code class="name flex">
 <span>def <span class="ident">to_dict</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Convert the document store to its metadata dictionary</p>
+<h2 id="returns">Returns</h2>
+<p>A dictionary representing the metadata for the store</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def to_dict(self):
-    &#34;&#34;&#34; &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    Convert the document store to its metadata dictionary
+
+    Returns:
+        A dictionary representing the metadata for the store
+    &#34;&#34;&#34;
     return {
         &#34;type&#34;: &#34;DOCUMENT&#34;,
         &#34;ref&#34;: self.ref
@@ -1765,12 +1946,9 @@ related Document that refers to it.</p>
 <ul class="hlist">
 <li><code><a title="kodexa.model.model.DocumentStore.accept" href="../model/model.html#kodexa.model.model.DocumentStore.accept">accept</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.add_related_document_to_family" href="../model/model.html#kodexa.model.model.DocumentStore.add_related_document_to_family">add_related_document_to_family</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.count" href="../model/model.html#kodexa.model.model.DocumentStore.count">count</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.get_by_uuid" href="../model/model.html#kodexa.model.model.DocumentStore.get_by_uuid">get_by_uuid</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_family_by_path" href="../model/model.html#kodexa.model.model.DocumentStore.get_family_by_path">get_family_by_path</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.list" href="../model/model.html#kodexa.model.model.DocumentStore.list">list</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="../model/model.html#kodexa.model.model.DocumentStore.query">query</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="../model/model.html#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
 </ul>
 </li>
 <li><code><b><a title="kodexa.model.model.RemoteStore" href="../model/model.html#kodexa.model.model.RemoteStore">RemoteStore</a></b></code>:
@@ -1819,7 +1997,7 @@ related Document that refers to it.</p>
 
         Args:
           object_path: the path to the content (ie. mymodel.dat)
-          object_path: str: 
+          object_path: str:
 
         Returns:
           True if deleted, False if there was no file at the path
@@ -1845,7 +2023,7 @@ related Document that refers to it.</p>
 
         Args:
           object_path: the object path
-          object_path: str: 
+          object_path: str:
 
         Returns:
           the bytes or None is nothing is at the path
@@ -1864,14 +2042,14 @@ related Document that refers to it.</p>
             logger.error(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content, force_replace=False):
+    def put(self, path: str, content, force_replace=False) -&gt; ContentObject:
         &#34;&#34;&#34;Put the content into the model store at the given path
 
         Args:
           path: The path you wish to put the content at
           content: The content for that object
           force_replace: overwrite the existing object if it is there (defaulted to False)
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -1879,8 +2057,6 @@ related Document that refers to it.</p>
         from kodexa import KodexaPlatform
         import requests
         try:
-            import io
-
             files = {&#34;file&#34;: content}
             data = {&#34;path&#34;: path, &#34;forceReplace&#34;: force_replace}
             content_object_response = requests.post(
@@ -1889,21 +2065,21 @@ related Document that refers to it.</p>
                 files=files, data=data)
 
             if content_object_response.status_code == 200:
-                from addict import Dict
-                content_object = Dict(json.loads(content_object_response.text))
+                return ContentObject.from_dict(content_object_response.json())
             elif content_object_response.status_code == 400:
                 from addict import Dict
                 bad_request = Dict(json.loads(content_object_response.text))
                 for error_key in bad_request.errors.keys():
                     print(bad_request.errors[error_key] + &#34; (&#34; + error_key + &#34;)&#34;)
+                raise Exception(&#34;Invalid request&#34;)
             else:
-                logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
-                    content_object_response.status_code))
-                raise Exception(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
-                    content_object_response.status_code))
+                msg = &#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
+                    content_object_response.status_code)
+                logger.error(msg)
+                raise Exception(msg)
         except JSONDecodeError:
             logger.error(
-                f&#34;Unable to JSON decode the response?&#34;)
+                &#34;Unable to JSON decode the response?&#34;)
             raise</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1923,7 +2099,7 @@ related Document that refers to it.</p>
 <dt><strong><code>object_path</code></strong></dt>
 <dd>the path to the content (ie. mymodel.dat)</dd>
 <dt><strong><code>object_path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>True if deleted, False if there was no file at the path</p></div>
@@ -1936,7 +2112,7 @@ related Document that refers to it.</p>
 
     Args:
       object_path: the path to the content (ie. mymodel.dat)
-      object_path: str: 
+      object_path: str:
 
     Returns:
       True if deleted, False if there was no file at the path
@@ -1968,7 +2144,7 @@ related Document that refers to it.</p>
 <dt><strong><code>object_path</code></strong></dt>
 <dd>the object path</dd>
 <dt><strong><code>object_path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>the bytes or None is nothing is at the path</p></div>
@@ -1981,7 +2157,7 @@ related Document that refers to it.</p>
 
     Args:
       object_path: the object path
-      object_path: str: 
+      object_path: str:
 
     Returns:
       the bytes or None is nothing is at the path
@@ -2023,7 +2199,7 @@ related Document that refers to it.</p>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteModelStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, path: str, content, force_replace=False)</span>
+<span>def <span class="ident">put</span></span>(<span>self, path: str, content, force_replace=False) ‑> <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Put the content into the model store at the given path</p>
@@ -2036,21 +2212,21 @@ related Document that refers to it.</p>
 <dt><strong><code>force_replace</code></strong></dt>
 <dd>overwrite the existing object if it is there (defaulted to False)</dd>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, content, force_replace=False):
+<pre><code class="python">def put(self, path: str, content, force_replace=False) -&gt; ContentObject:
     &#34;&#34;&#34;Put the content into the model store at the given path
 
     Args:
       path: The path you wish to put the content at
       content: The content for that object
       force_replace: overwrite the existing object if it is there (defaulted to False)
-      path: str: 
+      path: str:
 
     Returns:
 
@@ -2058,8 +2234,6 @@ related Document that refers to it.</p>
     from kodexa import KodexaPlatform
     import requests
     try:
-        import io
-
         files = {&#34;file&#34;: content}
         data = {&#34;path&#34;: path, &#34;forceReplace&#34;: force_replace}
         content_object_response = requests.post(
@@ -2068,21 +2242,21 @@ related Document that refers to it.</p>
             files=files, data=data)
 
         if content_object_response.status_code == 200:
-            from addict import Dict
-            content_object = Dict(json.loads(content_object_response.text))
+            return ContentObject.from_dict(content_object_response.json())
         elif content_object_response.status_code == 400:
             from addict import Dict
             bad_request = Dict(json.loads(content_object_response.text))
             for error_key in bad_request.errors.keys():
                 print(bad_request.errors[error_key] + &#34; (&#34; + error_key + &#34;)&#34;)
+            raise Exception(&#34;Invalid request&#34;)
         else:
-            logger.error(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
-                content_object_response.status_code))
-            raise Exception(&#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
-                content_object_response.status_code))
+            msg = &#34;Execution creation failed [&#34; + content_object_response.text + &#34;], response &#34; + str(
+                content_object_response.status_code)
+            logger.error(msg)
+            raise Exception(msg)
     except JSONDecodeError:
         logger.error(
-            f&#34;Unable to JSON decode the response?&#34;)
+            &#34;Unable to JSON decode the response?&#34;)
         raise</code></pre>
 </details>
 </dd>
@@ -2115,7 +2289,7 @@ related Document that refers to it.</p>
 </dd>
 <dt id="kodexa.stores.stores.RemoteTableDataStore"><code class="flex name class">
 <span>class <span class="ident">RemoteTableDataStore</span></span>
-<span>(</span><span>ref: str, columns: List[str] = [])</span>
+<span>(</span><span>ref: str, columns=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -2126,7 +2300,9 @@ related Document that refers to it.</p>
 <pre><code class="python">class RemoteTableDataStore(RemoteStore):
     &#34;&#34;&#34; &#34;&#34;&#34;
 
-    def __init__(self, ref: str, columns: List[str] = []):
+    def __init__(self, ref: str, columns=None):
+        if columns is None:
+            columns = []
         self.ref = ref
         self.columns = columns
 
@@ -2138,7 +2314,7 @@ related Document that refers to it.</p>
         &#34;&#34;&#34;
 
         Args:
-          table: str: 
+          table: str:
 
         Returns:
 
@@ -2152,7 +2328,7 @@ related Document that refers to it.</p>
         &#34;&#34;&#34;
 
         Args:
-          table: str: 
+          table: str:
 
         Returns:
 
@@ -2199,7 +2375,7 @@ related Document that refers to it.</p>
         &#34;&#34;&#34;
 
         Args:
-          table: str: 
+          table: str:
           page_number: int:  (Default value = 1)
           page_size:  (Default value = 5000)
 
@@ -2229,7 +2405,7 @@ related Document that refers to it.</p>
         &#34;&#34;&#34;
 
         Args:
-          rows: 
+          rows:
 
         Returns:
 
@@ -2253,7 +2429,7 @@ related Document that refers to it.</p>
         &#34;&#34;&#34;
 
         Args:
-          row: 
+          row:
 
         Returns:
 
@@ -2291,11 +2467,8 @@ related Document that refers to it.</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>row</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>row:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2304,7 +2477,7 @@ related Document that refers to it.</p>
     &#34;&#34;&#34;
 
     Args:
-      row: 
+      row:
 
     Returns:
 
@@ -2337,11 +2510,8 @@ related Document that refers to it.</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>rows</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>rows:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2350,7 +2520,7 @@ related Document that refers to it.</p>
     &#34;&#34;&#34;
 
     Args:
-      rows: 
+      rows:
 
     Returns:
 
@@ -2378,7 +2548,7 @@ related Document that refers to it.</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>table</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -2389,7 +2559,7 @@ related Document that refers to it.</p>
     &#34;&#34;&#34;
 
     Args:
-      table: str: 
+      table: str:
 
     Returns:
 
@@ -2440,7 +2610,7 @@ related Document that refers to it.</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>table</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -2451,7 +2621,7 @@ related Document that refers to it.</p>
     &#34;&#34;&#34;
 
     Args:
-      table: str: 
+      table: str:
 
     Returns:
 
@@ -2469,7 +2639,7 @@ related Document that refers to it.</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>table</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>page_number</code></strong></dt>
 <dd>int:
 (Default value = 1)</dd>
@@ -2485,7 +2655,7 @@ related Document that refers to it.</p>
     &#34;&#34;&#34;
 
     Args:
-      table: str: 
+      table: str:
       page_number: int:  (Default value = 1)
       page_size:  (Default value = 5000)
 
@@ -2546,17 +2716,14 @@ related Document that refers to it.</p>
 </ul>
 </li>
 <li>
-<h4><code><a title="kodexa.stores.stores.RemoteDictDataStore" href="#kodexa.stores.stores.RemoteDictDataStore">RemoteDictDataStore</a></code></h4>
-<ul class="">
-<li><code><a title="kodexa.stores.stores.RemoteDictDataStore.add" href="#kodexa.stores.stores.RemoteDictDataStore.add">add</a></code></li>
-</ul>
-</li>
-<li>
 <h4><code><a title="kodexa.stores.stores.RemoteDocumentStore" href="#kodexa.stores.stores.RemoteDocumentStore">RemoteDocumentStore</a></code></h4>
-<ul class="two-column">
+<ul class="">
+<li><code><a title="kodexa.stores.stores.RemoteDocumentStore.count" href="#kodexa.stores.stores.RemoteDocumentStore.count">count</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.delete" href="#kodexa.stores.stores.RemoteDocumentStore.delete">delete</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get" href="#kodexa.stores.stores.RemoteDocumentStore.get">get</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_by_path" href="#kodexa.stores.stores.RemoteDocumentStore.get_by_path">get_by_path</a></code></li>
+<li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_by_uuid" href="#kodexa.stores.stores.RemoteDocumentStore.get_by_uuid">get_by_uuid</a></code></li>
+<li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_document_by_content_object" href="#kodexa.stores.stores.RemoteDocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_name" href="#kodexa.stores.stores.RemoteDocumentStore.get_name">get_name</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_next_objects" href="#kodexa.stores.stores.RemoteDocumentStore.get_next_objects">get_next_objects</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.get_ref" href="#kodexa.stores.stores.RemoteDocumentStore.get_ref">get_ref</a></code></li>
@@ -2565,6 +2732,7 @@ related Document that refers to it.</p>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.put" href="#kodexa.stores.stores.RemoteDocumentStore.put">put</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.put_native" href="#kodexa.stores.stores.RemoteDocumentStore.put_native">put_native</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.query_objects" href="#kodexa.stores.stores.RemoteDocumentStore.query_objects">query_objects</a></code></li>
+<li><code><a title="kodexa.stores.stores.RemoteDocumentStore.register_listener" href="#kodexa.stores.stores.RemoteDocumentStore.register_listener">register_listener</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteDocumentStore.to_dict" href="#kodexa.stores.stores.RemoteDocumentStore.to_dict">to_dict</a></code></li>
 </ul>
 </li>

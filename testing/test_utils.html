@@ -34,8 +34,7 @@ from typing import List, cast
 from addict import Dict, addict
 
 from kodexa import Assistant, AssistantResponse, LocalDocumentStore
-from kodexa import ContentNode, Document, PipelineContext, TableDataStore
-from kodexa.model.document_families import ContentEvent, DocumentActor, DocumentTransition
+from kodexa import ContentNode, Document, PipelineContext, TableDataStore,  ContentEvent, DocumentActor, DocumentTransition, TransitionType
 from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger(&#39;kodexa.testing&#39;)
@@ -46,8 +45,8 @@ def print_data_table(context: PipelineContext, store_name: str):
 
     Args:
       context: param store_name:
-      context: PipelineContext: 
-      store_name: str: 
+      context: PipelineContext:
+      store_name: str:
 
     Returns:
 
@@ -71,9 +70,9 @@ def snapshot_store(context: PipelineContext, store_name: str, filename: str):
       context: the pipeline context
       store_name: the name of the store
       filename: the name of the file to snapshot the store to
-      context: PipelineContext: 
-      store_name: str: 
-      filename: str: 
+      context: PipelineContext:
+      store_name: str:
+      filename: str:
 
     Returns:
 
@@ -88,7 +87,7 @@ def simplify_node(node: ContentNode):
     &#34;&#34;&#34;
 
     Args:
-      node: ContentNode: 
+      node: ContentNode:
 
     Returns:
 
@@ -107,7 +106,7 @@ def simplify_document(document: Document) -&gt; Dict:
     &#34;&#34;&#34;
 
     Args:
-      document: Document: 
+      document: Document:
 
     Returns:
 
@@ -121,8 +120,8 @@ def compare_document(document: Document, filename: str, throw_exception=True):
     &#34;&#34;&#34;
 
     Args:
-      document: Document: 
-      filename: str: 
+      document: Document:
+      filename: str:
       throw_exception:  (Default value = True)
 
     Returns:
@@ -171,9 +170,9 @@ def compare_store(context: PipelineContext, store_name: str, filename: str, thro
       store_name: the name of the store
       filename: the filename of the
       throw_exception: throw an exception if there is a mismatch (Default value = True)
-      context: PipelineContext: 
-      store_name: str: 
-      filename: str: 
+      context: PipelineContext:
+      store_name: str:
+      filename: str:
 
     Returns:
 
@@ -272,7 +271,7 @@ class AssistantTestHarness:
 
         Args:
           event: content event
-          event: ContentEvent: 
+          event: ContentEvent:
 
         Returns:
           None
@@ -285,22 +284,24 @@ class AssistantTestHarness:
         store = self.get_store(event)
 
         for pipeline in response.pipelines:
-            pipeline.connector = [store.get_document_by_content_object(event.content_object)]
-            pipeline_context = pipeline.run()
+            document = store.get_document_by_content_object(event.content_object)
+            if document is not None:
+                pipeline.connector = [document]
+                pipeline_context = pipeline.run()
 
-            if pipeline_context.output_document is not None:
-                # We need to build the transition between the old and the new
-                document_relationship = DocumentTransition(&#34;DERIVED&#34;, event.content_object.id, None,
-                                                           DocumentActor(&#34;testing&#34;, &#34;assistant&#34;))
+                if pipeline_context.output_document is not None:
+                    # We need to build the transition between the old and the new
+                    document_relationship = DocumentTransition(TransitionType.DERIVED, event.content_object.id, None,
+                                                               DocumentActor(&#34;testing&#34;, &#34;assistant&#34;))
 
-                store.add_related_document_to_family(event.document_family.id, document_relationship,
-                                                     pipeline_context.output_document)
+                    store.add_related_document_to_family(event.document_family.id, document_relationship,
+                                                         pipeline_context.output_document)
 
-            # We need to handle the context here, basically we are going to take the result
-            # of the pipeline as a new document and add it to the family?? think about that?
+                # We need to handle the context here, basically we are going to take the result
+                # of the pipeline as a new document and add it to the family?? think about that?
 
-            # so does the assistant decide to write to the store? or do we just do it anyway?
-            # how does the assistant know what happened to the pipeline?
+                # so does the assistant decide to write to the store? or do we just do it anyway?
+                # how does the assistant know what happened to the pipeline?
 
         pass
 
@@ -309,7 +310,7 @@ class AssistantTestHarness:
         Register a local document store with this harness
 
         Args:
-          store: LocalDocumentStore: 
+          store: LocalDocumentStore:
 
         Returns:
 
@@ -321,7 +322,7 @@ class AssistantTestHarness:
         Get a document store for the event (based on the document family ID)
 
         Args:
-          event: ContentEvent: 
+          event: ContentEvent:
 
         Returns:
           The instance of the document store
@@ -365,7 +366,7 @@ class ExtensionPackUtil:
         &#34;&#34;&#34;
 
         Args:
-          action_slug: 
+          action_slug:
           options:  (Default value = None)
 
         Returns:
@@ -458,9 +459,9 @@ class ExtensionPackUtil:
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 <dt><strong><code>filename</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>throw_exception</code></strong></dt>
 <dd>(Default value = True)</dd>
 </dl>
@@ -473,8 +474,8 @@ class ExtensionPackUtil:
     &#34;&#34;&#34;
 
     Args:
-      document: Document: 
-      filename: str: 
+      document: Document:
+      filename: str:
       throw_exception:  (Default value = True)
 
     Returns:
@@ -531,11 +532,11 @@ class ExtensionPackUtil:
 <dt><strong><code>throw_exception</code></strong></dt>
 <dd>throw an exception if there is a mismatch (Default value = True)</dd>
 <dt><strong><code>context</code></strong></dt>
-<dd>PipelineContext: </dd>
+<dd>PipelineContext:</dd>
 <dt><strong><code>store_name</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>filename</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -550,9 +551,9 @@ class ExtensionPackUtil:
       store_name: the name of the store
       filename: the filename of the
       throw_exception: throw an exception if there is a mismatch (Default value = True)
-      context: PipelineContext: 
-      store_name: str: 
-      filename: str: 
+      context: PipelineContext:
+      store_name: str:
+      filename: str:
 
     Returns:
 
@@ -630,9 +631,9 @@ class ExtensionPackUtil:
 <dt><strong><code>context</code></strong></dt>
 <dd>param store_name:</dd>
 <dt><strong><code>context</code></strong></dt>
-<dd>PipelineContext: </dd>
+<dd>PipelineContext:</dd>
 <dt><strong><code>store_name</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -644,8 +645,8 @@ class ExtensionPackUtil:
 
     Args:
       context: param store_name:
-      context: PipelineContext: 
-      store_name: str: 
+      context: PipelineContext:
+      store_name: str:
 
     Returns:
 
@@ -668,7 +669,7 @@ class ExtensionPackUtil:
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -679,7 +680,7 @@ class ExtensionPackUtil:
     &#34;&#34;&#34;
 
     Args:
-      document: Document: 
+      document: Document:
 
     Returns:
 
@@ -696,7 +697,7 @@ class ExtensionPackUtil:
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>node</code></strong></dt>
-<dd>ContentNode: </dd>
+<dd>ContentNode:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -707,7 +708,7 @@ class ExtensionPackUtil:
     &#34;&#34;&#34;
 
     Args:
-      node: ContentNode: 
+      node: ContentNode:
 
     Returns:
 
@@ -737,11 +738,11 @@ to compare the data (usually in a test)</p>
 <dt><strong><code>filename</code></strong></dt>
 <dd>the name of the file to snapshot the store to</dd>
 <dt><strong><code>context</code></strong></dt>
-<dd>PipelineContext: </dd>
+<dd>PipelineContext:</dd>
 <dt><strong><code>store_name</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>filename</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -756,9 +757,9 @@ to compare the data (usually in a test)</p>
       context: the pipeline context
       store_name: the name of the store
       filename: the name of the file to snapshot the store to
-      context: PipelineContext: 
-      store_name: str: 
-      filename: str: 
+      context: PipelineContext:
+      store_name: str:
+      filename: str:
 
     Returns:
 
@@ -826,7 +827,7 @@ to compare the data (usually in a test)</p>
 
         Args:
           event: content event
-          event: ContentEvent: 
+          event: ContentEvent:
 
         Returns:
           None
@@ -839,22 +840,24 @@ to compare the data (usually in a test)</p>
         store = self.get_store(event)
 
         for pipeline in response.pipelines:
-            pipeline.connector = [store.get_document_by_content_object(event.content_object)]
-            pipeline_context = pipeline.run()
+            document = store.get_document_by_content_object(event.content_object)
+            if document is not None:
+                pipeline.connector = [document]
+                pipeline_context = pipeline.run()
 
-            if pipeline_context.output_document is not None:
-                # We need to build the transition between the old and the new
-                document_relationship = DocumentTransition(&#34;DERIVED&#34;, event.content_object.id, None,
-                                                           DocumentActor(&#34;testing&#34;, &#34;assistant&#34;))
+                if pipeline_context.output_document is not None:
+                    # We need to build the transition between the old and the new
+                    document_relationship = DocumentTransition(TransitionType.DERIVED, event.content_object.id, None,
+                                                               DocumentActor(&#34;testing&#34;, &#34;assistant&#34;))
 
-                store.add_related_document_to_family(event.document_family.id, document_relationship,
-                                                     pipeline_context.output_document)
+                    store.add_related_document_to_family(event.document_family.id, document_relationship,
+                                                         pipeline_context.output_document)
 
-            # We need to handle the context here, basically we are going to take the result
-            # of the pipeline as a new document and add it to the family?? think about that?
+                # We need to handle the context here, basically we are going to take the result
+                # of the pipeline as a new document and add it to the family?? think about that?
 
-            # so does the assistant decide to write to the store? or do we just do it anyway?
-            # how does the assistant know what happened to the pipeline?
+                # so does the assistant decide to write to the store? or do we just do it anyway?
+                # how does the assistant know what happened to the pipeline?
 
         pass
 
@@ -863,7 +866,7 @@ to compare the data (usually in a test)</p>
         Register a local document store with this harness
 
         Args:
-          store: LocalDocumentStore: 
+          store: LocalDocumentStore:
 
         Returns:
 
@@ -875,7 +878,7 @@ to compare the data (usually in a test)</p>
         Get a document store for the event (based on the document family ID)
 
         Args:
-          event: ContentEvent: 
+          event: ContentEvent:
 
         Returns:
           The instance of the document store
@@ -889,14 +892,14 @@ to compare the data (usually in a test)</p>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.testing.test_utils.AssistantTestHarness.get_store"><code class="name flex">
-<span>def <span class="ident">get_store</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>) ‑> <a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a></span>
+<span>def <span class="ident">get_store</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>) ‑> <a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a document store for the event (based on the document family ID)</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>event</code></strong></dt>
-<dd>ContentEvent: </dd>
+<dd>ContentEvent:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>The instance of the document store</p></div>
@@ -909,7 +912,7 @@ to compare the data (usually in a test)</p>
     Get a document store for the event (based on the document family ID)
 
     Args:
-      event: ContentEvent: 
+      event: ContentEvent:
 
     Returns:
       The instance of the document store
@@ -922,7 +925,7 @@ to compare the data (usually in a test)</p>
 </details>
 </dd>
 <dt id="kodexa.testing.test_utils.AssistantTestHarness.process_event"><code class="name flex">
-<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>)</span>
+<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The harnesss will take the content event and
@@ -934,7 +937,7 @@ through them in turn (note in the platform this might be in parallel)</p>
 <dt><strong><code>event</code></strong></dt>
 <dd>content event</dd>
 <dt><strong><code>event</code></strong></dt>
-<dd>ContentEvent: </dd>
+<dd>ContentEvent:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>None</p></div>
@@ -950,7 +953,7 @@ through them in turn (note in the platform this might be in parallel)</p>
 
     Args:
       event: content event
-      event: ContentEvent: 
+      event: ContentEvent:
 
     Returns:
       None
@@ -963,22 +966,24 @@ through them in turn (note in the platform this might be in parallel)</p>
     store = self.get_store(event)
 
     for pipeline in response.pipelines:
-        pipeline.connector = [store.get_document_by_content_object(event.content_object)]
-        pipeline_context = pipeline.run()
+        document = store.get_document_by_content_object(event.content_object)
+        if document is not None:
+            pipeline.connector = [document]
+            pipeline_context = pipeline.run()
 
-        if pipeline_context.output_document is not None:
-            # We need to build the transition between the old and the new
-            document_relationship = DocumentTransition(&#34;DERIVED&#34;, event.content_object.id, None,
-                                                       DocumentActor(&#34;testing&#34;, &#34;assistant&#34;))
+            if pipeline_context.output_document is not None:
+                # We need to build the transition between the old and the new
+                document_relationship = DocumentTransition(TransitionType.DERIVED, event.content_object.id, None,
+                                                           DocumentActor(&#34;testing&#34;, &#34;assistant&#34;))
 
-            store.add_related_document_to_family(event.document_family.id, document_relationship,
-                                                 pipeline_context.output_document)
+                store.add_related_document_to_family(event.document_family.id, document_relationship,
+                                                     pipeline_context.output_document)
 
-        # We need to handle the context here, basically we are going to take the result
-        # of the pipeline as a new document and add it to the family?? think about that?
+            # We need to handle the context here, basically we are going to take the result
+            # of the pipeline as a new document and add it to the family?? think about that?
 
-        # so does the assistant decide to write to the store? or do we just do it anyway?
-        # how does the assistant know what happened to the pipeline?
+            # so does the assistant decide to write to the store? or do we just do it anyway?
+            # how does the assistant know what happened to the pipeline?
 
     pass</code></pre>
 </details>
@@ -991,7 +996,7 @@ through them in turn (note in the platform this might be in parallel)</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>store</code></strong></dt>
-<dd>LocalDocumentStore: </dd>
+<dd>LocalDocumentStore:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1003,7 +1008,7 @@ through them in turn (note in the platform this might be in parallel)</p>
     Register a local document store with this harness
 
     Args:
-      store: LocalDocumentStore: 
+      store: LocalDocumentStore:
 
     Returns:
 
@@ -1054,7 +1059,7 @@ through them in turn (note in the platform this might be in parallel)</p>
         &#34;&#34;&#34;
 
         Args:
-          action_slug: 
+          action_slug:
           options:  (Default value = None)
 
         Returns:
@@ -1225,8 +1230,7 @@ of an assistant in a test case</p>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>action_slug</code></strong></dt>
-<dd>&nbsp;</dd>
+<dt>action_slug:</dt>
 <dt><strong><code>options</code></strong></dt>
 <dd>(Default value = None)</dd>
 </dl>
@@ -1239,7 +1243,7 @@ of an assistant in a test case</p>
     &#34;&#34;&#34;
 
     Args:
-      action_slug: 
+      action_slug:
       options:  (Default value = None)
 
     Returns:

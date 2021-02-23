@@ -36,7 +36,7 @@ instance of the Kodexa platform
 
 from typing import List
 
-from kodexa.model.document_families import ContentEvent
+from kodexa.model import ContentEvent
 from kodexa.pipeline import Pipeline
 
 
@@ -72,18 +72,18 @@ class Assistant:
 
     def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
-        
+
         The event will focus on a specific content object (that will be stored and available).  Based on the
         metadata from the content object the assistant can then return a response which can include zero or more
         pipelines that it wishes to execute.
-        
+
         This pipelines will be run asynchronously and the result of the pipelines might well
         return as another event for the assistant
 
         Args:
           event: the content event to react to
           context: the assistant context
-          event: ContentEvent: 
+          event: ContentEvent:
           context: AssistantContext:  (Default value = None)
 
         Returns:
@@ -120,18 +120,18 @@ that is working with set of content</p></div>
 
     def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
-        
+
         The event will focus on a specific content object (that will be stored and available).  Based on the
         metadata from the content object the assistant can then return a response which can include zero or more
         pipelines that it wishes to execute.
-        
+
         This pipelines will be run asynchronously and the result of the pipelines might well
         return as another event for the assistant
 
         Args:
           event: the content event to react to
           context: the assistant context
-          event: ContentEvent: 
+          event: ContentEvent:
           context: AssistantContext:  (Default value = None)
 
         Returns:
@@ -148,7 +148,7 @@ that is working with set of content</p></div>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.assistant.assistant.Assistant.process_event"><code class="name flex">
-<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.document_families.ContentEvent" href="../model/document_families.html#kodexa.model.document_families.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
+<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>The assistant will need to examine the event to determine if it wants to respond</p>
@@ -165,7 +165,7 @@ return as another event for the assistant</p>
 <dt><strong><code>context</code></strong></dt>
 <dd>the assistant context</dd>
 <dt><strong><code>event</code></strong></dt>
-<dd>ContentEvent: </dd>
+<dd>ContentEvent:</dd>
 <dt><strong><code>context</code></strong></dt>
 <dd>AssistantContext:
 (Default value = None)</dd>
@@ -181,18 +181,18 @@ return as another event for the assistant</p>
 </summary>
 <pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
     &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
-    
+
     The event will focus on a specific content object (that will be stored and available).  Based on the
     metadata from the content object the assistant can then return a response which can include zero or more
     pipelines that it wishes to execute.
-    
+
     This pipelines will be run asynchronously and the result of the pipelines might well
     return as another event for the assistant
 
     Args:
       event: the content event to react to
       context: the assistant context
-      event: ContentEvent: 
+      event: ContentEvent:
       context: AssistantContext:  (Default value = None)
 
     Returns:

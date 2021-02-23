@@ -30,7 +30,7 @@
 <pre><code class="python">&#34;&#34;&#34;
 The core model provides definitions for all the base objects in the Kodexa Content Model
 &#34;&#34;&#34;
-
+import abc
 import dataclasses
 import inspect
 import itertools
@@ -39,7 +39,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
@@ -56,7 +56,7 @@ class ContentType(Enum):
 class ContentObject:
     &#34;&#34;&#34;A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
     a Kodexa document.
-    
+
     The content object allows us to capture metadata about the document or the native file without changing it
 
     Args:
@@ -93,7 +93,7 @@ class ContentObject:
 
     def to_dict(self):
         &#34;&#34;&#34;Convert the content object to a dictionary
-        
+
         :return: dictionary
 
         Args:
@@ -114,11 +114,11 @@ class ContentObject:
     @classmethod
     def from_dict(cls, co_dict):
         &#34;&#34;&#34;Create a content object from a dictionary
-        
+
         :return: A content object
 
         Args:
-          co_dict: 
+          co_dict:
 
         Returns:
 
@@ -141,7 +141,7 @@ class Store:
         &#34;&#34;&#34;
 
         Args:
-          other_store: 
+          other_store:
 
         Returns:
 
@@ -156,7 +156,7 @@ class Store:
         &#34;&#34;&#34;
 
         Args:
-          pipeline_context: 
+          pipeline_context:
 
         Returns:
 
@@ -173,7 +173,7 @@ class RemoteStore:
 
     def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-        
+
         :return: The reference
 
         Args:
@@ -241,9 +241,9 @@ class Traverse(Enum):
 class ContentNode(object):
     &#34;&#34;&#34;A Content Node identifies a section of the document containing logical
     grouping of information.
-    
+
     The node will have content and can include any number of features.
-    
+
     You should always create a node using the Document&#39;s create_node method to
     ensure that the correct mixins are applied.
 
@@ -254,7 +254,7 @@ class ContentNode(object):
     &gt;&gt;&gt; new_page = document.create_node(node_type=&#39;page&#39;, content=&#39;This is page 1&#39;)
     &lt;kodexa.model.model.ContentNode object at 0x7f80605e53c8&gt;
     &gt;&gt;&gt; current_content_node.add_child(new_page)
-    
+
     or
 
     Args:
@@ -324,8 +324,8 @@ class ContentNode(object):
         Args:
           Document: document: The Kodexa document from which the new ContentNode will be created (not added).
           dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
-          document: 
-          content_node_dict: Dict: 
+          document:
+          content_node_dict: Dict:
 
         Returns:
           ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
@@ -385,7 +385,7 @@ class ContentNode(object):
         Args:
           ContentNode: child: The node that will be added as a child of this node
           index(int, optional, optional): The index at which this child node should be added; defaults to None.  If None, index is set as the count of child node elements.
-          child: 
+          child:
 
         Returns:
 
@@ -419,9 +419,9 @@ class ContentNode(object):
           str: feature_type: The type of feature to be added to the node.
           str: name: The name of the feature.
           Any: value: The value of the feature.
-          feature_type: 
-          name: 
-          value: 
+          feature_type:
+          name:
+          value:
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode
@@ -435,7 +435,7 @@ class ContentNode(object):
 
     def add_feature(self, feature_type, name, value, single=True, serialized=False):
         &#34;&#34;&#34;Add a new feature to this ContentNode.
-        
+
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
         Args:
@@ -444,9 +444,9 @@ class ContentNode(object):
           Any: value: The value of the feature.
           single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
           serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-          feature_type: 
-          name: 
-          value: 
+          feature_type:
+          name:
+          value:
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -471,7 +471,7 @@ class ContentNode(object):
                         exclude_nodes: Optional[List] = None):
         &#34;&#34;&#34;Delete the children of this node, you can either supply a list of the nodes to delete
            or the nodes to exclude from the delete, if neither are supplied then we delete all the children.
-        
+
            Note there is precedence in place, if you have provided a list of nodes to delete then the nodes
            to exclude is ignored.
 
@@ -511,8 +511,8 @@ class ContentNode(object):
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
@@ -527,7 +527,7 @@ class ContentNode(object):
 
         Args:
           str: feature_type: The type of the feature.
-          feature_type: 
+          feature_type:
 
         Returns:
           list[ContentFeature]: A list of feature with the specified type.  If no features are found, an empty list is returned.
@@ -543,8 +543,8 @@ class ContentNode(object):
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           bool: True if the feature is present; else, False.
@@ -571,8 +571,8 @@ class ContentNode(object):
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
 
@@ -588,8 +588,8 @@ class ContentNode(object):
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
@@ -630,21 +630,21 @@ class ContentNode(object):
 
     def select(self, selector, variables=None):
         &#34;&#34;&#34;Select and return the child nodes of this node that match the selector value.
-        
-        
+
+
         or
 
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           list[ContentNode]: A list of the matching content nodes.  If no matches are found, the list will be empty.
 
         &gt;&gt;&gt; document.get_root().select(&#39;.&#39;)
            [ContentNode]
-        
+
         &gt;&gt;&gt; document.get_root().select(&#39;//*[hasTag($tagName)]&#39;, {&#34;tagName&#34;: &#34;div&#34;})
            [ContentNode]
         &#34;&#34;&#34;
@@ -657,24 +657,24 @@ class ContentNode(object):
     def select_as_node(self, selector, variables=None):
         &#34;&#34;&#34;Select and return the child nodes of this content node that match the selector value.
         Matching nodes will be returned as the children of a new proxy content node.
-        
+
         Note this doesn&#39;t impact this content node&#39;s children.  They are not adopted by the proxy node,
         therefore their parents remain intact.
-        
-        
+
+
         or
 
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           ContentNode: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
 
         &gt;&gt;&gt; document.content_node.select_as_node(&#39;//line&#39;)
            ContentNode
-        
+
         &gt;&gt;&gt; document.get_root().select_as_node(&#39;//*[hasTag($tagName)]&#39;, {&#34;tagName&#34;: &#34;div&#34;})
            ContentNode
         &#34;&#34;&#34;
@@ -705,14 +705,14 @@ class ContentNode(object):
 
     def move_child_to_parent(self, target_child, target_parent):
         &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
-        
+
         It will be added to the end of the parent
 
         Args:
           ContentNode: target_child: The child node that will be moved to a new parent node (target_parent).
           ContentNode: target_parent: The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
-          target_child: 
-          target_parent: 
+          target_child:
+          target_parent:
 
         Returns:
 
@@ -732,7 +732,7 @@ class ContentNode(object):
         Args:
           list: ContentNode] children: A list of ContentNodes that will be added to the end of this node&#39;s children collection
           bool: replace: If True, will remove all current children and replace them with the new list; defaults to True
-          children: 
+          children:
           replace:  (Default value = False)
 
         Returns:
@@ -755,7 +755,7 @@ class ContentNode(object):
 
         Args:
           str: tag_name: The name of the tag that should be removed.
-          tag_name: 
+          tag_name:
 
         Returns:
 
@@ -811,7 +811,7 @@ class ContentNode(object):
 
         Args:
           ContentNode: end_node: The node to end at
-          end_node: 
+          end_node:
 
         Returns:
           list[ContentNode]: A list of sibling nodes between this node and the end_node.
@@ -835,8 +835,8 @@ class ContentNode(object):
           ContentNode: end_node: The node to end with
           str: tag_to_apply: The tag name that will be applied to each node
           str: tag_uuid: The tag uuid used if you want to group them
-          end_node: 
-          tag_to_apply: 
+          end_node:
+          tag_to_apply:
           tag_uuid: str:  (Default value = None)
 
         Returns:
@@ -900,8 +900,8 @@ class ContentNode(object):
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None):
         &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
-        
-        
+
+
         Note that if you use the flag use_all_content then node_only will default to True if not set, else it
         will default to False
 
@@ -938,7 +938,7 @@ class ContentNode(object):
             &#34;&#34;&#34;
 
             Args:
-              tag_uuid: 
+              tag_uuid:
 
             Returns:
 
@@ -952,11 +952,11 @@ class ContentNode(object):
             &#34;&#34;&#34;
 
             Args:
-              node_to_check: 
-              start: 
-              end: 
-              node_data: 
-              tag_uuid: 
+              node_to_check:
+              start:
+              end:
+              node_data:
+              tag_uuid:
 
             Returns:
 
@@ -1031,8 +1031,8 @@ class ContentNode(object):
 
     def get_tags(self):
         &#34;&#34;&#34;Returns a list of the names of the tags on the given node
-        
-        
+
+
         :return: A list of the tag name
 
         Args:
@@ -1072,7 +1072,7 @@ class ContentNode(object):
           tag_name: tag name
           include_children: include the children of this node
           value_separator: the string to be used to join related tag values
-          tag_name: str: 
+          tag_name: str:
           include_children: bool:  (Default value = False)
           value_separator: str:  (Default value = &#39; &#39;)
 
@@ -1085,8 +1085,8 @@ class ContentNode(object):
             &#34;&#34;&#34;
 
             Args:
-              group_dict: 
-              feature_val: 
+              group_dict:
+              feature_val:
 
             Returns:
 
@@ -1178,7 +1178,7 @@ class ContentNode(object):
 
         Args:
           str: tag: The name of the tag.
-          tag: 
+          tag:
 
         Returns:
           bool: True if node has a tag by the specified name; else, False;
@@ -1227,9 +1227,9 @@ class ContentNode(object):
           Any: value: The feature value.
           direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
           instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
-          feature_type: 
-          feature_name: 
-          value: 
+          feature_type:
+          feature_name:
+          value:
 
         Returns:
           ContentNode or None: Matching node (if found), or None.
@@ -1253,9 +1253,9 @@ class ContentNode(object):
           str: feature_name: The feature name.
           Any: value: The feature value.
           direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-          feature_type: 
-          feature_name: 
-          value: 
+          feature_type:
+          feature_name:
+          value:
 
         Returns:
           list[ContentNode]: list of the matching content nodes
@@ -1325,14 +1325,14 @@ class ContentNode(object):
     def get_node_at_index(self, index):
         &#34;&#34;&#34;Returns the child node at the specified index. If the specified index is outside the first (0), or
         last child&#39;s index, None is returned.
-        
+
         Note:  documents allow for sparse representation and child nodes may not have consecutive index numbers.
         If there isn&#39;t a child node at the specfied index, a &#39;virtual&#39; node will be returned.  This &#39;virtual&#39; node
         will have the node type of its nearest sibling and will have an index value, but will have no features or content.
 
         Args:
           int: index: The index (zero-based) for the child node.
-          index: 
+          index:
 
         Returns:
           ContentNode or None: Node at index, or None if the index is outside the boundaries of child nodes.
@@ -1393,7 +1393,7 @@ class ContentNode(object):
 
     def next_node(self, node_type_re=&#39;.*&#39;, skip_virtual=False, has_no_content=True):
         &#34;&#34;&#34;Returns the next sibling content node.
-        
+
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
@@ -1424,7 +1424,7 @@ class ContentNode(object):
 
     def previous_node(self, node_type_re=&#39;.*&#39;, skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
         &#34;&#34;&#34;Returns the previous sibling content node.
-        
+
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the previous node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
@@ -1497,12 +1497,12 @@ class ContentNode(object):
         regular expressions using compiled expressions
 
         Args:
-          value_re_compiled: 
-          node_type_re_compiled: 
-          direction: 
-          tag_name: 
-          tag_name_compiled: 
-          use_all_content: 
+          value_re_compiled:
+          node_type_re_compiled:
+          direction:
+          tag_name:
+          tag_name_compiled:
+          use_all_content:
 
         Returns:
 
@@ -1600,7 +1600,7 @@ class SourceMetadata:
         &#34;&#34;&#34;
 
         Args:
-          env: 
+          env:
 
         Returns:
 
@@ -1648,7 +1648,7 @@ class Document(object):
 
         Args:
           label: str Label to add
-          label: str: 
+          label: str:
 
         Returns:
           the document
@@ -1664,7 +1664,7 @@ class Document(object):
 
         Args:
           label: str Label to remove
-          label: str: 
+          label: str:
 
         Returns:
           the document
@@ -1707,7 +1707,7 @@ class Document(object):
 
         Args:
           file_path: the path to the mdoc you wish to create
-          file_path: str: 
+          file_path: str:
 
         Returns:
 
@@ -1763,7 +1763,7 @@ class Document(object):
             &#34;&#34;&#34;
 
             Args:
-              d: 
+              d:
 
             Returns:
 
@@ -1795,7 +1795,7 @@ class Document(object):
 
         Args:
           dict: doc_dict: A dictionary representation of a Kodexa Document.
-          doc_dict: 
+          doc_dict:
 
         Returns:
           Document: A complete Kodexa Document
@@ -1829,7 +1829,7 @@ class Document(object):
 
         Args:
           str: json_string: A JSON string representation of a Kodexa Document
-          json_string: 
+          json_string:
 
         Returns:
           Document: A complete Kodexa Document
@@ -1862,7 +1862,7 @@ class Document(object):
         the node has the mixin appled.
 
         Args:
-          mixin: 
+          mixin:
 
         Returns:
 
@@ -1883,7 +1883,7 @@ class Document(object):
         &#39;Virtual&#39; nodes are synthesized as necessary to fill gaps in between non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
           ContentNode: parent: The parent for this newly created node; default is None;
           int: index: The index property to be set on this node; default is 0;
-          node_type: str: 
+          node_type: str:
           content: Optional[str]:  (Default value = None)
           virtual: bool:  (Default value = False)
           parent: ContentNode:  (Default value = None)
@@ -1938,7 +1938,7 @@ class Document(object):
         Args:
           str: url: The URL to which the new Document is connected.
           dict: headers: Headers that should be used when reading from the URL
-          url: 
+          url:
           headers:  (Default value = None)
 
         Returns:
@@ -1963,7 +1963,7 @@ class Document(object):
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
@@ -2014,12 +2014,212 @@ class Document(object):
         return self.labels
 
 
-class DocumentStore:
-    &#34;&#34;&#34;A document store supports storing, listing and retrieving Kodexa documents and document families&#34;&#34;&#34;
+class TransitionType(Enum):
+    &#34;&#34;&#34;
+    The type of transition
+    &#34;&#34;&#34;
+    DERIVED = &#39;DERIVED&#39;
+    &#34;&#34;&#34;A transition that derived a new document&#34;&#34;&#34;
+    FRAGMENT = &#39;FRAGMENT&#39;
+    &#34;&#34;&#34;A transition that placed a fragment of the document in another document&#34;&#34;&#34;
 
+
+class ContentEventType(Enum):
+    &#34;&#34;&#34;
+    The type of event that occurred on the content
+    &#34;&#34;&#34;
+    NEW_OBJECT = &#39;NEW_OBJECT&#39;
+    DERIVED_DOCUMENT = &#39;DERIVED_DOCUMENT&#39;
+
+
+class ContentEvent:
+    &#34;&#34;&#34;A content event represents a change, update or deletion that has occurred in a document family
+    in a store, and can be relayed for a reaction
+    &#34;&#34;&#34;
+
+    def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
+        &#34;&#34;&#34;
+        Initialize a content event
+        Args:
+            content_object: the content object on which the event occurred
+            event_type: the type of event
+            document_family: the document family to which the object belongs
+        &#34;&#34;&#34;
+        self.content_object = content_object
+        &#34;&#34;&#34;The content object that raised the event&#34;&#34;&#34;
+        self.event_type = event_type
+        &#34;&#34;&#34;The event type&#34;&#34;&#34;
+        self.document_family: DocumentFamily = document_family
+        &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;
+
+
+class DocumentActor:
+    &#34;&#34;&#34;A document actor is something that can create a new document in a family and is
+    part of the document transition
+    &#34;&#34;&#34;
+
+    def __init__(self, actor_id: str, actor_type: str):
+        &#34;&#34;&#34;
+        Initialize a document actor
+
+        Args:
+            actor_id: the ID of the actor (this typically has meaning within the scope of the actor type)
+            actor_type: the type of actor
+        &#34;&#34;&#34;
+        self.actor_id = actor_id
+        &#34;&#34;&#34;The ID of the actor (based on the type)&#34;&#34;&#34;
+        self.actor_type = actor_type
+        &#34;&#34;&#34;The type of actor&#34;&#34;&#34;
+
+
+class DocumentTransition:
+    &#34;&#34;&#34;
+    A document transition represents a link between two documents and tries to capture the actor that was involved
+    in the transition as well at the type of transition that exists
+    &#34;&#34;&#34;
+
+    def __init__(self, transition_type: TransitionType, source_content_object_id: str,
+                 destination_content_object_id: Optional[str] = None,
+                 actor: Optional[DocumentActor] = None):
+        &#34;&#34;&#34;
+        Create a document transition
+
+        Args:
+            transition_type:TransitionType: the type of transition
+            source_content_object_id:str: the ID of the source content object
+            destination_content_object_id:Optional[str] the ID of the destination content object
+            actor:Optional[DocumentActor]: the actor (Defaults to None)
+        &#34;&#34;&#34;
+        self.transition_type = transition_type
+        &#34;&#34;&#34;The type of transition&#34;&#34;&#34;
+        self.source_content_object_id = source_content_object_id
+        &#34;&#34;&#34;The ID of the source content object&#34;&#34;&#34;
+        self.destination_content_object_id = destination_content_object_id
+        &#34;&#34;&#34;The ID of the destination content object&#34;&#34;&#34;
+        self.actor = actor
+        &#34;&#34;&#34;The actor in the transition&#34;&#34;&#34;
+
+    @classmethod
+    def from_dict(cls, transition_dict):
+        &#34;&#34;&#34;
+        Converts a dictionary from a REST call back into a DocumentTransition
+        Args:
+            transition_dict: Dictionary
+
+        Returns: A document transition
+
+        &#34;&#34;&#34;
+        transition = DocumentTransition(transition_dict[&#39;transitionType&#39;], transition_dict[&#39;sourceContentObjectId&#39;],
+                                        transition_dict[&#39;destinationContentObjectId&#39;])
+        return transition
+
+
+class DocumentFamily:
+    &#34;&#34;&#34;A document family represents a collection of related documents which together represent different views of the same
+    source material
+
+    This approach allows parsed representations to he linked to native, derived representations, labelled etc all to be
+    part of a family of content views that can be used together to understand the document and its content
+
+    &#34;&#34;&#34;
+
+    def __init__(self, path: str, store_ref: str):
+        &#34;&#34;&#34;
+        Creates a new document family at the given path and optionally with the
+        document as its first entry
+
+        :param path: the path at which this document family exists (i.e. my-file.pdf)
+        :param store_ref: the reference to the store holding this family
+        &#34;&#34;&#34;
+        self.id: str = str(uuid.uuid4())
+        self.transitions: List[DocumentTransition] = []
+        self.content_objects: List[ContentObject] = []
+        self.path = path
+        self.store_ref = store_ref
+
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document:
+          transition: DocumentTransition:  (Default value = None)
+
+        Returns:
+
+        &#34;&#34;&#34;
+        new_content_object = ContentObject()
+        new_content_object.store_ref = self.store_ref
+        new_content_object.content_type = ContentType.DOCUMENT
+        new_content_object.metadata = document.metadata
+        new_content_object.labels = document.labels
+
+        self.content_objects.append(new_content_object)
+
+        if transition is not None:
+            transition.destination_content_object_id = new_content_object.id
+            self.transitions.append(transition)
+
+        new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
+        return new_event
+
+    def get_latest_content(self) -&gt; ContentObject:
+        &#34;&#34;&#34;Returns the latest content object that we have in place
+
+        Returns:
+            The latest content object in the family
+        &#34;&#34;&#34;
+        return self.content_objects[-1]
+
+    def get_content_objects(self) -&gt; List[ContentObject]:
+        &#34;&#34;&#34;Returns all the content objects in the family
+
+        Returns:
+            a list of the content objects
+
+
+        &#34;&#34;&#34;
+        return self.content_objects
+
+    def get_document_count(self) -&gt; int:
+        &#34;&#34;&#34;
+        Count of content objects in the family
+
+        Returns:
+          number of documents in the family
+
+        &#34;&#34;&#34;
+        return len(self.content_objects)
+
+    @classmethod
+    def from_dict(cls, family_dict: dict):
+        &#34;&#34;&#34;
+        Convert a dictionary from a REST call into the Document Family
+
+        Args:
+            param: the document family object as a dictionary
+
+        Returns:
+            An instance of the document family
+        &#34;&#34;&#34;
+        document_family = DocumentFamily(family_dict[&#39;path&#39;], family_dict[&#39;storeRef&#39;])
+        document_family.id = family_dict[&#39;id&#39;]
+        document_family.content_objects = []
+        for co_dict in family_dict[&#39;contentObjects&#39;]:
+            document_family.content_objects.append(ContentObject.from_dict(co_dict))
+        for transition_dict in family_dict[&#39;documentTransitions&#39;]:
+            document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
+        return document_family
+
+
+class DocumentStore:
+    &#34;&#34;&#34;
+    A document store supports storing, listing and retrieving Kodexa documents and document families
+    &#34;&#34;&#34;
+
+    @abc.abstractmethod
     def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Returns the reference (org-slug/store-slug:version)
-        
+
         :return: the reference
 
         Args:
@@ -2027,24 +2227,26 @@ class DocumentStore:
         Returns:
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
         Args:
           uuid_value: the ID of the ContentObject
-          uuid_value: str: 
+          uuid_value: str:
 
         Returns:
           A document (or None if not found)
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def list_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;List the content objects in the store
-        
+
         :return: a list of the content objects
 
         Args:
@@ -2052,8 +2254,9 @@ class DocumentStore:
         Returns:
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                        document: Document):
         &#34;&#34;&#34;Add a document to a family as a new transition
@@ -2062,31 +2265,32 @@ class DocumentStore:
           document_family_id: the ID for the document family
           document_relationship: the document transition
           document: the document
-          document_family_id: str: 
-          document: Document: 
+          document_family_id: str:
+          document: Document:
 
         Returns:
           None
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
-    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+    @abc.abstractmethod
+    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a document for a given content object
 
         Args:
           content_object: the content object
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
-          the Document
+          the Document (or None if not found)
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
     def list(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;Print out a table listing the content objects in the store
-        
+
         :return: The list of content objects
 
         Args:
@@ -2110,11 +2314,12 @@ class DocumentStore:
         objects = self.query_objects(query)
         self._draw_table(objects)
 
+    @abc.abstractmethod
     def register_listener(self, listener):
         &#34;&#34;&#34;Register a listener to this store.
-        
+
         A store listener must have the method
-        
+
             process_event(content_event:ContentEvent)
 
         Args:
@@ -2124,7 +2329,7 @@ class DocumentStore:
           None
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
     def _draw_table(self, objects):
         &#34;&#34;&#34;Internal method to draw a table
@@ -2152,37 +2357,54 @@ class DocumentStore:
 
         print(table)
 
+    @abc.abstractmethod
     def query_objects(self, query: str) -&gt; List[ContentObject]:
         &#34;&#34;&#34;
 
         Args:
-          query: str: 
+          query: str:
 
         Returns:
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def put(self, path: str, document: Document):
         &#34;&#34;&#34;Puts a new document in the store with the given path.
-        
+
         There mustn&#39;t be a family in the path, this method will create a new family based around the
         document
 
         Args:
           path: the path you wish to add the document in the store
           document: the document
-          path: str: 
-          document: Document: 
+          path: str:
+          document: Document:
 
         Returns:
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
+        &#34;&#34;&#34;
+        Returns the document family (or None is not available) for a specific path in the store
+
+        Args:
+            path:str the path within the store
+
+        Returns:
+            The document family, or None is no family exists at that path
+
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def count(self) -&gt; int:
         &#34;&#34;&#34;The number of document families in the store
-        
+
         :return: the count of families
 
         Args:
@@ -2190,7 +2412,7 @@ class DocumentStore:
         Returns:
 
         &#34;&#34;&#34;
-        return 0
+        raise NotImplementedError
 
     def accept(self, document: Document):
         &#34;&#34;&#34;Determine if the store will accept this document.  This would typically mean that the store does
@@ -2198,7 +2420,7 @@ class DocumentStore:
 
         Args:
           document: the document to check
-          document: Document: 
+          document: Document:
 
         Returns:
           True if there is no current family at derived path, False is there is one
@@ -2215,7 +2437,7 @@ class ModelStore:
 
         Args:
           path: the path to get content from
-          path: str: 
+          path: str:
 
         Returns:
           Bytes or None is there is nothing at the path
@@ -2227,8 +2449,8 @@ class ModelStore:
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
-          content: 
+          path: str:
+          content:
 
         Returns:
 
@@ -2257,6 +2479,96 @@ class ContentObjectReference:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="kodexa.model.model.ContentEvent"><code class="flex name class">
+<span>class <span class="ident">ContentEvent</span></span>
+<span>(</span><span>content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>, event_type: <a title="kodexa.model.model.ContentEventType" href="#kodexa.model.model.ContentEventType">ContentEventType</a>, document_family)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A content event represents a change, update or deletion that has occurred in a document family
+in a store, and can be relayed for a reaction</p>
+<p>Initialize a content event</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>the content object on which the event occurred</dd>
+<dt><strong><code>event_type</code></strong></dt>
+<dd>the type of event</dd>
+<dt><strong><code>document_family</code></strong></dt>
+<dd>the document family to which the object belongs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ContentEvent:
+    &#34;&#34;&#34;A content event represents a change, update or deletion that has occurred in a document family
+    in a store, and can be relayed for a reaction
+    &#34;&#34;&#34;
+
+    def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
+        &#34;&#34;&#34;
+        Initialize a content event
+        Args:
+            content_object: the content object on which the event occurred
+            event_type: the type of event
+            document_family: the document family to which the object belongs
+        &#34;&#34;&#34;
+        self.content_object = content_object
+        &#34;&#34;&#34;The content object that raised the event&#34;&#34;&#34;
+        self.event_type = event_type
+        &#34;&#34;&#34;The event type&#34;&#34;&#34;
+        self.document_family: DocumentFamily = document_family
+        &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.ContentEvent.content_object"><code class="name">var <span class="ident">content_object</span></code></dt>
+<dd>
+<div class="desc"><p>The content object that raised the event</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentEvent.document_family"><code class="name">var <span class="ident">document_family</span></code></dt>
+<dd>
+<div class="desc"><p>The document family containing the content object</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentEvent.event_type"><code class="name">var <span class="ident">event_type</span></code></dt>
+<dd>
+<div class="desc"><p>The event type</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.model.model.ContentEventType"><code class="flex name class">
+<span>class <span class="ident">ContentEventType</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The type of event that occurred on the content</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ContentEventType(Enum):
+    &#34;&#34;&#34;
+    The type of event that occurred on the content
+    &#34;&#34;&#34;
+    NEW_OBJECT = &#39;NEW_OBJECT&#39;
+    DERIVED_DOCUMENT = &#39;DERIVED_DOCUMENT&#39;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="kodexa.model.model.ContentEventType.DERIVED_DOCUMENT"><code class="name">var <span class="ident">DERIVED_DOCUMENT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="kodexa.model.model.ContentEventType.NEW_OBJECT"><code class="name">var <span class="ident">NEW_OBJECT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="kodexa.model.model.ContentFeature"><code class="flex name class">
 <span>class <span class="ident">ContentFeature</span></span>
 <span>(</span><span>feature_type, name, value, description=None, single=True)</span>
@@ -2362,9 +2674,9 @@ ensure that the correct mixins are applied.</p>
 <pre><code class="python">class ContentNode(object):
     &#34;&#34;&#34;A Content Node identifies a section of the document containing logical
     grouping of information.
-    
+
     The node will have content and can include any number of features.
-    
+
     You should always create a node using the Document&#39;s create_node method to
     ensure that the correct mixins are applied.
 
@@ -2375,7 +2687,7 @@ ensure that the correct mixins are applied.</p>
     &gt;&gt;&gt; new_page = document.create_node(node_type=&#39;page&#39;, content=&#39;This is page 1&#39;)
     &lt;kodexa.model.model.ContentNode object at 0x7f80605e53c8&gt;
     &gt;&gt;&gt; current_content_node.add_child(new_page)
-    
+
     or
 
     Args:
@@ -2445,8 +2757,8 @@ ensure that the correct mixins are applied.</p>
         Args:
           Document: document: The Kodexa document from which the new ContentNode will be created (not added).
           dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
-          document: 
-          content_node_dict: Dict: 
+          document:
+          content_node_dict: Dict:
 
         Returns:
           ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
@@ -2506,7 +2818,7 @@ ensure that the correct mixins are applied.</p>
         Args:
           ContentNode: child: The node that will be added as a child of this node
           index(int, optional, optional): The index at which this child node should be added; defaults to None.  If None, index is set as the count of child node elements.
-          child: 
+          child:
 
         Returns:
 
@@ -2540,9 +2852,9 @@ ensure that the correct mixins are applied.</p>
           str: feature_type: The type of feature to be added to the node.
           str: name: The name of the feature.
           Any: value: The value of the feature.
-          feature_type: 
-          name: 
-          value: 
+          feature_type:
+          name:
+          value:
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode
@@ -2556,7 +2868,7 @@ ensure that the correct mixins are applied.</p>
 
     def add_feature(self, feature_type, name, value, single=True, serialized=False):
         &#34;&#34;&#34;Add a new feature to this ContentNode.
-        
+
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
         Args:
@@ -2565,9 +2877,9 @@ ensure that the correct mixins are applied.</p>
           Any: value: The value of the feature.
           single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
           serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-          feature_type: 
-          name: 
-          value: 
+          feature_type:
+          name:
+          value:
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -2592,7 +2904,7 @@ ensure that the correct mixins are applied.</p>
                         exclude_nodes: Optional[List] = None):
         &#34;&#34;&#34;Delete the children of this node, you can either supply a list of the nodes to delete
            or the nodes to exclude from the delete, if neither are supplied then we delete all the children.
-        
+
            Note there is precedence in place, if you have provided a list of nodes to delete then the nodes
            to exclude is ignored.
 
@@ -2632,8 +2944,8 @@ ensure that the correct mixins are applied.</p>
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
@@ -2648,7 +2960,7 @@ ensure that the correct mixins are applied.</p>
 
         Args:
           str: feature_type: The type of the feature.
-          feature_type: 
+          feature_type:
 
         Returns:
           list[ContentFeature]: A list of feature with the specified type.  If no features are found, an empty list is returned.
@@ -2664,8 +2976,8 @@ ensure that the correct mixins are applied.</p>
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           bool: True if the feature is present; else, False.
@@ -2692,8 +3004,8 @@ ensure that the correct mixins are applied.</p>
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
 
@@ -2709,8 +3021,8 @@ ensure that the correct mixins are applied.</p>
         Args:
           str: feature_type: The type of the feature.
           str: name: The name of the feature.
-          feature_type: 
-          name: 
+          feature_type:
+          name:
 
         Returns:
           Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
@@ -2751,21 +3063,21 @@ ensure that the correct mixins are applied.</p>
 
     def select(self, selector, variables=None):
         &#34;&#34;&#34;Select and return the child nodes of this node that match the selector value.
-        
-        
+
+
         or
 
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           list[ContentNode]: A list of the matching content nodes.  If no matches are found, the list will be empty.
 
         &gt;&gt;&gt; document.get_root().select(&#39;.&#39;)
            [ContentNode]
-        
+
         &gt;&gt;&gt; document.get_root().select(&#39;//*[hasTag($tagName)]&#39;, {&#34;tagName&#34;: &#34;div&#34;})
            [ContentNode]
         &#34;&#34;&#34;
@@ -2778,24 +3090,24 @@ ensure that the correct mixins are applied.</p>
     def select_as_node(self, selector, variables=None):
         &#34;&#34;&#34;Select and return the child nodes of this content node that match the selector value.
         Matching nodes will be returned as the children of a new proxy content node.
-        
+
         Note this doesn&#39;t impact this content node&#39;s children.  They are not adopted by the proxy node,
         therefore their parents remain intact.
-        
-        
+
+
         or
 
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           ContentNode: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
 
         &gt;&gt;&gt; document.content_node.select_as_node(&#39;//line&#39;)
            ContentNode
-        
+
         &gt;&gt;&gt; document.get_root().select_as_node(&#39;//*[hasTag($tagName)]&#39;, {&#34;tagName&#34;: &#34;div&#34;})
            ContentNode
         &#34;&#34;&#34;
@@ -2826,14 +3138,14 @@ ensure that the correct mixins are applied.</p>
 
     def move_child_to_parent(self, target_child, target_parent):
         &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
-        
+
         It will be added to the end of the parent
 
         Args:
           ContentNode: target_child: The child node that will be moved to a new parent node (target_parent).
           ContentNode: target_parent: The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
-          target_child: 
-          target_parent: 
+          target_child:
+          target_parent:
 
         Returns:
 
@@ -2853,7 +3165,7 @@ ensure that the correct mixins are applied.</p>
         Args:
           list: ContentNode] children: A list of ContentNodes that will be added to the end of this node&#39;s children collection
           bool: replace: If True, will remove all current children and replace them with the new list; defaults to True
-          children: 
+          children:
           replace:  (Default value = False)
 
         Returns:
@@ -2876,7 +3188,7 @@ ensure that the correct mixins are applied.</p>
 
         Args:
           str: tag_name: The name of the tag that should be removed.
-          tag_name: 
+          tag_name:
 
         Returns:
 
@@ -2932,7 +3244,7 @@ ensure that the correct mixins are applied.</p>
 
         Args:
           ContentNode: end_node: The node to end at
-          end_node: 
+          end_node:
 
         Returns:
           list[ContentNode]: A list of sibling nodes between this node and the end_node.
@@ -2956,8 +3268,8 @@ ensure that the correct mixins are applied.</p>
           ContentNode: end_node: The node to end with
           str: tag_to_apply: The tag name that will be applied to each node
           str: tag_uuid: The tag uuid used if you want to group them
-          end_node: 
-          tag_to_apply: 
+          end_node:
+          tag_to_apply:
           tag_uuid: str:  (Default value = None)
 
         Returns:
@@ -3021,8 +3333,8 @@ ensure that the correct mixins are applied.</p>
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None):
         &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
-        
-        
+
+
         Note that if you use the flag use_all_content then node_only will default to True if not set, else it
         will default to False
 
@@ -3059,7 +3371,7 @@ ensure that the correct mixins are applied.</p>
             &#34;&#34;&#34;
 
             Args:
-              tag_uuid: 
+              tag_uuid:
 
             Returns:
 
@@ -3073,11 +3385,11 @@ ensure that the correct mixins are applied.</p>
             &#34;&#34;&#34;
 
             Args:
-              node_to_check: 
-              start: 
-              end: 
-              node_data: 
-              tag_uuid: 
+              node_to_check:
+              start:
+              end:
+              node_data:
+              tag_uuid:
 
             Returns:
 
@@ -3152,8 +3464,8 @@ ensure that the correct mixins are applied.</p>
 
     def get_tags(self):
         &#34;&#34;&#34;Returns a list of the names of the tags on the given node
-        
-        
+
+
         :return: A list of the tag name
 
         Args:
@@ -3193,7 +3505,7 @@ ensure that the correct mixins are applied.</p>
           tag_name: tag name
           include_children: include the children of this node
           value_separator: the string to be used to join related tag values
-          tag_name: str: 
+          tag_name: str:
           include_children: bool:  (Default value = False)
           value_separator: str:  (Default value = &#39; &#39;)
 
@@ -3206,8 +3518,8 @@ ensure that the correct mixins are applied.</p>
             &#34;&#34;&#34;
 
             Args:
-              group_dict: 
-              feature_val: 
+              group_dict:
+              feature_val:
 
             Returns:
 
@@ -3299,7 +3611,7 @@ ensure that the correct mixins are applied.</p>
 
         Args:
           str: tag: The name of the tag.
-          tag: 
+          tag:
 
         Returns:
           bool: True if node has a tag by the specified name; else, False;
@@ -3348,9 +3660,9 @@ ensure that the correct mixins are applied.</p>
           Any: value: The feature value.
           direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
           instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
-          feature_type: 
-          feature_name: 
-          value: 
+          feature_type:
+          feature_name:
+          value:
 
         Returns:
           ContentNode or None: Matching node (if found), or None.
@@ -3374,9 +3686,9 @@ ensure that the correct mixins are applied.</p>
           str: feature_name: The feature name.
           Any: value: The feature value.
           direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-          feature_type: 
-          feature_name: 
-          value: 
+          feature_type:
+          feature_name:
+          value:
 
         Returns:
           list[ContentNode]: list of the matching content nodes
@@ -3446,14 +3758,14 @@ ensure that the correct mixins are applied.</p>
     def get_node_at_index(self, index):
         &#34;&#34;&#34;Returns the child node at the specified index. If the specified index is outside the first (0), or
         last child&#39;s index, None is returned.
-        
+
         Note:  documents allow for sparse representation and child nodes may not have consecutive index numbers.
         If there isn&#39;t a child node at the specfied index, a &#39;virtual&#39; node will be returned.  This &#39;virtual&#39; node
         will have the node type of its nearest sibling and will have an index value, but will have no features or content.
 
         Args:
           int: index: The index (zero-based) for the child node.
-          index: 
+          index:
 
         Returns:
           ContentNode or None: Node at index, or None if the index is outside the boundaries of child nodes.
@@ -3514,7 +3826,7 @@ ensure that the correct mixins are applied.</p>
 
     def next_node(self, node_type_re=&#39;.*&#39;, skip_virtual=False, has_no_content=True):
         &#34;&#34;&#34;Returns the next sibling content node.
-        
+
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
@@ -3545,7 +3857,7 @@ ensure that the correct mixins are applied.</p>
 
     def previous_node(self, node_type_re=&#39;.*&#39;, skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
         &#34;&#34;&#34;Returns the previous sibling content node.
-        
+
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the previous node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
         skip_virtual parameter to False.
@@ -3618,12 +3930,12 @@ ensure that the correct mixins are applied.</p>
         regular expressions using compiled expressions
 
         Args:
-          value_re_compiled: 
-          node_type_re_compiled: 
-          direction: 
-          tag_name: 
-          tag_name_compiled: 
-          use_all_content: 
+          value_re_compiled:
+          node_type_re_compiled:
+          direction:
+          tag_name:
+          tag_name_compiled:
+          use_all_content:
 
         Returns:
 
@@ -3671,10 +3983,9 @@ ensure that the correct mixins are applied.</p>
 <dt><strong><code>dict</code></strong></dt>
 <dd>content_node_dict: The dictionary-structured representation of a ContentNode.
 This value will be unpacked into a ContentNode.</dd>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
+<dt>document:</dt>
 <dt><strong><code>content_node_dict</code></strong></dt>
-<dd>Dict: </dd>
+<dd>Dict:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -3694,8 +4005,8 @@ def from_dict(document, content_node_dict: Dict):
     Args:
       Document: document: The Kodexa document from which the new ContentNode will be created (not added).
       dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
-      document: 
-      content_node_dict: Dict: 
+      document:
+      content_node_dict: Dict:
 
     Returns:
       ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
@@ -3745,12 +4056,11 @@ def from_dict(document, content_node_dict: Dict):
 <dl>
 <dt><strong><code>ContentNode</code></strong></dt>
 <dd>child: The node that will be added as a child of this node</dd>
-<dt>index(int, optional, optional): The index at which this child node should be added; defaults to None.
-If None, index is set as the count of child node elements.</dt>
-<dt><strong><code>child</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
-<p>Returns:</p>
+<p>index(int, optional, optional): The index at which this child node should be added; defaults to None.
+If None, index is set as the count of child node elements.
+child:
+Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; new_page = document.create_node(node_type='page')
     &lt;kodexa.model.model.ContentNode object at 0x7f80605e53c8&gt;
     &gt;&gt;&gt; current_content_node.add_child(new_page)
@@ -3765,7 +4075,7 @@ If None, index is set as the count of child node elements.</dt>
     Args:
       ContentNode: child: The node that will be added as a child of this node
       index(int, optional, optional): The index at which this child node should be added; defaults to None.  If None, index is set as the count of child node elements.
-      child: 
+      child:
 
     Returns:
 
@@ -3833,15 +4143,12 @@ If None, index is set as the count of child node elements.</dt>
 <dd>name: The name of the feature.</dd>
 <dt><strong><code>Any</code></strong></dt>
 <dd>value: The value of the feature.</dd>
-<dt>single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.</dt>
-<dt>serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.</dt>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>name</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>value</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
+serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
+feature_type:
+name:
+value:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code></dt>
@@ -3857,7 +4164,7 @@ If None, index is set as the count of child node elements.</dt>
 </summary>
 <pre><code class="python">def add_feature(self, feature_type, name, value, single=True, serialized=False):
     &#34;&#34;&#34;Add a new feature to this ContentNode.
-    
+
     Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
     Args:
@@ -3866,9 +4173,9 @@ If None, index is set as the count of child node elements.</dt>
       Any: value: The value of the feature.
       single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
       serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-      feature_type: 
-      name: 
-      value: 
+      feature_type:
+      name:
+      value:
 
     Returns:
       ContentFeature: The feature that was added to this ContentNode.
@@ -3901,8 +4208,7 @@ If None, index is set as the count of child node elements.</dt>
 <dd>ContentNode] children: A list of ContentNodes that will be added to the end of this node's children collection</dd>
 <dt><strong><code>bool</code></strong></dt>
 <dd>replace: If True, will remove all current children and replace them with the new list; defaults to True</dd>
-<dt><strong><code>children</code></strong></dt>
-<dd>&nbsp;</dd>
+<dt>children:</dt>
 <dt><strong><code>replace</code></strong></dt>
 <dd>(Default value = False)</dd>
 </dl>
@@ -3921,7 +4227,7 @@ If None, index is set as the count of child node elements.</dt>
     Args:
       list: ContentNode] children: A list of ContentNodes that will be added to the end of this node&#39;s children collection
       bool: replace: If True, will remove all current children and replace them with the new list; defaults to True
-      children: 
+      children:
       replace:  (Default value = False)
 
     Returns:
@@ -3949,9 +4255,8 @@ If None, index is set as the count of child node elements.</dt>
 <dl>
 <dt><strong><code>ContentNode</code></strong></dt>
 <dd>end_node: The node to end at</dd>
-<dt><strong><code>end_node</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>end_node:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[<a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a>]</code></dt>
@@ -3968,7 +4273,7 @@ If None, index is set as the count of child node elements.</dt>
 
     Args:
       ContentNode: end_node: The node to end at
-      end_node: 
+      end_node:
 
     Returns:
       list[ContentNode]: A list of sibling nodes between this node and the end_node.
@@ -4089,7 +4394,7 @@ to exclude is ignored.</p>
                     exclude_nodes: Optional[List] = None):
     &#34;&#34;&#34;Delete the children of this node, you can either supply a list of the nodes to delete
        or the nodes to exclude from the delete, if neither are supplied then we delete all the children.
-    
+
        Note there is precedence in place, if you have provided a list of nodes to delete then the nodes
        to exclude is ignored.
 
@@ -4190,16 +4495,13 @@ use_all_content(bool, optional, optional): Match content_re against the content 
 <dd>feature_name: The feature name.</dd>
 <dt><strong><code>Any</code></strong></dt>
 <dd>value: The feature value.</dd>
-<dt>direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.</dt>
-<dt>instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).
-Value must be greater than zero; default is 1.</dt>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>feature_name</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>value</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
+instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).
+Value must be greater than zero; default is 1.
+feature_type:
+feature_name:
+value:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a></code> or <code>None</code></dt>
@@ -4221,9 +4523,9 @@ Value must be greater than zero; default is 1.</dt>
       Any: value: The feature value.
       direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
       instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
-      feature_type: 
-      feature_name: 
-      value: 
+      feature_type:
+      feature_name:
+      value:
 
     Returns:
       ContentNode or None: Matching node (if found), or None.
@@ -4302,21 +4604,13 @@ use_all_content(bool, optional, optional): Match content_re against the content 
 <div class="desc"><p>Search for a node that matches on the value and or type using
 regular expressions using compiled expressions</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>value_re_compiled</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>node_type_re_compiled</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>direction</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>tag_name</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>tag_name_compiled</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>use_all_content</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>value_re_compiled:
+node_type_re_compiled:
+direction:
+tag_name:
+tag_name_compiled:
+use_all_content:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -4327,12 +4621,12 @@ regular expressions using compiled expressions</p>
     regular expressions using compiled expressions
 
     Args:
-      value_re_compiled: 
-      node_type_re_compiled: 
-      direction: 
-      tag_name: 
-      tag_name_compiled: 
-      use_all_content: 
+      value_re_compiled:
+      node_type_re_compiled:
+      direction:
+      tag_name:
+      tag_name_compiled:
+      use_all_content:
 
     Returns:
 
@@ -4380,14 +4674,11 @@ regular expressions using compiled expressions</p>
 <dd>feature_name: The feature name.</dd>
 <dt><strong><code>Any</code></strong></dt>
 <dd>value: The feature value.</dd>
-<dt>direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.</dt>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>feature_name</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>value</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
+feature_type:
+feature_name:
+value:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[<a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a>]</code></dt>
@@ -4408,9 +4699,9 @@ regular expressions using compiled expressions</p>
       str: feature_name: The feature name.
       Any: value: The feature value.
       direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-      feature_type: 
-      feature_name: 
-      value: 
+      feature_type:
+      feature_name:
+      value:
 
     Returns:
       list[ContentNode]: list of the matching content nodes
@@ -4579,11 +4870,9 @@ regular expressions using compiled expressions</p>
 <dd>feature_type: The type of the feature.</dd>
 <dt><strong><code>str</code></strong></dt>
 <dd>name: The name of the feature.</dd>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>name</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>feature_type:
+name:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code> or <code>None</code></dt>
@@ -4603,8 +4892,8 @@ If no feature is found, None is returned.</dd>
     Args:
       str: feature_type: The type of the feature.
       str: name: The name of the feature.
-      feature_type: 
-      name: 
+      feature_type:
+      name:
 
     Returns:
       ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
@@ -4626,11 +4915,9 @@ If no feature is found, None is returned.</dd>
 <dd>feature_type: The type of the feature.</dd>
 <dt><strong><code>str</code></strong></dt>
 <dd>name: The name of the feature.</dd>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>name</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>feature_type:
+name:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>Any</code> or <code>None</code></dt>
@@ -4649,8 +4936,8 @@ If no feature is found, None is returned.</dd>
     Args:
       str: feature_type: The type of the feature.
       str: name: The name of the feature.
-      feature_type: 
-      name: 
+      feature_type:
+      name:
 
     Returns:
       Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
@@ -4700,9 +4987,8 @@ If no feature is found, None is returned.</dd>
 <dl>
 <dt><strong><code>str</code></strong></dt>
 <dd>feature_type: The type of the feature.</dd>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>feature_type:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[<a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a>]</code></dt>
@@ -4721,7 +5007,7 @@ If no features are found, an empty list is returned.</dd>
 
     Args:
       str: feature_type: The type of the feature.
-      feature_type: 
+      feature_type:
 
     Returns:
       list[ContentFeature]: A list of feature with the specified type.  If no features are found, an empty list is returned.
@@ -4783,9 +5069,8 @@ will have the node type of its nearest sibling and will have an index value, but
 <dl>
 <dt><strong><code>int</code></strong></dt>
 <dd>index: The index (zero-based) for the child node.</dd>
-<dt><strong><code>index</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>index:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a></code> or <code>None</code></dt>
@@ -4798,14 +5083,14 @@ will have the node type of its nearest sibling and will have an index value, but
 <pre><code class="python">def get_node_at_index(self, index):
     &#34;&#34;&#34;Returns the child node at the specified index. If the specified index is outside the first (0), or
     last child&#39;s index, None is returned.
-    
+
     Note:  documents allow for sparse representation and child nodes may not have consecutive index numbers.
     If there isn&#39;t a child node at the specfied index, a &#39;virtual&#39; node will be returned.  This &#39;virtual&#39; node
     will have the node type of its nearest sibling and will have an index value, but will have no features or content.
 
     Args:
       int: index: The index (zero-based) for the child node.
-      index: 
+      index:
 
     Returns:
       ContentNode or None: Node at index, or None if the index is outside the boundaries of child nodes.
@@ -4885,7 +5170,7 @@ will have the node type of its nearest sibling and will have an index value, but
 <dt><strong><code>value_separator</code></strong></dt>
 <dd>the string to be used to join related tag values</dd>
 <dt><strong><code>tag_name</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>include_children</code></strong></dt>
 <dd>bool:
 (Default value = False)</dd>
@@ -4906,7 +5191,7 @@ will have the node type of its nearest sibling and will have an index value, but
       tag_name: tag name
       include_children: include the children of this node
       value_separator: the string to be used to join related tag values
-      tag_name: str: 
+      tag_name: str:
       include_children: bool:  (Default value = False)
       value_separator: str:  (Default value = &#39; &#39;)
 
@@ -4919,8 +5204,8 @@ will have the node type of its nearest sibling and will have an index value, but
         &#34;&#34;&#34;
 
         Args:
-          group_dict: 
-          feature_val: 
+          group_dict:
+          feature_val:
 
         Returns:
 
@@ -5056,8 +5341,8 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
 </summary>
 <pre><code class="python">def get_tags(self):
     &#34;&#34;&#34;Returns a list of the names of the tags on the given node
-    
-    
+
+
     :return: A list of the tag name
 
     Args:
@@ -5081,11 +5366,9 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
 <dd>feature_type: The type of the feature.</dd>
 <dt><strong><code>str</code></strong></dt>
 <dd>name: The name of the feature.</dd>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>name</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>feature_type:
+name:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>bool</code></dt>
@@ -5104,8 +5387,8 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
     Args:
       str: feature_type: The type of the feature.
       str: name: The name of the feature.
-      feature_type: 
-      name: 
+      feature_type:
+      name:
 
     Returns:
       bool: True if the feature is present; else, False.
@@ -5187,9 +5470,8 @@ skip_virtual(bool, optional, optional): Skip virtual nodes and return the next r
 <dl>
 <dt><strong><code>str</code></strong></dt>
 <dd>tag: The name of the tag.</dd>
-<dt><strong><code>tag</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>tag:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>bool</code></dt>
@@ -5209,7 +5491,7 @@ skip_virtual(bool, optional, optional): Skip virtual nodes and return the next r
 
     Args:
       str: tag: The name of the tag.
-      tag: 
+      tag:
 
     Returns:
       bool: True if node has a tag by the specified name; else, False;
@@ -5331,12 +5613,10 @@ skip_virtual(bool, optional, optional): Skip virtual nodes and return the next r
 <dt><strong><code>ContentNode</code></strong></dt>
 <dd>target_parent: The parent node that the target_child will be added to.
 The target_child will be added at the end of the children collection.</dd>
-<dt><strong><code>target_child</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>target_parent</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
-<p>Returns:</p>
+<p>target_child:
+target_parent:
+Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; # Get first node of type 'line' from the first page
     &gt;&gt;&gt; target_child = document.get_root().select('//page')[0].select('//line')[0]
     &gt;&gt;&gt; # Get sixth node of type 'page'
@@ -5350,14 +5630,14 @@ The target_child will be added at the end of the children collection.</dd>
 </summary>
 <pre><code class="python">def move_child_to_parent(self, target_child, target_parent):
     &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
-    
+
     It will be added to the end of the parent
 
     Args:
       ContentNode: target_child: The child node that will be moved to a new parent node (target_parent).
       ContentNode: target_parent: The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
-      target_child: 
-      target_parent: 
+      target_child:
+      target_parent:
 
     Returns:
 
@@ -5398,7 +5678,7 @@ has_no_content(bool, optional, optional): Allow a node that has no content to be
 </summary>
 <pre><code class="python">def next_node(self, node_type_re=&#39;.*&#39;, skip_virtual=False, has_no_content=True):
     &#34;&#34;&#34;Returns the next sibling content node.
-    
+
     Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
     Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
     skip_virtual parameter to False.
@@ -5455,7 +5735,7 @@ traverse(Traverse(enum), optional, optional): The transition you'd like to trave
 </summary>
 <pre><code class="python">def previous_node(self, node_type_re=&#39;.*&#39;, skip_virtual=False, has_no_content=False, traverse=Traverse.SIBLING):
     &#34;&#34;&#34;Returns the previous sibling content node.
-    
+
     Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
     Therefore, the previous node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
     skip_virtual parameter to False.
@@ -5506,12 +5786,10 @@ traverse(Traverse(enum), optional, optional): The transition you'd like to trave
 <dd>feature_type: The type of the feature.</dd>
 <dt><strong><code>str</code></strong></dt>
 <dd>name: The name of the feature.</dd>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>name</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
-<p>Returns:</p>
+<p>feature_type:
+name:
+Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; new_page.remove_feature('pagination','pageNum')
 </code></pre></div>
 <details class="source">
@@ -5524,8 +5802,8 @@ traverse(Traverse(enum), optional, optional): The transition you'd like to trave
     Args:
       str: feature_type: The type of the feature.
       str: name: The name of the feature.
-      feature_type: 
-      name: 
+      feature_type:
+      name:
 
     Returns:
 
@@ -5545,10 +5823,9 @@ traverse(Traverse(enum), optional, optional): The transition you'd like to trave
 <dl>
 <dt><strong><code>str</code></strong></dt>
 <dd>tag_name: The name of the tag that should be removed.</dd>
-<dt><strong><code>tag_name</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
-<p>Returns:</p>
+<p>tag_name:
+Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; document.get_root().remove_tag('foo')
 </code></pre></div>
 <details class="source">
@@ -5560,7 +5837,7 @@ traverse(Traverse(enum), optional, optional): The transition you'd like to trave
 
     Args:
       str: tag_name: The name of the tag that should be removed.
-      tag_name: 
+      tag_name:
 
     Returns:
 
@@ -5579,11 +5856,10 @@ traverse(Traverse(enum), optional, optional): The transition you'd like to trave
 <dl>
 <dt><strong><code>str</code></strong></dt>
 <dd>selector: The selector (ie. //*)</dd>
-<dt>variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.
-Dictionary keys should match a variable specified in the selector.</dt>
-<dt><strong><code>selector</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.
+Dictionary keys should match a variable specified in the selector.
+selector:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[<a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a>]</code></dt>
@@ -5602,21 +5878,21 @@ If no matches are found, the list will be empty.</dd>
 </summary>
 <pre><code class="python">def select(self, selector, variables=None):
     &#34;&#34;&#34;Select and return the child nodes of this node that match the selector value.
-    
-    
+
+
     or
 
     Args:
       str: selector: The selector (ie. //*)
       variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-      selector: 
+      selector:
 
     Returns:
       list[ContentNode]: A list of the matching content nodes.  If no matches are found, the list will be empty.
 
     &gt;&gt;&gt; document.get_root().select(&#39;.&#39;)
        [ContentNode]
-    
+
     &gt;&gt;&gt; document.get_root().select(&#39;//*[hasTag($tagName)]&#39;, {&#34;tagName&#34;: &#34;div&#34;})
        [ContentNode]
     &#34;&#34;&#34;
@@ -5641,11 +5917,10 @@ therefore their parents remain intact.</p>
 <dl>
 <dt><strong><code>str</code></strong></dt>
 <dd>selector: The selector (ie. //*)</dd>
-<dt>variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.
-Dictionary keys should match a variable specified in the selector.</dt>
-<dt><strong><code>selector</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.
+Dictionary keys should match a variable specified in the selector.
+selector:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a></code></dt>
@@ -5665,24 +5940,24 @@ If no matches are found, the list of children will be empty.</dd>
 <pre><code class="python">def select_as_node(self, selector, variables=None):
     &#34;&#34;&#34;Select and return the child nodes of this content node that match the selector value.
     Matching nodes will be returned as the children of a new proxy content node.
-    
+
     Note this doesn&#39;t impact this content node&#39;s children.  They are not adopted by the proxy node,
     therefore their parents remain intact.
-    
-    
+
+
     or
 
     Args:
       str: selector: The selector (ie. //*)
       variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-      selector: 
+      selector:
 
     Returns:
       ContentNode: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
 
     &gt;&gt;&gt; document.content_node.select_as_node(&#39;//line&#39;)
        ContentNode
-    
+
     &gt;&gt;&gt; document.get_root().select_as_node(&#39;//*[hasTag($tagName)]&#39;, {&#34;tagName&#34;: &#34;div&#34;})
        ContentNode
     &#34;&#34;&#34;
@@ -5704,13 +5979,10 @@ If no matches are found, the list of children will be empty.</dd>
 <dd>name: The name of the feature.</dd>
 <dt><strong><code>Any</code></strong></dt>
 <dd>value: The value of the feature.</dd>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>name</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>value</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>feature_type:
+name:
+value:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code></dt>
@@ -5731,9 +6003,9 @@ If no matches are found, the list of children will be empty.</dd>
       str: feature_type: The type of feature to be added to the node.
       str: name: The name of the feature.
       Any: value: The value of the feature.
-      feature_type: 
-      name: 
-      value: 
+      feature_type:
+      name:
+      value:
 
     Returns:
       ContentFeature: The feature that was added to this ContentNode
@@ -5797,8 +6069,8 @@ tag_uuid: str:
         use_all_content=False, node_only=None,
         fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None):
     &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
-    
-    
+
+
     Note that if you use the flag use_all_content then node_only will default to True if not set, else it
     will default to False
 
@@ -5835,7 +6107,7 @@ tag_uuid: str:
         &#34;&#34;&#34;
 
         Args:
-          tag_uuid: 
+          tag_uuid:
 
         Returns:
 
@@ -5849,11 +6121,11 @@ tag_uuid: str:
         &#34;&#34;&#34;
 
         Args:
-          node_to_check: 
-          start: 
-          end: 
-          node_data: 
-          tag_uuid: 
+          node_to_check:
+          start:
+          end:
+          node_data:
+          tag_uuid:
 
         Returns:
 
@@ -5940,10 +6212,8 @@ tag_uuid: str:
 <dd>tag_to_apply: The tag name that will be applied to each node</dd>
 <dt><strong><code>str</code></strong></dt>
 <dd>tag_uuid: The tag uuid used if you want to group them</dd>
-<dt><strong><code>end_node</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>tag_to_apply</code></strong></dt>
-<dd>&nbsp;</dd>
+<dt>end_node:</dt>
+<dt>tag_to_apply:</dt>
 <dt><strong><code>tag_uuid</code></strong></dt>
 <dd>str:
 (Default value = None)</dd>
@@ -5962,8 +6232,8 @@ tag_uuid: str:
       ContentNode: end_node: The node to end with
       str: tag_to_apply: The tag name that will be applied to each node
       str: tag_uuid: The tag uuid used if you want to group them
-      end_node: 
-      tag_to_apply: 
+      end_node:
+      tag_to_apply:
       tag_uuid: str:  (Default value = None)
 
     Returns:
@@ -6149,7 +6419,7 @@ a Kodexa document.</p>
 <pre><code class="python">class ContentObject:
     &#34;&#34;&#34;A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
     a Kodexa document.
-    
+
     The content object allows us to capture metadata about the document or the native file without changing it
 
     Args:
@@ -6186,7 +6456,7 @@ a Kodexa document.</p>
 
     def to_dict(self):
         &#34;&#34;&#34;Convert the content object to a dictionary
-        
+
         :return: dictionary
 
         Args:
@@ -6207,11 +6477,11 @@ a Kodexa document.</p>
     @classmethod
     def from_dict(cls, co_dict):
         &#34;&#34;&#34;Create a content object from a dictionary
-        
+
         :return: A content object
 
         Args:
-          co_dict: 
+          co_dict:
 
         Returns:
 
@@ -6231,11 +6501,8 @@ a Kodexa document.</p>
 <div class="desc"><p>Create a content object from a dictionary</p>
 <p>:return: A content object</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>co_dict</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>co_dict:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -6243,11 +6510,11 @@ a Kodexa document.</p>
 <pre><code class="python">@classmethod
 def from_dict(cls, co_dict):
     &#34;&#34;&#34;Create a content object from a dictionary
-    
+
     :return: A content object
 
     Args:
-      co_dict: 
+      co_dict:
 
     Returns:
 
@@ -6313,7 +6580,7 @@ def from_dict(cls, co_dict):
 </summary>
 <pre><code class="python">def to_dict(self):
     &#34;&#34;&#34;Convert the content object to a dictionary
-    
+
     :return: dictionary
 
     Args:
@@ -6434,7 +6701,7 @@ def from_dict(cls, co_dict):
 
         Args:
           label: str Label to add
-          label: str: 
+          label: str:
 
         Returns:
           the document
@@ -6450,7 +6717,7 @@ def from_dict(cls, co_dict):
 
         Args:
           label: str Label to remove
-          label: str: 
+          label: str:
 
         Returns:
           the document
@@ -6493,7 +6760,7 @@ def from_dict(cls, co_dict):
 
         Args:
           file_path: the path to the mdoc you wish to create
-          file_path: str: 
+          file_path: str:
 
         Returns:
 
@@ -6549,7 +6816,7 @@ def from_dict(cls, co_dict):
             &#34;&#34;&#34;
 
             Args:
-              d: 
+              d:
 
             Returns:
 
@@ -6581,7 +6848,7 @@ def from_dict(cls, co_dict):
 
         Args:
           dict: doc_dict: A dictionary representation of a Kodexa Document.
-          doc_dict: 
+          doc_dict:
 
         Returns:
           Document: A complete Kodexa Document
@@ -6615,7 +6882,7 @@ def from_dict(cls, co_dict):
 
         Args:
           str: json_string: A JSON string representation of a Kodexa Document
-          json_string: 
+          json_string:
 
         Returns:
           Document: A complete Kodexa Document
@@ -6648,7 +6915,7 @@ def from_dict(cls, co_dict):
         the node has the mixin appled.
 
         Args:
-          mixin: 
+          mixin:
 
         Returns:
 
@@ -6669,7 +6936,7 @@ def from_dict(cls, co_dict):
         &#39;Virtual&#39; nodes are synthesized as necessary to fill gaps in between non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
           ContentNode: parent: The parent for this newly created node; default is None;
           int: index: The index property to be set on this node; default is 0;
-          node_type: str: 
+          node_type: str:
           content: Optional[str]:  (Default value = None)
           virtual: bool:  (Default value = False)
           parent: ContentNode:  (Default value = None)
@@ -6724,7 +6991,7 @@ def from_dict(cls, co_dict):
         Args:
           str: url: The URL to which the new Document is connected.
           dict: headers: Headers that should be used when reading from the URL
-          url: 
+          url:
           headers:  (Default value = None)
 
         Returns:
@@ -6749,7 +7016,7 @@ def from_dict(cls, co_dict):
         Args:
           str: selector: The selector (ie. //*)
           variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-          selector: 
+          selector:
 
         Returns:
           list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
@@ -6821,9 +7088,8 @@ def from_dict(cls, co_dict):
 <dl>
 <dt><strong><code>dict</code></strong></dt>
 <dd>doc_dict: A dictionary representation of a Kodexa Document.</dd>
-<dt><strong><code>doc_dict</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>doc_dict:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></code></dt>
@@ -6841,7 +7107,7 @@ def from_dict(doc_dict):
 
     Args:
       dict: doc_dict: A dictionary representation of a Kodexa Document.
-      doc_dict: 
+      doc_dict:
 
     Returns:
       Document: A complete Kodexa Document
@@ -6925,9 +7191,8 @@ def from_file(cls, file, unpack: bool = False):
 <dl>
 <dt><strong><code>str</code></strong></dt>
 <dd>json_string: A JSON string representation of a Kodexa Document</dd>
-<dt><strong><code>json_string</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>json_string:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></code></dt>
@@ -6945,7 +7210,7 @@ def from_json(json_string):
 
     Args:
       str: json_string: A JSON string representation of a Kodexa Document
-      json_string: 
+      json_string:
 
     Returns:
       Document: A complete Kodexa Document
@@ -7080,8 +7345,7 @@ def from_text(cls, text, separator=None):
 <dd>url: The URL to which the new Document is connected.</dd>
 <dt><strong><code>dict</code></strong></dt>
 <dd>headers: Headers that should be used when reading from the URL</dd>
-<dt><strong><code>url</code></strong></dt>
-<dd>&nbsp;</dd>
+<dt>url:</dt>
 <dt><strong><code>headers</code></strong></dt>
 <dd>(Default value = None)</dd>
 </dl>
@@ -7101,7 +7365,7 @@ def from_url(cls, url, headers=None):
     Args:
       str: url: The URL to which the new Document is connected.
       dict: headers: Headers that should be used when reading from the URL
-      url: 
+      url:
       headers:  (Default value = None)
 
     Returns:
@@ -7134,7 +7398,7 @@ def from_url(cls, url, headers=None):
 <dt><strong><code>label</code></strong></dt>
 <dd>str Label to add</dd>
 <dt><strong><code>label</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>the document</p></div>
@@ -7147,7 +7411,7 @@ def from_url(cls, url, headers=None):
 
     Args:
       label: str Label to add
-      label: str: 
+      label: str:
 
     Returns:
       the document
@@ -7168,11 +7432,8 @@ this will apply the mixin to all the content nodes,
 and also register it with the document so that future invocations of create_node will ensure
 the node has the mixin appled.</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>mixin</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p>
+<p>mixin:
+Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; document.add_mixin('spatial')
 </code></pre></div>
 <details class="source">
@@ -7185,7 +7446,7 @@ the node has the mixin appled.</p>
     the node has the mixin appled.
 
     Args:
-      mixin: 
+      mixin:
 
     Returns:
 
@@ -7249,7 +7510,7 @@ index: int:
     &#39;Virtual&#39; nodes are synthesized as necessary to fill gaps in between non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
       ContentNode: parent: The parent for this newly created node; default is None;
       int: index: The index property to be set on this node; default is 0;
-      node_type: str: 
+      node_type: str:
       content: Optional[str]:  (Default value = None)
       virtual: bool:  (Default value = False)
       parent: ContentNode:  (Default value = None)
@@ -7336,7 +7597,7 @@ index: int:
 <dt><strong><code>label</code></strong></dt>
 <dd>str Label to remove</dd>
 <dt><strong><code>label</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>the document</p></div>
@@ -7349,7 +7610,7 @@ index: int:
 
     Args:
       label: str Label to remove
-      label: str: 
+      label: str:
 
     Returns:
       the document
@@ -7368,11 +7629,10 @@ index: int:
 <dl>
 <dt><strong><code>str</code></strong></dt>
 <dd>selector: The selector (ie. //*)</dd>
-<dt>variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.
-Dictionary keys should match a variable specified in the selector.</dt>
-<dt><strong><code>selector</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p>variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.
+Dictionary keys should match a variable specified in the selector.
+selector:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[ContentNodes]</code></dt>
@@ -7392,7 +7652,7 @@ If no matches found, list is empty.</dd>
     Args:
       str: selector: The selector (ie. //*)
       variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-      selector: 
+      selector:
 
     Returns:
       list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
@@ -7491,7 +7751,7 @@ All ContentNodes on this Document that match the selector value are added as the
         &#34;&#34;&#34;
 
         Args:
-          d: 
+          d:
 
         Returns:
 
@@ -7559,7 +7819,7 @@ used with the Kodexa platform</p>
 <dt><strong><code>file_path</code></strong></dt>
 <dd>the path to the mdoc you wish to create</dd>
 <dt><strong><code>file_path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; document.to_mdoc('my-document.kdxa')
@@ -7574,7 +7834,7 @@ used with the Kodexa platform</p>
 
     Args:
       file_path: the path to the mdoc you wish to create
-      file_path: str: 
+      file_path: str:
 
     Returns:
 
@@ -7596,6 +7856,319 @@ used with the Kodexa platform</p>
 <pre><code class="python">def to_msgpack(self):
     &#34;&#34;&#34;Convert this document object structure into a message pack&#34;&#34;&#34;
     return msgpack.packb(self.to_dict(), use_bin_type=True)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.model.model.DocumentActor"><code class="flex name class">
+<span>class <span class="ident">DocumentActor</span></span>
+<span>(</span><span>actor_id: str, actor_type: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A document actor is something that can create a new document in a family and is
+part of the document transition</p>
+<p>Initialize a document actor</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>actor_id</code></strong></dt>
+<dd>the ID of the actor (this typically has meaning within the scope of the actor type)</dd>
+<dt><strong><code>actor_type</code></strong></dt>
+<dd>the type of actor</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentActor:
+    &#34;&#34;&#34;A document actor is something that can create a new document in a family and is
+    part of the document transition
+    &#34;&#34;&#34;
+
+    def __init__(self, actor_id: str, actor_type: str):
+        &#34;&#34;&#34;
+        Initialize a document actor
+
+        Args:
+            actor_id: the ID of the actor (this typically has meaning within the scope of the actor type)
+            actor_type: the type of actor
+        &#34;&#34;&#34;
+        self.actor_id = actor_id
+        &#34;&#34;&#34;The ID of the actor (based on the type)&#34;&#34;&#34;
+        self.actor_type = actor_type
+        &#34;&#34;&#34;The type of actor&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.DocumentActor.actor_id"><code class="name">var <span class="ident">actor_id</span></code></dt>
+<dd>
+<div class="desc"><p>The ID of the actor (based on the type)</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentActor.actor_type"><code class="name">var <span class="ident">actor_type</span></code></dt>
+<dd>
+<div class="desc"><p>The type of actor</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily"><code class="flex name class">
+<span>class <span class="ident">DocumentFamily</span></span>
+<span>(</span><span>path: str, store_ref: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A document family represents a collection of related documents which together represent different views of the same
+source material</p>
+<p>This approach allows parsed representations to he linked to native, derived representations, labelled etc all to be
+part of a family of content views that can be used together to understand the document and its content</p>
+<p>Creates a new document family at the given path and optionally with the
+document as its first entry</p>
+<p>:param path: the path at which this document family exists (i.e. my-file.pdf)
+:param store_ref: the reference to the store holding this family</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentFamily:
+    &#34;&#34;&#34;A document family represents a collection of related documents which together represent different views of the same
+    source material
+
+    This approach allows parsed representations to he linked to native, derived representations, labelled etc all to be
+    part of a family of content views that can be used together to understand the document and its content
+
+    &#34;&#34;&#34;
+
+    def __init__(self, path: str, store_ref: str):
+        &#34;&#34;&#34;
+        Creates a new document family at the given path and optionally with the
+        document as its first entry
+
+        :param path: the path at which this document family exists (i.e. my-file.pdf)
+        :param store_ref: the reference to the store holding this family
+        &#34;&#34;&#34;
+        self.id: str = str(uuid.uuid4())
+        self.transitions: List[DocumentTransition] = []
+        self.content_objects: List[ContentObject] = []
+        self.path = path
+        self.store_ref = store_ref
+
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
+        &#34;&#34;&#34;
+
+        Args:
+          document: Document:
+          transition: DocumentTransition:  (Default value = None)
+
+        Returns:
+
+        &#34;&#34;&#34;
+        new_content_object = ContentObject()
+        new_content_object.store_ref = self.store_ref
+        new_content_object.content_type = ContentType.DOCUMENT
+        new_content_object.metadata = document.metadata
+        new_content_object.labels = document.labels
+
+        self.content_objects.append(new_content_object)
+
+        if transition is not None:
+            transition.destination_content_object_id = new_content_object.id
+            self.transitions.append(transition)
+
+        new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
+        return new_event
+
+    def get_latest_content(self) -&gt; ContentObject:
+        &#34;&#34;&#34;Returns the latest content object that we have in place
+
+        Returns:
+            The latest content object in the family
+        &#34;&#34;&#34;
+        return self.content_objects[-1]
+
+    def get_content_objects(self) -&gt; List[ContentObject]:
+        &#34;&#34;&#34;Returns all the content objects in the family
+
+        Returns:
+            a list of the content objects
+
+
+        &#34;&#34;&#34;
+        return self.content_objects
+
+    def get_document_count(self) -&gt; int:
+        &#34;&#34;&#34;
+        Count of content objects in the family
+
+        Returns:
+          number of documents in the family
+
+        &#34;&#34;&#34;
+        return len(self.content_objects)
+
+    @classmethod
+    def from_dict(cls, family_dict: dict):
+        &#34;&#34;&#34;
+        Convert a dictionary from a REST call into the Document Family
+
+        Args:
+            param: the document family object as a dictionary
+
+        Returns:
+            An instance of the document family
+        &#34;&#34;&#34;
+        document_family = DocumentFamily(family_dict[&#39;path&#39;], family_dict[&#39;storeRef&#39;])
+        document_family.id = family_dict[&#39;id&#39;]
+        document_family.content_objects = []
+        for co_dict in family_dict[&#39;contentObjects&#39;]:
+            document_family.content_objects.append(ContentObject.from_dict(co_dict))
+        for transition_dict in family_dict[&#39;documentTransitions&#39;]:
+            document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
+        return document_family</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.model.model.DocumentFamily.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>family_dict: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert a dictionary from a REST call into the Document Family</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>param</code></strong></dt>
+<dd>the document family object as a dictionary</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>An instance of the document family</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_dict(cls, family_dict: dict):
+    &#34;&#34;&#34;
+    Convert a dictionary from a REST call into the Document Family
+
+    Args:
+        param: the document family object as a dictionary
+
+    Returns:
+        An instance of the document family
+    &#34;&#34;&#34;
+    document_family = DocumentFamily(family_dict[&#39;path&#39;], family_dict[&#39;storeRef&#39;])
+    document_family.id = family_dict[&#39;id&#39;]
+    document_family.content_objects = []
+    for co_dict in family_dict[&#39;contentObjects&#39;]:
+        document_family.content_objects.append(ContentObject.from_dict(co_dict))
+    for transition_dict in family_dict[&#39;documentTransitions&#39;]:
+        document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
+    return document_family</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.model.model.DocumentFamily.add_document"><code class="name flex">
+<span>def <span class="ident">add_document</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, transition: Union[<a title="kodexa.model.model.DocumentTransition" href="#kodexa.model.model.DocumentTransition">DocumentTransition</a>, NoneType] = None) ‑> <a title="kodexa.model.model.ContentEvent" href="#kodexa.model.model.ContentEvent">ContentEvent</a></span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document</code></strong></dt>
+<dd>Document:</dd>
+<dt><strong><code>transition</code></strong></dt>
+<dd>DocumentTransition:
+(Default value = None)</dd>
+</dl>
+<p>Returns:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
+    &#34;&#34;&#34;
+
+    Args:
+      document: Document:
+      transition: DocumentTransition:  (Default value = None)
+
+    Returns:
+
+    &#34;&#34;&#34;
+    new_content_object = ContentObject()
+    new_content_object.store_ref = self.store_ref
+    new_content_object.content_type = ContentType.DOCUMENT
+    new_content_object.metadata = document.metadata
+    new_content_object.labels = document.labels
+
+    self.content_objects.append(new_content_object)
+
+    if transition is not None:
+        transition.destination_content_object_id = new_content_object.id
+        self.transitions.append(transition)
+
+    new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
+    return new_event</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.get_content_objects"><code class="name flex">
+<span>def <span class="ident">get_content_objects</span></span>(<span>self) ‑> List[<a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns all the content objects in the family</p>
+<h2 id="returns">Returns</h2>
+<p>a list of the content objects</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_content_objects(self) -&gt; List[ContentObject]:
+    &#34;&#34;&#34;Returns all the content objects in the family
+
+    Returns:
+        a list of the content objects
+
+
+    &#34;&#34;&#34;
+    return self.content_objects</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.get_document_count"><code class="name flex">
+<span>def <span class="ident">get_document_count</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Count of content objects in the family</p>
+<h2 id="returns">Returns</h2>
+<p>number of documents in the family</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_document_count(self) -&gt; int:
+    &#34;&#34;&#34;
+    Count of content objects in the family
+
+    Returns:
+      number of documents in the family
+
+    &#34;&#34;&#34;
+    return len(self.content_objects)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.get_latest_content"><code class="name flex">
+<span>def <span class="ident">get_latest_content</span></span>(<span>self) ‑> <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the latest content object that we have in place</p>
+<h2 id="returns">Returns</h2>
+<p>The latest content object in the family</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_latest_content(self) -&gt; ContentObject:
+    &#34;&#34;&#34;Returns the latest content object that we have in place
+
+    Returns:
+        The latest content object in the family
+    &#34;&#34;&#34;
+    return self.content_objects[-1]</code></pre>
 </details>
 </dd>
 </dl>
@@ -7632,11 +8205,14 @@ used with the Kodexa platform</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DocumentStore:
-    &#34;&#34;&#34;A document store supports storing, listing and retrieving Kodexa documents and document families&#34;&#34;&#34;
+    &#34;&#34;&#34;
+    A document store supports storing, listing and retrieving Kodexa documents and document families
+    &#34;&#34;&#34;
 
+    @abc.abstractmethod
     def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Returns the reference (org-slug/store-slug:version)
-        
+
         :return: the reference
 
         Args:
@@ -7644,24 +8220,26 @@ used with the Kodexa platform</p>
         Returns:
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
         Args:
           uuid_value: the ID of the ContentObject
-          uuid_value: str: 
+          uuid_value: str:
 
         Returns:
           A document (or None if not found)
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def list_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;List the content objects in the store
-        
+
         :return: a list of the content objects
 
         Args:
@@ -7669,8 +8247,9 @@ used with the Kodexa platform</p>
         Returns:
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                        document: Document):
         &#34;&#34;&#34;Add a document to a family as a new transition
@@ -7679,31 +8258,32 @@ used with the Kodexa platform</p>
           document_family_id: the ID for the document family
           document_relationship: the document transition
           document: the document
-          document_family_id: str: 
-          document: Document: 
+          document_family_id: str:
+          document: Document:
 
         Returns:
           None
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
-    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+    @abc.abstractmethod
+    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a document for a given content object
 
         Args:
           content_object: the content object
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
-          the Document
+          the Document (or None if not found)
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
     def list(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;Print out a table listing the content objects in the store
-        
+
         :return: The list of content objects
 
         Args:
@@ -7727,11 +8307,12 @@ used with the Kodexa platform</p>
         objects = self.query_objects(query)
         self._draw_table(objects)
 
+    @abc.abstractmethod
     def register_listener(self, listener):
         &#34;&#34;&#34;Register a listener to this store.
-        
+
         A store listener must have the method
-        
+
             process_event(content_event:ContentEvent)
 
         Args:
@@ -7741,7 +8322,7 @@ used with the Kodexa platform</p>
           None
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
     def _draw_table(self, objects):
         &#34;&#34;&#34;Internal method to draw a table
@@ -7769,37 +8350,54 @@ used with the Kodexa platform</p>
 
         print(table)
 
+    @abc.abstractmethod
     def query_objects(self, query: str) -&gt; List[ContentObject]:
         &#34;&#34;&#34;
 
         Args:
-          query: str: 
+          query: str:
 
         Returns:
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
     def put(self, path: str, document: Document):
         &#34;&#34;&#34;Puts a new document in the store with the given path.
-        
+
         There mustn&#39;t be a family in the path, this method will create a new family based around the
         document
 
         Args:
           path: the path you wish to add the document in the store
           document: the document
-          path: str: 
-          document: Document: 
+          path: str:
+          document: Document:
 
         Returns:
 
         &#34;&#34;&#34;
-        pass
+        raise NotImplementedError
 
+    @abc.abstractmethod
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
+        &#34;&#34;&#34;
+        Returns the document family (or None is not available) for a specific path in the store
+
+        Args:
+            path:str the path within the store
+
+        Returns:
+            The document family, or None is no family exists at that path
+
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def count(self) -&gt; int:
         &#34;&#34;&#34;The number of document families in the store
-        
+
         :return: the count of families
 
         Args:
@@ -7807,7 +8405,7 @@ used with the Kodexa platform</p>
         Returns:
 
         &#34;&#34;&#34;
-        return 0
+        raise NotImplementedError
 
     def accept(self, document: Document):
         &#34;&#34;&#34;Determine if the store will accept this document.  This would typically mean that the store does
@@ -7815,7 +8413,7 @@ used with the Kodexa platform</p>
 
         Args:
           document: the document to check
-          document: Document: 
+          document: Document:
 
         Returns:
           True if there is no current family at derived path, False is there is one
@@ -7842,7 +8440,7 @@ not yet have a document at the derived family path</p>
 <dt><strong><code>document</code></strong></dt>
 <dd>the document to check</dd>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>True if there is no current family at derived path, False is there is one</p></div>
@@ -7856,7 +8454,7 @@ not yet have a document at the derived family path</p>
 
     Args:
       document: the document to check
-      document: Document: 
+      document: Document:
 
     Returns:
       True if there is no current family at derived path, False is there is one
@@ -7879,9 +8477,9 @@ not yet have a document at the derived family path</p>
 <dt><strong><code>document</code></strong></dt>
 <dd>the document</dd>
 <dt><strong><code>document_family_id</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>None</p></div>
@@ -7889,7 +8487,8 @@ not yet have a document at the derived family path</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_related_document_to_family(self, document_family_id: str, document_relationship,
+<pre><code class="python">@abc.abstractmethod
+def add_related_document_to_family(self, document_family_id: str, document_relationship,
                                    document: Document):
     &#34;&#34;&#34;Add a document to a family as a new transition
 
@@ -7897,14 +8496,14 @@ not yet have a document at the derived family path</p>
       document_family_id: the ID for the document family
       document_relationship: the document transition
       document: the document
-      document_family_id: str: 
-      document: Document: 
+      document_family_id: str:
+      document: Document:
 
     Returns:
       None
 
     &#34;&#34;&#34;
-    pass</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.count"><code class="name flex">
@@ -7919,9 +8518,10 @@ not yet have a document at the derived family path</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def count(self) -&gt; int:
+<pre><code class="python">@abc.abstractmethod
+def count(self) -&gt; int:
     &#34;&#34;&#34;The number of document families in the store
-    
+
     :return: the count of families
 
     Args:
@@ -7929,7 +8529,7 @@ not yet have a document at the derived family path</p>
     Returns:
 
     &#34;&#34;&#34;
-    return 0</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.get_by_uuid"><code class="name flex">
@@ -7942,7 +8542,7 @@ not yet have a document at the derived family path</p>
 <dt><strong><code>uuid_value</code></strong></dt>
 <dd>the ID of the ContentObject</dd>
 <dt><strong><code>uuid_value</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>A document (or None if not found)</p></div>
@@ -7950,22 +8550,23 @@ not yet have a document at the derived family path</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
+<pre><code class="python">@abc.abstractmethod
+def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
     &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
     Args:
       uuid_value: the ID of the ContentObject
-      uuid_value: str: 
+      uuid_value: str:
 
     Returns:
       A document (or None if not found)
 
     &#34;&#34;&#34;
-    pass</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.get_document_by_content_object"><code class="name flex">
-<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>) ‑> <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></span>
+<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>) ‑> Union[<a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a document for a given content object</p>
@@ -7974,26 +8575,55 @@ not yet have a document at the derived family path</p>
 <dt><strong><code>content_object</code></strong></dt>
 <dd>the content object</dd>
 <dt><strong><code>content_object</code></strong></dt>
-<dd>ContentObject: </dd>
+<dd>ContentObject:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>the Document</p></div>
+<p>the Document (or None if not found)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+<pre><code class="python">@abc.abstractmethod
+def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
     &#34;&#34;&#34;Get a document for a given content object
 
     Args:
       content_object: the content object
-      content_object: ContentObject: 
+      content_object: ContentObject:
 
     Returns:
-      the Document
+      the Document (or None if not found)
 
     &#34;&#34;&#34;
-    pass</code></pre>
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.DocumentStore.get_family_by_path"><code class="name flex">
+<span>def <span class="ident">get_family_by_path</span></span>(<span>self, path: str) ‑> Union[<a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>, NoneType]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the document family (or None is not available) for a specific path in the store</p>
+<h2 id="args">Args</h2>
+<p>path:str the path within the store</p>
+<h2 id="returns">Returns</h2>
+<p>The document family, or None is no family exists at that path</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abc.abstractmethod
+def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
+    &#34;&#34;&#34;
+    Returns the document family (or None is not available) for a specific path in the store
+
+    Args:
+        path:str the path within the store
+
+    Returns:
+        The document family, or None is no family exists at that path
+
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.get_ref"><code class="name flex">
@@ -8008,9 +8638,10 @@ not yet have a document at the derived family path</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_ref(self) -&gt; str:
+<pre><code class="python">@abc.abstractmethod
+def get_ref(self) -&gt; str:
     &#34;&#34;&#34;Returns the reference (org-slug/store-slug:version)
-    
+
     :return: the reference
 
     Args:
@@ -8018,7 +8649,7 @@ not yet have a document at the derived family path</p>
     Returns:
 
     &#34;&#34;&#34;
-    pass</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.list"><code class="name flex">
@@ -8035,7 +8666,7 @@ not yet have a document at the derived family path</p>
 </summary>
 <pre><code class="python">def list(self) -&gt; List[ContentObject]:
     &#34;&#34;&#34;Print out a table listing the content objects in the store
-    
+
     :return: The list of content objects
 
     Args:
@@ -8060,9 +8691,10 @@ not yet have a document at the derived family path</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def list_objects(self) -&gt; List[ContentObject]:
+<pre><code class="python">@abc.abstractmethod
+def list_objects(self) -&gt; List[ContentObject]:
     &#34;&#34;&#34;List the content objects in the store
-    
+
     :return: a list of the content objects
 
     Args:
@@ -8070,7 +8702,7 @@ not yet have a document at the derived family path</p>
     Returns:
 
     &#34;&#34;&#34;
-    pass</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.put"><code class="name flex">
@@ -8087,31 +8719,32 @@ document</p>
 <dt><strong><code>document</code></strong></dt>
 <dd>the document</dd>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, document: Document):
+<pre><code class="python">@abc.abstractmethod
+def put(self, path: str, document: Document):
     &#34;&#34;&#34;Puts a new document in the store with the given path.
-    
+
     There mustn&#39;t be a family in the path, this method will create a new family based around the
     document
 
     Args:
       path: the path you wish to add the document in the store
       document: the document
-      path: str: 
-      document: Document: 
+      path: str:
+      document: Document:
 
     Returns:
 
     &#34;&#34;&#34;
-    pass</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.query"><code class="name flex">
@@ -8149,23 +8782,24 @@ document</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>query</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def query_objects(self, query: str) -&gt; List[ContentObject]:
+<pre><code class="python">@abc.abstractmethod
+def query_objects(self, query: str) -&gt; List[ContentObject]:
     &#34;&#34;&#34;
 
     Args:
-      query: str: 
+      query: str:
 
     Returns:
 
     &#34;&#34;&#34;
-    pass</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.register_listener"><code class="name flex">
@@ -8187,11 +8821,12 @@ document</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register_listener(self, listener):
+<pre><code class="python">@abc.abstractmethod
+def register_listener(self, listener):
     &#34;&#34;&#34;Register a listener to this store.
-    
+
     A store listener must have the method
-    
+
         process_event(content_event:ContentEvent)
 
     Args:
@@ -8201,8 +8836,119 @@ document</p>
       None
 
     &#34;&#34;&#34;
-    pass</code></pre>
+    raise NotImplementedError</code></pre>
 </details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.model.model.DocumentTransition"><code class="flex name class">
+<span>class <span class="ident">DocumentTransition</span></span>
+<span>(</span><span>transition_type: <a title="kodexa.model.model.TransitionType" href="#kodexa.model.model.TransitionType">TransitionType</a>, source_content_object_id: str, destination_content_object_id: Union[str, NoneType] = None, actor: Union[<a title="kodexa.model.model.DocumentActor" href="#kodexa.model.model.DocumentActor">DocumentActor</a>, NoneType] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A document transition represents a link between two documents and tries to capture the actor that was involved
+in the transition as well at the type of transition that exists</p>
+<p>Create a document transition</p>
+<h2 id="args">Args</h2>
+<p>transition_type:TransitionType: the type of transition
+source_content_object_id:str: the ID of the source content object
+destination_content_object_id:Optional[str] the ID of the destination content object
+actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentTransition:
+    &#34;&#34;&#34;
+    A document transition represents a link between two documents and tries to capture the actor that was involved
+    in the transition as well at the type of transition that exists
+    &#34;&#34;&#34;
+
+    def __init__(self, transition_type: TransitionType, source_content_object_id: str,
+                 destination_content_object_id: Optional[str] = None,
+                 actor: Optional[DocumentActor] = None):
+        &#34;&#34;&#34;
+        Create a document transition
+
+        Args:
+            transition_type:TransitionType: the type of transition
+            source_content_object_id:str: the ID of the source content object
+            destination_content_object_id:Optional[str] the ID of the destination content object
+            actor:Optional[DocumentActor]: the actor (Defaults to None)
+        &#34;&#34;&#34;
+        self.transition_type = transition_type
+        &#34;&#34;&#34;The type of transition&#34;&#34;&#34;
+        self.source_content_object_id = source_content_object_id
+        &#34;&#34;&#34;The ID of the source content object&#34;&#34;&#34;
+        self.destination_content_object_id = destination_content_object_id
+        &#34;&#34;&#34;The ID of the destination content object&#34;&#34;&#34;
+        self.actor = actor
+        &#34;&#34;&#34;The actor in the transition&#34;&#34;&#34;
+
+    @classmethod
+    def from_dict(cls, transition_dict):
+        &#34;&#34;&#34;
+        Converts a dictionary from a REST call back into a DocumentTransition
+        Args:
+            transition_dict: Dictionary
+
+        Returns: A document transition
+
+        &#34;&#34;&#34;
+        transition = DocumentTransition(transition_dict[&#39;transitionType&#39;], transition_dict[&#39;sourceContentObjectId&#39;],
+                                        transition_dict[&#39;destinationContentObjectId&#39;])
+        return transition</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.model.model.DocumentTransition.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>transition_dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Converts a dictionary from a REST call back into a DocumentTransition</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>transition_dict</code></strong></dt>
+<dd>Dictionary</dd>
+</dl>
+<p>Returns: A document transition</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_dict(cls, transition_dict):
+    &#34;&#34;&#34;
+    Converts a dictionary from a REST call back into a DocumentTransition
+    Args:
+        transition_dict: Dictionary
+
+    Returns: A document transition
+
+    &#34;&#34;&#34;
+    transition = DocumentTransition(transition_dict[&#39;transitionType&#39;], transition_dict[&#39;sourceContentObjectId&#39;],
+                                    transition_dict[&#39;destinationContentObjectId&#39;])
+    return transition</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.DocumentTransition.actor"><code class="name">var <span class="ident">actor</span></code></dt>
+<dd>
+<div class="desc"><p>The actor in the transition</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentTransition.destination_content_object_id"><code class="name">var <span class="ident">destination_content_object_id</span></code></dt>
+<dd>
+<div class="desc"><p>The ID of the destination content object</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentTransition.source_content_object_id"><code class="name">var <span class="ident">source_content_object_id</span></code></dt>
+<dd>
+<div class="desc"><p>The ID of the source content object</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentTransition.transition_type"><code class="name">var <span class="ident">transition_type</span></code></dt>
+<dd>
+<div class="desc"><p>The type of transition</p></div>
 </dd>
 </dl>
 </dd>
@@ -8254,7 +9000,7 @@ document</p>
 
         Args:
           path: the path to get content from
-          path: str: 
+          path: str:
 
         Returns:
           Bytes or None is there is nothing at the path
@@ -8266,8 +9012,8 @@ document</p>
         &#34;&#34;&#34;
 
         Args:
-          path: str: 
-          content: 
+          path: str:
+          content:
 
         Returns:
 
@@ -8291,7 +9037,7 @@ document</p>
 <dt><strong><code>path</code></strong></dt>
 <dd>the path to get content from</dd>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>Bytes or None is there is nothing at the path</p></div>
@@ -8304,7 +9050,7 @@ document</p>
 
     Args:
       path: the path to get content from
-      path: str: 
+      path: str:
 
     Returns:
       Bytes or None is there is nothing at the path
@@ -8320,11 +9066,10 @@ document</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>path</code></strong></dt>
-<dd>str: </dd>
-<dt><strong><code>content</code></strong></dt>
-<dd>&nbsp;</dd>
+<dd>str:</dd>
 </dl>
-<p>Returns:</p></div>
+<p>content:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8333,8 +9078,8 @@ document</p>
     &#34;&#34;&#34;
 
     Args:
-      path: str: 
-      content: 
+      path: str:
+      content:
 
     Returns:
 
@@ -8359,7 +9104,7 @@ instance</p></div>
 
     def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-        
+
         :return: The reference
 
         Args:
@@ -8385,7 +9130,6 @@ instance</p></div>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="kodexa.stores.stores.RemoteDictDataStore" href="../stores/stores.html#kodexa.stores.stores.RemoteDictDataStore">RemoteDictDataStore</a></li>
 <li><a title="kodexa.stores.stores.RemoteDocumentStore" href="../stores/stores.html#kodexa.stores.stores.RemoteDocumentStore">RemoteDocumentStore</a></li>
 <li><a title="kodexa.stores.stores.RemoteModelStore" href="../stores/stores.html#kodexa.stores.stores.RemoteModelStore">RemoteModelStore</a></li>
 <li><a title="kodexa.stores.stores.RemoteTableDataStore" href="../stores/stores.html#kodexa.stores.stores.RemoteTableDataStore">RemoteTableDataStore</a></li>
@@ -8430,7 +9174,7 @@ instance</p></div>
 </summary>
 <pre><code class="python">def get_ref(self) -&gt; str:
     &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-    
+
     :return: The reference
 
     Args:
@@ -8492,7 +9236,7 @@ document</p>
         &#34;&#34;&#34;
 
         Args:
-          env: 
+          env:
 
         Returns:
 
@@ -8560,11 +9304,8 @@ document</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>env</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>env:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8574,7 +9315,7 @@ def from_dict(cls, env):
     &#34;&#34;&#34;
 
     Args:
-      env: 
+      env:
 
     Returns:
 
@@ -8607,7 +9348,7 @@ def from_dict(cls, env):
         &#34;&#34;&#34;
 
         Args:
-          other_store: 
+          other_store:
 
         Returns:
 
@@ -8622,7 +9363,7 @@ def from_dict(cls, env):
         &#34;&#34;&#34;
 
         Args:
-          pipeline_context: 
+          pipeline_context:
 
         Returns:
 
@@ -8672,11 +9413,8 @@ def from_dict(cls, env):
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>other_store</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>other_store:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8685,7 +9423,7 @@ def from_dict(cls, env):
     &#34;&#34;&#34;
 
     Args:
-      other_store: 
+      other_store:
 
     Returns:
 
@@ -8698,11 +9436,8 @@ def from_dict(cls, env):
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>pipeline_context</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>pipeline_context:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8711,7 +9446,7 @@ def from_dict(cls, env):
     &#34;&#34;&#34;
 
     Args:
-      pipeline_context: 
+      pipeline_context:
 
     Returns:
 
@@ -8792,6 +9527,41 @@ def from_dict(cls, env):
 </dd>
 </dl>
 </dd>
+<dt id="kodexa.model.model.TransitionType"><code class="flex name class">
+<span>class <span class="ident">TransitionType</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The type of transition</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TransitionType(Enum):
+    &#34;&#34;&#34;
+    The type of transition
+    &#34;&#34;&#34;
+    DERIVED = &#39;DERIVED&#39;
+    &#34;&#34;&#34;A transition that derived a new document&#34;&#34;&#34;
+    FRAGMENT = &#39;FRAGMENT&#39;
+    &#34;&#34;&#34;A transition that placed a fragment of the document in another document&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="kodexa.model.model.TransitionType.DERIVED"><code class="name">var <span class="ident">DERIVED</span></code></dt>
+<dd>
+<div class="desc"><p>A transition that derived a new document</p></div>
+</dd>
+<dt id="kodexa.model.model.TransitionType.FRAGMENT"><code class="name">var <span class="ident">FRAGMENT</span></code></dt>
+<dd>
+<div class="desc"><p>A transition that placed a fragment of the document in another document</p></div>
+</dd>
+</dl>
+</dd>
 <dt id="kodexa.model.model.Traverse"><code class="flex name class">
 <span>class <span class="ident">Traverse</span></span>
 <span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
@@ -8849,6 +9619,21 @@ def from_dict(cls, env):
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="kodexa.model.model.ContentEvent" href="#kodexa.model.model.ContentEvent">ContentEvent</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.ContentEvent.content_object" href="#kodexa.model.model.ContentEvent.content_object">content_object</a></code></li>
+<li><code><a title="kodexa.model.model.ContentEvent.document_family" href="#kodexa.model.model.ContentEvent.document_family">document_family</a></code></li>
+<li><code><a title="kodexa.model.model.ContentEvent.event_type" href="#kodexa.model.model.ContentEvent.event_type">event_type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.ContentEventType" href="#kodexa.model.model.ContentEventType">ContentEventType</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.ContentEventType.DERIVED_DOCUMENT" href="#kodexa.model.model.ContentEventType.DERIVED_DOCUMENT">DERIVED_DOCUMENT</a></code></li>
+<li><code><a title="kodexa.model.model.ContentEventType.NEW_OBJECT" href="#kodexa.model.model.ContentEventType.NEW_OBJECT">NEW_OBJECT</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code></h4>
 <ul class="">
@@ -8962,6 +9747,23 @@ def from_dict(cls, env):
 </ul>
 </li>
 <li>
+<h4><code><a title="kodexa.model.model.DocumentActor" href="#kodexa.model.model.DocumentActor">DocumentActor</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.DocumentActor.actor_id" href="#kodexa.model.model.DocumentActor.actor_id">actor_id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentActor.actor_type" href="#kodexa.model.model.DocumentActor.actor_type">actor_type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.DocumentFamily.add_document" href="#kodexa.model.model.DocumentFamily.add_document">add_document</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.from_dict" href="#kodexa.model.model.DocumentFamily.from_dict">from_dict</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.get_content_objects" href="#kodexa.model.model.DocumentFamily.get_content_objects">get_content_objects</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.get_document_count" href="#kodexa.model.model.DocumentFamily.get_document_count">get_document_count</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.get_latest_content" href="#kodexa.model.model.DocumentFamily.get_latest_content">get_latest_content</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="kodexa.model.model.DocumentMetadata" href="#kodexa.model.model.DocumentMetadata">DocumentMetadata</a></code></h4>
 </li>
 <li>
@@ -8972,6 +9774,7 @@ def from_dict(cls, env):
 <li><code><a title="kodexa.model.model.DocumentStore.count" href="#kodexa.model.model.DocumentStore.count">count</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_by_uuid" href="#kodexa.model.model.DocumentStore.get_by_uuid">get_by_uuid</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_family_by_path" href="#kodexa.model.model.DocumentStore.get_family_by_path">get_family_by_path</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.list" href="#kodexa.model.model.DocumentStore.list">list</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.list_objects" href="#kodexa.model.model.DocumentStore.list_objects">list_objects</a></code></li>
@@ -8979,6 +9782,16 @@ def from_dict(cls, env):
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="#kodexa.model.model.DocumentStore.query">query</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query_objects" href="#kodexa.model.model.DocumentStore.query_objects">query_objects</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.DocumentTransition" href="#kodexa.model.model.DocumentTransition">DocumentTransition</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.DocumentTransition.actor" href="#kodexa.model.model.DocumentTransition.actor">actor</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentTransition.destination_content_object_id" href="#kodexa.model.model.DocumentTransition.destination_content_object_id">destination_content_object_id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentTransition.from_dict" href="#kodexa.model.model.DocumentTransition.from_dict">from_dict</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentTransition.source_content_object_id" href="#kodexa.model.model.DocumentTransition.source_content_object_id">source_content_object_id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentTransition.transition_type" href="#kodexa.model.model.DocumentTransition.transition_type">transition_type</a></code></li>
 </ul>
 </li>
 <li>
@@ -9038,6 +9851,13 @@ def from_dict(cls, env):
 <li><code><a title="kodexa.model.model.Tag.start" href="#kodexa.model.model.Tag.start">start</a></code></li>
 <li><code><a title="kodexa.model.model.Tag.uuid" href="#kodexa.model.model.Tag.uuid">uuid</a></code></li>
 <li><code><a title="kodexa.model.model.Tag.value" href="#kodexa.model.model.Tag.value">value</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.TransitionType" href="#kodexa.model.model.TransitionType">TransitionType</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.TransitionType.DERIVED" href="#kodexa.model.model.TransitionType.DERIVED">DERIVED</a></code></li>
+<li><code><a title="kodexa.model.model.TransitionType.FRAGMENT" href="#kodexa.model.model.TransitionType.FRAGMENT">FRAGMENT</a></code></li>
 </ul>
 </li>
 <li>
