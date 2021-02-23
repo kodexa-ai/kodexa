@@ -603,7 +603,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         resp = requests.get(
             f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
             params={'meta': True},
-            headers = {"x-access-token": KodexaPlatform.get_access_token()})
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
             return DocumentFamily.from_dict(resp.json())
@@ -735,11 +735,12 @@ class RemoteModelStore(ModelStore, RemoteStore):
                 bad_request = Dict(json.loads(content_object_response.text))
                 for error_key in bad_request.errors.keys():
                     print(bad_request.errors[error_key] + " (" + error_key + ")")
+                raise Exception("Invalid request")
             else:
-                logger.error("Execution creation failed [" + content_object_response.text + "], response " + str(
-                    content_object_response.status_code))
-                raise Exception("Execution creation failed [" + content_object_response.text + "], response " + str(
-                    content_object_response.status_code))
+                msg = "Execution creation failed [" + content_object_response.text + "], response " + str(
+                    content_object_response.status_code)
+                logger.error(msg)
+                raise Exception(msg)
         except JSONDecodeError:
             logger.error(
                 "Unable to JSON decode the response?")
