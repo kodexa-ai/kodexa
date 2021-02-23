@@ -1,5 +1,5 @@
 [flake8]
-max-line-length = 127
+max-line-length = 250
 per-file-ignores =
     # line too long
     ./kodexa/selectors/parsetab.py: E231,

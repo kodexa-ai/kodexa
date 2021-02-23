@@ -11,6 +11,6 @@ and much more....
 
 Document families allow the organization of documents based on transitions and actors
 """
-from .document_families import DocumentTransition, DocumentFamily
+from .document_families import DocumentTransition, DocumentFamily, TransitionType
 from .model import DocumentMetadata, ContentNode, ContentFeature, SourceMetadata, \
     Document, Store, DocumentStore, RemoteStore, ModelStore, ContentObject, ContentType
