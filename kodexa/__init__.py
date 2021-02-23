@@ -14,7 +14,7 @@ from .model import ContentFeature, ContentNode, Document, DocumentFamily, Docume
 from .pipeline import Pipeline, PipelineContext, PipelineStatistics
 from .sinks import FolderSink, InMemoryDocumentSink
 from .steps import NodeTagCopy, NodeTagger, RollupTransformer, TagsToKeyValuePairExtractor, TextParser
-from .stores import DataStoreHelper, LocalDocumentStore, LocalModelStore, RemoteDictDataStore, RemoteDocumentStore, \
+from .stores import DataStoreHelper, LocalDocumentStore, LocalModelStore, RemoteDocumentStore, \
     RemoteModelStore, RemoteTableDataStore, TableDataStore
 from .taxonomy import RemoteTaxonomy, Taxon, Taxonomy
 from .workflow import CronSchedule, StorePublisher, WebSchedule, Workflow

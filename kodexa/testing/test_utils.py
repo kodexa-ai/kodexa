@@ -257,22 +257,24 @@ class AssistantTestHarness:
         store = self.get_store(event)
 
         for pipeline in response.pipelines:
-            pipeline.connector = [store.get_document_by_content_object(event.content_object)]
-            pipeline_context = pipeline.run()
+            document = store.get_document_by_content_object(event.content_object)
+            if document is not None:
+                pipeline.connector = [document]
+                pipeline_context = pipeline.run()
 
-            if pipeline_context.output_document is not None:
-                # We need to build the transition between the old and the new
-                document_relationship = DocumentTransition(TransitionType.DERIVED, event.content_object.id, None,
-                                                           DocumentActor("testing", "assistant"))
+                if pipeline_context.output_document is not None:
+                    # We need to build the transition between the old and the new
+                    document_relationship = DocumentTransition(TransitionType.DERIVED, event.content_object.id, None,
+                                                               DocumentActor("testing", "assistant"))
 
-                store.add_related_document_to_family(event.document_family.id, document_relationship,
-                                                     pipeline_context.output_document)
+                    store.add_related_document_to_family(event.document_family.id, document_relationship,
+                                                         pipeline_context.output_document)
 
-            # We need to handle the context here, basically we are going to take the result
-            # of the pipeline as a new document and add it to the family?? think about that?
+                # We need to handle the context here, basically we are going to take the result
+                # of the pipeline as a new document and add it to the family?? think about that?
 
-            # so does the assistant decide to write to the store? or do we just do it anyway?
-            # how does the assistant know what happened to the pipeline?
+                # so does the assistant decide to write to the store? or do we just do it anyway?
+                # how does the assistant know what happened to the pipeline?
 
         pass
 
