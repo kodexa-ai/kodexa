@@ -7,7 +7,7 @@ from addict import Dict, addict
 
 from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentNode, Document, PipelineContext, TableDataStore
-from kodexa.model.document_families import ContentEvent, DocumentActor, DocumentTransition
+from kodexa.model.document_families import ContentEvent, DocumentActor, DocumentTransition, TransitionType
 from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger('kodexa.testing')
@@ -18,8 +18,8 @@ def print_data_table(context: PipelineContext, store_name: str):
 
     Args:
       context: param store_name:
-      context: PipelineContext: 
-      store_name: str: 
+      context: PipelineContext:
+      store_name: str:
 
     Returns:
 
@@ -43,9 +43,9 @@ def snapshot_store(context: PipelineContext, store_name: str, filename: str):
       context: the pipeline context
       store_name: the name of the store
       filename: the name of the file to snapshot the store to
-      context: PipelineContext: 
-      store_name: str: 
-      filename: str: 
+      context: PipelineContext:
+      store_name: str:
+      filename: str:
 
     Returns:
 
@@ -60,7 +60,7 @@ def simplify_node(node: ContentNode):
     """
 
     Args:
-      node: ContentNode: 
+      node: ContentNode:
 
     Returns:
 
@@ -79,7 +79,7 @@ def simplify_document(document: Document) -> Dict:
     """
 
     Args:
-      document: Document: 
+      document: Document:
 
     Returns:
 
@@ -93,8 +93,8 @@ def compare_document(document: Document, filename: str, throw_exception=True):
     """
 
     Args:
-      document: Document: 
-      filename: str: 
+      document: Document:
+      filename: str:
       throw_exception:  (Default value = True)
 
     Returns:
@@ -143,9 +143,9 @@ def compare_store(context: PipelineContext, store_name: str, filename: str, thro
       store_name: the name of the store
       filename: the filename of the
       throw_exception: throw an exception if there is a mismatch (Default value = True)
-      context: PipelineContext: 
-      store_name: str: 
-      filename: str: 
+      context: PipelineContext:
+      store_name: str:
+      filename: str:
 
     Returns:
 
@@ -244,7 +244,7 @@ class AssistantTestHarness:
 
         Args:
           event: content event
-          event: ContentEvent: 
+          event: ContentEvent:
 
         Returns:
           None
@@ -262,7 +262,7 @@ class AssistantTestHarness:
 
             if pipeline_context.output_document is not None:
                 # We need to build the transition between the old and the new
-                document_relationship = DocumentTransition("DERIVED", event.content_object.id, None,
+                document_relationship = DocumentTransition(TransitionType.DERIVED, event.content_object.id, None,
                                                            DocumentActor("testing", "assistant"))
 
                 store.add_related_document_to_family(event.document_family.id, document_relationship,
@@ -281,7 +281,7 @@ class AssistantTestHarness:
         Register a local document store with this harness
 
         Args:
-          store: LocalDocumentStore: 
+          store: LocalDocumentStore:
 
         Returns:
 
@@ -293,7 +293,7 @@ class AssistantTestHarness:
         Get a document store for the event (based on the document family ID)
 
         Args:
-          event: ContentEvent: 
+          event: ContentEvent:
 
         Returns:
           The instance of the document store
@@ -337,7 +337,7 @@ class ExtensionPackUtil:
         """
 
         Args:
-          action_slug: 
+          action_slug:
           options:  (Default value = None)
 
         Returns:
