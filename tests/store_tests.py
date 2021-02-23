@@ -1,3 +1,5 @@
+import pytest
+
 from kodexa import *
 
 
@@ -22,6 +24,7 @@ def test_basic_local_document_store():
     assert lds.get_family_by_path("my_document.txt").get_document_count() == 2
 
 
+@pytest.mark.skip
 def test_basic_remote_document_store():
     remote_document_store = RemoteDocumentStore(
         'philiptest3/8a8a832877458ca70177459a89c70004-training-document-store:1.0.0')
