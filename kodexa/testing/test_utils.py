@@ -6,8 +6,7 @@ from typing import List, cast
 from addict import Dict, addict
 
 from kodexa import Assistant, AssistantResponse, LocalDocumentStore
-from kodexa import ContentNode, Document, PipelineContext, TableDataStore
-from kodexa.model.document_families import ContentEvent, DocumentActor, DocumentTransition, TransitionType
+from kodexa import ContentNode, Document, PipelineContext, TableDataStore,  ContentEvent, DocumentActor, DocumentTransition, TransitionType
 from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger('kodexa.testing')

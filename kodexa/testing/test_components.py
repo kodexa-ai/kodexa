@@ -1,5 +1,4 @@
-from kodexa import Assistant, AssistantContext, AssistantResponse, Pipeline
-from kodexa.model.document_families import ContentEvent
+from kodexa import Assistant, AssistantContext, AssistantResponse, ContentEvent, Pipeline
 
 
 class TestAction:
@@ -20,7 +19,7 @@ class TestAssistant(Assistant):
         """
 
         Args:
-          event: ContentEvent: 
+          event: ContentEvent:
           context: AssistantContext:  (Default value = None)
 
         Returns:

@@ -9,8 +9,7 @@ from typing import Dict, List, Optional
 
 import requests
 
-from kodexa import DocumentFamily
-from kodexa.model import ContentObject, Document, DocumentStore, ModelStore, RemoteStore
+from kodexa.model import ContentObject, Document, DocumentFamily, DocumentStore, ModelStore, RemoteStore
 from kodexa.stores.local import LocalModelStore, TableDataStore
 
 logger = logging.getLogger('kodexa.stores')
@@ -19,7 +18,9 @@ logger = logging.getLogger('kodexa.stores')
 class RemoteTableDataStore(RemoteStore):
     """ """
 
-    def __init__(self, ref: str, columns: List[str] = []):
+    def __init__(self, ref: str, columns=None):
+        if columns is None:
+            columns = []
         self.ref = ref
         self.columns = columns
 
