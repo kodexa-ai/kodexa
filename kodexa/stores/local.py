@@ -8,12 +8,12 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import jsonpickle
 
-from kodexa.model import DocumentFamily, DocumentStore, Document, ContentObject, ModelStore, Store
-from kodexa.model.document_families import ContentEvent, DocumentTransition
+from kodexa.model import ContentEvent, ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, \
+    ModelStore, Store
 
 logger = logging.getLogger('kodexa.stores')
 
@@ -76,8 +76,8 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          document: Document: 
-          context: 
+          document: Document:
+          context:
 
         Returns:
 
@@ -96,7 +96,7 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          listener: 
+          listener:
 
         Returns:
 
@@ -107,7 +107,7 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          content_event: ContentEvent: 
+          content_event: ContentEvent:
 
         Returns:
 
@@ -128,7 +128,7 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -153,7 +153,7 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          uuid: str: 
+          uuid: str:
 
         Returns:
 
@@ -170,7 +170,7 @@ class LocalDocumentStore(DocumentStore):
 
         Args:
           path: return:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -186,7 +186,7 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -200,7 +200,7 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -220,7 +220,7 @@ class LocalDocumentStore(DocumentStore):
 
     def count(self) -> int:
         """Returns a count of the number of document families
-        
+
         :return:
 
         Args:
@@ -234,7 +234,7 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          path: str: 
+          path: str:
 
         Returns:
 
@@ -247,9 +247,9 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          document_family_id: str: 
+          document_family_id: str:
           transition: DocumentTransition:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -263,7 +263,7 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -274,8 +274,8 @@ class LocalDocumentStore(DocumentStore):
         """
 
         Args:
-          path: str: 
-          document: Document: 
+          path: str:
+          document: Document:
 
         Returns:
 
@@ -342,7 +342,7 @@ class LocalModelStore(ModelStore):
         """
 
         Args:
-          object_path: str: 
+          object_path: str:
 
         Returns:
 
@@ -356,8 +356,8 @@ class LocalModelStore(ModelStore):
         """
 
         Args:
-          object_path: str: 
-          content: 
+          object_path: str:
+          content:
 
         Returns:
 
@@ -369,7 +369,7 @@ class LocalModelStore(ModelStore):
 
 class TableDataStore(Store):
     """Stores data as a list of lists that can represent a table.
-    
+
     This is a good store when you are capturing nested or tabular data.
 
     Args:
@@ -433,7 +433,7 @@ class TableDataStore(Store):
         """
 
         Args:
-          pipeline_context: 
+          pipeline_context:
 
         Returns:
 
@@ -453,7 +453,7 @@ class TableDataStore(Store):
 
     def count(self):
         """Returns the number of rows in the store
-        
+
         :return: number of rows
 
         Args:
@@ -480,7 +480,7 @@ class TableDataStore(Store):
         """
 
         Args:
-          store_dict: 
+          store_dict:
 
         Returns:
 

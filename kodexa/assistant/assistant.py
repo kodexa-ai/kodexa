@@ -5,7 +5,7 @@ instance of the Kodexa platform
 
 from typing import List
 
-from kodexa.model.document_families import ContentEvent
+from kodexa.model import ContentEvent
 from kodexa.pipeline import Pipeline
 
 
@@ -41,18 +41,18 @@ class Assistant:
 
     def process_event(self, event: ContentEvent, context: AssistantContext = None) -> AssistantResponse:
         """The assistant will need to examine the event to determine if it wants to respond
-        
+
         The event will focus on a specific content object (that will be stored and available).  Based on the
         metadata from the content object the assistant can then return a response which can include zero or more
         pipelines that it wishes to execute.
-        
+
         This pipelines will be run asynchronously and the result of the pipelines might well
         return as another event for the assistant
 
         Args:
           event: the content event to react to
           context: the assistant context
-          event: ContentEvent: 
+          event: ContentEvent:
           context: AssistantContext:  (Default value = None)
 
         Returns:
