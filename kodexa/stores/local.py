@@ -65,7 +65,7 @@ class LocalDocumentStore(DocumentStore):
         if self.index >= len(self.metastore):
             raise StopIteration
         content_object = self.metastore[self.index].content_objects[-1]
-        document = self.get_document_by_content_object(content_object)
+        document = self.get_document_by_content_object(self.metastore[self.index], content_object)
 
         from kodexa.model.model import ContentObjectReference
         content_object_reference = ContentObjectReference(content_object, self, document, self.metastore[self.index])
