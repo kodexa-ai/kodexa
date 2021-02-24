@@ -296,7 +296,11 @@ class LocalDocumentStore(DocumentStore):
             # Notify the listeners
             self.notify_listeners(new_event)
 
-        return self.get_family_by_path(path)
+        document_family = self.get_family_by_path(path)
+        if document_family is not None:
+            return document_family
+        else:
+            raise Exception("Unable to get document family?")
 
     def exists(self, document):
         """Look to see if we have document with the same original path and original filename
