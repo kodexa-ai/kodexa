@@ -259,26 +259,29 @@ class LocalDocumentStore(DocumentStore):
             if family.id == document_family_id:
                 family.add_document(document, transition)
 
-    def get_document_by_content_object(self, content_object: ContentObject) -> Document:
+    def get_document_by_content_object(self, document_family: DocumentFamily,
+                                       content_object: ContentObject) -> Document:
         """
 
         Args:
-          content_object: ContentObject:
+          document_family (DocumentFamily): The document family
+          content_object (ContentObject): The content object
 
         Returns:
 
         """
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
 
-    def put(self, path: str, document: Document):
+    def put(self, path: str, document: Document, force_replace: bool = False) -> DocumentFamily:
         """
 
         Args:
-          path: str:
-          document: Document:
+          path (str): The path to the document family
+          document (Document): The document you wish to upload
+          force_replace (bool): True if you want to delete the family in this path first
 
         Returns:
-
+            The new document family instance
         """
 
         # We can only add a document if it doesn't already exist as a family
@@ -351,20 +354,6 @@ class LocalModelStore(ModelStore):
             return open(os.path.join(self.store_path, object_path), 'rb')
         else:
             return None
-
-    def put(self, object_path: str, content):
-        """
-
-        Args:
-          object_path: str:
-          content:
-
-        Returns:
-
-        """
-        path = Path(object_path)
-        with open(os.path.join(self.store_path, path), 'wb') as object_file:
-            object_file.write(content)
 
 
 class TableDataStore(Store):
