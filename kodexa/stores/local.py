@@ -207,7 +207,7 @@ class LocalDocumentStore(DocumentStore):
         """
         for family in self.metastore:
             if family.path == path:
-                return self.get_document_by_content_object(family.content_objects[-1])
+                return self.get_document_by_content_object(family, family.content_objects[-1])
         return None
 
     def list_objects(self) -> List[ContentObject]:
