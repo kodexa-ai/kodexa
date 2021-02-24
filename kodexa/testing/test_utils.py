@@ -256,7 +256,7 @@ class AssistantTestHarness:
         store = self.get_store(event)
 
         for pipeline in response.pipelines:
-            document = store.get_document_by_content_object(event.content_object)
+            document = store.get_document_by_content_object(event.document_family, event.content_object)
             if document is not None:
                 pipeline.connector = [document]
                 pipeline_context = pipeline.run()
