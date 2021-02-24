@@ -8,7 +8,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import jsonpickle
 
@@ -345,19 +345,31 @@ class LocalModelStore(ModelStore):
             }
         }
 
-    def get(self, object_path: str):
+    def get_native(self, path: str):
         """
 
         Args:
-          object_path: str:
+          path: str:
 
         Returns:
 
         """
-        if Path(os.path.join(self.store_path, object_path)).is_file():
-            return open(os.path.join(self.store_path, object_path), 'rb')
+        if Path(os.path.join(self.store_path, path)).is_file():
+            return open(os.path.join(self.store_path, path), 'rb')
         else:
             return None
+
+    def put_native(self, path: str, content: Any):
+        """
+
+        Args:
+          path (str): The path to the native file
+          content (Any): The content to store
+        Returns:
+
+        """
+        with open(os.path.join(self.store_path, path), 'wb') as file:
+            file.write(content)
 
 
 class TableDataStore(Store):
