@@ -123,11 +123,13 @@ class ContentObject:
         Returns:
 
         &#34;&#34;&#34;
-        co = ContentObject(co_dict[&#39;name&#39;])
+        co = ContentObject(co_dict[&#39;path&#39;] if &#39;path&#39; in co_dict else None)
         co.id = co_dict[&#39;id&#39;]
         co.labels = co_dict[&#39;labels&#39;]
         co.metadata = co_dict[&#39;metadata&#39;]
         co.content_type = co_dict[&#39;content_type&#39;]
+
+        return co
 
 
 class Store:
@@ -188,13 +190,13 @@ class RemoteStore:
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
-            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
+            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(&#39;:&#39;, &#39;/&#39;)}/fs&#34;,
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
             return resp.content
         else:
-            msg = f&#34;Unable to delete contents {resp.text}, status : {resp.status_code}&#34;
+            msg = f&#34;Unable to delete families {resp.text}, status : {resp.status_code}&#34;
             raise Exception(msg)
 
 
@@ -2206,7 +2208,7 @@ class DocumentFamily:
         document_family.content_objects = []
         for co_dict in family_dict[&#39;contentObjects&#39;]:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
-        for transition_dict in family_dict[&#39;documentTransitions&#39;]:
+        for transition_dict in family_dict[&#39;transitions&#39;]:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
 
@@ -2218,24 +2220,22 @@ class DocumentStore:
 
     @abc.abstractmethod
     def get_ref(self) -&gt; str:
-        &#34;&#34;&#34;Returns the reference (org-slug/store-slug:version)
-
-        :return: the reference
-
-        Args:
+        &#34;&#34;&#34;
+        Returns the reference (org-slug/store-slug:version)
 
         Returns:
+            The reference of the document store (i.e. myorg/myslug:1.0.0)
 
         &#34;&#34;&#34;
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
         Args:
-          uuid_value: the ID of the ContentObject
-          uuid_value: str:
+          document_family(DocumentFamily): The document family
+          content_object_id(str): the ID of the ContentObject
 
         Returns:
           A document (or None if not found)
@@ -2244,29 +2244,28 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list_objects(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;List the content objects in the store
-
-        :return: a list of the content objects
+    def delete(self, path: str):
+        &#34;&#34;&#34;
+        Delete the document family stored at the given path
 
         Args:
+          path: the path to the content (ie. mymodel.dat)
 
         Returns:
+          True if deleted, False if there was no file at the path
 
         &#34;&#34;&#34;
         raise NotImplementedError
 
     @abc.abstractmethod
-    def add_related_document_to_family(self, document_family_id: str, document_relationship,
+    def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                        document: Document):
         &#34;&#34;&#34;Add a document to a family as a new transition
 
         Args:
-          document_family_id: the ID for the document family
-          document_relationship: the document transition
-          document: the document
-          document_family_id: str:
-          document: Document:
+          document_family_id (str): the ID for the document family
+          transition (DocumentTransition): the document transition
+          document (Document): the document
 
         Returns:
           None
@@ -2275,12 +2274,14 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
-        &#34;&#34;&#34;Get a document for a given content object
+    def get_document_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -&gt; \
+            Optional[Document]:
+        &#34;&#34;&#34;
+        Get a document for a given content object
 
         Args:
-          content_object: the content object
-          content_object: ContentObject:
+          document_family (DocumentFamily): the document family
+          content_object  (ContentObject): the content object
 
         Returns:
           the Document (or None if not found)
@@ -2288,31 +2289,33 @@ class DocumentStore:
         &#34;&#34;&#34;
         raise NotImplementedError
 
-    def list(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;Print out a table listing the content objects in the store
-
-        :return: The list of content objects
+    @abc.abstractmethod
+    def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -&gt; \
+            Any:
+        &#34;&#34;&#34;
+        Get the source for a given content object
 
         Args:
+          document_family (DocumentFamily): the document family
+          content_object  (ContentObject): the content object
 
         Returns:
+          the source (or None if not found)
 
         &#34;&#34;&#34;
-        objects = self.list_objects()
-        self._draw_table(objects)
-        return objects
+        raise NotImplementedError
 
     def query(self, query: str = &#34;*&#34;):
         &#34;&#34;&#34;
 
         Args:
-          query: str:  (Default value = &#34;*&#34;)
+          query (str):  The query (Default value = &#34;*&#34;)
 
         Returns:
 
         &#34;&#34;&#34;
-        objects = self.query_objects(query)
-        self._draw_table(objects)
+        families = self.query_families(query)
+        self._draw_table(families)
 
     @abc.abstractmethod
     def register_listener(self, listener):
@@ -2358,31 +2361,35 @@ class DocumentStore:
         print(table)
 
     @abc.abstractmethod
-    def query_objects(self, query: str) -&gt; List[ContentObject]:
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
         &#34;&#34;&#34;
+        Query the document families
 
         Args:
-          query: str:
+          page (int): The page number
+          page_size (int): The page size
+          query (str): The query (Defalt is *)
 
         Returns:
+            A list of matching document families
 
         &#34;&#34;&#34;
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document):
+    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         &#34;&#34;&#34;Puts a new document in the store with the given path.
 
         There mustn&#39;t be a family in the path, this method will create a new family based around the
         document
 
         Args:
-          path: the path you wish to add the document in the store
-          document: the document
-          path: str:
-          document: Document:
+          path (str): the path you wish to add the document in the store
+          document (Document): the document
+          force_replace (bool): Should we delete and replace the content at the path (Default False)
 
         Returns:
+            A new document family
 
         &#34;&#34;&#34;
         raise NotImplementedError
@@ -2393,7 +2400,7 @@ class DocumentStore:
         Returns the document family (or None is not available) for a specific path in the store
 
         Args:
-            path:str the path within the store
+            path (str): the path within the store
 
         Returns:
             The document family, or None is no family exists at that path
@@ -2405,12 +2412,8 @@ class DocumentStore:
     def count(self) -&gt; int:
         &#34;&#34;&#34;The number of document families in the store
 
-        :return: the count of families
-
-        Args:
-
         Returns:
-
+            the count of families
         &#34;&#34;&#34;
         raise NotImplementedError
 
@@ -2419,8 +2422,7 @@ class DocumentStore:
         not yet have a document at the derived family path
 
         Args:
-          document: the document to check
-          document: Document:
+          document (Document): the document to check
 
         Returns:
           True if there is no current family at derived path, False is there is one
@@ -2436,8 +2438,7 @@ class ModelStore:
         &#34;&#34;&#34;Returns the bytes object for the given path (or None is there nothing at that path)
 
         Args:
-          path: the path to get content from
-          path: str:
+          path(str): the path to get content from
 
         Returns:
           Bytes or None is there is nothing at the path
@@ -2445,13 +2446,13 @@ class ModelStore:
         &#34;&#34;&#34;
         pass
 
-    def put(self, path: str, content):
+    def put(self, path: str, content: Any, force_replace: bool = False):
         &#34;&#34;&#34;
 
         Args:
-          path: str:
-          content:
-
+          path (str): The path to put the content at
+          content: The content to put in the store
+          force_replace (bool): Replace the file stored at the path (Default false)
         Returns:
 
         &#34;&#34;&#34;
@@ -6486,11 +6487,13 @@ a Kodexa document.</p>
         Returns:
 
         &#34;&#34;&#34;
-        co = ContentObject(co_dict[&#39;name&#39;])
+        co = ContentObject(co_dict[&#39;path&#39;] if &#39;path&#39; in co_dict else None)
         co.id = co_dict[&#39;id&#39;]
         co.labels = co_dict[&#39;labels&#39;]
         co.metadata = co_dict[&#39;metadata&#39;]
-        co.content_type = co_dict[&#39;content_type&#39;]</code></pre>
+        co.content_type = co_dict[&#39;content_type&#39;]
+
+        return co</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -6519,11 +6522,13 @@ def from_dict(cls, co_dict):
     Returns:
 
     &#34;&#34;&#34;
-    co = ContentObject(co_dict[&#39;name&#39;])
+    co = ContentObject(co_dict[&#39;path&#39;] if &#39;path&#39; in co_dict else None)
     co.id = co_dict[&#39;id&#39;]
     co.labels = co_dict[&#39;labels&#39;]
     co.metadata = co_dict[&#39;metadata&#39;]
-    co.content_type = co_dict[&#39;content_type&#39;]</code></pre>
+    co.content_type = co_dict[&#39;content_type&#39;]
+
+    return co</code></pre>
 </details>
 </dd>
 </dl>
@@ -8018,7 +8023,7 @@ document as its first entry</p>
         document_family.content_objects = []
         for co_dict in family_dict[&#39;contentObjects&#39;]:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
-        for transition_dict in family_dict[&#39;documentTransitions&#39;]:
+        for transition_dict in family_dict[&#39;transitions&#39;]:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family</code></pre>
 </details>
@@ -8056,7 +8061,7 @@ def from_dict(cls, family_dict: dict):
     document_family.content_objects = []
     for co_dict in family_dict[&#39;contentObjects&#39;]:
         document_family.content_objects.append(ContentObject.from_dict(co_dict))
-    for transition_dict in family_dict[&#39;documentTransitions&#39;]:
+    for transition_dict in family_dict[&#39;transitions&#39;]:
         document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
     return document_family</code></pre>
 </details>
@@ -8211,24 +8216,22 @@ def from_dict(cls, family_dict: dict):
 
     @abc.abstractmethod
     def get_ref(self) -&gt; str:
-        &#34;&#34;&#34;Returns the reference (org-slug/store-slug:version)
-
-        :return: the reference
-
-        Args:
+        &#34;&#34;&#34;
+        Returns the reference (org-slug/store-slug:version)
 
         Returns:
+            The reference of the document store (i.e. myorg/myslug:1.0.0)
 
         &#34;&#34;&#34;
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
         Args:
-          uuid_value: the ID of the ContentObject
-          uuid_value: str:
+          document_family(DocumentFamily): The document family
+          content_object_id(str): the ID of the ContentObject
 
         Returns:
           A document (or None if not found)
@@ -8237,29 +8240,28 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list_objects(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;List the content objects in the store
-
-        :return: a list of the content objects
+    def delete(self, path: str):
+        &#34;&#34;&#34;
+        Delete the document family stored at the given path
 
         Args:
+          path: the path to the content (ie. mymodel.dat)
 
         Returns:
+          True if deleted, False if there was no file at the path
 
         &#34;&#34;&#34;
         raise NotImplementedError
 
     @abc.abstractmethod
-    def add_related_document_to_family(self, document_family_id: str, document_relationship,
+    def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                        document: Document):
         &#34;&#34;&#34;Add a document to a family as a new transition
 
         Args:
-          document_family_id: the ID for the document family
-          document_relationship: the document transition
-          document: the document
-          document_family_id: str:
-          document: Document:
+          document_family_id (str): the ID for the document family
+          transition (DocumentTransition): the document transition
+          document (Document): the document
 
         Returns:
           None
@@ -8268,12 +8270,14 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
-        &#34;&#34;&#34;Get a document for a given content object
+    def get_document_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -&gt; \
+            Optional[Document]:
+        &#34;&#34;&#34;
+        Get a document for a given content object
 
         Args:
-          content_object: the content object
-          content_object: ContentObject:
+          document_family (DocumentFamily): the document family
+          content_object  (ContentObject): the content object
 
         Returns:
           the Document (or None if not found)
@@ -8281,31 +8285,33 @@ def from_dict(cls, family_dict: dict):
         &#34;&#34;&#34;
         raise NotImplementedError
 
-    def list(self) -&gt; List[ContentObject]:
-        &#34;&#34;&#34;Print out a table listing the content objects in the store
-
-        :return: The list of content objects
+    @abc.abstractmethod
+    def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -&gt; \
+            Any:
+        &#34;&#34;&#34;
+        Get the source for a given content object
 
         Args:
+          document_family (DocumentFamily): the document family
+          content_object  (ContentObject): the content object
 
         Returns:
+          the source (or None if not found)
 
         &#34;&#34;&#34;
-        objects = self.list_objects()
-        self._draw_table(objects)
-        return objects
+        raise NotImplementedError
 
     def query(self, query: str = &#34;*&#34;):
         &#34;&#34;&#34;
 
         Args:
-          query: str:  (Default value = &#34;*&#34;)
+          query (str):  The query (Default value = &#34;*&#34;)
 
         Returns:
 
         &#34;&#34;&#34;
-        objects = self.query_objects(query)
-        self._draw_table(objects)
+        families = self.query_families(query)
+        self._draw_table(families)
 
     @abc.abstractmethod
     def register_listener(self, listener):
@@ -8351,31 +8357,35 @@ def from_dict(cls, family_dict: dict):
         print(table)
 
     @abc.abstractmethod
-    def query_objects(self, query: str) -&gt; List[ContentObject]:
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
         &#34;&#34;&#34;
+        Query the document families
 
         Args:
-          query: str:
+          page (int): The page number
+          page_size (int): The page size
+          query (str): The query (Defalt is *)
 
         Returns:
+            A list of matching document families
 
         &#34;&#34;&#34;
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document):
+    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         &#34;&#34;&#34;Puts a new document in the store with the given path.
 
         There mustn&#39;t be a family in the path, this method will create a new family based around the
         document
 
         Args:
-          path: the path you wish to add the document in the store
-          document: the document
-          path: str:
-          document: Document:
+          path (str): the path you wish to add the document in the store
+          document (Document): the document
+          force_replace (bool): Should we delete and replace the content at the path (Default False)
 
         Returns:
+            A new document family
 
         &#34;&#34;&#34;
         raise NotImplementedError
@@ -8386,7 +8396,7 @@ def from_dict(cls, family_dict: dict):
         Returns the document family (or None is not available) for a specific path in the store
 
         Args:
-            path:str the path within the store
+            path (str): the path within the store
 
         Returns:
             The document family, or None is no family exists at that path
@@ -8398,12 +8408,8 @@ def from_dict(cls, family_dict: dict):
     def count(self) -&gt; int:
         &#34;&#34;&#34;The number of document families in the store
 
-        :return: the count of families
-
-        Args:
-
         Returns:
-
+            the count of families
         &#34;&#34;&#34;
         raise NotImplementedError
 
@@ -8412,8 +8418,7 @@ def from_dict(cls, family_dict: dict):
         not yet have a document at the derived family path
 
         Args:
-          document: the document to check
-          document: Document:
+          document (Document): the document to check
 
         Returns:
           True if there is no current family at derived path, False is there is one
@@ -8437,10 +8442,8 @@ This would typically mean that the store does
 not yet have a document at the derived family path</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>document</code></strong></dt>
+<dt><strong><code>document</code></strong> :&ensp;<code><a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></code></dt>
 <dd>the document to check</dd>
-<dt><strong><code>document</code></strong></dt>
-<dd>Document:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>True if there is no current family at derived path, False is there is one</p></div>
@@ -8453,8 +8456,7 @@ not yet have a document at the derived family path</p>
     not yet have a document at the derived family path
 
     Args:
-      document: the document to check
-      document: Document:
+      document (Document): the document to check
 
     Returns:
       True if there is no current family at derived path, False is there is one
@@ -8464,22 +8466,18 @@ not yet have a document at the derived family path</p>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.add_related_document_to_family"><code class="name flex">
-<span>def <span class="ident">add_related_document_to_family</span></span>(<span>self, document_family_id: str, document_relationship, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>)</span>
+<span>def <span class="ident">add_related_document_to_family</span></span>(<span>self, document_family_id: str, transition: <a title="kodexa.model.model.DocumentTransition" href="#kodexa.model.model.DocumentTransition">DocumentTransition</a>, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add a document to a family as a new transition</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>document_family_id</code></strong></dt>
+<dt><strong><code>document_family_id</code></strong> :&ensp;<code>str</code></dt>
 <dd>the ID for the document family</dd>
-<dt><strong><code>document_relationship</code></strong></dt>
+<dt><strong><code>transition</code></strong> :&ensp;<code><a title="kodexa.model.model.DocumentTransition" href="#kodexa.model.model.DocumentTransition">DocumentTransition</a></code></dt>
 <dd>the document transition</dd>
-<dt><strong><code>document</code></strong></dt>
+<dt><strong><code>document</code></strong> :&ensp;<code><a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></code></dt>
 <dd>the document</dd>
-<dt><strong><code>document_family_id</code></strong></dt>
-<dd>str:</dd>
-<dt><strong><code>document</code></strong></dt>
-<dd>Document:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>None</p></div>
@@ -8488,16 +8486,14 @@ not yet have a document at the derived family path</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def add_related_document_to_family(self, document_family_id: str, document_relationship,
+def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                    document: Document):
     &#34;&#34;&#34;Add a document to a family as a new transition
 
     Args:
-      document_family_id: the ID for the document family
-      document_relationship: the document transition
-      document: the document
-      document_family_id: str:
-      document: Document:
+      document_family_id (str): the ID for the document family
+      transition (DocumentTransition): the document transition
+      document (Document): the document
 
     Returns:
       None
@@ -8511,9 +8507,8 @@ def add_related_document_to_family(self, document_family_id: str, document_relat
 </code></dt>
 <dd>
 <div class="desc"><p>The number of document families in the store</p>
-<p>:return: the count of families</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>the count of families</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8522,28 +8517,51 @@ def add_related_document_to_family(self, document_family_id: str, document_relat
 def count(self) -&gt; int:
     &#34;&#34;&#34;The number of document families in the store
 
-    :return: the count of families
+    Returns:
+        the count of families
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.DocumentStore.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, path: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete the document family stored at the given path</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>the path to the content (ie. mymodel.dat)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if deleted, False if there was no file at the path</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abc.abstractmethod
+def delete(self, path: str):
+    &#34;&#34;&#34;
+    Delete the document family stored at the given path
 
     Args:
+      path: the path to the content (ie. mymodel.dat)
 
     Returns:
+      True if deleted, False if there was no file at the path
 
     &#34;&#34;&#34;
     raise NotImplementedError</code></pre>
 </details>
 </dd>
-<dt id="kodexa.model.model.DocumentStore.get_by_uuid"><code class="name flex">
-<span>def <span class="ident">get_by_uuid</span></span>(<span>self, uuid_value: str) ‑> Union[<a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, NoneType]</span>
+<dt id="kodexa.model.model.DocumentStore.get_by_content_object_id"><code class="name flex">
+<span>def <span class="ident">get_by_content_object_id</span></span>(<span>self, document_family: <a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>, content_object_id: str) ‑> Union[<a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a Document based on the ID of the ContentObject</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>uuid_value</code></strong></dt>
-<dd>the ID of the ContentObject</dd>
-<dt><strong><code>uuid_value</code></strong></dt>
-<dd>str:</dd>
-</dl>
+<p>document_family(DocumentFamily): The document family
+content_object_id(str): the ID of the ContentObject</p>
 <h2 id="returns">Returns</h2>
 <p>A document (or None if not found)</p></div>
 <details class="source">
@@ -8551,12 +8569,12 @@ def count(self) -&gt; int:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
+def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
     &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
     Args:
-      uuid_value: the ID of the ContentObject
-      uuid_value: str:
+      document_family(DocumentFamily): The document family
+      content_object_id(str): the ID of the ContentObject
 
     Returns:
       A document (or None if not found)
@@ -8566,17 +8584,17 @@ def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.get_document_by_content_object"><code class="name flex">
-<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>) ‑> Union[<a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, NoneType]</span>
+<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, document_family: <a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>, content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>) ‑> Union[<a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a document for a given content object</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>content_object</code></strong></dt>
-<dd>the content object</dd>
-<dt><strong><code>content_object</code></strong></dt>
-<dd>ContentObject:</dd>
+<dt><strong><code>document_family</code></strong> :&ensp;<code><a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></code></dt>
+<dd>the document family</dd>
 </dl>
+<p>content_object
+(ContentObject): the content object</p>
 <h2 id="returns">Returns</h2>
 <p>the Document (or None if not found)</p></div>
 <details class="source">
@@ -8584,12 +8602,14 @@ def get_by_uuid(self, uuid_value: str) -&gt; Optional[Document]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_document_by_content_object(self, content_object: ContentObject) -&gt; Optional[Document]:
-    &#34;&#34;&#34;Get a document for a given content object
+def get_document_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -&gt; \
+        Optional[Document]:
+    &#34;&#34;&#34;
+    Get a document for a given content object
 
     Args:
-      content_object: the content object
-      content_object: ContentObject:
+      document_family (DocumentFamily): the document family
+      content_object  (ContentObject): the content object
 
     Returns:
       the Document (or None if not found)
@@ -8604,7 +8624,10 @@ def get_document_by_content_object(self, content_object: ContentObject) -&gt; Op
 <dd>
 <div class="desc"><p>Returns the document family (or None is not available) for a specific path in the store</p>
 <h2 id="args">Args</h2>
-<p>path:str the path within the store</p>
+<dl>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>the path within the store</dd>
+</dl>
 <h2 id="returns">Returns</h2>
 <p>The document family, or None is no family exists at that path</p></div>
 <details class="source">
@@ -8617,7 +8640,7 @@ def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
     Returns the document family (or None is not available) for a specific path in the store
 
     Args:
-        path:str the path within the store
+        path (str): the path within the store
 
     Returns:
         The document family, or None is no family exists at that path
@@ -8631,82 +8654,61 @@ def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the reference (org-slug/store-slug:version)</p>
-<p>:return: the reference</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>The reference of the document store (i.e. myorg/myslug:1.0.0)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
 def get_ref(self) -&gt; str:
-    &#34;&#34;&#34;Returns the reference (org-slug/store-slug:version)
-
-    :return: the reference
-
-    Args:
+    &#34;&#34;&#34;
+    Returns the reference (org-slug/store-slug:version)
 
     Returns:
+        The reference of the document store (i.e. myorg/myslug:1.0.0)
 
     &#34;&#34;&#34;
     raise NotImplementedError</code></pre>
 </details>
 </dd>
-<dt id="kodexa.model.model.DocumentStore.list"><code class="name flex">
-<span>def <span class="ident">list</span></span>(<span>self) ‑> List[<a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>]</span>
+<dt id="kodexa.model.model.DocumentStore.get_source_by_content_object"><code class="name flex">
+<span>def <span class="ident">get_source_by_content_object</span></span>(<span>self, document_family: <a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>, content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>) ‑> Any</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Print out a table listing the content objects in the store</p>
-<p>:return: The list of content objects</p>
-<p>Args:</p>
-<p>Returns:</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def list(self) -&gt; List[ContentObject]:
-    &#34;&#34;&#34;Print out a table listing the content objects in the store
-
-    :return: The list of content objects
-
-    Args:
-
-    Returns:
-
-    &#34;&#34;&#34;
-    objects = self.list_objects()
-    self._draw_table(objects)
-    return objects</code></pre>
-</details>
-</dd>
-<dt id="kodexa.model.model.DocumentStore.list_objects"><code class="name flex">
-<span>def <span class="ident">list_objects</span></span>(<span>self) ‑> List[<a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>List the content objects in the store</p>
-<p>:return: a list of the content objects</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+<div class="desc"><p>Get the source for a given content object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document_family</code></strong> :&ensp;<code><a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></code></dt>
+<dd>the document family</dd>
+</dl>
+<p>content_object
+(ContentObject): the content object</p>
+<h2 id="returns">Returns</h2>
+<p>the source (or None if not found)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def list_objects(self) -&gt; List[ContentObject]:
-    &#34;&#34;&#34;List the content objects in the store
-
-    :return: a list of the content objects
+def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -&gt; \
+        Any:
+    &#34;&#34;&#34;
+    Get the source for a given content object
 
     Args:
+      document_family (DocumentFamily): the document family
+      content_object  (ContentObject): the content object
 
     Returns:
+      the source (or None if not found)
 
     &#34;&#34;&#34;
     raise NotImplementedError</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>)</span>
+<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, force_replace: bool = False) ‑> <a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Puts a new document in the store with the given path.</p>
@@ -8714,34 +8716,33 @@ def list_objects(self) -&gt; List[ContentObject]:
 document</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>path</code></strong></dt>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
 <dd>the path you wish to add the document in the store</dd>
-<dt><strong><code>document</code></strong></dt>
+<dt><strong><code>document</code></strong> :&ensp;<code><a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></code></dt>
 <dd>the document</dd>
-<dt><strong><code>path</code></strong></dt>
-<dd>str:</dd>
-<dt><strong><code>document</code></strong></dt>
-<dd>Document:</dd>
+<dt><strong><code>force_replace</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Should we delete and replace the content at the path (Default False)</dd>
 </dl>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>A new document family</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def put(self, path: str, document: Document):
+def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
     &#34;&#34;&#34;Puts a new document in the store with the given path.
 
     There mustn&#39;t be a family in the path, this method will create a new family based around the
     document
 
     Args:
-      path: the path you wish to add the document in the store
-      document: the document
-      path: str:
-      document: Document:
+      path (str): the path you wish to add the document in the store
+      document (Document): the document
+      force_replace (bool): Should we delete and replace the content at the path (Default False)
 
     Returns:
+        A new document family
 
     &#34;&#34;&#34;
     raise NotImplementedError</code></pre>
@@ -8753,9 +8754,8 @@ def put(self, path: str, document: Document):
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>query</code></strong></dt>
-<dd>str:
-(Default value = "*")</dd>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The query (Default value = "*")</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -8766,37 +8766,47 @@ def put(self, path: str, document: Document):
     &#34;&#34;&#34;
 
     Args:
-      query: str:  (Default value = &#34;*&#34;)
+      query (str):  The query (Default value = &#34;*&#34;)
 
     Returns:
 
     &#34;&#34;&#34;
-    objects = self.query_objects(query)
-    self._draw_table(objects)</code></pre>
+    families = self.query_families(query)
+    self._draw_table(families)</code></pre>
 </details>
 </dd>
-<dt id="kodexa.model.model.DocumentStore.query_objects"><code class="name flex">
-<span>def <span class="ident">query_objects</span></span>(<span>self, query: str) ‑> List[<a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>]</span>
+<dt id="kodexa.model.model.DocumentStore.query_families"><code class="name flex">
+<span>def <span class="ident">query_families</span></span>(<span>self, query: str = '*', page: int = 1, page_size: int = 100) ‑> List[<a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
+<div class="desc"><p>Query the document families</p>
+<h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>query</code></strong></dt>
-<dd>str:</dd>
+<dt><strong><code>page</code></strong> :&ensp;<code>int</code></dt>
+<dd>The page number</dd>
+<dt><strong><code>page_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>The page size</dd>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The query (Defalt is *)</dd>
 </dl>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>A list of matching document families</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def query_objects(self, query: str) -&gt; List[ContentObject]:
+def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
     &#34;&#34;&#34;
+    Query the document families
 
     Args:
-      query: str:
+      page (int): The page number
+      page_size (int): The page size
+      query (str): The query (Defalt is *)
 
     Returns:
+        A list of matching document families
 
     &#34;&#34;&#34;
     raise NotImplementedError</code></pre>
@@ -8999,8 +9009,7 @@ def from_dict(cls, transition_dict):
         &#34;&#34;&#34;Returns the bytes object for the given path (or None is there nothing at that path)
 
         Args:
-          path: the path to get content from
-          path: str:
+          path(str): the path to get content from
 
         Returns:
           Bytes or None is there is nothing at the path
@@ -9008,13 +9017,13 @@ def from_dict(cls, transition_dict):
         &#34;&#34;&#34;
         pass
 
-    def put(self, path: str, content):
+    def put(self, path: str, content: Any, force_replace: bool = False):
         &#34;&#34;&#34;
 
         Args:
-          path: str:
-          content:
-
+          path (str): The path to put the content at
+          content: The content to put in the store
+          force_replace (bool): Replace the file stored at the path (Default false)
         Returns:
 
         &#34;&#34;&#34;
@@ -9033,12 +9042,7 @@ def from_dict(cls, transition_dict):
 <dd>
 <div class="desc"><p>Returns the bytes object for the given path (or None is there nothing at that path)</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>path</code></strong></dt>
-<dd>the path to get content from</dd>
-<dt><strong><code>path</code></strong></dt>
-<dd>str:</dd>
-</dl>
+<p>path(str): the path to get content from</p>
 <h2 id="returns">Returns</h2>
 <p>Bytes or None is there is nothing at the path</p></div>
 <details class="source">
@@ -9049,8 +9053,7 @@ def from_dict(cls, transition_dict):
     &#34;&#34;&#34;Returns the bytes object for the given path (or None is there nothing at that path)
 
     Args:
-      path: the path to get content from
-      path: str:
+      path(str): the path to get content from
 
     Returns:
       Bytes or None is there is nothing at the path
@@ -9060,27 +9063,30 @@ def from_dict(cls, transition_dict):
 </details>
 </dd>
 <dt id="kodexa.model.model.ModelStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, path: str, content)</span>
+<span>def <span class="ident">put</span></span>(<span>self, path: str, content: Any, force_replace: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>path</code></strong></dt>
-<dd>str:</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>The path to put the content at</dd>
+<dt><strong><code>content</code></strong></dt>
+<dd>The content to put in the store</dd>
+<dt><strong><code>force_replace</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Replace the file stored at the path (Default false)</dd>
 </dl>
-<p>content:
-Returns:</p></div>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, content):
+<pre><code class="python">def put(self, path: str, content: Any, force_replace: bool = False):
     &#34;&#34;&#34;
 
     Args:
-      path: str:
-      content:
-
+      path (str): The path to put the content at
+      content: The content to put in the store
+      force_replace (bool): Replace the file stored at the path (Default false)
     Returns:
 
     &#34;&#34;&#34;
@@ -9119,13 +9125,13 @@ instance</p></div>
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
-            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
+            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(&#39;:&#39;, &#39;/&#39;)}/fs&#34;,
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
             return resp.content
         else:
-            msg = f&#34;Unable to delete contents {resp.text}, status : {resp.status_code}&#34;
+            msg = f&#34;Unable to delete families {resp.text}, status : {resp.status_code}&#34;
             raise Exception(msg)</code></pre>
 </details>
 <h3>Subclasses</h3>
@@ -9150,13 +9156,13 @@ instance</p></div>
     from kodexa import KodexaPlatform
     import requests
     resp = requests.delete(
-        f&#34;{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
+        f&#34;{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(&#39;:&#39;, &#39;/&#39;)}/fs&#34;,
         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()})
 
     if resp.status_code == 200:
         return resp.content
     else:
-        msg = f&#34;Unable to delete contents {resp.text}, status : {resp.status_code}&#34;
+        msg = f&#34;Unable to delete families {resp.text}, status : {resp.status_code}&#34;
         raise Exception(msg)</code></pre>
 </details>
 </dd>
@@ -9772,15 +9778,15 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.DocumentStore.accept" href="#kodexa.model.model.DocumentStore.accept">accept</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.add_related_document_to_family" href="#kodexa.model.model.DocumentStore.add_related_document_to_family">add_related_document_to_family</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.count" href="#kodexa.model.model.DocumentStore.count">count</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.get_by_uuid" href="#kodexa.model.model.DocumentStore.get_by_uuid">get_by_uuid</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.delete" href="#kodexa.model.model.DocumentStore.delete">delete</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_by_content_object_id" href="#kodexa.model.model.DocumentStore.get_by_content_object_id">get_by_content_object_id</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_family_by_path" href="#kodexa.model.model.DocumentStore.get_family_by_path">get_family_by_path</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.list" href="#kodexa.model.model.DocumentStore.list">list</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.list_objects" href="#kodexa.model.model.DocumentStore.list_objects">list_objects</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_source_by_content_object" href="#kodexa.model.model.DocumentStore.get_source_by_content_object">get_source_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.put" href="#kodexa.model.model.DocumentStore.put">put</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="#kodexa.model.model.DocumentStore.query">query</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.query_objects" href="#kodexa.model.model.DocumentStore.query_objects">query_objects</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.query_families" href="#kodexa.model.model.DocumentStore.query_families">query_families</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
 </ul>
 </li>

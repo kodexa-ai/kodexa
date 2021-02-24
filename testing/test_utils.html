@@ -284,7 +284,7 @@ class AssistantTestHarness:
         store = self.get_store(event)
 
         for pipeline in response.pipelines:
-            document = store.get_document_by_content_object(event.content_object)
+            document = store.get_document_by_content_object(event.document_family, event.content_object)
             if document is not None:
                 pipeline.connector = [document]
                 pipeline_context = pipeline.run()
@@ -840,7 +840,7 @@ to compare the data (usually in a test)</p>
         store = self.get_store(event)
 
         for pipeline in response.pipelines:
-            document = store.get_document_by_content_object(event.content_object)
+            document = store.get_document_by_content_object(event.document_family, event.content_object)
             if document is not None:
                 pipeline.connector = [document]
                 pipeline_context = pipeline.run()
@@ -966,7 +966,7 @@ through them in turn (note in the platform this might be in parallel)</p>
     store = self.get_store(event)
 
     for pipeline in response.pipelines:
-        document = store.get_document_by_content_object(event.content_object)
+        document = store.get_document_by_content_object(event.document_family, event.content_object)
         if document is not None:
             pipeline.connector = [document]
             pipeline_context = pipeline.run()

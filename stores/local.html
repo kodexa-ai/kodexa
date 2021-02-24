@@ -38,7 +38,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import jsonpickle
 
@@ -95,7 +95,7 @@ class LocalDocumentStore(DocumentStore):
         if self.index &gt;= len(self.metastore):
             raise StopIteration
         content_object = self.metastore[self.index].content_objects[-1]
-        document = self.get_document_by_content_object(content_object)
+        document = self.get_document_by_content_object(self.metastore[self.index], content_object)
 
         from kodexa.model.model import ContentObjectReference
         content_object_reference = ContentObjectReference(content_object, self, document, self.metastore[self.index])
@@ -237,7 +237,7 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
         for family in self.metastore:
             if family.path == path:
-                return self.get_document_by_content_object(family.content_objects[-1])
+                return self.get_document_by_content_object(family, family.content_objects[-1])
         return None
 
     def list_objects(self) -&gt; List[ContentObject]:
@@ -289,26 +289,29 @@ class LocalDocumentStore(DocumentStore):
             if family.id == document_family_id:
                 family.add_document(document, transition)
 
-    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+    def get_document_by_content_object(self, document_family: DocumentFamily,
+                                       content_object: ContentObject) -&gt; Document:
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject:
+          document_family (DocumentFamily): The document family
+          content_object (ContentObject): The content object
 
         Returns:
 
         &#34;&#34;&#34;
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
 
-    def put(self, path: str, document: Document):
+    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
         Args:
-          path: str:
-          document: Document:
+          path (str): The path to the document family
+          document (Document): The document you wish to upload
+          force_replace (bool): True if you want to delete the family in this path first
 
         Returns:
-
+            The new document family instance
         &#34;&#34;&#34;
 
         # We can only add a document if it doesn&#39;t already exist as a family
@@ -323,7 +326,11 @@ class LocalDocumentStore(DocumentStore):
             # Notify the listeners
             self.notify_listeners(new_event)
 
-        return self.get_family_by_path(path)
+        document_family = self.get_family_by_path(path)
+        if document_family is not None:
+            return document_family
+        else:
+            raise Exception(&#34;Unable to get document family?&#34;)
 
     def exists(self, document):
         &#34;&#34;&#34;Look to see if we have document with the same original path and original filename
@@ -368,33 +375,31 @@ class LocalModelStore(ModelStore):
             }
         }
 
-    def get(self, object_path: str):
+    def get_native(self, path: str):
         &#34;&#34;&#34;
 
         Args:
-          object_path: str:
+          path: str:
 
         Returns:
 
         &#34;&#34;&#34;
-        if Path(os.path.join(self.store_path, object_path)).is_file():
-            return open(os.path.join(self.store_path, object_path), &#39;rb&#39;)
+        if Path(os.path.join(self.store_path, path)).is_file():
+            return open(os.path.join(self.store_path, path), &#39;rb&#39;)
         else:
             return None
 
-    def put(self, object_path: str, content):
+    def put_native(self, path: str, content: Any):
         &#34;&#34;&#34;
 
         Args:
-          object_path: str:
-          content:
-
+          path (str): The path to the native file
+          content (Any): The content to store
         Returns:
 
         &#34;&#34;&#34;
-        path = Path(object_path)
-        with open(os.path.join(self.store_path, path), &#39;wb&#39;) as object_file:
-            object_file.write(content)
+        with open(os.path.join(self.store_path, path), &#39;wb&#39;) as file:
+            file.write(content)
 
 
 class TableDataStore(Store):
@@ -584,7 +589,7 @@ class TableDataStore(Store):
         if self.index &gt;= len(self.metastore):
             raise StopIteration
         content_object = self.metastore[self.index].content_objects[-1]
-        document = self.get_document_by_content_object(content_object)
+        document = self.get_document_by_content_object(self.metastore[self.index], content_object)
 
         from kodexa.model.model import ContentObjectReference
         content_object_reference = ContentObjectReference(content_object, self, document, self.metastore[self.index])
@@ -726,7 +731,7 @@ class TableDataStore(Store):
         &#34;&#34;&#34;
         for family in self.metastore:
             if family.path == path:
-                return self.get_document_by_content_object(family.content_objects[-1])
+                return self.get_document_by_content_object(family, family.content_objects[-1])
         return None
 
     def list_objects(self) -&gt; List[ContentObject]:
@@ -778,26 +783,29 @@ class TableDataStore(Store):
             if family.id == document_family_id:
                 family.add_document(document, transition)
 
-    def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+    def get_document_by_content_object(self, document_family: DocumentFamily,
+                                       content_object: ContentObject) -&gt; Document:
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject:
+          document_family (DocumentFamily): The document family
+          content_object (ContentObject): The content object
 
         Returns:
 
         &#34;&#34;&#34;
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
 
-    def put(self, path: str, document: Document):
+    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
         Args:
-          path: str:
-          document: Document:
+          path (str): The path to the document family
+          document (Document): The document you wish to upload
+          force_replace (bool): True if you want to delete the family in this path first
 
         Returns:
-
+            The new document family instance
         &#34;&#34;&#34;
 
         # We can only add a document if it doesn&#39;t already exist as a family
@@ -812,7 +820,11 @@ class TableDataStore(Store):
             # Notify the listeners
             self.notify_listeners(new_event)
 
-        return self.get_family_by_path(path)
+        document_family = self.get_family_by_path(path)
+        if document_family is not None:
+            return document_family
+        else:
+            raise Exception(&#34;Unable to get document family?&#34;)
 
     def exists(self, document):
         &#34;&#34;&#34;Look to see if we have document with the same original path and original filename
@@ -1030,24 +1042,28 @@ class TableDataStore(Store):
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.get_document_by_content_object"><code class="name flex">
-<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>) ‑> <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a></span>
+<span>def <span class="ident">get_document_by_content_object</span></span>(<span>self, document_family: <a title="kodexa.model.model.DocumentFamily" href="../model/model.html#kodexa.model.model.DocumentFamily">DocumentFamily</a>, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>) ‑> <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a></span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>content_object</code></strong></dt>
-<dd>ContentObject:</dd>
+<dt><strong><code>document_family</code></strong> :&ensp;<code>DocumentFamily</code></dt>
+<dd>The document family</dd>
+<dt><strong><code>content_object</code></strong> :&ensp;<code>ContentObject</code></dt>
+<dd>The content object</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_document_by_content_object(self, content_object: ContentObject) -&gt; Document:
+<pre><code class="python">def get_document_by_content_object(self, document_family: DocumentFamily,
+                                   content_object: ContentObject) -&gt; Document:
     &#34;&#34;&#34;
 
     Args:
-      content_object: ContentObject:
+      document_family (DocumentFamily): The document family
+      content_object (ContentObject): The content object
 
     Returns:
 
@@ -1109,7 +1125,7 @@ class TableDataStore(Store):
     &#34;&#34;&#34;
     for family in self.metastore:
         if family.path == path:
-            return self.get_document_by_content_object(family.content_objects[-1])
+            return self.get_document_by_content_object(family, family.content_objects[-1])
     return None</code></pre>
 </details>
 </dd>
@@ -1125,6 +1141,24 @@ class TableDataStore(Store):
 <pre><code class="python">def get_name(self):
     &#34;&#34;&#34; &#34;&#34;&#34;
     return &#34;Local Document Store&#34;</code></pre>
+</details>
+</dd>
+<dt id="kodexa.stores.local.LocalDocumentStore.list_objects"><code class="name flex">
+<span>def <span class="ident">list_objects</span></span>(<span>self) ‑> List[<a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list_objects(self) -&gt; List[ContentObject]:
+    &#34;&#34;&#34; &#34;&#34;&#34;
+    co_list: List[ContentObject] = []
+    for family in self.metastore:
+        co_list.extend(family.content_objects)
+
+    return co_list</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.load_kdxa"><code class="name flex">
@@ -1182,30 +1216,34 @@ class TableDataStore(Store):
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
+<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>, force_replace: bool = False) ‑> <a title="kodexa.model.model.DocumentFamily" href="../model/model.html#kodexa.model.model.DocumentFamily">DocumentFamily</a></span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>path</code></strong></dt>
-<dd>str:</dd>
-<dt><strong><code>document</code></strong></dt>
-<dd>Document:</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>The path to the document family</dd>
+<dt><strong><code>document</code></strong> :&ensp;<code>Document</code></dt>
+<dd>The document you wish to upload</dd>
+<dt><strong><code>force_replace</code></strong> :&ensp;<code>bool</code></dt>
+<dd>True if you want to delete the family in this path first</dd>
 </dl>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>The new document family instance</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, document: Document):
+<pre><code class="python">def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
     &#34;&#34;&#34;
 
     Args:
-      path: str:
-      document: Document:
+      path (str): The path to the document family
+      document (Document): The document you wish to upload
+      force_replace (bool): True if you want to delete the family in this path first
 
     Returns:
-
+        The new document family instance
     &#34;&#34;&#34;
 
     # We can only add a document if it doesn&#39;t already exist as a family
@@ -1220,7 +1258,11 @@ class TableDataStore(Store):
         # Notify the listeners
         self.notify_listeners(new_event)
 
-    return self.get_family_by_path(path)</code></pre>
+    document_family = self.get_family_by_path(path)
+    if document_family is not None:
+        return document_family
+    else:
+        raise Exception(&#34;Unable to get document family?&#34;)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalDocumentStore.read_metastore"><code class="name flex">
@@ -1333,11 +1375,12 @@ Returns:</p></div>
 <ul class="hlist">
 <li><code><b><a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a></b></code>:
 <ul class="hlist">
+<li><code><a title="kodexa.model.model.DocumentStore.delete" href="../model/model.html#kodexa.model.model.DocumentStore.delete">delete</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_by_content_object_id" href="../model/model.html#kodexa.model.model.DocumentStore.get_by_content_object_id">get_by_content_object_id</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="../model/model.html#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.list" href="../model/model.html#kodexa.model.model.DocumentStore.list">list</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.list_objects" href="../model/model.html#kodexa.model.model.DocumentStore.list_objects">list_objects</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_source_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_source_by_content_object">get_source_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="../model/model.html#kodexa.model.model.DocumentStore.query">query</a></code></li>
-<li><code><a title="kodexa.model.model.DocumentStore.query_objects" href="../model/model.html#kodexa.model.model.DocumentStore.query_objects">query_objects</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.query_families" href="../model/model.html#kodexa.model.model.DocumentStore.query_families">query_families</a></code></li>
 </ul>
 </li>
 </ul>
@@ -1376,33 +1419,31 @@ Returns:</p></div>
             }
         }
 
-    def get(self, object_path: str):
+    def get_native(self, path: str):
         &#34;&#34;&#34;
 
         Args:
-          object_path: str:
+          path: str:
 
         Returns:
 
         &#34;&#34;&#34;
-        if Path(os.path.join(self.store_path, object_path)).is_file():
-            return open(os.path.join(self.store_path, object_path), &#39;rb&#39;)
+        if Path(os.path.join(self.store_path, path)).is_file():
+            return open(os.path.join(self.store_path, path), &#39;rb&#39;)
         else:
             return None
 
-    def put(self, object_path: str, content):
+    def put_native(self, path: str, content: Any):
         &#34;&#34;&#34;
 
         Args:
-          object_path: str:
-          content:
-
+          path (str): The path to the native file
+          content (Any): The content to store
         Returns:
 
         &#34;&#34;&#34;
-        path = Path(object_path)
-        with open(os.path.join(self.store_path, path), &#39;wb&#39;) as object_file:
-            object_file.write(content)</code></pre>
+        with open(os.path.join(self.store_path, path), &#39;wb&#39;) as file:
+            file.write(content)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1410,13 +1451,13 @@ Returns:</p></div>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="kodexa.stores.local.LocalModelStore.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, object_path: str)</span>
+<dt id="kodexa.stores.local.LocalModelStore.get_native"><code class="name flex">
+<span>def <span class="ident">get_native</span></span>(<span>self, path: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>object_path</code></strong></dt>
+<dt><strong><code>path</code></strong></dt>
 <dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
@@ -1424,49 +1465,48 @@ Returns:</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get(self, object_path: str):
+<pre><code class="python">def get_native(self, path: str):
     &#34;&#34;&#34;
 
     Args:
-      object_path: str:
+      path: str:
 
     Returns:
 
     &#34;&#34;&#34;
-    if Path(os.path.join(self.store_path, object_path)).is_file():
-        return open(os.path.join(self.store_path, object_path), &#39;rb&#39;)
+    if Path(os.path.join(self.store_path, path)).is_file():
+        return open(os.path.join(self.store_path, path), &#39;rb&#39;)
     else:
         return None</code></pre>
 </details>
 </dd>
-<dt id="kodexa.stores.local.LocalModelStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, object_path: str, content)</span>
+<dt id="kodexa.stores.local.LocalModelStore.put_native"><code class="name flex">
+<span>def <span class="ident">put_native</span></span>(<span>self, path: str, content: Any)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>object_path</code></strong></dt>
-<dd>str:</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>The path to the native file</dd>
+<dt><strong><code>content</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The content to store</dd>
 </dl>
-<p>content:
-Returns:</p></div>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, object_path: str, content):
+<pre><code class="python">def put_native(self, path: str, content: Any):
     &#34;&#34;&#34;
 
     Args:
-      object_path: str:
-      content:
-
+      path (str): The path to the native file
+      content (Any): The content to store
     Returns:
 
     &#34;&#34;&#34;
-    path = Path(object_path)
-    with open(os.path.join(self.store_path, path), &#39;wb&#39;) as object_file:
-        object_file.write(content)</code></pre>
+    with open(os.path.join(self.store_path, path), &#39;wb&#39;) as file:
+        file.write(content)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.local.LocalModelStore.to_dict"><code class="name flex">
@@ -1489,6 +1529,15 @@ Returns:</p></div>
 </details>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="kodexa.model.model.ModelStore" href="../model/model.html#kodexa.model.model.ModelStore">ModelStore</a></b></code>:
+<ul class="hlist">
+<li><code><a title="kodexa.model.model.ModelStore.get" href="../model/model.html#kodexa.model.model.ModelStore.get">get</a></code></li>
+<li><code><a title="kodexa.model.model.ModelStore.put" href="../model/model.html#kodexa.model.model.ModelStore.put">put</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="kodexa.stores.local.TableDataStore"><code class="flex name class">
 <span>class <span class="ident">TableDataStore</span></span>
@@ -1852,6 +1901,7 @@ def from_dict(cls, store_dict):
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_family_by_path" href="#kodexa.stores.local.LocalDocumentStore.get_family_by_path">get_family_by_path</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_latest_document" href="#kodexa.stores.local.LocalDocumentStore.get_latest_document">get_latest_document</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.get_name" href="#kodexa.stores.local.LocalDocumentStore.get_name">get_name</a></code></li>
+<li><code><a title="kodexa.stores.local.LocalDocumentStore.list_objects" href="#kodexa.stores.local.LocalDocumentStore.list_objects">list_objects</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.load_kdxa" href="#kodexa.stores.local.LocalDocumentStore.load_kdxa">load_kdxa</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.notify_listeners" href="#kodexa.stores.local.LocalDocumentStore.notify_listeners">notify_listeners</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalDocumentStore.put" href="#kodexa.stores.local.LocalDocumentStore.put">put</a></code></li>
@@ -1865,8 +1915,8 @@ def from_dict(cls, store_dict):
 <li>
 <h4><code><a title="kodexa.stores.local.LocalModelStore" href="#kodexa.stores.local.LocalModelStore">LocalModelStore</a></code></h4>
 <ul class="">
-<li><code><a title="kodexa.stores.local.LocalModelStore.get" href="#kodexa.stores.local.LocalModelStore.get">get</a></code></li>
-<li><code><a title="kodexa.stores.local.LocalModelStore.put" href="#kodexa.stores.local.LocalModelStore.put">put</a></code></li>
+<li><code><a title="kodexa.stores.local.LocalModelStore.get_native" href="#kodexa.stores.local.LocalModelStore.get_native">get_native</a></code></li>
+<li><code><a title="kodexa.stores.local.LocalModelStore.put_native" href="#kodexa.stores.local.LocalModelStore.put_native">put_native</a></code></li>
 <li><code><a title="kodexa.stores.local.LocalModelStore.to_dict" href="#kodexa.stores.local.LocalModelStore.to_dict">to_dict</a></code></li>
 </ul>
 </li>
