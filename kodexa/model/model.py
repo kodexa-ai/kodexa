@@ -94,11 +94,13 @@ class ContentObject:
         Returns:
 
         """
-        co = ContentObject(co_dict['name'])
+        co = ContentObject(co_dict['path'] if 'path' in co_dict else None)
         co.id = co_dict['id']
         co.labels = co_dict['labels']
         co.metadata = co_dict['metadata']
         co.content_type = co_dict['content_type']
+
+        return co
 
 
 class Store:
@@ -159,13 +161,13 @@ class RemoteStore:
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/contents",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/fs",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
             return resp.content
         else:
-            msg = f"Unable to delete contents {resp.text}, status : {resp.status_code}"
+            msg = f"Unable to delete families {resp.text}, status : {resp.status_code}"
             raise Exception(msg)
 
 
@@ -2177,7 +2179,7 @@ class DocumentFamily:
         document_family.content_objects = []
         for co_dict in family_dict['contentObjects']:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
-        for transition_dict in family_dict['documentTransitions']:
+        for transition_dict in family_dict['transitions']:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
 
@@ -2189,24 +2191,22 @@ class DocumentStore:
 
     @abc.abstractmethod
     def get_ref(self) -> str:
-        """Returns the reference (org-slug/store-slug:version)
-
-        :return: the reference
-
-        Args:
+        """
+        Returns the reference (org-slug/store-slug:version)
 
         Returns:
+            The reference of the document store (i.e. myorg/myslug:1.0.0)
 
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_uuid(self, uuid_value: str) -> Optional[Document]:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
         """Get a Document based on the ID of the ContentObject
 
         Args:
-          uuid_value: the ID of the ContentObject
-          uuid_value: str:
+          document_family(DocumentFamily): The document family
+          content_object_id(str): the ID of the ContentObject
 
         Returns:
           A document (or None if not found)
@@ -2215,29 +2215,28 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list_objects(self) -> List[ContentObject]:
-        """List the content objects in the store
-
-        :return: a list of the content objects
+    def delete(self, path: str):
+        """
+        Delete the document family stored at the given path
 
         Args:
+          path: the path to the content (ie. mymodel.dat)
 
         Returns:
+          True if deleted, False if there was no file at the path
 
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def add_related_document_to_family(self, document_family_id: str, document_relationship,
+    def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                        document: Document):
         """Add a document to a family as a new transition
 
         Args:
-          document_family_id: the ID for the document family
-          document_relationship: the document transition
-          document: the document
-          document_family_id: str:
-          document: Document:
+          document_family_id (str): the ID for the document family
+          transition (DocumentTransition): the document transition
+          document (Document): the document
 
         Returns:
           None
@@ -2246,12 +2245,14 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_document_by_content_object(self, content_object: ContentObject) -> Optional[Document]:
-        """Get a document for a given content object
+    def get_document_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
+            Optional[Document]:
+        """
+        Get a document for a given content object
 
         Args:
-          content_object: the content object
-          content_object: ContentObject:
+          document_family (DocumentFamily): the document family
+          content_object  (ContentObject): the content object
 
         Returns:
           the Document (or None if not found)
@@ -2259,31 +2260,33 @@ class DocumentStore:
         """
         raise NotImplementedError
 
-    def list(self) -> List[ContentObject]:
-        """Print out a table listing the content objects in the store
-
-        :return: The list of content objects
+    @abc.abstractmethod
+    def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
+            Any:
+        """
+        Get the source for a given content object
 
         Args:
+          document_family (DocumentFamily): the document family
+          content_object  (ContentObject): the content object
 
         Returns:
+          the source (or None if not found)
 
         """
-        objects = self.list_objects()
-        self._draw_table(objects)
-        return objects
+        raise NotImplementedError
 
     def query(self, query: str = "*"):
         """
 
         Args:
-          query: str:  (Default value = "*")
+          query (str):  The query (Default value = "*")
 
         Returns:
 
         """
-        objects = self.query_objects(query)
-        self._draw_table(objects)
+        families = self.query_families(query)
+        self._draw_table(families)
 
     @abc.abstractmethod
     def register_listener(self, listener):
@@ -2329,31 +2332,35 @@ class DocumentStore:
         print(table)
 
     @abc.abstractmethod
-    def query_objects(self, query: str) -> List[ContentObject]:
+    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
         """
+        Query the document families
 
         Args:
-          query: str:
+          page (int): The page number
+          page_size (int): The page size
+          query (str): The query (Defalt is *)
 
         Returns:
+            A list of matching document families
 
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document):
+    def put(self, path: str, document: Document, force_replace: bool = False) -> DocumentFamily:
         """Puts a new document in the store with the given path.
 
         There mustn't be a family in the path, this method will create a new family based around the
         document
 
         Args:
-          path: the path you wish to add the document in the store
-          document: the document
-          path: str:
-          document: Document:
+          path (str): the path you wish to add the document in the store
+          document (Document): the document
+          force_replace (bool): Should we delete and replace the content at the path (Default False)
 
         Returns:
+            A new document family
 
         """
         raise NotImplementedError
@@ -2364,7 +2371,7 @@ class DocumentStore:
         Returns the document family (or None is not available) for a specific path in the store
 
         Args:
-            path:str the path within the store
+            path (str): the path within the store
 
         Returns:
             The document family, or None is no family exists at that path
@@ -2376,12 +2383,8 @@ class DocumentStore:
     def count(self) -> int:
         """The number of document families in the store
 
-        :return: the count of families
-
-        Args:
-
         Returns:
-
+            the count of families
         """
         raise NotImplementedError
 
@@ -2390,8 +2393,7 @@ class DocumentStore:
         not yet have a document at the derived family path
 
         Args:
-          document: the document to check
-          document: Document:
+          document (Document): the document to check
 
         Returns:
           True if there is no current family at derived path, False is there is one
@@ -2407,8 +2409,7 @@ class ModelStore:
         """Returns the bytes object for the given path (or None is there nothing at that path)
 
         Args:
-          path: the path to get content from
-          path: str:
+          path(str): the path to get content from
 
         Returns:
           Bytes or None is there is nothing at the path
@@ -2416,13 +2417,13 @@ class ModelStore:
         """
         pass
 
-    def put(self, path: str, content):
+    def put(self, path: str, content: Any, force_replace: bool = False):
         """
 
         Args:
-          path: str:
-          content:
-
+          path (str): The path to put the content at
+          content: The content to put in the store
+          force_replace (bool): Replace the file stored at the path (Default false)
         Returns:
 
         """
