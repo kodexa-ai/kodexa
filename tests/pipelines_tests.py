@@ -11,7 +11,7 @@ def test_interesting_pipeline():
         return document
 
     def test_model_store(document, context):
-        context.get_store('my-model-store').put('cheese.txt', 'so cheesy'.encode('ascii'))
+        context.get_store('my-model-store').put_native('cheese.txt', 'so cheesy'.encode('ascii'))
         return document
 
     training_prep = Pipeline.from_text("hello world", apply_lineage=False).to_store(training_documents)
@@ -29,4 +29,4 @@ def test_interesting_pipeline():
 
     training_pipeline.run()
 
-    assert model_store.get('cheese.txt').read().decode('ascii') == 'so cheesy'
+    assert model_store.get_native('cheese.txt').read().decode('ascii') == 'so cheesy'
