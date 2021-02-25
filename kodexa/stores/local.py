@@ -149,6 +149,12 @@ class LocalDocumentStore(DocumentStore):
         with open(os.path.join(self.store_path, 'metastore.json'), 'w') as f:
             f.write(jsonpickle.encode(self.metastore))
 
+    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
+        for family in self.metastore:
+            if family.id == document_family_id:
+                return family
+        return None
+
     def get_by_uuid(self, uuid: str) -> Optional[Document]:
         """
 

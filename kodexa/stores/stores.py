@@ -284,6 +284,26 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 "Unable to decode the JSON response")
             raise
 
+    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
+        from kodexa import KodexaPlatform
+        try:
+            logger.info(f"Getting document family id {document_family_id}")
+            document_family_response = requests.get(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}",
+                headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+            if document_family_response.status_code == 200:
+                return DocumentFamily.from_dict(document_family_response.json())
+            else:
+                msg = "Get document family failed [" + document_family_response.text + "], response " + str(
+                    document_family_response.status_code)
+                logger.error(msg)
+                raise Exception(msg)
+        except JSONDecodeError:
+            logger.error(
+                "Unable to decode the JSON response")
+            raise
+
     def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
                                        document: Document):
         from kodexa import KodexaPlatform

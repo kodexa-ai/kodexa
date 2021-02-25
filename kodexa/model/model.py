@@ -2254,6 +2254,20 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
+    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
+        """
+        Returns a document family based on the ID
+
+        Args:
+            document_family_id (str): the ID of the document family
+
+        Returns:
+            The document family (or None if not found)
+
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def delete(self, path: str):
         """
         Delete the document family stored at the given path
