@@ -2027,12 +2027,14 @@ class ContentEvent:
     @classmethod
     def from_dict(cls, event_dict: dict):
         return ContentEvent(ContentObject.from_dict(event_dict['contentObject']),
+                            ContentEventType[event_dict['eventType']],
                             DocumentFamily.from_dict(event_dict['documentFamily']))
 
     def to_dict(self):
         return {
             'contentObject': self.content_object.to_dict(),
-            'documentFamily': self.document_family.to_dict()
+            'documentFamily': self.document_family.to_dict(),
+            'eventType': self.event_type
         }
 
 
