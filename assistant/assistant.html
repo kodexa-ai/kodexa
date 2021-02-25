@@ -44,7 +44,12 @@ class AssistantContext:
     &#34;&#34;&#34;The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
     &#34;&#34;&#34;
-    pass
+
+    def __init__(self, options=None):
+        if options is None:
+            options = {}
+        self.options = options
+        pass
 
 
 class AssistantResponse:
@@ -207,6 +212,7 @@ return as another event for the assistant</p>
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantContext"><code class="flex name class">
 <span>class <span class="ident">AssistantContext</span></span>
+<span>(</span><span>options=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Assistant Context provides a way to interact with additional services and capabilities
@@ -219,7 +225,12 @@ while processing an event</p></div>
     &#34;&#34;&#34;The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
     &#34;&#34;&#34;
-    pass</code></pre>
+
+    def __init__(self, options=None):
+        if options is None:
+            options = {}
+        self.options = options
+        pass</code></pre>
 </details>
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantResponse"><code class="flex name class">

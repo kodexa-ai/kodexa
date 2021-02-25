@@ -212,6 +212,11 @@ class LocalDocumentStore(DocumentStore):
                 return Document.from_kdxa(os.path.join(self.store_path, family.get_latest_content().id) + &#34;.kdxa&#34;)
         return None
 
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
+
+        # TODO implement query
+        return self.metastore
+
     def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
 
@@ -705,6 +710,11 @@ class TableDataStore(Store):
 
                 return Document.from_kdxa(os.path.join(self.store_path, family.get_latest_content().id) + &#34;.kdxa&#34;)
         return None
+
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
+
+        # TODO implement query
+        return self.metastore
 
     def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
@@ -1377,6 +1387,7 @@ Returns:</p></div>
 <ul class="hlist">
 <li><code><a title="kodexa.model.model.DocumentStore.delete" href="../model/model.html#kodexa.model.model.DocumentStore.delete">delete</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_by_content_object_id" href="../model/model.html#kodexa.model.model.DocumentStore.get_by_content_object_id">get_by_content_object_id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_latest_document_in_family" href="../model/model.html#kodexa.model.model.DocumentStore.get_latest_document_in_family">get_latest_document_in_family</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="../model/model.html#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_source_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_source_by_content_object">get_source_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="../model/model.html#kodexa.model.model.DocumentStore.query">query</a></code></li>

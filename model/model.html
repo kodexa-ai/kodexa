@@ -2368,7 +2368,7 @@ class DocumentStore:
         Args:
           page (int): The page number
           page_size (int): The page size
-          query (str): The query (Defalt is *)
+          query (str): The query (Default is *)
 
         Returns:
             A list of matching document families
@@ -2429,6 +2429,19 @@ class DocumentStore:
 
         &#34;&#34;&#34;
         return True
+
+    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+        Returns the latest instance
+        Args:
+            document_family (DocumentFamily): The document family which we want the latest document in
+
+        Returns:
+            The last document to be stored in the family or None if there isn&#39;t one available
+
+        &#34;&#34;&#34;
+        last_co = document_family.content_objects[-1]
+        return self.get_document_by_content_object(document_family, last_co)
 
 
 class ModelStore:
@@ -8364,7 +8377,7 @@ def from_dict(cls, family_dict: dict):
         Args:
           page (int): The page number
           page_size (int): The page size
-          query (str): The query (Defalt is *)
+          query (str): The query (Default is *)
 
         Returns:
             A list of matching document families
@@ -8424,7 +8437,20 @@ def from_dict(cls, family_dict: dict):
           True if there is no current family at derived path, False is there is one
 
         &#34;&#34;&#34;
-        return True</code></pre>
+        return True
+
+    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
+        &#34;&#34;&#34;
+        Returns the latest instance
+        Args:
+            document_family (DocumentFamily): The document family which we want the latest document in
+
+        Returns:
+            The last document to be stored in the family or None if there isn&#39;t one available
+
+        &#34;&#34;&#34;
+        last_co = document_family.content_objects[-1]
+        return self.get_document_by_content_object(document_family, last_co)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -8649,6 +8675,36 @@ def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
     raise NotImplementedError</code></pre>
 </details>
 </dd>
+<dt id="kodexa.model.model.DocumentStore.get_latest_document_in_family"><code class="name flex">
+<span>def <span class="ident">get_latest_document_in_family</span></span>(<span>self, document_family: <a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>) ‑> Union[<a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, NoneType]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the latest instance</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document_family</code></strong> :&ensp;<code><a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></code></dt>
+<dd>The document family which we want the latest document in</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The last document to be stored in the family or None if there isn't one available</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
+    &#34;&#34;&#34;
+    Returns the latest instance
+    Args:
+        document_family (DocumentFamily): The document family which we want the latest document in
+
+    Returns:
+        The last document to be stored in the family or None if there isn&#39;t one available
+
+    &#34;&#34;&#34;
+    last_co = document_family.content_objects[-1]
+    return self.get_document_by_content_object(document_family, last_co)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.DocumentStore.get_ref"><code class="name flex">
 <span>def <span class="ident">get_ref</span></span>(<span>self) ‑> str</span>
 </code></dt>
@@ -8787,7 +8843,7 @@ def put(self, path: str, document: Document, force_replace: bool = False) -&gt; 
 <dt><strong><code>page_size</code></strong> :&ensp;<code>int</code></dt>
 <dd>The page size</dd>
 <dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
-<dd>The query (Defalt is *)</dd>
+<dd>The query (Default is *)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>A list of matching document families</p></div>
@@ -8803,7 +8859,7 @@ def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int
     Args:
       page (int): The page number
       page_size (int): The page size
-      query (str): The query (Defalt is *)
+      query (str): The query (Default is *)
 
     Returns:
         A list of matching document families
@@ -9782,6 +9838,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.DocumentStore.get_by_content_object_id" href="#kodexa.model.model.DocumentStore.get_by_content_object_id">get_by_content_object_id</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_family_by_path" href="#kodexa.model.model.DocumentStore.get_family_by_path">get_family_by_path</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_latest_document_in_family" href="#kodexa.model.model.DocumentStore.get_latest_document_in_family">get_latest_document_in_family</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_source_by_content_object" href="#kodexa.model.model.DocumentStore.get_source_by_content_object">get_source_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.put" href="#kodexa.model.model.DocumentStore.put">put</a></code></li>

@@ -92,7 +92,7 @@ class FolderConnector:
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -157,7 +157,7 @@ class FileHandleConnector:
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -204,7 +204,7 @@ class UrlConnector:
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -263,7 +263,7 @@ class CacheConnector:
         &#34;&#34;&#34;
 
         Args:
-          source: SourceMetadata: 
+          source: SourceMetadata:
 
         Returns:
 
@@ -274,7 +274,7 @@ class CacheConnector:
         &#34;&#34;&#34;
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -304,7 +304,7 @@ def add_cache(cache_connector: CacheConnector):
 
     Args:
       cache_connector: return:
-      cache_connector: CacheConnector: 
+      cache_connector: CacheConnector:
 
     Returns:
 
@@ -316,8 +316,8 @@ def get_connector(connector: str, source: SourceMetadata):
     &#34;&#34;&#34;
 
     Args:
-      connector: str: 
-      source: SourceMetadata: 
+      connector: str:
+      source: SourceMetadata:
 
     Returns:
 
@@ -339,7 +339,7 @@ def add_connector(connector):
     &#34;&#34;&#34;
 
     Args:
-      connector: 
+      connector:
 
     Returns:
 
@@ -351,7 +351,7 @@ def get_source(document):
     &#34;&#34;&#34;
 
     Args:
-      document: 
+      document:
 
     Returns:
 
@@ -381,16 +381,16 @@ class DocumentStoreConnector(object):
         if self.index &gt;= self.store.count():
             raise StopIteration
         else:
-            uuid_value = self.store.list_objects()[self.index].id
+            document_family = self.store.query_families()[self.index]
             self.index += 1
-            return self.store.get_by_uuid(uuid_value)
+            return self.store.get_latest_document_in_family(document_family)
 
     @staticmethod
     def get_source(document):
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -428,7 +428,7 @@ determine if there is already an object in a cache that holds it</p>
 <dt><strong><code>cache_connector</code></strong></dt>
 <dd>return:</dd>
 <dt><strong><code>cache_connector</code></strong></dt>
-<dd>CacheConnector: </dd>
+<dd>CacheConnector:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -441,7 +441,7 @@ determine if there is already an object in a cache that holds it</p>
 
     Args:
       cache_connector: return:
-      cache_connector: CacheConnector: 
+      cache_connector: CacheConnector:
 
     Returns:
 
@@ -454,11 +454,8 @@ determine if there is already an object in a cache that holds it</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>connector</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>connector:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -467,7 +464,7 @@ determine if there is already an object in a cache that holds it</p>
     &#34;&#34;&#34;
 
     Args:
-      connector: 
+      connector:
 
     Returns:
 
@@ -503,9 +500,9 @@ determine if there is already an object in a cache that holds it</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>connector</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>source</code></strong></dt>
-<dd>SourceMetadata: </dd>
+<dd>SourceMetadata:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -516,8 +513,8 @@ determine if there is already an object in a cache that holds it</p>
     &#34;&#34;&#34;
 
     Args:
-      connector: str: 
-      source: SourceMetadata: 
+      connector: str:
+      source: SourceMetadata:
 
     Returns:
 
@@ -563,11 +560,8 @@ determine if there is already an object in a cache that holds it</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -576,7 +570,7 @@ determine if there is already an object in a cache that holds it</p>
     &#34;&#34;&#34;
 
     Args:
-      document: 
+      document:
 
     Returns:
 
@@ -619,7 +613,7 @@ a cache</p>
         &#34;&#34;&#34;
 
         Args:
-          source: SourceMetadata: 
+          source: SourceMetadata:
 
         Returns:
 
@@ -630,7 +624,7 @@ a cache</p>
         &#34;&#34;&#34;
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -646,7 +640,7 @@ a cache</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -657,7 +651,7 @@ a cache</p>
     &#34;&#34;&#34;
 
     Args:
-      document: Document: 
+      document: Document:
 
     Returns:
 
@@ -672,7 +666,7 @@ a cache</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>source</code></strong></dt>
-<dd>SourceMetadata: </dd>
+<dd>SourceMetadata:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -683,7 +677,7 @@ a cache</p>
     &#34;&#34;&#34;
 
     Args:
-      source: SourceMetadata: 
+      source: SourceMetadata:
 
     Returns:
 
@@ -723,16 +717,16 @@ a cache</p>
         if self.index &gt;= self.store.count():
             raise StopIteration
         else:
-            uuid_value = self.store.list_objects()[self.index].id
+            document_family = self.store.query_families()[self.index]
             self.index += 1
-            return self.store.get_by_uuid(uuid_value)
+            return self.store.get_latest_document_in_family(document_family)
 
     @staticmethod
     def get_source(document):
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -767,11 +761,8 @@ def get_name():
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -781,7 +772,7 @@ def get_source(document):
     &#34;&#34;&#34;
 
     Args:
-      document: 
+      document:
 
     Returns:
 
@@ -825,7 +816,7 @@ def get_source(document):
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -872,11 +863,8 @@ def get_name():
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -886,7 +874,7 @@ def get_source(document):
     &#34;&#34;&#34;
 
     Args:
-      document: 
+      document:
 
     Returns:
 
@@ -934,7 +922,7 @@ def get_source(document):
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -1002,11 +990,8 @@ def get_name():
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1016,7 +1001,7 @@ def get_source(document):
     &#34;&#34;&#34;
 
     Args:
-      document: 
+      document:
 
     Returns:
 
@@ -1057,7 +1042,7 @@ def get_source(document):
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -1118,11 +1103,8 @@ def get_name():
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1132,7 +1114,7 @@ def get_source(document):
     &#34;&#34;&#34;
 
     Args:
-      document: 
+      document:
 
     Returns:
 
