@@ -64,7 +64,7 @@ class Assistant:
     that is working with set of content
     """
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -> AssistantResponse:
+    def process_event(self, event: ContentEvent, context: AssistantContext) -> AssistantResponse:
         """The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -75,10 +75,8 @@ class Assistant:
         return as another event for the assistant
 
         Args:
-          event: the content event to react to
-          context: the assistant context
-          event: ContentEvent:
-          context: AssistantContext:  (Default value = None)
+          event: ContentEvent: the event
+          context: AssistantContext:  the context for the assistant
 
         Returns:
           AssistantResponse: the response to the event
