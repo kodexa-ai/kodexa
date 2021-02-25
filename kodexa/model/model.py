@@ -29,21 +29,18 @@ class ContentObject:
     a Kodexa document.
 
     The content object allows us to capture metadata about the document or the native file without changing it
-
-    Args:
-
-    Returns:
-
     """
 
     def __init__(self, name="untitled", id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
-                 store_ref=None, labels=None):
+                 store_ref=None, labels=None, mixins=None):
         if labels is None:
             labels = []
         if metadata is None:
             metadata = {}
         if tags is None:
             tags = []
+        if mixins is None:
+            mixins = []
         from kodexa.pipeline import new_id
         self.id = new_id() if id is None else id
         """The unique ID for the content object"""
@@ -61,6 +58,8 @@ class ContentObject:
         """A list of the labels related to the object"""
         self.path = name
         """.. deprecated::"""
+        self.mixins = mixins
+        """The mixins for this object"""
 
     def to_dict(self):
         """Convert the content object to a dictionary
@@ -79,26 +78,26 @@ class ContentObject:
             'content_type': self.content_type.name,
             'metadata': self.metadata,
             'name': self.name,
-            'store_ref': self.store_ref
+            'store_ref': self.store_ref,
+            'mixins': self.mixins
         }
 
     @classmethod
     def from_dict(cls, co_dict):
         """Create a content object from a dictionary
 
-        :return: A content object
-
         Args:
-          co_dict:
+          co_dict (dict): The content object as a dictionary
 
         Returns:
-
+          A content object
         """
         co = ContentObject(co_dict['path'] if 'path' in co_dict else None)
         co.id = co_dict['id']
         co.labels = co_dict['labels']
         co.metadata = co_dict['metadata']
         co.content_type = co_dict['content_type']
+        co.mixins = co_dict['mixins']
 
         return co
 
