@@ -4,7 +4,6 @@ instance of the Kodexa platform
 """
 
 from kodexa.model import ContentEvent
-from kodexa.testing import ExtensionPackUtil
 
 
 class AssistantContext:
@@ -19,7 +18,8 @@ class AssistantContext:
         Args:
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
         """
-        self.extension_pack_utl = ExtensionPackUtil(path_to_kodexa_metadata)
+        from kodexa.testing import ExtensionPackUtil
+        self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
 
     def get_step(self, step: str, options=None):
         """
@@ -36,7 +36,7 @@ class AssistantContext:
         """
         if options is None:
             options = {}
-        return self.extension_pack_utl.get_step(step, options)
+        return self.extension_pack_util.get_step(step, options)
 
 
 class AssistantResponse:
