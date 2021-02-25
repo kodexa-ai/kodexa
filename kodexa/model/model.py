@@ -2024,6 +2024,12 @@ class ContentEvent:
         self.document_family: DocumentFamily = document_family
         """The document family containing the content object"""
 
+    def to_dict(self):
+        return {
+            'contentObject': self.content_object.to_dict(),
+            'documentFamily': self.document_family.to_dict()
+        }
+
 
 class DocumentActor:
     """A document actor is something that can create a new document in a family and is
@@ -2085,6 +2091,19 @@ class DocumentTransition:
                                         transition_dict['destinationContentObjectId'])
         return transition
 
+    def to_dict(self) -> dict:
+        """
+        Convert the transition to a dictionary to match REST API
+
+        Returns:
+            dictionary of transition
+        """
+        return {
+            'transitionType': self.transition_type,
+            'sourceContentObjectId': self.source_content_object_id,
+            'destinationContentObjectId': self.destination_content_object_id
+        }
+
 
 class DocumentFamily:
     """A document family represents a collection of related documents which together represent different views of the same
@@ -2117,7 +2136,7 @@ class DocumentFamily:
           transition: DocumentTransition:  (Default value = None)
 
         Returns:
-
+          A new content event
         """
         new_content_object = ContentObject()
         new_content_object.store_ref = self.store_ref
@@ -2181,6 +2200,20 @@ class DocumentFamily:
         for transition_dict in family_dict['transitions']:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
+
+    def to_dict(self) -> dict:
+        """
+        Convert the document family to a dictionary to match REST API
+
+        Returns:
+            dictionary of document family
+        """
+        return {
+            'id': self.id,
+            'storeRef': self.store_ref,
+            'path': self.path,
+            'contentObjects': [co.to_dict() for co in self.content_objects],
+            'transitions': [transition.to_dict() for transition in self.transitions]}
 
 
 class DocumentStore:
