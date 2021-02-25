@@ -275,6 +275,7 @@ class LocalDocumentStore(DocumentStore):
           content_object (ContentObject): The content object
 
         Returns:
+          The Kodexa document related to the content family
 
         """
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
