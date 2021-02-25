@@ -3,10 +3,8 @@ Provides the high-level classes and definition for an Assistant that can be impl
 instance of the Kodexa platform
 """
 
-from typing import List
-
 from kodexa.model import ContentEvent
-from kodexa.pipeline import Pipeline
+from kodexa.testing import ExtensionPackUtil
 
 
 class AssistantContext:
@@ -14,11 +12,31 @@ class AssistantContext:
     while processing an event
     """
 
-    def __init__(self, options=None):
+    def __init__(self, path_to_kodexa_metadata: str = 'kodexa.yml'):
+        """
+        Initialize the context based with a path to the kodexa file
+
+        Args:
+            path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
+        """
+        self.extension_pack_utl = ExtensionPackUtil(path_to_kodexa_metadata)
+
+    def get_step(self, step: str, options=None):
+        """
+        Returns an instance of a step that is packaged in the same extension pack as the
+        assistant, this allows you to build pipelines when you don't know the owning organization
+
+        Args:
+            step (str): The step name (ie. pdf-parser)
+            options: A dictionary of the options to create the step
+
+        Returns:
+            The step
+
+        """
         if options is None:
             options = {}
-        self.options = options
-        pass
+        return self.extension_pack_utl.get_step(step, options)
 
 
 class AssistantResponse:
@@ -27,7 +45,7 @@ class AssistantResponse:
     event.
     """
 
-    def __init__(self, pipelines: List[Pipeline]):
+    def __init__(self, pipelines=None):
         """
         Initialize the response from the assistant
 
@@ -35,6 +53,8 @@ class AssistantResponse:
             pipelines: zero or more pipelines that you want executed on the content object for which the
                        event was raised
         """
+        if pipelines is None:
+            pipelines = []
         self.pipelines = pipelines
         """The list of pipelines that you wish to have executed against the content object from the event"""
 

@@ -6,7 +6,8 @@ from typing import List, cast
 from addict import Dict, addict
 
 from kodexa import Assistant, AssistantResponse, LocalDocumentStore
-from kodexa import ContentNode, Document, PipelineContext, TableDataStore,  ContentEvent, DocumentActor, DocumentTransition, TransitionType
+from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
+    TableDataStore, TransitionType
 from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger('kodexa.testing')
@@ -221,36 +222,39 @@ class AssistantTestHarness:
 
     """
 
-    def __init__(self, assistant: Assistant, stores: List[DocumentStore]):
+    def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str):
         """
         Initialize the test harness
 
         Args:
             assistant: the instance of the assistant
             stores: the list of stores (usually LocalDocumentStore) that we will use to monitor for events
+            kodexa_metadata_path (str): the path to the kodexa.yml (or kodexa.json)
         """
         self.assistant = assistant
         self.stores = stores
+        self.kodexa_metadata_path = kodexa_metadata_path
 
         for store in self.stores:
             store.register_listener(self)
 
     def process_event(self, event: ContentEvent):
-        """The harnesss will take the content event and
+        """The harness will take the content event and
         will pass it to the assistant - then we will
         take each of the pipelines and run the document
         through them in turn (note in the platform this might be in parallel)
 
         Args:
-          event: content event
-          event: ContentEvent:
+          event: ContentEvent: The event to process
 
         Returns:
           None
 
         """
+        from kodexa import AssistantContext
+        assistant_context = AssistantContext(self.kodexa_metadata_path)
 
-        response: AssistantResponse = self.assistant.process_event(event)
+        response: AssistantResponse = self.assistant.process_event(event, assistant_context)
 
         # We need to get the document down
         store = self.get_store(event)
@@ -329,17 +333,24 @@ class ExtensionPackUtil:
     def __init__(self, file_path='kodexa.yml'):
         self.file_path = file_path
 
-        import yaml
+        if file_path.endswith('.yml'):
+            import yaml
 
-        with open(file_path, 'r') as stream:
-            self.kodexa_metadata = addict.Dict(yaml.safe_load(stream))
+            with open(file_path, 'r') as stream:
+                self.kodexa_metadata = addict.Dict(yaml.safe_load(stream))
+
+        if file_path.endswith('.json'):
+            import json
+
+            with open(file_path, 'r') as stream:
+                self.kodexa_metadata = addict.Dict(json.load(stream))
 
     def get_step(self, action_slug, options=None):
         """
 
         Args:
-          action_slug:
-          options:  (Default value = None)
+          action_slug (str): the slug to the action (ie. pdf-parser)
+          options (dict):  the options for the action as a dictionary (Default value = None)
 
         Returns:
 
@@ -388,7 +399,7 @@ class ExtensionPackUtil:
             stores = []
         assistant = self.get_assistant(assistant_slug, options)
 
-        return AssistantTestHarness(assistant, stores)
+        return AssistantTestHarness(assistant, stores, self.file_path)
 
     def get_assistant(self, assistant_slug, options=None):
         """Create an instance of an assistant from the kodexa metadata
