@@ -95,7 +95,7 @@ class Assistant:
     that is working with set of content
     &#34;&#34;&#34;
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
+    def process_event(self, event: ContentEvent, context: AssistantContext) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -106,10 +106,8 @@ class Assistant:
         return as another event for the assistant
 
         Args:
-          event: the content event to react to
-          context: the assistant context
-          event: ContentEvent:
-          context: AssistantContext:  (Default value = None)
+          event: ContentEvent: the event
+          context: AssistantContext:  the context for the assistant
 
         Returns:
           AssistantResponse: the response to the event
@@ -143,7 +141,7 @@ that is working with set of content</p></div>
     that is working with set of content
     &#34;&#34;&#34;
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
+    def process_event(self, event: ContentEvent, context: AssistantContext) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -154,10 +152,8 @@ that is working with set of content</p></div>
         return as another event for the assistant
 
         Args:
-          event: the content event to react to
-          context: the assistant context
-          event: ContentEvent:
-          context: AssistantContext:  (Default value = None)
+          event: ContentEvent: the event
+          context: AssistantContext:  the context for the assistant
 
         Returns:
           AssistantResponse: the response to the event
@@ -173,7 +169,7 @@ that is working with set of content</p></div>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.assistant.assistant.Assistant.process_event"><code class="name flex">
-<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a> = None) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
+<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a>) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>The assistant will need to examine the event to determine if it wants to respond</p>
@@ -186,14 +182,10 @@ return as another event for the assistant</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>event</code></strong></dt>
-<dd>the content event to react to</dd>
-<dt><strong><code>context</code></strong></dt>
-<dd>the assistant context</dd>
-<dt><strong><code>event</code></strong></dt>
-<dd>ContentEvent:</dd>
+<dd>ContentEvent: the event</dd>
 <dt><strong><code>context</code></strong></dt>
 <dd>AssistantContext:
-(Default value = None)</dd>
+the context for the assistant</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -204,7 +196,7 @@ return as another event for the assistant</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext = None) -&gt; AssistantResponse:
+<pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext) -&gt; AssistantResponse:
     &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
     The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -215,10 +207,8 @@ return as another event for the assistant</p>
     return as another event for the assistant
 
     Args:
-      event: the content event to react to
-      context: the assistant context
-      event: ContentEvent:
-      context: AssistantContext:  (Default value = None)
+      event: ContentEvent: the event
+      context: AssistantContext:  the context for the assistant
 
     Returns:
       AssistantResponse: the response to the event
