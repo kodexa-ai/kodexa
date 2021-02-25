@@ -2283,6 +2283,20 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
+        &#34;&#34;&#34;
+        Returns a document family based on the ID
+
+        Args:
+            document_family_id (str): the ID of the document family
+
+        Returns:
+            The document family (or None if not found)
+
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def delete(self, path: str):
         &#34;&#34;&#34;
         Delete the document family stored at the given path
@@ -8389,6 +8403,20 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
+        &#34;&#34;&#34;
+        Returns a document family based on the ID
+
+        Args:
+            document_family_id (str): the ID of the document family
+
+        Returns:
+            The document family (or None if not found)
+
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def delete(self, path: str):
         &#34;&#34;&#34;
         Delete the document family stored at the given path
@@ -8775,6 +8803,37 @@ def get_document_by_content_object(self, document_family: DocumentFamily, conten
 
     Returns:
       the Document (or None if not found)
+
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.DocumentStore.get_family"><code class="name flex">
+<span>def <span class="ident">get_family</span></span>(<span>self, document_family_id: str) ‑> Union[<a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>, NoneType]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns a document family based on the ID</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>document_family_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>the ID of the document family</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The document family (or None if not found)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abc.abstractmethod
+def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
+    &#34;&#34;&#34;
+    Returns a document family based on the ID
+
+    Args:
+        document_family_id (str): the ID of the document family
+
+    Returns:
+        The document family (or None if not found)
 
     &#34;&#34;&#34;
     raise NotImplementedError</code></pre>
@@ -10018,6 +10077,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.DocumentStore.delete" href="#kodexa.model.model.DocumentStore.delete">delete</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_by_content_object_id" href="#kodexa.model.model.DocumentStore.get_by_content_object_id">get_by_content_object_id</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_document_by_content_object" href="#kodexa.model.model.DocumentStore.get_document_by_content_object">get_document_by_content_object</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_family" href="#kodexa.model.model.DocumentStore.get_family">get_family</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_family_by_path" href="#kodexa.model.model.DocumentStore.get_family_by_path">get_family_by_path</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_latest_document_in_family" href="#kodexa.model.model.DocumentStore.get_latest_document_in_family">get_latest_document_in_family</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>

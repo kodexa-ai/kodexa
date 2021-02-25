@@ -179,6 +179,12 @@ class LocalDocumentStore(DocumentStore):
         with open(os.path.join(self.store_path, &#39;metastore.json&#39;), &#39;w&#39;) as f:
             f.write(jsonpickle.encode(self.metastore))
 
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
+        for family in self.metastore:
+            if family.id == document_family_id:
+                return family
+        return None
+
     def get_by_uuid(self, uuid: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;
 
@@ -680,6 +686,12 @@ class TableDataStore(Store):
         &#34;&#34;&#34;Method to write the JSON store index back to store path&#34;&#34;&#34;
         with open(os.path.join(self.store_path, &#39;metastore.json&#39;), &#39;w&#39;) as f:
             f.write(jsonpickle.encode(self.metastore))
+
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
+        for family in self.metastore:
+            if family.id == document_family_id:
+                return family
+        return None
 
     def get_by_uuid(self, uuid: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;
@@ -1397,6 +1409,7 @@ Returns:</p></div>
 <ul class="hlist">
 <li><code><a title="kodexa.model.model.DocumentStore.delete" href="../model/model.html#kodexa.model.model.DocumentStore.delete">delete</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_by_content_object_id" href="../model/model.html#kodexa.model.model.DocumentStore.get_by_content_object_id">get_by_content_object_id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.get_family" href="../model/model.html#kodexa.model.model.DocumentStore.get_family">get_family</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_latest_document_in_family" href="../model/model.html#kodexa.model.model.DocumentStore.get_latest_document_in_family">get_latest_document_in_family</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="../model/model.html#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_source_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_source_by_content_object">get_source_by_content_object</a></code></li>
