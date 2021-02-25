@@ -352,7 +352,7 @@ class DocumentStoreConnector(object):
         else:
             document_family = self.store.query_families()[self.index]
             self.index += 1
-            return self.store.get_latest_document(document_family)
+            return self.store.get_latest_document_in_family(document_family)
 
     @staticmethod
     def get_source(document):

@@ -2339,7 +2339,7 @@ class DocumentStore:
         Args:
           page (int): The page number
           page_size (int): The page size
-          query (str): The query (Defalt is *)
+          query (str): The query (Default is *)
 
         Returns:
             A list of matching document families
@@ -2401,7 +2401,7 @@ class DocumentStore:
         """
         return True
 
-    def get_latest_document(self, document_family: DocumentFamily) -> Optional[Document]:
+    def get_latest_document_in_family(self, document_family: DocumentFamily) -> Optional[Document]:
         """
         Returns the latest instance
         Args:

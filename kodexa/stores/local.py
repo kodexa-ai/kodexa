@@ -182,6 +182,11 @@ class LocalDocumentStore(DocumentStore):
                 return Document.from_kdxa(os.path.join(self.store_path, family.get_latest_content().id) + ".kdxa")
         return None
 
+    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
+
+        # TODO implement query
+        return self.metastore
+
     def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
         """
 
