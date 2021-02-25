@@ -1,6 +1,8 @@
 from kodexa.assistant import Assistant, AssistantContext, AssistantResponse
+from kodexa.assistant.assistant import AssistantPipeline
 from kodexa.model import ContentEvent
 from kodexa.pipeline import Pipeline
+
 
 class TestAction:
     """ """
@@ -33,4 +35,4 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label('hello')
 
-        return AssistantResponse([pipeline])
+        return AssistantResponse([AssistantPipeline(pipeline)])

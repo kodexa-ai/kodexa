@@ -2,6 +2,7 @@
 Provides the high-level classes and definition for an Assistant that can be implemented in Kodexa and run on an
 instance of the Kodexa platform
 """
+from typing import List
 
 from kodexa.model import ContentEvent
 
@@ -39,13 +40,20 @@ class AssistantContext:
         return self.extension_pack_util.get_step(step, options)
 
 
+class AssistantPipeline:
+
+    def __init__(self, pipeline, description=None):
+        self.pipeline = pipeline
+        self.description = description
+
+
 class AssistantResponse:
     """
     An assistant response allows you to provide the response from an assistant to a specific
     event.
     """
 
-    def __init__(self, pipelines=None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None):
         """
         Initialize the response from the assistant
 
