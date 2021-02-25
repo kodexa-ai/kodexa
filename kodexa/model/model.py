@@ -2024,6 +2024,11 @@ class ContentEvent:
         self.document_family: DocumentFamily = document_family
         """The document family containing the content object"""
 
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return ContentEvent(ContentObject.from_dict(event_dict['contentObject']),
+                            DocumentFamily.from_dict(event_dict['documentFamily']))
+
     def to_dict(self):
         return {
             'contentObject': self.content_object.to_dict(),
