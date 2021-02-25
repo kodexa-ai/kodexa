@@ -262,7 +262,9 @@ class LocalDocumentStore(DocumentStore):
         self.read_metastore()
         for family in self.metastore:
             if family.id == document_family_id:
-                family.add_document(document, transition)
+                new_event = family.add_document(document, transition)
+                document.to_kdxa(os.path.join(self.store_path, new_event.content_object.id) + ".kdxa")
+                self.write_metastore()
 
     def get_document_by_content_object(self, document_family: DocumentFamily,
                                        content_object: ContentObject) -> Document:
