@@ -305,6 +305,7 @@ class LocalDocumentStore(DocumentStore):
           content_object (ContentObject): The content object
 
         Returns:
+          The Kodexa document related to the content family
 
         &#34;&#34;&#34;
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
@@ -806,6 +807,7 @@ class TableDataStore(Store):
           content_object (ContentObject): The content object
 
         Returns:
+          The Kodexa document related to the content family
 
         &#34;&#34;&#34;
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
@@ -1068,7 +1070,8 @@ class TableDataStore(Store):
 <dt><strong><code>content_object</code></strong> :&ensp;<code>ContentObject</code></dt>
 <dd>The content object</dd>
 </dl>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>The Kodexa document related to the content family</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1082,6 +1085,7 @@ class TableDataStore(Store):
       content_object (ContentObject): The content object
 
     Returns:
+      The Kodexa document related to the content family
 
     &#34;&#34;&#34;
     return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)</code></pre>
