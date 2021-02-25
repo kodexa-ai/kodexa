@@ -1,5 +1,6 @@
-from kodexa import Assistant, AssistantContext, AssistantResponse, ContentEvent, Pipeline
-
+from kodexa.assistant import Assistant, AssistantContext, AssistantResponse
+from kodexa.model import ContentEvent
+from kodexa.pipeline import Pipeline
 
 class TestAction:
     """ """
