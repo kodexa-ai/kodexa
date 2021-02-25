@@ -13,7 +13,12 @@ class AssistantContext:
     """The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
     """
-    pass
+
+    def __init__(self, options=None):
+        if options is None:
+            options = {}
+        self.options = options
+        pass
 
 
 class AssistantResponse:

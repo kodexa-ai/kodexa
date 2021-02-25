@@ -2401,6 +2401,19 @@ class DocumentStore:
         """
         return True
 
+    def get_latest_document(self, document_family: DocumentFamily) -> Optional[Document]:
+        """
+        Returns the latest instance
+        Args:
+            document_family (DocumentFamily): The document family which we want the latest document in
+
+        Returns:
+            The last document to be stored in the family or None if there isn't one available
+
+        """
+        last_co = document_family.content_objects[-1]
+        return self.get_document_by_content_object(document_family, last_co)
+
 
 class ModelStore:
     """A model store supports storing and retrieving of a ML models"""
