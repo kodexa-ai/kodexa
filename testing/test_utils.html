@@ -31,7 +31,7 @@ import importlib
 import logging
 from typing import List, cast
 
-from addict import Dict, addict
+from addict import addict
 
 from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
@@ -45,11 +45,8 @@ def print_data_table(context: PipelineContext, store_name: str):
     &#34;&#34;&#34;A small helper to support working with a store in a test
 
     Args:
-      context: param store_name:
-      context: PipelineContext:
-      store_name: str:
-
-    Returns:
+      context: PipelineContext: The context for the pipeline
+      store_name: str: The store name
 
     &#34;&#34;&#34;
     if store_name in context.get_store_names():
@@ -103,7 +100,7 @@ def simplify_node(node: ContentNode):
     }
 
 
-def simplify_document(document: Document) -&gt; Dict:
+def simplify_document(document: Document) -&gt; dict:
     &#34;&#34;&#34;
 
     Args:
@@ -401,7 +398,16 @@ class ExtensionPackUtil:
 
                     for option_name in options.keys():
                         if option_name not in option_names:
-                            raise OptionException(f&#34;Unexpected option {option_name}&#34;)
+
+                            # We need to determine if this is actually a group
+                            is_group = False
+                            for check_option in service.metadata.options:
+                                if check_option[&#39;group&#39;] is not None:
+                                    if check_option[&#39;group&#39;][&#39;name&#39;] == option_name:
+                                        is_group = True
+
+                            if not is_group:
+                                raise OptionException(f&#34;Unexpected option {option_name}&#34;)
 
                 # We need to create and return our action
                 module = importlib.import_module(service.step.package)
@@ -640,13 +646,10 @@ class ExtensionPackUtil:
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>context</code></strong></dt>
-<dd>param store_name:</dd>
-<dt><strong><code>context</code></strong></dt>
-<dd>PipelineContext:</dd>
+<dd>PipelineContext: The context for the pipeline</dd>
 <dt><strong><code>store_name</code></strong></dt>
-<dd>str:</dd>
-</dl>
-<p>Returns:</p></div>
+<dd>str: The store name</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -655,11 +658,8 @@ class ExtensionPackUtil:
     &#34;&#34;&#34;A small helper to support working with a store in a test
 
     Args:
-      context: param store_name:
-      context: PipelineContext:
-      store_name: str:
-
-    Returns:
+      context: PipelineContext: The context for the pipeline
+      store_name: str: The store name
 
     &#34;&#34;&#34;
     if store_name in context.get_store_names():
@@ -674,7 +674,7 @@ class ExtensionPackUtil:
 </details>
 </dd>
 <dt id="kodexa.testing.test_utils.simplify_document"><code class="name flex">
-<span>def <span class="ident">simplify_document</span></span>(<span>document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>) ‑> addict.addict.Dict</span>
+<span>def <span class="ident">simplify_document</span></span>(<span>document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>) ‑> dict</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -687,7 +687,7 @@ class ExtensionPackUtil:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def simplify_document(document: Document) -&gt; Dict:
+<pre><code class="python">def simplify_document(document: Document) -&gt; dict:
     &#34;&#34;&#34;
 
     Args:
@@ -1105,7 +1105,16 @@ through them in turn (note in the platform this might be in parallel)</p>
 
                     for option_name in options.keys():
                         if option_name not in option_names:
-                            raise OptionException(f&#34;Unexpected option {option_name}&#34;)
+
+                            # We need to determine if this is actually a group
+                            is_group = False
+                            for check_option in service.metadata.options:
+                                if check_option[&#39;group&#39;] is not None:
+                                    if check_option[&#39;group&#39;][&#39;name&#39;] == option_name:
+                                        is_group = True
+
+                            if not is_group:
+                                raise OptionException(f&#34;Unexpected option {option_name}&#34;)
 
                 # We need to create and return our action
                 module = importlib.import_module(service.step.package)
@@ -1290,7 +1299,16 @@ of an assistant in a test case</p>
 
                 for option_name in options.keys():
                     if option_name not in option_names:
-                        raise OptionException(f&#34;Unexpected option {option_name}&#34;)
+
+                        # We need to determine if this is actually a group
+                        is_group = False
+                        for check_option in service.metadata.options:
+                            if check_option[&#39;group&#39;] is not None:
+                                if check_option[&#39;group&#39;][&#39;name&#39;] == option_name:
+                                    is_group = True
+
+                        if not is_group:
+                            raise OptionException(f&#34;Unexpected option {option_name}&#34;)
 
             # We need to create and return our action
             module = importlib.import_module(service.step.package)
