@@ -58,21 +58,18 @@ class ContentObject:
     a Kodexa document.
 
     The content object allows us to capture metadata about the document or the native file without changing it
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, name=&#34;untitled&#34;, id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
-                 store_ref=None, labels=None):
+                 store_ref=None, labels=None, mixins=None):
         if labels is None:
             labels = []
         if metadata is None:
             metadata = {}
         if tags is None:
             tags = []
+        if mixins is None:
+            mixins = []
         from kodexa.pipeline import new_id
         self.id = new_id() if id is None else id
         &#34;&#34;&#34;The unique ID for the content object&#34;&#34;&#34;
@@ -90,6 +87,8 @@ class ContentObject:
         &#34;&#34;&#34;A list of the labels related to the object&#34;&#34;&#34;
         self.path = name
         &#34;&#34;&#34;.. deprecated::&#34;&#34;&#34;
+        self.mixins = mixins
+        &#34;&#34;&#34;The mixins for this object&#34;&#34;&#34;
 
     def to_dict(self):
         &#34;&#34;&#34;Convert the content object to a dictionary
@@ -108,26 +107,26 @@ class ContentObject:
             &#39;content_type&#39;: self.content_type.name,
             &#39;metadata&#39;: self.metadata,
             &#39;name&#39;: self.name,
-            &#39;store_ref&#39;: self.store_ref
+            &#39;store_ref&#39;: self.store_ref,
+            &#39;mixins&#39;: self.mixins
         }
 
     @classmethod
     def from_dict(cls, co_dict):
         &#34;&#34;&#34;Create a content object from a dictionary
 
-        :return: A content object
-
         Args:
-          co_dict:
+          co_dict (dict): The content object as a dictionary
 
         Returns:
-
+          A content object
         &#34;&#34;&#34;
         co = ContentObject(co_dict[&#39;path&#39;] if &#39;path&#39; in co_dict else None)
         co.id = co_dict[&#39;id&#39;]
         co.labels = co_dict[&#39;labels&#39;]
         co.metadata = co_dict[&#39;metadata&#39;]
         co.content_type = co_dict[&#39;content_type&#39;]
+        co.mixins = co_dict[&#39;mixins&#39;]
 
         return co
 
@@ -6418,14 +6417,12 @@ tag_uuid: str:
 </dd>
 <dt id="kodexa.model.model.ContentObject"><code class="flex name class">
 <span>class <span class="ident">ContentObject</span></span>
-<span>(</span><span>name='untitled', id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None, store_ref=None, labels=None)</span>
+<span>(</span><span>name='untitled', id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None, store_ref=None, labels=None, mixins=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
 a Kodexa document.</p>
-<p>The content object allows us to capture metadata about the document or the native file without changing it</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+<p>The content object allows us to capture metadata about the document or the native file without changing it</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -6435,21 +6432,18 @@ a Kodexa document.</p>
     a Kodexa document.
 
     The content object allows us to capture metadata about the document or the native file without changing it
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, name=&#34;untitled&#34;, id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
-                 store_ref=None, labels=None):
+                 store_ref=None, labels=None, mixins=None):
         if labels is None:
             labels = []
         if metadata is None:
             metadata = {}
         if tags is None:
             tags = []
+        if mixins is None:
+            mixins = []
         from kodexa.pipeline import new_id
         self.id = new_id() if id is None else id
         &#34;&#34;&#34;The unique ID for the content object&#34;&#34;&#34;
@@ -6467,6 +6461,8 @@ a Kodexa document.</p>
         &#34;&#34;&#34;A list of the labels related to the object&#34;&#34;&#34;
         self.path = name
         &#34;&#34;&#34;.. deprecated::&#34;&#34;&#34;
+        self.mixins = mixins
+        &#34;&#34;&#34;The mixins for this object&#34;&#34;&#34;
 
     def to_dict(self):
         &#34;&#34;&#34;Convert the content object to a dictionary
@@ -6485,26 +6481,26 @@ a Kodexa document.</p>
             &#39;content_type&#39;: self.content_type.name,
             &#39;metadata&#39;: self.metadata,
             &#39;name&#39;: self.name,
-            &#39;store_ref&#39;: self.store_ref
+            &#39;store_ref&#39;: self.store_ref,
+            &#39;mixins&#39;: self.mixins
         }
 
     @classmethod
     def from_dict(cls, co_dict):
         &#34;&#34;&#34;Create a content object from a dictionary
 
-        :return: A content object
-
         Args:
-          co_dict:
+          co_dict (dict): The content object as a dictionary
 
         Returns:
-
+          A content object
         &#34;&#34;&#34;
         co = ContentObject(co_dict[&#39;path&#39;] if &#39;path&#39; in co_dict else None)
         co.id = co_dict[&#39;id&#39;]
         co.labels = co_dict[&#39;labels&#39;]
         co.metadata = co_dict[&#39;metadata&#39;]
         co.content_type = co_dict[&#39;content_type&#39;]
+        co.mixins = co_dict[&#39;mixins&#39;]
 
         return co</code></pre>
 </details>
@@ -6515,10 +6511,13 @@ a Kodexa document.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a content object from a dictionary</p>
-<p>:return: A content object</p>
 <h2 id="args">Args</h2>
-<p>co_dict:
-Returns:</p></div>
+<dl>
+<dt><strong><code>co_dict</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The content object as a dictionary</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A content object</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -6527,19 +6526,18 @@ Returns:</p></div>
 def from_dict(cls, co_dict):
     &#34;&#34;&#34;Create a content object from a dictionary
 
-    :return: A content object
-
     Args:
-      co_dict:
+      co_dict (dict): The content object as a dictionary
 
     Returns:
-
+      A content object
     &#34;&#34;&#34;
     co = ContentObject(co_dict[&#39;path&#39;] if &#39;path&#39; in co_dict else None)
     co.id = co_dict[&#39;id&#39;]
     co.labels = co_dict[&#39;labels&#39;]
     co.metadata = co_dict[&#39;metadata&#39;]
     co.content_type = co_dict[&#39;content_type&#39;]
+    co.mixins = co_dict[&#39;mixins&#39;]
 
     return co</code></pre>
 </details>
@@ -6562,6 +6560,10 @@ def from_dict(cls, co_dict):
 <dt id="kodexa.model.model.ContentObject.metadata"><code class="name">var <span class="ident">metadata</span></code></dt>
 <dd>
 <div class="desc"><p>A dictionary of the metadata</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentObject.mixins"><code class="name">var <span class="ident">mixins</span></code></dt>
+<dd>
+<div class="desc"><p>The mixins for this object</p></div>
 </dd>
 <dt id="kodexa.model.model.ContentObject.name"><code class="name">var <span class="ident">name</span></code></dt>
 <dd>
@@ -6613,7 +6615,8 @@ def from_dict(cls, co_dict):
         &#39;content_type&#39;: self.content_type.name,
         &#39;metadata&#39;: self.metadata,
         &#39;name&#39;: self.name,
-        &#39;store_ref&#39;: self.store_ref
+        &#39;store_ref&#39;: self.store_ref,
+        &#39;mixins&#39;: self.mixins
     }</code></pre>
 </details>
 </dd>
@@ -9764,6 +9767,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentObject.id" href="#kodexa.model.model.ContentObject.id">id</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.labels" href="#kodexa.model.model.ContentObject.labels">labels</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.metadata" href="#kodexa.model.model.ContentObject.metadata">metadata</a></code></li>
+<li><code><a title="kodexa.model.model.ContentObject.mixins" href="#kodexa.model.model.ContentObject.mixins">mixins</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.name" href="#kodexa.model.model.ContentObject.name">name</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.path" href="#kodexa.model.model.ContentObject.path">path</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.store_ref" href="#kodexa.model.model.ContentObject.store_ref">store_ref</a></code></li>
