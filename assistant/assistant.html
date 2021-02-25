@@ -33,6 +33,7 @@ instance of the Kodexa platform</p>
 Provides the high-level classes and definition for an Assistant that can be implemented in Kodexa and run on an
 instance of the Kodexa platform
 &#34;&#34;&#34;
+from typing import List
 
 from kodexa.model import ContentEvent
 
@@ -70,13 +71,20 @@ class AssistantContext:
         return self.extension_pack_util.get_step(step, options)
 
 
+class AssistantPipeline:
+
+    def __init__(self, pipeline, description=None):
+        self.pipeline = pipeline
+        self.description = description
+
+
 class AssistantResponse:
     &#34;&#34;&#34;
     An assistant response allows you to provide the response from an assistant to a specific
     event.
     &#34;&#34;&#34;
 
-    def __init__(self, pipelines=None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None):
         &#34;&#34;&#34;
         Initialize the response from the assistant
 
@@ -310,9 +318,26 @@ assistant, this allows you to build pipelines when you don't know the owning org
 </dd>
 </dl>
 </dd>
+<dt id="kodexa.assistant.assistant.AssistantPipeline"><code class="flex name class">
+<span>class <span class="ident">AssistantPipeline</span></span>
+<span>(</span><span>pipeline, description=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AssistantPipeline:
+
+    def __init__(self, pipeline, description=None):
+        self.pipeline = pipeline
+        self.description = description</code></pre>
+</details>
+</dd>
 <dt id="kodexa.assistant.assistant.AssistantResponse"><code class="flex name class">
 <span>class <span class="ident">AssistantResponse</span></span>
-<span>(</span><span>pipelines=None)</span>
+<span>(</span><span>pipelines: List[<a title="kodexa.assistant.assistant.AssistantPipeline" href="#kodexa.assistant.assistant.AssistantPipeline">AssistantPipeline</a>] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>An assistant response allows you to provide the response from an assistant to a specific
@@ -334,7 +359,7 @@ event was raised</dd>
     event.
     &#34;&#34;&#34;
 
-    def __init__(self, pipelines=None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None):
         &#34;&#34;&#34;
         Initialize the response from the assistant
 
@@ -382,6 +407,9 @@ event was raised</dd>
 <ul class="">
 <li><code><a title="kodexa.assistant.assistant.AssistantContext.get_step" href="#kodexa.assistant.assistant.AssistantContext.get_step">get_step</a></code></li>
 </ul>
+</li>
+<li>
+<h4><code><a title="kodexa.assistant.assistant.AssistantPipeline" href="#kodexa.assistant.assistant.AssistantPipeline">AssistantPipeline</a></code></h4>
 </li>
 <li>
 <h4><code><a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></code></h4>

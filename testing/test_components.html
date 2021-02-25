@@ -27,8 +27,10 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from kodexa.assistant import Assistant, AssistantContext, AssistantResponse
+from kodexa.assistant.assistant import AssistantPipeline
 from kodexa.model import ContentEvent
 from kodexa.pipeline import Pipeline
+
 
 class TestAction:
     &#34;&#34;&#34; &#34;&#34;&#34;
@@ -61,7 +63,7 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label(&#39;hello&#39;)
 
-        return AssistantResponse([pipeline])</code></pre>
+        return AssistantResponse([AssistantPipeline(pipeline)])</code></pre>
 </details>
 </section>
 <section>
@@ -140,7 +142,7 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label(&#39;hello&#39;)
 
-        return AssistantResponse([pipeline])</code></pre>
+        return AssistantResponse([AssistantPipeline(pipeline)])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -182,7 +184,7 @@ class TestAssistant(Assistant):
     pipeline = Pipeline()
     pipeline.add_label(&#39;hello&#39;)
 
-    return AssistantResponse([pipeline])</code></pre>
+    return AssistantResponse([AssistantPipeline(pipeline)])</code></pre>
 </details>
 </dd>
 </dl>
