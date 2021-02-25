@@ -21,7 +21,5 @@ def test_basic_assistant():
     # two documents related
 
     assert lds.get_family_by_path('missing') is None
-
     document_family = lds.get_family_by_path('cheesy-puff.txt')
-
     assert document_family.get_document_count() == 2
