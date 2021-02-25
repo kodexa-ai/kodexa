@@ -2053,10 +2053,17 @@ class ContentEvent:
         self.document_family: DocumentFamily = document_family
         &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;
 
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return ContentEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                            ContentEventType[event_dict[&#39;eventType&#39;]],
+                            DocumentFamily.from_dict(event_dict[&#39;documentFamily&#39;]))
+
     def to_dict(self):
         return {
             &#39;contentObject&#39;: self.content_object.to_dict(),
-            &#39;documentFamily&#39;: self.document_family.to_dict()
+            &#39;documentFamily&#39;: self.document_family.to_dict(),
+            &#39;eventType&#39;: self.event_type
         }
 
 
@@ -2566,12 +2573,38 @@ in a store, and can be relayed for a reaction</p>
         self.document_family: DocumentFamily = document_family
         &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;
 
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return ContentEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                            ContentEventType[event_dict[&#39;eventType&#39;]],
+                            DocumentFamily.from_dict(event_dict[&#39;documentFamily&#39;]))
+
     def to_dict(self):
         return {
             &#39;contentObject&#39;: self.content_object.to_dict(),
-            &#39;documentFamily&#39;: self.document_family.to_dict()
+            &#39;documentFamily&#39;: self.document_family.to_dict(),
+            &#39;eventType&#39;: self.event_type
         }</code></pre>
 </details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.model.model.ContentEvent.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>event_dict: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_dict(cls, event_dict: dict):
+    return ContentEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                        ContentEventType[event_dict[&#39;eventType&#39;]],
+                        DocumentFamily.from_dict(event_dict[&#39;documentFamily&#39;]))</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="kodexa.model.model.ContentEvent.content_object"><code class="name">var <span class="ident">content_object</span></code></dt>
@@ -2601,7 +2634,8 @@ in a store, and can be relayed for a reaction</p>
 <pre><code class="python">def to_dict(self):
     return {
         &#39;contentObject&#39;: self.content_object.to_dict(),
-        &#39;documentFamily&#39;: self.document_family.to_dict()
+        &#39;documentFamily&#39;: self.document_family.to_dict(),
+        &#39;eventType&#39;: self.event_type
     }</code></pre>
 </details>
 </dd>
@@ -9830,6 +9864,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentEvent.content_object" href="#kodexa.model.model.ContentEvent.content_object">content_object</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.document_family" href="#kodexa.model.model.ContentEvent.document_family">document_family</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.event_type" href="#kodexa.model.model.ContentEvent.event_type">event_type</a></code></li>
+<li><code><a title="kodexa.model.model.ContentEvent.from_dict" href="#kodexa.model.model.ContentEvent.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.to_dict" href="#kodexa.model.model.ContentEvent.to_dict">to_dict</a></code></li>
 </ul>
 </li>
