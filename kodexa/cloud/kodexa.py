@@ -29,7 +29,6 @@ from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
 from kodexa.taxonomy import Taxonomy
-from kodexa.workflow.workflow import Workflow
 
 logger = logging.getLogger('kodexa.platform')
 
@@ -38,7 +37,7 @@ dirs = AppDirs("Kodexa", "Kodexa")
 
 def get_config():
     """Get the kodexa config object we use when you want to store your PAT locally
-    
+
     :return: the config as a dict
 
     Args:
@@ -184,10 +183,6 @@ OBJECT_TYPES = {
     "taxonomies": {
         "name": "taxonomy",
         "plural": "taxonomies"
-    },
-    "workflows": {
-        "name": "workflow",
-        "plural": "workflows"
     }
 }
 
@@ -315,7 +310,7 @@ class KodexaPlatform:
         """
 
         Args:
-          metadata: 
+          metadata:
 
         Returns:
 
@@ -335,8 +330,8 @@ class KodexaPlatform:
         """
 
         Args:
-          path: 
-          organisation_slug: 
+          path:
+          organisation_slug:
 
         Returns:
 
@@ -357,7 +352,7 @@ class KodexaPlatform:
         """
 
         Args:
-          ref: str: 
+          ref: str:
 
         Returns:
 
@@ -377,8 +372,8 @@ class KodexaPlatform:
         """
 
         Args:
-          ref: str: 
-          object_type: str: 
+          ref: str:
+          object_type: str:
 
         Returns:
 
@@ -406,8 +401,8 @@ class KodexaPlatform:
         """
 
         Args:
-          ref: str: 
-          kodexa_object: 
+          ref: str:
+          kodexa_object:
           name: str:  (Default value = None)
           description: str:  (Default value = None)
           options:  (Default value = None)
@@ -486,18 +481,6 @@ class KodexaPlatform:
             metadata_object.description = 'A table data store' if metadata_object.description is None else metadata_object.description
             metadata_object.type = 'store'
             metadata_object.storeType = 'TABLE'
-        elif isinstance(kodexa_object, Workflow):
-            metadata_object.name = 'New Workflow' if metadata_object.name is None else metadata_object.name
-            metadata_object.description = 'A new workflow' if metadata_object.description is None else metadata_object.description
-            object_url = 'workflows'
-            metadata_object.type = 'workflow'
-            metadata_object.pipelines = jsonpickle.decode(jsonpickle.encode(kodexa_object.pipelines, unpicklable=False))
-            metadata_object.stores = jsonpickle.decode(jsonpickle.encode(kodexa_object.stores, unpicklable=False))
-            metadata_object.connectors = jsonpickle.decode(
-                jsonpickle.encode(kodexa_object.connectors, unpicklable=False))
-            metadata_object.schedules = jsonpickle.decode(jsonpickle.encode(kodexa_object.schedules, unpicklable=False))
-            metadata_object.accessToken = kodexa_object.access_token
-            metadata_object.active = kodexa_object.active
         elif isinstance(kodexa_object, Taxonomy):
             metadata_object.name = 'New Taxonomy' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new taxonomy' if metadata_object.description is None else metadata_object.description
@@ -582,8 +565,8 @@ class KodexaPlatform:
         """
 
         Args:
-          organization_slug: 
-          object_type: 
+          organization_slug:
+          object_type:
 
         Returns:
 
@@ -602,8 +585,8 @@ class KodexaPlatform:
         """
 
         Args:
-          object_type: str: 
-          ref: str: 
+          object_type: str:
+          ref: str:
 
         Returns:
 
@@ -626,8 +609,8 @@ class KodexaPlatform:
         """
 
         Args:
-          ref: 
-          object_type: 
+          ref:
+          object_type:
 
         Returns:
 
@@ -646,8 +629,8 @@ class KodexaPlatform:
         """
 
         Args:
-          ref: 
-          object_type: 
+          ref:
+          object_type:
 
         Returns:
 
@@ -667,8 +650,8 @@ class KodexaPlatform:
         """
 
         Args:
-          object_type: 
-          ref: 
+          object_type:
+          ref:
           path:  (Default value = None)
 
         Returns:
@@ -717,8 +700,8 @@ class KodexaPlatform:
         """
 
         Args:
-          object_type: 
-          ref: 
+          object_type:
+          ref:
 
         Returns:
 
@@ -737,9 +720,9 @@ class KodexaPlatform:
         """
 
         Args:
-          kodexa_url: 
-          username: 
-          password: 
+          kodexa_url:
+          username:
+          password:
 
         Returns:
 
@@ -776,8 +759,8 @@ class KodexaPlatform:
         """
 
         Args:
-          object_type: 
-          ref: 
+          object_type:
+          ref:
 
         Returns:
 
@@ -809,7 +792,7 @@ class RemoteSession:
         """
 
         Args:
-          ref: 
+          ref:
 
         Returns:
 
@@ -842,10 +825,10 @@ class RemoteSession:
         """
 
         Args:
-          document: 
-          options: 
-          attach_source: 
-          context: 
+          document:
+          options:
+          attach_source:
+          context:
 
         Returns:
 
@@ -882,7 +865,7 @@ class RemoteSession:
         """
 
         Args:
-          execution: 
+          execution:
 
         Returns:
 
@@ -929,7 +912,7 @@ class RemoteSession:
         """
 
         Args:
-          execution: 
+          execution:
 
         Returns:
 
@@ -948,8 +931,8 @@ class RemoteSession:
         """
 
         Args:
-          execution: 
-          store: 
+          execution:
+          store:
 
         Returns:
 
@@ -965,8 +948,8 @@ class RemoteSession:
         """
 
         Args:
-          execution: 
-          context: PipelineContext: 
+          execution:
+          context: PipelineContext:
 
         Returns:
 
@@ -1060,9 +1043,9 @@ class RemotePipeline:
           slug: The slug for the remote pipeline
           url: The URL ie. https://www.google.com
           headers: A dictionary of headers (Default value = None)
-          slug: str: 
-          *args: 
-          **kwargs: 
+          slug: str:
+          *args:
+          **kwargs:
 
         Returns:
           A new instance of a remote pipeline
@@ -1078,11 +1061,11 @@ class RemotePipeline:
           slug: The slug for the remote pipeline
           file_path: The path to the file
           unpack: Unpack the file as a KDXA
-          slug: str: 
-          file_path: str: 
+          slug: str:
+          file_path: str:
           unpack: bool:  (Default value = False)
-          *args: 
-          **kwargs: 
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -1097,10 +1080,10 @@ class RemotePipeline:
         Args:
           slug: The slug for the remote pipeline
           text: Text to use to create document
-          slug: str: 
-          text: str: 
-          *args: 
-          **kwargs: 
+          slug: str:
+          text: str:
+          *args:
+          **kwargs:
 
         Returns:
           RemotePipeline: A new pipeline
@@ -1126,8 +1109,8 @@ class RemotePipeline:
           relative: Is the folder path relative to the caller (default False)
           caller_path: The caller path (defaults to trying to work this out from the stack)
           unpack: Unpack the file as a KDXA document
-          slug: str: 
-          folder_path: str: 
+          slug: str:
+          folder_path: str:
           filename_filter: str:  (Default value = "*")
           recursive: bool:  (Default value = False)
           unpack: bool:  (Default value = False)
@@ -1143,13 +1126,13 @@ class RemotePipeline:
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
         """Allows you to provide the sink store easily
-        
+
         This will wrap the store in a document store sink
 
         Args:
           document_store: document store to use
           processing_mode: the processing mode (update or new)
-          document_store: DocumentStore: 
+          document_store: DocumentStore:
           processing_mode: str:  (Default value = "update")
 
         Returns:
@@ -1190,8 +1173,8 @@ class RemoteAction:
         """
 
         Args:
-          document: 
-          context: 
+          document:
+          context:
 
         Returns:
 
@@ -1228,7 +1211,7 @@ class RemoteAction:
 
     def to_configuration(self):
         """Returns a dictionary representing the configuration information for the step
-        
+
         :return: dictionary representing the configuration of the step
 
         Args:
@@ -1250,7 +1233,7 @@ class ExtensionHelper:
         """
 
         Args:
-          path: 
+          path:
 
         Returns:
 

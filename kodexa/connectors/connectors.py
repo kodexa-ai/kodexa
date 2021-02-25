@@ -61,7 +61,7 @@ class FolderConnector:
         """
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -126,7 +126,7 @@ class FileHandleConnector:
         """
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -173,7 +173,7 @@ class UrlConnector:
         """
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -232,7 +232,7 @@ class CacheConnector:
         """
 
         Args:
-          source: SourceMetadata: 
+          source: SourceMetadata:
 
         Returns:
 
@@ -243,7 +243,7 @@ class CacheConnector:
         """
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -273,7 +273,7 @@ def add_cache(cache_connector: CacheConnector):
 
     Args:
       cache_connector: return:
-      cache_connector: CacheConnector: 
+      cache_connector: CacheConnector:
 
     Returns:
 
@@ -285,8 +285,8 @@ def get_connector(connector: str, source: SourceMetadata):
     """
 
     Args:
-      connector: str: 
-      source: SourceMetadata: 
+      connector: str:
+      source: SourceMetadata:
 
     Returns:
 
@@ -308,7 +308,7 @@ def add_connector(connector):
     """
 
     Args:
-      connector: 
+      connector:
 
     Returns:
 
@@ -320,7 +320,7 @@ def get_source(document):
     """
 
     Args:
-      document: 
+      document:
 
     Returns:
 
@@ -350,16 +350,16 @@ class DocumentStoreConnector(object):
         if self.index >= self.store.count():
             raise StopIteration
         else:
-            uuid_value = self.store.list_objects()[self.index].id
+            document_family = self.store.query_families()[self.index]
             self.index += 1
-            return self.store.get_by_uuid(uuid_value)
+            return self.store.get_latest_document(document_family)
 
     @staticmethod
     def get_source(document):
         """
 
         Args:
-          document: 
+          document:
 
         Returns:
 
