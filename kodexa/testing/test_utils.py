@@ -3,7 +3,7 @@ import importlib
 import logging
 from typing import List, cast
 
-from addict import Dict, addict
+from addict import addict
 
 from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
@@ -17,11 +17,8 @@ def print_data_table(context: PipelineContext, store_name: str):
     """A small helper to support working with a store in a test
 
     Args:
-      context: param store_name:
-      context: PipelineContext:
-      store_name: str:
-
-    Returns:
+      context: PipelineContext: The context for the pipeline
+      store_name: str: The store name
 
     """
     if store_name in context.get_store_names():
@@ -75,7 +72,7 @@ def simplify_node(node: ContentNode):
     }
 
 
-def simplify_document(document: Document) -> Dict:
+def simplify_document(document: Document) -> dict:
     """
 
     Args:
@@ -373,7 +370,16 @@ class ExtensionPackUtil:
 
                     for option_name in options.keys():
                         if option_name not in option_names:
-                            raise OptionException(f"Unexpected option {option_name}")
+
+                            # We need to determine if this is actually a group
+                            is_group = False
+                            for check_option in service.metadata.options:
+                                if check_option['group'] is not None:
+                                    if check_option['group']['name'] == option_name:
+                                        is_group = True
+
+                            if not is_group:
+                                raise OptionException(f"Unexpected option {option_name}")
 
                 # We need to create and return our action
                 module = importlib.import_module(service.step.package)
