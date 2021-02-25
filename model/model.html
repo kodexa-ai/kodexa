@@ -2053,6 +2053,12 @@ class ContentEvent:
         self.document_family: DocumentFamily = document_family
         &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;
 
+    def to_dict(self):
+        return {
+            &#39;contentObject&#39;: self.content_object.to_dict(),
+            &#39;documentFamily&#39;: self.document_family.to_dict()
+        }
+
 
 class DocumentActor:
     &#34;&#34;&#34;A document actor is something that can create a new document in a family and is
@@ -2114,6 +2120,19 @@ class DocumentTransition:
                                         transition_dict[&#39;destinationContentObjectId&#39;])
         return transition
 
+    def to_dict(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Convert the transition to a dictionary to match REST API
+
+        Returns:
+            dictionary of transition
+        &#34;&#34;&#34;
+        return {
+            &#39;transitionType&#39;: self.transition_type,
+            &#39;sourceContentObjectId&#39;: self.source_content_object_id,
+            &#39;destinationContentObjectId&#39;: self.destination_content_object_id
+        }
+
 
 class DocumentFamily:
     &#34;&#34;&#34;A document family represents a collection of related documents which together represent different views of the same
@@ -2146,7 +2165,7 @@ class DocumentFamily:
           transition: DocumentTransition:  (Default value = None)
 
         Returns:
-
+          A new content event
         &#34;&#34;&#34;
         new_content_object = ContentObject()
         new_content_object.store_ref = self.store_ref
@@ -2210,6 +2229,20 @@ class DocumentFamily:
         for transition_dict in family_dict[&#39;transitions&#39;]:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
+
+    def to_dict(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Convert the document family to a dictionary to match REST API
+
+        Returns:
+            dictionary of document family
+        &#34;&#34;&#34;
+        return {
+            &#39;id&#39;: self.id,
+            &#39;storeRef&#39;: self.store_ref,
+            &#39;path&#39;: self.path,
+            &#39;contentObjects&#39;: [co.to_dict() for co in self.content_objects],
+            &#39;transitions&#39;: [transition.to_dict() for transition in self.transitions]}
 
 
 class DocumentStore:
@@ -2531,7 +2564,13 @@ in a store, and can be relayed for a reaction</p>
         self.event_type = event_type
         &#34;&#34;&#34;The event type&#34;&#34;&#34;
         self.document_family: DocumentFamily = document_family
-        &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;</code></pre>
+        &#34;&#34;&#34;The document family containing the content object&#34;&#34;&#34;
+
+    def to_dict(self):
+        return {
+            &#39;contentObject&#39;: self.content_object.to_dict(),
+            &#39;documentFamily&#39;: self.document_family.to_dict()
+        }</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
@@ -2546,6 +2585,25 @@ in a store, and can be relayed for a reaction</p>
 <dt id="kodexa.model.model.ContentEvent.event_type"><code class="name">var <span class="ident">event_type</span></code></dt>
 <dd>
 <div class="desc"><p>The event type</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.model.model.ContentEvent.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self):
+    return {
+        &#39;contentObject&#39;: self.content_object.to_dict(),
+        &#39;documentFamily&#39;: self.document_family.to_dict()
+    }</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
@@ -7978,7 +8036,7 @@ document as its first entry</p>
           transition: DocumentTransition:  (Default value = None)
 
         Returns:
-
+          A new content event
         &#34;&#34;&#34;
         new_content_object = ContentObject()
         new_content_object.store_ref = self.store_ref
@@ -8041,7 +8099,21 @@ document as its first entry</p>
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
         for transition_dict in family_dict[&#39;transitions&#39;]:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
-        return document_family</code></pre>
+        return document_family
+
+    def to_dict(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Convert the document family to a dictionary to match REST API
+
+        Returns:
+            dictionary of document family
+        &#34;&#34;&#34;
+        return {
+            &#39;id&#39;: self.id,
+            &#39;storeRef&#39;: self.store_ref,
+            &#39;path&#39;: self.path,
+            &#39;contentObjects&#39;: [co.to_dict() for co in self.content_objects],
+            &#39;transitions&#39;: [transition.to_dict() for transition in self.transitions]}</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -8097,7 +8169,8 @@ def from_dict(cls, family_dict: dict):
 <dd>DocumentTransition:
 (Default value = None)</dd>
 </dl>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>A new content event</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8110,7 +8183,7 @@ def from_dict(cls, family_dict: dict):
       transition: DocumentTransition:  (Default value = None)
 
     Returns:
-
+      A new content event
     &#34;&#34;&#34;
     new_content_object = ContentObject()
     new_content_object.store_ref = self.store_ref
@@ -8190,6 +8263,32 @@ def from_dict(cls, family_dict: dict):
         The latest content object in the family
     &#34;&#34;&#34;
     return self.content_objects[-1]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert the document family to a dictionary to match REST API</p>
+<h2 id="returns">Returns</h2>
+<p>dictionary of document family</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self) -&gt; dict:
+    &#34;&#34;&#34;
+    Convert the document family to a dictionary to match REST API
+
+    Returns:
+        dictionary of document family
+    &#34;&#34;&#34;
+    return {
+        &#39;id&#39;: self.id,
+        &#39;storeRef&#39;: self.store_ref,
+        &#39;path&#39;: self.path,
+        &#39;contentObjects&#39;: [co.to_dict() for co in self.content_objects],
+        &#39;transitions&#39;: [transition.to_dict() for transition in self.transitions]}</code></pre>
 </details>
 </dd>
 </dl>
@@ -8966,7 +9065,20 @@ actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
         &#34;&#34;&#34;
         transition = DocumentTransition(transition_dict[&#39;transitionType&#39;], transition_dict[&#39;sourceContentObjectId&#39;],
                                         transition_dict[&#39;destinationContentObjectId&#39;])
-        return transition</code></pre>
+        return transition
+
+    def to_dict(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Convert the transition to a dictionary to match REST API
+
+        Returns:
+            dictionary of transition
+        &#34;&#34;&#34;
+        return {
+            &#39;transitionType&#39;: self.transition_type,
+            &#39;sourceContentObjectId&#39;: self.source_content_object_id,
+            &#39;destinationContentObjectId&#39;: self.destination_content_object_id
+        }</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
@@ -9018,6 +9130,34 @@ def from_dict(cls, transition_dict):
 <dt id="kodexa.model.model.DocumentTransition.transition_type"><code class="name">var <span class="ident">transition_type</span></code></dt>
 <dd>
 <div class="desc"><p>The type of transition</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.model.model.DocumentTransition.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert the transition to a dictionary to match REST API</p>
+<h2 id="returns">Returns</h2>
+<p>dictionary of transition</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self) -&gt; dict:
+    &#34;&#34;&#34;
+    Convert the transition to a dictionary to match REST API
+
+    Returns:
+        dictionary of transition
+    &#34;&#34;&#34;
+    return {
+        &#39;transitionType&#39;: self.transition_type,
+        &#39;sourceContentObjectId&#39;: self.source_content_object_id,
+        &#39;destinationContentObjectId&#39;: self.destination_content_object_id
+    }</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
@@ -9690,6 +9830,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentEvent.content_object" href="#kodexa.model.model.ContentEvent.content_object">content_object</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.document_family" href="#kodexa.model.model.ContentEvent.document_family">document_family</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.event_type" href="#kodexa.model.model.ContentEvent.event_type">event_type</a></code></li>
+<li><code><a title="kodexa.model.model.ContentEvent.to_dict" href="#kodexa.model.model.ContentEvent.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 <li>
@@ -9821,12 +9962,13 @@ Returns:</p></div>
 </li>
 <li>
 <h4><code><a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="kodexa.model.model.DocumentFamily.add_document" href="#kodexa.model.model.DocumentFamily.add_document">add_document</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.from_dict" href="#kodexa.model.model.DocumentFamily.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_content_objects" href="#kodexa.model.model.DocumentFamily.get_content_objects">get_content_objects</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_document_count" href="#kodexa.model.model.DocumentFamily.get_document_count">get_document_count</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_latest_content" href="#kodexa.model.model.DocumentFamily.get_latest_content">get_latest_content</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.to_dict" href="#kodexa.model.model.DocumentFamily.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 <li>
@@ -9858,6 +10000,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.DocumentTransition.destination_content_object_id" href="#kodexa.model.model.DocumentTransition.destination_content_object_id">destination_content_object_id</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentTransition.from_dict" href="#kodexa.model.model.DocumentTransition.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentTransition.source_content_object_id" href="#kodexa.model.model.DocumentTransition.source_content_object_id">source_content_object_id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentTransition.to_dict" href="#kodexa.model.model.DocumentTransition.to_dict">to_dict</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentTransition.transition_type" href="#kodexa.model.model.DocumentTransition.transition_type">transition_type</a></code></li>
 </ul>
 </li>
