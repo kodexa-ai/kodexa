@@ -1203,7 +1203,7 @@ class RemoteAction:
 
         return result_document if result_document else document
 
-    def end_processing(self):
+    def end_processing(self, pipeline_context: PipelineContext):
         """ """
 
         # TODO not yet implemented for remote steps
