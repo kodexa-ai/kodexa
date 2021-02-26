@@ -35,4 +35,4 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label('hello')
 
-        return AssistantResponse([AssistantPipeline(pipeline)])
+        return AssistantResponse([AssistantPipeline(pipeline, write_back_to_store=True)])
