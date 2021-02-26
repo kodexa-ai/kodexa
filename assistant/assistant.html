@@ -38,20 +38,34 @@ from typing import List
 from kodexa.model import ContentEvent
 
 
+class AssistantMetadata:
+    &#34;&#34;&#34;
+    A set of metadata for the assistant that can be made available on from the context
+    &#34;&#34;&#34;
+
+    def __init__(self, assistant_id: str, assistant_name: str):
+        self.assistant_id = assistant_id
+        &#34;&#34;&#34;The ID of the assistant&#34;&#34;&#34;
+        self.assistant_name = assistant_name
+        &#34;&#34;&#34;The name of the assistant&#34;&#34;&#34;
+
+
 class AssistantContext:
     &#34;&#34;&#34;The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
     &#34;&#34;&#34;
 
-    def __init__(self, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;):
+    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;):
         &#34;&#34;&#34;
         Initialize the context based with a path to the kodexa file
 
         Args:
+            metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
         &#34;&#34;&#34;
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
+        self.metadata: AssistantMetadata = metadata
 
     def get_step(self, step: str, options=None):
         &#34;&#34;&#34;
@@ -230,7 +244,7 @@ the context for the assistant</dd>
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantContext"><code class="flex name class">
 <span>class <span class="ident">AssistantContext</span></span>
-<span>(</span><span>path_to_kodexa_metadata: str = 'kodexa.yml')</span>
+<span>(</span><span>metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>, path_to_kodexa_metadata: str = 'kodexa.yml')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Assistant Context provides a way to interact with additional services and capabilities
@@ -238,6 +252,8 @@ while processing an event</p>
 <p>Initialize the context based with a path to the kodexa file</p>
 <h2 id="args">Args</h2>
 <dl>
+<dt><strong><code>metadata</code></strong> :&ensp;<code><a title="kodexa.assistant.assistant.AssistantMetadata" href="#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a></code></dt>
+<dd>metadata for the assistant being setup in context</dd>
 <dt><strong><code>path_to_kodexa_metadata</code></strong> :&ensp;<code>str</code></dt>
 <dd>the path to the kodexa.yml (note it can also open a kodexa.json)</dd>
 </dl></div>
@@ -250,15 +266,17 @@ while processing an event</p>
     while processing an event
     &#34;&#34;&#34;
 
-    def __init__(self, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;):
+    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;):
         &#34;&#34;&#34;
         Initialize the context based with a path to the kodexa file
 
         Args:
+            metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
         &#34;&#34;&#34;
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
+        self.metadata: AssistantMetadata = metadata
 
     def get_step(self, step: str, options=None):
         &#34;&#34;&#34;
@@ -315,6 +333,39 @@ assistant, this allows you to build pipelines when you don't know the owning org
         options = {}
     return self.extension_pack_util.get_step(step, options)</code></pre>
 </details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantMetadata"><code class="flex name class">
+<span>class <span class="ident">AssistantMetadata</span></span>
+<span>(</span><span>assistant_id: str, assistant_name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A set of metadata for the assistant that can be made available on from the context</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AssistantMetadata:
+    &#34;&#34;&#34;
+    A set of metadata for the assistant that can be made available on from the context
+    &#34;&#34;&#34;
+
+    def __init__(self, assistant_id: str, assistant_name: str):
+        self.assistant_id = assistant_id
+        &#34;&#34;&#34;The ID of the assistant&#34;&#34;&#34;
+        self.assistant_name = assistant_name
+        &#34;&#34;&#34;The name of the assistant&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.assistant.assistant.AssistantMetadata.assistant_id"><code class="name">var <span class="ident">assistant_id</span></code></dt>
+<dd>
+<div class="desc"><p>The ID of the assistant</p></div>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantMetadata.assistant_name"><code class="name">var <span class="ident">assistant_name</span></code></dt>
+<dd>
+<div class="desc"><p>The name of the assistant</p></div>
 </dd>
 </dl>
 </dd>
@@ -406,6 +457,13 @@ event was raised</dd>
 <h4><code><a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a></code></h4>
 <ul class="">
 <li><code><a title="kodexa.assistant.assistant.AssistantContext.get_step" href="#kodexa.assistant.assistant.AssistantContext.get_step">get_step</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.assistant.assistant.AssistantMetadata" href="#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.assistant.assistant.AssistantMetadata.assistant_id" href="#kodexa.assistant.assistant.AssistantMetadata.assistant_id">assistant_id</a></code></li>
+<li><code><a title="kodexa.assistant.assistant.AssistantMetadata.assistant_name" href="#kodexa.assistant.assistant.AssistantMetadata.assistant_name">assistant_name</a></code></li>
 </ul>
 </li>
 <li>

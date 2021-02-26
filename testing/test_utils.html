@@ -36,6 +36,7 @@ from addict import addict
 from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
     TableDataStore, TransitionType
+from kodexa.assistant.assistant import AssistantMetadata
 from kodexa.model.model import DocumentStore
 
 logger = logging.getLogger(&#39;kodexa.testing&#39;)
@@ -247,7 +248,8 @@ class AssistantTestHarness:
 
     &#34;&#34;&#34;
 
-    def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str):
+    def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str,
+                 metadata: AssistantMetadata):
         &#34;&#34;&#34;
         Initialize the test harness
 
@@ -255,10 +257,12 @@ class AssistantTestHarness:
             assistant: the instance of the assistant
             stores: the list of stores (usually LocalDocumentStore) that we will use to monitor for events
             kodexa_metadata_path (str): the path to the kodexa.yml (or kodexa.json)
+            metadata (AssistantMetadata): the assistant metadata to use for this assistant
         &#34;&#34;&#34;
         self.assistant = assistant
         self.stores = stores
         self.kodexa_metadata_path = kodexa_metadata_path
+        self.metadata = metadata
 
         for store in self.stores:
             store.register_listener(self)
@@ -277,7 +281,7 @@ class AssistantTestHarness:
 
         &#34;&#34;&#34;
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.kodexa_metadata_path)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path)
 
         response: AssistantResponse = self.assistant.process_event(event, assistant_context)
 
@@ -417,14 +421,15 @@ class ExtensionPackUtil:
 
         raise Exception(&#34;Unable to find the action &#34; + action_slug)
 
-    def get_assistant_test_harness(self, assistant_slug, options=None, stores=None) -&gt; AssistantTestHarness:
+    def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None, stores=None) -&gt; AssistantTestHarness:
         &#34;&#34;&#34;Provides a local test harness that can be used to validate the functionality
         of an assistant in a test case
 
         Args:
-          assistant_slug: param options:
-          stores: a list of the document stores to monitor (Default value = None)
-          options:  (Default value = None)
+          assistant_slug (str): The slug for the assistant (ie. pdf-parser-assistant)
+          assistant_metadata (AssistantMetadata): the metadata to use for the assistant
+          stores (List): a list of the document stores to monitor (Default value = None)
+          options (dict): The options to provide  (Default value = None)
 
         Returns:
           The assistant test harness
@@ -434,7 +439,7 @@ class ExtensionPackUtil:
             stores = []
         assistant = self.get_assistant(assistant_slug, options)
 
-        return AssistantTestHarness(assistant, stores, self.file_path)
+        return AssistantTestHarness(assistant, stores, self.file_path, assistant_metadata)
 
     def get_assistant(self, assistant_slug, options=None):
         &#34;&#34;&#34;Create an instance of an assistant from the kodexa metadata
@@ -789,7 +794,7 @@ to compare the data (usually in a test)</p>
 <dl>
 <dt id="kodexa.testing.test_utils.AssistantTestHarness"><code class="flex name class">
 <span>class <span class="ident">AssistantTestHarness</span></span>
-<span>(</span><span>assistant: <a title="kodexa.assistant.assistant.Assistant" href="../assistant/assistant.html#kodexa.assistant.assistant.Assistant">Assistant</a>, stores: List[<a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>], kodexa_metadata_path: str)</span>
+<span>(</span><span>assistant: <a title="kodexa.assistant.assistant.Assistant" href="../assistant/assistant.html#kodexa.assistant.assistant.Assistant">Assistant</a>, stores: List[<a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>], kodexa_metadata_path: str, metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A test harness to allow the testing of assistants in unit tests and offline for development</p>
@@ -805,6 +810,8 @@ to compare the data (usually in a test)</p>
 <dd>the list of stores (usually LocalDocumentStore) that we will use to monitor for events</dd>
 <dt><strong><code>kodexa_metadata_path</code></strong> :&ensp;<code>str</code></dt>
 <dd>the path to the kodexa.yml (or kodexa.json)</dd>
+<dt><strong><code>metadata</code></strong> :&ensp;<code>AssistantMetadata</code></dt>
+<dd>the assistant metadata to use for this assistant</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -819,7 +826,8 @@ to compare the data (usually in a test)</p>
 
     &#34;&#34;&#34;
 
-    def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str):
+    def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str,
+                 metadata: AssistantMetadata):
         &#34;&#34;&#34;
         Initialize the test harness
 
@@ -827,10 +835,12 @@ to compare the data (usually in a test)</p>
             assistant: the instance of the assistant
             stores: the list of stores (usually LocalDocumentStore) that we will use to monitor for events
             kodexa_metadata_path (str): the path to the kodexa.yml (or kodexa.json)
+            metadata (AssistantMetadata): the assistant metadata to use for this assistant
         &#34;&#34;&#34;
         self.assistant = assistant
         self.stores = stores
         self.kodexa_metadata_path = kodexa_metadata_path
+        self.metadata = metadata
 
         for store in self.stores:
             store.register_listener(self)
@@ -849,7 +859,7 @@ to compare the data (usually in a test)</p>
 
         &#34;&#34;&#34;
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.kodexa_metadata_path)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path)
 
         response: AssistantResponse = self.assistant.process_event(event, assistant_context)
 
@@ -975,7 +985,7 @@ through them in turn (note in the platform this might be in parallel)</p>
 
     &#34;&#34;&#34;
     from kodexa import AssistantContext
-    assistant_context = AssistantContext(self.kodexa_metadata_path)
+    assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path)
 
     response: AssistantResponse = self.assistant.process_event(event, assistant_context)
 
@@ -1126,14 +1136,15 @@ through them in turn (note in the platform this might be in parallel)</p>
 
         raise Exception(&#34;Unable to find the action &#34; + action_slug)
 
-    def get_assistant_test_harness(self, assistant_slug, options=None, stores=None) -&gt; AssistantTestHarness:
+    def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None, stores=None) -&gt; AssistantTestHarness:
         &#34;&#34;&#34;Provides a local test harness that can be used to validate the functionality
         of an assistant in a test case
 
         Args:
-          assistant_slug: param options:
-          stores: a list of the document stores to monitor (Default value = None)
-          options:  (Default value = None)
+          assistant_slug (str): The slug for the assistant (ie. pdf-parser-assistant)
+          assistant_metadata (AssistantMetadata): the metadata to use for the assistant
+          stores (List): a list of the document stores to monitor (Default value = None)
+          options (dict): The options to provide  (Default value = None)
 
         Returns:
           The assistant test harness
@@ -1143,7 +1154,7 @@ through them in turn (note in the platform this might be in parallel)</p>
             stores = []
         assistant = self.get_assistant(assistant_slug, options)
 
-        return AssistantTestHarness(assistant, stores, self.file_path)
+        return AssistantTestHarness(assistant, stores, self.file_path, assistant_metadata)
 
     def get_assistant(self, assistant_slug, options=None):
         &#34;&#34;&#34;Create an instance of an assistant from the kodexa metadata
@@ -1218,19 +1229,22 @@ through them in turn (note in the platform this might be in parallel)</p>
 </details>
 </dd>
 <dt id="kodexa.testing.test_utils.ExtensionPackUtil.get_assistant_test_harness"><code class="name flex">
-<span>def <span class="ident">get_assistant_test_harness</span></span>(<span>self, assistant_slug, options=None, stores=None) ‑> <a title="kodexa.testing.test_utils.AssistantTestHarness" href="#kodexa.testing.test_utils.AssistantTestHarness">AssistantTestHarness</a></span>
+<span>def <span class="ident">get_assistant_test_harness</span></span>(<span>self, assistant_slug, assistant_metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>, options=None, stores=None) ‑> <a title="kodexa.testing.test_utils.AssistantTestHarness" href="#kodexa.testing.test_utils.AssistantTestHarness">AssistantTestHarness</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Provides a local test harness that can be used to validate the functionality
 of an assistant in a test case</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>assistant_slug</code></strong></dt>
-<dd>param options:</dd>
-<dt><strong><code>stores</code></strong></dt>
+<dt><strong><code>assistant_slug</code></strong> :&ensp;<code>str</code></dt>
+<dd>The slug for the assistant (ie. pdf-parser-assistant)</dd>
+<dt><strong><code>assistant_metadata</code></strong> :&ensp;<code>AssistantMetadata</code></dt>
+<dd>the metadata to use for the assistant</dd>
+<dt><strong><code>stores</code></strong> :&ensp;<code>List</code></dt>
 <dd>a list of the document stores to monitor (Default value = None)</dd>
-<dt><strong><code>options</code></strong></dt>
-<dd>(Default value = None)</dd>
+<dt><strong><code>options</code></strong> :&ensp;<code>dict</code></dt>
+<dd>The options to provide
+(Default value = None)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>The assistant test harness</p></div>
@@ -1238,14 +1252,15 @@ of an assistant in a test case</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_assistant_test_harness(self, assistant_slug, options=None, stores=None) -&gt; AssistantTestHarness:
+<pre><code class="python">def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None, stores=None) -&gt; AssistantTestHarness:
     &#34;&#34;&#34;Provides a local test harness that can be used to validate the functionality
     of an assistant in a test case
 
     Args:
-      assistant_slug: param options:
-      stores: a list of the document stores to monitor (Default value = None)
-      options:  (Default value = None)
+      assistant_slug (str): The slug for the assistant (ie. pdf-parser-assistant)
+      assistant_metadata (AssistantMetadata): the metadata to use for the assistant
+      stores (List): a list of the document stores to monitor (Default value = None)
+      options (dict): The options to provide  (Default value = None)
 
     Returns:
       The assistant test harness
@@ -1255,7 +1270,7 @@ of an assistant in a test case</p>
         stores = []
     assistant = self.get_assistant(assistant_slug, options)
 
-    return AssistantTestHarness(assistant, stores, self.file_path)</code></pre>
+    return AssistantTestHarness(assistant, stores, self.file_path, assistant_metadata)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.testing.test_utils.ExtensionPackUtil.get_step"><code class="name flex">
