@@ -303,7 +303,6 @@ class AssistantTestHarness:
                     store.add_related_document_to_family(event.document_family.id, document_relationship,
                                                          pipeline_context.output_document)
 
-
         pass
 
     def register_local_document_store(self, store: LocalDocumentStore):
@@ -412,11 +411,26 @@ class ExtensionPackUtil:
                 # We need to create and return our action
                 module = importlib.import_module(service.step.package)
                 klass = getattr(module, service.step[&#39;class&#39;])
-                return klass(**options)
+                new_instance = klass(**options)
+
+                # Since we will be using to access metadata we will need to
+                # make sure we have a to_dict() that is able to convert this step properly
+
+                import types
+
+                def general_to_dict(self):
+                    return {
+                        &#39;ref&#39;: f&#39;./{action_slug}&#39;,
+                        &#39;options&#39;: options
+                    }
+
+                new_instance.to_dict = types.MethodType(general_to_dict, new_instance)
+                return new_instance
 
         raise Exception(&#34;Unable to find the action &#34; + action_slug)
 
-    def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None, stores=None) -&gt; AssistantTestHarness:
+    def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None,
+                                   stores=None) -&gt; AssistantTestHarness:
         &#34;&#34;&#34;Provides a local test harness that can be used to validate the functionality
         of an assistant in a test case
 
@@ -876,7 +890,6 @@ to compare the data (usually in a test)</p>
                     store.add_related_document_to_family(event.document_family.id, document_relationship,
                                                          pipeline_context.output_document)
 
-
         pass
 
     def register_local_document_store(self, store: LocalDocumentStore):
@@ -997,7 +1010,6 @@ through them in turn (note in the platform this might be in parallel)</p>
                 store.add_related_document_to_family(event.document_family.id, document_relationship,
                                                      pipeline_context.output_document)
 
-
     pass</code></pre>
 </details>
 </dd>
@@ -1117,11 +1129,26 @@ through them in turn (note in the platform this might be in parallel)</p>
                 # We need to create and return our action
                 module = importlib.import_module(service.step.package)
                 klass = getattr(module, service.step[&#39;class&#39;])
-                return klass(**options)
+                new_instance = klass(**options)
+
+                # Since we will be using to access metadata we will need to
+                # make sure we have a to_dict() that is able to convert this step properly
+
+                import types
+
+                def general_to_dict(self):
+                    return {
+                        &#39;ref&#39;: f&#39;./{action_slug}&#39;,
+                        &#39;options&#39;: options
+                    }
+
+                new_instance.to_dict = types.MethodType(general_to_dict, new_instance)
+                return new_instance
 
         raise Exception(&#34;Unable to find the action &#34; + action_slug)
 
-    def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None, stores=None) -&gt; AssistantTestHarness:
+    def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None,
+                                   stores=None) -&gt; AssistantTestHarness:
         &#34;&#34;&#34;Provides a local test harness that can be used to validate the functionality
         of an assistant in a test case
 
@@ -1237,7 +1264,8 @@ of an assistant in a test case</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None, stores=None) -&gt; AssistantTestHarness:
+<pre><code class="python">def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None,
+                               stores=None) -&gt; AssistantTestHarness:
     &#34;&#34;&#34;Provides a local test harness that can be used to validate the functionality
     of an assistant in a test case
 
@@ -1316,7 +1344,21 @@ of an assistant in a test case</p>
             # We need to create and return our action
             module = importlib.import_module(service.step.package)
             klass = getattr(module, service.step[&#39;class&#39;])
-            return klass(**options)
+            new_instance = klass(**options)
+
+            # Since we will be using to access metadata we will need to
+            # make sure we have a to_dict() that is able to convert this step properly
+
+            import types
+
+            def general_to_dict(self):
+                return {
+                    &#39;ref&#39;: f&#39;./{action_slug}&#39;,
+                    &#39;options&#39;: options
+                }
+
+            new_instance.to_dict = types.MethodType(general_to_dict, new_instance)
+            return new_instance
 
     raise Exception(&#34;Unable to find the action &#34; + action_slug)</code></pre>
 </details>
