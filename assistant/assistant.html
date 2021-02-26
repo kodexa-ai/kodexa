@@ -87,9 +87,10 @@ class AssistantContext:
 
 class AssistantPipeline:
 
-    def __init__(self, pipeline, description=None):
+    def __init__(self, pipeline, description=None, write_back_to_store: bool = False):
         self.pipeline = pipeline
         self.description = description
+        self.write_back_to_store = write_back_to_store
 
 
 class AssistantResponse:
@@ -371,7 +372,7 @@ assistant, this allows you to build pipelines when you don't know the owning org
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantPipeline"><code class="flex name class">
 <span>class <span class="ident">AssistantPipeline</span></span>
-<span>(</span><span>pipeline, description=None)</span>
+<span>(</span><span>pipeline, description=None, write_back_to_store: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -381,9 +382,10 @@ assistant, this allows you to build pipelines when you don't know the owning org
 </summary>
 <pre><code class="python">class AssistantPipeline:
 
-    def __init__(self, pipeline, description=None):
+    def __init__(self, pipeline, description=None, write_back_to_store: bool = False):
         self.pipeline = pipeline
-        self.description = description</code></pre>
+        self.description = description
+        self.write_back_to_store = write_back_to_store</code></pre>
 </details>
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantResponse"><code class="flex name class">
