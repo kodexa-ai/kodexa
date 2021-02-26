@@ -1,5 +1,6 @@
 from kodexa import LocalDocumentStore
-from kodexa.testing import ExtensionPackUtil, Document
+from kodexa.assistant.assistant import AssistantMetadata
+from kodexa.testing import Document, ExtensionPackUtil
 
 
 def test_basic_assistant():
@@ -9,7 +10,9 @@ def test_basic_assistant():
 
     extension_pack_util = ExtensionPackUtil("tests/kodexa-assistant.yml")
     lds = LocalDocumentStore('/tmp/assistant-lds', force_initialize=True)
-    assistant_harness = extension_pack_util.get_assistant_test_harness("my-assistant", stores=[lds])
+    assistant_harness = extension_pack_util.get_assistant_test_harness("my-assistant", stores=[lds],
+                                                                       assistant_metadata=AssistantMetadata(
+                                                                           'test-assistant-1', 'My Test Assistant'))
 
     # OK - for our test our assistant is just going to try and run a pipeline to label something
     # we are keeping it very simple - note in the harness that everything is synchronous, in the Kodexa
