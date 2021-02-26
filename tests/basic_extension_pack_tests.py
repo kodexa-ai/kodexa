@@ -20,3 +20,11 @@ def test_invald_option():
         util = ExtensionPackUtil('tests/kodexa-action.yml')
         my_action = util.get_step('my-action', {'nocheese': 'goo'})
         assert my_action.get_name() == 'Hello'
+
+
+def test_to_dict():
+    util = ExtensionPackUtil('tests/kodexa-action.yml')
+    my_action = util.get_step('my-action', {'cheese': 'goo'})
+    action_dict = my_action.to_dict()
+    assert action_dict['ref'] == "./my-action"
+    assert action_dict['options'] == {'cheese': 'goo'}
