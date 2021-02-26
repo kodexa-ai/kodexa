@@ -56,9 +56,10 @@ class AssistantContext:
 
 class AssistantPipeline:
 
-    def __init__(self, pipeline, description=None):
+    def __init__(self, pipeline, description=None, write_back_to_store: bool = False):
         self.pipeline = pipeline
         self.description = description
+        self.write_back_to_store = write_back_to_store
 
 
 class AssistantResponse:
