@@ -63,7 +63,7 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label(&#39;hello&#39;)
 
-        return AssistantResponse([AssistantPipeline(pipeline)])</code></pre>
+        return AssistantResponse([AssistantPipeline(pipeline, write_back_to_store=True)])</code></pre>
 </details>
 </section>
 <section>
@@ -142,7 +142,7 @@ class TestAssistant(Assistant):
         pipeline = Pipeline()
         pipeline.add_label(&#39;hello&#39;)
 
-        return AssistantResponse([AssistantPipeline(pipeline)])</code></pre>
+        return AssistantResponse([AssistantPipeline(pipeline, write_back_to_store=True)])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -184,7 +184,7 @@ class TestAssistant(Assistant):
     pipeline = Pipeline()
     pipeline.add_label(&#39;hello&#39;)
 
-    return AssistantResponse([AssistantPipeline(pipeline)])</code></pre>
+    return AssistantResponse([AssistantPipeline(pipeline, write_back_to_store=True)])</code></pre>
 </details>
 </dd>
 </dl>
