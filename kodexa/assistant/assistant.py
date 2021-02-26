@@ -7,20 +7,34 @@ from typing import List
 from kodexa.model import ContentEvent
 
 
+class AssistantMetadata:
+    """
+    A set of metadata for the assistant that can be made available on from the context
+    """
+
+    def __init__(self, assistant_id: str, assistant_name: str):
+        self.assistant_id = assistant_id
+        """The ID of the assistant"""
+        self.assistant_name = assistant_name
+        """The name of the assistant"""
+
+
 class AssistantContext:
     """The Assistant Context provides a way to interact with additional services and capabilities
     while processing an event
     """
 
-    def __init__(self, path_to_kodexa_metadata: str = 'kodexa.yml'):
+    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = 'kodexa.yml'):
         """
         Initialize the context based with a path to the kodexa file
 
         Args:
+            metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
         """
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
+        self.metadata: AssistantMetadata = metadata
 
     def get_step(self, step: str, options=None):
         """
