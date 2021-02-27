@@ -43,11 +43,11 @@ import os
 import tempfile
 import urllib
 from os.path import join
-from typing import Dict, Type, List
+from typing import Dict, List, Type
 
 import requests
 
-from kodexa.model import Document, DocumentMetadata, DocumentStore, SourceMetadata
+from kodexa.model import ContentObject, Document, DocumentMetadata, DocumentStore, SourceMetadata
 
 logger = logging.getLogger(&#39;kodexa.connectors&#39;)
 
@@ -397,7 +397,9 @@ class DocumentStoreConnector(object):
         &#34;&#34;&#34;
         from kodexa import RemoteDocumentStore
         remote_document_store = RemoteDocumentStore(document.source.headers[&#39;ref&#39;])
-        bytes = remote_document_store.get_source(document.source.headers[&#39;id&#39;])
+        family = remote_document_store.get_family(document.source.headers[&#39;family&#39;])
+        bytes = remote_document_store.get_source_by_content_object(family,
+                                                                   ContentObject(id=document.source.headers[&#39;id&#39;]))
         if bytes is None:
             raise Exception(f&#34;Unable to get source, document with id {document.source.headers[&#39;id&#39;]} is missing?&#34;)
         else:
@@ -733,7 +735,9 @@ a cache</p>
         &#34;&#34;&#34;
         from kodexa import RemoteDocumentStore
         remote_document_store = RemoteDocumentStore(document.source.headers[&#39;ref&#39;])
-        bytes = remote_document_store.get_source(document.source.headers[&#39;id&#39;])
+        family = remote_document_store.get_family(document.source.headers[&#39;family&#39;])
+        bytes = remote_document_store.get_source_by_content_object(family,
+                                                                   ContentObject(id=document.source.headers[&#39;id&#39;]))
         if bytes is None:
             raise Exception(f&#34;Unable to get source, document with id {document.source.headers[&#39;id&#39;]} is missing?&#34;)
         else:
@@ -779,7 +783,9 @@ def get_source(document):
     &#34;&#34;&#34;
     from kodexa import RemoteDocumentStore
     remote_document_store = RemoteDocumentStore(document.source.headers[&#39;ref&#39;])
-    bytes = remote_document_store.get_source(document.source.headers[&#39;id&#39;])
+    family = remote_document_store.get_family(document.source.headers[&#39;family&#39;])
+    bytes = remote_document_store.get_source_by_content_object(family,
+                                                               ContentObject(id=document.source.headers[&#39;id&#39;]))
     if bytes is None:
         raise Exception(f&#34;Unable to get source, document with id {document.source.headers[&#39;id&#39;]} is missing?&#34;)
     else:
