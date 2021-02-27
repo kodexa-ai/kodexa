@@ -12,11 +12,11 @@ import os
 import tempfile
 import urllib
 from os.path import join
-from typing import Dict, Type, List
+from typing import Dict, List, Type
 
 import requests
 
-from kodexa.model import Document, DocumentMetadata, DocumentStore, SourceMetadata
+from kodexa.model import ContentObject, Document, DocumentMetadata, DocumentStore, SourceMetadata
 
 logger = logging.getLogger('kodexa.connectors')
 
@@ -366,7 +366,9 @@ class DocumentStoreConnector(object):
         """
         from kodexa import RemoteDocumentStore
         remote_document_store = RemoteDocumentStore(document.source.headers['ref'])
-        bytes = remote_document_store.get_source(document.source.headers['id'])
+        family = remote_document_store.get_family(document.source.headers['family'])
+        bytes = remote_document_store.get_source_by_content_object(family,
+                                                                   ContentObject(id=document.source.headers['id']))
         if bytes is None:
             raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
         else:
