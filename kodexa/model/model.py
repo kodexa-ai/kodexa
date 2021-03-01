@@ -1592,11 +1592,16 @@ class Document(object):
     def __str__(self):
         return f"kodexa://{self.uuid}"
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref:str=None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
             source = SourceMetadata()
+
+        # The ref is not stored and is used when we have
+        # initialized a document from a remote store and want
+        # to keep track of that
+        self.ref = ref
 
         self.metadata: DocumentMetadata = metadata
         self.content_node: Optional[ContentNode] = content_node
