@@ -2521,7 +2521,10 @@ class DocumentStore:
         """
         last_co = document_family.content_objects[-1]
         document = self.get_document_by_content_object(document_family, last_co)
-        document.ref = f"{self.get_ref()}/{document_family.id}/{last_co.id}"
+
+        if document is not None:
+            document.ref = f"{self.get_ref()}/{document_family.id}/{last_co.id}"
+
         return document
 
 
