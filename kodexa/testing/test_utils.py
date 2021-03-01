@@ -9,7 +9,7 @@ from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
     TableDataStore, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
-from kodexa.model.model import DocumentStore
+from kodexa.model.model import ContentObjectReference, DocumentStore
 
 logger = logging.getLogger('kodexa.testing')
 
@@ -264,7 +264,9 @@ class AssistantTestHarness:
             document = store.get_document_by_content_object(event.document_family, event.content_object)
             if document is not None:
                 pipeline = assistant_pipeline.pipeline
-                pipeline.connector = [document]
+                pipeline.connector = [
+                    ContentObjectReference(content_object=event.content_object, document=document, store=store,
+                                           document_family=event.document_family)]
                 pipeline_context = pipeline.run()
 
                 if pipeline_context.output_document is not None and assistant_pipeline.write_back_to_store:
