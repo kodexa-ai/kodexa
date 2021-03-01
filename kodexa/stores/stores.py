@@ -233,6 +233,15 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     def __init__(self, ref: str):
         self.ref: str = ref
 
+        get_response = self._base_get(
+            f"api/stores/{self.ref.replace(':', '/')}")
+
+        if get_response is not None:
+            self.store_type = get_response.json()['storeType']
+            self.store_purpose = get_response.json()['storePurpose']
+        else:
+            raise Exception(f"Unable to find store with ref {ref}")
+
     def get_name(self):
         """The name of the connector
 
@@ -263,7 +272,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         """
         return {
             "type": "DOCUMENT",
-            "ref": self.ref
+            "ref": self.ref,
+            "storeType": self.store_type,
+            "storePurpose": self.store_purpose
         }
 
     def delete(self, path: str):
