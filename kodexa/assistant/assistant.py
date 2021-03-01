@@ -5,6 +5,7 @@ instance of the Kodexa platform
 from typing import List
 
 from kodexa.model import ContentEvent
+from kodexa.model.model import BaseEvent
 
 
 class AssistantMetadata:
@@ -87,7 +88,7 @@ class Assistant:
     that is working with set of content
     """
 
-    def process_event(self, event: ContentEvent, context: AssistantContext) -> AssistantResponse:
+    def process_event(self, event: BaseEvent, context: AssistantContext) -> AssistantResponse:
         """The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -98,7 +99,7 @@ class Assistant:
         return as another event for the assistant
 
         Args:
-          event: ContentEvent: the event
+          event: BaseEvent: the event being provided to the assistant
           context: AssistantContext:  the context for the assistant
 
         Returns:

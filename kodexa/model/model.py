@@ -1996,6 +1996,13 @@ class TransitionType(Enum):
     """A transition that placed a fragment of the document in another document"""
 
 
+class BaseEvent:
+    """
+    The base for all events within Kodexa
+    """
+    pass
+
+
 class ContentEventType(Enum):
     """
     The type of event that occurred on the content
@@ -2004,7 +2011,7 @@ class ContentEventType(Enum):
     DERIVED_DOCUMENT = 'DERIVED_DOCUMENT'
 
 
-class ContentEvent:
+class ContentEvent(BaseEvent):
     """A content event represents a change, update or deletion that has occurred in a document family
     in a store, and can be relayed for a reaction
     """
@@ -2034,6 +2041,43 @@ class ContentEvent:
         return {
             'contentObject': self.content_object.to_dict(),
             'documentFamily': self.document_family.to_dict(),
+            'eventType': self.event_type
+        }
+
+
+class AssistantEventType(Enum):
+    """
+    The type of event that is being provided to the assistant
+    """
+    PROCESS_DOCUMENT = 'PROCESS_DOCUMENT'
+
+
+class AssistantEvent(BaseEvent):
+    """
+    A assistant event represents an interaction, usually from a user or an API, to evalute
+    and respond to a document
+    """
+
+    def __init__(self, content_object: ContentObject, event_type: AssistantEventType):
+        """
+        Initialize a content event
+        Args:
+            content_object: the content object on which the event occurred
+            event_type: the type of event
+        """
+        self.content_object = content_object
+        """The assistant event"""
+        self.event_type = event_type
+        """The event type"""
+
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return AssistantEvent(ContentObject.from_dict(event_dict['contentObject']),
+                              AssistantEventType[event_dict['eventType']])
+
+    def to_dict(self):
+        return {
+            'contentObject': self.content_object.to_dict(),
             'eventType': self.event_type
         }
 
