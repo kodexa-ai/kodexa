@@ -1621,11 +1621,16 @@ class Document(object):
     def __str__(self):
         return f&#34;kodexa://{self.uuid}&#34;
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref:str=None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
             source = SourceMetadata()
+
+        # The ref is not stored and is used when we have
+        # initialized a document from a remote store and want
+        # to keep track of that
+        self.ref = ref
 
         self.metadata: DocumentMetadata = metadata
         self.content_node: Optional[ContentNode] = content_node
@@ -2025,6 +2030,13 @@ class TransitionType(Enum):
     &#34;&#34;&#34;A transition that placed a fragment of the document in another document&#34;&#34;&#34;
 
 
+class BaseEvent:
+    &#34;&#34;&#34;
+    The base for all events within Kodexa
+    &#34;&#34;&#34;
+    pass
+
+
 class ContentEventType(Enum):
     &#34;&#34;&#34;
     The type of event that occurred on the content
@@ -2033,10 +2045,12 @@ class ContentEventType(Enum):
     DERIVED_DOCUMENT = &#39;DERIVED_DOCUMENT&#39;
 
 
-class ContentEvent:
+class ContentEvent(BaseEvent):
     &#34;&#34;&#34;A content event represents a change, update or deletion that has occurred in a document family
     in a store, and can be relayed for a reaction
     &#34;&#34;&#34;
+
+    type = &#34;content&#34;
 
     def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
         &#34;&#34;&#34;
@@ -2063,7 +2077,48 @@ class ContentEvent:
         return {
             &#39;contentObject&#39;: self.content_object.to_dict(),
             &#39;documentFamily&#39;: self.document_family.to_dict(),
-            &#39;eventType&#39;: self.event_type
+            &#39;eventType&#39;: self.event_type,
+            &#39;type&#39;: self.type
+        }
+
+
+class AssistantEventType(Enum):
+    &#34;&#34;&#34;
+    The type of event that is being provided to the assistant
+    &#34;&#34;&#34;
+    PROCESS_DOCUMENT = &#39;PROCESS_DOCUMENT&#39;
+
+
+class AssistantEvent(BaseEvent):
+    type = &#34;assistant&#34;
+
+    &#34;&#34;&#34;
+    A assistant event represents an interaction, usually from a user or an API, to evalute
+    and respond to a document
+    &#34;&#34;&#34;
+
+    def __init__(self, content_object: ContentObject, event_type: AssistantEventType):
+        &#34;&#34;&#34;
+        Initialize a content event
+        Args:
+            content_object: the content object on which the event occurred
+            event_type: the type of event
+        &#34;&#34;&#34;
+        self.content_object = content_object
+        &#34;&#34;&#34;The assistant event&#34;&#34;&#34;
+        self.event_type = event_type
+        &#34;&#34;&#34;The event type&#34;&#34;&#34;
+
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                              AssistantEventType[event_dict[&#39;eventType&#39;]])
+
+    def to_dict(self):
+        return {
+            &#39;contentObject&#39;: self.content_object.to_dict(),
+            &#39;eventType&#39;: self.event_type,
+            &#39;type&#39;: self.type
         }
 
 
@@ -2494,7 +2549,12 @@ class DocumentStore:
 
         &#34;&#34;&#34;
         last_co = document_family.content_objects[-1]
-        return self.get_document_by_content_object(document_family, last_co)
+        document = self.get_document_by_content_object(document_family, last_co)
+
+        if document is not None:
+            document.ref = f&#34;{self.get_ref()}/{document_family.id}/{last_co.id}&#34;
+
+        return document
 
 
 class ModelStore:
@@ -2546,6 +2606,167 @@ class ContentObjectReference:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="kodexa.model.model.AssistantEvent"><code class="flex name class">
+<span>class <span class="ident">AssistantEvent</span></span>
+<span>(</span><span>content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>, event_type: <a title="kodexa.model.model.AssistantEventType" href="#kodexa.model.model.AssistantEventType">AssistantEventType</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The base for all events within Kodexa</p>
+<p>Initialize a content event</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>content_object</code></strong></dt>
+<dd>the content object on which the event occurred</dd>
+<dt><strong><code>event_type</code></strong></dt>
+<dd>the type of event</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AssistantEvent(BaseEvent):
+    type = &#34;assistant&#34;
+
+    &#34;&#34;&#34;
+    A assistant event represents an interaction, usually from a user or an API, to evalute
+    and respond to a document
+    &#34;&#34;&#34;
+
+    def __init__(self, content_object: ContentObject, event_type: AssistantEventType):
+        &#34;&#34;&#34;
+        Initialize a content event
+        Args:
+            content_object: the content object on which the event occurred
+            event_type: the type of event
+        &#34;&#34;&#34;
+        self.content_object = content_object
+        &#34;&#34;&#34;The assistant event&#34;&#34;&#34;
+        self.event_type = event_type
+        &#34;&#34;&#34;The event type&#34;&#34;&#34;
+
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                              AssistantEventType[event_dict[&#39;eventType&#39;]])
+
+    def to_dict(self):
+        return {
+            &#39;contentObject&#39;: self.content_object.to_dict(),
+            &#39;eventType&#39;: self.event_type,
+            &#39;type&#39;: self.type
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="kodexa.model.model.BaseEvent" href="#kodexa.model.model.BaseEvent">BaseEvent</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="kodexa.model.model.AssistantEvent.type"><code class="name">var <span class="ident">type</span></code></dt>
+<dd>
+<div class="desc"><p>A assistant event represents an interaction, usually from a user or an API, to evalute
+and respond to a document</p></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.model.model.AssistantEvent.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>event_dict: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_dict(cls, event_dict: dict):
+    return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                          AssistantEventType[event_dict[&#39;eventType&#39;]])</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.AssistantEvent.content_object"><code class="name">var <span class="ident">content_object</span></code></dt>
+<dd>
+<div class="desc"><p>The assistant event</p></div>
+</dd>
+<dt id="kodexa.model.model.AssistantEvent.event_type"><code class="name">var <span class="ident">event_type</span></code></dt>
+<dd>
+<div class="desc"><p>The event type</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.model.model.AssistantEvent.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self):
+    return {
+        &#39;contentObject&#39;: self.content_object.to_dict(),
+        &#39;eventType&#39;: self.event_type,
+        &#39;type&#39;: self.type
+    }</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.model.model.AssistantEventType"><code class="flex name class">
+<span>class <span class="ident">AssistantEventType</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The type of event that is being provided to the assistant</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AssistantEventType(Enum):
+    &#34;&#34;&#34;
+    The type of event that is being provided to the assistant
+    &#34;&#34;&#34;
+    PROCESS_DOCUMENT = &#39;PROCESS_DOCUMENT&#39;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="kodexa.model.model.AssistantEventType.PROCESS_DOCUMENT"><code class="name">var <span class="ident">PROCESS_DOCUMENT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="kodexa.model.model.BaseEvent"><code class="flex name class">
+<span>class <span class="ident">BaseEvent</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>The base for all events within Kodexa</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BaseEvent:
+    &#34;&#34;&#34;
+    The base for all events within Kodexa
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="kodexa.model.model.AssistantEvent" href="#kodexa.model.model.AssistantEvent">AssistantEvent</a></li>
+<li><a title="kodexa.model.model.ContentEvent" href="#kodexa.model.model.ContentEvent">ContentEvent</a></li>
+</ul>
+</dd>
 <dt id="kodexa.model.model.ContentEvent"><code class="flex name class">
 <span>class <span class="ident">ContentEvent</span></span>
 <span>(</span><span>content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>, event_type: <a title="kodexa.model.model.ContentEventType" href="#kodexa.model.model.ContentEventType">ContentEventType</a>, document_family)</span>
@@ -2567,10 +2788,12 @@ in a store, and can be relayed for a reaction</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ContentEvent:
+<pre><code class="python">class ContentEvent(BaseEvent):
     &#34;&#34;&#34;A content event represents a change, update or deletion that has occurred in a document family
     in a store, and can be relayed for a reaction
     &#34;&#34;&#34;
+
+    type = &#34;content&#34;
 
     def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
         &#34;&#34;&#34;
@@ -2597,9 +2820,21 @@ in a store, and can be relayed for a reaction</p>
         return {
             &#39;contentObject&#39;: self.content_object.to_dict(),
             &#39;documentFamily&#39;: self.document_family.to_dict(),
-            &#39;eventType&#39;: self.event_type
+            &#39;eventType&#39;: self.event_type,
+            &#39;type&#39;: self.type
         }</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="kodexa.model.model.BaseEvent" href="#kodexa.model.model.BaseEvent">BaseEvent</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="kodexa.model.model.ContentEvent.type"><code class="name">var <span class="ident">type</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 <h3>Static methods</h3>
 <dl>
 <dt id="kodexa.model.model.ContentEvent.from_dict"><code class="name flex">
@@ -2649,7 +2884,8 @@ def from_dict(cls, event_dict: dict):
     return {
         &#39;contentObject&#39;: self.content_object.to_dict(),
         &#39;documentFamily&#39;: self.document_family.to_dict(),
-        &#39;eventType&#39;: self.event_type
+        &#39;eventType&#39;: self.event_type,
+        &#39;type&#39;: self.type
     }</code></pre>
 </details>
 </dd>
@@ -6783,7 +7019,7 @@ def from_dict(cls, co_dict):
 </dd>
 <dt id="kodexa.model.model.Document"><code class="flex name class">
 <span>class <span class="ident">Document</span></span>
-<span>(</span><span>metadata=None, content_node: <a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a> = None, source=None)</span>
+<span>(</span><span>metadata=None, content_node: <a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a> = None, source=None, ref: str = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A Document is a collection of metadata and a set of content nodes.</p></div>
@@ -6800,11 +7036,16 @@ def from_dict(cls, co_dict):
     def __str__(self):
         return f&#34;kodexa://{self.uuid}&#34;
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref:str=None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
             source = SourceMetadata()
+
+        # The ref is not stored and is used when we have
+        # initialized a document from a remote store and want
+        # to keep track of that
+        self.ref = ref
 
         self.metadata: DocumentMetadata = metadata
         self.content_node: Optional[ContentNode] = content_node
@@ -8618,7 +8859,12 @@ def from_dict(cls, family_dict: dict):
 
         &#34;&#34;&#34;
         last_co = document_family.content_objects[-1]
-        return self.get_document_by_content_object(document_family, last_co)</code></pre>
+        document = self.get_document_by_content_object(document_family, last_co)
+
+        if document is not None:
+            document.ref = f&#34;{self.get_ref()}/{document_family.id}/{last_co.id}&#34;
+
+        return document</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -8901,7 +9147,12 @@ def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
 
     &#34;&#34;&#34;
     last_co = document_family.content_objects[-1]
-    return self.get_document_by_content_object(document_family, last_co)</code></pre>
+    document = self.get_document_by_content_object(document_family, last_co)
+
+    if document is not None:
+        document.ref = f&#34;{self.get_ref()}/{document_family.id}/{last_co.id}&#34;
+
+    return document</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.get_ref"><code class="name flex">
@@ -9922,13 +10173,33 @@ Returns:</p></div>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="kodexa.model.model.ContentEvent" href="#kodexa.model.model.ContentEvent">ContentEvent</a></code></h4>
+<h4><code><a title="kodexa.model.model.AssistantEvent" href="#kodexa.model.model.AssistantEvent">AssistantEvent</a></code></h4>
 <ul class="">
+<li><code><a title="kodexa.model.model.AssistantEvent.content_object" href="#kodexa.model.model.AssistantEvent.content_object">content_object</a></code></li>
+<li><code><a title="kodexa.model.model.AssistantEvent.event_type" href="#kodexa.model.model.AssistantEvent.event_type">event_type</a></code></li>
+<li><code><a title="kodexa.model.model.AssistantEvent.from_dict" href="#kodexa.model.model.AssistantEvent.from_dict">from_dict</a></code></li>
+<li><code><a title="kodexa.model.model.AssistantEvent.to_dict" href="#kodexa.model.model.AssistantEvent.to_dict">to_dict</a></code></li>
+<li><code><a title="kodexa.model.model.AssistantEvent.type" href="#kodexa.model.model.AssistantEvent.type">type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.AssistantEventType" href="#kodexa.model.model.AssistantEventType">AssistantEventType</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.AssistantEventType.PROCESS_DOCUMENT" href="#kodexa.model.model.AssistantEventType.PROCESS_DOCUMENT">PROCESS_DOCUMENT</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.BaseEvent" href="#kodexa.model.model.BaseEvent">BaseEvent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.ContentEvent" href="#kodexa.model.model.ContentEvent">ContentEvent</a></code></h4>
+<ul class="two-column">
 <li><code><a title="kodexa.model.model.ContentEvent.content_object" href="#kodexa.model.model.ContentEvent.content_object">content_object</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.document_family" href="#kodexa.model.model.ContentEvent.document_family">document_family</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.event_type" href="#kodexa.model.model.ContentEvent.event_type">event_type</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.from_dict" href="#kodexa.model.model.ContentEvent.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.ContentEvent.to_dict" href="#kodexa.model.model.ContentEvent.to_dict">to_dict</a></code></li>
+<li><code><a title="kodexa.model.model.ContentEvent.type" href="#kodexa.model.model.ContentEvent.type">type</a></code></li>
 </ul>
 </li>
 <li>

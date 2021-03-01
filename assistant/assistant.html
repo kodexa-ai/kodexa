@@ -36,6 +36,7 @@ instance of the Kodexa platform
 from typing import List
 
 from kodexa.model import ContentEvent
+from kodexa.model.model import BaseEvent
 
 
 class AssistantMetadata:
@@ -118,7 +119,7 @@ class Assistant:
     that is working with set of content
     &#34;&#34;&#34;
 
-    def process_event(self, event: ContentEvent, context: AssistantContext) -&gt; AssistantResponse:
+    def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -129,7 +130,7 @@ class Assistant:
         return as another event for the assistant
 
         Args:
-          event: ContentEvent: the event
+          event: BaseEvent: the event being provided to the assistant
           context: AssistantContext:  the context for the assistant
 
         Returns:
@@ -164,7 +165,7 @@ that is working with set of content</p></div>
     that is working with set of content
     &#34;&#34;&#34;
 
-    def process_event(self, event: ContentEvent, context: AssistantContext) -&gt; AssistantResponse:
+    def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -175,7 +176,7 @@ that is working with set of content</p></div>
         return as another event for the assistant
 
         Args:
-          event: ContentEvent: the event
+          event: BaseEvent: the event being provided to the assistant
           context: AssistantContext:  the context for the assistant
 
         Returns:
@@ -192,7 +193,7 @@ that is working with set of content</p></div>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.assistant.assistant.Assistant.process_event"><code class="name flex">
-<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a>) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
+<span>def <span class="ident">process_event</span></span>(<span>self, event: <a title="kodexa.model.model.BaseEvent" href="../model/model.html#kodexa.model.model.BaseEvent">BaseEvent</a>, context: <a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a>) ‑> <a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>The assistant will need to examine the event to determine if it wants to respond</p>
@@ -205,7 +206,7 @@ return as another event for the assistant</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>event</code></strong></dt>
-<dd>ContentEvent: the event</dd>
+<dd>BaseEvent: the event being provided to the assistant</dd>
 <dt><strong><code>context</code></strong></dt>
 <dd>AssistantContext:
 the context for the assistant</dd>
@@ -219,7 +220,7 @@ the context for the assistant</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def process_event(self, event: ContentEvent, context: AssistantContext) -&gt; AssistantResponse:
+<pre><code class="python">def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; AssistantResponse:
     &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
     The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -230,7 +231,7 @@ the context for the assistant</dd>
     return as another event for the assistant
 
     Args:
-      event: ContentEvent: the event
+      event: BaseEvent: the event being provided to the assistant
       context: AssistantContext:  the context for the assistant
 
     Returns:
