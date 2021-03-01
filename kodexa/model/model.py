@@ -2016,6 +2016,8 @@ class ContentEvent(BaseEvent):
     in a store, and can be relayed for a reaction
     """
 
+    type = "content"
+
     def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
         """
         Initialize a content event
@@ -2041,7 +2043,8 @@ class ContentEvent(BaseEvent):
         return {
             'contentObject': self.content_object.to_dict(),
             'documentFamily': self.document_family.to_dict(),
-            'eventType': self.event_type
+            'eventType': self.event_type,
+            'type': self.type
         }
 
 
@@ -2053,6 +2056,8 @@ class AssistantEventType(Enum):
 
 
 class AssistantEvent(BaseEvent):
+    type = "assistant"
+
     """
     A assistant event represents an interaction, usually from a user or an API, to evalute
     and respond to a document
@@ -2078,7 +2083,8 @@ class AssistantEvent(BaseEvent):
     def to_dict(self):
         return {
             'contentObject': self.content_object.to_dict(),
-            'eventType': self.event_type
+            'eventType': self.event_type,
+            'type': self.type
         }
 
 
