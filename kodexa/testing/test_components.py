@@ -1,6 +1,6 @@
 from kodexa.assistant import Assistant, AssistantContext, AssistantResponse
 from kodexa.assistant.assistant import AssistantPipeline
-from kodexa.model import ContentEvent
+from kodexa.model.model import BaseEvent
 from kodexa.pipeline import Pipeline
 
 
@@ -18,11 +18,11 @@ class TestAction:
 class TestAssistant(Assistant):
     """ """
 
-    def process_event(self, event: ContentEvent, context: AssistantContext = None) -> AssistantResponse:
+    def process_event(self, event: BaseEvent, context: AssistantContext = None) -> AssistantResponse:
         """
 
         Args:
-          event: ContentEvent:
+          event: BaseEvent:
           context: AssistantContext:  (Default value = None)
 
         Returns:
