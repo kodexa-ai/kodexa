@@ -33,9 +33,8 @@ instance of the Kodexa platform</p>
 Provides the high-level classes and definition for an Assistant that can be implemented in Kodexa and run on an
 instance of the Kodexa platform
 &#34;&#34;&#34;
-from typing import List
+from typing import List, Optional
 
-from kodexa.model import ContentEvent
 from kodexa.model.model import BaseEvent
 
 
@@ -94,24 +93,46 @@ class AssistantPipeline:
         self.write_back_to_store = write_back_to_store
 
 
+class AssistantIntent:
+    &#34;&#34;&#34;
+    The representation of an available intention from the assistant
+    &#34;&#34;&#34;
+
+    def __init__(self, intent_id: str, text: str):
+        self.intent_id = intent_id
+        &#34;&#34;&#34;The ID of the intention&#34;&#34;&#34;
+        self.text = text
+        &#34;&#34;&#34;Text description of the intention&#34;&#34;&#34;
+
+
 class AssistantResponse:
     &#34;&#34;&#34;
     An assistant response allows you to provide the response from an assistant to a specific
     event.
     &#34;&#34;&#34;
 
-    def __init__(self, pipelines: List[AssistantPipeline] = None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None):
         &#34;&#34;&#34;
         Initialize the response from the assistant
 
         Args:
             pipelines: zero or more pipelines that you want executed on the content object for which the
                        event was raised
+            text: the
         &#34;&#34;&#34;
+        if available_intents is None:
+            available_intents = []
         if pipelines is None:
             pipelines = []
+
         self.pipelines = pipelines
         &#34;&#34;&#34;The list of pipelines that you wish to have executed against the content object from the event&#34;&#34;&#34;
+
+        self.text = text
+        &#34;&#34;&#34;The text that will be provided back to the user from the assistant&#34;&#34;&#34;
+
+        self.available_intents = available_intents
+        &#34;&#34;&#34;Any available intentions that the assistant will further respond to&#34;&#34;&#34;
 
 
 class Assistant:
@@ -338,6 +359,39 @@ assistant, this allows you to build pipelines when you don't know the owning org
 </dd>
 </dl>
 </dd>
+<dt id="kodexa.assistant.assistant.AssistantIntent"><code class="flex name class">
+<span>class <span class="ident">AssistantIntent</span></span>
+<span>(</span><span>intent_id: str, text: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The representation of an available intention from the assistant</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AssistantIntent:
+    &#34;&#34;&#34;
+    The representation of an available intention from the assistant
+    &#34;&#34;&#34;
+
+    def __init__(self, intent_id: str, text: str):
+        self.intent_id = intent_id
+        &#34;&#34;&#34;The ID of the intention&#34;&#34;&#34;
+        self.text = text
+        &#34;&#34;&#34;Text description of the intention&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.assistant.assistant.AssistantIntent.intent_id"><code class="name">var <span class="ident">intent_id</span></code></dt>
+<dd>
+<div class="desc"><p>The ID of the intention</p></div>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantIntent.text"><code class="name">var <span class="ident">text</span></code></dt>
+<dd>
+<div class="desc"><p>Text description of the intention</p></div>
+</dd>
+</dl>
+</dd>
 <dt id="kodexa.assistant.assistant.AssistantMetadata"><code class="flex name class">
 <span>class <span class="ident">AssistantMetadata</span></span>
 <span>(</span><span>assistant_id: str, assistant_name: str)</span>
@@ -391,7 +445,7 @@ assistant, this allows you to build pipelines when you don't know the owning org
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantResponse"><code class="flex name class">
 <span>class <span class="ident">AssistantResponse</span></span>
-<span>(</span><span>pipelines: List[<a title="kodexa.assistant.assistant.AssistantPipeline" href="#kodexa.assistant.assistant.AssistantPipeline">AssistantPipeline</a>] = None)</span>
+<span>(</span><span>pipelines: List[<a title="kodexa.assistant.assistant.AssistantPipeline" href="#kodexa.assistant.assistant.AssistantPipeline">AssistantPipeline</a>] = None, text: Union[str, NoneType] = None, available_intents=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>An assistant response allows you to provide the response from an assistant to a specific
@@ -402,6 +456,8 @@ event.</p>
 <dt><strong><code>pipelines</code></strong></dt>
 <dd>zero or more pipelines that you want executed on the content object for which the
 event was raised</dd>
+<dt><strong><code>text</code></strong></dt>
+<dd>the</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -413,24 +469,42 @@ event was raised</dd>
     event.
     &#34;&#34;&#34;
 
-    def __init__(self, pipelines: List[AssistantPipeline] = None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None):
         &#34;&#34;&#34;
         Initialize the response from the assistant
 
         Args:
             pipelines: zero or more pipelines that you want executed on the content object for which the
                        event was raised
+            text: the
         &#34;&#34;&#34;
+        if available_intents is None:
+            available_intents = []
         if pipelines is None:
             pipelines = []
+
         self.pipelines = pipelines
-        &#34;&#34;&#34;The list of pipelines that you wish to have executed against the content object from the event&#34;&#34;&#34;</code></pre>
+        &#34;&#34;&#34;The list of pipelines that you wish to have executed against the content object from the event&#34;&#34;&#34;
+
+        self.text = text
+        &#34;&#34;&#34;The text that will be provided back to the user from the assistant&#34;&#34;&#34;
+
+        self.available_intents = available_intents
+        &#34;&#34;&#34;Any available intentions that the assistant will further respond to&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
+<dt id="kodexa.assistant.assistant.AssistantResponse.available_intents"><code class="name">var <span class="ident">available_intents</span></code></dt>
+<dd>
+<div class="desc"><p>Any available intentions that the assistant will further respond to</p></div>
+</dd>
 <dt id="kodexa.assistant.assistant.AssistantResponse.pipelines"><code class="name">var <span class="ident">pipelines</span></code></dt>
 <dd>
 <div class="desc"><p>The list of pipelines that you wish to have executed against the content object from the event</p></div>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantResponse.text"><code class="name">var <span class="ident">text</span></code></dt>
+<dd>
+<div class="desc"><p>The text that will be provided back to the user from the assistant</p></div>
 </dd>
 </dl>
 </dd>
@@ -463,6 +537,13 @@ event was raised</dd>
 </ul>
 </li>
 <li>
+<h4><code><a title="kodexa.assistant.assistant.AssistantIntent" href="#kodexa.assistant.assistant.AssistantIntent">AssistantIntent</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.assistant.assistant.AssistantIntent.intent_id" href="#kodexa.assistant.assistant.AssistantIntent.intent_id">intent_id</a></code></li>
+<li><code><a title="kodexa.assistant.assistant.AssistantIntent.text" href="#kodexa.assistant.assistant.AssistantIntent.text">text</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="kodexa.assistant.assistant.AssistantMetadata" href="#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a></code></h4>
 <ul class="">
 <li><code><a title="kodexa.assistant.assistant.AssistantMetadata.assistant_id" href="#kodexa.assistant.assistant.AssistantMetadata.assistant_id">assistant_id</a></code></li>
@@ -475,7 +556,9 @@ event was raised</dd>
 <li>
 <h4><code><a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></code></h4>
 <ul class="">
+<li><code><a title="kodexa.assistant.assistant.AssistantResponse.available_intents" href="#kodexa.assistant.assistant.AssistantResponse.available_intents">available_intents</a></code></li>
 <li><code><a title="kodexa.assistant.assistant.AssistantResponse.pipelines" href="#kodexa.assistant.assistant.AssistantResponse.pipelines">pipelines</a></code></li>
+<li><code><a title="kodexa.assistant.assistant.AssistantResponse.text" href="#kodexa.assistant.assistant.AssistantResponse.text">text</a></code></li>
 </ul>
 </li>
 </ul>
