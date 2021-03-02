@@ -2060,6 +2060,7 @@ class AssistantEventType(Enum):
     PROCESS_DOCUMENT = 'PROCESS_DOCUMENT'
 
 
+
 class AssistantEvent(BaseEvent):
     type = "assistant"
 
