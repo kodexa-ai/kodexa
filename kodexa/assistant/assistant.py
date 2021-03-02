@@ -2,9 +2,8 @@
 Provides the high-level classes and definition for an Assistant that can be implemented in Kodexa and run on an
 instance of the Kodexa platform
 """
-from typing import List
+from typing import List, Optional
 
-from kodexa.model import ContentEvent
 from kodexa.model.model import BaseEvent
 
 
@@ -63,24 +62,46 @@ class AssistantPipeline:
         self.write_back_to_store = write_back_to_store
 
 
+class AssistantIntent:
+    """
+    The representation of an available intention from the assistant
+    """
+
+    def __init__(self, intent_id: str, text: str):
+        self.intent_id = intent_id
+        """The ID of the intention"""
+        self.text = text
+        """Text description of the intention"""
+
+
 class AssistantResponse:
     """
     An assistant response allows you to provide the response from an assistant to a specific
     event.
     """
 
-    def __init__(self, pipelines: List[AssistantPipeline] = None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None):
         """
         Initialize the response from the assistant
 
         Args:
             pipelines: zero or more pipelines that you want executed on the content object for which the
                        event was raised
+            text: the
         """
+        if available_intents is None:
+            available_intents = []
         if pipelines is None:
             pipelines = []
+
         self.pipelines = pipelines
         """The list of pipelines that you wish to have executed against the content object from the event"""
+
+        self.text = text
+        """The text that will be provided back to the user from the assistant"""
+
+        self.available_intents = available_intents
+        """Any available intentions that the assistant will further respond to"""
 
 
 class Assistant:
