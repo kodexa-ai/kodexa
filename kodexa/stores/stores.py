@@ -231,6 +231,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     """
 
     def __init__(self, ref: str):
+
         self.ref: str = ref
 
         get_response = self._base_get(
@@ -241,6 +242,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             self.store_purpose = get_response.json()['storePurpose']
         else:
             raise Exception(f"Unable to find store with ref {ref}")
+
+        super().__init__(self.store_type, self.store_purpose)
 
     def get_name(self):
         """The name of the connector
