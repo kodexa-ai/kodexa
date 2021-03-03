@@ -253,7 +253,7 @@ class AssistantTestHarness:
 
         """
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
 
         response: AssistantResponse = self.assistant.process_event(event, assistant_context)
 

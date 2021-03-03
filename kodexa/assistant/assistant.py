@@ -4,8 +4,6 @@ instance of the Kodexa platform
 """
 from typing import List, Optional
 
-from kodexa.model.model import BaseEvent
-
 
 class AssistantMetadata:
     """
@@ -24,17 +22,22 @@ class AssistantContext:
     while processing an event
     """
 
-    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = 'kodexa.yml'):
+    from kodexa.model.model import ContentEvent, DocumentStore
+
+    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = 'kodexa.yml',
+                 stores: List[DocumentStore] = []):
         """
         Initialize the context based with a path to the kodexa file
 
         Args:
             metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
+            stores: A list of the stores that are available to the assistant (note these are local stores usually)
         """
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
         self.metadata: AssistantMetadata = metadata
+        self.stores = stores
 
     def get_step(self, step: str, options=None):
         """
@@ -52,6 +55,26 @@ class AssistantContext:
         if options is None:
             options = {}
         return self.extension_pack_util.get_step(step, options)
+
+    def get_store(self, event: ContentEvent) -> DocumentStore:
+        """
+        Get a document store for the event (based on the document family ID)
+
+        Args:
+          event: ContentEvent:
+
+        Returns:
+          The instance of the document store
+        """
+        for store in self.stores:
+            if event.document_family.store_ref == store.get_ref():
+                return store
+
+        if event.document_family.store_ref is not None:
+            from kodexa import RemoteDocumentStore
+            return RemoteDocumentStore(event.document_family.store_ref)
+
+        raise Exception(f"Unable to get store ref {event.document_family.store_ref}")
 
 
 class AssistantPipeline:
@@ -87,7 +110,8 @@ class AssistantResponse:
         Args:
             pipelines: zero or more pipelines that you want executed on the content object for which the
                        event was raised
-            text: the
+            text: the to be presented with the response
+            available_intents: a list of the available intents that you can return for this document
         """
         if available_intents is None:
             available_intents = []
@@ -108,6 +132,8 @@ class Assistant:
     """An assistant is a rich-API to allow you to work with a reactive content store or with an end user
     that is working with set of content
     """
+
+    from kodexa.model.model import BaseEvent
 
     def process_event(self, event: BaseEvent, context: AssistantContext) -> AssistantResponse:
         """The assistant will need to examine the event to determine if it wants to respond
