@@ -21,7 +21,9 @@ logger = logging.getLogger('kodexa.stores')
 class LocalDocumentStore(DocumentStore):
     """ """
 
-    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = 'ALL'):
+    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = 'ALL', store_type='DOCUMENT',
+                 store_purpose='OPERATIONAL'):
+        super().__init__(store_type, store_purpose)
 
         modes = ['ALL', 'ONLY_NEW']
 
@@ -33,6 +35,8 @@ class LocalDocumentStore(DocumentStore):
         self.metastore: List[DocumentFamily] = []
         self.mode = mode
         self.listeners: List = []
+        self.store_type = store_type
+        self.store_purpose = store_purpose
 
         path = Path(store_path)
 

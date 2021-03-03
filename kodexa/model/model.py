@@ -1592,7 +1592,7 @@ class Document(object):
     def __str__(self):
         return f"kodexa://{self.uuid}"
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref:str=None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -2060,7 +2060,6 @@ class AssistantEventType(Enum):
     PROCESS_DOCUMENT = 'PROCESS_DOCUMENT'
 
 
-
 class AssistantEvent(BaseEvent):
     type = "assistant"
 
@@ -2280,6 +2279,11 @@ class DocumentFamily:
 
 
 class DocumentStore:
+
+    def __init__(self, store_type='DOCUMENT', store_purpose='OPERATIONAL'):
+        self.store_type = store_type
+        self.store_purpose = store_purpose
+
     """
     A document store supports storing, listing and retrieving Kodexa documents and document families
     """
