@@ -35,8 +35,6 @@ instance of the Kodexa platform
 &#34;&#34;&#34;
 from typing import List, Optional
 
-from kodexa.model.model import BaseEvent
-
 
 class AssistantMetadata:
     &#34;&#34;&#34;
@@ -55,17 +53,22 @@ class AssistantContext:
     while processing an event
     &#34;&#34;&#34;
 
-    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;):
+    from kodexa.model.model import ContentEvent, DocumentStore
+
+    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;,
+                 stores: List[DocumentStore] = []):
         &#34;&#34;&#34;
         Initialize the context based with a path to the kodexa file
 
         Args:
             metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
+            stores: A list of the stores that are available to the assistant (note these are local stores usually)
         &#34;&#34;&#34;
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
         self.metadata: AssistantMetadata = metadata
+        self.stores = stores
 
     def get_step(self, step: str, options=None):
         &#34;&#34;&#34;
@@ -83,6 +86,26 @@ class AssistantContext:
         if options is None:
             options = {}
         return self.extension_pack_util.get_step(step, options)
+
+    def get_store(self, event: ContentEvent) -&gt; DocumentStore:
+        &#34;&#34;&#34;
+        Get a document store for the event (based on the document family ID)
+
+        Args:
+          event: ContentEvent:
+
+        Returns:
+          The instance of the document store
+        &#34;&#34;&#34;
+        for store in self.stores:
+            if event.document_family.store_ref == store.get_ref():
+                return store
+
+        if event.document_family.store_ref is not None:
+            from kodexa import RemoteDocumentStore
+            return RemoteDocumentStore(event.document_family.store_ref)
+
+        raise Exception(f&#34;Unable to get store ref {event.document_family.store_ref}&#34;)
 
 
 class AssistantPipeline:
@@ -118,7 +141,8 @@ class AssistantResponse:
         Args:
             pipelines: zero or more pipelines that you want executed on the content object for which the
                        event was raised
-            text: the
+            text: the to be presented with the response
+            available_intents: a list of the available intents that you can return for this document
         &#34;&#34;&#34;
         if available_intents is None:
             available_intents = []
@@ -139,6 +163,8 @@ class Assistant:
     &#34;&#34;&#34;An assistant is a rich-API to allow you to work with a reactive content store or with an end user
     that is working with set of content
     &#34;&#34;&#34;
+
+    from kodexa.model.model import BaseEvent
 
     def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
@@ -186,6 +212,8 @@ that is working with set of content</p></div>
     that is working with set of content
     &#34;&#34;&#34;
 
+    from kodexa.model.model import BaseEvent
+
     def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; AssistantResponse:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
@@ -211,6 +239,13 @@ that is working with set of content</p></div>
 <ul class="hlist">
 <li><a title="kodexa.testing.test_components.TestAssistant" href="../testing/test_components.html#kodexa.testing.test_components.TestAssistant">TestAssistant</a></li>
 </ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="kodexa.assistant.assistant.Assistant.BaseEvent"><code class="name">var <span class="ident">BaseEvent</span></code></dt>
+<dd>
+<div class="desc"><p>The base for all events within Kodexa</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.assistant.assistant.Assistant.process_event"><code class="name flex">
@@ -267,7 +302,7 @@ the context for the assistant</dd>
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantContext"><code class="flex name class">
 <span>class <span class="ident">AssistantContext</span></span>
-<span>(</span><span>metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>, path_to_kodexa_metadata: str = 'kodexa.yml')</span>
+<span>(</span><span>metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>, path_to_kodexa_metadata: str = 'kodexa.yml', stores: List[<a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>] = [])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Assistant Context provides a way to interact with additional services and capabilities
@@ -279,6 +314,8 @@ while processing an event</p>
 <dd>metadata for the assistant being setup in context</dd>
 <dt><strong><code>path_to_kodexa_metadata</code></strong> :&ensp;<code>str</code></dt>
 <dd>the path to the kodexa.yml (note it can also open a kodexa.json)</dd>
+<dt><strong><code>stores</code></strong></dt>
+<dd>A list of the stores that are available to the assistant (note these are local stores usually)</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -289,17 +326,22 @@ while processing an event</p>
     while processing an event
     &#34;&#34;&#34;
 
-    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;):
+    from kodexa.model.model import ContentEvent, DocumentStore
+
+    def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;,
+                 stores: List[DocumentStore] = []):
         &#34;&#34;&#34;
         Initialize the context based with a path to the kodexa file
 
         Args:
             metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
+            stores: A list of the stores that are available to the assistant (note these are local stores usually)
         &#34;&#34;&#34;
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
         self.metadata: AssistantMetadata = metadata
+        self.stores = stores
 
     def get_step(self, step: str, options=None):
         &#34;&#34;&#34;
@@ -316,8 +358,40 @@ while processing an event</p>
         &#34;&#34;&#34;
         if options is None:
             options = {}
-        return self.extension_pack_util.get_step(step, options)</code></pre>
+        return self.extension_pack_util.get_step(step, options)
+
+    def get_store(self, event: ContentEvent) -&gt; DocumentStore:
+        &#34;&#34;&#34;
+        Get a document store for the event (based on the document family ID)
+
+        Args:
+          event: ContentEvent:
+
+        Returns:
+          The instance of the document store
+        &#34;&#34;&#34;
+        for store in self.stores:
+            if event.document_family.store_ref == store.get_ref():
+                return store
+
+        if event.document_family.store_ref is not None:
+            from kodexa import RemoteDocumentStore
+            return RemoteDocumentStore(event.document_family.store_ref)
+
+        raise Exception(f&#34;Unable to get store ref {event.document_family.store_ref}&#34;)</code></pre>
 </details>
+<h3>Class variables</h3>
+<dl>
+<dt id="kodexa.assistant.assistant.AssistantContext.ContentEvent"><code class="name">var <span class="ident">ContentEvent</span></code></dt>
+<dd>
+<div class="desc"><p>A content event represents a change, update or deletion that has occurred in a document family
+in a store, and can be relayed for a reaction</p></div>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantContext.DocumentStore"><code class="name">var <span class="ident">DocumentStore</span></code></dt>
+<dd>
+<div class="desc"><p>A document store supports storing, listing and retrieving Kodexa documents and document families</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.assistant.assistant.AssistantContext.get_step"><code class="name flex">
@@ -355,6 +429,43 @@ assistant, this allows you to build pipelines when you don't know the owning org
     if options is None:
         options = {}
     return self.extension_pack_util.get_step(step, options)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantContext.get_store"><code class="name flex">
+<span>def <span class="ident">get_store</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>) ‑> <a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a document store for the event (based on the document family ID)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>event</code></strong></dt>
+<dd>ContentEvent:</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The instance of the document store</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_store(self, event: ContentEvent) -&gt; DocumentStore:
+    &#34;&#34;&#34;
+    Get a document store for the event (based on the document family ID)
+
+    Args:
+      event: ContentEvent:
+
+    Returns:
+      The instance of the document store
+    &#34;&#34;&#34;
+    for store in self.stores:
+        if event.document_family.store_ref == store.get_ref():
+            return store
+
+    if event.document_family.store_ref is not None:
+        from kodexa import RemoteDocumentStore
+        return RemoteDocumentStore(event.document_family.store_ref)
+
+    raise Exception(f&#34;Unable to get store ref {event.document_family.store_ref}&#34;)</code></pre>
 </details>
 </dd>
 </dl>
@@ -457,7 +568,9 @@ event.</p>
 <dd>zero or more pipelines that you want executed on the content object for which the
 event was raised</dd>
 <dt><strong><code>text</code></strong></dt>
-<dd>the</dd>
+<dd>the to be presented with the response</dd>
+<dt><strong><code>available_intents</code></strong></dt>
+<dd>a list of the available intents that you can return for this document</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -476,7 +589,8 @@ event was raised</dd>
         Args:
             pipelines: zero or more pipelines that you want executed on the content object for which the
                        event was raised
-            text: the
+            text: the to be presented with the response
+            available_intents: a list of the available intents that you can return for this document
         &#34;&#34;&#34;
         if available_intents is None:
             available_intents = []
@@ -527,13 +641,17 @@ event was raised</dd>
 <li>
 <h4><code><a title="kodexa.assistant.assistant.Assistant" href="#kodexa.assistant.assistant.Assistant">Assistant</a></code></h4>
 <ul class="">
+<li><code><a title="kodexa.assistant.assistant.Assistant.BaseEvent" href="#kodexa.assistant.assistant.Assistant.BaseEvent">BaseEvent</a></code></li>
 <li><code><a title="kodexa.assistant.assistant.Assistant.process_event" href="#kodexa.assistant.assistant.Assistant.process_event">process_event</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a></code></h4>
 <ul class="">
+<li><code><a title="kodexa.assistant.assistant.AssistantContext.ContentEvent" href="#kodexa.assistant.assistant.AssistantContext.ContentEvent">ContentEvent</a></code></li>
+<li><code><a title="kodexa.assistant.assistant.AssistantContext.DocumentStore" href="#kodexa.assistant.assistant.AssistantContext.DocumentStore">DocumentStore</a></code></li>
 <li><code><a title="kodexa.assistant.assistant.AssistantContext.get_step" href="#kodexa.assistant.assistant.AssistantContext.get_step">get_step</a></code></li>
+<li><code><a title="kodexa.assistant.assistant.AssistantContext.get_store" href="#kodexa.assistant.assistant.AssistantContext.get_store">get_store</a></code></li>
 </ul>
 </li>
 <li>
