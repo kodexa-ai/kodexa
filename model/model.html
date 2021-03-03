@@ -1621,7 +1621,7 @@ class Document(object):
     def __str__(self):
         return f&#34;kodexa://{self.uuid}&#34;
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref:str=None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -2089,7 +2089,6 @@ class AssistantEventType(Enum):
     PROCESS_DOCUMENT = &#39;PROCESS_DOCUMENT&#39;
 
 
-
 class AssistantEvent(BaseEvent):
     type = &#34;assistant&#34;
 
@@ -2309,6 +2308,11 @@ class DocumentFamily:
 
 
 class DocumentStore:
+
+    def __init__(self, store_type=&#39;DOCUMENT&#39;, store_purpose=&#39;OPERATIONAL&#39;):
+        self.store_type = store_type
+        self.store_purpose = store_purpose
+
     &#34;&#34;&#34;
     A document store supports storing, listing and retrieving Kodexa documents and document families
     &#34;&#34;&#34;
@@ -7037,7 +7041,7 @@ def from_dict(cls, co_dict):
     def __str__(self):
         return f&#34;kodexa://{self.uuid}&#34;
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref:str=None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -8611,14 +8615,20 @@ def from_dict(cls, family_dict: dict):
 </dd>
 <dt id="kodexa.model.model.DocumentStore"><code class="flex name class">
 <span>class <span class="ident">DocumentStore</span></span>
+<span>(</span><span>store_type='DOCUMENT', store_purpose='OPERATIONAL')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A document store supports storing, listing and retrieving Kodexa documents and document families</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DocumentStore:
+
+    def __init__(self, store_type=&#39;DOCUMENT&#39;, store_purpose=&#39;OPERATIONAL&#39;):
+        self.store_type = store_type
+        self.store_purpose = store_purpose
+
     &#34;&#34;&#34;
     A document store supports storing, listing and retrieving Kodexa documents and document families
     &#34;&#34;&#34;

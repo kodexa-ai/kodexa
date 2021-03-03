@@ -260,6 +260,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     &#34;&#34;&#34;
 
     def __init__(self, ref: str):
+
         self.ref: str = ref
 
         get_response = self._base_get(
@@ -270,6 +271,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             self.store_purpose = get_response.json()[&#39;storePurpose&#39;]
         else:
             raise Exception(f&#34;Unable to find store with ref {ref}&#34;)
+
+        super().__init__(self.store_type, self.store_purpose)
 
     def get_name(self):
         &#34;&#34;&#34;The name of the connector
@@ -731,6 +734,7 @@ in an instance of the Kodexa platform</p></div>
     &#34;&#34;&#34;
 
     def __init__(self, ref: str):
+
         self.ref: str = ref
 
         get_response = self._base_get(
@@ -741,6 +745,8 @@ in an instance of the Kodexa platform</p></div>
             self.store_purpose = get_response.json()[&#39;storePurpose&#39;]
         else:
             raise Exception(f&#34;Unable to find store with ref {ref}&#34;)
+
+        super().__init__(self.store_type, self.store_purpose)
 
     def get_name(self):
         &#34;&#34;&#34;The name of the connector

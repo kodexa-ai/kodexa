@@ -51,7 +51,9 @@ logger = logging.getLogger(&#39;kodexa.stores&#39;)
 class LocalDocumentStore(DocumentStore):
     &#34;&#34;&#34; &#34;&#34;&#34;
 
-    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = &#39;ALL&#39;):
+    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = &#39;ALL&#39;, store_type=&#39;DOCUMENT&#39;,
+                 store_purpose=&#39;OPERATIONAL&#39;):
+        super().__init__(store_type, store_purpose)
 
         modes = [&#39;ALL&#39;, &#39;ONLY_NEW&#39;]
 
@@ -63,6 +65,8 @@ class LocalDocumentStore(DocumentStore):
         self.metastore: List[DocumentFamily] = []
         self.mode = mode
         self.listeners: List = []
+        self.store_type = store_type
+        self.store_purpose = store_purpose
 
         path = Path(store_path)
 
@@ -548,7 +552,7 @@ class TableDataStore(Store):
 <dl>
 <dt id="kodexa.stores.local.LocalDocumentStore"><code class="flex name class">
 <span>class <span class="ident">LocalDocumentStore</span></span>
-<span>(</span><span>store_path: str, force_initialize: bool = False, mode: str = 'ALL')</span>
+<span>(</span><span>store_path: str, force_initialize: bool = False, mode: str = 'ALL', store_type='DOCUMENT', store_purpose='OPERATIONAL')</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -559,7 +563,9 @@ class TableDataStore(Store):
 <pre><code class="python">class LocalDocumentStore(DocumentStore):
     &#34;&#34;&#34; &#34;&#34;&#34;
 
-    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = &#39;ALL&#39;):
+    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = &#39;ALL&#39;, store_type=&#39;DOCUMENT&#39;,
+                 store_purpose=&#39;OPERATIONAL&#39;):
+        super().__init__(store_type, store_purpose)
 
         modes = [&#39;ALL&#39;, &#39;ONLY_NEW&#39;]
 
@@ -571,6 +577,8 @@ class TableDataStore(Store):
         self.metastore: List[DocumentFamily] = []
         self.mode = mode
         self.listeners: List = []
+        self.store_type = store_type
+        self.store_purpose = store_purpose
 
         path = Path(store_path)
 
