@@ -2217,14 +2217,20 @@ class DocumentFamily:
         Creates a new document family at the given path and optionally with the
         document as its first entry
 
-        :param path: the path at which this document family exists (i.e. my-file.pdf)
-        :param store_ref: the reference to the store holding this family
+        Args:
+            path (str): the path at which this document family exists (i.e. my-file.pdf)
+            store_ref (str): the reference to the store holding this family
         &#34;&#34;&#34;
         self.id: str = str(uuid.uuid4())
+        &#34;&#34;&#34;The ID of this document family&#34;&#34;&#34;
         self.transitions: List[DocumentTransition] = []
+        &#34;&#34;&#34;A list of the transitions within the document family&#34;&#34;&#34;
         self.content_objects: List[ContentObject] = []
+        &#34;&#34;&#34;A list of the content objects in the document family&#34;&#34;&#34;
         self.path = path
+        &#34;&#34;&#34;The path for this document family in the store (akin to a filename)&#34;&#34;&#34;
         self.store_ref = store_ref
+        &#34;&#34;&#34;The reference to the store containing the document family&#34;&#34;&#34;
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
         &#34;&#34;&#34;
@@ -8304,8 +8310,13 @@ source material</p>
 part of a family of content views that can be used together to understand the document and its content</p>
 <p>Creates a new document family at the given path and optionally with the
 document as its first entry</p>
-<p>:param path: the path at which this document family exists (i.e. my-file.pdf)
-:param store_ref: the reference to the store holding this family</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>the path at which this document family exists (i.e. my-file.pdf)</dd>
+<dt><strong><code>store_ref</code></strong> :&ensp;<code>str</code></dt>
+<dd>the reference to the store holding this family</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -8324,14 +8335,20 @@ document as its first entry</p>
         Creates a new document family at the given path and optionally with the
         document as its first entry
 
-        :param path: the path at which this document family exists (i.e. my-file.pdf)
-        :param store_ref: the reference to the store holding this family
+        Args:
+            path (str): the path at which this document family exists (i.e. my-file.pdf)
+            store_ref (str): the reference to the store holding this family
         &#34;&#34;&#34;
         self.id: str = str(uuid.uuid4())
+        &#34;&#34;&#34;The ID of this document family&#34;&#34;&#34;
         self.transitions: List[DocumentTransition] = []
+        &#34;&#34;&#34;A list of the transitions within the document family&#34;&#34;&#34;
         self.content_objects: List[ContentObject] = []
+        &#34;&#34;&#34;A list of the content objects in the document family&#34;&#34;&#34;
         self.path = path
+        &#34;&#34;&#34;The path for this document family in the store (akin to a filename)&#34;&#34;&#34;
         self.store_ref = store_ref
+        &#34;&#34;&#34;The reference to the store containing the document family&#34;&#34;&#34;
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
         &#34;&#34;&#34;
@@ -8458,6 +8475,29 @@ def from_dict(cls, family_dict: dict):
         document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
     return document_family</code></pre>
 </details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.DocumentFamily.content_objects"><code class="name">var <span class="ident">content_objects</span></code></dt>
+<dd>
+<div class="desc"><p>A list of the content objects in the document family</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.id"><code class="name">var <span class="ident">id</span></code></dt>
+<dd>
+<div class="desc"><p>The ID of this document family</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.path"><code class="name">var <span class="ident">path</span></code></dt>
+<dd>
+<div class="desc"><p>The path for this document family in the store (akin to a filename)</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.store_ref"><code class="name">var <span class="ident">store_ref</span></code></dt>
+<dd>
+<div class="desc"><p>The reference to the store containing the document family</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.transitions"><code class="name">var <span class="ident">transitions</span></code></dt>
+<dd>
+<div class="desc"><p>A list of the transitions within the document family</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -10373,11 +10413,16 @@ Returns:</p></div>
 <h4><code><a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></code></h4>
 <ul class="two-column">
 <li><code><a title="kodexa.model.model.DocumentFamily.add_document" href="#kodexa.model.model.DocumentFamily.add_document">add_document</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.content_objects" href="#kodexa.model.model.DocumentFamily.content_objects">content_objects</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.from_dict" href="#kodexa.model.model.DocumentFamily.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_content_objects" href="#kodexa.model.model.DocumentFamily.get_content_objects">get_content_objects</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_document_count" href="#kodexa.model.model.DocumentFamily.get_document_count">get_document_count</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_latest_content" href="#kodexa.model.model.DocumentFamily.get_latest_content">get_latest_content</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.id" href="#kodexa.model.model.DocumentFamily.id">id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.path" href="#kodexa.model.model.DocumentFamily.path">path</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.store_ref" href="#kodexa.model.model.DocumentFamily.store_ref">store_ref</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.to_dict" href="#kodexa.model.model.DocumentFamily.to_dict">to_dict</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.transitions" href="#kodexa.model.model.DocumentFamily.transitions">transitions</a></code></li>
 </ul>
 </li>
 <li>
