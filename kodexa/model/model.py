@@ -2188,14 +2188,20 @@ class DocumentFamily:
         Creates a new document family at the given path and optionally with the
         document as its first entry
 
-        :param path: the path at which this document family exists (i.e. my-file.pdf)
-        :param store_ref: the reference to the store holding this family
+        Args:
+            path (str): the path at which this document family exists (i.e. my-file.pdf)
+            store_ref (str): the reference to the store holding this family
         """
         self.id: str = str(uuid.uuid4())
+        """The ID of this document family"""
         self.transitions: List[DocumentTransition] = []
+        """A list of the transitions within the document family"""
         self.content_objects: List[ContentObject] = []
+        """A list of the content objects in the document family"""
         self.path = path
+        """The path for this document family in the store (akin to a filename)"""
         self.store_ref = store_ref
+        """The reference to the store containing the document family"""
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
         """
