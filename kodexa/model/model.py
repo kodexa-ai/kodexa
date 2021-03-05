@@ -181,7 +181,7 @@ class Tag(Dict):
     """A tag represents the metadata for a label that is applies as a feature on a content node"""
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
-                 uuid: Optional[str] = None, data: Any = None, *args,
+                 uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
@@ -194,6 +194,8 @@ class Tag(Dict):
         """Any data object (JSON serializable) that you wish to associate with the label"""
         self.uuid: Optional[str] = uuid
         """The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID"""
+        self.confidence: Optional[float] = confidence
+        """The confidence of the tag in a range of 0-1"""
 
 
 class FindDirection(Enum):
@@ -2120,7 +2122,7 @@ class DocumentTransition:
 
     def __init__(self, transition_type: TransitionType, source_content_object_id: str,
                  destination_content_object_id: Optional[str] = None,
-                 actor: Optional[DocumentActor] = None):
+                 actor: Optional[DocumentActor] = None, execution_id: Optional[str] = None):
         """
         Create a document transition
 
@@ -2128,7 +2130,8 @@ class DocumentTransition:
             transition_type:TransitionType: the type of transition
             source_content_object_id:str: the ID of the source content object
             destination_content_object_id:Optional[str] the ID of the destination content object
-            actor:Optional[DocumentActor]: the actor (Defaults to None)
+            actor (Optional[DocumentActor]): the actor (Defaults to None)
+            execution_id (Optional[str]): the ID of the execution that created this transition
         """
         self.transition_type = transition_type
         """The type of transition"""
@@ -2138,9 +2141,11 @@ class DocumentTransition:
         """The ID of the destination content object"""
         self.actor = actor
         """The actor in the transition"""
+        self.execution_id = execution_id
+        """The ID of the execution that created this transition"""
 
     @classmethod
-    def from_dict(cls, transition_dict):
+    def from_dict(cls, transition_dict: dict):
         """
         Converts a dictionary from a REST call back into a DocumentTransition
         Args:
@@ -2150,7 +2155,8 @@ class DocumentTransition:
 
         """
         transition = DocumentTransition(transition_dict['transitionType'], transition_dict['sourceContentObjectId'],
-                                        transition_dict['destinationContentObjectId'])
+                                        transition_dict['destinationContentObjectId'],
+                                        execution_id=transition_dict.get('executionId'))
         return transition
 
     def to_dict(self) -> dict:
@@ -2163,7 +2169,8 @@ class DocumentTransition:
         return {
             'transitionType': self.transition_type,
             'sourceContentObjectId': self.source_content_object_id,
-            'destinationContentObjectId': self.destination_content_object_id
+            'destinationContentObjectId': self.destination_content_object_id,
+            'executionId': self.execution_id
         }
 
 
