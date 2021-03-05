@@ -9,7 +9,7 @@ from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
     TableDataStore, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
-from kodexa.model.model import ContentObjectReference, DocumentStore
+from kodexa.model.model import AssistantEvent, ContentObjectReference, DocumentStore
 
 logger = logging.getLogger('kodexa.testing')
 
@@ -238,6 +238,9 @@ class AssistantTestHarness:
 
         for store in self.stores:
             store.register_listener(self)
+
+    def test_assistant_event(self, assistant_event: AssistantEvent):
+        pass
 
     def process_event(self, event: ContentEvent):
         """The harness will take the content event and

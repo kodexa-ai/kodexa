@@ -45,7 +45,7 @@ class InMemoryContentProvider:
         """
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -56,8 +56,8 @@ class InMemoryContentProvider:
         """
 
         Args:
-          content_object: ContentObject: 
-          content: 
+          content_object: ContentObject:
+          content:
 
         Returns:
 
@@ -75,8 +75,8 @@ class InMemoryStoreProvider:
         """
 
         Args:
-          name: str: 
-          store: Store: 
+          name: str:
+          store: Store:
 
         Returns:
 
@@ -87,7 +87,7 @@ class InMemoryStoreProvider:
         """
 
         Args:
-          name: 
+          name:
 
         Returns:
 
@@ -102,7 +102,7 @@ class InMemoryStoreProvider:
 class PipelineContext:
     """Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
-    
+
     It also provides access to the 'stores' that have been added to the pipeline
 
     Args:
@@ -113,7 +113,7 @@ class PipelineContext:
 
     def __init__(self, content_provider=None, store_provider=None,
                  existing_content_objects=None,
-                 context=None):
+                 context=None, execution_id=None):
         if content_provider is None:
             content_provider = InMemoryContentProvider()
         if store_provider is None:
@@ -122,7 +122,8 @@ class PipelineContext:
             context = {}
         if existing_content_objects is None:
             existing_content_objects = []
-        self.transaction_id = str(uuid4())
+
+        self.execution_id = str(uuid4()) if execution_id is None else execution_id
         self.statistics: PipelineStatistics = PipelineStatistics()
         self.output_document: Optional[Document] = None
         self.content_objects: List[ContentObject] = existing_content_objects
@@ -147,7 +148,7 @@ class PipelineContext:
         """
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -158,8 +159,8 @@ class PipelineContext:
         """
 
         Args:
-          content_object: ContentObject: 
-          content: 
+          content_object: ContentObject:
+          content:
 
         Returns:
 
@@ -172,7 +173,7 @@ class PipelineContext:
         Args:
           name: the name to refer to the store with
           store: the instance of the store
-          name: str: 
+          name: str:
 
         Returns:
 
@@ -195,7 +196,7 @@ class PipelineContext:
 
         Args:
           current_document: The current document
-          current_document: Document: 
+          current_document: Document:
 
         Returns:
 
@@ -204,7 +205,7 @@ class PipelineContext:
 
     def get_current_document(self) -> Document:
         """Get the current document that is being processed in the pipeline
-        
+
         :return: The current document, or None
 
         Args:
@@ -219,7 +220,7 @@ class PipelineContext:
 
         Args:
           output_document: the final output document from the pipeline
-          output_document: Document: 
+          output_document: Document:
 
         Returns:
           the final output document
@@ -233,7 +234,7 @@ class PipelineContext:
         Args:
           name: the name to refer to the store with
           default: optionally the default to create the store as if it isn't there
-          name: str: 
+          name: str:
           default: Store:  (Default value = None)
 
         Returns:
@@ -252,8 +253,8 @@ class PipelineContext:
         """
 
         Args:
-          name: 
-          store: 
+          name:
+          store:
 
         Returns:
 
@@ -267,7 +268,7 @@ class PipelineContext:
 class PipelineStep:
     """The representation of a step within a step, which captures both the step itself and
     also the details around the step's use.
-    
+
     It is internally used by the Pipeline and is not a public API
 
     Args:
@@ -332,8 +333,8 @@ class PipelineStep:
         """
 
         Args:
-          context: 
-          document: 
+          context:
+          document:
 
         Returns:
 
@@ -368,8 +369,8 @@ class PipelineStep:
                             """
 
                             Args:
-                              opts: 
-                              params: 
+                              opts:
+                              params:
 
                             Returns:
 
@@ -440,8 +441,8 @@ class PipelineStep:
         """
 
         Args:
-          context: 
-          document: 
+          context:
+          document:
 
         Returns:
 
@@ -462,7 +463,7 @@ class PipelineStep:
         """
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -475,7 +476,7 @@ class PipelineStep:
         """
 
         Args:
-          context: 
+          context:
 
         Returns:
 
@@ -501,7 +502,7 @@ class LabelStep(object):
         """
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -525,7 +526,7 @@ class PipelineStore:
         """
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -536,7 +537,7 @@ class PipelineStore:
 
 class Pipeline:
     """A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
-    
+
     When you create a Pipeline you must provide the connector that will be used to source the documents.
 
     Args:
@@ -576,8 +577,8 @@ class Pipeline:
           store: the store that should be added
           extracted_labelled: at the end of the pipeline we will extract the labelled data
         to this store (Default value = False)
-          name: str: 
-          store: Store: 
+          name: str:
+          store: Store:
 
         Returns:
 
@@ -599,7 +600,7 @@ class Pipeline:
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline's parameters to the options (Default value = False)
           cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-          label: str: 
+          label: str:
 
         Returns:
           the pipeline
@@ -623,7 +624,7 @@ class Pipeline:
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline's parameters to the options (Default value = False)
           cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-          label: str: 
+          label: str:
 
         Returns:
           the pipeline
@@ -638,11 +639,11 @@ class Pipeline:
     def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
                  parameterized=False, cache_path=None):
         """Add the given step to the current pipeline
-        
-        
+
+
         Note that it is also possible to add a function as a step, for example
-        
-        
+
+
         If you are using remote actions on a server, or for deployment to a remote
         pipeline you can also use a shorthand
 
@@ -660,12 +661,12 @@ class Pipeline:
 
         >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
             >>> pipeline.add_step(ExampleStep())
-        
+
             >>> def my_function(doc):
             >>>      doc.metadata.fishstick = 'foo'
             >>>      return doc
             >>> pipeline.add_step(my_function)
-        
+
             >>> pipeline.add_step('kodexa/html-parser',options={'summarize':False})
         """
         if options is None:
@@ -694,13 +695,13 @@ class Pipeline:
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
         """Allows you to provide the sink store easily
-        
+
         This will wrap the store in a document store sink
 
         Args:
           document_store: document store to use
           processing_mode: the processing mode (update or new)
-          document_store: DocumentStore: 
+          document_store: DocumentStore:
           processing_mode: str:  (Default value = "update")
 
         Returns:
@@ -713,9 +714,9 @@ class Pipeline:
 
     def to_yaml(self):
         """Will return the YAML representation of any actions that support conversion to YAML
-        
+
         The YAML representation for RemoteAction's can be used for metadata only pipelines in the Kodexa Platform
-        
+
         :return: YAML representation
 
         Args:
@@ -737,8 +738,8 @@ class Pipeline:
 
     def run(self, parameters=None):
         """Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
-        
-        
+
+
         :return: The context from the run
 
         Args:
@@ -854,9 +855,9 @@ class Pipeline:
         Args:
           store: DocumentStore The URL ie. https://www.google.com
           subscription: str The subscription query to use (Default value = None)
-          store: DocumentStore: 
-          *args: 
-          **kwargs: 
+          store: DocumentStore:
+          *args:
+          **kwargs:
 
         Returns:
           A new instance of a pipeline
@@ -871,8 +872,8 @@ class Pipeline:
         Args:
           url: The URL ie. https://www.google.com
           headers: A dictionary of headers (Default value = None)
-          *args: 
-          **kwargs: 
+          *args:
+          **kwargs:
 
         Returns:
           A new instance of a pipeline
@@ -886,9 +887,9 @@ class Pipeline:
 
         Args:
           file_path: The path to the file
-          file_path: str: 
-          *args: 
-          **kwargs: 
+          file_path: str:
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -902,9 +903,9 @@ class Pipeline:
 
         Args:
           text: Text to use to create document
-          text: str: 
-          *args: 
-          **kwargs: 
+          text: str:
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -924,13 +925,13 @@ class Pipeline:
           relative: Is the folder path relative to the caller (default False)
           caller_path: The caller path (defaults to trying to work this out from the stack)
           unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-          folder_path: str: 
+          folder_path: str:
           filename_filter: str:  (Default value = "*")
           recursive: bool:  (Default value = False)
           relative: bool:  (Default value = False)
           caller_path: str:  (Default value = get_caller_dir())
-          *args: 
-          **kwargs: 
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -942,7 +943,7 @@ class Pipeline:
 
 class PipelineStatistics:
     """A set of statistics for the processed document
-    
+
     documents_processed
     document_exceptions
 

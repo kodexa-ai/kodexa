@@ -74,7 +74,7 @@ def test_class_step_step_with_context():
             return "test-step"
 
         def process(self, doc, context):
-            doc.metadata.cheese = context.transaction_id
+            doc.metadata.cheese = context.execution_id
             logging.error("Hello")
             return doc
 
@@ -87,7 +87,7 @@ def test_class_step_step_with_context():
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
     assert new_document_store.count() == 1
-    assert new_document_store.get_latest_document("test.doc").metadata.cheese == pipeline.context.transaction_id
+    assert new_document_store.get_latest_document("test.doc").metadata.cheese == pipeline.context.execution_id
 
 
 def test_enabled_steps():
@@ -112,7 +112,7 @@ def test_function_step_with_context():
     new_document_store = LocalDocumentStore("/tmp/test-json-store2", force_initialize=True)
 
     def my_function(doc, context):
-        doc.metadata.cheese = context.transaction_id
+        doc.metadata.cheese = context.execution_id
         logging.error("Hello")
         return doc
 
@@ -125,7 +125,7 @@ def test_function_step_with_context():
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
     assert new_document_store.count() == 1
-    assert new_document_store.get_latest_document("test.doc").metadata.cheese == pipeline.context.transaction_id
+    assert new_document_store.get_latest_document("test.doc").metadata.cheese == pipeline.context.execution_id
 
 
 def test_function_step():
