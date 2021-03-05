@@ -210,7 +210,7 @@ class Tag(Dict):
     &#34;&#34;&#34;A tag represents the metadata for a label that is applies as a feature on a content node&#34;&#34;&#34;
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
-                 uuid: Optional[str] = None, data: Any = None, *args,
+                 uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
@@ -223,6 +223,8 @@ class Tag(Dict):
         &#34;&#34;&#34;Any data object (JSON serializable) that you wish to associate with the label&#34;&#34;&#34;
         self.uuid: Optional[str] = uuid
         &#34;&#34;&#34;The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID&#34;&#34;&#34;
+        self.confidence: Optional[float] = confidence
+        &#34;&#34;&#34;The confidence of the tag in a range of 0-1&#34;&#34;&#34;
 
 
 class FindDirection(Enum):
@@ -2149,7 +2151,7 @@ class DocumentTransition:
 
     def __init__(self, transition_type: TransitionType, source_content_object_id: str,
                  destination_content_object_id: Optional[str] = None,
-                 actor: Optional[DocumentActor] = None):
+                 actor: Optional[DocumentActor] = None, execution_id: Optional[str] = None):
         &#34;&#34;&#34;
         Create a document transition
 
@@ -2157,7 +2159,8 @@ class DocumentTransition:
             transition_type:TransitionType: the type of transition
             source_content_object_id:str: the ID of the source content object
             destination_content_object_id:Optional[str] the ID of the destination content object
-            actor:Optional[DocumentActor]: the actor (Defaults to None)
+            actor (Optional[DocumentActor]): the actor (Defaults to None)
+            execution_id (Optional[str]): the ID of the execution that created this transition
         &#34;&#34;&#34;
         self.transition_type = transition_type
         &#34;&#34;&#34;The type of transition&#34;&#34;&#34;
@@ -2167,9 +2170,11 @@ class DocumentTransition:
         &#34;&#34;&#34;The ID of the destination content object&#34;&#34;&#34;
         self.actor = actor
         &#34;&#34;&#34;The actor in the transition&#34;&#34;&#34;
+        self.execution_id = execution_id
+        &#34;&#34;&#34;The ID of the execution that created this transition&#34;&#34;&#34;
 
     @classmethod
-    def from_dict(cls, transition_dict):
+    def from_dict(cls, transition_dict: dict):
         &#34;&#34;&#34;
         Converts a dictionary from a REST call back into a DocumentTransition
         Args:
@@ -2179,7 +2184,8 @@ class DocumentTransition:
 
         &#34;&#34;&#34;
         transition = DocumentTransition(transition_dict[&#39;transitionType&#39;], transition_dict[&#39;sourceContentObjectId&#39;],
-                                        transition_dict[&#39;destinationContentObjectId&#39;])
+                                        transition_dict[&#39;destinationContentObjectId&#39;],
+                                        execution_id=transition_dict.get(&#39;executionId&#39;))
         return transition
 
     def to_dict(self) -&gt; dict:
@@ -2192,7 +2198,8 @@ class DocumentTransition:
         return {
             &#39;transitionType&#39;: self.transition_type,
             &#39;sourceContentObjectId&#39;: self.source_content_object_id,
-            &#39;destinationContentObjectId&#39;: self.destination_content_object_id
+            &#39;destinationContentObjectId&#39;: self.destination_content_object_id,
+            &#39;executionId&#39;: self.execution_id
         }
 
 
@@ -9370,17 +9377,22 @@ def register_listener(self, listener):
 </dd>
 <dt id="kodexa.model.model.DocumentTransition"><code class="flex name class">
 <span>class <span class="ident">DocumentTransition</span></span>
-<span>(</span><span>transition_type: <a title="kodexa.model.model.TransitionType" href="#kodexa.model.model.TransitionType">TransitionType</a>, source_content_object_id: str, destination_content_object_id: Union[str, NoneType] = None, actor: Union[<a title="kodexa.model.model.DocumentActor" href="#kodexa.model.model.DocumentActor">DocumentActor</a>, NoneType] = None)</span>
+<span>(</span><span>transition_type: <a title="kodexa.model.model.TransitionType" href="#kodexa.model.model.TransitionType">TransitionType</a>, source_content_object_id: str, destination_content_object_id: Union[str, NoneType] = None, actor: Union[<a title="kodexa.model.model.DocumentActor" href="#kodexa.model.model.DocumentActor">DocumentActor</a>, NoneType] = None, execution_id: Union[str, NoneType] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A document transition represents a link between two documents and tries to capture the actor that was involved
 in the transition as well at the type of transition that exists</p>
 <p>Create a document transition</p>
 <h2 id="args">Args</h2>
-<p>transition_type:TransitionType: the type of transition
-source_content_object_id:str: the ID of the source content object
-destination_content_object_id:Optional[str] the ID of the destination content object
-actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
+<dl>
+<dt>transition_type:TransitionType: the type of transition</dt>
+<dt>source_content_object_id:str: the ID of the source content object</dt>
+<dt>destination_content_object_id:Optional[str] the ID of the destination content object</dt>
+<dt><strong><code>actor</code></strong> :&ensp;<code>Optional[<a title="kodexa.model.model.DocumentActor" href="#kodexa.model.model.DocumentActor">DocumentActor</a>]</code></dt>
+<dd>the actor (Defaults to None)</dd>
+<dt><strong><code>execution_id</code></strong> :&ensp;<code>Optional[str]</code></dt>
+<dd>the ID of the execution that created this transition</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -9393,7 +9405,7 @@ actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
 
     def __init__(self, transition_type: TransitionType, source_content_object_id: str,
                  destination_content_object_id: Optional[str] = None,
-                 actor: Optional[DocumentActor] = None):
+                 actor: Optional[DocumentActor] = None, execution_id: Optional[str] = None):
         &#34;&#34;&#34;
         Create a document transition
 
@@ -9401,7 +9413,8 @@ actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
             transition_type:TransitionType: the type of transition
             source_content_object_id:str: the ID of the source content object
             destination_content_object_id:Optional[str] the ID of the destination content object
-            actor:Optional[DocumentActor]: the actor (Defaults to None)
+            actor (Optional[DocumentActor]): the actor (Defaults to None)
+            execution_id (Optional[str]): the ID of the execution that created this transition
         &#34;&#34;&#34;
         self.transition_type = transition_type
         &#34;&#34;&#34;The type of transition&#34;&#34;&#34;
@@ -9411,9 +9424,11 @@ actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
         &#34;&#34;&#34;The ID of the destination content object&#34;&#34;&#34;
         self.actor = actor
         &#34;&#34;&#34;The actor in the transition&#34;&#34;&#34;
+        self.execution_id = execution_id
+        &#34;&#34;&#34;The ID of the execution that created this transition&#34;&#34;&#34;
 
     @classmethod
-    def from_dict(cls, transition_dict):
+    def from_dict(cls, transition_dict: dict):
         &#34;&#34;&#34;
         Converts a dictionary from a REST call back into a DocumentTransition
         Args:
@@ -9423,7 +9438,8 @@ actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
 
         &#34;&#34;&#34;
         transition = DocumentTransition(transition_dict[&#39;transitionType&#39;], transition_dict[&#39;sourceContentObjectId&#39;],
-                                        transition_dict[&#39;destinationContentObjectId&#39;])
+                                        transition_dict[&#39;destinationContentObjectId&#39;],
+                                        execution_id=transition_dict.get(&#39;executionId&#39;))
         return transition
 
     def to_dict(self) -&gt; dict:
@@ -9436,13 +9452,14 @@ actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
         return {
             &#39;transitionType&#39;: self.transition_type,
             &#39;sourceContentObjectId&#39;: self.source_content_object_id,
-            &#39;destinationContentObjectId&#39;: self.destination_content_object_id
+            &#39;destinationContentObjectId&#39;: self.destination_content_object_id,
+            &#39;executionId&#39;: self.execution_id
         }</code></pre>
 </details>
 <h3>Static methods</h3>
 <dl>
 <dt id="kodexa.model.model.DocumentTransition.from_dict"><code class="name flex">
-<span>def <span class="ident">from_dict</span></span>(<span>transition_dict)</span>
+<span>def <span class="ident">from_dict</span></span>(<span>transition_dict: dict)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Converts a dictionary from a REST call back into a DocumentTransition</p>
@@ -9457,7 +9474,7 @@ actor:Optional[DocumentActor]: the actor (Defaults to None)</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def from_dict(cls, transition_dict):
+def from_dict(cls, transition_dict: dict):
     &#34;&#34;&#34;
     Converts a dictionary from a REST call back into a DocumentTransition
     Args:
@@ -9467,7 +9484,8 @@ def from_dict(cls, transition_dict):
 
     &#34;&#34;&#34;
     transition = DocumentTransition(transition_dict[&#39;transitionType&#39;], transition_dict[&#39;sourceContentObjectId&#39;],
-                                    transition_dict[&#39;destinationContentObjectId&#39;])
+                                    transition_dict[&#39;destinationContentObjectId&#39;],
+                                    execution_id=transition_dict.get(&#39;executionId&#39;))
     return transition</code></pre>
 </details>
 </dd>
@@ -9481,6 +9499,10 @@ def from_dict(cls, transition_dict):
 <dt id="kodexa.model.model.DocumentTransition.destination_content_object_id"><code class="name">var <span class="ident">destination_content_object_id</span></code></dt>
 <dd>
 <div class="desc"><p>The ID of the destination content object</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentTransition.execution_id"><code class="name">var <span class="ident">execution_id</span></code></dt>
+<dd>
+<div class="desc"><p>The ID of the execution that created this transition</p></div>
 </dd>
 <dt id="kodexa.model.model.DocumentTransition.source_content_object_id"><code class="name">var <span class="ident">source_content_object_id</span></code></dt>
 <dd>
@@ -9514,7 +9536,8 @@ def from_dict(cls, transition_dict):
     return {
         &#39;transitionType&#39;: self.transition_type,
         &#39;sourceContentObjectId&#39;: self.source_content_object_id,
-        &#39;destinationContentObjectId&#39;: self.destination_content_object_id
+        &#39;destinationContentObjectId&#39;: self.destination_content_object_id,
+        &#39;executionId&#39;: self.execution_id
     }</code></pre>
 </details>
 </dd>
@@ -10036,7 +10059,7 @@ Returns:</p></div>
 </dd>
 <dt id="kodexa.model.model.Tag"><code class="flex name class">
 <span>class <span class="ident">Tag</span></span>
-<span>(</span><span>start: Union[int, NoneType] = None, end: Union[int, NoneType] = None, value: Union[str, NoneType] = None, uuid: Union[str, NoneType] = None, data: Any = None, *args, **kwargs)</span>
+<span>(</span><span>start: Union[int, NoneType] = None, end: Union[int, NoneType] = None, value: Union[str, NoneType] = None, uuid: Union[str, NoneType] = None, data: Any = None, *args, confidence: Union[float, NoneType] = None, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A tag represents the metadata for a label that is applies as a feature on a content node</p></div>
@@ -10048,7 +10071,7 @@ Returns:</p></div>
     &#34;&#34;&#34;A tag represents the metadata for a label that is applies as a feature on a content node&#34;&#34;&#34;
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
-                 uuid: Optional[str] = None, data: Any = None, *args,
+                 uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
@@ -10060,7 +10083,9 @@ Returns:</p></div>
         self.data: Optional[Any] = data
         &#34;&#34;&#34;Any data object (JSON serializable) that you wish to associate with the label&#34;&#34;&#34;
         self.uuid: Optional[str] = uuid
-        &#34;&#34;&#34;The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID&#34;&#34;&#34;</code></pre>
+        &#34;&#34;&#34;The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID&#34;&#34;&#34;
+        self.confidence: Optional[float] = confidence
+        &#34;&#34;&#34;The confidence of the tag in a range of 0-1&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -10069,6 +10094,10 @@ Returns:</p></div>
 </ul>
 <h3>Instance variables</h3>
 <dl>
+<dt id="kodexa.model.model.Tag.confidence"><code class="name">var <span class="ident">confidence</span></code></dt>
+<dd>
+<div class="desc"><p>The confidence of the tag in a range of 0-1</p></div>
+</dd>
 <dt id="kodexa.model.model.Tag.data"><code class="name">var <span class="ident">data</span></code></dt>
 <dd>
 <div class="desc"><p>Any data object (JSON serializable) that you wish to associate with the label</p></div>
@@ -10379,6 +10408,7 @@ Returns:</p></div>
 <ul class="">
 <li><code><a title="kodexa.model.model.DocumentTransition.actor" href="#kodexa.model.model.DocumentTransition.actor">actor</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentTransition.destination_content_object_id" href="#kodexa.model.model.DocumentTransition.destination_content_object_id">destination_content_object_id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentTransition.execution_id" href="#kodexa.model.model.DocumentTransition.execution_id">execution_id</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentTransition.from_dict" href="#kodexa.model.model.DocumentTransition.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentTransition.source_content_object_id" href="#kodexa.model.model.DocumentTransition.source_content_object_id">source_content_object_id</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentTransition.to_dict" href="#kodexa.model.model.DocumentTransition.to_dict">to_dict</a></code></li>
@@ -10436,7 +10466,8 @@ Returns:</p></div>
 </li>
 <li>
 <h4><code><a title="kodexa.model.model.Tag" href="#kodexa.model.model.Tag">Tag</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="kodexa.model.model.Tag.confidence" href="#kodexa.model.model.Tag.confidence">confidence</a></code></li>
 <li><code><a title="kodexa.model.model.Tag.data" href="#kodexa.model.model.Tag.data">data</a></code></li>
 <li><code><a title="kodexa.model.model.Tag.end" href="#kodexa.model.model.Tag.end">end</a></code></li>
 <li><code><a title="kodexa.model.model.Tag.start" href="#kodexa.model.model.Tag.start">start</a></code></li>

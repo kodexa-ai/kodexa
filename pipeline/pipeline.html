@@ -73,7 +73,7 @@ class InMemoryContentProvider:
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -84,8 +84,8 @@ class InMemoryContentProvider:
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
-          content: 
+          content_object: ContentObject:
+          content:
 
         Returns:
 
@@ -103,8 +103,8 @@ class InMemoryStoreProvider:
         &#34;&#34;&#34;
 
         Args:
-          name: str: 
-          store: Store: 
+          name: str:
+          store: Store:
 
         Returns:
 
@@ -115,7 +115,7 @@ class InMemoryStoreProvider:
         &#34;&#34;&#34;
 
         Args:
-          name: 
+          name:
 
         Returns:
 
@@ -130,7 +130,7 @@ class InMemoryStoreProvider:
 class PipelineContext:
     &#34;&#34;&#34;Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
-    
+
     It also provides access to the &#39;stores&#39; that have been added to the pipeline
 
     Args:
@@ -141,7 +141,7 @@ class PipelineContext:
 
     def __init__(self, content_provider=None, store_provider=None,
                  existing_content_objects=None,
-                 context=None):
+                 context=None, execution_id=None):
         if content_provider is None:
             content_provider = InMemoryContentProvider()
         if store_provider is None:
@@ -150,7 +150,8 @@ class PipelineContext:
             context = {}
         if existing_content_objects is None:
             existing_content_objects = []
-        self.transaction_id = str(uuid4())
+
+        self.execution_id = str(uuid4()) if execution_id is None else execution_id
         self.statistics: PipelineStatistics = PipelineStatistics()
         self.output_document: Optional[Document] = None
         self.content_objects: List[ContentObject] = existing_content_objects
@@ -175,7 +176,7 @@ class PipelineContext:
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -186,8 +187,8 @@ class PipelineContext:
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
-          content: 
+          content_object: ContentObject:
+          content:
 
         Returns:
 
@@ -200,7 +201,7 @@ class PipelineContext:
         Args:
           name: the name to refer to the store with
           store: the instance of the store
-          name: str: 
+          name: str:
 
         Returns:
 
@@ -223,7 +224,7 @@ class PipelineContext:
 
         Args:
           current_document: The current document
-          current_document: Document: 
+          current_document: Document:
 
         Returns:
 
@@ -232,7 +233,7 @@ class PipelineContext:
 
     def get_current_document(self) -&gt; Document:
         &#34;&#34;&#34;Get the current document that is being processed in the pipeline
-        
+
         :return: The current document, or None
 
         Args:
@@ -247,7 +248,7 @@ class PipelineContext:
 
         Args:
           output_document: the final output document from the pipeline
-          output_document: Document: 
+          output_document: Document:
 
         Returns:
           the final output document
@@ -261,7 +262,7 @@ class PipelineContext:
         Args:
           name: the name to refer to the store with
           default: optionally the default to create the store as if it isn&#39;t there
-          name: str: 
+          name: str:
           default: Store:  (Default value = None)
 
         Returns:
@@ -280,8 +281,8 @@ class PipelineContext:
         &#34;&#34;&#34;
 
         Args:
-          name: 
-          store: 
+          name:
+          store:
 
         Returns:
 
@@ -295,7 +296,7 @@ class PipelineContext:
 class PipelineStep:
     &#34;&#34;&#34;The representation of a step within a step, which captures both the step itself and
     also the details around the step&#39;s use.
-    
+
     It is internally used by the Pipeline and is not a public API
 
     Args:
@@ -360,8 +361,8 @@ class PipelineStep:
         &#34;&#34;&#34;
 
         Args:
-          context: 
-          document: 
+          context:
+          document:
 
         Returns:
 
@@ -396,8 +397,8 @@ class PipelineStep:
                             &#34;&#34;&#34;
 
                             Args:
-                              opts: 
-                              params: 
+                              opts:
+                              params:
 
                             Returns:
 
@@ -468,8 +469,8 @@ class PipelineStep:
         &#34;&#34;&#34;
 
         Args:
-          context: 
-          document: 
+          context:
+          document:
 
         Returns:
 
@@ -490,7 +491,7 @@ class PipelineStep:
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -503,7 +504,7 @@ class PipelineStep:
         &#34;&#34;&#34;
 
         Args:
-          context: 
+          context:
 
         Returns:
 
@@ -529,7 +530,7 @@ class LabelStep(object):
         &#34;&#34;&#34;
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -553,7 +554,7 @@ class PipelineStore:
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -564,7 +565,7 @@ class PipelineStore:
 
 class Pipeline:
     &#34;&#34;&#34;A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
-    
+
     When you create a Pipeline you must provide the connector that will be used to source the documents.
 
     Args:
@@ -604,8 +605,8 @@ class Pipeline:
           store: the store that should be added
           extracted_labelled: at the end of the pipeline we will extract the labelled data
         to this store (Default value = False)
-          name: str: 
-          store: Store: 
+          name: str:
+          store: Store:
 
         Returns:
 
@@ -627,7 +628,7 @@ class Pipeline:
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
           cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-          label: str: 
+          label: str:
 
         Returns:
           the pipeline
@@ -651,7 +652,7 @@ class Pipeline:
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
           cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-          label: str: 
+          label: str:
 
         Returns:
           the pipeline
@@ -666,11 +667,11 @@ class Pipeline:
     def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
                  parameterized=False, cache_path=None):
         &#34;&#34;&#34;Add the given step to the current pipeline
-        
-        
+
+
         Note that it is also possible to add a function as a step, for example
-        
-        
+
+
         If you are using remote actions on a server, or for deployment to a remote
         pipeline you can also use a shorthand
 
@@ -688,12 +689,12 @@ class Pipeline:
 
         &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
             &gt;&gt;&gt; pipeline.add_step(ExampleStep())
-        
+
             &gt;&gt;&gt; def my_function(doc):
             &gt;&gt;&gt;      doc.metadata.fishstick = &#39;foo&#39;
             &gt;&gt;&gt;      return doc
             &gt;&gt;&gt; pipeline.add_step(my_function)
-        
+
             &gt;&gt;&gt; pipeline.add_step(&#39;kodexa/html-parser&#39;,options={&#39;summarize&#39;:False})
         &#34;&#34;&#34;
         if options is None:
@@ -722,13 +723,13 @@ class Pipeline:
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
         &#34;&#34;&#34;Allows you to provide the sink store easily
-        
+
         This will wrap the store in a document store sink
 
         Args:
           document_store: document store to use
           processing_mode: the processing mode (update or new)
-          document_store: DocumentStore: 
+          document_store: DocumentStore:
           processing_mode: str:  (Default value = &#34;update&#34;)
 
         Returns:
@@ -741,9 +742,9 @@ class Pipeline:
 
     def to_yaml(self):
         &#34;&#34;&#34;Will return the YAML representation of any actions that support conversion to YAML
-        
+
         The YAML representation for RemoteAction&#39;s can be used for metadata only pipelines in the Kodexa Platform
-        
+
         :return: YAML representation
 
         Args:
@@ -765,8 +766,8 @@ class Pipeline:
 
     def run(self, parameters=None):
         &#34;&#34;&#34;Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
-        
-        
+
+
         :return: The context from the run
 
         Args:
@@ -882,9 +883,9 @@ class Pipeline:
         Args:
           store: DocumentStore The URL ie. https://www.google.com
           subscription: str The subscription query to use (Default value = None)
-          store: DocumentStore: 
-          *args: 
-          **kwargs: 
+          store: DocumentStore:
+          *args:
+          **kwargs:
 
         Returns:
           A new instance of a pipeline
@@ -899,8 +900,8 @@ class Pipeline:
         Args:
           url: The URL ie. https://www.google.com
           headers: A dictionary of headers (Default value = None)
-          *args: 
-          **kwargs: 
+          *args:
+          **kwargs:
 
         Returns:
           A new instance of a pipeline
@@ -914,9 +915,9 @@ class Pipeline:
 
         Args:
           file_path: The path to the file
-          file_path: str: 
-          *args: 
-          **kwargs: 
+          file_path: str:
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -930,9 +931,9 @@ class Pipeline:
 
         Args:
           text: Text to use to create document
-          text: str: 
-          *args: 
-          **kwargs: 
+          text: str:
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -952,13 +953,13 @@ class Pipeline:
           relative: Is the folder path relative to the caller (default False)
           caller_path: The caller path (defaults to trying to work this out from the stack)
           unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-          folder_path: str: 
+          folder_path: str:
           filename_filter: str:  (Default value = &#34;*&#34;)
           recursive: bool:  (Default value = False)
           relative: bool:  (Default value = False)
           caller_path: str:  (Default value = get_caller_dir())
-          *args: 
-          **kwargs: 
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -970,7 +971,7 @@ class Pipeline:
 
 class PipelineStatistics:
     &#34;&#34;&#34;A set of statistics for the processed document
-    
+
     documents_processed
     document_exceptions
 
@@ -1054,7 +1055,7 @@ and from the pipeline</p>
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -1065,8 +1066,8 @@ and from the pipeline</p>
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
-          content: 
+          content_object: ContentObject:
+          content:
 
         Returns:
 
@@ -1082,7 +1083,7 @@ and from the pipeline</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>content_object</code></strong></dt>
-<dd>ContentObject: </dd>
+<dd>ContentObject:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1093,7 +1094,7 @@ and from the pipeline</p>
     &#34;&#34;&#34;
 
     Args:
-      content_object: ContentObject: 
+      content_object: ContentObject:
 
     Returns:
 
@@ -1108,11 +1109,10 @@ and from the pipeline</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>content_object</code></strong></dt>
-<dd>ContentObject: </dd>
-<dt><strong><code>content</code></strong></dt>
-<dd>&nbsp;</dd>
+<dd>ContentObject:</dd>
 </dl>
-<p>Returns:</p></div>
+<p>content:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1121,8 +1121,8 @@ and from the pipeline</p>
     &#34;&#34;&#34;
 
     Args:
-      content_object: ContentObject: 
-      content: 
+      content_object: ContentObject:
+      content:
 
     Returns:
 
@@ -1151,8 +1151,8 @@ and from the pipeline</p>
         &#34;&#34;&#34;
 
         Args:
-          name: str: 
-          store: Store: 
+          name: str:
+          store: Store:
 
         Returns:
 
@@ -1163,7 +1163,7 @@ and from the pipeline</p>
         &#34;&#34;&#34;
 
         Args:
-          name: 
+          name:
 
         Returns:
 
@@ -1181,11 +1181,8 @@ and from the pipeline</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>name</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>name:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1194,7 +1191,7 @@ and from the pipeline</p>
     &#34;&#34;&#34;
 
     Args:
-      name: 
+      name:
 
     Returns:
 
@@ -1223,9 +1220,9 @@ and from the pipeline</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>name</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>store</code></strong></dt>
-<dd>Store: </dd>
+<dd>Store:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1236,8 +1233,8 @@ and from the pipeline</p>
     &#34;&#34;&#34;
 
     Args:
-      name: str: 
-      store: Store: 
+      name: str:
+      store: Store:
 
     Returns:
 
@@ -1272,7 +1269,7 @@ and from the pipeline</p>
         &#34;&#34;&#34;
 
         Args:
-          document: Document: 
+          document: Document:
 
         Returns:
 
@@ -1306,7 +1303,7 @@ and from the pipeline</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -1317,7 +1314,7 @@ and from the pipeline</p>
     &#34;&#34;&#34;
 
     Args:
-      document: Document: 
+      document: Document:
 
     Returns:
 
@@ -1358,7 +1355,7 @@ and from the pipeline</p>
 </summary>
 <pre><code class="python">class Pipeline:
     &#34;&#34;&#34;A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
-    
+
     When you create a Pipeline you must provide the connector that will be used to source the documents.
 
     Args:
@@ -1398,8 +1395,8 @@ and from the pipeline</p>
           store: the store that should be added
           extracted_labelled: at the end of the pipeline we will extract the labelled data
         to this store (Default value = False)
-          name: str: 
-          store: Store: 
+          name: str:
+          store: Store:
 
         Returns:
 
@@ -1421,7 +1418,7 @@ and from the pipeline</p>
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
           cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-          label: str: 
+          label: str:
 
         Returns:
           the pipeline
@@ -1445,7 +1442,7 @@ and from the pipeline</p>
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
           cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-          label: str: 
+          label: str:
 
         Returns:
           the pipeline
@@ -1460,11 +1457,11 @@ and from the pipeline</p>
     def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
                  parameterized=False, cache_path=None):
         &#34;&#34;&#34;Add the given step to the current pipeline
-        
-        
+
+
         Note that it is also possible to add a function as a step, for example
-        
-        
+
+
         If you are using remote actions on a server, or for deployment to a remote
         pipeline you can also use a shorthand
 
@@ -1482,12 +1479,12 @@ and from the pipeline</p>
 
         &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
             &gt;&gt;&gt; pipeline.add_step(ExampleStep())
-        
+
             &gt;&gt;&gt; def my_function(doc):
             &gt;&gt;&gt;      doc.metadata.fishstick = &#39;foo&#39;
             &gt;&gt;&gt;      return doc
             &gt;&gt;&gt; pipeline.add_step(my_function)
-        
+
             &gt;&gt;&gt; pipeline.add_step(&#39;kodexa/html-parser&#39;,options={&#39;summarize&#39;:False})
         &#34;&#34;&#34;
         if options is None:
@@ -1516,13 +1513,13 @@ and from the pipeline</p>
 
     def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
         &#34;&#34;&#34;Allows you to provide the sink store easily
-        
+
         This will wrap the store in a document store sink
 
         Args:
           document_store: document store to use
           processing_mode: the processing mode (update or new)
-          document_store: DocumentStore: 
+          document_store: DocumentStore:
           processing_mode: str:  (Default value = &#34;update&#34;)
 
         Returns:
@@ -1535,9 +1532,9 @@ and from the pipeline</p>
 
     def to_yaml(self):
         &#34;&#34;&#34;Will return the YAML representation of any actions that support conversion to YAML
-        
+
         The YAML representation for RemoteAction&#39;s can be used for metadata only pipelines in the Kodexa Platform
-        
+
         :return: YAML representation
 
         Args:
@@ -1559,8 +1556,8 @@ and from the pipeline</p>
 
     def run(self, parameters=None):
         &#34;&#34;&#34;Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
-        
-        
+
+
         :return: The context from the run
 
         Args:
@@ -1676,9 +1673,9 @@ and from the pipeline</p>
         Args:
           store: DocumentStore The URL ie. https://www.google.com
           subscription: str The subscription query to use (Default value = None)
-          store: DocumentStore: 
-          *args: 
-          **kwargs: 
+          store: DocumentStore:
+          *args:
+          **kwargs:
 
         Returns:
           A new instance of a pipeline
@@ -1693,8 +1690,8 @@ and from the pipeline</p>
         Args:
           url: The URL ie. https://www.google.com
           headers: A dictionary of headers (Default value = None)
-          *args: 
-          **kwargs: 
+          *args:
+          **kwargs:
 
         Returns:
           A new instance of a pipeline
@@ -1708,9 +1705,9 @@ and from the pipeline</p>
 
         Args:
           file_path: The path to the file
-          file_path: str: 
-          *args: 
-          **kwargs: 
+          file_path: str:
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -1724,9 +1721,9 @@ and from the pipeline</p>
 
         Args:
           text: Text to use to create document
-          text: str: 
-          *args: 
-          **kwargs: 
+          text: str:
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -1746,13 +1743,13 @@ and from the pipeline</p>
           relative: Is the folder path relative to the caller (default False)
           caller_path: The caller path (defaults to trying to work this out from the stack)
           unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-          folder_path: str: 
+          folder_path: str:
           filename_filter: str:  (Default value = &#34;*&#34;)
           recursive: bool:  (Default value = False)
           relative: bool:  (Default value = False)
           caller_path: str:  (Default value = get_caller_dir())
-          *args: 
-          **kwargs: 
+          *args:
+          **kwargs:
 
         Returns:
           Pipeline: A new pipeline
@@ -1780,12 +1777,10 @@ and from the pipeline</p>
 <dt><strong><code>file_path</code></strong></dt>
 <dd>The path to the file</dd>
 <dt><strong><code>file_path</code></strong></dt>
-<dd>str: </dd>
-<dt><strong><code>*args</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>**kwargs</code></strong></dt>
-<dd>&nbsp;</dd>
+<dd>str:</dd>
 </dl>
+<p><em>args:
+</em>*kwargs:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.pipeline.pipeline.Pipeline" href="#kodexa.pipeline.pipeline.Pipeline">Pipeline</a></code></dt>
@@ -1801,9 +1796,9 @@ def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
 
     Args:
       file_path: The path to the file
-      file_path: str: 
-      *args: 
-      **kwargs: 
+      file_path: str:
+      *args:
+      **kwargs:
 
     Returns:
       Pipeline: A new pipeline
@@ -1832,7 +1827,7 @@ def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
 <dt><strong><code>unpack</code></strong></dt>
 <dd>Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)</dd>
 <dt><strong><code>folder_path</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>filename_filter</code></strong></dt>
 <dd>str:
 (Default value = "*")</dd>
@@ -1845,11 +1840,9 @@ def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
 <dt><strong><code>caller_path</code></strong></dt>
 <dd>str:
 (Default value = get_caller_dir())</dd>
-<dt><strong><code>*args</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>**kwargs</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p><em>args:
+</em>*kwargs:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.pipeline.pipeline.Pipeline" href="#kodexa.pipeline.pipeline.Pipeline">Pipeline</a></code></dt>
@@ -1871,13 +1864,13 @@ def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive:
       relative: Is the folder path relative to the caller (default False)
       caller_path: The caller path (defaults to trying to work this out from the stack)
       unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-      folder_path: str: 
+      folder_path: str:
       filename_filter: str:  (Default value = &#34;*&#34;)
       recursive: bool:  (Default value = False)
       relative: bool:  (Default value = False)
       caller_path: str:  (Default value = get_caller_dir())
-      *args: 
-      **kwargs: 
+      *args:
+      **kwargs:
 
     Returns:
       Pipeline: A new pipeline
@@ -1899,12 +1892,10 @@ def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive:
 <dt><strong><code>subscription</code></strong></dt>
 <dd>str The subscription query to use (Default value = None)</dd>
 <dt><strong><code>store</code></strong></dt>
-<dd>DocumentStore: </dd>
-<dt><strong><code>*args</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>**kwargs</code></strong></dt>
-<dd>&nbsp;</dd>
+<dd>DocumentStore:</dd>
 </dl>
+<p><em>args:
+</em>*kwargs:</p>
 <h2 id="returns">Returns</h2>
 <p>A new instance of a pipeline</p></div>
 <details class="source">
@@ -1918,9 +1909,9 @@ def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
     Args:
       store: DocumentStore The URL ie. https://www.google.com
       subscription: str The subscription query to use (Default value = None)
-      store: DocumentStore: 
-      *args: 
-      **kwargs: 
+      store: DocumentStore:
+      *args:
+      **kwargs:
 
     Returns:
       A new instance of a pipeline
@@ -1939,12 +1930,10 @@ def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
 <dt><strong><code>text</code></strong></dt>
 <dd>Text to use to create document</dd>
 <dt><strong><code>text</code></strong></dt>
-<dd>str: </dd>
-<dt><strong><code>*args</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>**kwargs</code></strong></dt>
-<dd>&nbsp;</dd>
+<dd>str:</dd>
 </dl>
+<p><em>args:
+</em>*kwargs:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.pipeline.pipeline.Pipeline" href="#kodexa.pipeline.pipeline.Pipeline">Pipeline</a></code></dt>
@@ -1960,9 +1949,9 @@ def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
 
     Args:
       text: Text to use to create document
-      text: str: 
-      *args: 
-      **kwargs: 
+      text: str:
+      *args:
+      **kwargs:
 
     Returns:
       Pipeline: A new pipeline
@@ -1982,11 +1971,9 @@ def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
 <dd>The URL ie. <a href="https://www.google.com">https://www.google.com</a></dd>
 <dt><strong><code>headers</code></strong></dt>
 <dd>A dictionary of headers (Default value = None)</dd>
-<dt><strong><code>*args</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>**kwargs</code></strong></dt>
-<dd>&nbsp;</dd>
 </dl>
+<p><em>args:
+</em>*kwargs:</p>
 <h2 id="returns">Returns</h2>
 <p>A new instance of a pipeline</p></div>
 <details class="source">
@@ -2000,8 +1987,8 @@ def from_url(url, headers=None, *args, **kwargs):
     Args:
       url: The URL ie. https://www.google.com
       headers: A dictionary of headers (Default value = None)
-      *args: 
-      **kwargs: 
+      *args:
+      **kwargs:
 
     Returns:
       A new instance of a pipeline
@@ -2035,7 +2022,7 @@ def from_url(url, headers=None, *args, **kwargs):
 <dt><strong><code>cache_path</code></strong></dt>
 <dd>cache the document locally, note this is only for local pipelines (Default value = None)</dd>
 <dt><strong><code>label</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>the pipeline</p></div>
@@ -2055,7 +2042,7 @@ def from_url(url, headers=None, *args, **kwargs):
       attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
       parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
       cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-      label: str: 
+      label: str:
 
     Returns:
       the pipeline
@@ -2113,11 +2100,11 @@ pipeline you can also use a shorthand</p>
 <pre><code class="python">def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
              parameterized=False, cache_path=None):
     &#34;&#34;&#34;Add the given step to the current pipeline
-    
-    
+
+
     Note that it is also possible to add a function as a step, for example
-    
-    
+
+
     If you are using remote actions on a server, or for deployment to a remote
     pipeline you can also use a shorthand
 
@@ -2135,12 +2122,12 @@ pipeline you can also use a shorthand</p>
 
     &gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path=&#39;/tmp/&#39;, file_filter=&#39;example.pdf&#39;))
         &gt;&gt;&gt; pipeline.add_step(ExampleStep())
-    
+
         &gt;&gt;&gt; def my_function(doc):
         &gt;&gt;&gt;      doc.metadata.fishstick = &#39;foo&#39;
         &gt;&gt;&gt;      return doc
         &gt;&gt;&gt; pipeline.add_step(my_function)
-    
+
         &gt;&gt;&gt; pipeline.add_step(&#39;kodexa/html-parser&#39;,options={&#39;summarize&#39;:False})
     &#34;&#34;&#34;
     if options is None:
@@ -2167,7 +2154,7 @@ pipeline you can also use a shorthand</p>
 </dl>
 <p>to this store (Default value = False)
 name: str:
-store: Store: </p>
+store: Store:</p>
 <p>Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
     &gt;&gt;&gt; pipeline.add_store(&quot;test-store&quot;, TableDataStore())
@@ -2184,8 +2171,8 @@ store: Store: </p>
       store: the store that should be added
       extracted_labelled: at the end of the pipeline we will extract the labelled data
     to this store (Default value = False)
-      name: str: 
-      store: Store: 
+      name: str:
+      store: Store:
 
     Returns:
 
@@ -2218,7 +2205,7 @@ store: Store: </p>
 <dt><strong><code>cache_path</code></strong></dt>
 <dd>cache the document locally, note this is only for local pipelines (Default value = None)</dd>
 <dt><strong><code>label</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>the pipeline</p></div>
@@ -2238,7 +2225,7 @@ store: Store: </p>
       attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
       parameterized: apply the pipeline&#39;s parameters to the options (Default value = False)
       cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-      label: str: 
+      label: str:
 
     Returns:
       the pipeline
@@ -2273,8 +2260,8 @@ store: Store: </p>
 </summary>
 <pre><code class="python">def run(self, parameters=None):
     &#34;&#34;&#34;Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
-    
-    
+
+
     :return: The context from the run
 
     Args:
@@ -2434,7 +2421,7 @@ sink</p>
 <dt><strong><code>processing_mode</code></strong></dt>
 <dd>the processing mode (update or new)</dd>
 <dt><strong><code>document_store</code></strong></dt>
-<dd>DocumentStore: </dd>
+<dd>DocumentStore:</dd>
 <dt><strong><code>processing_mode</code></strong></dt>
 <dd>str:
 (Default value = "update")</dd>
@@ -2447,13 +2434,13 @@ sink</p>
 </summary>
 <pre><code class="python">def to_store(self, document_store: DocumentStore, processing_mode: str = &#34;update&#34;):
     &#34;&#34;&#34;Allows you to provide the sink store easily
-    
+
     This will wrap the store in a document store sink
 
     Args:
       document_store: document store to use
       processing_mode: the processing mode (update or new)
-      document_store: DocumentStore: 
+      document_store: DocumentStore:
       processing_mode: str:  (Default value = &#34;update&#34;)
 
     Returns:
@@ -2480,9 +2467,9 @@ sink</p>
 </summary>
 <pre><code class="python">def to_yaml(self):
     &#34;&#34;&#34;Will return the YAML representation of any actions that support conversion to YAML
-    
+
     The YAML representation for RemoteAction&#39;s can be used for metadata only pipelines in the Kodexa Platform
-    
+
     :return: YAML representation
 
     Args:
@@ -2507,7 +2494,7 @@ sink</p>
 </dd>
 <dt id="kodexa.pipeline.pipeline.PipelineContext"><code class="flex name class">
 <span>class <span class="ident">PipelineContext</span></span>
-<span>(</span><span>content_provider=None, store_provider=None, existing_content_objects=None, context=None)</span>
+<span>(</span><span>content_provider=None, store_provider=None, existing_content_objects=None, context=None, execution_id=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Pipeline context is created when you create a pipeline and it provides a way to access information about the
@@ -2523,7 +2510,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <pre><code class="python">class PipelineContext:
     &#34;&#34;&#34;Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
-    
+
     It also provides access to the &#39;stores&#39; that have been added to the pipeline
 
     Args:
@@ -2534,7 +2521,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 
     def __init__(self, content_provider=None, store_provider=None,
                  existing_content_objects=None,
-                 context=None):
+                 context=None, execution_id=None):
         if content_provider is None:
             content_provider = InMemoryContentProvider()
         if store_provider is None:
@@ -2543,7 +2530,8 @@ It can be made available to steps/functions so they can interact with it.</p>
             context = {}
         if existing_content_objects is None:
             existing_content_objects = []
-        self.transaction_id = str(uuid4())
+
+        self.execution_id = str(uuid4()) if execution_id is None else execution_id
         self.statistics: PipelineStatistics = PipelineStatistics()
         self.output_document: Optional[Document] = None
         self.content_objects: List[ContentObject] = existing_content_objects
@@ -2568,7 +2556,7 @@ It can be made available to steps/functions so they can interact with it.</p>
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
+          content_object: ContentObject:
 
         Returns:
 
@@ -2579,8 +2567,8 @@ It can be made available to steps/functions so they can interact with it.</p>
         &#34;&#34;&#34;
 
         Args:
-          content_object: ContentObject: 
-          content: 
+          content_object: ContentObject:
+          content:
 
         Returns:
 
@@ -2593,7 +2581,7 @@ It can be made available to steps/functions so they can interact with it.</p>
         Args:
           name: the name to refer to the store with
           store: the instance of the store
-          name: str: 
+          name: str:
 
         Returns:
 
@@ -2616,7 +2604,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 
         Args:
           current_document: The current document
-          current_document: Document: 
+          current_document: Document:
 
         Returns:
 
@@ -2625,7 +2613,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 
     def get_current_document(self) -&gt; Document:
         &#34;&#34;&#34;Get the current document that is being processed in the pipeline
-        
+
         :return: The current document, or None
 
         Args:
@@ -2640,7 +2628,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 
         Args:
           output_document: the final output document from the pipeline
-          output_document: Document: 
+          output_document: Document:
 
         Returns:
           the final output document
@@ -2654,7 +2642,7 @@ It can be made available to steps/functions so they can interact with it.</p>
         Args:
           name: the name to refer to the store with
           default: optionally the default to create the store as if it isn&#39;t there
-          name: str: 
+          name: str:
           default: Store:  (Default value = None)
 
         Returns:
@@ -2673,8 +2661,8 @@ It can be made available to steps/functions so they can interact with it.</p>
         &#34;&#34;&#34;
 
         Args:
-          name: 
-          store: 
+          name:
+          store:
 
         Returns:
 
@@ -2698,7 +2686,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <dt><strong><code>store</code></strong></dt>
 <dd>the instance of the store</dd>
 <dt><strong><code>name</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -2711,7 +2699,7 @@ It can be made available to steps/functions so they can interact with it.</p>
     Args:
       name: the name to refer to the store with
       store: the instance of the store
-      name: str: 
+      name: str:
 
     Returns:
 
@@ -2726,7 +2714,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>content_object</code></strong></dt>
-<dd>ContentObject: </dd>
+<dd>ContentObject:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -2737,7 +2725,7 @@ It can be made available to steps/functions so they can interact with it.</p>
     &#34;&#34;&#34;
 
     Args:
-      content_object: ContentObject: 
+      content_object: ContentObject:
 
     Returns:
 
@@ -2787,7 +2775,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 </summary>
 <pre><code class="python">def get_current_document(self) -&gt; Document:
     &#34;&#34;&#34;Get the current document that is being processed in the pipeline
-    
+
     :return: The current document, or None
 
     Args:
@@ -2810,7 +2798,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <dt><strong><code>default</code></strong></dt>
 <dd>optionally the default to create the store as if it isn't there</dd>
 <dt><strong><code>name</code></strong></dt>
-<dd>str: </dd>
+<dd>str:</dd>
 <dt><strong><code>default</code></strong></dt>
 <dd>Store:
 (Default value = None)</dd>
@@ -2827,7 +2815,7 @@ It can be made available to steps/functions so they can interact with it.</p>
     Args:
       name: the name to refer to the store with
       default: optionally the default to create the store as if it isn&#39;t there
-      name: str: 
+      name: str:
       default: Store:  (Default value = None)
 
     Returns:
@@ -2871,13 +2859,9 @@ It can be made available to steps/functions so they can interact with it.</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>name</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>store</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>name:
+store:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2886,8 +2870,8 @@ It can be made available to steps/functions so they can interact with it.</p>
     &#34;&#34;&#34;
 
     Args:
-      name: 
-      store: 
+      name:
+      store:
 
     Returns:
 
@@ -2905,11 +2889,10 @@ It can be made available to steps/functions so they can interact with it.</p>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>content_object</code></strong></dt>
-<dd>ContentObject: </dd>
-<dt><strong><code>content</code></strong></dt>
-<dd>&nbsp;</dd>
+<dd>ContentObject:</dd>
 </dl>
-<p>Returns:</p></div>
+<p>content:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2918,8 +2901,8 @@ It can be made available to steps/functions so they can interact with it.</p>
     &#34;&#34;&#34;
 
     Args:
-      content_object: ContentObject: 
-      content: 
+      content_object: ContentObject:
+      content:
 
     Returns:
 
@@ -2937,7 +2920,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <dt><strong><code>current_document</code></strong></dt>
 <dd>The current document</dd>
 <dt><strong><code>current_document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
@@ -2949,7 +2932,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 
     Args:
       current_document: The current document
-      current_document: Document: 
+      current_document: Document:
 
     Returns:
 
@@ -2967,7 +2950,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <dt><strong><code>output_document</code></strong></dt>
 <dd>the final output document from the pipeline</dd>
 <dt><strong><code>output_document</code></strong></dt>
-<dd>Document: </dd>
+<dd>Document:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>the final output document</p></div>
@@ -2980,7 +2963,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 
     Args:
       output_document: the final output document from the pipeline
-      output_document: Document: 
+      output_document: Document:
 
     Returns:
       the final output document
@@ -3006,7 +2989,7 @@ document_exceptions</p>
 </summary>
 <pre><code class="python">class PipelineStatistics:
     &#34;&#34;&#34;A set of statistics for the processed document
-    
+
     documents_processed
     document_exceptions
 
@@ -3085,7 +3068,7 @@ also the details around the step's use.</p>
 <pre><code class="python">class PipelineStep:
     &#34;&#34;&#34;The representation of a step within a step, which captures both the step itself and
     also the details around the step&#39;s use.
-    
+
     It is internally used by the Pipeline and is not a public API
 
     Args:
@@ -3150,8 +3133,8 @@ also the details around the step's use.</p>
         &#34;&#34;&#34;
 
         Args:
-          context: 
-          document: 
+          context:
+          document:
 
         Returns:
 
@@ -3186,8 +3169,8 @@ also the details around the step's use.</p>
                             &#34;&#34;&#34;
 
                             Args:
-                              opts: 
-                              params: 
+                              opts:
+                              params:
 
                             Returns:
 
@@ -3258,8 +3241,8 @@ also the details around the step's use.</p>
         &#34;&#34;&#34;
 
         Args:
-          context: 
-          document: 
+          context:
+          document:
 
         Returns:
 
@@ -3280,7 +3263,7 @@ also the details around the step's use.</p>
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -3293,7 +3276,7 @@ also the details around the step's use.</p>
         &#34;&#34;&#34;
 
         Args:
-          context: 
+          context:
 
         Returns:
 
@@ -3310,11 +3293,8 @@ also the details around the step's use.</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>context</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>context:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3323,7 +3303,7 @@ also the details around the step's use.</p>
     &#34;&#34;&#34;
 
     Args:
-      context: 
+      context:
 
     Returns:
 
@@ -3339,13 +3319,9 @@ also the details around the step's use.</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>context</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>context:
+document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3354,8 +3330,8 @@ also the details around the step's use.</p>
     &#34;&#34;&#34;
 
     Args:
-      context: 
-      document: 
+      context:
+      document:
 
     Returns:
 
@@ -3390,8 +3366,8 @@ also the details around the step's use.</p>
                         &#34;&#34;&#34;
 
                         Args:
-                          opts: 
-                          params: 
+                          opts:
+                          params:
 
                         Returns:
 
@@ -3464,11 +3440,8 @@ also the details around the step's use.</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3477,7 +3450,7 @@ also the details around the step's use.</p>
     &#34;&#34;&#34;
 
     Args:
-      document: 
+      document:
 
     Returns:
 
@@ -3529,13 +3502,9 @@ also the details around the step's use.</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>context</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>context:
+document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3544,8 +3513,8 @@ also the details around the step's use.</p>
     &#34;&#34;&#34;
 
     Args:
-      context: 
-      document: 
+      context:
+      document:
 
     Returns:
 
@@ -3587,7 +3556,7 @@ also the details around the step's use.</p>
         &#34;&#34;&#34;
 
         Args:
-          document: 
+          document:
 
         Returns:
 
@@ -3602,11 +3571,8 @@ also the details around the step's use.</p>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<p>document:
+Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3615,7 +3581,7 @@ also the details around the step's use.</p>
     &#34;&#34;&#34;
 
     Args:
-      document: 
+      document:
 
     Returns:
 

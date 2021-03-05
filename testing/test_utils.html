@@ -37,7 +37,7 @@ from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
     TableDataStore, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
-from kodexa.model.model import ContentObjectReference, DocumentStore
+from kodexa.model.model import AssistantEvent, ContentObjectReference, DocumentStore
 
 logger = logging.getLogger(&#39;kodexa.testing&#39;)
 
@@ -266,6 +266,9 @@ class AssistantTestHarness:
 
         for store in self.stores:
             store.register_listener(self)
+
+    def test_assistant_event(self, assistant_event: AssistantEvent):
+        pass
 
     def process_event(self, event: ContentEvent):
         &#34;&#34;&#34;The harness will take the content event and
@@ -856,6 +859,9 @@ to compare the data (usually in a test)</p>
         for store in self.stores:
             store.register_listener(self)
 
+    def test_assistant_event(self, assistant_event: AssistantEvent):
+        pass
+
     def process_event(self, event: ContentEvent):
         &#34;&#34;&#34;The harness will take the content event and
         will pass it to the assistant - then we will
@@ -1044,6 +1050,19 @@ through them in turn (note in the platform this might be in parallel)</p>
     Returns:
 
     &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="kodexa.testing.test_utils.AssistantTestHarness.test_assistant_event"><code class="name flex">
+<span>def <span class="ident">test_assistant_event</span></span>(<span>self, assistant_event: <a title="kodexa.model.model.AssistantEvent" href="../model/model.html#kodexa.model.model.AssistantEvent">AssistantEvent</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_assistant_event(self, assistant_event: AssistantEvent):
     pass</code></pre>
 </details>
 </dd>
@@ -1425,6 +1444,7 @@ of an assistant in a test case</p>
 <li><code><a title="kodexa.testing.test_utils.AssistantTestHarness.get_store" href="#kodexa.testing.test_utils.AssistantTestHarness.get_store">get_store</a></code></li>
 <li><code><a title="kodexa.testing.test_utils.AssistantTestHarness.process_event" href="#kodexa.testing.test_utils.AssistantTestHarness.process_event">process_event</a></code></li>
 <li><code><a title="kodexa.testing.test_utils.AssistantTestHarness.register_local_document_store" href="#kodexa.testing.test_utils.AssistantTestHarness.register_local_document_store">register_local_document_store</a></code></li>
+<li><code><a title="kodexa.testing.test_utils.AssistantTestHarness.test_assistant_event" href="#kodexa.testing.test_utils.AssistantTestHarness.test_assistant_event">test_assistant_event</a></code></li>
 </ul>
 </li>
 <li>
