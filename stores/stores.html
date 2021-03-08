@@ -270,7 +270,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             self.store_type = get_response.json()[&#39;storeType&#39;]
             self.store_purpose = get_response.json()[&#39;storePurpose&#39;]
         else:
-            raise Exception(f&#34;Unable to find store with ref {ref}&#34;)
+            # we couldn&#39;t find metadata for this store, so we&#39;re setting default values
+            self.store_type = &#39;DOCUMENT&#39;
+            self.store_purpose = &#39;OPERATIONAL&#39;
 
         super().__init__(self.store_type, self.store_purpose)
 
@@ -744,7 +746,9 @@ in an instance of the Kodexa platform</p></div>
             self.store_type = get_response.json()[&#39;storeType&#39;]
             self.store_purpose = get_response.json()[&#39;storePurpose&#39;]
         else:
-            raise Exception(f&#34;Unable to find store with ref {ref}&#34;)
+            # we couldn&#39;t find metadata for this store, so we&#39;re setting default values
+            self.store_type = &#39;DOCUMENT&#39;
+            self.store_purpose = &#39;OPERATIONAL&#39;
 
         super().__init__(self.store_type, self.store_purpose)
 
