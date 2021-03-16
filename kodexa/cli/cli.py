@@ -103,7 +103,7 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
     else:
         print("Deploying local metadata from", path)
         metadata = ExtensionHelper.load_metadata(path)
-        metadata['orgSlug'] = org;
+        metadata['orgSlug'] = org
         KodexaPlatform.deploy_extension(metadata)
 
     print("Deployed extension pack :tada:")
@@ -183,7 +183,7 @@ def platform(_: Info, python: bool):
         print(f"Release: {kodexa_version['release']}")
         if python:
             print("\nPython example:\n\n")
-            print(f"from kodexa import *")
+            print("from kodexa import *")
             print(f"KodexaPlatform.set_url('{KodexaPlatform.get_url()}')")
             print(f"KodexaPlatform.set_access_token('{KodexaPlatform.get_access_token()}')")
     else:
@@ -229,7 +229,7 @@ def metadata(_: Info, path: str):
 
     """
     metadata = ExtensionHelper.load_metadata(path)
-    print(f"Metadata loaded")
+    print("Metadata loaded")
 
 
 @cli.command()
@@ -344,3 +344,81 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
         generate_site(metadata=metadata_obj, base_dir=sitedir, output_filename=os.path.join(output, output_filename),
                       url=url, output_json=versioned_metadata)
         print("Extension site has been successfully built :tada:")
+
+
+@cli.command()
+@click.option('--slug', help='Slug for trainable action whose training prepare method should be called.')
+@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
+@pass_info
+def preparedata(_: Info, slug: str, path: str):
+
+    metadata = ExtensionHelper.load_metadata(path)
+    print("Data preparation metadata loaded")
+
+    if metadata['services']:
+        trainable_model_dict = [service for service in metadata['services'] if service['slug'] == slug]
+
+        if len(trainable_model_dict) == 1:
+            trainable_model_config = trainable_model_dict[0]
+
+            # check the type
+            if trainable_model_config['type'] and trainable_model_config['type'].lower() == 'trainableaction':
+                import importlib
+                # get the data prep and training packages/functions
+                data_prep_package_name = trainable_model_config['training']['prepare']['package']
+                data_prep_function_name = trainable_model_config['training']['prepare']['function']
+                data_prep_module = importlib.import_module(data_prep_package_name)
+                data_prep_fun = getattr(data_prep_module, data_prep_function_name)
+                data_prep_fun(**prepare_training_args(trainable_model_config['training']['prepare']['options']))
+            else:
+                print('This services is not defined as a trainableAction.')
+        else:
+            print(f'Trainable action definition with slug: {slug} not found.')
+    else:
+        print('There are no services defined in the kodexa.yml')
+
+    print("Data prep complete! :tada:")
+
+
+@cli.command()
+@click.option('--slug', help='Slug for trainable action to be trained.')
+@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
+@pass_info
+def train(_: Info, slug: str, path: str):
+    metadata = ExtensionHelper.load_metadata(path)
+    print("Training metadata loaded")
+
+    if metadata['services']:
+        trainable_model_dict = [service for service in metadata['services'] if service['slug'] == slug]
+
+        if len(trainable_model_dict) == 1:
+            trainable_model_config = trainable_model_dict[0]
+
+            # check the type
+            if trainable_model_config['type'] and trainable_model_config['type'].lower() == 'trainableaction':
+                import importlib
+                # get the data prep and training packages/functions
+                experiment_package_name = trainable_model_config['training']['experiment']['package']
+                experiment_function_name = trainable_model_config['training']['experiment']['function']
+                experiment_module = importlib.import_module(experiment_package_name)
+                experiment_fun = getattr(experiment_module, experiment_function_name)
+                experiment_fun(**prepare_training_args(trainable_model_config['training']['experiment']['options']))
+
+            else:
+                print('This services is not defined as a trainableAction.')
+        else:
+            print(f'Trainable action definition with slug: {slug} not found.')
+    else:
+        print('There are no services defined in the kodexa.yml')
+
+    print("Training complete! :tada:")
+
+
+def prepare_training_args(arg_list):
+
+    arg_dict = {}
+    for a in arg_list:
+        if a['default']:
+            arg_dict[a['name']] = a['default']
+
+    return arg_dict
