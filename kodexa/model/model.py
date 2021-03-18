@@ -262,21 +262,6 @@ class ContentNode(object):
 
         self._parent_cid: Optional[str] = None
 
-    @property
-    def parent(self) -> Optional['ContentNode']:
-        if self._parent_cid is not None:
-            return self.document.document_engine.get_content_node(self._parent_cid)
-        else:
-            return None
-
-    @parent.setter
-    def parent(self, value: 'ContentNode'):
-        self._parent_cid = value.uuid
-
-    @property
-    def children(self) -> List['ContentNode']:
-        return self.document.document_engine.get_child_nodes(self.uuid)
-
     def __str__(self):
         return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
             self.content) + "]"
