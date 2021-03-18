@@ -10,7 +10,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
@@ -1643,9 +1643,6 @@ class Document(object):
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
-
-        from kodexa.model.storage import DocumentEngine
-        self.document_engine = DocumentEngine()
 
     def add_label(self, label: str):
         """Add a label to the document
