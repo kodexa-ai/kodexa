@@ -401,6 +401,30 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 "Unable to decode the JSON response")
             raise
 
+    def put_native(self, path: str, content, force_replace: bool = False) -> DocumentFamily:
+        from kodexa import KodexaPlatform
+        try:
+            logger.info(f"Putting native content to path {path}")
+
+            files = {"file": content}
+            data = {"path": path, "forceReplace": force_replace}
+            document_family_response = requests.post(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
+                headers={"x-access-token": KodexaPlatform.get_access_token()},
+                files=files, data=data)
+
+            if document_family_response.status_code == 200:
+                return DocumentFamily.from_dict(document_family_response.json())
+            else:
+                msg = "Document family create failed [" + document_family_response.text + "], response " + str(
+                    document_family_response.status_code)
+                logger.error(msg)
+                raise Exception(msg)
+        except JSONDecodeError:
+            logger.error(
+                "Unable to decode the JSON response")
+            raise
+
     def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
         get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/fs/{path}", params={"meta": True})
         return DocumentFamily.from_dict(get_response.json()) if get_response is not None else None
