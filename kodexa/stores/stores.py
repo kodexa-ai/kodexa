@@ -241,7 +241,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             self.store_type = get_response.json()['storeType']
             self.store_purpose = get_response.json()['storePurpose']
         else:
-            raise Exception(f"Unable to find store with ref {ref}")
+            # we couldn't find metadata for this store, so we're setting default values
+            self.store_type = 'DOCUMENT'
+            self.store_purpose = 'OPERATIONAL'
 
         super().__init__(self.store_type, self.store_purpose)
 
