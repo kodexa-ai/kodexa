@@ -261,6 +261,9 @@ class ContentNode(object):
         self._feature_map: Dict[str, ContentFeature] = {}
 
         self.parent: Optional[ContentNode] = None
+        """The parent content node"""
+        self.children: List[ContentNode] = []
+        """The child content nodes of this content node"""
 
     def __str__(self):
         return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
