@@ -273,16 +273,26 @@ class ContentNode(object):
         if content_parts is None:
             content_parts = []
         self.node_type: str = node_type
+        &#34;&#34;&#34;The node type (ie. line, page, cell etc)&#34;&#34;&#34;
         self.content: Optional[str] = content
+        &#34;&#34;&#34;The content of the node&#34;&#34;&#34;
         self.document: Document = document
+        &#34;&#34;&#34;The document that the node belongs to&#34;&#34;&#34;
         self.content_parts: List[Any] = content_parts
-        self.parent: Optional[ContentNode] = None
-        self.children: List[ContentNode] = []
+        &#34;&#34;&#34;The children of the content node&#34;&#34;&#34;
         self.index: int = 0
+        &#34;&#34;&#34;The index of the content node&#34;&#34;&#34;
         self.uuid: str = str(uuid.uuid4())
+        &#34;&#34;&#34;The UUID of the content node&#34;&#34;&#34;
         self.virtual: bool = False
+        &#34;&#34;&#34;Is the node virtual (ie. it doesn&#39;t actually exist in the document)&#34;&#34;&#34;
         # Added for performance
         self._feature_map: Dict[str, ContentFeature] = {}
+
+        self.parent: Optional[ContentNode] = None
+        &#34;&#34;&#34;The parent content node&#34;&#34;&#34;
+        self.children: List[ContentNode] = []
+        &#34;&#34;&#34;The child content nodes of this content node&#34;&#34;&#34;
 
     def __str__(self):
         return f&#34;ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [&#34; + str(
@@ -365,7 +375,7 @@ class ContentNode(object):
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;index&#39;])
         return new_content_node
 
-    def add_child_content(self, node_type, content, index=None):
+    def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -&gt; &#39;ContentNode&#39;:
         &#34;&#34;&#34;Convenience method to allow you to quick add a child node with a type and content
 
         Args:
@@ -1881,7 +1891,8 @@ class Document(object):
     def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
                     parent: ContentNode = None,
                     index: int = 0):
-        &#34;&#34;&#34;Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
+        &#34;&#34;&#34;
+        Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
         applied to the document will also be available on the new node.
 
         Args:
@@ -1965,13 +1976,12 @@ class Document(object):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector, variables=None):
+    def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
         &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
-          str: selector: The selector (ie. //*)
-          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-          selector:
+          selector (str): The selector (ie. //*)
+          variables (Optional[dict): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
           list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
@@ -1990,12 +2000,12 @@ class Document(object):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None):
+    def select_as_node(self, selector, variables=None) -&gt; ContentNode:
         &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
-          selector: The selector (ie. //*)
-          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
+          selector (str): The selector (ie. //*)
+          variables (Optional[dict]): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
           ContentNode: A new ContentNode.  All ContentNodes on this Document that match the selector value are added as the children for the returned ContentNode.
@@ -2016,7 +2026,7 @@ class Document(object):
         Args:
 
         Returns:
-          :return: list of associated labels
+          List[str]: list of associated labels
 
         &#34;&#34;&#34;
         return self.labels
@@ -2045,6 +2055,24 @@ class ContentEventType(Enum):
     &#34;&#34;&#34;
     NEW_OBJECT = &#39;NEW_OBJECT&#39;
     DERIVED_DOCUMENT = &#39;DERIVED_DOCUMENT&#39;
+
+
+class ScheduledEvent(BaseEvent):
+    &#34;&#34;&#34;A scheduled event is sent to an assistant when a scheduled has been met&#34;&#34;&#34;
+
+    type = &#34;scheduled&#34;
+
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return ScheduledEvent()
+
+    def to_dict(self):
+        return {
+            &#39;contentObject&#39;: self.content_object.to_dict(),
+            &#39;documentFamily&#39;: self.document_family.to_dict(),
+            &#39;eventType&#39;: self.event_type,
+            &#39;type&#39;: self.type
+        }
 
 
 class ContentEvent(BaseEvent):
@@ -2352,6 +2380,19 @@ class DocumentStore:
         Returns:
           A document (or None if not found)
 
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def put_native(self, path: str, content, force_replace=False):
+        &#34;&#34;&#34;
+        Push content directly, this will create both a native object in the store and also a
+        related Document that refers to it.
+
+        :param path: the path where you want to put the native content
+        :param content: the binary content for the native file
+        :param force_replace: replace the content at this path completely
+        :return: None
         &#34;&#34;&#34;
         raise NotImplementedError
 
@@ -2783,6 +2824,7 @@ def from_dict(cls, event_dict: dict):
 <ul class="hlist">
 <li><a title="kodexa.model.model.AssistantEvent" href="#kodexa.model.model.AssistantEvent">AssistantEvent</a></li>
 <li><a title="kodexa.model.model.ContentEvent" href="#kodexa.model.model.ContentEvent">ContentEvent</a></li>
+<li><a title="kodexa.model.model.ScheduledEvent" href="#kodexa.model.model.ScheduledEvent">ScheduledEvent</a></li>
 </ul>
 </dd>
 <dt id="kodexa.model.model.ContentEvent"><code class="flex name class">
@@ -3076,16 +3118,26 @@ ensure that the correct mixins are applied.</p>
         if content_parts is None:
             content_parts = []
         self.node_type: str = node_type
+        &#34;&#34;&#34;The node type (ie. line, page, cell etc)&#34;&#34;&#34;
         self.content: Optional[str] = content
+        &#34;&#34;&#34;The content of the node&#34;&#34;&#34;
         self.document: Document = document
+        &#34;&#34;&#34;The document that the node belongs to&#34;&#34;&#34;
         self.content_parts: List[Any] = content_parts
-        self.parent: Optional[ContentNode] = None
-        self.children: List[ContentNode] = []
+        &#34;&#34;&#34;The children of the content node&#34;&#34;&#34;
         self.index: int = 0
+        &#34;&#34;&#34;The index of the content node&#34;&#34;&#34;
         self.uuid: str = str(uuid.uuid4())
+        &#34;&#34;&#34;The UUID of the content node&#34;&#34;&#34;
         self.virtual: bool = False
+        &#34;&#34;&#34;Is the node virtual (ie. it doesn&#39;t actually exist in the document)&#34;&#34;&#34;
         # Added for performance
         self._feature_map: Dict[str, ContentFeature] = {}
+
+        self.parent: Optional[ContentNode] = None
+        &#34;&#34;&#34;The parent content node&#34;&#34;&#34;
+        self.children: List[ContentNode] = []
+        &#34;&#34;&#34;The child content nodes of this content node&#34;&#34;&#34;
 
     def __str__(self):
         return f&#34;ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [&#34; + str(
@@ -3168,7 +3220,7 @@ ensure that the correct mixins are applied.</p>
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;index&#39;])
         return new_content_node
 
-    def add_child_content(self, node_type, content, index=None):
+    def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -&gt; &#39;ContentNode&#39;:
         &#34;&#34;&#34;Convenience method to allow you to quick add a child node with a type and content
 
         Args:
@@ -4418,6 +4470,45 @@ def from_dict(document, content_node_dict: Dict):
 </details>
 </dd>
 </dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.ContentNode.children"><code class="name">var <span class="ident">children</span></code></dt>
+<dd>
+<div class="desc"><p>The child content nodes of this content node</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentNode.content"><code class="name">var <span class="ident">content</span></code></dt>
+<dd>
+<div class="desc"><p>The content of the node</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentNode.content_parts"><code class="name">var <span class="ident">content_parts</span></code></dt>
+<dd>
+<div class="desc"><p>The children of the content node</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentNode.document"><code class="name">var <span class="ident">document</span></code></dt>
+<dd>
+<div class="desc"><p>The document that the node belongs to</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentNode.index"><code class="name">var <span class="ident">index</span></code></dt>
+<dd>
+<div class="desc"><p>The index of the content node</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentNode.node_type"><code class="name">var <span class="ident">node_type</span></code></dt>
+<dd>
+<div class="desc"><p>The node type (ie. line, page, cell etc)</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentNode.parent"><code class="name">var <span class="ident">parent</span></code></dt>
+<dd>
+<div class="desc"><p>The parent content node</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentNode.uuid"><code class="name">var <span class="ident">uuid</span></code></dt>
+<dd>
+<div class="desc"><p>The UUID of the content node</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentNode.virtual"><code class="name">var <span class="ident">virtual</span></code></dt>
+<dd>
+<div class="desc"><p>Is the node virtual (ie. it doesn't actually exist in the document)</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.model.model.ContentNode.add_child"><code class="name flex">
@@ -4465,7 +4556,7 @@ Returns:</p>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.add_child_content"><code class="name flex">
-<span>def <span class="ident">add_child_content</span></span>(<span>self, node_type, content, index=None)</span>
+<span>def <span class="ident">add_child_content</span></span>(<span>self, node_type: str, content: str, index: Union[int, NoneType] = None) ‑> <a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convenience method to allow you to quick add a child node with a type and content</p>
@@ -4484,7 +4575,7 @@ Returns:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_child_content(self, node_type, content, index=None):
+<pre><code class="python">def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -&gt; &#39;ContentNode&#39;:
     &#34;&#34;&#34;Convenience method to allow you to quick add a child node with a type and content
 
     Args:
@@ -7312,7 +7403,8 @@ def from_dict(cls, co_dict):
     def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
                     parent: ContentNode = None,
                     index: int = 0):
-        &#34;&#34;&#34;Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
+        &#34;&#34;&#34;
+        Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
         applied to the document will also be available on the new node.
 
         Args:
@@ -7396,13 +7488,12 @@ def from_dict(cls, co_dict):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector, variables=None):
+    def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
         &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
-          str: selector: The selector (ie. //*)
-          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-          selector:
+          selector (str): The selector (ie. //*)
+          variables (Optional[dict): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
           list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
@@ -7421,12 +7512,12 @@ def from_dict(cls, co_dict):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None):
+    def select_as_node(self, selector, variables=None) -&gt; ContentNode:
         &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
-          selector: The selector (ie. //*)
-          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
+          selector (str): The selector (ie. //*)
+          variables (Optional[dict]): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
           ContentNode: A new ContentNode.  All ContentNodes on this Document that match the selector value are added as the children for the returned ContentNode.
@@ -7447,15 +7538,11 @@ def from_dict(cls, co_dict):
         Args:
 
         Returns:
-          :return: list of associated labels
+          List[str]: list of associated labels
 
         &#34;&#34;&#34;
         return self.labels</code></pre>
 </details>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="kodexa.model.document.DocumentV3" href="document.html#kodexa.model.document.DocumentV3">DocumentV3</a></li>
-</ul>
 <h3>Class variables</h3>
 <dl>
 <dt id="kodexa.model.model.Document.CURRENT_VERSION"><code class="name">var <span class="ident">CURRENT_VERSION</span> : str</code></dt>
@@ -7890,7 +7977,8 @@ index: int:
 <pre><code class="python">def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
                 parent: ContentNode = None,
                 index: int = 0):
-    &#34;&#34;&#34;Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
+    &#34;&#34;&#34;
+    Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
     applied to the document will also be available on the new node.
 
     Args:
@@ -7932,7 +8020,10 @@ index: int:
 <dd>
 <div class="desc"><p>Args:</p>
 <h2 id="returns">Returns</h2>
-<p>:return: list of associated labels</p></div>
+<dl>
+<dt><code>List[str]</code></dt>
+<dd>list of associated labels</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -7943,7 +8034,7 @@ index: int:
     Args:
 
     Returns:
-      :return: list of associated labels
+      List[str]: list of associated labels
 
     &#34;&#34;&#34;
     return self.labels</code></pre>
@@ -8011,18 +8102,18 @@ index: int:
 </details>
 </dd>
 <dt id="kodexa.model.model.Document.select"><code class="name flex">
-<span>def <span class="ident">select</span></span>(<span>self, selector, variables=None)</span>
+<span>def <span class="ident">select</span></span>(<span>self, selector: str, variables: Union[dict, NoneType] = None) ‑> List[<a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute a selector on the root node and then return a list of the matching nodes.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>str</code></strong></dt>
-<dd>selector: The selector (ie. //*)</dd>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
+<dd>The selector (ie. //*)</dd>
+<dt><strong><code>variables</code></strong> :&ensp;<code>Optional[dict</code></dt>
+<dd>A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.
+Dictionary keys should match a variable specified in the selector.</dd>
 </dl>
-<p>variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.
-Dictionary keys should match a variable specified in the selector.
-selector:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list[ContentNodes]</code></dt>
@@ -8036,13 +8127,12 @@ If no matches found, list is empty.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(self, selector, variables=None):
+<pre><code class="python">def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
     &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
     Args:
-      str: selector: The selector (ie. //*)
-      variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-      selector:
+      selector (str): The selector (ie. //*)
+      variables (Optional[dict): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
 
     Returns:
       list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
@@ -8063,17 +8153,18 @@ If no matches found, list is empty.</dd>
 </details>
 </dd>
 <dt id="kodexa.model.model.Document.select_as_node"><code class="name flex">
-<span>def <span class="ident">select_as_node</span></span>(<span>self, selector, variables=None)</span>
+<span>def <span class="ident">select_as_node</span></span>(<span>self, selector, variables=None) ‑> <a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Execute a selector on the root node and then return new ContentNode with the results set as its children.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>selector</code></strong></dt>
+<dt><strong><code>selector</code></strong> :&ensp;<code>str</code></dt>
 <dd>The selector (ie. //*)</dd>
+<dt><strong><code>variables</code></strong> :&ensp;<code>Optional[dict]</code></dt>
+<dd>A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.
+Dictionary keys should match a variable specified in the selector.</dd>
 </dl>
-<p>variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.
-Dictionary keys should match a variable specified in the selector.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a></code></dt>
@@ -8087,12 +8178,12 @@ All ContentNodes on this Document that match the selector value are added as the
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select_as_node(self, selector, variables=None):
+<pre><code class="python">def select_as_node(self, selector, variables=None) -&gt; ContentNode:
     &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
     Args:
-      selector: The selector (ie. //*)
-      variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
+      selector (str): The selector (ie. //*)
+      variables (Optional[dict]): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
 
     Returns:
       ContentNode: A new ContentNode.  All ContentNodes on this Document that match the selector value are added as the children for the returned ContentNode.
@@ -8706,6 +8797,19 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def put_native(self, path: str, content, force_replace=False):
+        &#34;&#34;&#34;
+        Push content directly, this will create both a native object in the store and also a
+        related Document that refers to it.
+
+        :param path: the path where you want to put the native content
+        :param content: the binary content for the native file
+        :param force_replace: replace the content at this path completely
+        :return: None
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns a document family based on the ID
@@ -9312,6 +9416,34 @@ def put(self, path: str, document: Document, force_replace: bool = False) -&gt; 
     raise NotImplementedError</code></pre>
 </details>
 </dd>
+<dt id="kodexa.model.model.DocumentStore.put_native"><code class="name flex">
+<span>def <span class="ident">put_native</span></span>(<span>self, path: str, content, force_replace=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Push content directly, this will create both a native object in the store and also a
+related Document that refers to it.</p>
+<p>:param path: the path where you want to put the native content
+:param content: the binary content for the native file
+:param force_replace: replace the content at this path completely
+:return: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abc.abstractmethod
+def put_native(self, path: str, content, force_replace=False):
+    &#34;&#34;&#34;
+    Push content directly, this will create both a native object in the store and also a
+    related Document that refers to it.
+
+    :param path: the path where you want to put the native content
+    :param content: the binary content for the native file
+    :param force_replace: replace the content at this path completely
+    :return: None
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.DocumentStore.query"><code class="name flex">
 <span>def <span class="ident">query</span></span>(<span>self, query: str = '*')</span>
 </code></dt>
@@ -9814,6 +9946,82 @@ instance</p></div>
 </dd>
 </dl>
 </dd>
+<dt id="kodexa.model.model.ScheduledEvent"><code class="flex name class">
+<span>class <span class="ident">ScheduledEvent</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>A scheduled event is sent to an assistant when a scheduled has been met</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ScheduledEvent(BaseEvent):
+    &#34;&#34;&#34;A scheduled event is sent to an assistant when a scheduled has been met&#34;&#34;&#34;
+
+    type = &#34;scheduled&#34;
+
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return ScheduledEvent()
+
+    def to_dict(self):
+        return {
+            &#39;contentObject&#39;: self.content_object.to_dict(),
+            &#39;documentFamily&#39;: self.document_family.to_dict(),
+            &#39;eventType&#39;: self.event_type,
+            &#39;type&#39;: self.type
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="kodexa.model.model.BaseEvent" href="#kodexa.model.model.BaseEvent">BaseEvent</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="kodexa.model.model.ScheduledEvent.type"><code class="name">var <span class="ident">type</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.model.model.ScheduledEvent.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>event_dict: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_dict(cls, event_dict: dict):
+    return ScheduledEvent()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.model.model.ScheduledEvent.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self):
+    return {
+        &#39;contentObject&#39;: self.content_object.to_dict(),
+        &#39;documentFamily&#39;: self.document_family.to_dict(),
+        &#39;eventType&#39;: self.event_type,
+        &#39;type&#39;: self.type
+    }</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="kodexa.model.model.SourceMetadata"><code class="flex name class">
 <span>class <span class="ident">SourceMetadata</span></span>
 <span>(</span><span>original_filename: Union[str, NoneType] = None, original_path: Union[str, NoneType] = None, checksum: Union[str, NoneType] = None, cid: Union[str, NoneType] = None, last_modified: Union[str, NoneType] = None, created: Union[str, NoneType] = None, connector: Union[str, NoneType] = None, mime_type: Union[str, NoneType] = None, headers: Union[addict.addict.Dict, NoneType] = None, lineage_document_uuid: Union[str, NoneType] = None, source_document_uuid: Union[str, NoneType] = None, pdf_document_uuid: Union[str, NoneType] = None)</span>
@@ -10302,9 +10510,13 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentNode.add_child_content" href="#kodexa.model.model.ContentNode.add_child_content">add_child_content</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.add_feature" href="#kodexa.model.model.ContentNode.add_feature">add_feature</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.adopt_children" href="#kodexa.model.model.ContentNode.adopt_children">adopt_children</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.children" href="#kodexa.model.model.ContentNode.children">children</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.collect_nodes_to" href="#kodexa.model.model.ContentNode.collect_nodes_to">collect_nodes_to</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.content" href="#kodexa.model.model.ContentNode.content">content</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.content_parts" href="#kodexa.model.model.ContentNode.content_parts">content_parts</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.copy_tag" href="#kodexa.model.model.ContentNode.copy_tag">copy_tag</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.delete_children" href="#kodexa.model.model.ContentNode.delete_children">delete_children</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.document" href="#kodexa.model.model.ContentNode.document">document</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.find" href="#kodexa.model.model.ContentNode.find">find</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.find_with_feature_value" href="#kodexa.model.model.ContentNode.find_with_feature_value">find_with_feature_value</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.findall" href="#kodexa.model.model.ContentNode.findall">findall</a></code></li>
@@ -10331,10 +10543,13 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentNode.has_previous_node" href="#kodexa.model.model.ContentNode.has_previous_node">has_previous_node</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.has_tag" href="#kodexa.model.model.ContentNode.has_tag">has_tag</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.has_tags" href="#kodexa.model.model.ContentNode.has_tags">has_tags</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.index" href="#kodexa.model.model.ContentNode.index">index</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.is_first_child" href="#kodexa.model.model.ContentNode.is_first_child">is_first_child</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.is_last_child" href="#kodexa.model.model.ContentNode.is_last_child">is_last_child</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.move_child_to_parent" href="#kodexa.model.model.ContentNode.move_child_to_parent">move_child_to_parent</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.next_node" href="#kodexa.model.model.ContentNode.next_node">next_node</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.node_type" href="#kodexa.model.model.ContentNode.node_type">node_type</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.parent" href="#kodexa.model.model.ContentNode.parent">parent</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.previous_node" href="#kodexa.model.model.ContentNode.previous_node">previous_node</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.remove_feature" href="#kodexa.model.model.ContentNode.remove_feature">remove_feature</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.remove_tag" href="#kodexa.model.model.ContentNode.remove_tag">remove_tag</a></code></li>
@@ -10347,6 +10562,8 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentNode.tag_text_tree" href="#kodexa.model.model.ContentNode.tag_text_tree">tag_text_tree</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.to_dict" href="#kodexa.model.model.ContentNode.to_dict">to_dict</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.to_json" href="#kodexa.model.model.ContentNode.to_json">to_json</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.uuid" href="#kodexa.model.model.ContentNode.uuid">uuid</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.virtual" href="#kodexa.model.model.ContentNode.virtual">virtual</a></code></li>
 </ul>
 </li>
 <li>
@@ -10443,6 +10660,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.DocumentStore.get_ref" href="#kodexa.model.model.DocumentStore.get_ref">get_ref</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.get_source_by_content_object" href="#kodexa.model.model.DocumentStore.get_source_by_content_object">get_source_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.put" href="#kodexa.model.model.DocumentStore.put">put</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.put_native" href="#kodexa.model.model.DocumentStore.put_native">put_native</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="#kodexa.model.model.DocumentStore.query">query</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query_families" href="#kodexa.model.model.DocumentStore.query_families">query_families</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
@@ -10479,6 +10697,14 @@ Returns:</p></div>
 <ul class="">
 <li><code><a title="kodexa.model.model.RemoteStore.delete_contents" href="#kodexa.model.model.RemoteStore.delete_contents">delete_contents</a></code></li>
 <li><code><a title="kodexa.model.model.RemoteStore.get_ref" href="#kodexa.model.model.RemoteStore.get_ref">get_ref</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.ScheduledEvent" href="#kodexa.model.model.ScheduledEvent">ScheduledEvent</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.ScheduledEvent.from_dict" href="#kodexa.model.model.ScheduledEvent.from_dict">from_dict</a></code></li>
+<li><code><a title="kodexa.model.model.ScheduledEvent.to_dict" href="#kodexa.model.model.ScheduledEvent.to_dict">to_dict</a></code></li>
+<li><code><a title="kodexa.model.model.ScheduledEvent.type" href="#kodexa.model.model.ScheduledEvent.type">type</a></code></li>
 </ul>
 </li>
 <li>
