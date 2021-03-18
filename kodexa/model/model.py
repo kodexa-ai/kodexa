@@ -10,7 +10,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import msgpack
 from addict import Dict
@@ -244,16 +244,38 @@ class ContentNode(object):
         if content_parts is None:
             content_parts = []
         self.node_type: str = node_type
+        """The node type (ie. line, page, cell etc)"""
         self.content: Optional[str] = content
+        """The content of the node"""
         self.document: Document = document
+        """The document that the node belongs to"""
         self.content_parts: List[Any] = content_parts
-        self.parent: Optional[ContentNode] = None
-        self.children: List[ContentNode] = []
+        """The children of the content node"""
         self.index: int = 0
+        """The index of the content node"""
         self.uuid: str = str(uuid.uuid4())
+        """The UUID of the content node"""
         self.virtual: bool = False
+        """Is the node virtual (ie. it doesn't actually exist in the document)"""
         # Added for performance
         self._feature_map: Dict[str, ContentFeature] = {}
+
+        self._parent_cid: Optional[str] = None
+
+    @property
+    def parent(self) -> Optional['ContentNode']:
+        if self._parent_cid is not None:
+            return self.document.document_engine.get_content_node(self._parent_cid)
+        else:
+            return None
+
+    @parent.setter
+    def parent(self, value: 'ContentNode'):
+        self._parent_cid = value.uuid
+
+    @property
+    def children(self) -> List['ContentNode']:
+        return self.document.document_engine.get_child_nodes(self.uuid)
 
     def __str__(self):
         return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
@@ -336,7 +358,7 @@ class ContentNode(object):
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
         return new_content_node
 
-    def add_child_content(self, node_type, content, index=None):
+    def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -> 'ContentNode':
         """Convenience method to allow you to quick add a child node with a type and content
 
         Args:
@@ -1622,6 +1644,9 @@ class Document(object):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
+        from kodexa.model.storage import DocumentEngine
+        self.document_engine = DocumentEngine()
+
     def add_label(self, label: str):
         """Add a label to the document
 
@@ -1852,7 +1877,8 @@ class Document(object):
     def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
                     parent: ContentNode = None,
                     index: int = 0):
-        """Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
+        """
+        Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
         applied to the document will also be available on the new node.
 
         Args:
@@ -1936,13 +1962,12 @@ class Document(object):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector, variables=None):
+    def select(self, selector: str, variables: Optional[dict] = None) -> List[ContentNode]:
         """Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
-          str: selector: The selector (ie. //*)
-          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-          selector:
+          selector (str): The selector (ie. //*)
+          variables (Optional[dict): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
           list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.
@@ -1961,12 +1986,12 @@ class Document(object):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None):
+    def select_as_node(self, selector, variables=None) -> ContentNode:
         """Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
-          selector: The selector (ie. //*)
-          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
+          selector (str): The selector (ie. //*)
+          variables (Optional[dict]): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
           ContentNode: A new ContentNode.  All ContentNodes on this Document that match the selector value are added as the children for the returned ContentNode.
@@ -1987,7 +2012,7 @@ class Document(object):
         Args:
 
         Returns:
-          :return: list of associated labels
+          List[str]: list of associated labels
 
         """
         return self.labels
@@ -2016,6 +2041,24 @@ class ContentEventType(Enum):
     """
     NEW_OBJECT = 'NEW_OBJECT'
     DERIVED_DOCUMENT = 'DERIVED_DOCUMENT'
+
+
+class ScheduledEvent(BaseEvent):
+    """A scheduled event is sent to an assistant when a scheduled has been met"""
+
+    type = "scheduled"
+
+    @classmethod
+    def from_dict(cls, event_dict: dict):
+        return ScheduledEvent()
+
+    def to_dict(self):
+        return {
+            'contentObject': self.content_object.to_dict(),
+            'documentFamily': self.document_family.to_dict(),
+            'eventType': self.event_type,
+            'type': self.type
+        }
 
 
 class ContentEvent(BaseEvent):
@@ -2323,6 +2366,19 @@ class DocumentStore:
         Returns:
           A document (or None if not found)
 
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def put_native(self, path: str, content, force_replace=False):
+        """
+        Push content directly, this will create both a native object in the store and also a
+        related Document that refers to it.
+
+        :param path: the path where you want to put the native content
+        :param content: the binary content for the native file
+        :param force_replace: replace the content at this path completely
+        :return: None
         """
         raise NotImplementedError
 
