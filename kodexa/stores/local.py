@@ -89,8 +89,7 @@ class LocalDocumentStore(DocumentStore):
 
         document = Document()
         document.source.connector = "document-store"
-        document.source.headers = {"ref": family.store_ref, "family": family.id}
-        document.source.id = native_content_object.id
+        document.source.headers = {"ref": family.store_ref, "family": family.id, "id": native_content_object.id}
         content_event = family.add_document(document)
         document.to_kdxa(os.path.join(self.store_path, content_event.content_object.id) + ".kdxa")
 
