@@ -61,6 +61,59 @@ class LocalDocumentStore(DocumentStore):
         """ """
         return "Local Document Store"
 
+    def put_native(self, path: str, content: Any, force_replace=False):
+        """
+
+        Args:
+          path (str): The path to the native file
+          content (Any): The content to store
+        Returns:
+
+        """
+
+        # In order to store a native document we will first get the family
+        # then we will create a content object for the native object
+        # and also a content object for the document that references it
+
+        family = self.get_family_by_path(path)
+
+        if family is None:
+            family = DocumentFamily(path, self.get_ref())
+            self.metastore.append(family)
+
+        from kodexa.model import ContentType
+        native_content_object = ContentObject(content_type=ContentType.NATIVE)
+        family.content_objects.append(native_content_object)
+        with open(os.path.join(self.store_path, native_content_object.id), 'wb') as file:
+            file.write(content)
+
+        document = Document()
+        document.source.connector = "document-store"
+        document.source.headers = {"ref": family.store_ref, "family": family.id}
+        document.source.id = native_content_object.id
+        content_event = family.add_document(document)
+        document.to_kdxa(os.path.join(self.store_path, content_event.content_object.id) + ".kdxa")
+
+    def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
+            Any:
+        """
+        Get the source for a given content object
+
+        Args:
+          document_family (DocumentFamily): the document family
+          content_object  (ContentObject): the content object
+
+        Returns:
+          the source (or None if not found)
+
+        """
+        self.read_metastore()
+        family = self.get_family(document_family.id)
+        if family is None:
+            return None
+
+        return open(os.path.join(self.store_path, content_object.id), 'rb')
+
     def __iter__(self):
         self.index = 0
         return self
@@ -187,8 +240,6 @@ class LocalDocumentStore(DocumentStore):
         """
         for family in self.metastore:
             if family.path == path:
-                # TODO we need to get the latest document from the family
-
                 return Document.from_kdxa(os.path.join(self.store_path, family.get_latest_content().id) + ".kdxa")
         return None
 
@@ -377,7 +428,7 @@ class LocalModelStore(ModelStore):
         else:
             return None
 
-    def put_native(self, path: str, content: Any):
+    def put_native(self, path: str, content: Any, force_replace=False):
         """
 
         Args:
