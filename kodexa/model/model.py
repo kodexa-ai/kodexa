@@ -1610,7 +1610,7 @@ class ContentClassification(object):
                 "confidence": self.confidence}
 
     @classmethod
-    def from_dict(cls, dict_val: Dict[str, Any]):
+    def from_dict(cls, dict_val):
         return ContentClassification(label=dict_val['label'], taxonomy=dict_val.get('taxonomy'),
                                      selector=dict_val.get('selector'), confidence=dict_val.get('confidence'))
 
