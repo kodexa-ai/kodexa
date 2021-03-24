@@ -10,7 +10,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
@@ -60,6 +60,8 @@ class ContentObject:
         """.. deprecated::"""
         self.mixins = mixins
         """The mixins for this object"""
+        self.classes: List[ContentClassification] = []
+        """A list of the content classifications associated at the document level"""
 
     def to_dict(self):
         """Convert the content object to a dictionary
@@ -79,7 +81,8 @@ class ContentObject:
             'metadata': self.metadata,
             'name': self.name,
             'store_ref': self.store_ref,
-            'mixins': self.mixins
+            'mixins': self.mixins,
+            'classes': [content_class.to_dict() for content_class in self.classes],
         }
 
     @classmethod
@@ -98,7 +101,9 @@ class ContentObject:
         co.metadata = co_dict['metadata']
         co.content_type = co_dict['content_type']
         co.mixins = co_dict['mixins']
-
+        if 'classes' in co_dict and co_dict['classes']:
+            co.classes = [ContentClassification.from_dict(content_class) for content_class in
+                          co_dict['classes']]
         return co
 
 
@@ -1636,20 +1641,33 @@ class Document(object):
         self.ref = ref
 
         self.metadata: DocumentMetadata = metadata
+        """Metadata relating to the document"""
         self.content_node: Optional[ContentNode] = content_node
+        """The root content node"""
         self.virtual: bool = False
+        """Is the document virtual (deprecated)"""
         self._mixins: List[str] = []
+        """A list of the mixins for this document"""
         self.uuid: str = str(uuid.uuid4())
+        """The UUID of this document"""
         self.exceptions: List = []
+        """A list of the exceptions on this document (deprecated)"""
         self.log: List[str] = []
+        """A log for this document (deprecated)"""
         self.version = Document.CURRENT_VERSION
-        self.add_mixin('core')
+        """The version of the document"""
         self.source: SourceMetadata = source
+        """Source metadata for this document"""
         self.labels: List[str] = []
+        """A list of the document level labels for the document"""
         self.taxonomies: List[str] = []
+        """A list of the taxonomy references for this document"""
         self.classes: List[ContentClassification] = []
+        """A list of the content classifications associated at the document level"""
+        self.add_mixin('core')
 
-        # Make sure we apply all the mixins
+
+    # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
     def add_label(self, label: str):
@@ -2373,6 +2391,22 @@ class DocumentStore:
 
         Returns:
           A document (or None if not found)
+
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                               document: Document) -> DocumentFamily:
+        """Replace the document in a specific content object in a document family.
+
+        Args:
+          document_family(DocumentFamily): The document family
+          content_object_id(str): the ID of the ContentObject
+          document(Document): the document to replace the content object with
+
+        Returns:
+          The document family (or None if it wasn't found)
 
         """
         raise NotImplementedError
