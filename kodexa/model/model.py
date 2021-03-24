@@ -1595,6 +1595,26 @@ class SourceMetadata:
         })
 
 
+class ContentClassification(object):
+    """A content classification captures information at the document level to track classification metadata"""
+
+    def __init__(self, label: str, taxonomy: Optional[str] = None, selector: Optional[str] = None,
+                 confidence: Optional[float] = None):
+        self.label = label
+        self.taxonomy = taxonomy
+        self.selector = selector
+        self.confidence = confidence
+
+    def to_dict(self) -> dict:
+        return {"label": self.label, "taxonomy": self.taxonomy, "selector": self.selector,
+                "confidence": self.confidence}
+
+    @classmethod
+    def from_dict(cls, dict_val: dict) -> 'ContentClassification':
+        return ContentClassification(label=dict_val.get('label'), taxonomy=dict_val.get('taxonomy'),
+                                     selector=dict_val.get('selector'), confidence=dict_val.get('confidence'))
+
+
 class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
 
@@ -1627,7 +1647,7 @@ class Document(object):
         self.source: SourceMetadata = source
         self.labels: List[str] = []
         self.taxonomies: List[str] = []
-        self.classifications: List[str] = []
+        self.classes: List[ContentClassification] = []
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
@@ -1772,7 +1792,7 @@ class Document(object):
                 'source': clean_none_values(dataclasses.asdict(self.source)),
                 'mixins': self._mixins,
                 'taxonomies': self.taxonomies,
-                'classifications': self.classifications,
+                'classes': [content_class.to_dict() for content_class in self.classes],
                 'exceptions': self.exceptions,
                 'log': self.log,
                 'labels': self.labels,
@@ -1810,6 +1830,9 @@ class Document(object):
             new_document.labels = doc_dict['labels']
         if 'taxomomies' in doc_dict and doc_dict['taxomomies']:
             new_document.labels = doc_dict['taxomomies']
+        if 'classes' in doc_dict and doc_dict['classes']:
+            new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                    doc_dict['classes']]
         return new_document
 
     @staticmethod
