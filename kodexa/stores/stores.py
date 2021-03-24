@@ -377,6 +377,30 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         else:
             return []
 
+    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                               document: Document) -> DocumentFamily:
+        from kodexa import KodexaPlatform
+        try:
+            logger.info(f"Replacing document in family {document_family.id} content object {content_object_id}")
+
+            files = {"document": document.to_msgpack()}
+            content_object_replace = requests.post(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content",
+                headers={"x-access-token": KodexaPlatform.get_access_token()},
+                files=files)
+
+            if content_object_replace.status_code == 200:
+                return DocumentFamily.from_dict(content_object_replace.json())
+            else:
+                msg = "Document replace failed [" + content_object_replace.text + "], response " + str(
+                    content_object_replace.status_code)
+                logger.error(msg)
+                raise Exception(msg)
+        except JSONDecodeError:
+            logger.error(
+                "Unable to decode the JSON response")
+            raise
+
     def put(self, path: str, document: Document, force_replace: bool = False) -> DocumentFamily:
         from kodexa import KodexaPlatform
         try:
