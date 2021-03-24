@@ -10,7 +10,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import msgpack
 from addict import Dict
@@ -1605,12 +1605,12 @@ class ContentClassification(object):
         self.selector = selector
         self.confidence = confidence
 
-    def to_dict(self) -> dict:
+    def to_dict(self):
         return {"label": self.label, "taxonomy": self.taxonomy, "selector": self.selector,
                 "confidence": self.confidence}
 
     @classmethod
-    def from_dict(cls, dict_val: dict[str, Any]) -> 'ContentClassification':
+    def from_dict(cls, dict_val: Dict[str, Any]):
         return ContentClassification(label=dict_val['label'], taxonomy=dict_val.get('taxonomy'),
                                      selector=dict_val.get('selector'), confidence=dict_val.get('confidence'))
 
