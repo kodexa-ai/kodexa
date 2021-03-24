@@ -39,7 +39,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import msgpack
 from addict import Dict
@@ -1624,6 +1624,26 @@ class SourceMetadata:
         })
 
 
+class ContentClassification(object):
+    &#34;&#34;&#34;A content classification captures information at the document level to track classification metadata&#34;&#34;&#34;
+
+    def __init__(self, label: str, taxonomy: Optional[str] = None, selector: Optional[str] = None,
+                 confidence: Optional[float] = None):
+        self.label = label
+        self.taxonomy = taxonomy
+        self.selector = selector
+        self.confidence = confidence
+
+    def to_dict(self):
+        return {&#34;label&#34;: self.label, &#34;taxonomy&#34;: self.taxonomy, &#34;selector&#34;: self.selector,
+                &#34;confidence&#34;: self.confidence}
+
+    @classmethod
+    def from_dict(cls, dict_val):
+        return ContentClassification(label=dict_val[&#39;label&#39;], taxonomy=dict_val.get(&#39;taxonomy&#39;),
+                                     selector=dict_val.get(&#39;selector&#39;), confidence=dict_val.get(&#39;confidence&#39;))
+
+
 class Document(object):
     &#34;&#34;&#34;A Document is a collection of metadata and a set of content nodes.&#34;&#34;&#34;
 
@@ -1656,7 +1676,7 @@ class Document(object):
         self.source: SourceMetadata = source
         self.labels: List[str] = []
         self.taxonomies: List[str] = []
-        self.classifications: List[str] = []
+        self.classes: List[ContentClassification] = []
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
@@ -1801,7 +1821,7 @@ class Document(object):
                 &#39;source&#39;: clean_none_values(dataclasses.asdict(self.source)),
                 &#39;mixins&#39;: self._mixins,
                 &#39;taxonomies&#39;: self.taxonomies,
-                &#39;classifications&#39;: self.classifications,
+                &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
                 &#39;exceptions&#39;: self.exceptions,
                 &#39;log&#39;: self.log,
                 &#39;labels&#39;: self.labels,
@@ -1839,6 +1859,9 @@ class Document(object):
             new_document.labels = doc_dict[&#39;labels&#39;]
         if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
             new_document.labels = doc_dict[&#39;taxomomies&#39;]
+        if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
+            new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                    doc_dict[&#39;classes&#39;]]
         return new_document
 
     @staticmethod
@@ -2826,6 +2849,71 @@ def from_dict(cls, event_dict: dict):
 <li><a title="kodexa.model.model.ContentEvent" href="#kodexa.model.model.ContentEvent">ContentEvent</a></li>
 <li><a title="kodexa.model.model.ScheduledEvent" href="#kodexa.model.model.ScheduledEvent">ScheduledEvent</a></li>
 </ul>
+</dd>
+<dt id="kodexa.model.model.ContentClassification"><code class="flex name class">
+<span>class <span class="ident">ContentClassification</span></span>
+<span>(</span><span>label: str, taxonomy: Union[str, NoneType] = None, selector: Union[str, NoneType] = None, confidence: Union[float, NoneType] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A content classification captures information at the document level to track classification metadata</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ContentClassification(object):
+    &#34;&#34;&#34;A content classification captures information at the document level to track classification metadata&#34;&#34;&#34;
+
+    def __init__(self, label: str, taxonomy: Optional[str] = None, selector: Optional[str] = None,
+                 confidence: Optional[float] = None):
+        self.label = label
+        self.taxonomy = taxonomy
+        self.selector = selector
+        self.confidence = confidence
+
+    def to_dict(self):
+        return {&#34;label&#34;: self.label, &#34;taxonomy&#34;: self.taxonomy, &#34;selector&#34;: self.selector,
+                &#34;confidence&#34;: self.confidence}
+
+    @classmethod
+    def from_dict(cls, dict_val):
+        return ContentClassification(label=dict_val[&#39;label&#39;], taxonomy=dict_val.get(&#39;taxonomy&#39;),
+                                     selector=dict_val.get(&#39;selector&#39;), confidence=dict_val.get(&#39;confidence&#39;))</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.model.model.ContentClassification.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>dict_val)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_dict(cls, dict_val):
+    return ContentClassification(label=dict_val[&#39;label&#39;], taxonomy=dict_val.get(&#39;taxonomy&#39;),
+                                 selector=dict_val.get(&#39;selector&#39;), confidence=dict_val.get(&#39;confidence&#39;))</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.model.model.ContentClassification.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self):
+    return {&#34;label&#34;: self.label, &#34;taxonomy&#34;: self.taxonomy, &#34;selector&#34;: self.selector,
+            &#34;confidence&#34;: self.confidence}</code></pre>
+</details>
+</dd>
+</dl>
 </dd>
 <dt id="kodexa.model.model.ContentEvent"><code class="flex name class">
 <span>class <span class="ident">ContentEvent</span></span>
@@ -7168,7 +7256,7 @@ def from_dict(cls, co_dict):
         self.source: SourceMetadata = source
         self.labels: List[str] = []
         self.taxonomies: List[str] = []
-        self.classifications: List[str] = []
+        self.classes: List[ContentClassification] = []
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
@@ -7313,7 +7401,7 @@ def from_dict(cls, co_dict):
                 &#39;source&#39;: clean_none_values(dataclasses.asdict(self.source)),
                 &#39;mixins&#39;: self._mixins,
                 &#39;taxonomies&#39;: self.taxonomies,
-                &#39;classifications&#39;: self.classifications,
+                &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
                 &#39;exceptions&#39;: self.exceptions,
                 &#39;log&#39;: self.log,
                 &#39;labels&#39;: self.labels,
@@ -7351,6 +7439,9 @@ def from_dict(cls, co_dict):
             new_document.labels = doc_dict[&#39;labels&#39;]
         if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
             new_document.labels = doc_dict[&#39;taxomomies&#39;]
+        if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
+            new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                    doc_dict[&#39;classes&#39;]]
         return new_document
 
     @staticmethod
@@ -7610,6 +7701,9 @@ def from_dict(doc_dict):
         new_document.labels = doc_dict[&#39;labels&#39;]
     if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
         new_document.labels = doc_dict[&#39;taxomomies&#39;]
+    if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
+        new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                doc_dict[&#39;classes&#39;]]
     return new_document</code></pre>
 </details>
 </dd>
@@ -8252,7 +8346,7 @@ All ContentNodes on this Document that match the selector value are added as the
             &#39;source&#39;: clean_none_values(dataclasses.asdict(self.source)),
             &#39;mixins&#39;: self._mixins,
             &#39;taxonomies&#39;: self.taxonomies,
-            &#39;classifications&#39;: self.classifications,
+            &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
             &#39;exceptions&#39;: self.exceptions,
             &#39;log&#39;: self.log,
             &#39;labels&#39;: self.labels,
@@ -10478,6 +10572,13 @@ Returns:</p></div>
 </li>
 <li>
 <h4><code><a title="kodexa.model.model.BaseEvent" href="#kodexa.model.model.BaseEvent">BaseEvent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="kodexa.model.model.ContentClassification" href="#kodexa.model.model.ContentClassification">ContentClassification</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.model.model.ContentClassification.from_dict" href="#kodexa.model.model.ContentClassification.from_dict">from_dict</a></code></li>
+<li><code><a title="kodexa.model.model.ContentClassification.to_dict" href="#kodexa.model.model.ContentClassification.to_dict">to_dict</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="kodexa.model.model.ContentEvent" href="#kodexa.model.model.ContentEvent">ContentEvent</a></code></h4>
