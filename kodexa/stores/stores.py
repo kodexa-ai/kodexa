@@ -384,7 +384,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.info(f"Replacing document in family {document_family.id} content object {content_object_id}")
 
             files = {"document": document.to_msgpack()}
-            content_object_replace = requests.post(
+            content_object_replace = requests.put(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files)
