@@ -2290,6 +2290,12 @@ class DocumentFamily:
         """The path for this document family in the store (akin to a filename)"""
         self.store_ref = store_ref
         """The reference to the store containing the document family"""
+        self.classes:List[ContentClassification] = []
+        """The content classifications from the latest content object"""
+        self.mixins:List[str] = []
+        """The mixins from the latest content object"""
+        self.labels:List[str] = []
+        """The labels from the latest content object"""
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
         """
@@ -2358,6 +2364,13 @@ class DocumentFamily:
         document_family = DocumentFamily(family_dict['path'], family_dict['storeRef'])
         document_family.id = family_dict['id']
         document_family.content_objects = []
+
+        for co_class in family_dict['classes']:
+            document_family.classes.append(ContentClassification.from_dict(co_class))
+
+        document_family.labels = family_dict['labels']
+        document_family.mixins = family_dict['mixins']
+
         for co_dict in family_dict['contentObjects']:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
         for transition_dict in family_dict['transitions']:
