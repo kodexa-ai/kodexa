@@ -30,25 +30,25 @@ class RemoteTableDataStore(RemoteStore):
         """ """
         return self.ref
 
-    def get_table_df(self, table: str):
+    def get_parent_df(self, parent: str):
         """
 
         Args:
-          table: str:
+          parent (str): The parent taxon (/ is root)
 
         Returns:
 
         """
         import pandas as pd
 
-        table_result = self.get_table(table)
+        table_result = self.get_parent(parent)
         return pd.DataFrame(table_result['rows'], columns=table_result['columns'])
 
-    def get_table(self, table: str):
+    def get_parent(self, parent: str):
         """
 
         Args:
-          table: str:
+          parent (str): The parent taxon (/ is root)
 
         Returns:
 
@@ -63,7 +63,7 @@ class RemoteTableDataStore(RemoteStore):
         total_pages = row_response['totalPages']
 
         for page in range(2, total_pages):
-            row_response = self.get_table_page_request(table, page)
+            row_response = self.get_table_page_request(parent, page)
             rows = rows + row_response['content']
 
         # Once we have all the rows we will then get a list of all the columns
@@ -91,13 +91,13 @@ class RemoteTableDataStore(RemoteStore):
             "rows": new_rows
         }
 
-    def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000):
         """
 
         Args:
-          table: str:
-          page_number: int:  (Default value = 1)
-          page_size:  (Default value = 5000)
+          parent (str): The parent taxon (/ is root)
+          page_number (int):  (Default value = 1)
+          page_size (int):  (Default value = 5000)
 
         Returns:
 
@@ -110,7 +110,7 @@ class RemoteTableDataStore(RemoteStore):
         # We need to go through and pull all the pages
         rows_response = requests.get(
             url,
-            params={"table": table, "page": page_number, "pageSize": page_size},
+            params={"parent": parent, "page": page_number, "pageSize": page_size},
             headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
 
         if rows_response.status_code == 200:
