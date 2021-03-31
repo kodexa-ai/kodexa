@@ -341,7 +341,7 @@ class LocalDocumentStore(DocumentStore):
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
 
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -> DocumentFamily:
+                               document: Document) -> Optional[DocumentFamily]:
 
         for co in document_family.content_objects:
             if co.id == content_object_id:
