@@ -2429,7 +2429,7 @@ class DocumentStore:
 
     @abc.abstractmethod
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -> DocumentFamily:
+                               document: Document) -> Optional[DocumentFamily]:
         """Replace the document in a specific content object in a document family.
 
         Args:
