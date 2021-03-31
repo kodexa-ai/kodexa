@@ -39,7 +39,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
@@ -89,6 +89,8 @@ class ContentObject:
         &#34;&#34;&#34;.. deprecated::&#34;&#34;&#34;
         self.mixins = mixins
         &#34;&#34;&#34;The mixins for this object&#34;&#34;&#34;
+        self.classes: List[ContentClassification] = []
+        &#34;&#34;&#34;A list of the content classifications associated at the document level&#34;&#34;&#34;
 
     def to_dict(self):
         &#34;&#34;&#34;Convert the content object to a dictionary
@@ -108,7 +110,8 @@ class ContentObject:
             &#39;metadata&#39;: self.metadata,
             &#39;name&#39;: self.name,
             &#39;store_ref&#39;: self.store_ref,
-            &#39;mixins&#39;: self.mixins
+            &#39;mixins&#39;: self.mixins,
+            &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
         }
 
     @classmethod
@@ -125,9 +128,11 @@ class ContentObject:
         co.id = co_dict[&#39;id&#39;]
         co.labels = co_dict[&#39;labels&#39;]
         co.metadata = co_dict[&#39;metadata&#39;]
-        co.content_type = co_dict[&#39;content_type&#39;]
+        co.content_type = ContentType[co_dict[&#39;content_type&#39;]]
         co.mixins = co_dict[&#39;mixins&#39;]
-
+        if &#39;classes&#39; in co_dict and co_dict[&#39;classes&#39;]:
+            co.classes = [ContentClassification.from_dict(content_class) for content_class in
+                          co_dict[&#39;classes&#39;]]
         return co
 
 
@@ -1665,21 +1670,53 @@ class Document(object):
         self.ref = ref
 
         self.metadata: DocumentMetadata = metadata
+        &#34;&#34;&#34;Metadata relating to the document&#34;&#34;&#34;
         self.content_node: Optional[ContentNode] = content_node
+        &#34;&#34;&#34;The root content node&#34;&#34;&#34;
         self.virtual: bool = False
+        &#34;&#34;&#34;Is the document virtual (deprecated)&#34;&#34;&#34;
         self._mixins: List[str] = []
+        &#34;&#34;&#34;A list of the mixins for this document&#34;&#34;&#34;
         self.uuid: str = str(uuid.uuid4())
+        &#34;&#34;&#34;The UUID of this document&#34;&#34;&#34;
         self.exceptions: List = []
+        &#34;&#34;&#34;A list of the exceptions on this document (deprecated)&#34;&#34;&#34;
         self.log: List[str] = []
+        &#34;&#34;&#34;A log for this document (deprecated)&#34;&#34;&#34;
         self.version = Document.CURRENT_VERSION
-        self.add_mixin(&#39;core&#39;)
+        &#34;&#34;&#34;The version of the document&#34;&#34;&#34;
         self.source: SourceMetadata = source
+        &#34;&#34;&#34;Source metadata for this document&#34;&#34;&#34;
         self.labels: List[str] = []
+        &#34;&#34;&#34;A list of the document level labels for the document&#34;&#34;&#34;
         self.taxonomies: List[str] = []
+        &#34;&#34;&#34;A list of the taxonomy references for this document&#34;&#34;&#34;
         self.classes: List[ContentClassification] = []
+        &#34;&#34;&#34;A list of the content classifications associated at the document level&#34;&#34;&#34;
+        self.add_mixin(&#39;core&#39;)
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
+
+    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
+        &#34;&#34;&#34;Add a content classification to the document
+
+        Args:
+          label(str): the label
+          taxonomy_ref(Optional[str]): the reference to the taxonomy
+
+        Returns:
+          the content classification created (or the matching one if it is already on the document)
+
+        &#34;&#34;&#34;
+        content_classification = ContentClassification(label, taxonomy=taxonomy_ref)
+
+        for existing_class in self.classes:
+            if existing_class.label == content_classification.label:
+                return existing_class
+
+        self.classes.append(content_classification)
+        return content_classification
 
     def add_label(self, label: str):
         &#34;&#34;&#34;Add a label to the document
@@ -2282,6 +2319,12 @@ class DocumentFamily:
         &#34;&#34;&#34;The path for this document family in the store (akin to a filename)&#34;&#34;&#34;
         self.store_ref = store_ref
         &#34;&#34;&#34;The reference to the store containing the document family&#34;&#34;&#34;
+        self.classes:List[ContentClassification] = []
+        &#34;&#34;&#34;The content classifications from the latest content object&#34;&#34;&#34;
+        self.mixins:List[str] = []
+        &#34;&#34;&#34;The mixins from the latest content object&#34;&#34;&#34;
+        self.labels:List[str] = []
+        &#34;&#34;&#34;The labels from the latest content object&#34;&#34;&#34;
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
         &#34;&#34;&#34;
@@ -2350,6 +2393,13 @@ class DocumentFamily:
         document_family = DocumentFamily(family_dict[&#39;path&#39;], family_dict[&#39;storeRef&#39;])
         document_family.id = family_dict[&#39;id&#39;]
         document_family.content_objects = []
+
+        for co_class in family_dict[&#39;classes&#39;]:
+            document_family.classes.append(ContentClassification.from_dict(co_class))
+
+        document_family.labels = family_dict[&#39;labels&#39;]
+        document_family.mixins = family_dict[&#39;mixins&#39;]
+
         for co_dict in family_dict[&#39;contentObjects&#39;]:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
         for transition_dict in family_dict[&#39;transitions&#39;]:
@@ -2402,6 +2452,22 @@ class DocumentStore:
 
         Returns:
           A document (or None if not found)
+
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                               document: Document) -&gt; Optional[DocumentFamily]:
+        &#34;&#34;&#34;Replace the document in a specific content object in a document family.
+
+        Args:
+          document_family(DocumentFamily): The document family
+          content_object_id(str): the ID of the ContentObject
+          document(Document): the document to replace the content object with
+
+        Returns:
+          The document family (or None if it wasn&#39;t found)
 
         &#34;&#34;&#34;
         raise NotImplementedError
@@ -7002,6 +7068,8 @@ a Kodexa document.</p>
         &#34;&#34;&#34;.. deprecated::&#34;&#34;&#34;
         self.mixins = mixins
         &#34;&#34;&#34;The mixins for this object&#34;&#34;&#34;
+        self.classes: List[ContentClassification] = []
+        &#34;&#34;&#34;A list of the content classifications associated at the document level&#34;&#34;&#34;
 
     def to_dict(self):
         &#34;&#34;&#34;Convert the content object to a dictionary
@@ -7021,7 +7089,8 @@ a Kodexa document.</p>
             &#39;metadata&#39;: self.metadata,
             &#39;name&#39;: self.name,
             &#39;store_ref&#39;: self.store_ref,
-            &#39;mixins&#39;: self.mixins
+            &#39;mixins&#39;: self.mixins,
+            &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
         }
 
     @classmethod
@@ -7038,9 +7107,11 @@ a Kodexa document.</p>
         co.id = co_dict[&#39;id&#39;]
         co.labels = co_dict[&#39;labels&#39;]
         co.metadata = co_dict[&#39;metadata&#39;]
-        co.content_type = co_dict[&#39;content_type&#39;]
+        co.content_type = ContentType[co_dict[&#39;content_type&#39;]]
         co.mixins = co_dict[&#39;mixins&#39;]
-
+        if &#39;classes&#39; in co_dict and co_dict[&#39;classes&#39;]:
+            co.classes = [ContentClassification.from_dict(content_class) for content_class in
+                          co_dict[&#39;classes&#39;]]
         return co</code></pre>
 </details>
 <h3>Static methods</h3>
@@ -7075,15 +7146,21 @@ def from_dict(cls, co_dict):
     co.id = co_dict[&#39;id&#39;]
     co.labels = co_dict[&#39;labels&#39;]
     co.metadata = co_dict[&#39;metadata&#39;]
-    co.content_type = co_dict[&#39;content_type&#39;]
+    co.content_type = ContentType[co_dict[&#39;content_type&#39;]]
     co.mixins = co_dict[&#39;mixins&#39;]
-
+    if &#39;classes&#39; in co_dict and co_dict[&#39;classes&#39;]:
+        co.classes = [ContentClassification.from_dict(content_class) for content_class in
+                      co_dict[&#39;classes&#39;]]
     return co</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
+<dt id="kodexa.model.model.ContentObject.classes"><code class="name">var <span class="ident">classes</span></code></dt>
+<dd>
+<div class="desc"><p>A list of the content classifications associated at the document level</p></div>
+</dd>
 <dt id="kodexa.model.model.ContentObject.content_type"><code class="name">var <span class="ident">content_type</span></code></dt>
 <dd>
 <div class="desc"><p>The type of content the object refers to</p></div>
@@ -7155,7 +7232,8 @@ def from_dict(cls, co_dict):
         &#39;metadata&#39;: self.metadata,
         &#39;name&#39;: self.name,
         &#39;store_ref&#39;: self.store_ref,
-        &#39;mixins&#39;: self.mixins
+        &#39;mixins&#39;: self.mixins,
+        &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
     }</code></pre>
 </details>
 </dd>
@@ -7245,21 +7323,53 @@ def from_dict(cls, co_dict):
         self.ref = ref
 
         self.metadata: DocumentMetadata = metadata
+        &#34;&#34;&#34;Metadata relating to the document&#34;&#34;&#34;
         self.content_node: Optional[ContentNode] = content_node
+        &#34;&#34;&#34;The root content node&#34;&#34;&#34;
         self.virtual: bool = False
+        &#34;&#34;&#34;Is the document virtual (deprecated)&#34;&#34;&#34;
         self._mixins: List[str] = []
+        &#34;&#34;&#34;A list of the mixins for this document&#34;&#34;&#34;
         self.uuid: str = str(uuid.uuid4())
+        &#34;&#34;&#34;The UUID of this document&#34;&#34;&#34;
         self.exceptions: List = []
+        &#34;&#34;&#34;A list of the exceptions on this document (deprecated)&#34;&#34;&#34;
         self.log: List[str] = []
+        &#34;&#34;&#34;A log for this document (deprecated)&#34;&#34;&#34;
         self.version = Document.CURRENT_VERSION
-        self.add_mixin(&#39;core&#39;)
+        &#34;&#34;&#34;The version of the document&#34;&#34;&#34;
         self.source: SourceMetadata = source
+        &#34;&#34;&#34;Source metadata for this document&#34;&#34;&#34;
         self.labels: List[str] = []
+        &#34;&#34;&#34;A list of the document level labels for the document&#34;&#34;&#34;
         self.taxonomies: List[str] = []
+        &#34;&#34;&#34;A list of the taxonomy references for this document&#34;&#34;&#34;
         self.classes: List[ContentClassification] = []
+        &#34;&#34;&#34;A list of the content classifications associated at the document level&#34;&#34;&#34;
+        self.add_mixin(&#39;core&#39;)
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
+
+    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
+        &#34;&#34;&#34;Add a content classification to the document
+
+        Args:
+          label(str): the label
+          taxonomy_ref(Optional[str]): the reference to the taxonomy
+
+        Returns:
+          the content classification created (or the matching one if it is already on the document)
+
+        &#34;&#34;&#34;
+        content_classification = ContentClassification(label, taxonomy=taxonomy_ref)
+
+        for existing_class in self.classes:
+            if existing_class.label == content_classification.label:
+                return existing_class
+
+        self.classes.append(content_classification)
+        return content_classification
 
     def add_label(self, label: str):
         &#34;&#34;&#34;Add a label to the document
@@ -7957,8 +8067,90 @@ def from_url(cls, url, headers=None):
 </details>
 </dd>
 </dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.Document.classes"><code class="name">var <span class="ident">classes</span></code></dt>
+<dd>
+<div class="desc"><p>A list of the content classifications associated at the document level</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.content_node"><code class="name">var <span class="ident">content_node</span></code></dt>
+<dd>
+<div class="desc"><p>The root content node</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.exceptions"><code class="name">var <span class="ident">exceptions</span></code></dt>
+<dd>
+<div class="desc"><p>A list of the exceptions on this document (deprecated)</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.labels"><code class="name">var <span class="ident">labels</span></code></dt>
+<dd>
+<div class="desc"><p>A list of the document level labels for the document</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.log"><code class="name">var <span class="ident">log</span></code></dt>
+<dd>
+<div class="desc"><p>A log for this document (deprecated)</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.metadata"><code class="name">var <span class="ident">metadata</span></code></dt>
+<dd>
+<div class="desc"><p>Metadata relating to the document</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.source"><code class="name">var <span class="ident">source</span></code></dt>
+<dd>
+<div class="desc"><p>Source metadata for this document</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.taxonomies"><code class="name">var <span class="ident">taxonomies</span></code></dt>
+<dd>
+<div class="desc"><p>A list of the taxonomy references for this document</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.uuid"><code class="name">var <span class="ident">uuid</span></code></dt>
+<dd>
+<div class="desc"><p>The UUID of this document</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.version"><code class="name">var <span class="ident">version</span></code></dt>
+<dd>
+<div class="desc"><p>The version of the document</p></div>
+</dd>
+<dt id="kodexa.model.model.Document.virtual"><code class="name">var <span class="ident">virtual</span></code></dt>
+<dd>
+<div class="desc"><p>Is the document virtual (deprecated)</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
+<dt id="kodexa.model.model.Document.add_classification"><code class="name flex">
+<span>def <span class="ident">add_classification</span></span>(<span>self, label: str, taxonomy_ref: Union[str, NoneType] = None) ‑> <a title="kodexa.model.model.ContentClassification" href="#kodexa.model.model.ContentClassification">ContentClassification</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a content classification to the document</p>
+<h2 id="args">Args</h2>
+<p>label(str): the label
+taxonomy_ref(Optional[str]): the reference to the taxonomy</p>
+<h2 id="returns">Returns</h2>
+<p>the content classification created (or the matching one if it is already on the document)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
+    &#34;&#34;&#34;Add a content classification to the document
+
+    Args:
+      label(str): the label
+      taxonomy_ref(Optional[str]): the reference to the taxonomy
+
+    Returns:
+      the content classification created (or the matching one if it is already on the document)
+
+    &#34;&#34;&#34;
+    content_classification = ContentClassification(label, taxonomy=taxonomy_ref)
+
+    for existing_class in self.classes:
+        if existing_class.label == content_classification.label:
+            return existing_class
+
+    self.classes.append(content_classification)
+    return content_classification</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.Document.add_label"><code class="name flex">
 <span>def <span class="ident">add_label</span></span>(<span>self, label: str)</span>
 </code></dt>
@@ -8534,6 +8726,12 @@ document as its first entry</p>
         &#34;&#34;&#34;The path for this document family in the store (akin to a filename)&#34;&#34;&#34;
         self.store_ref = store_ref
         &#34;&#34;&#34;The reference to the store containing the document family&#34;&#34;&#34;
+        self.classes:List[ContentClassification] = []
+        &#34;&#34;&#34;The content classifications from the latest content object&#34;&#34;&#34;
+        self.mixins:List[str] = []
+        &#34;&#34;&#34;The mixins from the latest content object&#34;&#34;&#34;
+        self.labels:List[str] = []
+        &#34;&#34;&#34;The labels from the latest content object&#34;&#34;&#34;
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
         &#34;&#34;&#34;
@@ -8602,6 +8800,13 @@ document as its first entry</p>
         document_family = DocumentFamily(family_dict[&#39;path&#39;], family_dict[&#39;storeRef&#39;])
         document_family.id = family_dict[&#39;id&#39;]
         document_family.content_objects = []
+
+        for co_class in family_dict[&#39;classes&#39;]:
+            document_family.classes.append(ContentClassification.from_dict(co_class))
+
+        document_family.labels = family_dict[&#39;labels&#39;]
+        document_family.mixins = family_dict[&#39;mixins&#39;]
+
         for co_dict in family_dict[&#39;contentObjects&#39;]:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
         for transition_dict in family_dict[&#39;transitions&#39;]:
@@ -8654,6 +8859,13 @@ def from_dict(cls, family_dict: dict):
     document_family = DocumentFamily(family_dict[&#39;path&#39;], family_dict[&#39;storeRef&#39;])
     document_family.id = family_dict[&#39;id&#39;]
     document_family.content_objects = []
+
+    for co_class in family_dict[&#39;classes&#39;]:
+        document_family.classes.append(ContentClassification.from_dict(co_class))
+
+    document_family.labels = family_dict[&#39;labels&#39;]
+    document_family.mixins = family_dict[&#39;mixins&#39;]
+
     for co_dict in family_dict[&#39;contentObjects&#39;]:
         document_family.content_objects.append(ContentObject.from_dict(co_dict))
     for transition_dict in family_dict[&#39;transitions&#39;]:
@@ -8664,6 +8876,10 @@ def from_dict(cls, family_dict: dict):
 </dl>
 <h3>Instance variables</h3>
 <dl>
+<dt id="kodexa.model.model.DocumentFamily.classes"><code class="name">var <span class="ident">classes</span></code></dt>
+<dd>
+<div class="desc"><p>The content classifications from the latest content object</p></div>
+</dd>
 <dt id="kodexa.model.model.DocumentFamily.content_objects"><code class="name">var <span class="ident">content_objects</span></code></dt>
 <dd>
 <div class="desc"><p>A list of the content objects in the document family</p></div>
@@ -8671,6 +8887,14 @@ def from_dict(cls, family_dict: dict):
 <dt id="kodexa.model.model.DocumentFamily.id"><code class="name">var <span class="ident">id</span></code></dt>
 <dd>
 <div class="desc"><p>The ID of this document family</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.labels"><code class="name">var <span class="ident">labels</span></code></dt>
+<dd>
+<div class="desc"><p>The labels from the latest content object</p></div>
+</dd>
+<dt id="kodexa.model.model.DocumentFamily.mixins"><code class="name">var <span class="ident">mixins</span></code></dt>
+<dd>
+<div class="desc"><p>The mixins from the latest content object</p></div>
 </dd>
 <dt id="kodexa.model.model.DocumentFamily.path"><code class="name">var <span class="ident">path</span></code></dt>
 <dd>
@@ -8886,6 +9110,22 @@ def from_dict(cls, family_dict: dict):
 
         Returns:
           A document (or None if not found)
+
+        &#34;&#34;&#34;
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                               document: Document) -&gt; Optional[DocumentFamily]:
+        &#34;&#34;&#34;Replace the document in a specific content object in a document family.
+
+        Args:
+          document_family(DocumentFamily): The document family
+          content_object_id(str): the ID of the ContentObject
+          document(Document): the document to replace the content object with
+
+        Returns:
+          The document family (or None if it wasn&#39;t found)
 
         &#34;&#34;&#34;
         raise NotImplementedError
@@ -9634,6 +9874,38 @@ def register_listener(self, listener):
 
     Returns:
       None
+
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.DocumentStore.replace_content_object"><code class="name flex">
+<span>def <span class="ident">replace_content_object</span></span>(<span>self, document_family: <a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>, content_object_id: str, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>) ‑> Union[<a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a>, NoneType]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Replace the document in a specific content object in a document family.</p>
+<h2 id="args">Args</h2>
+<p>document_family(DocumentFamily): The document family
+content_object_id(str): the ID of the ContentObject
+document(Document): the document to replace the content object with</p>
+<h2 id="returns">Returns</h2>
+<p>The document family (or None if it wasn't found)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abc.abstractmethod
+def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                           document: Document) -&gt; Optional[DocumentFamily]:
+    &#34;&#34;&#34;Replace the document in a specific content object in a document family.
+
+    Args:
+      document_family(DocumentFamily): The document family
+      content_object_id(str): the ID of the ContentObject
+      document(Document): the document to replace the content object with
+
+    Returns:
+      The document family (or None if it wasn&#39;t found)
 
     &#34;&#34;&#34;
     raise NotImplementedError</code></pre>
@@ -10670,6 +10942,7 @@ Returns:</p></div>
 <li>
 <h4><code><a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a></code></h4>
 <ul class="two-column">
+<li><code><a title="kodexa.model.model.ContentObject.classes" href="#kodexa.model.model.ContentObject.classes">classes</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.content_type" href="#kodexa.model.model.ContentObject.content_type">content_type</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.from_dict" href="#kodexa.model.model.ContentObject.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.ContentObject.id" href="#kodexa.model.model.ContentObject.id">id</a></code></li>
@@ -10698,9 +10971,13 @@ Returns:</p></div>
 <ul class="two-column">
 <li><code><a title="kodexa.model.model.Document.CURRENT_VERSION" href="#kodexa.model.model.Document.CURRENT_VERSION">CURRENT_VERSION</a></code></li>
 <li><code><a title="kodexa.model.model.Document.PREVIOUS_VERSION" href="#kodexa.model.model.Document.PREVIOUS_VERSION">PREVIOUS_VERSION</a></code></li>
+<li><code><a title="kodexa.model.model.Document.add_classification" href="#kodexa.model.model.Document.add_classification">add_classification</a></code></li>
 <li><code><a title="kodexa.model.model.Document.add_label" href="#kodexa.model.model.Document.add_label">add_label</a></code></li>
 <li><code><a title="kodexa.model.model.Document.add_mixin" href="#kodexa.model.model.Document.add_mixin">add_mixin</a></code></li>
+<li><code><a title="kodexa.model.model.Document.classes" href="#kodexa.model.model.Document.classes">classes</a></code></li>
+<li><code><a title="kodexa.model.model.Document.content_node" href="#kodexa.model.model.Document.content_node">content_node</a></code></li>
 <li><code><a title="kodexa.model.model.Document.create_node" href="#kodexa.model.model.Document.create_node">create_node</a></code></li>
+<li><code><a title="kodexa.model.model.Document.exceptions" href="#kodexa.model.model.Document.exceptions">exceptions</a></code></li>
 <li><code><a title="kodexa.model.model.Document.from_dict" href="#kodexa.model.model.Document.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.Document.from_file" href="#kodexa.model.model.Document.from_file">from_file</a></code></li>
 <li><code><a title="kodexa.model.model.Document.from_json" href="#kodexa.model.model.Document.from_json">from_json</a></code></li>
@@ -10711,13 +10988,21 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.Document.get_labels" href="#kodexa.model.model.Document.get_labels">get_labels</a></code></li>
 <li><code><a title="kodexa.model.model.Document.get_mixins" href="#kodexa.model.model.Document.get_mixins">get_mixins</a></code></li>
 <li><code><a title="kodexa.model.model.Document.get_root" href="#kodexa.model.model.Document.get_root">get_root</a></code></li>
+<li><code><a title="kodexa.model.model.Document.labels" href="#kodexa.model.model.Document.labels">labels</a></code></li>
+<li><code><a title="kodexa.model.model.Document.log" href="#kodexa.model.model.Document.log">log</a></code></li>
+<li><code><a title="kodexa.model.model.Document.metadata" href="#kodexa.model.model.Document.metadata">metadata</a></code></li>
 <li><code><a title="kodexa.model.model.Document.remove_label" href="#kodexa.model.model.Document.remove_label">remove_label</a></code></li>
 <li><code><a title="kodexa.model.model.Document.select" href="#kodexa.model.model.Document.select">select</a></code></li>
 <li><code><a title="kodexa.model.model.Document.select_as_node" href="#kodexa.model.model.Document.select_as_node">select_as_node</a></code></li>
+<li><code><a title="kodexa.model.model.Document.source" href="#kodexa.model.model.Document.source">source</a></code></li>
+<li><code><a title="kodexa.model.model.Document.taxonomies" href="#kodexa.model.model.Document.taxonomies">taxonomies</a></code></li>
 <li><code><a title="kodexa.model.model.Document.to_dict" href="#kodexa.model.model.Document.to_dict">to_dict</a></code></li>
 <li><code><a title="kodexa.model.model.Document.to_json" href="#kodexa.model.model.Document.to_json">to_json</a></code></li>
 <li><code><a title="kodexa.model.model.Document.to_kdxa" href="#kodexa.model.model.Document.to_kdxa">to_kdxa</a></code></li>
 <li><code><a title="kodexa.model.model.Document.to_msgpack" href="#kodexa.model.model.Document.to_msgpack">to_msgpack</a></code></li>
+<li><code><a title="kodexa.model.model.Document.uuid" href="#kodexa.model.model.Document.uuid">uuid</a></code></li>
+<li><code><a title="kodexa.model.model.Document.version" href="#kodexa.model.model.Document.version">version</a></code></li>
+<li><code><a title="kodexa.model.model.Document.virtual" href="#kodexa.model.model.Document.virtual">virtual</a></code></li>
 </ul>
 </li>
 <li>
@@ -10731,12 +11016,15 @@ Returns:</p></div>
 <h4><code><a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></code></h4>
 <ul class="two-column">
 <li><code><a title="kodexa.model.model.DocumentFamily.add_document" href="#kodexa.model.model.DocumentFamily.add_document">add_document</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.classes" href="#kodexa.model.model.DocumentFamily.classes">classes</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.content_objects" href="#kodexa.model.model.DocumentFamily.content_objects">content_objects</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.from_dict" href="#kodexa.model.model.DocumentFamily.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_content_objects" href="#kodexa.model.model.DocumentFamily.get_content_objects">get_content_objects</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_document_count" href="#kodexa.model.model.DocumentFamily.get_document_count">get_document_count</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.get_latest_content" href="#kodexa.model.model.DocumentFamily.get_latest_content">get_latest_content</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.id" href="#kodexa.model.model.DocumentFamily.id">id</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.labels" href="#kodexa.model.model.DocumentFamily.labels">labels</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentFamily.mixins" href="#kodexa.model.model.DocumentFamily.mixins">mixins</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.path" href="#kodexa.model.model.DocumentFamily.path">path</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.store_ref" href="#kodexa.model.model.DocumentFamily.store_ref">store_ref</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentFamily.to_dict" href="#kodexa.model.model.DocumentFamily.to_dict">to_dict</a></code></li>
@@ -10765,6 +11053,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="#kodexa.model.model.DocumentStore.query">query</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query_families" href="#kodexa.model.model.DocumentStore.query_families">query_families</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.replace_content_object" href="#kodexa.model.model.DocumentStore.replace_content_object">replace_content_object</a></code></li>
 </ul>
 </li>
 <li>

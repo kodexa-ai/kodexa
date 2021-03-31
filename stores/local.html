@@ -370,6 +370,20 @@ class LocalDocumentStore(DocumentStore):
         &#34;&#34;&#34;
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
 
+    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                               document: Document) -&gt; Optional[DocumentFamily]:
+
+        for co in document_family.content_objects:
+            if co.id == content_object_id:
+                document.to_kdxa(os.path.join(self.store_path, content_object_id) + &#34;.kdxa&#34;)
+                co.labels = document.labels
+                co.classes = document.classes
+                self.write_metastore()
+                return document_family
+
+        return None
+
+
     def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
@@ -931,6 +945,20 @@ class TableDataStore(Store):
 
         &#34;&#34;&#34;
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
+
+    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                               document: Document) -&gt; Optional[DocumentFamily]:
+
+        for co in document_family.content_objects:
+            if co.id == content_object_id:
+                document.to_kdxa(os.path.join(self.store_path, content_object_id) + &#34;.kdxa&#34;)
+                co.labels = document.labels
+                co.classes = document.classes
+                self.write_metastore()
+                return document_family
+
+        return None
+
 
     def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         &#34;&#34;&#34;
@@ -1570,6 +1598,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.DocumentStore.get_source_by_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.get_source_by_content_object">get_source_by_content_object</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="../model/model.html#kodexa.model.model.DocumentStore.query">query</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query_families" href="../model/model.html#kodexa.model.model.DocumentStore.query_families">query_families</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.replace_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.replace_content_object">replace_content_object</a></code></li>
 </ul>
 </li>
 </ul>

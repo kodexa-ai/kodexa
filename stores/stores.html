@@ -59,25 +59,25 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
-    def get_table_df(self, table: str):
+    def get_parent_df(self, parent: str):
         &#34;&#34;&#34;
 
         Args:
-          table: str:
+          parent (str): The parent taxon (/ is root)
 
         Returns:
 
         &#34;&#34;&#34;
         import pandas as pd
 
-        table_result = self.get_table(table)
+        table_result = self.get_parent(parent)
         return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])
 
-    def get_table(self, table: str):
+    def get_parent(self, parent: str):
         &#34;&#34;&#34;
 
         Args:
-          table: str:
+          parent (str): The parent taxon (/ is root)
 
         Returns:
 
@@ -85,14 +85,14 @@ class RemoteTableDataStore(RemoteStore):
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_table_page_request(table, 1)
+        row_response = self.get_parent_page_request(parent, 1)
 
         # lets work out the last page
         rows = rows + row_response[&#39;content&#39;]
         total_pages = row_response[&#39;totalPages&#39;]
 
         for page in range(2, total_pages):
-            row_response = self.get_table_page_request(table, page)
+            row_response = self.get_parent_page_request(parent, page)
             rows = rows + row_response[&#39;content&#39;]
 
         # Once we have all the rows we will then get a list of all the columns
@@ -120,13 +120,13 @@ class RemoteTableDataStore(RemoteStore):
             &#34;rows&#34;: new_rows
         }
 
-    def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000):
         &#34;&#34;&#34;
 
         Args:
-          table: str:
-          page_number: int:  (Default value = 1)
-          page_size:  (Default value = 5000)
+          parent (str): The parent taxon (/ is root)
+          page_number (int):  (Default value = 1)
+          page_size (int):  (Default value = 5000)
 
         Returns:
 
@@ -139,7 +139,7 @@ class RemoteTableDataStore(RemoteStore):
         # We need to go through and pull all the pages
         rows_response = requests.get(
             url,
-            params={&#34;table&#34;: table, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
+            params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
         if rows_response.status_code == 200:
@@ -405,6 +405,30 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             return families
         else:
             return []
+
+    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                               document: Document) -&gt; DocumentFamily:
+        from kodexa import KodexaPlatform
+        try:
+            logger.info(f&#34;Replacing document in family {document_family.id} content object {content_object_id}&#34;)
+
+            files = {&#34;document&#34;: document.to_msgpack()}
+            content_object_replace = requests.put(
+                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families/{document_family.id}/objects/{content_object_id}/content&#34;,
+                headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
+                files=files)
+
+            if content_object_replace.status_code == 200:
+                return DocumentFamily.from_dict(content_object_replace.json())
+            else:
+                msg = &#34;Document replace failed [&#34; + content_object_replace.text + &#34;], response &#34; + str(
+                    content_object_replace.status_code)
+                logger.error(msg)
+                raise Exception(msg)
+        except JSONDecodeError:
+            logger.error(
+                &#34;Unable to decode the JSON response&#34;)
+            raise
 
     def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         from kodexa import KodexaPlatform
@@ -906,6 +930,30 @@ in an instance of the Kodexa platform</p></div>
         else:
             return []
 
+    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
+                               document: Document) -&gt; DocumentFamily:
+        from kodexa import KodexaPlatform
+        try:
+            logger.info(f&#34;Replacing document in family {document_family.id} content object {content_object_id}&#34;)
+
+            files = {&#34;document&#34;: document.to_msgpack()}
+            content_object_replace = requests.put(
+                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families/{document_family.id}/objects/{content_object_id}/content&#34;,
+                headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
+                files=files)
+
+            if content_object_replace.status_code == 200:
+                return DocumentFamily.from_dict(content_object_replace.json())
+            else:
+                msg = &#34;Document replace failed [&#34; + content_object_replace.text + &#34;], response &#34; + str(
+                    content_object_replace.status_code)
+                logger.error(msg)
+                raise Exception(msg)
+        except JSONDecodeError:
+            logger.error(
+                &#34;Unable to decode the JSON response&#34;)
+            raise
+
     def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         from kodexa import KodexaPlatform
         try:
@@ -1094,6 +1142,7 @@ in an instance of the Kodexa platform</p></div>
 <li><code><a title="kodexa.model.model.DocumentStore.query" href="../model/model.html#kodexa.model.model.DocumentStore.query">query</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.query_families" href="../model/model.html#kodexa.model.model.DocumentStore.query_families">query_families</a></code></li>
 <li><code><a title="kodexa.model.model.DocumentStore.register_listener" href="../model/model.html#kodexa.model.model.DocumentStore.register_listener">register_listener</a></code></li>
+<li><code><a title="kodexa.model.model.DocumentStore.replace_content_object" href="../model/model.html#kodexa.model.model.DocumentStore.replace_content_object">replace_content_object</a></code></li>
 </ul>
 </li>
 <li><code><b><a title="kodexa.model.model.RemoteStore" href="../model/model.html#kodexa.model.model.RemoteStore">RemoteStore</a></b></code>:
@@ -1457,25 +1506,25 @@ in an instance of the Kodexa platform</p></div>
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
-    def get_table_df(self, table: str):
+    def get_parent_df(self, parent: str):
         &#34;&#34;&#34;
 
         Args:
-          table: str:
+          parent (str): The parent taxon (/ is root)
 
         Returns:
 
         &#34;&#34;&#34;
         import pandas as pd
 
-        table_result = self.get_table(table)
+        table_result = self.get_parent(parent)
         return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])
 
-    def get_table(self, table: str):
+    def get_parent(self, parent: str):
         &#34;&#34;&#34;
 
         Args:
-          table: str:
+          parent (str): The parent taxon (/ is root)
 
         Returns:
 
@@ -1483,14 +1532,14 @@ in an instance of the Kodexa platform</p></div>
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_table_page_request(table, 1)
+        row_response = self.get_parent_page_request(parent, 1)
 
         # lets work out the last page
         rows = rows + row_response[&#39;content&#39;]
         total_pages = row_response[&#39;totalPages&#39;]
 
         for page in range(2, total_pages):
-            row_response = self.get_table_page_request(table, page)
+            row_response = self.get_parent_page_request(parent, page)
             rows = rows + row_response[&#39;content&#39;]
 
         # Once we have all the rows we will then get a list of all the columns
@@ -1518,13 +1567,13 @@ in an instance of the Kodexa platform</p></div>
             &#34;rows&#34;: new_rows
         }
 
-    def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000):
         &#34;&#34;&#34;
 
         Args:
-          table: str:
-          page_number: int:  (Default value = 1)
-          page_size:  (Default value = 5000)
+          parent (str): The parent taxon (/ is root)
+          page_number (int):  (Default value = 1)
+          page_size (int):  (Default value = 5000)
 
         Returns:
 
@@ -1537,7 +1586,7 @@ in an instance of the Kodexa platform</p></div>
         # We need to go through and pull all the pages
         rows_response = requests.get(
             url,
-            params={&#34;table&#34;: table, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
+            params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
         if rows_response.status_code == 200:
@@ -1688,25 +1737,25 @@ Returns:</p></div>
         raise Exception(&#34;Unable to post rows to remote store [&#34; + doc.text + &#34;], response &#34; + str(doc.status_code))</code></pre>
 </details>
 </dd>
-<dt id="kodexa.stores.stores.RemoteTableDataStore.get_table"><code class="name flex">
-<span>def <span class="ident">get_table</span></span>(<span>self, table: str)</span>
+<dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent"><code class="name flex">
+<span>def <span class="ident">get_parent</span></span>(<span>self, parent: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>table</code></strong></dt>
-<dd>str:</dd>
+<dt><strong><code>parent</code></strong> :&ensp;<code>str</code></dt>
+<dd>The parent taxon (/ is root)</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_table(self, table: str):
+<pre><code class="python">def get_parent(self, parent: str):
     &#34;&#34;&#34;
 
     Args:
-      table: str:
+      parent (str): The parent taxon (/ is root)
 
     Returns:
 
@@ -1714,14 +1763,14 @@ Returns:</p></div>
 
     # We need to get the first set of rows,
     rows: List = []
-    row_response = self.get_table_page_request(table, 1)
+    row_response = self.get_parent_page_request(parent, 1)
 
     # lets work out the last page
     rows = rows + row_response[&#39;content&#39;]
     total_pages = row_response[&#39;totalPages&#39;]
 
     for page in range(2, total_pages):
-        row_response = self.get_table_page_request(table, page)
+        row_response = self.get_parent_page_request(parent, page)
         rows = rows + row_response[&#39;content&#39;]
 
     # Once we have all the rows we will then get a list of all the columns
@@ -1750,47 +1799,46 @@ Returns:</p></div>
     }</code></pre>
 </details>
 </dd>
-<dt id="kodexa.stores.stores.RemoteTableDataStore.get_table_df"><code class="name flex">
-<span>def <span class="ident">get_table_df</span></span>(<span>self, table: str)</span>
+<dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent_df"><code class="name flex">
+<span>def <span class="ident">get_parent_df</span></span>(<span>self, parent: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>table</code></strong></dt>
-<dd>str:</dd>
+<dt><strong><code>parent</code></strong> :&ensp;<code>str</code></dt>
+<dd>The parent taxon (/ is root)</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_table_df(self, table: str):
+<pre><code class="python">def get_parent_df(self, parent: str):
     &#34;&#34;&#34;
 
     Args:
-      table: str:
+      parent (str): The parent taxon (/ is root)
 
     Returns:
 
     &#34;&#34;&#34;
     import pandas as pd
 
-    table_result = self.get_table(table)
+    table_result = self.get_parent(parent)
     return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])</code></pre>
 </details>
 </dd>
-<dt id="kodexa.stores.stores.RemoteTableDataStore.get_table_page_request"><code class="name flex">
-<span>def <span class="ident">get_table_page_request</span></span>(<span>self, table: str, page_number: int = 1, page_size=5000)</span>
+<dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent_page_request"><code class="name flex">
+<span>def <span class="ident">get_parent_page_request</span></span>(<span>self, parent: str, page_number: int = 1, page_size=5000)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>table</code></strong></dt>
-<dd>str:</dd>
-<dt><strong><code>page_number</code></strong></dt>
-<dd>int:
-(Default value = 1)</dd>
-<dt><strong><code>page_size</code></strong></dt>
+<dt><strong><code>parent</code></strong> :&ensp;<code>str</code></dt>
+<dd>The parent taxon (/ is root)</dd>
+<dt><strong><code>page_number</code></strong> :&ensp;<code>int</code></dt>
+<dd>(Default value = 1)</dd>
+<dt><strong><code>page_size</code></strong> :&ensp;<code>int</code></dt>
 <dd>(Default value = 5000)</dd>
 </dl>
 <p>Returns:</p></div>
@@ -1798,13 +1846,13 @@ Returns:</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_table_page_request(self, table: str, page_number: int = 1, page_size=5000):
+<pre><code class="python">def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000):
     &#34;&#34;&#34;
 
     Args:
-      table: str:
-      page_number: int:  (Default value = 1)
-      page_size:  (Default value = 5000)
+      parent (str): The parent taxon (/ is root)
+      page_number (int):  (Default value = 1)
+      page_size (int):  (Default value = 5000)
 
     Returns:
 
@@ -1817,7 +1865,7 @@ Returns:</p></div>
     # We need to go through and pull all the pages
     rows_response = requests.get(
         url,
-        params={&#34;table&#34;: table, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
+        params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
     if rows_response.status_code == 200:
@@ -1885,9 +1933,9 @@ Returns:</p></div>
 <ul class="">
 <li><code><a title="kodexa.stores.stores.RemoteTableDataStore.add" href="#kodexa.stores.stores.RemoteTableDataStore.add">add</a></code></li>
 <li><code><a title="kodexa.stores.stores.RemoteTableDataStore.add_rows" href="#kodexa.stores.stores.RemoteTableDataStore.add_rows">add_rows</a></code></li>
-<li><code><a title="kodexa.stores.stores.RemoteTableDataStore.get_table" href="#kodexa.stores.stores.RemoteTableDataStore.get_table">get_table</a></code></li>
-<li><code><a title="kodexa.stores.stores.RemoteTableDataStore.get_table_df" href="#kodexa.stores.stores.RemoteTableDataStore.get_table_df">get_table_df</a></code></li>
-<li><code><a title="kodexa.stores.stores.RemoteTableDataStore.get_table_page_request" href="#kodexa.stores.stores.RemoteTableDataStore.get_table_page_request">get_table_page_request</a></code></li>
+<li><code><a title="kodexa.stores.stores.RemoteTableDataStore.get_parent" href="#kodexa.stores.stores.RemoteTableDataStore.get_parent">get_parent</a></code></li>
+<li><code><a title="kodexa.stores.stores.RemoteTableDataStore.get_parent_df" href="#kodexa.stores.stores.RemoteTableDataStore.get_parent_df">get_parent_df</a></code></li>
+<li><code><a title="kodexa.stores.stores.RemoteTableDataStore.get_parent_page_request" href="#kodexa.stores.stores.RemoteTableDataStore.get_parent_page_request">get_parent_page_request</a></code></li>
 </ul>
 </li>
 </ul>
