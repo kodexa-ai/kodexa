@@ -56,14 +56,14 @@ class RemoteTableDataStore(RemoteStore):
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_table_page_request(table, 1)
+        row_response = self.get_parent_page_request(parent, 1)
 
         # lets work out the last page
         rows = rows + row_response['content']
         total_pages = row_response['totalPages']
 
         for page in range(2, total_pages):
-            row_response = self.get_table_page_request(parent, page)
+            row_response = self.get_parent_page_request(parent, page)
             rows = rows + row_response['content']
 
         # Once we have all the rows we will then get a list of all the columns
