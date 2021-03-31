@@ -99,7 +99,7 @@ class ContentObject:
         co.id = co_dict['id']
         co.labels = co_dict['labels']
         co.metadata = co_dict['metadata']
-        co.content_type = co_dict['content_type']
+        co.content_type = ContentType[co_dict['content_type']]
         co.mixins = co_dict['mixins']
         if 'classes' in co_dict and co_dict['classes']:
             co.classes = [ContentClassification.from_dict(content_class) for content_class in
