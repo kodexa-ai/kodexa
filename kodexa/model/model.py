@@ -1527,14 +1527,19 @@ class ContentNode(object):
 
 
 class ContentFeature(object):
-    """A feature that has been added to a ContentNode"""
+    """A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode"""
 
     def __init__(self, feature_type, name, value, description=None, single=True):
         self.feature_type = feature_type
+        """The type of feature, a logical name to group feature types together (ie. spatial)"""
         self.name = name
+        """The name of the feature (ie. bbox)"""
         self.value = value
+        """A value of the feature, this can be any JSON serializable data object"""
         self.description = description
+        """Description of the feature (Optional)"""
         self.single = single
+        """Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false"""
 
     def __str__(self):
         return f"Feature [type='{self.feature_type}' name='{self.name}' value='{self.value}' single='{self.single}']"
@@ -2290,11 +2295,11 @@ class DocumentFamily:
         """The path for this document family in the store (akin to a filename)"""
         self.store_ref = store_ref
         """The reference to the store containing the document family"""
-        self.classes:List[ContentClassification] = []
+        self.classes: List[ContentClassification] = []
         """The content classifications from the latest content object"""
-        self.mixins:List[str] = []
+        self.mixins: List[str] = []
         """The mixins from the latest content object"""
-        self.labels:List[str] = []
+        self.labels: List[str] = []
         """The labels from the latest content object"""
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
