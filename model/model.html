@@ -1556,14 +1556,19 @@ class ContentNode(object):
 
 
 class ContentFeature(object):
-    &#34;&#34;&#34;A feature that has been added to a ContentNode&#34;&#34;&#34;
+    &#34;&#34;&#34;A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode&#34;&#34;&#34;
 
     def __init__(self, feature_type, name, value, description=None, single=True):
         self.feature_type = feature_type
+        &#34;&#34;&#34;The type of feature, a logical name to group feature types together (ie. spatial)&#34;&#34;&#34;
         self.name = name
+        &#34;&#34;&#34;The name of the feature (ie. bbox)&#34;&#34;&#34;
         self.value = value
+        &#34;&#34;&#34;A value of the feature, this can be any JSON serializable data object&#34;&#34;&#34;
         self.description = description
+        &#34;&#34;&#34;Description of the feature (Optional)&#34;&#34;&#34;
         self.single = single
+        &#34;&#34;&#34;Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false&#34;&#34;&#34;
 
     def __str__(self):
         return f&#34;Feature [type=&#39;{self.feature_type}&#39; name=&#39;{self.name}&#39; value=&#39;{self.value}&#39; single=&#39;{self.single}&#39;]&#34;
@@ -2319,11 +2324,11 @@ class DocumentFamily:
         &#34;&#34;&#34;The path for this document family in the store (akin to a filename)&#34;&#34;&#34;
         self.store_ref = store_ref
         &#34;&#34;&#34;The reference to the store containing the document family&#34;&#34;&#34;
-        self.classes:List[ContentClassification] = []
+        self.classes: List[ContentClassification] = []
         &#34;&#34;&#34;The content classifications from the latest content object&#34;&#34;&#34;
-        self.mixins:List[str] = []
+        self.mixins: List[str] = []
         &#34;&#34;&#34;The mixins from the latest content object&#34;&#34;&#34;
-        self.labels:List[str] = []
+        self.labels: List[str] = []
         &#34;&#34;&#34;The labels from the latest content object&#34;&#34;&#34;
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
@@ -3143,20 +3148,25 @@ def from_dict(cls, event_dict: dict):
 <span>(</span><span>feature_type, name, value, description=None, single=True)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A feature that has been added to a ContentNode</p></div>
+<div class="desc"><p>A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ContentFeature(object):
-    &#34;&#34;&#34;A feature that has been added to a ContentNode&#34;&#34;&#34;
+    &#34;&#34;&#34;A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode&#34;&#34;&#34;
 
     def __init__(self, feature_type, name, value, description=None, single=True):
         self.feature_type = feature_type
+        &#34;&#34;&#34;The type of feature, a logical name to group feature types together (ie. spatial)&#34;&#34;&#34;
         self.name = name
+        &#34;&#34;&#34;The name of the feature (ie. bbox)&#34;&#34;&#34;
         self.value = value
+        &#34;&#34;&#34;A value of the feature, this can be any JSON serializable data object&#34;&#34;&#34;
         self.description = description
+        &#34;&#34;&#34;Description of the feature (Optional)&#34;&#34;&#34;
         self.single = single
+        &#34;&#34;&#34;Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false&#34;&#34;&#34;
 
     def __str__(self):
         return f&#34;Feature [type=&#39;{self.feature_type}&#39; name=&#39;{self.name}&#39; value=&#39;{self.value}&#39; single=&#39;{self.single}&#39;]&#34;
@@ -3173,6 +3183,29 @@ def from_dict(cls, event_dict: dict):
         &#34;&#34;&#34;
         return {&#39;name&#39;: self.feature_type + &#39;:&#39; + self.name, &#39;value&#39;: self.value, &#39;single&#39;: self.single}</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.ContentFeature.description"><code class="name">var <span class="ident">description</span></code></dt>
+<dd>
+<div class="desc"><p>Description of the feature (Optional)</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentFeature.feature_type"><code class="name">var <span class="ident">feature_type</span></code></dt>
+<dd>
+<div class="desc"><p>The type of feature, a logical name to group feature types together (ie. spatial)</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentFeature.name"><code class="name">var <span class="ident">name</span></code></dt>
+<dd>
+<div class="desc"><p>The name of the feature (ie. bbox)</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentFeature.single"><code class="name">var <span class="ident">single</span></code></dt>
+<dd>
+<div class="desc"><p>Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false</p></div>
+</dd>
+<dt id="kodexa.model.model.ContentFeature.value"><code class="name">var <span class="ident">value</span></code></dt>
+<dd>
+<div class="desc"><p>A value of the feature, this can be any JSON serializable data object</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.model.model.ContentFeature.to_dict"><code class="name flex">
@@ -8726,11 +8759,11 @@ document as its first entry</p>
         &#34;&#34;&#34;The path for this document family in the store (akin to a filename)&#34;&#34;&#34;
         self.store_ref = store_ref
         &#34;&#34;&#34;The reference to the store containing the document family&#34;&#34;&#34;
-        self.classes:List[ContentClassification] = []
+        self.classes: List[ContentClassification] = []
         &#34;&#34;&#34;The content classifications from the latest content object&#34;&#34;&#34;
-        self.mixins:List[str] = []
+        self.mixins: List[str] = []
         &#34;&#34;&#34;The mixins from the latest content object&#34;&#34;&#34;
-        self.labels:List[str] = []
+        self.labels: List[str] = []
         &#34;&#34;&#34;The labels from the latest content object&#34;&#34;&#34;
 
     def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
@@ -10872,8 +10905,13 @@ Returns:</p></div>
 </li>
 <li>
 <h4><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="kodexa.model.model.ContentFeature.description" href="#kodexa.model.model.ContentFeature.description">description</a></code></li>
+<li><code><a title="kodexa.model.model.ContentFeature.feature_type" href="#kodexa.model.model.ContentFeature.feature_type">feature_type</a></code></li>
+<li><code><a title="kodexa.model.model.ContentFeature.name" href="#kodexa.model.model.ContentFeature.name">name</a></code></li>
+<li><code><a title="kodexa.model.model.ContentFeature.single" href="#kodexa.model.model.ContentFeature.single">single</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.to_dict" href="#kodexa.model.model.ContentFeature.to_dict">to_dict</a></code></li>
+<li><code><a title="kodexa.model.model.ContentFeature.value" href="#kodexa.model.model.ContentFeature.value">value</a></code></li>
 </ul>
 </li>
 <li>
