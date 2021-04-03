@@ -2370,8 +2370,9 @@ class DocumentFamily:
         document_family.id = family_dict['id']
         document_family.content_objects = []
 
-        for co_class in family_dict['classes']:
-            document_family.classes.append(ContentClassification.from_dict(co_class))
+        if 'classes' in family_dict:
+            for co_class in family_dict['classes']:
+                document_family.classes.append(ContentClassification.from_dict(co_class))
 
         document_family.labels = family_dict['labels']
         document_family.mixins = family_dict['mixins']
