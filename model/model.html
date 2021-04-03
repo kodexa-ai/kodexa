@@ -2399,8 +2399,9 @@ class DocumentFamily:
         document_family.id = family_dict[&#39;id&#39;]
         document_family.content_objects = []
 
-        for co_class in family_dict[&#39;classes&#39;]:
-            document_family.classes.append(ContentClassification.from_dict(co_class))
+        if &#39;classes&#39; in family_dict:
+            for co_class in family_dict[&#39;classes&#39;]:
+                document_family.classes.append(ContentClassification.from_dict(co_class))
 
         document_family.labels = family_dict[&#39;labels&#39;]
         document_family.mixins = family_dict[&#39;mixins&#39;]
@@ -8834,8 +8835,9 @@ document as its first entry</p>
         document_family.id = family_dict[&#39;id&#39;]
         document_family.content_objects = []
 
-        for co_class in family_dict[&#39;classes&#39;]:
-            document_family.classes.append(ContentClassification.from_dict(co_class))
+        if &#39;classes&#39; in family_dict:
+            for co_class in family_dict[&#39;classes&#39;]:
+                document_family.classes.append(ContentClassification.from_dict(co_class))
 
         document_family.labels = family_dict[&#39;labels&#39;]
         document_family.mixins = family_dict[&#39;mixins&#39;]
@@ -8893,8 +8895,9 @@ def from_dict(cls, family_dict: dict):
     document_family.id = family_dict[&#39;id&#39;]
     document_family.content_objects = []
 
-    for co_class in family_dict[&#39;classes&#39;]:
-        document_family.classes.append(ContentClassification.from_dict(co_class))
+    if &#39;classes&#39; in family_dict:
+        for co_class in family_dict[&#39;classes&#39;]:
+            document_family.classes.append(ContentClassification.from_dict(co_class))
 
     document_family.labels = family_dict[&#39;labels&#39;]
     document_family.mixins = family_dict[&#39;mixins&#39;]
