@@ -30,26 +30,26 @@ class RemoteTableDataStore(RemoteStore):
         """ """
         return self.ref
 
-    def get_parent_df(self, parent: str):
+    def get_parent_df(self, parent: str, query: str = "*"):
         """
 
         Args:
           parent (str): The parent taxon (/ is root)
-
+          query (str): A query to limit the results (Defaults to *)
         Returns:
 
         """
         import pandas as pd
 
-        table_result = self.get_parent(parent)
+        table_result = self.get_parent(parent, query)
         return pd.DataFrame(table_result['rows'], columns=table_result['columns'])
 
-    def get_parent(self, parent: str):
+    def get_parent(self, parent: str, query: str = "*"):
         """
 
         Args:
           parent (str): The parent taxon (/ is root)
-
+          query (str): A query to limit the results (Default *)
         Returns:
 
         """
@@ -63,7 +63,7 @@ class RemoteTableDataStore(RemoteStore):
         total_pages = row_response['totalPages']
 
         for page in range(2, total_pages):
-            row_response = self.get_parent_page_request(parent, page)
+            row_response = self.get_parent_page_request(parent, page, query)
             rows = rows + row_response['content']
 
         # Once we have all the rows we will then get a list of all the columns
@@ -91,13 +91,14 @@ class RemoteTableDataStore(RemoteStore):
             "rows": new_rows
         }
 
-    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query="*"):
         """
 
         Args:
           parent (str): The parent taxon (/ is root)
           page_number (int):  (Default value = 1)
           page_size (int):  (Default value = 5000)
+          query (str): The query to limit results (Default *)
 
         Returns:
 
@@ -110,7 +111,7 @@ class RemoteTableDataStore(RemoteStore):
         # We need to go through and pull all the pages
         rows_response = requests.get(
             url,
-            params={"parent": parent, "page": page_number, "pageSize": page_size},
+            params={"parent": parent, "page": page_number, "pageSize": page_size, "query": query},
             headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
 
         if rows_response.status_code == 200:
@@ -125,7 +126,7 @@ class RemoteTableDataStore(RemoteStore):
         """
 
         Args:
-          rows:
+          rows: A list of rows that you want to post
 
         Returns:
 
