@@ -1897,8 +1897,6 @@ class Document(object):
             new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
         if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
             new_document.labels = doc_dict[&#39;labels&#39;]
-        if &#39;classifications&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
-            new_document.labels = doc_dict[&#39;labels&#39;]
         if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
             new_document.labels = doc_dict[&#39;taxomomies&#39;]
         if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
@@ -7579,8 +7577,6 @@ def from_dict(cls, co_dict):
             new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
         if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
             new_document.labels = doc_dict[&#39;labels&#39;]
-        if &#39;classifications&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
-            new_document.labels = doc_dict[&#39;labels&#39;]
         if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
             new_document.labels = doc_dict[&#39;taxomomies&#39;]
         if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
@@ -7840,8 +7836,6 @@ def from_dict(doc_dict):
     if &#39;source&#39; in doc_dict and doc_dict[&#39;source&#39;]:
         new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
     if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
-        new_document.labels = doc_dict[&#39;labels&#39;]
-    if &#39;classifications&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
         new_document.labels = doc_dict[&#39;labels&#39;]
     if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
         new_document.labels = doc_dict[&#39;taxomomies&#39;]
