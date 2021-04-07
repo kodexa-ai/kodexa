@@ -1868,8 +1868,6 @@ class Document(object):
             new_document.source = SourceMetadata.from_dict(doc_dict['source'])
         if 'labels' in doc_dict and doc_dict['labels']:
             new_document.labels = doc_dict['labels']
-        if 'classifications' in doc_dict and doc_dict['labels']:
-            new_document.labels = doc_dict['labels']
         if 'taxomomies' in doc_dict and doc_dict['taxomomies']:
             new_document.labels = doc_dict['taxomomies']
         if 'classes' in doc_dict and doc_dict['classes']:
