@@ -59,26 +59,26 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
-    def get_parent_df(self, parent: str):
+    def get_parent_df(self, parent: str, query: str = &#34;*&#34;):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
-
+          query (str): A query to limit the results (Defaults to *)
         Returns:
 
         &#34;&#34;&#34;
         import pandas as pd
 
-        table_result = self.get_parent(parent)
+        table_result = self.get_parent(parent, query)
         return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])
 
-    def get_parent(self, parent: str):
+    def get_parent(self, parent: str, query: str = &#34;*&#34;):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
-
+          query (str): A query to limit the results (Default *)
         Returns:
 
         &#34;&#34;&#34;
@@ -92,7 +92,7 @@ class RemoteTableDataStore(RemoteStore):
         total_pages = row_response[&#39;totalPages&#39;]
 
         for page in range(2, total_pages):
-            row_response = self.get_parent_page_request(parent, page)
+            row_response = self.get_parent_page_request(parent, page, query)
             rows = rows + row_response[&#39;content&#39;]
 
         # Once we have all the rows we will then get a list of all the columns
@@ -120,13 +120,14 @@ class RemoteTableDataStore(RemoteStore):
             &#34;rows&#34;: new_rows
         }
 
-    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
           page_number (int):  (Default value = 1)
           page_size (int):  (Default value = 5000)
+          query (str): The query to limit results (Default *)
 
         Returns:
 
@@ -139,7 +140,7 @@ class RemoteTableDataStore(RemoteStore):
         # We need to go through and pull all the pages
         rows_response = requests.get(
             url,
-            params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
+            params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query},
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
         if rows_response.status_code == 200:
@@ -154,7 +155,7 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34;
 
         Args:
-          rows:
+          rows: A list of rows that you want to post
 
         Returns:
 
@@ -1506,26 +1507,26 @@ in an instance of the Kodexa platform</p></div>
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
-    def get_parent_df(self, parent: str):
+    def get_parent_df(self, parent: str, query: str = &#34;*&#34;):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
-
+          query (str): A query to limit the results (Defaults to *)
         Returns:
 
         &#34;&#34;&#34;
         import pandas as pd
 
-        table_result = self.get_parent(parent)
+        table_result = self.get_parent(parent, query)
         return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])
 
-    def get_parent(self, parent: str):
+    def get_parent(self, parent: str, query: str = &#34;*&#34;):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
-
+          query (str): A query to limit the results (Default *)
         Returns:
 
         &#34;&#34;&#34;
@@ -1539,7 +1540,7 @@ in an instance of the Kodexa platform</p></div>
         total_pages = row_response[&#39;totalPages&#39;]
 
         for page in range(2, total_pages):
-            row_response = self.get_parent_page_request(parent, page)
+            row_response = self.get_parent_page_request(parent, page, query)
             rows = rows + row_response[&#39;content&#39;]
 
         # Once we have all the rows we will then get a list of all the columns
@@ -1567,13 +1568,14 @@ in an instance of the Kodexa platform</p></div>
             &#34;rows&#34;: new_rows
         }
 
-    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
           page_number (int):  (Default value = 1)
           page_size (int):  (Default value = 5000)
+          query (str): The query to limit results (Default *)
 
         Returns:
 
@@ -1586,7 +1588,7 @@ in an instance of the Kodexa platform</p></div>
         # We need to go through and pull all the pages
         rows_response = requests.get(
             url,
-            params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
+            params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query},
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
         if rows_response.status_code == 200:
@@ -1601,7 +1603,7 @@ in an instance of the Kodexa platform</p></div>
         &#34;&#34;&#34;
 
         Args:
-          rows:
+          rows: A list of rows that you want to post
 
         Returns:
 
@@ -1706,8 +1708,11 @@ Returns:</p></div>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
-<p>rows:
-Returns:</p></div>
+<dl>
+<dt><strong><code>rows</code></strong></dt>
+<dd>A list of rows that you want to post</dd>
+</dl>
+<p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1716,7 +1721,7 @@ Returns:</p></div>
     &#34;&#34;&#34;
 
     Args:
-      rows:
+      rows: A list of rows that you want to post
 
     Returns:
 
@@ -1738,25 +1743,27 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent"><code class="name flex">
-<span>def <span class="ident">get_parent</span></span>(<span>self, parent: str)</span>
+<span>def <span class="ident">get_parent</span></span>(<span>self, parent: str, query: str = '*')</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>parent</code></strong> :&ensp;<code>str</code></dt>
 <dd>The parent taxon (/ is root)</dd>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>A query to limit the results (Default *)</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_parent(self, parent: str):
+<pre><code class="python">def get_parent(self, parent: str, query: str = &#34;*&#34;):
     &#34;&#34;&#34;
 
     Args:
       parent (str): The parent taxon (/ is root)
-
+      query (str): A query to limit the results (Default *)
     Returns:
 
     &#34;&#34;&#34;
@@ -1770,7 +1777,7 @@ Returns:</p></div>
     total_pages = row_response[&#39;totalPages&#39;]
 
     for page in range(2, total_pages):
-        row_response = self.get_parent_page_request(parent, page)
+        row_response = self.get_parent_page_request(parent, page, query)
         rows = rows + row_response[&#39;content&#39;]
 
     # Once we have all the rows we will then get a list of all the columns
@@ -1800,36 +1807,38 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent_df"><code class="name flex">
-<span>def <span class="ident">get_parent_df</span></span>(<span>self, parent: str)</span>
+<span>def <span class="ident">get_parent_df</span></span>(<span>self, parent: str, query: str = '*')</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>parent</code></strong> :&ensp;<code>str</code></dt>
 <dd>The parent taxon (/ is root)</dd>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>A query to limit the results (Defaults to *)</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_parent_df(self, parent: str):
+<pre><code class="python">def get_parent_df(self, parent: str, query: str = &#34;*&#34;):
     &#34;&#34;&#34;
 
     Args:
       parent (str): The parent taxon (/ is root)
-
+      query (str): A query to limit the results (Defaults to *)
     Returns:
 
     &#34;&#34;&#34;
     import pandas as pd
 
-    table_result = self.get_parent(parent)
+    table_result = self.get_parent(parent, query)
     return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent_page_request"><code class="name flex">
-<span>def <span class="ident">get_parent_page_request</span></span>(<span>self, parent: str, page_number: int = 1, page_size=5000)</span>
+<span>def <span class="ident">get_parent_page_request</span></span>(<span>self, parent: str, page_number: int = 1, page_size=5000, query='*')</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -1840,19 +1849,22 @@ Returns:</p></div>
 <dd>(Default value = 1)</dd>
 <dt><strong><code>page_size</code></strong> :&ensp;<code>int</code></dt>
 <dd>(Default value = 5000)</dd>
+<dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
+<dd>The query to limit results (Default *)</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000):
+<pre><code class="python">def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;):
     &#34;&#34;&#34;
 
     Args:
       parent (str): The parent taxon (/ is root)
       page_number (int):  (Default value = 1)
       page_size (int):  (Default value = 5000)
+      query (str): The query to limit results (Default *)
 
     Returns:
 
@@ -1865,7 +1877,7 @@ Returns:</p></div>
     # We need to go through and pull all the pages
     rows_response = requests.get(
         url,
-        params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size},
+        params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query},
         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
     if rows_response.status_code == 200:
