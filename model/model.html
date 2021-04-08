@@ -2401,8 +2401,15 @@ class DocumentFamily:
             for co_class in family_dict[&#39;classes&#39;]:
                 document_family.classes.append(ContentClassification.from_dict(co_class))
 
-        document_family.labels = family_dict[&#39;labels&#39;]
-        document_family.mixins = family_dict[&#39;mixins&#39;]
+        if &#39;labels&#39; in family_dict:
+            document_family.labels = family_dict[&#39;labels&#39;]
+        else:
+            document_family.labels = []
+
+        if &#39;mixins&#39; in family_dict:
+            document_family.mixins = family_dict[&#39;mixins&#39;]
+        else:
+            document_family.mixins = []
 
         for co_dict in family_dict[&#39;contentObjects&#39;]:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
@@ -8833,8 +8840,15 @@ document as its first entry</p>
             for co_class in family_dict[&#39;classes&#39;]:
                 document_family.classes.append(ContentClassification.from_dict(co_class))
 
-        document_family.labels = family_dict[&#39;labels&#39;]
-        document_family.mixins = family_dict[&#39;mixins&#39;]
+        if &#39;labels&#39; in family_dict:
+            document_family.labels = family_dict[&#39;labels&#39;]
+        else:
+            document_family.labels = []
+
+        if &#39;mixins&#39; in family_dict:
+            document_family.mixins = family_dict[&#39;mixins&#39;]
+        else:
+            document_family.mixins = []
 
         for co_dict in family_dict[&#39;contentObjects&#39;]:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
@@ -8893,8 +8907,15 @@ def from_dict(cls, family_dict: dict):
         for co_class in family_dict[&#39;classes&#39;]:
             document_family.classes.append(ContentClassification.from_dict(co_class))
 
-    document_family.labels = family_dict[&#39;labels&#39;]
-    document_family.mixins = family_dict[&#39;mixins&#39;]
+    if &#39;labels&#39; in family_dict:
+        document_family.labels = family_dict[&#39;labels&#39;]
+    else:
+        document_family.labels = []
+
+    if &#39;mixins&#39; in family_dict:
+        document_family.mixins = family_dict[&#39;mixins&#39;]
+    else:
+        document_family.mixins = []
 
     for co_dict in family_dict[&#39;contentObjects&#39;]:
         document_family.content_objects.append(ContentObject.from_dict(co_dict))
