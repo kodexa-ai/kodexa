@@ -2372,8 +2372,15 @@ class DocumentFamily:
             for co_class in family_dict['classes']:
                 document_family.classes.append(ContentClassification.from_dict(co_class))
 
-        document_family.labels = family_dict['labels']
-        document_family.mixins = family_dict['mixins']
+        if 'labels' in family_dict:
+            document_family.labels = family_dict['labels']
+        else:
+            document_family.labels = []
+
+        if 'mixins' in family_dict:
+            document_family.mixins = family_dict['mixins']
+        else:
+            document_family.mixins = []
 
         for co_dict in family_dict['contentObjects']:
             document_family.content_objects.append(ContentObject.from_dict(co_dict))
