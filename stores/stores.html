@@ -59,40 +59,42 @@ class RemoteTableDataStore(RemoteStore):
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
-    def get_parent_df(self, parent: str, query: str = &#34;*&#34;):
+    def get_parent_df(self, parent: str, query: str = &#34;*&#34;, document_family: Optional[DocumentFamily] = None):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
           query (str): A query to limit the results (Defaults to *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
         Returns:
 
         &#34;&#34;&#34;
         import pandas as pd
 
-        table_result = self.get_parent(parent, query)
+        table_result = self.get_parent(parent, query, document_family)
         return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])
 
-    def get_parent(self, parent: str, query: str = &#34;*&#34;):
+    def get_parent(self, parent: str, query: str = &#34;*&#34;, document_family: Optional[DocumentFamily] = None):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
           query (str): A query to limit the results (Default *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
         Returns:
 
         &#34;&#34;&#34;
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_parent_page_request(parent, 1)
+        row_response = self.get_parent_page_request(parent, 1, document_family=document_family)
 
         # lets work out the last page
         rows = rows + row_response[&#39;content&#39;]
         total_pages = row_response[&#39;totalPages&#39;]
 
         for page in range(2, total_pages):
-            row_response = self.get_parent_page_request(parent, page, query)
+            row_response = self.get_parent_page_request(parent, page, query=query, document_family=document_family)
             rows = rows + row_response[&#39;content&#39;]
 
         # Once we have all the rows we will then get a list of all the columns
@@ -120,7 +122,8 @@ class RemoteTableDataStore(RemoteStore):
             &#34;rows&#34;: new_rows
         }
 
-    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;,
+                                document_family: Optional[DocumentFamily] = None):
         &#34;&#34;&#34;
 
         Args:
@@ -128,6 +131,7 @@ class RemoteTableDataStore(RemoteStore):
           page_number (int):  (Default value = 1)
           page_size (int):  (Default value = 5000)
           query (str): The query to limit results (Default *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
 
         Returns:
 
@@ -138,9 +142,15 @@ class RemoteTableDataStore(RemoteStore):
         logger.debug(f&#34;Downloading a specific table from {url}&#34;)
 
         # We need to go through and pull all the pages
+        params = {&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query}
+
+        if document_family:
+            params[&#39;documentFamilyId&#39;] = document_family.id
+            params[&#39;storeRef&#39;] = document_family.store_ref
+
         rows_response = requests.get(
             url,
-            params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query},
+            params=params,
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
         if rows_response.status_code == 200:
@@ -1507,40 +1517,42 @@ in an instance of the Kodexa platform</p></div>
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.ref
 
-    def get_parent_df(self, parent: str, query: str = &#34;*&#34;):
+    def get_parent_df(self, parent: str, query: str = &#34;*&#34;, document_family: Optional[DocumentFamily] = None):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
           query (str): A query to limit the results (Defaults to *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
         Returns:
 
         &#34;&#34;&#34;
         import pandas as pd
 
-        table_result = self.get_parent(parent, query)
+        table_result = self.get_parent(parent, query, document_family)
         return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])
 
-    def get_parent(self, parent: str, query: str = &#34;*&#34;):
+    def get_parent(self, parent: str, query: str = &#34;*&#34;, document_family: Optional[DocumentFamily] = None):
         &#34;&#34;&#34;
 
         Args:
           parent (str): The parent taxon (/ is root)
           query (str): A query to limit the results (Default *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
         Returns:
 
         &#34;&#34;&#34;
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_parent_page_request(parent, 1)
+        row_response = self.get_parent_page_request(parent, 1, document_family=document_family)
 
         # lets work out the last page
         rows = rows + row_response[&#39;content&#39;]
         total_pages = row_response[&#39;totalPages&#39;]
 
         for page in range(2, total_pages):
-            row_response = self.get_parent_page_request(parent, page, query)
+            row_response = self.get_parent_page_request(parent, page, query=query, document_family=document_family)
             rows = rows + row_response[&#39;content&#39;]
 
         # Once we have all the rows we will then get a list of all the columns
@@ -1568,7 +1580,8 @@ in an instance of the Kodexa platform</p></div>
             &#34;rows&#34;: new_rows
         }
 
-    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;,
+                                document_family: Optional[DocumentFamily] = None):
         &#34;&#34;&#34;
 
         Args:
@@ -1576,6 +1589,7 @@ in an instance of the Kodexa platform</p></div>
           page_number (int):  (Default value = 1)
           page_size (int):  (Default value = 5000)
           query (str): The query to limit results (Default *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
 
         Returns:
 
@@ -1586,9 +1600,15 @@ in an instance of the Kodexa platform</p></div>
         logger.debug(f&#34;Downloading a specific table from {url}&#34;)
 
         # We need to go through and pull all the pages
+        params = {&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query}
+
+        if document_family:
+            params[&#39;documentFamilyId&#39;] = document_family.id
+            params[&#39;storeRef&#39;] = document_family.store_ref
+
         rows_response = requests.get(
             url,
-            params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query},
+            params=params,
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
         if rows_response.status_code == 200:
@@ -1743,7 +1763,7 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent"><code class="name flex">
-<span>def <span class="ident">get_parent</span></span>(<span>self, parent: str, query: str = '*')</span>
+<span>def <span class="ident">get_parent</span></span>(<span>self, parent: str, query: str = '*', document_family: Union[<a title="kodexa.model.model.DocumentFamily" href="../model/model.html#kodexa.model.model.DocumentFamily">DocumentFamily</a>, NoneType] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -1752,32 +1772,35 @@ Returns:</p></div>
 <dd>The parent taxon (/ is root)</dd>
 <dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
 <dd>A query to limit the results (Default *)</dd>
+<dt><strong><code>document_family</code></strong> :&ensp;<code>Optional[DocumentFamily</code></dt>
+<dd>Optionally the document family to limit results to</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_parent(self, parent: str, query: str = &#34;*&#34;):
+<pre><code class="python">def get_parent(self, parent: str, query: str = &#34;*&#34;, document_family: Optional[DocumentFamily] = None):
     &#34;&#34;&#34;
 
     Args:
       parent (str): The parent taxon (/ is root)
       query (str): A query to limit the results (Default *)
+      document_family (Optional[DocumentFamily): Optionally the document family to limit results to
     Returns:
 
     &#34;&#34;&#34;
 
     # We need to get the first set of rows,
     rows: List = []
-    row_response = self.get_parent_page_request(parent, 1)
+    row_response = self.get_parent_page_request(parent, 1, document_family=document_family)
 
     # lets work out the last page
     rows = rows + row_response[&#39;content&#39;]
     total_pages = row_response[&#39;totalPages&#39;]
 
     for page in range(2, total_pages):
-        row_response = self.get_parent_page_request(parent, page, query)
+        row_response = self.get_parent_page_request(parent, page, query=query, document_family=document_family)
         rows = rows + row_response[&#39;content&#39;]
 
     # Once we have all the rows we will then get a list of all the columns
@@ -1807,7 +1830,7 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent_df"><code class="name flex">
-<span>def <span class="ident">get_parent_df</span></span>(<span>self, parent: str, query: str = '*')</span>
+<span>def <span class="ident">get_parent_df</span></span>(<span>self, parent: str, query: str = '*', document_family: Union[<a title="kodexa.model.model.DocumentFamily" href="../model/model.html#kodexa.model.model.DocumentFamily">DocumentFamily</a>, NoneType] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -1816,29 +1839,32 @@ Returns:</p></div>
 <dd>The parent taxon (/ is root)</dd>
 <dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
 <dd>A query to limit the results (Defaults to *)</dd>
+<dt><strong><code>document_family</code></strong> :&ensp;<code>Optional[DocumentFamily</code></dt>
+<dd>Optionally the document family to limit results to</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_parent_df(self, parent: str, query: str = &#34;*&#34;):
+<pre><code class="python">def get_parent_df(self, parent: str, query: str = &#34;*&#34;, document_family: Optional[DocumentFamily] = None):
     &#34;&#34;&#34;
 
     Args:
       parent (str): The parent taxon (/ is root)
       query (str): A query to limit the results (Defaults to *)
+      document_family (Optional[DocumentFamily): Optionally the document family to limit results to
     Returns:
 
     &#34;&#34;&#34;
     import pandas as pd
 
-    table_result = self.get_parent(parent, query)
+    table_result = self.get_parent(parent, query, document_family)
     return pd.DataFrame(table_result[&#39;rows&#39;], columns=table_result[&#39;columns&#39;])</code></pre>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteTableDataStore.get_parent_page_request"><code class="name flex">
-<span>def <span class="ident">get_parent_page_request</span></span>(<span>self, parent: str, page_number: int = 1, page_size=5000, query='*')</span>
+<span>def <span class="ident">get_parent_page_request</span></span>(<span>self, parent: str, page_number: int = 1, page_size=5000, query='*', document_family: Union[<a title="kodexa.model.model.DocumentFamily" href="../model/model.html#kodexa.model.model.DocumentFamily">DocumentFamily</a>, NoneType] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -1851,13 +1877,16 @@ Returns:</p></div>
 <dd>(Default value = 5000)</dd>
 <dt><strong><code>query</code></strong> :&ensp;<code>str</code></dt>
 <dd>The query to limit results (Default *)</dd>
+<dt><strong><code>document_family</code></strong> :&ensp;<code>Optional[DocumentFamily</code></dt>
+<dd>Optionally the document family to limit results to</dd>
 </dl>
 <p>Returns:</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;):
+<pre><code class="python">def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query=&#34;*&#34;,
+                            document_family: Optional[DocumentFamily] = None):
     &#34;&#34;&#34;
 
     Args:
@@ -1865,6 +1894,7 @@ Returns:</p></div>
       page_number (int):  (Default value = 1)
       page_size (int):  (Default value = 5000)
       query (str): The query to limit results (Default *)
+      document_family (Optional[DocumentFamily): Optionally the document family to limit results to
 
     Returns:
 
@@ -1875,9 +1905,15 @@ Returns:</p></div>
     logger.debug(f&#34;Downloading a specific table from {url}&#34;)
 
     # We need to go through and pull all the pages
+    params = {&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query}
+
+    if document_family:
+        params[&#39;documentFamilyId&#39;] = document_family.id
+        params[&#39;storeRef&#39;] = document_family.store_ref
+
     rows_response = requests.get(
         url,
-        params={&#34;parent&#34;: parent, &#34;page&#34;: page_number, &#34;pageSize&#34;: page_size, &#34;query&#34;: query},
+        params=params,
         headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token(), &#34;content-type&#34;: &#34;application/json&#34;})
 
     if rows_response.status_code == 200:
