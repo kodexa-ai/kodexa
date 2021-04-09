@@ -2315,6 +2315,7 @@ class DocumentFamily:
         new_content_object.content_type = ContentType.DOCUMENT
         new_content_object.metadata = document.metadata
         new_content_object.labels = document.labels
+        new_content_object.mixins = document.get_mixins()
 
         self.content_objects.append(new_content_object)
 
