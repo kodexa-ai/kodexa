@@ -30,40 +30,42 @@ class RemoteTableDataStore(RemoteStore):
         """ """
         return self.ref
 
-    def get_parent_df(self, parent: str, query: str = "*"):
+    def get_parent_df(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
 
         Args:
           parent (str): The parent taxon (/ is root)
           query (str): A query to limit the results (Defaults to *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
         Returns:
 
         """
         import pandas as pd
 
-        table_result = self.get_parent(parent, query)
+        table_result = self.get_parent(parent, query, document_family)
         return pd.DataFrame(table_result['rows'], columns=table_result['columns'])
 
-    def get_parent(self, parent: str, query: str = "*"):
+    def get_parent(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
 
         Args:
           parent (str): The parent taxon (/ is root)
           query (str): A query to limit the results (Default *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
         Returns:
 
         """
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_parent_page_request(parent, 1)
+        row_response = self.get_parent_page_request(parent, 1, document_family=document_family)
 
         # lets work out the last page
         rows = rows + row_response['content']
         total_pages = row_response['totalPages']
 
         for page in range(2, total_pages):
-            row_response = self.get_parent_page_request(parent, page, query)
+            row_response = self.get_parent_page_request(parent, page, query=query, document_family=document_family)
             rows = rows + row_response['content']
 
         # Once we have all the rows we will then get a list of all the columns
@@ -91,7 +93,8 @@ class RemoteTableDataStore(RemoteStore):
             "rows": new_rows
         }
 
-    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query="*"):
+    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query="*",
+                                document_family: Optional[DocumentFamily] = None):
         """
 
         Args:
@@ -99,6 +102,7 @@ class RemoteTableDataStore(RemoteStore):
           page_number (int):  (Default value = 1)
           page_size (int):  (Default value = 5000)
           query (str): The query to limit results (Default *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
 
         Returns:
 
@@ -109,9 +113,15 @@ class RemoteTableDataStore(RemoteStore):
         logger.debug(f"Downloading a specific table from {url}")
 
         # We need to go through and pull all the pages
+        params = {"parent": parent, "page": page_number, "pageSize": page_size, "query": query}
+
+        if document_family:
+            params['documentFamilyId'] = document_family.id
+            params['storeRef'] = document_family.store_ref
+
         rows_response = requests.get(
             url,
-            params={"parent": parent, "page": page_number, "pageSize": page_size, "query": query},
+            params=params,
             headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
 
         if rows_response.status_code == 200:
