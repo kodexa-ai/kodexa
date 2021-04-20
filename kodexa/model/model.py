@@ -2169,7 +2169,7 @@ class AssistantEvent(BaseEvent):
     @classmethod
     def from_dict(cls, event_dict: dict):
         return AssistantEvent(ContentObject.from_dict(event_dict['contentObject']),
-                              AssistantEventType[event_dict['eventType']])
+                              event_dict['eventType'])
 
     def to_dict(self):
         return {
