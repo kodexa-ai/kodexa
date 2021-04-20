@@ -2146,13 +2146,6 @@ class ContentEvent(BaseEvent):
         }
 
 
-class AssistantEventType(Enum):
-    """
-    The type of event that is being provided to the assistant
-    """
-    PROCESS_DOCUMENT = 'PROCESS_DOCUMENT'
-
-
 class AssistantEvent(BaseEvent):
     type = "assistant"
 
@@ -2161,7 +2154,7 @@ class AssistantEvent(BaseEvent):
     and respond to a document
     """
 
-    def __init__(self, content_object: ContentObject, event_type: AssistantEventType):
+    def __init__(self, content_object: ContentObject, event_type: str):
         """
         Initialize a content event
         Args:
