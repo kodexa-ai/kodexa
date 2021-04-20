@@ -2175,13 +2175,6 @@ class ContentEvent(BaseEvent):
         }
 
 
-class AssistantEventType(Enum):
-    &#34;&#34;&#34;
-    The type of event that is being provided to the assistant
-    &#34;&#34;&#34;
-    PROCESS_DOCUMENT = &#39;PROCESS_DOCUMENT&#39;
-
-
 class AssistantEvent(BaseEvent):
     type = &#34;assistant&#34;
 
@@ -2190,7 +2183,7 @@ class AssistantEvent(BaseEvent):
     and respond to a document
     &#34;&#34;&#34;
 
-    def __init__(self, content_object: ContentObject, event_type: AssistantEventType):
+    def __init__(self, content_object: ContentObject, event_type: str):
         &#34;&#34;&#34;
         Initialize a content event
         Args:
@@ -2205,7 +2198,7 @@ class AssistantEvent(BaseEvent):
     @classmethod
     def from_dict(cls, event_dict: dict):
         return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
-                              AssistantEventType[event_dict[&#39;eventType&#39;]])
+                              event_dict[&#39;eventType&#39;])
 
     def to_dict(self):
         return {
@@ -2768,7 +2761,7 @@ class ContentObjectReference:
 <dl>
 <dt id="kodexa.model.model.AssistantEvent"><code class="flex name class">
 <span>class <span class="ident">AssistantEvent</span></span>
-<span>(</span><span>content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>, event_type: <a title="kodexa.model.model.AssistantEventType" href="#kodexa.model.model.AssistantEventType">AssistantEventType</a>)</span>
+<span>(</span><span>content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>, event_type: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The base for all events within Kodexa</p>
@@ -2792,7 +2785,7 @@ class ContentObjectReference:
     and respond to a document
     &#34;&#34;&#34;
 
-    def __init__(self, content_object: ContentObject, event_type: AssistantEventType):
+    def __init__(self, content_object: ContentObject, event_type: str):
         &#34;&#34;&#34;
         Initialize a content event
         Args:
@@ -2807,7 +2800,7 @@ class ContentObjectReference:
     @classmethod
     def from_dict(cls, event_dict: dict):
         return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
-                              AssistantEventType[event_dict[&#39;eventType&#39;]])
+                              event_dict[&#39;eventType&#39;])
 
     def to_dict(self):
         return {
@@ -2842,7 +2835,7 @@ and respond to a document</p></div>
 <pre><code class="python">@classmethod
 def from_dict(cls, event_dict: dict):
     return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
-                          AssistantEventType[event_dict[&#39;eventType&#39;]])</code></pre>
+                          event_dict[&#39;eventType&#39;])</code></pre>
 </details>
 </dd>
 </dl>
@@ -2875,34 +2868,6 @@ def from_dict(cls, event_dict: dict):
         &#39;type&#39;: self.type
     }</code></pre>
 </details>
-</dd>
-</dl>
-</dd>
-<dt id="kodexa.model.model.AssistantEventType"><code class="flex name class">
-<span>class <span class="ident">AssistantEventType</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>The type of event that is being provided to the assistant</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class AssistantEventType(Enum):
-    &#34;&#34;&#34;
-    The type of event that is being provided to the assistant
-    &#34;&#34;&#34;
-    PROCESS_DOCUMENT = &#39;PROCESS_DOCUMENT&#39;</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="kodexa.model.model.AssistantEventType.PROCESS_DOCUMENT"><code class="name">var <span class="ident">PROCESS_DOCUMENT</span></code></dt>
-<dd>
-<div class="desc"></div>
 </dd>
 </dl>
 </dd>
@@ -10888,12 +10853,6 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.AssistantEvent.from_dict" href="#kodexa.model.model.AssistantEvent.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.AssistantEvent.to_dict" href="#kodexa.model.model.AssistantEvent.to_dict">to_dict</a></code></li>
 <li><code><a title="kodexa.model.model.AssistantEvent.type" href="#kodexa.model.model.AssistantEvent.type">type</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="kodexa.model.model.AssistantEventType" href="#kodexa.model.model.AssistantEventType">AssistantEventType</a></code></h4>
-<ul class="">
-<li><code><a title="kodexa.model.model.AssistantEventType.PROCESS_DOCUMENT" href="#kodexa.model.model.AssistantEventType.PROCESS_DOCUMENT">PROCESS_DOCUMENT</a></code></li>
 </ul>
 </li>
 <li>
