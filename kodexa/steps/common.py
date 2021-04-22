@@ -3,13 +3,20 @@ from kodexa.stores import TableDataStore
 
 
 class KodexaProcessingException(Exception):
-    """ """
+    """
+    This is a specialized exception, if thrown while in the Kodexa Platform we will include the
+    additional exception details so that they can be presented back to the user
+    """
 
     def __init__(self, message, description, advice=None, documentation_url=None):
         self.description = description
+        """The description of the problem, this is longer description"""
         self.advice = advice
+        """Any advice on how to handle the problem, this can also include markdown to help present possible solutions"""
         self.message = message
+        """A short message to express the problem"""
         self.documentation_url = documentation_url
+        """A link to a URL where the user might find more information on the problem"""
         super().__init__(self.message)
 
     def __str__(self):
@@ -22,21 +29,22 @@ class NodeTagger:
     
     It allows for multiple matching groups to be defined, also the ability to use all content
     and also just tag the node (ignoring the matching groups)
-
-    Args:
-
-    Returns:
-
     """
 
     def __init__(self, selector, tag_to_apply, content_re=".*", use_all_content=True, node_only=False,
                  node_tag_uuid=None):
         self.selector = selector
+        """The selector to use to find the node(s) to tag"""
         self.content_re = content_re
+        """A regular expression used to match the content in the identified nodes"""
         self.use_all_content = use_all_content
+        """A flag that will assume that all content should be tagged (there will be no start/end)"""
         self.tag_to_apply = tag_to_apply
+        """The tag to apply to the node(s)"""
         self.node_only = node_only
+        """Tag the node only and no content"""
         self.node_tag_uuid = node_tag_uuid
+        """The UUID to use on the tag"""
 
     def get_name(self):
         """ """
@@ -44,12 +52,6 @@ class NodeTagger:
 
     def process(self, document):
         """
-
-        Args:
-          document: 
-
-        Returns:
-
         """
         document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                                   use_all_content=self.use_all_content,
@@ -61,17 +63,15 @@ class NodeTagger:
 class NodeTagCopy:
     """The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
     If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.
-
-    Args:
-
-    Returns:
-
     """
 
     def __init__(self, selector, existing_tag_name, new_tag_name):
         self.selector = selector
+        """The selector to match the nodes"""
         self.existing_tag_name = existing_tag_name
+        """The existing tag name that will be the source"""
         self.new_tag_name = new_tag_name
+        """The new tag name that will be the destination"""
 
     def get_name(self):
         """ """
@@ -79,12 +79,6 @@ class NodeTagCopy:
 
     def process(self, document):
         """
-
-        Args:
-          document: 
-
-        Returns:
-
         """
         document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
                                        new_tag_name=self.new_tag_name)
@@ -93,18 +87,13 @@ class NodeTagCopy:
 
 class TextParser:
     """Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes).
-
-    Args:
-      encoding: str  The encoding that should be used when attempting to decode data  (default 'utf-8')
-      lines_as_child_nodes: bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
-
-    Returns:
-
     """
 
     def __init__(self, encoding="utf-8", lines_as_child_nodes=False):
         self.encoding = encoding
+        """The encoding that should be used when attempting to decode data  (default 'utf-8')"""
         self.lines_as_child_nodes = lines_as_child_nodes
+        """If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)"""
 
     @staticmethod
     def get_name():
@@ -113,12 +102,6 @@ class TextParser:
 
     def decode_text(self, data):
         """
-
-        Args:
-          data: 
-
-        Returns:
-
         """
         try:
             data = data.decode(self.encoding)
@@ -128,12 +111,6 @@ class TextParser:
 
     def process(self, document):
         """
-
-        Args:
-          document: 
-
-        Returns:
-
         """
         with get_source(document) as fh:
 
@@ -157,11 +134,6 @@ class TextParser:
 class RollupTransformer:
     """The rollup step allows you to decide how you want to collapse content in a document by removing nodes
     while maintaining content and features as needed
-
-    Args:
-
-    Returns:
-
     """
 
     def __init__(self, collapse_type_res=None, reindex: bool = True, selector: str = ".",
@@ -180,11 +152,6 @@ class RollupTransformer:
 
     def process(self, document):
         """
-
-        Args:
-          document: 
-
-        Returns:
 
         """
 
@@ -294,13 +261,6 @@ class TagsToKeyValuePairExtractor:
 
     def process(self, document, context):
         """
-
-        Args:
-          document: 
-          context: 
-
-        Returns:
-
         """
 
         table_store = context.get_store(self.store_name, self.get_default_store())
@@ -312,13 +272,6 @@ class TagsToKeyValuePairExtractor:
 
     def process_node(self, table_store, node):
         """
-
-        Args:
-          table_store: 
-          node: 
-
-        Returns:
-
         """
         for feature in node.get_features():
             if feature.feature_type == 'tag' \

@@ -234,14 +234,6 @@ class ContentNode(object):
     <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
     >>> current_content_node.add_child(new_page)
 
-    or
-
-    Args:
-        document: The document to which the node belongs
-        node_type: the type of the node
-        content: the content for this node
-
-    Returns:
     """
 
     def __init__(self, document, node_type: str, content: Optional[str] = None,
