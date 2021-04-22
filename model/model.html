@@ -263,14 +263,6 @@ class ContentNode(object):
     &lt;kodexa.model.model.ContentNode object at 0x7f80605e53c8&gt;
     &gt;&gt;&gt; current_content_node.add_child(new_page)
 
-    or
-
-    Args:
-        document: The document to which the node belongs
-        node_type: the type of the node
-        content: the content for this node
-
-    Returns:
     &#34;&#34;&#34;
 
     def __init__(self, document, node_type: str, content: Optional[str] = None,
@@ -3229,18 +3221,7 @@ ensure that the correct mixins are applied.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; new_page = document.create_node(node_type='page', content='This is page 1')
 &lt;kodexa.model.model.ContentNode object at 0x7f80605e53c8&gt;
 &gt;&gt;&gt; current_content_node.add_child(new_page)
-</code></pre>
-<p>or</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>The document to which the node belongs</dd>
-<dt><strong><code>node_type</code></strong></dt>
-<dd>the type of the node</dd>
-<dt><strong><code>content</code></strong></dt>
-<dd>the content for this node</dd>
-</dl>
-<p>Returns:</p></div>
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3262,14 +3243,6 @@ ensure that the correct mixins are applied.</p>
     &lt;kodexa.model.model.ContentNode object at 0x7f80605e53c8&gt;
     &gt;&gt;&gt; current_content_node.add_child(new_page)
 
-    or
-
-    Args:
-        document: The document to which the node belongs
-        node_type: the type of the node
-        content: the content for this node
-
-    Returns:
     &#34;&#34;&#34;
 
     def __init__(self, document, node_type: str, content: Optional[str] = None,

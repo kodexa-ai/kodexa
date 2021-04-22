@@ -31,13 +31,20 @@ from kodexa.stores import TableDataStore
 
 
 class KodexaProcessingException(Exception):
-    &#34;&#34;&#34; &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    This is a specialized exception, if thrown while in the Kodexa Platform we will include the
+    additional exception details so that they can be presented back to the user
+    &#34;&#34;&#34;
 
     def __init__(self, message, description, advice=None, documentation_url=None):
         self.description = description
+        &#34;&#34;&#34;The description of the problem, this is longer description&#34;&#34;&#34;
         self.advice = advice
+        &#34;&#34;&#34;Any advice on how to handle the problem, this can also include markdown to help present possible solutions&#34;&#34;&#34;
         self.message = message
+        &#34;&#34;&#34;A short message to express the problem&#34;&#34;&#34;
         self.documentation_url = documentation_url
+        &#34;&#34;&#34;A link to a URL where the user might find more information on the problem&#34;&#34;&#34;
         super().__init__(self.message)
 
     def __str__(self):
@@ -50,21 +57,22 @@ class NodeTagger:
     
     It allows for multiple matching groups to be defined, also the ability to use all content
     and also just tag the node (ignoring the matching groups)
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, selector, tag_to_apply, content_re=&#34;.*&#34;, use_all_content=True, node_only=False,
                  node_tag_uuid=None):
         self.selector = selector
+        &#34;&#34;&#34;The selector to use to find the node(s) to tag&#34;&#34;&#34;
         self.content_re = content_re
+        &#34;&#34;&#34;A regular expression used to match the content in the identified nodes&#34;&#34;&#34;
         self.use_all_content = use_all_content
+        &#34;&#34;&#34;A flag that will assume that all content should be tagged (there will be no start/end)&#34;&#34;&#34;
         self.tag_to_apply = tag_to_apply
+        &#34;&#34;&#34;The tag to apply to the node(s)&#34;&#34;&#34;
         self.node_only = node_only
+        &#34;&#34;&#34;Tag the node only and no content&#34;&#34;&#34;
         self.node_tag_uuid = node_tag_uuid
+        &#34;&#34;&#34;The UUID to use on the tag&#34;&#34;&#34;
 
     def get_name(self):
         &#34;&#34;&#34; &#34;&#34;&#34;
@@ -72,12 +80,6 @@ class NodeTagger:
 
     def process(self, document):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-
-        Returns:
-
         &#34;&#34;&#34;
         document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                                   use_all_content=self.use_all_content,
@@ -89,17 +91,15 @@ class NodeTagger:
 class NodeTagCopy:
     &#34;&#34;&#34;The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
     If a tag with the &#39;existing_tag_name&#39; does not exist on a selected node, no action is taken for that node.
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, selector, existing_tag_name, new_tag_name):
         self.selector = selector
+        &#34;&#34;&#34;The selector to match the nodes&#34;&#34;&#34;
         self.existing_tag_name = existing_tag_name
+        &#34;&#34;&#34;The existing tag name that will be the source&#34;&#34;&#34;
         self.new_tag_name = new_tag_name
+        &#34;&#34;&#34;The new tag name that will be the destination&#34;&#34;&#34;
 
     def get_name(self):
         &#34;&#34;&#34; &#34;&#34;&#34;
@@ -107,12 +107,6 @@ class NodeTagCopy:
 
     def process(self, document):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-
-        Returns:
-
         &#34;&#34;&#34;
         document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
                                        new_tag_name=self.new_tag_name)
@@ -121,18 +115,13 @@ class NodeTagCopy:
 
 class TextParser:
     &#34;&#34;&#34;Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root&#39;s child nodes (controlled by lines_as_child_nodes).
-
-    Args:
-      encoding: str  The encoding that should be used when attempting to decode data  (default &#39;utf-8&#39;)
-      lines_as_child_nodes: bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, encoding=&#34;utf-8&#34;, lines_as_child_nodes=False):
         self.encoding = encoding
+        &#34;&#34;&#34;The encoding that should be used when attempting to decode data  (default &#39;utf-8&#39;)&#34;&#34;&#34;
         self.lines_as_child_nodes = lines_as_child_nodes
+        &#34;&#34;&#34;If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)&#34;&#34;&#34;
 
     @staticmethod
     def get_name():
@@ -141,12 +130,6 @@ class TextParser:
 
     def decode_text(self, data):
         &#34;&#34;&#34;
-
-        Args:
-          data: 
-
-        Returns:
-
         &#34;&#34;&#34;
         try:
             data = data.decode(self.encoding)
@@ -156,12 +139,6 @@ class TextParser:
 
     def process(self, document):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-
-        Returns:
-
         &#34;&#34;&#34;
         with get_source(document) as fh:
 
@@ -185,11 +162,6 @@ class TextParser:
 class RollupTransformer:
     &#34;&#34;&#34;The rollup step allows you to decide how you want to collapse content in a document by removing nodes
     while maintaining content and features as needed
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, collapse_type_res=None, reindex: bool = True, selector: str = &#34;.&#34;,
@@ -208,11 +180,6 @@ class RollupTransformer:
 
     def process(self, document):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-
-        Returns:
 
         &#34;&#34;&#34;
 
@@ -322,13 +289,6 @@ class TagsToKeyValuePairExtractor:
 
     def process(self, document, context):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-          context: 
-
-        Returns:
-
         &#34;&#34;&#34;
 
         table_store = context.get_store(self.store_name, self.get_default_store())
@@ -340,13 +300,6 @@ class TagsToKeyValuePairExtractor:
 
     def process_node(self, table_store, node):
         &#34;&#34;&#34;
-
-        Args:
-          table_store: 
-          node: 
-
-        Returns:
-
         &#34;&#34;&#34;
         for feature in node.get_features():
             if feature.feature_type == &#39;tag&#39; \
@@ -379,19 +332,27 @@ class TagsToKeyValuePairExtractor:
 <span>(</span><span>message, description, advice=None, documentation_url=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>This is a specialized exception, if thrown while in the Kodexa Platform we will include the
+additional exception details so that they can be presented back to the user</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class KodexaProcessingException(Exception):
-    &#34;&#34;&#34; &#34;&#34;&#34;
+    &#34;&#34;&#34;
+    This is a specialized exception, if thrown while in the Kodexa Platform we will include the
+    additional exception details so that they can be presented back to the user
+    &#34;&#34;&#34;
 
     def __init__(self, message, description, advice=None, documentation_url=None):
         self.description = description
+        &#34;&#34;&#34;The description of the problem, this is longer description&#34;&#34;&#34;
         self.advice = advice
+        &#34;&#34;&#34;Any advice on how to handle the problem, this can also include markdown to help present possible solutions&#34;&#34;&#34;
         self.message = message
+        &#34;&#34;&#34;A short message to express the problem&#34;&#34;&#34;
         self.documentation_url = documentation_url
+        &#34;&#34;&#34;A link to a URL where the user might find more information on the problem&#34;&#34;&#34;
         super().__init__(self.message)
 
     def __str__(self):
@@ -402,6 +363,25 @@ class TagsToKeyValuePairExtractor:
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.steps.common.KodexaProcessingException.advice"><code class="name">var <span class="ident">advice</span></code></dt>
+<dd>
+<div class="desc"><p>Any advice on how to handle the problem, this can also include markdown to help present possible solutions</p></div>
+</dd>
+<dt id="kodexa.steps.common.KodexaProcessingException.description"><code class="name">var <span class="ident">description</span></code></dt>
+<dd>
+<div class="desc"><p>The description of the problem, this is longer description</p></div>
+</dd>
+<dt id="kodexa.steps.common.KodexaProcessingException.documentation_url"><code class="name">var <span class="ident">documentation_url</span></code></dt>
+<dd>
+<div class="desc"><p>A link to a URL where the user might find more information on the problem</p></div>
+</dd>
+<dt id="kodexa.steps.common.KodexaProcessingException.message"><code class="name">var <span class="ident">message</span></code></dt>
+<dd>
+<div class="desc"><p>A short message to express the problem</p></div>
+</dd>
+</dl>
 </dd>
 <dt id="kodexa.steps.common.NodeTagCopy"><code class="flex name class">
 <span>class <span class="ident">NodeTagCopy</span></span>
@@ -409,9 +389,7 @@ class TagsToKeyValuePairExtractor:
 </code></dt>
 <dd>
 <div class="desc"><p>The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
-If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+If a tag with the 'existing_tag_name' does not exist on a selected node, no action is taken for that node.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -419,17 +397,15 @@ If a tag with the 'existing_tag_name' does not exist on a selected node, no acti
 <pre><code class="python">class NodeTagCopy:
     &#34;&#34;&#34;The NodeTagCopy action allows you select nodes specified by the selector and create copies of the existing_tag (if it exists) with the new_tag_name.
     If a tag with the &#39;existing_tag_name&#39; does not exist on a selected node, no action is taken for that node.
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, selector, existing_tag_name, new_tag_name):
         self.selector = selector
+        &#34;&#34;&#34;The selector to match the nodes&#34;&#34;&#34;
         self.existing_tag_name = existing_tag_name
+        &#34;&#34;&#34;The existing tag name that will be the source&#34;&#34;&#34;
         self.new_tag_name = new_tag_name
+        &#34;&#34;&#34;The new tag name that will be the destination&#34;&#34;&#34;
 
     def get_name(self):
         &#34;&#34;&#34; &#34;&#34;&#34;
@@ -437,17 +413,26 @@ If a tag with the 'existing_tag_name' does not exist on a selected node, no acti
 
     def process(self, document):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-
-        Returns:
-
         &#34;&#34;&#34;
         document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
                                        new_tag_name=self.new_tag_name)
         return document</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.steps.common.NodeTagCopy.existing_tag_name"><code class="name">var <span class="ident">existing_tag_name</span></code></dt>
+<dd>
+<div class="desc"><p>The existing tag name that will be the source</p></div>
+</dd>
+<dt id="kodexa.steps.common.NodeTagCopy.new_tag_name"><code class="name">var <span class="ident">new_tag_name</span></code></dt>
+<dd>
+<div class="desc"><p>The new tag name that will be the destination</p></div>
+</dd>
+<dt id="kodexa.steps.common.NodeTagCopy.selector"><code class="name">var <span class="ident">selector</span></code></dt>
+<dd>
+<div class="desc"><p>The selector to match the nodes</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.steps.common.NodeTagCopy.get_name"><code class="name flex">
@@ -468,24 +453,13 @@ If a tag with the 'existing_tag_name' does not exist on a selected node, no acti
 <span>def <span class="ident">process</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document):
     &#34;&#34;&#34;
-
-    Args:
-      document: 
-
-    Returns:
-
     &#34;&#34;&#34;
     document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
                                    new_tag_name=self.new_tag_name)
@@ -502,9 +476,7 @@ If a tag with the 'existing_tag_name' does not exist on a selected node, no acti
 <div class="desc"><p>A node tagger allows you to provide a type and content regular expression and then
 tag content in all matching nodes.</p>
 <p>It allows for multiple matching groups to be defined, also the ability to use all content
-and also just tag the node (ignoring the matching groups)</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+and also just tag the node (ignoring the matching groups)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -515,21 +487,22 @@ and also just tag the node (ignoring the matching groups)</p>
     
     It allows for multiple matching groups to be defined, also the ability to use all content
     and also just tag the node (ignoring the matching groups)
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, selector, tag_to_apply, content_re=&#34;.*&#34;, use_all_content=True, node_only=False,
                  node_tag_uuid=None):
         self.selector = selector
+        &#34;&#34;&#34;The selector to use to find the node(s) to tag&#34;&#34;&#34;
         self.content_re = content_re
+        &#34;&#34;&#34;A regular expression used to match the content in the identified nodes&#34;&#34;&#34;
         self.use_all_content = use_all_content
+        &#34;&#34;&#34;A flag that will assume that all content should be tagged (there will be no start/end)&#34;&#34;&#34;
         self.tag_to_apply = tag_to_apply
+        &#34;&#34;&#34;The tag to apply to the node(s)&#34;&#34;&#34;
         self.node_only = node_only
+        &#34;&#34;&#34;Tag the node only and no content&#34;&#34;&#34;
         self.node_tag_uuid = node_tag_uuid
+        &#34;&#34;&#34;The UUID to use on the tag&#34;&#34;&#34;
 
     def get_name(self):
         &#34;&#34;&#34; &#34;&#34;&#34;
@@ -537,12 +510,6 @@ and also just tag the node (ignoring the matching groups)</p>
 
     def process(self, document):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-
-        Returns:
-
         &#34;&#34;&#34;
         document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                                   use_all_content=self.use_all_content,
@@ -550,6 +517,33 @@ and also just tag the node (ignoring the matching groups)</p>
 
         return document</code></pre>
 </details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.steps.common.NodeTagger.content_re"><code class="name">var <span class="ident">content_re</span></code></dt>
+<dd>
+<div class="desc"><p>A regular expression used to match the content in the identified nodes</p></div>
+</dd>
+<dt id="kodexa.steps.common.NodeTagger.node_only"><code class="name">var <span class="ident">node_only</span></code></dt>
+<dd>
+<div class="desc"><p>Tag the node only and no content</p></div>
+</dd>
+<dt id="kodexa.steps.common.NodeTagger.node_tag_uuid"><code class="name">var <span class="ident">node_tag_uuid</span></code></dt>
+<dd>
+<div class="desc"><p>The UUID to use on the tag</p></div>
+</dd>
+<dt id="kodexa.steps.common.NodeTagger.selector"><code class="name">var <span class="ident">selector</span></code></dt>
+<dd>
+<div class="desc"><p>The selector to use to find the node(s) to tag</p></div>
+</dd>
+<dt id="kodexa.steps.common.NodeTagger.tag_to_apply"><code class="name">var <span class="ident">tag_to_apply</span></code></dt>
+<dd>
+<div class="desc"><p>The tag to apply to the node(s)</p></div>
+</dd>
+<dt id="kodexa.steps.common.NodeTagger.use_all_content"><code class="name">var <span class="ident">use_all_content</span></code></dt>
+<dd>
+<div class="desc"><p>A flag that will assume that all content should be tagged (there will be no start/end)</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.steps.common.NodeTagger.get_name"><code class="name flex">
@@ -570,24 +564,13 @@ and also just tag the node (ignoring the matching groups)</p>
 <span>def <span class="ident">process</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document):
     &#34;&#34;&#34;
-
-    Args:
-      document: 
-
-    Returns:
-
     &#34;&#34;&#34;
     document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
                               use_all_content=self.use_all_content,
@@ -604,9 +587,7 @@ and also just tag the node (ignoring the matching groups)</p>
 </code></dt>
 <dd>
 <div class="desc"><p>The rollup step allows you to decide how you want to collapse content in a document by removing nodes
-while maintaining content and features as needed</p>
-<p>Args:</p>
-<p>Returns:</p></div>
+while maintaining content and features as needed</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -614,11 +595,6 @@ while maintaining content and features as needed</p>
 <pre><code class="python">class RollupTransformer:
     &#34;&#34;&#34;The rollup step allows you to decide how you want to collapse content in a document by removing nodes
     while maintaining content and features as needed
-
-    Args:
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, collapse_type_res=None, reindex: bool = True, selector: str = &#34;.&#34;,
@@ -637,11 +613,6 @@ while maintaining content and features as needed</p>
 
     def process(self, document):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-
-        Returns:
 
         &#34;&#34;&#34;
 
@@ -782,23 +753,13 @@ while maintaining content and features as needed</p>
 <span>def <span class="ident">process</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document):
     &#34;&#34;&#34;
-
-    Args:
-      document: 
-
-    Returns:
 
     &#34;&#34;&#34;
 
@@ -902,13 +863,6 @@ while maintaining content and features as needed</p>
 
     def process(self, document, context):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-          context: 
-
-        Returns:
-
         &#34;&#34;&#34;
 
         table_store = context.get_store(self.store_name, self.get_default_store())
@@ -920,13 +874,6 @@ while maintaining content and features as needed</p>
 
     def process_node(self, table_store, node):
         &#34;&#34;&#34;
-
-        Args:
-          table_store: 
-          node: 
-
-        Returns:
-
         &#34;&#34;&#34;
         for feature in node.get_features():
             if feature.feature_type == &#39;tag&#39; \
@@ -985,27 +932,13 @@ def get_name():
 <span>def <span class="ident">process</span></span>(<span>self, document, context)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>context</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document, context):
     &#34;&#34;&#34;
-
-    Args:
-      document: 
-      context: 
-
-    Returns:
-
     &#34;&#34;&#34;
 
     table_store = context.get_store(self.store_name, self.get_default_store())
@@ -1020,27 +953,13 @@ def get_name():
 <span>def <span class="ident">process_node</span></span>(<span>self, table_store, node)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>table_store</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>node</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process_node(self, table_store, node):
     &#34;&#34;&#34;
-
-    Args:
-      table_store: 
-      node: 
-
-    Returns:
-
     &#34;&#34;&#34;
     for feature in node.get_features():
         if feature.feature_type == &#39;tag&#39; \
@@ -1067,37 +986,20 @@ def get_name():
 </code></dt>
 <dd>
 <div class="desc"><p>Parser to load a source file as a text document.
-The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes).</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>encoding</code></strong></dt>
-<dd>str
-The encoding that should be used when attempting to decode data
-(default 'utf-8')</dd>
-<dt><strong><code>lines_as_child_nodes</code></strong></dt>
-<dd>bool
-If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.
-(default False)</dd>
-</dl>
-<p>Returns:</p></div>
+The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes).</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class TextParser:
     &#34;&#34;&#34;Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root&#39;s child nodes (controlled by lines_as_child_nodes).
-
-    Args:
-      encoding: str  The encoding that should be used when attempting to decode data  (default &#39;utf-8&#39;)
-      lines_as_child_nodes: bool  If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)
-
-    Returns:
-
     &#34;&#34;&#34;
 
     def __init__(self, encoding=&#34;utf-8&#34;, lines_as_child_nodes=False):
         self.encoding = encoding
+        &#34;&#34;&#34;The encoding that should be used when attempting to decode data  (default &#39;utf-8&#39;)&#34;&#34;&#34;
         self.lines_as_child_nodes = lines_as_child_nodes
+        &#34;&#34;&#34;If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)&#34;&#34;&#34;
 
     @staticmethod
     def get_name():
@@ -1106,12 +1008,6 @@ If True, the lines of the file will be set as children of the root ContentNode; 
 
     def decode_text(self, data):
         &#34;&#34;&#34;
-
-        Args:
-          data: 
-
-        Returns:
-
         &#34;&#34;&#34;
         try:
             data = data.decode(self.encoding)
@@ -1121,12 +1017,6 @@ If True, the lines of the file will be set as children of the root ContentNode; 
 
     def process(self, document):
         &#34;&#34;&#34;
-
-        Args:
-          document: 
-
-        Returns:
-
         &#34;&#34;&#34;
         with get_source(document) as fh:
 
@@ -1164,30 +1054,32 @@ def get_name():
 </details>
 </dd>
 </dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.steps.common.TextParser.encoding"><code class="name">var <span class="ident">encoding</span></code></dt>
+<dd>
+<div class="desc"><p>The encoding that should be used when attempting to decode data
+(default 'utf-8')</p></div>
+</dd>
+<dt id="kodexa.steps.common.TextParser.lines_as_child_nodes"><code class="name">var <span class="ident">lines_as_child_nodes</span></code></dt>
+<dd>
+<div class="desc"><p>If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.
+(default False)</p></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.steps.common.TextParser.decode_text"><code class="name flex">
 <span>def <span class="ident">decode_text</span></span>(<span>self, data)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>data</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def decode_text(self, data):
     &#34;&#34;&#34;
-
-    Args:
-      data: 
-
-    Returns:
-
     &#34;&#34;&#34;
     try:
         data = data.decode(self.encoding)
@@ -1200,24 +1092,13 @@ def get_name():
 <span>def <span class="ident">process</span></span>(<span>self, document)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>document</code></strong></dt>
-<dd>&nbsp;</dd>
-</dl>
-<p>Returns:</p></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process(self, document):
     &#34;&#34;&#34;
-
-    Args:
-      document: 
-
-    Returns:
-
     &#34;&#34;&#34;
     with get_source(document) as fh:
 
@@ -1258,19 +1139,34 @@ def get_name():
 <ul>
 <li>
 <h4><code><a title="kodexa.steps.common.KodexaProcessingException" href="#kodexa.steps.common.KodexaProcessingException">KodexaProcessingException</a></code></h4>
+<ul class="">
+<li><code><a title="kodexa.steps.common.KodexaProcessingException.advice" href="#kodexa.steps.common.KodexaProcessingException.advice">advice</a></code></li>
+<li><code><a title="kodexa.steps.common.KodexaProcessingException.description" href="#kodexa.steps.common.KodexaProcessingException.description">description</a></code></li>
+<li><code><a title="kodexa.steps.common.KodexaProcessingException.documentation_url" href="#kodexa.steps.common.KodexaProcessingException.documentation_url">documentation_url</a></code></li>
+<li><code><a title="kodexa.steps.common.KodexaProcessingException.message" href="#kodexa.steps.common.KodexaProcessingException.message">message</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="kodexa.steps.common.NodeTagCopy" href="#kodexa.steps.common.NodeTagCopy">NodeTagCopy</a></code></h4>
 <ul class="">
+<li><code><a title="kodexa.steps.common.NodeTagCopy.existing_tag_name" href="#kodexa.steps.common.NodeTagCopy.existing_tag_name">existing_tag_name</a></code></li>
 <li><code><a title="kodexa.steps.common.NodeTagCopy.get_name" href="#kodexa.steps.common.NodeTagCopy.get_name">get_name</a></code></li>
+<li><code><a title="kodexa.steps.common.NodeTagCopy.new_tag_name" href="#kodexa.steps.common.NodeTagCopy.new_tag_name">new_tag_name</a></code></li>
 <li><code><a title="kodexa.steps.common.NodeTagCopy.process" href="#kodexa.steps.common.NodeTagCopy.process">process</a></code></li>
+<li><code><a title="kodexa.steps.common.NodeTagCopy.selector" href="#kodexa.steps.common.NodeTagCopy.selector">selector</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="kodexa.steps.common.NodeTagger" href="#kodexa.steps.common.NodeTagger">NodeTagger</a></code></h4>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="kodexa.steps.common.NodeTagger.content_re" href="#kodexa.steps.common.NodeTagger.content_re">content_re</a></code></li>
 <li><code><a title="kodexa.steps.common.NodeTagger.get_name" href="#kodexa.steps.common.NodeTagger.get_name">get_name</a></code></li>
+<li><code><a title="kodexa.steps.common.NodeTagger.node_only" href="#kodexa.steps.common.NodeTagger.node_only">node_only</a></code></li>
+<li><code><a title="kodexa.steps.common.NodeTagger.node_tag_uuid" href="#kodexa.steps.common.NodeTagger.node_tag_uuid">node_tag_uuid</a></code></li>
 <li><code><a title="kodexa.steps.common.NodeTagger.process" href="#kodexa.steps.common.NodeTagger.process">process</a></code></li>
+<li><code><a title="kodexa.steps.common.NodeTagger.selector" href="#kodexa.steps.common.NodeTagger.selector">selector</a></code></li>
+<li><code><a title="kodexa.steps.common.NodeTagger.tag_to_apply" href="#kodexa.steps.common.NodeTagger.tag_to_apply">tag_to_apply</a></code></li>
+<li><code><a title="kodexa.steps.common.NodeTagger.use_all_content" href="#kodexa.steps.common.NodeTagger.use_all_content">use_all_content</a></code></li>
 </ul>
 </li>
 <li>
@@ -1294,7 +1190,9 @@ def get_name():
 <h4><code><a title="kodexa.steps.common.TextParser" href="#kodexa.steps.common.TextParser">TextParser</a></code></h4>
 <ul class="">
 <li><code><a title="kodexa.steps.common.TextParser.decode_text" href="#kodexa.steps.common.TextParser.decode_text">decode_text</a></code></li>
+<li><code><a title="kodexa.steps.common.TextParser.encoding" href="#kodexa.steps.common.TextParser.encoding">encoding</a></code></li>
 <li><code><a title="kodexa.steps.common.TextParser.get_name" href="#kodexa.steps.common.TextParser.get_name">get_name</a></code></li>
+<li><code><a title="kodexa.steps.common.TextParser.lines_as_child_nodes" href="#kodexa.steps.common.TextParser.lines_as_child_nodes">lines_as_child_nodes</a></code></li>
 <li><code><a title="kodexa.steps.common.TextParser.process" href="#kodexa.steps.common.TextParser.process">process</a></code></li>
 </ul>
 </li>
