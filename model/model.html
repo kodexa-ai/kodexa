@@ -908,7 +908,7 @@ class ContentNode(object):
 
     def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None):
+            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None):
         &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -925,14 +925,15 @@ class ContentNode(object):
           fixed_position: Use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
           data: A dictionary of data for the given tag (Default value = None)
           tag_uuid: A UUID used to tie tags in order to demonstrate they&#39;re related and form a single concept.
-        For example, if tagging the two words &#34;Wells&#34; and &#34;Fargo&#34; as an ORGANIZATION, the tag on both words should have the
-        same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
-        on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
-        For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
-        The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
-        pattern.  In that case, each feature value would share the same UUID.
-        If no tag_uuid is provided, a new uuid is generated for each tag instance.
-          tag_uuid: str:  (Default value = None)
+            For example, if tagging the two words &#34;Wells&#34; and &#34;Fargo&#34; as an ORGANIZATION, the tag on both words should have the
+            same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
+            on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
+            For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
+            The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
+            pattern.  In that case, each feature value would share the same UUID.
+            If no tag_uuid is provided, a new uuid is generated for each tag instance.
+              tag_uuid: str:  (Default value = None)
+          confidence: The confidence in the tag (0-1)
 
         Returns:
 
@@ -981,14 +982,14 @@ class ContentNode(object):
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(start, end,
                                                       node_to_check.content[start:end],
-                                                      data=node_data, uuid=tag_uuid))
+                                                      data=node_data, uuid=tag_uuid, confidence=confidence))
                         return -1
                     elif start &lt; len(node_to_check.content) &lt;= end:
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
                                                       value=node_to_check.content[start:],
-                                                      data=node_data, uuid=tag_uuid))
+                                                      data=node_data, uuid=tag_uuid, confidence=confidence))
 
                 end = end - len(node_to_check.content) + len(separator)
                 content_length = len(node_to_check.content) + len(separator)
@@ -1015,7 +1016,8 @@ class ContentNode(object):
 
             else:
                 if not content_re:
-                    node.add_feature(&#39;tag&#39;, tag_to_apply, Tag(data=data, uuid=get_tag_uuid(tag_uuid)))
+                    node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1032,7 +1034,8 @@ class ContentNode(object):
                             # If we are only tagging the node we
                             # simply need to know if there are any matches
                             if any(True for _ in matches):
-                                node.add_feature(&#39;tag&#39;, tag_to_apply, Tag(data=data, uuid=get_tag_uuid(tag_uuid)))
+                                node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
                         else:
                             for match in matches:
                                 start_offset = match.span()[0]
@@ -3888,7 +3891,7 @@ ensure that the correct mixins are applied.</p>
 
     def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None):
+            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None):
         &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -3905,14 +3908,15 @@ ensure that the correct mixins are applied.</p>
           fixed_position: Use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
           data: A dictionary of data for the given tag (Default value = None)
           tag_uuid: A UUID used to tie tags in order to demonstrate they&#39;re related and form a single concept.
-        For example, if tagging the two words &#34;Wells&#34; and &#34;Fargo&#34; as an ORGANIZATION, the tag on both words should have the
-        same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
-        on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
-        For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
-        The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
-        pattern.  In that case, each feature value would share the same UUID.
-        If no tag_uuid is provided, a new uuid is generated for each tag instance.
-          tag_uuid: str:  (Default value = None)
+            For example, if tagging the two words &#34;Wells&#34; and &#34;Fargo&#34; as an ORGANIZATION, the tag on both words should have the
+            same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
+            on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
+            For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
+            The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
+            pattern.  In that case, each feature value would share the same UUID.
+            If no tag_uuid is provided, a new uuid is generated for each tag instance.
+              tag_uuid: str:  (Default value = None)
+          confidence: The confidence in the tag (0-1)
 
         Returns:
 
@@ -3961,14 +3965,14 @@ ensure that the correct mixins are applied.</p>
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(start, end,
                                                       node_to_check.content[start:end],
-                                                      data=node_data, uuid=tag_uuid))
+                                                      data=node_data, uuid=tag_uuid, confidence=confidence))
                         return -1
                     elif start &lt; len(node_to_check.content) &lt;= end:
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
                                                       value=node_to_check.content[start:],
-                                                      data=node_data, uuid=tag_uuid))
+                                                      data=node_data, uuid=tag_uuid, confidence=confidence))
 
                 end = end - len(node_to_check.content) + len(separator)
                 content_length = len(node_to_check.content) + len(separator)
@@ -3995,7 +3999,8 @@ ensure that the correct mixins are applied.</p>
 
             else:
                 if not content_re:
-                    node.add_feature(&#39;tag&#39;, tag_to_apply, Tag(data=data, uuid=get_tag_uuid(tag_uuid)))
+                    node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -4012,7 +4017,8 @@ ensure that the correct mixins are applied.</p>
                             # If we are only tagging the node we
                             # simply need to know if there are any matches
                             if any(True for _ in matches):
-                                node.add_feature(&#39;tag&#39;, tag_to_apply, Tag(data=data, uuid=get_tag_uuid(tag_uuid)))
+                                node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
                         else:
                             for match in matches:
                                 start_offset = match.span()[0]
@@ -6615,7 +6621,7 @@ value:</p>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.tag"><code class="name flex">
-<span>def <span class="ident">tag</span></span>(<span>self, tag_to_apply, selector='.', content_re=None, use_all_content=False, node_only=None, fixed_position=None, data=None, separator=' ', tag_uuid: str = None)</span>
+<span>def <span class="ident">tag</span></span>(<span>self, tag_to_apply, selector='.', content_re=None, use_all_content=False, node_only=None, fixed_position=None, data=None, separator=' ', tag_uuid: str = None, confidence=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This will tag (see Feature Tagging) the expression groups identified by the regular expression.</p>
@@ -6640,9 +6646,8 @@ will default to False</p>
 <dt><strong><code>data</code></strong></dt>
 <dd>A dictionary of data for the given tag (Default value = None)</dd>
 <dt><strong><code>tag_uuid</code></strong></dt>
-<dd>A UUID used to tie tags in order to demonstrate they're related and form a single concept.</dd>
-</dl>
-<p>For example, if tagging the two words "Wells" and "Fargo" as an ORGANIZATION, the tag on both words should have the
+<dd>A UUID used to tie tags in order to demonstrate they're related and form a single concept.
+For example, if tagging the two words "Wells" and "Fargo" as an ORGANIZATION, the tag on both words should have the
 same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.
 If a tag_uuid is provided, it is used
 on all tags created in this method.
@@ -6653,7 +6658,10 @@ pattern.
 In that case, each feature value would share the same UUID.
 If no tag_uuid is provided, a new uuid is generated for each tag instance.
 tag_uuid: str:
-(Default value = None)</p>
+(Default value = None)</dd>
+<dt><strong><code>confidence</code></strong></dt>
+<dd>The confidence in the tag (0-1)</dd>
+</dl>
 <p>Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; document.content_node.tag('is_cheese')
 </code></pre></div>
@@ -6663,7 +6671,7 @@ tag_uuid: str:
 </summary>
 <pre><code class="python">def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
         use_all_content=False, node_only=None,
-        fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None):
+        fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None):
     &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -6680,14 +6688,15 @@ tag_uuid: str:
       fixed_position: Use a fixed position, supplied as a tuple i.e. - (4,10) tag from position 4 to 10 (default None)
       data: A dictionary of data for the given tag (Default value = None)
       tag_uuid: A UUID used to tie tags in order to demonstrate they&#39;re related and form a single concept.
-    For example, if tagging the two words &#34;Wells&#34; and &#34;Fargo&#34; as an ORGANIZATION, the tag on both words should have the
-    same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
-    on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
-    For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
-    The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
-    pattern.  In that case, each feature value would share the same UUID.
-    If no tag_uuid is provided, a new uuid is generated for each tag instance.
-      tag_uuid: str:  (Default value = None)
+        For example, if tagging the two words &#34;Wells&#34; and &#34;Fargo&#34; as an ORGANIZATION, the tag on both words should have the
+        same tag_uuid in order to indicate they are both needed to form the single ORGANIZATION.  If a tag_uuid is provided, it is used
+        on all tags created in this method.  This may result in multiple nodes or multiple feature values having the same tag_uuid.
+        For example, if the selector provided results in more than one node being selected, each node would be tagged with the same tag_uuid.
+        The same holds true if a content_re value is provided, node_only is set to False, and multiple matches are found for the content_re
+        pattern.  In that case, each feature value would share the same UUID.
+        If no tag_uuid is provided, a new uuid is generated for each tag instance.
+          tag_uuid: str:  (Default value = None)
+      confidence: The confidence in the tag (0-1)
 
     Returns:
 
@@ -6736,14 +6745,14 @@ tag_uuid: str:
                     node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                               Tag(start, end,
                                                   node_to_check.content[start:end],
-                                                  data=node_data, uuid=tag_uuid))
+                                                  data=node_data, uuid=tag_uuid, confidence=confidence))
                     return -1
                 elif start &lt; len(node_to_check.content) &lt;= end:
                     node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                               Tag(start,
                                                   len(node_to_check.content),
                                                   value=node_to_check.content[start:],
-                                                  data=node_data, uuid=tag_uuid))
+                                                  data=node_data, uuid=tag_uuid, confidence=confidence))
 
             end = end - len(node_to_check.content) + len(separator)
             content_length = len(node_to_check.content) + len(separator)
@@ -6770,7 +6779,8 @@ tag_uuid: str:
 
         else:
             if not content_re:
-                node.add_feature(&#39;tag&#39;, tag_to_apply, Tag(data=data, uuid=get_tag_uuid(tag_uuid)))
+                node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
             else:
                 if not use_all_content:
                     if node.content:
@@ -6787,7 +6797,8 @@ tag_uuid: str:
                         # If we are only tagging the node we
                         # simply need to know if there are any matches
                         if any(True for _ in matches):
-                            node.add_feature(&#39;tag&#39;, tag_to_apply, Tag(data=data, uuid=get_tag_uuid(tag_uuid)))
+                            node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                             Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
                     else:
                         for match in matches:
                             start_offset = match.span()[0]
