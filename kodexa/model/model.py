@@ -1541,9 +1541,6 @@ class ContentFeature(object):
 
     def to_dict(self):
         """Create a dictionary representing this ContentFeature's structure and content.
-
-        Args:
-
         Returns:
           dict: The properties of this ContentFeature structured as a dictionary.
 
@@ -1551,6 +1548,16 @@ class ContentFeature(object):
         """
         return {'name': self.feature_type + ':' + self.name, 'value': self.value, 'single': self.single}
 
+    def get_value(self):
+        """Get the value from the feature. This method will handle the single flag
+
+           Returns:
+              The value of the feature
+        """
+        if self.single:
+            return self.value[0]
+        else:
+            return self.value
 
 @dataclasses.dataclass()
 class SourceMetadata:
