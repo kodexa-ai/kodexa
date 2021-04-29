@@ -1570,9 +1570,6 @@ class ContentFeature(object):
 
     def to_dict(self):
         &#34;&#34;&#34;Create a dictionary representing this ContentFeature&#39;s structure and content.
-
-        Args:
-
         Returns:
           dict: The properties of this ContentFeature structured as a dictionary.
 
@@ -1580,6 +1577,16 @@ class ContentFeature(object):
         &#34;&#34;&#34;
         return {&#39;name&#39;: self.feature_type + &#39;:&#39; + self.name, &#39;value&#39;: self.value, &#39;single&#39;: self.single}
 
+    def get_value(self):
+        &#34;&#34;&#34;Get the value from the feature. This method will handle the single flag
+
+           Returns:
+              The value of the feature
+        &#34;&#34;&#34;
+        if self.single:
+            return self.value[0]
+        else:
+            return self.value
 
 @dataclasses.dataclass()
 class SourceMetadata:
@@ -3140,15 +3147,23 @@ def from_dict(cls, event_dict: dict):
 
     def to_dict(self):
         &#34;&#34;&#34;Create a dictionary representing this ContentFeature&#39;s structure and content.
-
-        Args:
-
         Returns:
           dict: The properties of this ContentFeature structured as a dictionary.
 
         &gt;&gt;&gt; node.to_dict()
         &#34;&#34;&#34;
-        return {&#39;name&#39;: self.feature_type + &#39;:&#39; + self.name, &#39;value&#39;: self.value, &#39;single&#39;: self.single}</code></pre>
+        return {&#39;name&#39;: self.feature_type + &#39;:&#39; + self.name, &#39;value&#39;: self.value, &#39;single&#39;: self.single}
+
+    def get_value(self):
+        &#34;&#34;&#34;Get the value from the feature. This method will handle the single flag
+
+           Returns:
+              The value of the feature
+        &#34;&#34;&#34;
+        if self.single:
+            return self.value[0]
+        else:
+            return self.value</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
@@ -3175,12 +3190,34 @@ def from_dict(cls, event_dict: dict):
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="kodexa.model.model.ContentFeature.get_value"><code class="name flex">
+<span>def <span class="ident">get_value</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the value from the feature. This method will handle the single flag</p>
+<h2 id="returns">Returns</h2>
+<p>The value of the feature</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_value(self):
+    &#34;&#34;&#34;Get the value from the feature. This method will handle the single flag
+
+       Returns:
+          The value of the feature
+    &#34;&#34;&#34;
+    if self.single:
+        return self.value[0]
+    else:
+        return self.value</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.ContentFeature.to_dict"><code class="name flex">
 <span>def <span class="ident">to_dict</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a dictionary representing this ContentFeature's structure and content.</p>
-<p>Args:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>dict</code></dt>
@@ -3194,9 +3231,6 @@ def from_dict(cls, event_dict: dict):
 </summary>
 <pre><code class="python">def to_dict(self):
     &#34;&#34;&#34;Create a dictionary representing this ContentFeature&#39;s structure and content.
-
-    Args:
-
     Returns:
       dict: The properties of this ContentFeature structured as a dictionary.
 
@@ -10872,6 +10906,7 @@ Returns:</p></div>
 <ul class="two-column">
 <li><code><a title="kodexa.model.model.ContentFeature.description" href="#kodexa.model.model.ContentFeature.description">description</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.feature_type" href="#kodexa.model.model.ContentFeature.feature_type">feature_type</a></code></li>
+<li><code><a title="kodexa.model.model.ContentFeature.get_value" href="#kodexa.model.model.ContentFeature.get_value">get_value</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.name" href="#kodexa.model.model.ContentFeature.name">name</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.single" href="#kodexa.model.model.ContentFeature.single">single</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.to_dict" href="#kodexa.model.model.ContentFeature.to_dict">to_dict</a></code></li>
