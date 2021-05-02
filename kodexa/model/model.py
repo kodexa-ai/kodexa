@@ -2451,14 +2451,13 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put_native(self, path: str, content, force_replace=False):
+    def put_native(self, path: str, content):
         """
         Push content directly, this will create both a native object in the store and also a
         related Document that refers to it.
 
         :param path: the path where you want to put the native content
         :param content: the binary content for the native file
-        :param force_replace: replace the content at this path completely
         :return: None
         """
         raise NotImplementedError
@@ -2611,7 +2610,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document, force_replace: bool = False) -> DocumentFamily:
+    def put(self, path: str, document: Document) -> DocumentFamily:
         """Puts a new document in the store with the given path.
 
         There mustn't be a family in the path, this method will create a new family based around the
@@ -2620,8 +2619,6 @@ class DocumentStore:
         Args:
           path (str): the path you wish to add the document in the store
           document (Document): the document
-          force_replace (bool): Should we delete and replace the content at the path (Default False)
-
         Returns:
             A new document family
 
