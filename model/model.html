@@ -2480,14 +2480,13 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put_native(self, path: str, content, force_replace=False):
+    def put_native(self, path: str, content):
         &#34;&#34;&#34;
         Push content directly, this will create both a native object in the store and also a
         related Document that refers to it.
 
         :param path: the path where you want to put the native content
         :param content: the binary content for the native file
-        :param force_replace: replace the content at this path completely
         :return: None
         &#34;&#34;&#34;
         raise NotImplementedError
@@ -2640,7 +2639,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
+    def put(self, path: str, document: Document) -&gt; DocumentFamily:
         &#34;&#34;&#34;Puts a new document in the store with the given path.
 
         There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -2649,8 +2648,6 @@ class DocumentStore:
         Args:
           path (str): the path you wish to add the document in the store
           document (Document): the document
-          force_replace (bool): Should we delete and replace the content at the path (Default False)
-
         Returns:
             A new document family
 
@@ -9168,14 +9165,13 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put_native(self, path: str, content, force_replace=False):
+    def put_native(self, path: str, content):
         &#34;&#34;&#34;
         Push content directly, this will create both a native object in the store and also a
         related Document that refers to it.
 
         :param path: the path where you want to put the native content
         :param content: the binary content for the native file
-        :param force_replace: replace the content at this path completely
         :return: None
         &#34;&#34;&#34;
         raise NotImplementedError
@@ -9328,7 +9324,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
+    def put(self, path: str, document: Document) -&gt; DocumentFamily:
         &#34;&#34;&#34;Puts a new document in the store with the given path.
 
         There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -9337,8 +9333,6 @@ def from_dict(cls, family_dict: dict):
         Args:
           path (str): the path you wish to add the document in the store
           document (Document): the document
-          force_replace (bool): Should we delete and replace the content at the path (Default False)
-
         Returns:
             A new document family
 
@@ -9747,7 +9741,7 @@ def get_source_by_content_object(self, document_family: DocumentFamily, content_
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>, force_replace: bool = False) ‑> <a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></span>
+<span>def <span class="ident">put</span></span>(<span>self, path: str, document: <a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a>) ‑> <a title="kodexa.model.model.DocumentFamily" href="#kodexa.model.model.DocumentFamily">DocumentFamily</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Puts a new document in the store with the given path.</p>
@@ -9759,8 +9753,6 @@ document</p>
 <dd>the path you wish to add the document in the store</dd>
 <dt><strong><code>document</code></strong> :&ensp;<code><a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></code></dt>
 <dd>the document</dd>
-<dt><strong><code>force_replace</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Should we delete and replace the content at the path (Default False)</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>A new document family</p></div>
@@ -9769,7 +9761,7 @@ document</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
+def put(self, path: str, document: Document) -&gt; DocumentFamily:
     &#34;&#34;&#34;Puts a new document in the store with the given path.
 
     There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -9778,8 +9770,6 @@ def put(self, path: str, document: Document, force_replace: bool = False) -&gt; 
     Args:
       path (str): the path you wish to add the document in the store
       document (Document): the document
-      force_replace (bool): Should we delete and replace the content at the path (Default False)
-
     Returns:
         A new document family
 
@@ -9788,28 +9778,26 @@ def put(self, path: str, document: Document, force_replace: bool = False) -&gt; 
 </details>
 </dd>
 <dt id="kodexa.model.model.DocumentStore.put_native"><code class="name flex">
-<span>def <span class="ident">put_native</span></span>(<span>self, path: str, content, force_replace=False)</span>
+<span>def <span class="ident">put_native</span></span>(<span>self, path: str, content)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Push content directly, this will create both a native object in the store and also a
 related Document that refers to it.</p>
 <p>:param path: the path where you want to put the native content
 :param content: the binary content for the native file
-:param force_replace: replace the content at this path completely
 :return: None</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def put_native(self, path: str, content, force_replace=False):
+def put_native(self, path: str, content):
     &#34;&#34;&#34;
     Push content directly, this will create both a native object in the store and also a
     related Document that refers to it.
 
     :param path: the path where you want to put the native content
     :param content: the binary content for the native file
-    :param force_replace: replace the content at this path completely
     :return: None
     &#34;&#34;&#34;
     raise NotImplementedError</code></pre>
