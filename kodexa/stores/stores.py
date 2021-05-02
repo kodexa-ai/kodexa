@@ -412,13 +412,13 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 "Unable to decode the JSON response")
             raise
 
-    def put(self, path: str, document: Document, force_replace: bool = False) -> DocumentFamily:
+    def put(self, path: str, document: Document) -> DocumentFamily:
         from kodexa import KodexaPlatform
         try:
             logger.info(f"Putting document to path {path}")
 
             files = {"document": document.to_msgpack()}
-            data = {"path": path, "forceReplace": force_replace}
+            data = {"path": path}
             document_family_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
@@ -436,13 +436,13 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 "Unable to decode the JSON response")
             raise
 
-    def put_native(self, path: str, content, force_replace: bool = False) -> DocumentFamily:
+    def put_native(self, path: str, content) -> DocumentFamily:
         from kodexa import KodexaPlatform
         try:
             logger.info(f"Putting native content to path {path}")
 
             files = {"file": content}
-            data = {"path": path, "forceReplace": force_replace}
+            data = {"path": path}
             document_family_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
