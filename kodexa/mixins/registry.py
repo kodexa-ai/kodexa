@@ -44,9 +44,9 @@ def apply_to_node(mixin_name, node):
     Returns:
 
     """
-    if mixin_name in registered_mixins:
-        registered_mixins[mixin_name].apply_to(node)
 
+    if mixin_name in registered_mixins and node.document.disable_mixin_methods is False:
+        registered_mixins[mixin_name].apply_to(node)
         # Apply to the children
         if node.get_children():
             for child in node.get_children():
@@ -62,6 +62,10 @@ def apply_to_document(document):
     Returns:
 
     """
+
+    if document.disable_mixin_methods is True:
+        return
+
     for mixin in document.get_mixins():
         add_mixin_to_document(mixin, document)
 
@@ -76,6 +80,10 @@ def add_mixins_to_document_node(document, node):
     Returns:
 
     """
+
+    if document.disable_mixin_methods is True:
+        return
+
     for mixin in document.get_mixins():
         apply_to_node(mixin, node)
 
