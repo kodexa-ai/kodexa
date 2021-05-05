@@ -96,7 +96,7 @@ def add_mixin_to_document(mixin, document):
         if mixin not in registered_mixins or document.disable_mixin_methods is True:
             return
 
-        if document.content_node and document.mixin:
+        if document.content_node:
             apply_to_node(mixin, document.content_node)
 
         # Include support for mix-in dependencies
