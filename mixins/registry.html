@@ -72,9 +72,9 @@ def apply_to_node(mixin_name, node):
     Returns:
 
     &#34;&#34;&#34;
-    if mixin_name in registered_mixins:
-        registered_mixins[mixin_name].apply_to(node)
 
+    if mixin_name in registered_mixins and node.document.disable_mixin_methods is False:
+        registered_mixins[mixin_name].apply_to(node)
         # Apply to the children
         if node.get_children():
             for child in node.get_children():
@@ -90,6 +90,10 @@ def apply_to_document(document):
     Returns:
 
     &#34;&#34;&#34;
+
+    if document.disable_mixin_methods is True:
+        return
+
     for mixin in document.get_mixins():
         add_mixin_to_document(mixin, document)
 
@@ -104,6 +108,10 @@ def add_mixins_to_document_node(document, node):
     Returns:
 
     &#34;&#34;&#34;
+
+    if document.disable_mixin_methods is True:
+        return
+
     for mixin in document.get_mixins():
         apply_to_node(mixin, node)
 
@@ -262,6 +270,10 @@ def get_renderers(document):
     Returns:
 
     &#34;&#34;&#34;
+
+    if document.disable_mixin_methods is True:
+        return
+
     for mixin in document.get_mixins():
         apply_to_node(mixin, node)</code></pre>
 </details>
@@ -289,6 +301,10 @@ def get_renderers(document):
     Returns:
 
     &#34;&#34;&#34;
+
+    if document.disable_mixin_methods is True:
+        return
+
     for mixin in document.get_mixins():
         add_mixin_to_document(mixin, document)</code></pre>
 </details>
@@ -319,9 +335,9 @@ def get_renderers(document):
     Returns:
 
     &#34;&#34;&#34;
-    if mixin_name in registered_mixins:
-        registered_mixins[mixin_name].apply_to(node)
 
+    if mixin_name in registered_mixins and node.document.disable_mixin_methods is False:
+        registered_mixins[mixin_name].apply_to(node)
         # Apply to the children
         if node.get_children():
             for child in node.get_children():
