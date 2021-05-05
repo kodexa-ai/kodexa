@@ -93,7 +93,7 @@ def add_mixin_to_document(mixin, document):
     if mixin not in document.get_mixins():
         document.get_mixins().append(mixin)
 
-        if mixin not in registered_mixins or document.disable_mixin_methods:
+        if mixin not in registered_mixins or document.disable_mixin_methods is True:
             return
 
         if document.content_node and document.mixin:
