@@ -1635,6 +1635,9 @@ class Document(object):
         if source is None:
             source = SourceMetadata()
 
+        # Mix-ins are going away - so we will allow people to turn them off as needed
+        self.disable_mixin_methods = False
+
         # The ref is not stored and is used when we have
         # initialized a document from a remote store and want
         # to keep track of that
