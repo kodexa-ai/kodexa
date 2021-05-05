@@ -773,6 +773,190 @@ class ContentNode(object):
         &#34;&#34;&#34;
         self.remove_feature(&#39;tag&#39;, tag_name)
 
+    def set_statistics(self, statistics):
+        &#34;&#34;&#34;Set the spatial statistics for this node
+
+        Args:
+          statistics: the statistics object
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_statistics(NodeStatistics())
+        &#34;&#34;&#34;
+        self.add_feature(&#34;spatial&#34;, &#34;statistics&#34;, statistics)
+
+    def get_statistics(self):
+        &#34;&#34;&#34;Get the spatial statistics for this node
+
+
+        :return: the statistics object (or None if not set)
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
+            &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
+        &#34;&#34;&#34;
+        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)
+
+    def set_bbox(self, bbox):
+        &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
+
+        [x1,y1,x2,y2]
+
+        Args:
+          bbox: the bounding box array
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_bbox([10,20,50,100])
+        &#34;&#34;&#34;
+        self.set_feature(&#34;spatial&#34;, &#34;bbox&#34;, bbox)
+
+    def get_bbox(self):
+        &#34;&#34;&#34;Get the bounding box for the node, this is structured as:
+
+        [x1,y1,x2,y2]
+
+
+        :return: the bounding box array
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_bbox()
+            [10,20,50,100]
+        &#34;&#34;&#34;
+        return self.get_feature_value(&#34;spatial&#34;, &#34;bbox&#34;)
+
+    def set_bbox_from_children(self):
+        &#34;&#34;&#34;Set the bounding box for this node based on its children&#34;&#34;&#34;
+
+        x_min = None
+        x_max = None
+        y_min = None
+        y_max = None
+
+        for child in self.children:
+            child_bbox = child.get_bbox()
+            if child_bbox:
+                if not x_min or x_min &gt; child_bbox[0]:
+                    x_min = child_bbox[0]
+                if not x_max or x_max &lt; child_bbox[2]:
+                    x_max = child_bbox[2]
+                if not y_min or y_min &gt; child_bbox[1]:
+                    y_min = child_bbox[1]
+                if not y_max or y_max &lt; child_bbox[3]:
+                    y_max = child_bbox[3]
+
+        if x_min:
+            self.set_bbox([x_min, y_min, x_max, y_max])
+
+    def set_rotate(self, rotate):
+        &#34;&#34;&#34;Set the rotate of the node
+
+        Args:
+          rotate: the rotation of the node
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_rotate(90)
+        &#34;&#34;&#34;
+        self.add_feature(&#34;spatial&#34;, &#34;rotate&#34;, rotate)
+
+    def get_rotate(self):
+        &#34;&#34;&#34;Get the rotate of the node
+
+
+        :return: the rotation of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_rotate()
+            90
+        &#34;&#34;&#34;
+        return self.get_feature_value(&#34;spatial&#34;, &#34;rotate&#34;)
+
+    def get_x(self):
+        &#34;&#34;&#34;Get the X position of the node
+
+
+        :return: the X position of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_x()
+            10
+        &#34;&#34;&#34;
+        self_bbox = self.get_bbox()
+        if self_bbox:
+            return self_bbox[0]
+        else:
+            return None
+
+    def get_y(self):
+        &#34;&#34;&#34;Get the Y position of the node
+
+
+        :return: the Y position of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_y()
+            90
+        &#34;&#34;&#34;
+        self_bbox = self.get_bbox()
+        if self_bbox:
+            return self_bbox[1]
+        else:
+            return None
+
+    def get_width(self):
+        &#34;&#34;&#34;Get the width of the node
+
+
+        :return: the width of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_width()
+            70
+        &#34;&#34;&#34;
+        self_bbox = self.get_bbox()
+        if self_bbox:
+            return self_bbox[2] - self_bbox[0]
+        else:
+            return None
+
+    def get_height(self):
+        &#34;&#34;&#34;Get the height of the node
+
+
+        :return: the height of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_height()
+            40
+        &#34;&#34;&#34;
+        self_bbox = self.get_bbox()
+        if self_bbox:
+            return self_bbox[3] - self_bbox[1]
+        else:
+            return None
+
     def copy_tag(self, selector=&#34;.&#34;, existing_tag_name=None, new_tag_name=None):
         &#34;&#34;&#34;Creates a new tag of &#39;new_tag_name&#39; on the selected content node(s) with the same information as the tag with &#39;existing_tag_name&#39;.
         Both existing_tag_name and new_tag_name values are required and must be different from one another.  Otherwise, no action is taken.
@@ -3790,6 +3974,190 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;
         self.remove_feature(&#39;tag&#39;, tag_name)
 
+    def set_statistics(self, statistics):
+        &#34;&#34;&#34;Set the spatial statistics for this node
+
+        Args:
+          statistics: the statistics object
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_statistics(NodeStatistics())
+        &#34;&#34;&#34;
+        self.add_feature(&#34;spatial&#34;, &#34;statistics&#34;, statistics)
+
+    def get_statistics(self):
+        &#34;&#34;&#34;Get the spatial statistics for this node
+
+
+        :return: the statistics object (or None if not set)
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
+            &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
+        &#34;&#34;&#34;
+        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)
+
+    def set_bbox(self, bbox):
+        &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
+
+        [x1,y1,x2,y2]
+
+        Args:
+          bbox: the bounding box array
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_bbox([10,20,50,100])
+        &#34;&#34;&#34;
+        self.set_feature(&#34;spatial&#34;, &#34;bbox&#34;, bbox)
+
+    def get_bbox(self):
+        &#34;&#34;&#34;Get the bounding box for the node, this is structured as:
+
+        [x1,y1,x2,y2]
+
+
+        :return: the bounding box array
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_bbox()
+            [10,20,50,100]
+        &#34;&#34;&#34;
+        return self.get_feature_value(&#34;spatial&#34;, &#34;bbox&#34;)
+
+    def set_bbox_from_children(self):
+        &#34;&#34;&#34;Set the bounding box for this node based on its children&#34;&#34;&#34;
+
+        x_min = None
+        x_max = None
+        y_min = None
+        y_max = None
+
+        for child in self.children:
+            child_bbox = child.get_bbox()
+            if child_bbox:
+                if not x_min or x_min &gt; child_bbox[0]:
+                    x_min = child_bbox[0]
+                if not x_max or x_max &lt; child_bbox[2]:
+                    x_max = child_bbox[2]
+                if not y_min or y_min &gt; child_bbox[1]:
+                    y_min = child_bbox[1]
+                if not y_max or y_max &lt; child_bbox[3]:
+                    y_max = child_bbox[3]
+
+        if x_min:
+            self.set_bbox([x_min, y_min, x_max, y_max])
+
+    def set_rotate(self, rotate):
+        &#34;&#34;&#34;Set the rotate of the node
+
+        Args:
+          rotate: the rotation of the node
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_rotate(90)
+        &#34;&#34;&#34;
+        self.add_feature(&#34;spatial&#34;, &#34;rotate&#34;, rotate)
+
+    def get_rotate(self):
+        &#34;&#34;&#34;Get the rotate of the node
+
+
+        :return: the rotation of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_rotate()
+            90
+        &#34;&#34;&#34;
+        return self.get_feature_value(&#34;spatial&#34;, &#34;rotate&#34;)
+
+    def get_x(self):
+        &#34;&#34;&#34;Get the X position of the node
+
+
+        :return: the X position of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_x()
+            10
+        &#34;&#34;&#34;
+        self_bbox = self.get_bbox()
+        if self_bbox:
+            return self_bbox[0]
+        else:
+            return None
+
+    def get_y(self):
+        &#34;&#34;&#34;Get the Y position of the node
+
+
+        :return: the Y position of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_y()
+            90
+        &#34;&#34;&#34;
+        self_bbox = self.get_bbox()
+        if self_bbox:
+            return self_bbox[1]
+        else:
+            return None
+
+    def get_width(self):
+        &#34;&#34;&#34;Get the width of the node
+
+
+        :return: the width of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_width()
+            70
+        &#34;&#34;&#34;
+        self_bbox = self.get_bbox()
+        if self_bbox:
+            return self_bbox[2] - self_bbox[0]
+        else:
+            return None
+
+    def get_height(self):
+        &#34;&#34;&#34;Get the height of the node
+
+
+        :return: the height of the node
+
+        Args:
+
+        Returns:
+
+        &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_height()
+            40
+        &#34;&#34;&#34;
+        self_bbox = self.get_bbox()
+        if self_bbox:
+            return self_bbox[3] - self_bbox[1]
+        else:
+            return None
+
     def copy_tag(self, selector=&#34;.&#34;, existing_tag_name=None, new_tag_name=None):
         &#34;&#34;&#34;Creates a new tag of &#39;new_tag_name&#39; on the selected content node(s) with the same information as the tag with &#39;existing_tag_name&#39;.
         Both existing_tag_name and new_tag_name values are required and must be different from one another.  Otherwise, no action is taken.
@@ -5433,6 +5801,40 @@ value:</p>
     return list(set(tags))</code></pre>
 </details>
 </dd>
+<dt id="kodexa.model.model.ContentNode.get_bbox"><code class="name flex">
+<span>def <span class="ident">get_bbox</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the bounding box for the node, this is structured as:</p>
+<p>[x1,y1,x2,y2]</p>
+<p>:return: the bounding box array</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_bbox()
+    [10,20,50,100]
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_bbox(self):
+    &#34;&#34;&#34;Get the bounding box for the node, this is structured as:
+
+    [x1,y1,x2,y2]
+
+
+    :return: the bounding box array
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_bbox()
+        [10,20,50,100]
+    &#34;&#34;&#34;
+    return self.get_feature_value(&#34;spatial&#34;, &#34;bbox&#34;)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.ContentNode.get_children"><code class="name flex">
 <span>def <span class="ident">get_children</span></span>(<span>self)</span>
 </code></dt>
@@ -5652,6 +6054,41 @@ If no features are found, an empty list is returned.</dd>
        []
     &#34;&#34;&#34;
     return [i for i in self.get_features() if i.feature_type == feature_type]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.get_height"><code class="name flex">
+<span>def <span class="ident">get_height</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the height of the node</p>
+<p>:return: the height of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_height()
+    40
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_height(self):
+    &#34;&#34;&#34;Get the height of the node
+
+
+    :return: the height of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_height()
+        40
+    &#34;&#34;&#34;
+    self_bbox = self.get_bbox()
+    if self_bbox:
+        return self_bbox[3] - self_bbox[1]
+    else:
+        return None</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_last_child_index"><code class="name flex">
@@ -5876,6 +6313,68 @@ will have the node type of its nearest sibling and will have an index value, but
     return value_strings</code></pre>
 </details>
 </dd>
+<dt id="kodexa.model.model.ContentNode.get_rotate"><code class="name flex">
+<span>def <span class="ident">get_rotate</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the rotate of the node</p>
+<p>:return: the rotation of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_rotate()
+    90
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_rotate(self):
+    &#34;&#34;&#34;Get the rotate of the node
+
+
+    :return: the rotation of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_rotate()
+        90
+    &#34;&#34;&#34;
+    return self.get_feature_value(&#34;spatial&#34;, &#34;rotate&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.get_statistics"><code class="name flex">
+<span>def <span class="ident">get_statistics</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the spatial statistics for this node</p>
+<p>:return: the statistics object (or None if not set)</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_statistics()
+    &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_statistics(self):
+    &#34;&#34;&#34;Get the spatial statistics for this node
+
+
+    :return: the statistics object (or None if not set)
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
+        &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
+    &#34;&#34;&#34;
+    return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.ContentNode.get_tag"><code class="name flex">
 <span>def <span class="ident">get_tag</span></span>(<span>self, tag_name)</span>
 </code></dt>
@@ -5989,6 +6488,111 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
         [&#39;is_cheese&#39;]
     &#34;&#34;&#34;
     return [i.name for i in self.get_features_of_type(&#34;tag&#34;)]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.get_width"><code class="name flex">
+<span>def <span class="ident">get_width</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the width of the node</p>
+<p>:return: the width of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_width()
+    70
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_width(self):
+    &#34;&#34;&#34;Get the width of the node
+
+
+    :return: the width of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_width()
+        70
+    &#34;&#34;&#34;
+    self_bbox = self.get_bbox()
+    if self_bbox:
+        return self_bbox[2] - self_bbox[0]
+    else:
+        return None</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.get_x"><code class="name flex">
+<span>def <span class="ident">get_x</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the X position of the node</p>
+<p>:return: the X position of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_x()
+    10
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_x(self):
+    &#34;&#34;&#34;Get the X position of the node
+
+
+    :return: the X position of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_x()
+        10
+    &#34;&#34;&#34;
+    self_bbox = self.get_bbox()
+    if self_bbox:
+        return self_bbox[0]
+    else:
+        return None</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.get_y"><code class="name flex">
+<span>def <span class="ident">get_y</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the Y position of the node</p>
+<p>:return: the Y position of the node</p>
+<p>Args:</p>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].get_y()
+    90
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_y(self):
+    &#34;&#34;&#34;Get the Y position of the node
+
+
+    :return: the Y position of the node
+
+    Args:
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_y()
+        90
+    &#34;&#34;&#34;
+    self_bbox = self.get_bbox()
+    if self_bbox:
+        return self_bbox[1]
+    else:
+        return None</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.has_feature"><code class="name flex">
@@ -6602,6 +7206,72 @@ If no matches are found, the list of children will be empty.</dd>
     return new_node</code></pre>
 </details>
 </dd>
+<dt id="kodexa.model.model.ContentNode.set_bbox"><code class="name flex">
+<span>def <span class="ident">set_bbox</span></span>(<span>self, bbox)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the bounding box for the node, this is structured as:</p>
+<p>[x1,y1,x2,y2]</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>bbox</code></strong></dt>
+<dd>the bounding box array</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].set_bbox([10,20,50,100])
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_bbox(self, bbox):
+    &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
+
+    [x1,y1,x2,y2]
+
+    Args:
+      bbox: the bounding box array
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_bbox([10,20,50,100])
+    &#34;&#34;&#34;
+    self.set_feature(&#34;spatial&#34;, &#34;bbox&#34;, bbox)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.set_bbox_from_children"><code class="name flex">
+<span>def <span class="ident">set_bbox_from_children</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the bounding box for this node based on its children</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_bbox_from_children(self):
+    &#34;&#34;&#34;Set the bounding box for this node based on its children&#34;&#34;&#34;
+
+    x_min = None
+    x_max = None
+    y_min = None
+    y_max = None
+
+    for child in self.children:
+        child_bbox = child.get_bbox()
+        if child_bbox:
+            if not x_min or x_min &gt; child_bbox[0]:
+                x_min = child_bbox[0]
+            if not x_max or x_max &lt; child_bbox[2]:
+                x_max = child_bbox[2]
+            if not y_min or y_min &gt; child_bbox[1]:
+                y_min = child_bbox[1]
+            if not y_max or y_max &lt; child_bbox[3]:
+                y_max = child_bbox[3]
+
+    if x_min:
+        self.set_bbox([x_min, y_min, x_max, y_max])</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.ContentNode.set_feature"><code class="name flex">
 <span>def <span class="ident">set_feature</span></span>(<span>self, feature_type, name, value)</span>
 </code></dt>
@@ -6652,6 +7322,66 @@ value:</p>
     &#34;&#34;&#34;
     self.remove_feature(feature_type, name)
     return self.add_feature(feature_type, name, value)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.set_rotate"><code class="name flex">
+<span>def <span class="ident">set_rotate</span></span>(<span>self, rotate)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the rotate of the node</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>rotate</code></strong></dt>
+<dd>the rotation of the node</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].set_rotate(90)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_rotate(self, rotate):
+    &#34;&#34;&#34;Set the rotate of the node
+
+    Args:
+      rotate: the rotation of the node
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_rotate(90)
+    &#34;&#34;&#34;
+    self.add_feature(&#34;spatial&#34;, &#34;rotate&#34;, rotate)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.set_statistics"><code class="name flex">
+<span>def <span class="ident">set_statistics</span></span>(<span>self, statistics)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the spatial statistics for this node</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>statistics</code></strong></dt>
+<dd>the statistics object</dd>
+</dl>
+<p>Returns:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; document.select.('//page')[0].set_statistics(NodeStatistics())
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_statistics(self, statistics):
+    &#34;&#34;&#34;Set the spatial statistics for this node
+
+    Args:
+      statistics: the statistics object
+
+    Returns:
+
+    &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].set_statistics(NodeStatistics())
+    &#34;&#34;&#34;
+    self.add_feature(&#34;spatial&#34;, &#34;statistics&#34;, statistics)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.tag"><code class="name flex">
@@ -10929,19 +11659,26 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentNode.from_dict" href="#kodexa.model.model.ContentNode.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_all_content" href="#kodexa.model.model.ContentNode.get_all_content">get_all_content</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_all_tags" href="#kodexa.model.model.ContentNode.get_all_tags">get_all_tags</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_bbox" href="#kodexa.model.model.ContentNode.get_bbox">get_bbox</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_children" href="#kodexa.model.model.ContentNode.get_children">get_children</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_content" href="#kodexa.model.model.ContentNode.get_content">get_content</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_feature" href="#kodexa.model.model.ContentNode.get_feature">get_feature</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_feature_value" href="#kodexa.model.model.ContentNode.get_feature_value">get_feature_value</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_features" href="#kodexa.model.model.ContentNode.get_features">get_features</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_features_of_type" href="#kodexa.model.model.ContentNode.get_features_of_type">get_features_of_type</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_height" href="#kodexa.model.model.ContentNode.get_height">get_height</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_last_child_index" href="#kodexa.model.model.ContentNode.get_last_child_index">get_last_child_index</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_node_at_index" href="#kodexa.model.model.ContentNode.get_node_at_index">get_node_at_index</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_node_type" href="#kodexa.model.model.ContentNode.get_node_type">get_node_type</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_related_tag_values" href="#kodexa.model.model.ContentNode.get_related_tag_values">get_related_tag_values</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_rotate" href="#kodexa.model.model.ContentNode.get_rotate">get_rotate</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_statistics" href="#kodexa.model.model.ContentNode.get_statistics">get_statistics</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_tag" href="#kodexa.model.model.ContentNode.get_tag">get_tag</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_tag_values" href="#kodexa.model.model.ContentNode.get_tag_values">get_tag_values</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_tags" href="#kodexa.model.model.ContentNode.get_tags">get_tags</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_width" href="#kodexa.model.model.ContentNode.get_width">get_width</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_x" href="#kodexa.model.model.ContentNode.get_x">get_x</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_y" href="#kodexa.model.model.ContentNode.get_y">get_y</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.has_feature" href="#kodexa.model.model.ContentNode.has_feature">has_feature</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.has_next_node" href="#kodexa.model.model.ContentNode.has_next_node">has_next_node</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.has_previous_node" href="#kodexa.model.model.ContentNode.has_previous_node">has_previous_node</a></code></li>
@@ -10959,7 +11696,11 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentNode.remove_tag" href="#kodexa.model.model.ContentNode.remove_tag">remove_tag</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.select" href="#kodexa.model.model.ContentNode.select">select</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.select_as_node" href="#kodexa.model.model.ContentNode.select_as_node">select_as_node</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.set_bbox" href="#kodexa.model.model.ContentNode.set_bbox">set_bbox</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.set_bbox_from_children" href="#kodexa.model.model.ContentNode.set_bbox_from_children">set_bbox_from_children</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.set_feature" href="#kodexa.model.model.ContentNode.set_feature">set_feature</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.set_rotate" href="#kodexa.model.model.ContentNode.set_rotate">set_rotate</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.set_statistics" href="#kodexa.model.model.ContentNode.set_statistics">set_statistics</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.tag" href="#kodexa.model.model.ContentNode.tag">tag</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.tag_nodes_to" href="#kodexa.model.model.ContentNode.tag_nodes_to">tag_nodes_to</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.tag_range" href="#kodexa.model.model.ContentNode.tag_range">tag_range</a></code></li>
