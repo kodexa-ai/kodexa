@@ -361,7 +361,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise
 
     def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
-                                       document: Document):
+                                       document: Document) -&gt; ContentObject:
         from kodexa import KodexaPlatform
         try:
             logger.info(f&#34;Putting document to family id {document_family_id}&#34;)
@@ -376,7 +376,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 files=files)
 
             if document_family_response.status_code == 200:
-                return DocumentFamily.from_dict(document_family_response.json())
+                return ContentObject.from_dict(document_family_response.json())
             else:
                 msg = &#34;Document family create failed [&#34; + document_family_response.text + &#34;], response &#34; + str(
                     document_family_response.status_code)
@@ -885,7 +885,7 @@ in an instance of the Kodexa platform</p></div>
             raise
 
     def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
-                                       document: Document):
+                                       document: Document) -&gt; ContentObject:
         from kodexa import KodexaPlatform
         try:
             logger.info(f&#34;Putting document to family id {document_family_id}&#34;)
@@ -900,7 +900,7 @@ in an instance of the Kodexa platform</p></div>
                 files=files)
 
             if document_family_response.status_code == 200:
-                return DocumentFamily.from_dict(document_family_response.json())
+                return ContentObject.from_dict(document_family_response.json())
             else:
                 msg = &#34;Document family create failed [&#34; + document_family_response.text + &#34;], response &#34; + str(
                     document_family_response.status_code)
