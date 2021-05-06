@@ -366,7 +366,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         try:
             logger.info(f&#34;Putting document to family id {document_family_id}&#34;)
 
-            data = {&#39;transitionType&#39;: str(transition.transition_type),
+            data = {&#39;transitionType&#39;: transition.transition_type.value,
                     &#39;sourceContentObjectId&#39;: transition.source_content_object_id}
             files = {&#34;document&#34;: document.to_msgpack()}
             document_family_response = requests.post(
@@ -890,7 +890,7 @@ in an instance of the Kodexa platform</p></div>
         try:
             logger.info(f&#34;Putting document to family id {document_family_id}&#34;)
 
-            data = {&#39;transitionType&#39;: str(transition.transition_type),
+            data = {&#39;transitionType&#39;: transition.transition_type.value,
                     &#39;sourceContentObjectId&#39;: transition.source_content_object_id}
             files = {&#34;document&#34;: document.to_msgpack()}
             document_family_response = requests.post(
