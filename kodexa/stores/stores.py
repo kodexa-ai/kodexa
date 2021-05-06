@@ -332,7 +332,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise
 
     def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
-                                       document: Document):
+                                       document: Document) -> ContentObject:
         from kodexa import KodexaPlatform
         try:
             logger.info(f"Putting document to family id {document_family_id}")
@@ -347,7 +347,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 files=files)
 
             if document_family_response.status_code == 200:
-                return DocumentFamily.from_dict(document_family_response.json())
+                return ContentObject.from_dict(document_family_response.json())
             else:
                 msg = "Document family create failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
