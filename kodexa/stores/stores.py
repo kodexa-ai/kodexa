@@ -337,7 +337,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         try:
             logger.info(f"Putting document to family id {document_family_id}")
 
-            data = {'transitionType': str(transition.transition_type),
+            data = {'transitionType': transition.transition_type.value,
                     'sourceContentObjectId': transition.source_content_object_id}
             files = {"document": document.to_msgpack()}
             document_family_response = requests.post(
