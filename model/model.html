@@ -1347,6 +1347,8 @@ class ContentNode(object):
                 else:
                     node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)
 
+        return node_groups
+
     def get_tag(self, tag_name, tag_uuid=None):
         &#34;&#34;&#34;Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
         content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
@@ -4587,6 +4589,8 @@ ensure that the correct mixins are applied.</p>
                 else:
                     node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)
 
+        return node_groups
+
     def get_tag(self, tag_name, tag_uuid=None):
         &#34;&#34;&#34;Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
         content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
@@ -6351,7 +6355,9 @@ will have the node type of its nearest sibling and will have an index value, but
             if tag_instance[&#39;uuid&#39;] not in node_groups:
                 node_groups[tag_instance[&#39;uuid&#39;]] = [tagged_node]
             else:
-                node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)</code></pre>
+                node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)
+
+    return node_groups</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_related_tag_values"><code class="name flex">
