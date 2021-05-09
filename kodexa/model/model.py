@@ -1300,44 +1300,23 @@ class ContentNode(object):
           a list of the tag content nodes
 
         """
-
-        def group_tag_nodes(group_dict, feature_val):
-            """
-            Group the tags by tag UUID
-
-            Args:
-              group_dict:
-              feature_val:
-
-            Returns:
-
-            """
-            # we know the names of all these tags are the same, but we want to group them if they share the same uuid
-            if feature_val['uuid'] in node_groups.keys():
-                # we've seen this UUID - add it's value to the group
-                group_dict[feature_val['uuid']].append(feature_val['value'])
-            else:
-                # first occurrence
-                group_dict[feature_val['uuid']] = [feature_val['value']]
-
         if include_children:
             tagged_nodes = self.select(f'//*[hasTag("{tag_name}")]')
         else:
-            tagged_nodes = self.select('.')
+            tagged_nodes = [self]
 
-        node_groups: Dict[str, List[ContentNode]] = {}
-        for tag_node in tagged_nodes:
-            group_tag_nodes(node_groups, v)
-            tag = tag_node.get_tag(tag_name)
-            if tag:
-                for v in tag:
-                    group_tag_nodes(node_groups, v)
+        # We need to group these nodes together based on the TAG UUID
 
-        grouped_nodes = []
-        for k in node_groups.keys():
-            grouped_nodes.append(node_groups[k])
+        node_groups = {}
 
-        return grouped_nodes
+        for tagged_node in tagged_nodes:
+            tag_instances = tagged_node.get_tag(tag_name)
+
+            for tag_instance in tag_instances:
+                if tag_instance['uuid'] not in node_groups:
+                    node_groups[tag_instance['uuid']] = [tagged_node]
+                else:
+                    node_groups[tag_instance['uuid']].append(tagged_node)
 
     def get_tag(self, tag_name):
         """Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
@@ -1793,6 +1772,7 @@ class ContentFeature(object):
             return self.value[0]
         else:
             return self.value
+
 
 @dataclasses.dataclass()
 class SourceMetadata:
