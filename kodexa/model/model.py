@@ -1251,6 +1251,7 @@ class ContentNode(object):
 
         def group_tag_values(group_dict, feature_val):
             """
+            Group the tags by tag UUID
 
             Args:
               group_dict:
@@ -1287,6 +1288,56 @@ class ContentNode(object):
             value_strings.append(value_separator.join(value_groups[k]))
 
         return value_strings
+
+    def get_related_tag_nodes(self, tag_name: str, include_children: bool = False):
+        """Get the nodes for a specific tag name, grouped by uuid
+
+        Args:
+          tag_name: tag name
+          include_children: include the children of this node
+
+        Returns:
+          a list of the tag content nodes
+
+        """
+
+        def group_tag_nodes(group_dict, feature_val):
+            """
+            Group the tags by tag UUID
+
+            Args:
+              group_dict:
+              feature_val:
+
+            Returns:
+
+            """
+            # we know the names of all these tags are the same, but we want to group them if they share the same uuid
+            if feature_val['uuid'] in node_groups.keys():
+                # we've seen this UUID - add it's value to the group
+                group_dict[feature_val['uuid']].append(feature_val['value'])
+            else:
+                # first occurrence
+                group_dict[feature_val['uuid']] = [feature_val['value']]
+
+        if include_children:
+            tagged_nodes = self.select(f'//*[hasTag("{tag_name}")]')
+        else:
+            tagged_nodes = self.select('.')
+
+        node_groups: Dict[str, List[ContentNode]] = {}
+        for tag_node in tagged_nodes:
+            group_tag_nodes(node_groups, v)
+            tag = tag_node.get_tag(tag_name)
+            if tag:
+                for v in tag:
+                    group_tag_nodes(node_groups, v)
+
+        grouped_nodes = []
+        for k in node_groups.keys():
+            grouped_nodes.append(node_groups[k])
+
+        return grouped_nodes
 
     def get_tag(self, tag_name):
         """Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
