@@ -1318,6 +1318,8 @@ class ContentNode(object):
                 else:
                     node_groups[tag_instance['uuid']].append(tagged_node)
 
+        return node_groups
+
     def get_tag(self, tag_name, tag_uuid=None):
         """Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
         content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
