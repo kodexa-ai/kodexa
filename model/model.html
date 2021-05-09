@@ -1347,12 +1347,13 @@ class ContentNode(object):
                 else:
                     node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)
 
-    def get_tag(self, tag_name):
-        &#34;&#34;&#34;Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
+    def get_tag(self, tag_name, tag_uuid=None):
+        &#34;&#34;&#34;Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
         content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
 
         Args:
           tag_name: The name of the tag
+          tag_uuid (Optional): Optionally you can also provide the tag UUID
 
         Returns:
           A list tagged location and values for this label in this node
@@ -1365,10 +1366,17 @@ class ContentNode(object):
         if tag_details is None:
             return []
 
-        if isinstance(tag_details, list):
-            return tag_details
-        else:
-            return [tag_details]
+        if not isinstance(tag_details, list):
+            tag_details = [tag_details]
+
+        final_result = []
+        for tag_detail in tag_details:
+            if &#39;uuid&#39; in tag_detail and tag_uuid:
+                if tag_detail[&#39;uuid&#39;] == tag_uuid:
+                    final_result.append(tag_detail)
+            else:
+                final_result.append(tag_detail)
+        return final_result
 
     def get_all_tags(self):
         &#34;&#34;&#34;Get the names of all tags that have been applied to this node or to its children.
@@ -4579,12 +4587,13 @@ ensure that the correct mixins are applied.</p>
                 else:
                     node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)
 
-    def get_tag(self, tag_name):
-        &#34;&#34;&#34;Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
+    def get_tag(self, tag_name, tag_uuid=None):
+        &#34;&#34;&#34;Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
         content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
 
         Args:
           tag_name: The name of the tag
+          tag_uuid (Optional): Optionally you can also provide the tag UUID
 
         Returns:
           A list tagged location and values for this label in this node
@@ -4597,10 +4606,17 @@ ensure that the correct mixins are applied.</p>
         if tag_details is None:
             return []
 
-        if isinstance(tag_details, list):
-            return tag_details
-        else:
-            return [tag_details]
+        if not isinstance(tag_details, list):
+            tag_details = [tag_details]
+
+        final_result = []
+        for tag_detail in tag_details:
+            if &#39;uuid&#39; in tag_detail and tag_uuid:
+                if tag_detail[&#39;uuid&#39;] == tag_uuid:
+                    final_result.append(tag_detail)
+            else:
+                final_result.append(tag_detail)
+        return final_result
 
     def get_all_tags(self):
         &#34;&#34;&#34;Get the names of all tags that have been applied to this node or to its children.
@@ -6486,15 +6502,17 @@ will have the node type of its nearest sibling and will have an index value, but
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_tag"><code class="name flex">
-<span>def <span class="ident">get_tag</span></span>(<span>self, tag_name)</span>
+<span>def <span class="ident">get_tag</span></span>(<span>self, tag_name, tag_uuid=None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
+<div class="desc"><p>Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
 content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>tag_name</code></strong></dt>
 <dd>The name of the tag</dd>
+<dt><strong><code>tag_uuid</code></strong> :&ensp;<code>Optional</code></dt>
+<dd>Optionally you can also provide the tag UUID</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>A list tagged location and values for this label in this node</p>
@@ -6505,12 +6523,13 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_tag(self, tag_name):
-    &#34;&#34;&#34;Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
+<pre><code class="python">def get_tag(self, tag_name, tag_uuid=None):
+    &#34;&#34;&#34;Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
     content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
 
     Args:
       tag_name: The name of the tag
+      tag_uuid (Optional): Optionally you can also provide the tag UUID
 
     Returns:
       A list tagged location and values for this label in this node
@@ -6523,10 +6542,17 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
     if tag_details is None:
         return []
 
-    if isinstance(tag_details, list):
-        return tag_details
-    else:
-        return [tag_details]</code></pre>
+    if not isinstance(tag_details, list):
+        tag_details = [tag_details]
+
+    final_result = []
+    for tag_detail in tag_details:
+        if &#39;uuid&#39; in tag_detail and tag_uuid:
+            if tag_detail[&#39;uuid&#39;] == tag_uuid:
+                final_result.append(tag_detail)
+        else:
+            final_result.append(tag_detail)
+    return final_result</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_tag_values"><code class="name flex">
