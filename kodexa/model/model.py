@@ -1318,12 +1318,13 @@ class ContentNode(object):
                 else:
                     node_groups[tag_instance['uuid']].append(tagged_node)
 
-    def get_tag(self, tag_name):
-        """Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
+    def get_tag(self, tag_name, tag_uuid=None):
+        """Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
         content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
 
         Args:
           tag_name: The name of the tag
+          tag_uuid (Optional): Optionally you can also provide the tag UUID
 
         Returns:
           A list tagged location and values for this label in this node
@@ -1336,10 +1337,17 @@ class ContentNode(object):
         if tag_details is None:
             return []
 
-        if isinstance(tag_details, list):
-            return tag_details
-        else:
-            return [tag_details]
+        if not isinstance(tag_details, list):
+            tag_details = [tag_details]
+
+        final_result = []
+        for tag_detail in tag_details:
+            if 'uuid' in tag_detail and tag_uuid:
+                if tag_detail['uuid'] == tag_uuid:
+                    final_result.append(tag_detail)
+            else:
+                final_result.append(tag_detail)
+        return final_result
 
     def get_all_tags(self):
         """Get the names of all tags that have been applied to this node or to its children.
