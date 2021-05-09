@@ -1280,6 +1280,7 @@ class ContentNode(object):
 
         def group_tag_values(group_dict, feature_val):
             &#34;&#34;&#34;
+            Group the tags by tag UUID
 
             Args:
               group_dict:
@@ -1316,6 +1317,35 @@ class ContentNode(object):
             value_strings.append(value_separator.join(value_groups[k]))
 
         return value_strings
+
+    def get_related_tag_nodes(self, tag_name: str, include_children: bool = False):
+        &#34;&#34;&#34;Get the nodes for a specific tag name, grouped by uuid
+
+        Args:
+          tag_name: tag name
+          include_children: include the children of this node
+
+        Returns:
+          a list of the tag content nodes
+
+        &#34;&#34;&#34;
+        if include_children:
+            tagged_nodes = self.select(f&#39;//*[hasTag(&#34;{tag_name}&#34;)]&#39;)
+        else:
+            tagged_nodes = [self]
+
+        # We need to group these nodes together based on the TAG UUID
+
+        node_groups = {}
+
+        for tagged_node in tagged_nodes:
+            tag_instances = tagged_node.get_tag(tag_name)
+
+            for tag_instance in tag_instances:
+                if tag_instance[&#39;uuid&#39;] not in node_groups:
+                    node_groups[tag_instance[&#39;uuid&#39;]] = [tagged_node]
+                else:
+                    node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)
 
     def get_tag(self, tag_name):
         &#34;&#34;&#34;Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
@@ -1771,6 +1801,7 @@ class ContentFeature(object):
             return self.value[0]
         else:
             return self.value
+
 
 @dataclasses.dataclass()
 class SourceMetadata:
@@ -4481,6 +4512,7 @@ ensure that the correct mixins are applied.</p>
 
         def group_tag_values(group_dict, feature_val):
             &#34;&#34;&#34;
+            Group the tags by tag UUID
 
             Args:
               group_dict:
@@ -4517,6 +4549,35 @@ ensure that the correct mixins are applied.</p>
             value_strings.append(value_separator.join(value_groups[k]))
 
         return value_strings
+
+    def get_related_tag_nodes(self, tag_name: str, include_children: bool = False):
+        &#34;&#34;&#34;Get the nodes for a specific tag name, grouped by uuid
+
+        Args:
+          tag_name: tag name
+          include_children: include the children of this node
+
+        Returns:
+          a list of the tag content nodes
+
+        &#34;&#34;&#34;
+        if include_children:
+            tagged_nodes = self.select(f&#39;//*[hasTag(&#34;{tag_name}&#34;)]&#39;)
+        else:
+            tagged_nodes = [self]
+
+        # We need to group these nodes together based on the TAG UUID
+
+        node_groups = {}
+
+        for tagged_node in tagged_nodes:
+            tag_instances = tagged_node.get_tag(tag_name)
+
+            for tag_instance in tag_instances:
+                if tag_instance[&#39;uuid&#39;] not in node_groups:
+                    node_groups[tag_instance[&#39;uuid&#39;]] = [tagged_node]
+                else:
+                    node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)
 
     def get_tag(self, tag_name):
         &#34;&#34;&#34;Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
@@ -6229,6 +6290,54 @@ will have the node type of its nearest sibling and will have an index value, but
     return self.node_type</code></pre>
 </details>
 </dd>
+<dt id="kodexa.model.model.ContentNode.get_related_tag_nodes"><code class="name flex">
+<span>def <span class="ident">get_related_tag_nodes</span></span>(<span>self, tag_name: str, include_children: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the nodes for a specific tag name, grouped by uuid</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tag_name</code></strong></dt>
+<dd>tag name</dd>
+<dt><strong><code>include_children</code></strong></dt>
+<dd>include the children of this node</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>a list of the tag content nodes</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_related_tag_nodes(self, tag_name: str, include_children: bool = False):
+    &#34;&#34;&#34;Get the nodes for a specific tag name, grouped by uuid
+
+    Args:
+      tag_name: tag name
+      include_children: include the children of this node
+
+    Returns:
+      a list of the tag content nodes
+
+    &#34;&#34;&#34;
+    if include_children:
+        tagged_nodes = self.select(f&#39;//*[hasTag(&#34;{tag_name}&#34;)]&#39;)
+    else:
+        tagged_nodes = [self]
+
+    # We need to group these nodes together based on the TAG UUID
+
+    node_groups = {}
+
+    for tagged_node in tagged_nodes:
+        tag_instances = tagged_node.get_tag(tag_name)
+
+        for tag_instance in tag_instances:
+            if tag_instance[&#39;uuid&#39;] not in node_groups:
+                node_groups[tag_instance[&#39;uuid&#39;]] = [tagged_node]
+            else:
+                node_groups[tag_instance[&#39;uuid&#39;]].append(tagged_node)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.ContentNode.get_related_tag_values"><code class="name flex">
 <span>def <span class="ident">get_related_tag_values</span></span>(<span>self, tag_name: str, include_children: bool = False, value_separator: str = ' ')</span>
 </code></dt>
@@ -6275,6 +6384,7 @@ will have the node type of its nearest sibling and will have an index value, but
 
     def group_tag_values(group_dict, feature_val):
         &#34;&#34;&#34;
+        Group the tags by tag UUID
 
         Args:
           group_dict:
@@ -11670,6 +11780,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentNode.get_last_child_index" href="#kodexa.model.model.ContentNode.get_last_child_index">get_last_child_index</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_node_at_index" href="#kodexa.model.model.ContentNode.get_node_at_index">get_node_at_index</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_node_type" href="#kodexa.model.model.ContentNode.get_node_type">get_node_type</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_related_tag_nodes" href="#kodexa.model.model.ContentNode.get_related_tag_nodes">get_related_tag_nodes</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_related_tag_values" href="#kodexa.model.model.ContentNode.get_related_tag_values">get_related_tag_values</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_rotate" href="#kodexa.model.model.ContentNode.get_rotate">get_rotate</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_statistics" href="#kodexa.model.model.ContentNode.get_statistics">get_statistics</a></code></li>
