@@ -2332,9 +2332,6 @@ class ScheduledEvent(BaseEvent):
 
     def to_dict(self):
         return {
-            'contentObject': self.content_object.to_dict(),
-            'documentFamily': self.document_family.to_dict(),
-            'eventType': self.event_type,
             'type': self.type
         }
 
@@ -2380,7 +2377,7 @@ class AssistantEvent(BaseEvent):
     type = "assistant"
 
     """
-    A assistant event represents an interaction, usually from a user or an API, to evalute
+    A assistant event represents an interaction, usually from a user or an API, to evaluate
     and respond to a document
     """
 
