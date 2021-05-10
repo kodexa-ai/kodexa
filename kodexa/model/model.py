@@ -2326,13 +2326,19 @@ class ScheduledEvent(BaseEvent):
 
     type = "scheduled"
 
+    def __init__(self, last_date=None, next_date=None):
+        self.last_date = last_date
+        self.next_date = next_date
+
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return ScheduledEvent()
+        return ScheduledEvent(event_dict.get('lastDate'), event_dict.get('nextDate'))
 
     def to_dict(self):
         return {
-            'type': self.type
+            'type': self.type,
+            'lastDate': self.last_date,
+            'nextDate': self.next_date
         }
 
 
