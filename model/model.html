@@ -2361,9 +2361,6 @@ class ScheduledEvent(BaseEvent):
 
     def to_dict(self):
         return {
-            &#39;contentObject&#39;: self.content_object.to_dict(),
-            &#39;documentFamily&#39;: self.document_family.to_dict(),
-            &#39;eventType&#39;: self.event_type,
             &#39;type&#39;: self.type
         }
 
@@ -2409,7 +2406,7 @@ class AssistantEvent(BaseEvent):
     type = &#34;assistant&#34;
 
     &#34;&#34;&#34;
-    A assistant event represents an interaction, usually from a user or an API, to evalute
+    A assistant event represents an interaction, usually from a user or an API, to evaluate
     and respond to a document
     &#34;&#34;&#34;
 
@@ -3008,7 +3005,7 @@ class ContentObjectReference:
     type = &#34;assistant&#34;
 
     &#34;&#34;&#34;
-    A assistant event represents an interaction, usually from a user or an API, to evalute
+    A assistant event represents an interaction, usually from a user or an API, to evaluate
     and respond to a document
     &#34;&#34;&#34;
 
@@ -3044,7 +3041,7 @@ class ContentObjectReference:
 <dl>
 <dt id="kodexa.model.model.AssistantEvent.type"><code class="name">var <span class="ident">type</span></code></dt>
 <dd>
-<div class="desc"><p>A assistant event represents an interaction, usually from a user or an API, to evalute
+<div class="desc"><p>A assistant event represents an interaction, usually from a user or an API, to evaluate
 and respond to a document</p></div>
 </dd>
 </dl>
@@ -11235,9 +11232,6 @@ instance</p></div>
 
     def to_dict(self):
         return {
-            &#39;contentObject&#39;: self.content_object.to_dict(),
-            &#39;documentFamily&#39;: self.document_family.to_dict(),
-            &#39;eventType&#39;: self.event_type,
             &#39;type&#39;: self.type
         }</code></pre>
 </details>
@@ -11282,9 +11276,6 @@ def from_dict(cls, event_dict: dict):
 </summary>
 <pre><code class="python">def to_dict(self):
     return {
-        &#39;contentObject&#39;: self.content_object.to_dict(),
-        &#39;documentFamily&#39;: self.document_family.to_dict(),
-        &#39;eventType&#39;: self.event_type,
         &#39;type&#39;: self.type
     }</code></pre>
 </details>
