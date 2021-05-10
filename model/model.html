@@ -2355,13 +2355,19 @@ class ScheduledEvent(BaseEvent):
 
     type = &#34;scheduled&#34;
 
+    def __init__(self, last_date=None, next_date=None):
+        self.last_date = last_date
+        self.next_date = next_date
+
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return ScheduledEvent()
+        return ScheduledEvent(event_dict.get(&#39;lastDate&#39;), event_dict.get(&#39;nextDate&#39;))
 
     def to_dict(self):
         return {
-            &#39;type&#39;: self.type
+            &#39;type&#39;: self.type,
+            &#39;lastDate&#39;: self.last_date,
+            &#39;nextDate&#39;: self.next_date
         }
 
 
@@ -11214,6 +11220,7 @@ instance</p></div>
 </dd>
 <dt id="kodexa.model.model.ScheduledEvent"><code class="flex name class">
 <span>class <span class="ident">ScheduledEvent</span></span>
+<span>(</span><span>last_date=None, next_date=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A scheduled event is sent to an assistant when a scheduled has been met</p></div>
@@ -11226,13 +11233,19 @@ instance</p></div>
 
     type = &#34;scheduled&#34;
 
+    def __init__(self, last_date=None, next_date=None):
+        self.last_date = last_date
+        self.next_date = next_date
+
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return ScheduledEvent()
+        return ScheduledEvent(event_dict.get(&#39;lastDate&#39;), event_dict.get(&#39;nextDate&#39;))
 
     def to_dict(self):
         return {
-            &#39;type&#39;: self.type
+            &#39;type&#39;: self.type,
+            &#39;lastDate&#39;: self.last_date,
+            &#39;nextDate&#39;: self.next_date
         }</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -11259,7 +11272,7 @@ instance</p></div>
 </summary>
 <pre><code class="python">@classmethod
 def from_dict(cls, event_dict: dict):
-    return ScheduledEvent()</code></pre>
+    return ScheduledEvent(event_dict.get(&#39;lastDate&#39;), event_dict.get(&#39;nextDate&#39;))</code></pre>
 </details>
 </dd>
 </dl>
@@ -11276,7 +11289,9 @@ def from_dict(cls, event_dict: dict):
 </summary>
 <pre><code class="python">def to_dict(self):
     return {
-        &#39;type&#39;: self.type
+        &#39;type&#39;: self.type,
+        &#39;lastDate&#39;: self.last_date,
+        &#39;nextDate&#39;: self.next_date
     }</code></pre>
 </details>
 </dd>
