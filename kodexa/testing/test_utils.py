@@ -239,8 +239,29 @@ class AssistantTestHarness:
         for store in self.stores:
             store.register_listener(self)
 
-    def test_assistant_event(self, assistant_event: AssistantEvent):
-        pass
+    def test_assistant_event(self, assistant_event: AssistantEvent) -> AssistantResponse:
+        """
+        Pass an assistant event into the assistant
+
+        :param assistant_event: the assistant event to process
+        :return: the response from the event
+        """
+        from kodexa import AssistantContext
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+
+        return self.assistant.process_event(assistant_event, assistant_context)
+
+    def test_scheduled_event(self, scheduled_event: AssistantEvent) -> AssistantResponse:
+        """
+        Pass a scheduled event into the assistant
+
+        :param scheduled_event: the scheduled event to process
+        :return: the response from the assistant
+        """
+        from kodexa import AssistantContext
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+
+        return self.assistant.process_event(scheduled_event, assistant_context)
 
     def process_event(self, event: ContentEvent):
         """The harness will take the content event and
@@ -279,8 +300,6 @@ class AssistantTestHarness:
 
                     store.add_related_document_to_family(event.document_family.id, document_relationship,
                                                          pipeline_context.output_document)
-
-        pass
 
     def register_local_document_store(self, store: LocalDocumentStore):
         """
