@@ -2430,12 +2430,15 @@ class AssistantEvent(BaseEvent):
 
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return AssistantEvent(ContentObject.from_dict(event_dict.get(&#39;contentObject&#39;)),
-                              event_dict[&#39;eventType&#39;])
+        if &#39;contentObject&#39; in event_dict:
+            return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                                  event_dict[&#39;eventType&#39;])
+        else:
+            return AssistantEvent(None, event_dict[&#39;eventType&#39;])
 
     def to_dict(self):
         return {
-            &#39;contentObject&#39;: self.content_object.to_dict(),
+            &#39;contentObject&#39;: self.content_object.to_dict() if self.content_object is not None else None,
             &#39;eventType&#39;: self.event_type,
             &#39;type&#39;: self.type
         }
@@ -3029,12 +3032,15 @@ class ContentObjectReference:
 
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return AssistantEvent(ContentObject.from_dict(event_dict.get(&#39;contentObject&#39;)),
-                              event_dict[&#39;eventType&#39;])
+        if &#39;contentObject&#39; in event_dict:
+            return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                                  event_dict[&#39;eventType&#39;])
+        else:
+            return AssistantEvent(None, event_dict[&#39;eventType&#39;])
 
     def to_dict(self):
         return {
-            &#39;contentObject&#39;: self.content_object.to_dict(),
+            &#39;contentObject&#39;: self.content_object.to_dict() if self.content_object is not None else None,
             &#39;eventType&#39;: self.event_type,
             &#39;type&#39;: self.type
         }</code></pre>
@@ -3064,8 +3070,11 @@ and respond to a document</p></div>
 </summary>
 <pre><code class="python">@classmethod
 def from_dict(cls, event_dict: dict):
-    return AssistantEvent(ContentObject.from_dict(event_dict.get(&#39;contentObject&#39;)),
-                          event_dict[&#39;eventType&#39;])</code></pre>
+    if &#39;contentObject&#39; in event_dict:
+        return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+                              event_dict[&#39;eventType&#39;])
+    else:
+        return AssistantEvent(None, event_dict[&#39;eventType&#39;])</code></pre>
 </details>
 </dd>
 </dl>
@@ -3093,7 +3102,7 @@ def from_dict(cls, event_dict: dict):
 </summary>
 <pre><code class="python">def to_dict(self):
     return {
-        &#39;contentObject&#39;: self.content_object.to_dict(),
+        &#39;contentObject&#39;: self.content_object.to_dict() if self.content_object is not None else None,
         &#39;eventType&#39;: self.event_type,
         &#39;type&#39;: self.type
     }</code></pre>
