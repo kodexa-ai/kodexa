@@ -391,6 +391,8 @@ class KodexaPlatform:
                 return RemoteTableDataStore(ref)
             if obj_info['storeType'] == 'DOCUMENT':
                 return RemoteDocumentStore(ref)
+            if obj_info['storeType'] == 'MODEL':
+                return RemoteModelStore(ref)
 
         # TODO - there are other things we need?
         raise Exception(f"Unable to get a local instance of {ref} of type {object_type}")
