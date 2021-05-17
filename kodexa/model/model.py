@@ -2387,7 +2387,7 @@ class AssistantEvent(BaseEvent):
     and respond to a document
     """
 
-    def __init__(self, content_object: ContentObject, event_type: str):
+    def __init__(self, content_object: Optional[ContentObject], event_type: str):
         """
         Initialize a content event
         Args:
@@ -2401,7 +2401,7 @@ class AssistantEvent(BaseEvent):
 
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return AssistantEvent(ContentObject.from_dict(event_dict['contentObject']),
+        return AssistantEvent(ContentObject.from_dict(event_dict.get('contentObject')),
                               event_dict['eventType'])
 
     def to_dict(self):
