@@ -422,6 +422,8 @@ class KodexaPlatform:
                 return RemoteTableDataStore(ref)
             if obj_info[&#39;storeType&#39;] == &#39;DOCUMENT&#39;:
                 return RemoteDocumentStore(ref)
+            if obj_info[&#39;storeType&#39;] == &#39;MODEL&#39;:
+                return RemoteModelStore(ref)
 
         # TODO - there are other things we need?
         raise Exception(f&#34;Unable to get a local instance of {ref} of type {object_type}&#34;)
@@ -1672,6 +1674,8 @@ components</p>
                 return RemoteTableDataStore(ref)
             if obj_info[&#39;storeType&#39;] == &#39;DOCUMENT&#39;:
                 return RemoteDocumentStore(ref)
+            if obj_info[&#39;storeType&#39;] == &#39;MODEL&#39;:
+                return RemoteModelStore(ref)
 
         # TODO - there are other things we need?
         raise Exception(f&#34;Unable to get a local instance of {ref} of type {object_type}&#34;)
@@ -2590,6 +2594,8 @@ def get_object_instance(ref: str, object_type: str):
             return RemoteTableDataStore(ref)
         if obj_info[&#39;storeType&#39;] == &#39;DOCUMENT&#39;:
             return RemoteDocumentStore(ref)
+        if obj_info[&#39;storeType&#39;] == &#39;MODEL&#39;:
+            return RemoteModelStore(ref)
 
     # TODO - there are other things we need?
     raise Exception(f&#34;Unable to get a local instance of {ref} of type {object_type}&#34;)</code></pre>
