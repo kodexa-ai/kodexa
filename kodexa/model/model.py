@@ -1251,6 +1251,7 @@ class ContentNode(object):
 
         def group_tag_values(group_dict, feature_val):
             """
+            Group the tags by tag UUID
 
             Args:
               group_dict:
@@ -1288,12 +1289,44 @@ class ContentNode(object):
 
         return value_strings
 
-    def get_tag(self, tag_name):
-        """Returns the value of a tag, this can be either a single list [start,end,value] or if multiple parts of the
+    def get_related_tag_nodes(self, tag_name: str, include_children: bool = False):
+        """Get the nodes for a specific tag name, grouped by uuid
+
+        Args:
+          tag_name: tag name
+          include_children: include the children of this node
+
+        Returns:
+          a list of the tag content nodes
+
+        """
+        if include_children:
+            tagged_nodes = self.select(f'//*[hasTag("{tag_name}")]')
+        else:
+            tagged_nodes = [self]
+
+        # We need to group these nodes together based on the TAG UUID
+
+        node_groups = {}
+
+        for tagged_node in tagged_nodes:
+            tag_instances = tagged_node.get_tag(tag_name)
+
+            for tag_instance in tag_instances:
+                if tag_instance['uuid'] not in node_groups:
+                    node_groups[tag_instance['uuid']] = [tagged_node]
+                else:
+                    node_groups[tag_instance['uuid']].append(tagged_node)
+
+        return node_groups
+
+    def get_tag(self, tag_name, tag_uuid=None):
+        """Returns the value of a tag (a dictionary), this can be either a single value in a list [[start,end,value]] or if multiple parts of the
         content of this node match you can end up with a list of lists i.e. [[start1,end1,value1],[start2,end2,value2]]
 
         Args:
           tag_name: The name of the tag
+          tag_uuid (Optional): Optionally you can also provide the tag UUID
 
         Returns:
           A list tagged location and values for this label in this node
@@ -1306,10 +1339,17 @@ class ContentNode(object):
         if tag_details is None:
             return []
 
-        if isinstance(tag_details, list):
-            return tag_details
-        else:
-            return [tag_details]
+        if not isinstance(tag_details, list):
+            tag_details = [tag_details]
+
+        final_result = []
+        for tag_detail in tag_details:
+            if 'uuid' in tag_detail and tag_uuid:
+                if tag_detail['uuid'] == tag_uuid:
+                    final_result.append(tag_detail)
+            else:
+                final_result.append(tag_detail)
+        return final_result
 
     def get_all_tags(self):
         """Get the names of all tags that have been applied to this node or to its children.
@@ -1742,6 +1782,7 @@ class ContentFeature(object):
             return self.value[0]
         else:
             return self.value
+
 
 @dataclasses.dataclass()
 class SourceMetadata:
@@ -2285,16 +2326,19 @@ class ScheduledEvent(BaseEvent):
 
     type = "scheduled"
 
+    def __init__(self, last_date=None, next_date=None):
+        self.last_date = last_date
+        self.next_date = next_date
+
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return ScheduledEvent()
+        return ScheduledEvent(event_dict.get('lastDate'), event_dict.get('nextDate'))
 
     def to_dict(self):
         return {
-            'contentObject': self.content_object.to_dict(),
-            'documentFamily': self.document_family.to_dict(),
-            'eventType': self.event_type,
-            'type': self.type
+            'type': self.type,
+            'lastDate': self.last_date,
+            'nextDate': self.next_date
         }
 
 
@@ -2339,11 +2383,11 @@ class AssistantEvent(BaseEvent):
     type = "assistant"
 
     """
-    A assistant event represents an interaction, usually from a user or an API, to evalute
+    A assistant event represents an interaction, usually from a user or an API, to evaluate
     and respond to a document
     """
 
-    def __init__(self, content_object: ContentObject, event_type: str):
+    def __init__(self, content_object: Optional[ContentObject], event_type: str):
         """
         Initialize a content event
         Args:
@@ -2357,7 +2401,7 @@ class AssistantEvent(BaseEvent):
 
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return AssistantEvent(ContentObject.from_dict(event_dict['contentObject']),
+        return AssistantEvent(ContentObject.from_dict(event_dict.get('contentObject')),
                               event_dict['eventType'])
 
     def to_dict(self):
