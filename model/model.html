@@ -2416,7 +2416,7 @@ class AssistantEvent(BaseEvent):
     and respond to a document
     &#34;&#34;&#34;
 
-    def __init__(self, content_object: ContentObject, event_type: str):
+    def __init__(self, content_object: Optional[ContentObject], event_type: str):
         &#34;&#34;&#34;
         Initialize a content event
         Args:
@@ -2430,7 +2430,7 @@ class AssistantEvent(BaseEvent):
 
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+        return AssistantEvent(ContentObject.from_dict(event_dict.get(&#39;contentObject&#39;)),
                               event_dict[&#39;eventType&#39;])
 
     def to_dict(self):
@@ -2991,7 +2991,7 @@ class ContentObjectReference:
 <dl>
 <dt id="kodexa.model.model.AssistantEvent"><code class="flex name class">
 <span>class <span class="ident">AssistantEvent</span></span>
-<span>(</span><span>content_object: <a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>, event_type: str)</span>
+<span>(</span><span>content_object: Union[<a title="kodexa.model.model.ContentObject" href="#kodexa.model.model.ContentObject">ContentObject</a>, NoneType], event_type: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The base for all events within Kodexa</p>
@@ -3015,7 +3015,7 @@ class ContentObjectReference:
     and respond to a document
     &#34;&#34;&#34;
 
-    def __init__(self, content_object: ContentObject, event_type: str):
+    def __init__(self, content_object: Optional[ContentObject], event_type: str):
         &#34;&#34;&#34;
         Initialize a content event
         Args:
@@ -3029,7 +3029,7 @@ class ContentObjectReference:
 
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+        return AssistantEvent(ContentObject.from_dict(event_dict.get(&#39;contentObject&#39;)),
                               event_dict[&#39;eventType&#39;])
 
     def to_dict(self):
@@ -3064,7 +3064,7 @@ and respond to a document</p></div>
 </summary>
 <pre><code class="python">@classmethod
 def from_dict(cls, event_dict: dict):
-    return AssistantEvent(ContentObject.from_dict(event_dict[&#39;contentObject&#39;]),
+    return AssistantEvent(ContentObject.from_dict(event_dict.get(&#39;contentObject&#39;)),
                           event_dict[&#39;eventType&#39;])</code></pre>
 </details>
 </dd>
