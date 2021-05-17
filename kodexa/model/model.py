@@ -2401,12 +2401,15 @@ class AssistantEvent(BaseEvent):
 
     @classmethod
     def from_dict(cls, event_dict: dict):
-        return AssistantEvent(ContentObject.from_dict(event_dict.get('contentObject')),
-                              event_dict['eventType'])
+        if 'contentObject' in event_dict:
+            return AssistantEvent(ContentObject.from_dict(event_dict['contentObject']),
+                                  event_dict['eventType'])
+        else:
+            return AssistantEvent(None, event_dict['eventType'])
 
     def to_dict(self):
         return {
-            'contentObject': self.content_object.to_dict(),
+            'contentObject': self.content_object.to_dict() if self.content_object is not None else None,
             'eventType': self.event_type,
             'type': self.type
         }
