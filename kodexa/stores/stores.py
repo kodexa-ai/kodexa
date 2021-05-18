@@ -12,6 +12,7 @@ from requests import Response
 
 from kodexa.model import ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, ModelStore, \
     RemoteStore
+from kodexa.model.model import ModelContentMetadata
 from kodexa.stores.local import LocalModelStore, TableDataStore
 
 logger = logging.getLogger('kodexa.stores')
@@ -616,3 +617,54 @@ class RemoteModelStore(ModelStore, RemoteStore):
             logger.error(
                 "Unable to JSON decode the response?")
             raise
+
+    def set_content_metadata(self, model_content_metadata: ModelContentMetadata):
+        """
+        Updates the model content metadata for the model store
+
+        :param model_content_metadata: The metadata object
+        """
+        from kodexa import KodexaPlatform
+        import requests
+        try:
+            content_object_response = requests.post(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/metadata",
+                headers={"x-access-token": KodexaPlatform.get_access_token()},
+                json=model_content_metadata.to_dict())
+
+            if content_object_response.status_code == 200:
+                return model_content_metadata
+            elif content_object_response.status_code == 400:
+                from addict import Dict
+                bad_request = Dict(json.loads(content_object_response.text))
+                for error_key in bad_request.errors.keys():
+                    print(bad_request.errors[error_key] + " (" + error_key + ")")
+                raise Exception("Invalid request")
+            else:
+                msg = "Execution creation failed [" + content_object_response.text + "], response " + str(
+                    content_object_response.status_code)
+                logger.error(msg)
+                raise Exception(msg)
+        except JSONDecodeError:
+            logger.error(
+                "Unable to JSON decode the response?")
+            raise
+
+    def get_content_metadata(self) -> ModelContentMetadata:
+        """
+        Gets the latest model content metadata for the model store
+
+        :return: the model content metadata
+        """
+        from kodexa import KodexaPlatform
+        import requests
+        resp = requests.get(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/metadata",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return ModelContentMetadata.from_dict(resp.json())
+        else:
+            msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
+            logger.error(msg)
+            raise Exception(msg)
