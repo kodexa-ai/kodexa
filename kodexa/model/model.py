@@ -2914,6 +2914,53 @@ class DocumentStore:
         return document
 
 
+class ModelContentMetadata:
+    """Represents the metadata that can be stored with a model"""
+
+    def __init__(self):
+        self.state = 'PENDING'
+        """The state of the model"""
+        self.parameters: dict = {}
+        """Parameters used in building the model"""
+        self.final_statistics: dict = {}
+        """Final statistics from the model"""
+        self.build_statistics: dict = {}
+        """Statistics while building from the model"""
+        self.deployment: dict = {}
+        """Metadata from the deployment of the model"""
+
+    @classmethod
+    def from_dict(cls, model_content_dict: dict):
+        """
+        Converts a dictionary from a REST call back into ModelContentMetadata
+        Args:
+            model_content_dict: Dictionary
+
+        Returns: A ModelContentMetadata object
+
+        """
+        model_content_metadata = ModelContentMetadata(model_content_dict['state'], model_content_dict['parameters'],
+                                                      model_content_dict['finalStatistics'],
+                                                      model_content_dict['buildStatistics'],
+                                                      model_content_dict['deployment'])
+        return model_content_metadata
+
+    def to_dict(self) -> dict:
+        """
+        Convert the ModelContentMetadata to a dictionary to match REST API
+
+        Returns:
+            dictionary of model content metadata
+        """
+        return {
+            'state': self.state,
+            'parameters': self.parameters,
+            'finalStatistics': self.final_statistics,
+            'buildStatistics': self.build_statistics,
+            'deployment': self.deployment
+        }
+
+
 class ModelStore:
     """A model store supports storing and retrieving of a ML models"""
 
@@ -2938,6 +2985,22 @@ class ModelStore:
           force_replace (bool): Replace the file stored at the path (Default false)
         Returns:
 
+        """
+        pass
+
+    def set_content_metadata(self, model_content_metadata: ModelContentMetadata):
+        """
+        Updates the model content metadata for the model store
+
+        :param model_content_metadata: The metadata object
+        """
+        pass
+
+    def get_content_metadata(self) -> ModelContentMetadata:
+        """
+        Gets the latest model content metadata for the model store
+
+        :return: the model content metadata
         """
         pass
 
