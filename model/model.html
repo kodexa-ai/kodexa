@@ -2943,6 +2943,62 @@ class DocumentStore:
         return document
 
 
+class ModelContentMetadata:
+    &#34;&#34;&#34;Represents the metadata that can be stored with a model&#34;&#34;&#34;
+
+    def __init__(self, state: str = &#39;PENDING&#39;, parameters=None, final_statistics=None, build_statistics=None,
+                 deployment=None):
+        if deployment is None:
+            deployment = {}
+        if build_statistics is None:
+            build_statistics = {}
+        if final_statistics is None:
+            final_statistics = {}
+        if parameters is None:
+            parameters = {}
+        self.state = state
+        &#34;&#34;&#34;The state of the model&#34;&#34;&#34;
+        self.parameters: dict = parameters
+        &#34;&#34;&#34;Parameters used in building the model&#34;&#34;&#34;
+        self.final_statistics: dict = final_statistics
+        &#34;&#34;&#34;Final statistics from the model&#34;&#34;&#34;
+        self.build_statistics: dict = build_statistics
+        &#34;&#34;&#34;Statistics while building from the model&#34;&#34;&#34;
+        self.deployment: dict = deployment
+        &#34;&#34;&#34;Metadata from the deployment of the model&#34;&#34;&#34;
+
+    @classmethod
+    def from_dict(cls, model_content_dict: dict):
+        &#34;&#34;&#34;
+        Converts a dictionary from a REST call back into ModelContentMetadata
+        Args:
+            model_content_dict: Dictionary
+
+        Returns: A ModelContentMetadata object
+
+        &#34;&#34;&#34;
+        model_content_metadata = ModelContentMetadata(model_content_dict[&#39;state&#39;], model_content_dict[&#39;parameters&#39;],
+                                                      model_content_dict[&#39;finalStatistics&#39;],
+                                                      model_content_dict[&#39;buildStatistics&#39;],
+                                                      model_content_dict[&#39;deployment&#39;])
+        return model_content_metadata
+
+    def to_dict(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Convert the ModelContentMetadata to a dictionary to match REST API
+
+        Returns:
+            dictionary of model content metadata
+        &#34;&#34;&#34;
+        return {
+            &#39;state&#39;: self.state,
+            &#39;parameters&#39;: self.parameters,
+            &#39;finalStatistics&#39;: self.final_statistics,
+            &#39;buildStatistics&#39;: self.build_statistics,
+            &#39;deployment&#39;: self.deployment
+        }
+
+
 class ModelStore:
     &#34;&#34;&#34;A model store supports storing and retrieving of a ML models&#34;&#34;&#34;
 
@@ -2967,6 +3023,22 @@ class ModelStore:
           force_replace (bool): Replace the file stored at the path (Default false)
         Returns:
 
+        &#34;&#34;&#34;
+        pass
+
+    def set_content_metadata(self, model_content_metadata: ModelContentMetadata):
+        &#34;&#34;&#34;
+        Updates the model content metadata for the model store
+
+        :param model_content_metadata: The metadata object
+        &#34;&#34;&#34;
+        pass
+
+    def get_content_metadata(self) -&gt; ModelContentMetadata:
+        &#34;&#34;&#34;
+        Gets the latest model content metadata for the model store
+
+        :return: the model content metadata
         &#34;&#34;&#34;
         pass
 
@@ -11027,6 +11099,160 @@ def from_dict(cls, transition_dict: dict):
 </dd>
 </dl>
 </dd>
+<dt id="kodexa.model.model.ModelContentMetadata"><code class="flex name class">
+<span>class <span class="ident">ModelContentMetadata</span></span>
+<span>(</span><span>state: str = 'PENDING', parameters=None, final_statistics=None, build_statistics=None, deployment=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the metadata that can be stored with a model</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ModelContentMetadata:
+    &#34;&#34;&#34;Represents the metadata that can be stored with a model&#34;&#34;&#34;
+
+    def __init__(self, state: str = &#39;PENDING&#39;, parameters=None, final_statistics=None, build_statistics=None,
+                 deployment=None):
+        if deployment is None:
+            deployment = {}
+        if build_statistics is None:
+            build_statistics = {}
+        if final_statistics is None:
+            final_statistics = {}
+        if parameters is None:
+            parameters = {}
+        self.state = state
+        &#34;&#34;&#34;The state of the model&#34;&#34;&#34;
+        self.parameters: dict = parameters
+        &#34;&#34;&#34;Parameters used in building the model&#34;&#34;&#34;
+        self.final_statistics: dict = final_statistics
+        &#34;&#34;&#34;Final statistics from the model&#34;&#34;&#34;
+        self.build_statistics: dict = build_statistics
+        &#34;&#34;&#34;Statistics while building from the model&#34;&#34;&#34;
+        self.deployment: dict = deployment
+        &#34;&#34;&#34;Metadata from the deployment of the model&#34;&#34;&#34;
+
+    @classmethod
+    def from_dict(cls, model_content_dict: dict):
+        &#34;&#34;&#34;
+        Converts a dictionary from a REST call back into ModelContentMetadata
+        Args:
+            model_content_dict: Dictionary
+
+        Returns: A ModelContentMetadata object
+
+        &#34;&#34;&#34;
+        model_content_metadata = ModelContentMetadata(model_content_dict[&#39;state&#39;], model_content_dict[&#39;parameters&#39;],
+                                                      model_content_dict[&#39;finalStatistics&#39;],
+                                                      model_content_dict[&#39;buildStatistics&#39;],
+                                                      model_content_dict[&#39;deployment&#39;])
+        return model_content_metadata
+
+    def to_dict(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Convert the ModelContentMetadata to a dictionary to match REST API
+
+        Returns:
+            dictionary of model content metadata
+        &#34;&#34;&#34;
+        return {
+            &#39;state&#39;: self.state,
+            &#39;parameters&#39;: self.parameters,
+            &#39;finalStatistics&#39;: self.final_statistics,
+            &#39;buildStatistics&#39;: self.build_statistics,
+            &#39;deployment&#39;: self.deployment
+        }</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="kodexa.model.model.ModelContentMetadata.from_dict"><code class="name flex">
+<span>def <span class="ident">from_dict</span></span>(<span>model_content_dict: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Converts a dictionary from a REST call back into ModelContentMetadata</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_content_dict</code></strong></dt>
+<dd>Dictionary</dd>
+</dl>
+<p>Returns: A ModelContentMetadata object</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_dict(cls, model_content_dict: dict):
+    &#34;&#34;&#34;
+    Converts a dictionary from a REST call back into ModelContentMetadata
+    Args:
+        model_content_dict: Dictionary
+
+    Returns: A ModelContentMetadata object
+
+    &#34;&#34;&#34;
+    model_content_metadata = ModelContentMetadata(model_content_dict[&#39;state&#39;], model_content_dict[&#39;parameters&#39;],
+                                                  model_content_dict[&#39;finalStatistics&#39;],
+                                                  model_content_dict[&#39;buildStatistics&#39;],
+                                                  model_content_dict[&#39;deployment&#39;])
+    return model_content_metadata</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="kodexa.model.model.ModelContentMetadata.build_statistics"><code class="name">var <span class="ident">build_statistics</span></code></dt>
+<dd>
+<div class="desc"><p>Statistics while building from the model</p></div>
+</dd>
+<dt id="kodexa.model.model.ModelContentMetadata.deployment"><code class="name">var <span class="ident">deployment</span></code></dt>
+<dd>
+<div class="desc"><p>Metadata from the deployment of the model</p></div>
+</dd>
+<dt id="kodexa.model.model.ModelContentMetadata.final_statistics"><code class="name">var <span class="ident">final_statistics</span></code></dt>
+<dd>
+<div class="desc"><p>Final statistics from the model</p></div>
+</dd>
+<dt id="kodexa.model.model.ModelContentMetadata.parameters"><code class="name">var <span class="ident">parameters</span></code></dt>
+<dd>
+<div class="desc"><p>Parameters used in building the model</p></div>
+</dd>
+<dt id="kodexa.model.model.ModelContentMetadata.state"><code class="name">var <span class="ident">state</span></code></dt>
+<dd>
+<div class="desc"><p>The state of the model</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="kodexa.model.model.ModelContentMetadata.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert the ModelContentMetadata to a dictionary to match REST API</p>
+<h2 id="returns">Returns</h2>
+<p>dictionary of model content metadata</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self) -&gt; dict:
+    &#34;&#34;&#34;
+    Convert the ModelContentMetadata to a dictionary to match REST API
+
+    Returns:
+        dictionary of model content metadata
+    &#34;&#34;&#34;
+    return {
+        &#39;state&#39;: self.state,
+        &#39;parameters&#39;: self.parameters,
+        &#39;finalStatistics&#39;: self.final_statistics,
+        &#39;buildStatistics&#39;: self.build_statistics,
+        &#39;deployment&#39;: self.deployment
+    }</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="kodexa.model.model.ModelStore"><code class="flex name class">
 <span>class <span class="ident">ModelStore</span></span>
 </code></dt>
@@ -11060,6 +11286,22 @@ def from_dict(cls, transition_dict: dict):
           force_replace (bool): Replace the file stored at the path (Default false)
         Returns:
 
+        &#34;&#34;&#34;
+        pass
+
+    def set_content_metadata(self, model_content_metadata: ModelContentMetadata):
+        &#34;&#34;&#34;
+        Updates the model content metadata for the model store
+
+        :param model_content_metadata: The metadata object
+        &#34;&#34;&#34;
+        pass
+
+    def get_content_metadata(self) -&gt; ModelContentMetadata:
+        &#34;&#34;&#34;
+        Gets the latest model content metadata for the model store
+
+        :return: the model content metadata
         &#34;&#34;&#34;
         pass</code></pre>
 </details>
@@ -11096,6 +11338,25 @@ def from_dict(cls, transition_dict: dict):
     pass</code></pre>
 </details>
 </dd>
+<dt id="kodexa.model.model.ModelStore.get_content_metadata"><code class="name flex">
+<span>def <span class="ident">get_content_metadata</span></span>(<span>self) ‑> <a title="kodexa.model.model.ModelContentMetadata" href="#kodexa.model.model.ModelContentMetadata">ModelContentMetadata</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets the latest model content metadata for the model store</p>
+<p>:return: the model content metadata</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_content_metadata(self) -&gt; ModelContentMetadata:
+    &#34;&#34;&#34;
+    Gets the latest model content metadata for the model store
+
+    :return: the model content metadata
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
 <dt id="kodexa.model.model.ModelStore.put"><code class="name flex">
 <span>def <span class="ident">put</span></span>(<span>self, path: str, content: Any, force_replace: bool = False)</span>
 </code></dt>
@@ -11123,6 +11384,25 @@ def from_dict(cls, transition_dict: dict):
       force_replace (bool): Replace the file stored at the path (Default false)
     Returns:
 
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ModelStore.set_content_metadata"><code class="name flex">
+<span>def <span class="ident">set_content_metadata</span></span>(<span>self, model_content_metadata: <a title="kodexa.model.model.ModelContentMetadata" href="#kodexa.model.model.ModelContentMetadata">ModelContentMetadata</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Updates the model content metadata for the model store</p>
+<p>:param model_content_metadata: The metadata object</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_content_metadata(self, model_content_metadata: ModelContentMetadata):
+    &#34;&#34;&#34;
+    Updates the model content metadata for the model store
+
+    :param model_content_metadata: The metadata object
     &#34;&#34;&#34;
     pass</code></pre>
 </details>
@@ -12006,10 +12286,24 @@ Returns:</p></div>
 </ul>
 </li>
 <li>
+<h4><code><a title="kodexa.model.model.ModelContentMetadata" href="#kodexa.model.model.ModelContentMetadata">ModelContentMetadata</a></code></h4>
+<ul class="two-column">
+<li><code><a title="kodexa.model.model.ModelContentMetadata.build_statistics" href="#kodexa.model.model.ModelContentMetadata.build_statistics">build_statistics</a></code></li>
+<li><code><a title="kodexa.model.model.ModelContentMetadata.deployment" href="#kodexa.model.model.ModelContentMetadata.deployment">deployment</a></code></li>
+<li><code><a title="kodexa.model.model.ModelContentMetadata.final_statistics" href="#kodexa.model.model.ModelContentMetadata.final_statistics">final_statistics</a></code></li>
+<li><code><a title="kodexa.model.model.ModelContentMetadata.from_dict" href="#kodexa.model.model.ModelContentMetadata.from_dict">from_dict</a></code></li>
+<li><code><a title="kodexa.model.model.ModelContentMetadata.parameters" href="#kodexa.model.model.ModelContentMetadata.parameters">parameters</a></code></li>
+<li><code><a title="kodexa.model.model.ModelContentMetadata.state" href="#kodexa.model.model.ModelContentMetadata.state">state</a></code></li>
+<li><code><a title="kodexa.model.model.ModelContentMetadata.to_dict" href="#kodexa.model.model.ModelContentMetadata.to_dict">to_dict</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="kodexa.model.model.ModelStore" href="#kodexa.model.model.ModelStore">ModelStore</a></code></h4>
 <ul class="">
 <li><code><a title="kodexa.model.model.ModelStore.get" href="#kodexa.model.model.ModelStore.get">get</a></code></li>
+<li><code><a title="kodexa.model.model.ModelStore.get_content_metadata" href="#kodexa.model.model.ModelStore.get_content_metadata">get_content_metadata</a></code></li>
 <li><code><a title="kodexa.model.model.ModelStore.put" href="#kodexa.model.model.ModelStore.put">put</a></code></li>
+<li><code><a title="kodexa.model.model.ModelStore.set_content_metadata" href="#kodexa.model.model.ModelStore.set_content_metadata">set_content_metadata</a></code></li>
 </ul>
 </li>
 <li>
