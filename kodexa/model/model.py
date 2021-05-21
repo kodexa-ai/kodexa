@@ -2917,16 +2917,25 @@ class DocumentStore:
 class ModelContentMetadata:
     """Represents the metadata that can be stored with a model"""
 
-    def __init__(self):
-        self.state = 'PENDING'
+    def __init__(self, state: str = 'PENDING', parameters=None, final_statistics=None, build_statistics=None,
+                 deployment=None):
+        if deployment is None:
+            deployment = {}
+        if build_statistics is None:
+            build_statistics = {}
+        if final_statistics is None:
+            final_statistics = {}
+        if parameters is None:
+            parameters = {}
+        self.state = state
         """The state of the model"""
-        self.parameters: dict = {}
+        self.parameters: dict = parameters
         """Parameters used in building the model"""
-        self.final_statistics: dict = {}
+        self.final_statistics: dict = final_statistics
         """Final statistics from the model"""
-        self.build_statistics: dict = {}
+        self.build_statistics: dict = build_statistics
         """Statistics while building from the model"""
-        self.deployment: dict = {}
+        self.deployment: dict = deployment
         """Metadata from the deployment of the model"""
 
     @classmethod
