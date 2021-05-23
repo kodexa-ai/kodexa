@@ -627,7 +627,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         try:
-            content_object_response = requests.post(
+            content_object_response = requests.put(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/metadata",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 json=model_content_metadata.to_dict())
