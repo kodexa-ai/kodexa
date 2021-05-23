@@ -2991,6 +2991,7 @@ class ModelContentMetadata:
             dictionary of model content metadata
         &#34;&#34;&#34;
         return {
+            &#39;type&#39;: &#39;model&#39;,
             &#39;state&#39;: self.state,
             &#39;parameters&#39;: self.parameters,
             &#39;finalStatistics&#39;: self.final_statistics,
@@ -11157,6 +11158,7 @@ def from_dict(cls, transition_dict: dict):
             dictionary of model content metadata
         &#34;&#34;&#34;
         return {
+            &#39;type&#39;: &#39;model&#39;,
             &#39;state&#39;: self.state,
             &#39;parameters&#39;: self.parameters,
             &#39;finalStatistics&#39;: self.final_statistics,
@@ -11243,6 +11245,7 @@ def from_dict(cls, model_content_dict: dict):
         dictionary of model content metadata
     &#34;&#34;&#34;
     return {
+        &#39;type&#39;: &#39;model&#39;,
         &#39;state&#39;: self.state,
         &#39;parameters&#39;: self.parameters,
         &#39;finalStatistics&#39;: self.final_statistics,
