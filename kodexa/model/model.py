@@ -2962,6 +2962,7 @@ class ModelContentMetadata:
             dictionary of model content metadata
         """
         return {
+            'type': 'model',
             'state': self.state,
             'parameters': self.parameters,
             'finalStatistics': self.final_statistics,
