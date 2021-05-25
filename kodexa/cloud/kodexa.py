@@ -3,7 +3,6 @@ Provides classes and utilities to allow you to interact with an instance of the 
 platform.
 """
 
-
 from __future__ import annotations
 
 import errno
@@ -154,7 +153,6 @@ DEFAULT_COLUMNS = {
     ]
 }
 
-
 OBJECT_TYPES = {
     "extensionPacks": {
         "name": "extension pack",
@@ -257,7 +255,7 @@ class KodexaPlatform:
         return env_url if env_url is not None else kodexa_config['url']
 
     @staticmethod
-    def set_access_token(access_token:str):
+    def set_access_token(access_token: str):
         """
         Set to override the access token to use, not that this does not impact your user config stored
         value
@@ -272,7 +270,7 @@ class KodexaPlatform:
             os.environ["KODEXA_ACCESS_TOKEN"] = access_token
 
     @staticmethod
-    def set_url(url:str):
+    def set_url(url: str):
         """
         Set to override the URL to use, not that this does not impact your user config stored
         value
@@ -490,7 +488,8 @@ class KodexaPlatform:
             metadata_object.type = 'taxonomy'
             metadata_object.enabled = kodexa_object.enabled
             metadata_object.taxonomyType = kodexa_object.taxonomy_type
-            metadata_object.taxons = jsonpickle.decode(jsonpickle.encode([taxon.to_dict() for taxon in kodexa_object.taxons], unpicklable=False))
+            metadata_object.taxons = jsonpickle.decode(
+                jsonpickle.encode([taxon.to_dict() for taxon in kodexa_object.taxons], unpicklable=False))
         elif isinstance(kodexa_object, Assistant):
             metadata_object.name = 'New Assistant Definition' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A new assistant definition' if metadata_object.description is None else metadata_object.description
@@ -865,6 +864,7 @@ class RemoteSession:
 
     def wait_for_execution(self, execution):
         """
+        Wait for the remote execution to complete
 
         Args:
           execution:
@@ -912,15 +912,17 @@ class RemoteSession:
 
     def get_output_document(self, execution):
         """
+        Get the output document from a given execution
 
         Args:
-          execution:
+          execution: the execution holding the document
 
         Returns:
+            the output document (or None if there isn't one)
 
         """
         if execution.outputId:
-            logger.info("Downloading output document [{execution.outputId}]")
+            logger.info(f"Downloading output document [{execution.outputId}]")
             doc = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()})
@@ -931,23 +933,28 @@ class RemoteSession:
 
     def get_store(self, execution, store):
         """
+        Download a store from an execution
 
         Args:
-          execution:
-          store:
+          execution: the execution containing the store
+          store: the store
 
         Returns:
+            The full store
 
         """
+        logger.debug("Downloading store from server")
         response = requests.get(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}",
             headers={"x-access-token": KodexaPlatform.get_access_token()})
-        logger.debug(f"Response from server [{response.text}]")
-        raw_store = Dict(json.loads(response.text))
+        logger.debug(f"Response from server [{response.text}] [{response.status_code}]")
+        raw_store = Dict(response.json())
+
         return TableDataStore(raw_store.data.columns, raw_store.data.rows)
 
     def merge_stores(self, execution, context: PipelineContext):
         """
+        Merge the stores between an execution and a context
 
         Args:
           execution:
@@ -957,6 +964,7 @@ class RemoteSession:
 
         """
         for store in execution.stores:
+            logger.debug(f"Merging store {store.id}")
             context.merge_store(store.name, self.get_store(execution, store))
 
 
@@ -1173,6 +1181,7 @@ class RemoteAction:
 
     def process(self, document, context):
         """
+        Process the remove action
 
         Args:
           document:
@@ -1195,12 +1204,16 @@ class RemoteAction:
                                                    self.attach_source if self.attach_source else requires_source,
                                                    context)
 
+        logger.debug("Waiting for remote execution")
         execution = cloud_session.wait_for_execution(execution)
 
+        logger.debug("Downloading the result document")
         result_document = cloud_session.get_output_document(execution)
 
+        logger.debug("Set the context to match the context from the execution")
         context.context = execution.context
 
+        logger.debug("Merge the stores from the execution back into the context")
         cloud_session.merge_stores(execution, context)
 
         return result_document if result_document else document

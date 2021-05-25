@@ -251,6 +251,7 @@ class PipelineContext:
 
     def merge_store(self, name, store):
         """
+        Merge a store into the pipeline context
 
         Args:
           name:
@@ -260,8 +261,10 @@ class PipelineContext:
 
         """
         if name not in self.get_store_names():
+            logger.debug("New store, adding")
             self.add_store(name, store)
         else:
+            logger.debug("Existing store, merging")
             self.get_store(name).merge(store)
 
 
