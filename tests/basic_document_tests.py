@@ -1,3 +1,6 @@
+import io
+
+from kodexa import get_source
 from kodexa.model import DocumentMetadata, Document
 from kodexa.testing.test_utils import compare_document
 
@@ -202,3 +205,32 @@ def test_doc_from_text():
     assert doc.get_root().content == None
     assert len(doc.get_root().children) == 8
     assert doc.get_root().children[4].content == 'be'
+
+
+def test_get_source():
+    document = Document.from_url('https://www.google.com')
+
+    with get_source(document) as fh:
+        data = fh.read()
+        print(data)
+
+def test_again():
+
+    def cheese():
+        headers = {"x-access-token": '09a171d85ca64ebe8de3da59a441afdb'}
+        content_object_id='d9d6bba610b44c149f9dd2027ac6b4b4'
+        session = '47d1f2b949a543009be2c952f20c33e8'
+        execution = '0d2cf5615ac24dafb072fa6d6d82f95d'
+
+        import requests
+
+        print( f"https://lehua.kodexa.ai/api/sessions/{session}/executions/{execution}/objects/{content_object_id}")
+        co_response = requests.get(
+            f"https://lehua.kodexa.ai/api/sessions/{session}/executions/{execution}/objects/{content_object_id}",
+            headers=headers)
+        print("here")
+        bytes =  co_response.content
+        return io.BytesIO(bytes)
+
+    with cheese() as fh:
+        Document.from_msgpack(fh.read())
