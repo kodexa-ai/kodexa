@@ -279,6 +279,7 @@ class PipelineContext:
 
     def merge_store(self, name, store):
         &#34;&#34;&#34;
+        Merge a store into the pipeline context
 
         Args:
           name:
@@ -288,8 +289,10 @@ class PipelineContext:
 
         &#34;&#34;&#34;
         if name not in self.get_store_names():
+            logger.debug(&#34;New store, adding&#34;)
             self.add_store(name, store)
         else:
+            logger.debug(&#34;Existing store, merging&#34;)
             self.get_store(name).merge(store)
 
 
@@ -2659,6 +2662,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 
     def merge_store(self, name, store):
         &#34;&#34;&#34;
+        Merge a store into the pipeline context
 
         Args:
           name:
@@ -2668,8 +2672,10 @@ It can be made available to steps/functions so they can interact with it.</p>
 
         &#34;&#34;&#34;
         if name not in self.get_store_names():
+            logger.debug(&#34;New store, adding&#34;)
             self.add_store(name, store)
         else:
+            logger.debug(&#34;Existing store, merging&#34;)
             self.get_store(name).merge(store)</code></pre>
 </details>
 <h3>Methods</h3>
@@ -2858,7 +2864,8 @@ It can be made available to steps/functions so they can interact with it.</p>
 <span>def <span class="ident">merge_store</span></span>(<span>self, name, store)</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="args">Args</h2>
+<div class="desc"><p>Merge a store into the pipeline context</p>
+<h2 id="args">Args</h2>
 <p>name:
 store:
 Returns:</p></div>
@@ -2868,6 +2875,7 @@ Returns:</p></div>
 </summary>
 <pre><code class="python">def merge_store(self, name, store):
     &#34;&#34;&#34;
+    Merge a store into the pipeline context
 
     Args:
       name:
@@ -2877,8 +2885,10 @@ Returns:</p></div>
 
     &#34;&#34;&#34;
     if name not in self.get_store_names():
+        logger.debug(&#34;New store, adding&#34;)
         self.add_store(name, store)
     else:
+        logger.debug(&#34;Existing store, merging&#34;)
         self.get_store(name).merge(store)</code></pre>
 </details>
 </dd>
