@@ -1148,7 +1148,6 @@ class ContentNode(object):
                 # Now we need to go through the content parts and we need to make sure we understand
                 # our offset
                 for part in node_to_check.content_parts:
-                    print(f"part:{part}")
                     if isinstance(part, str):
                         # It is just content
                         if start < len(part) and end < len(part):
