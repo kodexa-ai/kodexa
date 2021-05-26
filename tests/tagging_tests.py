@@ -184,36 +184,28 @@ def test_tag_copy():
     assert len(list(uuid_intersection)) == 0
 
 
-def test_tag_with_grouped_values():
-    kdxa_doc = Document.from_kdxa(get_test_directory() + 'CityOfRaleigh_ocr.kdxa')
-
-    # This CSV contains the NER labels and the string offsets that we expect to find on the first page (generated via spaCy)
-    ner_df = pd.read_csv(get_test_directory() + 'city_of_raleigh_ners.csv')
-
-    for i, row in ner_df.iterrows():
-        kdxa_doc.select('//page')[0].tag(row['entity_label'], fixed_position=(row['start_offset'], row['end_offset']))
-
-    # now let's check the entities that were tagged
-    for ent_label in ner_df.entity_label.unique():
-        grouped_tags = kdxa_doc.select('//page')[0].get_related_tag_values(ent_label, True)
-        orig_org_ners = ner_df.loc[ner_df['entity_label'] == ent_label]['entity_text'].to_list()
-
-        assert len(orig_org_ners) == len(grouped_tags)
-        assert collections.Counter(grouped_tags) == collections.Counter(orig_org_ners)
-
-
-@pytest.mark.skip
 def test_tagging_issue_with_html():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'tagging_issue.kdxa')
 
-    print(kdxa_doc.content_node.get_all_content())
-    print(kdxa_doc.content_node.get_all_content()[2422:2449])
+    # print(kdxa_doc.content_node.get_all_content())
+    assert "IIJ" == kdxa_doc.content_node.get_all_content()[4277:4280]
 
-    assert "American dental association" == kdxa_doc.content_node.get_all_content()[2422:2449]
-
+    print(kdxa_doc.content_node.get_all_content()[4200:4400])
+    print("-----")
+    print(kdxa_doc.content_node.get_all_content()[4160 + 116:4400])
     # Now we tag the same location and try and get the content from the tag
-    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(2422, 2449))
+    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(4277, 4280))
 
+    print("-------")
+
+    node = kdxa_doc.select('//*[hasTag("test_tag")]')[0]
+    feature = node.get_feature_value("tag", "test_tag")
+    print(feature)
+    all_content = node.get_all_content()
+
+    print(node.get_all_content()[feature.start:feature.end])
+    print(node.get_all_content()[feature.start - 20:feature.end + 20])
     print(kdxa_doc.select_as_node("//*[hasTag('test_tag')]").get_all_content())
 
-    assert "American dental association" == kdxa_doc.select_as_node("//*[hasTag('test_tag')]").get_all_content()
+    print(kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content().index('ers. IIJ'))
+    assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content()[feature.start:feature.end]
