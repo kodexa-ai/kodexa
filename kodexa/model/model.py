@@ -682,6 +682,10 @@ class ContentNode(object):
             for child in self.children:
                 s += child.get_all_content(separator)
                 s += separator
+        elif not self.get_content() and not self.content_parts:
+            for child in self.children:
+                s += child.get_all_content(separator)
+                s += separator
         elif len(self.content_parts) > 0:
             for part in self.content_parts:
                 if isinstance(part, str):
