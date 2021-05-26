@@ -1127,7 +1127,7 @@ class ContentNode(object):
             else:
                 return str(uuid.uuid4())
 
-        def tag_node_position(node_to_check, start, end, node_data, tag_uuid):
+        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0):
             """
 
             Args:
@@ -1142,7 +1142,8 @@ class ContentNode(object):
             """
 
             content_length = 0
-
+            original_start = start
+            original_end = end
             # We need to work out if we are dealing with content parts or just content
             if node_to_check.content_parts and len(node_to_check.content_parts) > 0:
                 # Now we need to go through the content parts and we need to make sure we understand
@@ -1150,32 +1151,44 @@ class ContentNode(object):
                 for part in node_to_check.content_parts:
                     if isinstance(part, str):
                         # It is just content
-                        if start < len(part) and end < len(part):
+                        part_length = len(part)
+                        if start < part_length and end < part_length:
                             node_to_check.add_feature('tag', tag_to_apply,
-                                                      Tag(start, end,
+                                                      Tag(original_start, original_end,
                                                           part[start:end],
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
                             return -1
-                        elif start < len(part) <= end:
+                        elif start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
-                                                      Tag(start,
-                                                          len(node_to_check.content),
+                                                      Tag(original_start,
+                                                          len(content_length + part_length),
                                                           value=part[start:],
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
-                        end = end - (len(part) + len(separator))
-                        content_length = content_length + len(part) + len(separator)
-                        start = 0 if start - len(part) - len(separator) < 0 else start - len(
-                            part) - len(separator)
+
+                        # Add the separator
+                        part_length = part_length + 1
+
+                        end = end - part_length
+                        print(f"Part {part_length}")
+                        content_length = content_length + part_length
+                        offset = offset + part_length
+                        start = 0 if start - part_length < 0 else start - part_length
 
                     elif isinstance(part, int):
                         child_node = node_to_check.children[part]
-                        result = tag_node_position(child_node, start, end, node_data, tag_uuid)
-                        content_length = content_length + result
+                        result = tag_node_position(child_node, start, end, node_data, tag_uuid,
+                                                   offset=offset)
                         if result < 0 or (end - result) <= 0:
                             return -1
                         else:
-                            end = end - (result + len(separator))
-                            start = 0 if start - result < 0 else start - (result + len(separator))
+                            # Even if we didn't have anything we have a separator
+
+                            result = result + 1
+                            offset = offset + result
+                            end = end - result
+                            start = 0 if start - result < 0 else start - result
+
+                            content_length = content_length + result
                     else:
                         raise Exception("Invalid part?")
             else:
@@ -1200,13 +1213,16 @@ class ContentNode(object):
 
                 for child_node in node_to_check.children:
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid)
-                    content_length = content_length + result
+
                     if result < 0 or (end - result) < 0:
                         return -1
                     else:
+                        content_length = content_length + result
                         end = end - result
                         start = 0 if start - result < 0 else start - result
 
+            if len(node_to_check.get_all_content()) != content_length:
+                raise Exception("There is a problem in the structure? Length mismatch")
             return content_length
 
         if content_re:
@@ -1214,7 +1230,7 @@ class ContentNode(object):
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid))
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0)
 
             else:
                 if not content_re:
