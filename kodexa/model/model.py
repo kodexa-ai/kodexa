@@ -1217,7 +1217,7 @@ class ContentNode(object):
                     if result < 0 or (end - result) < 0:
                         return -1
                     else:
-                        content_length = content_length + result
+                        content_length = content_length + result + len(separator)
                         end = end - result
                         start = 0 if start - result < 0 else start - result
 
