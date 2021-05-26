@@ -1,3 +1,5 @@
+import pytest
+
 from kodexa import Document, Pipeline, NodeTagger, NodeTagCopy
 import os
 import uuid
@@ -200,6 +202,7 @@ def test_tag_with_grouped_values():
         assert collections.Counter(grouped_tags) == collections.Counter(orig_org_ners)
 
 
+@pytest.mark.skip
 def test_tagging_issue_with_html():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'tagging_issue.kdxa')
 
