@@ -1161,7 +1161,7 @@ class ContentNode(object):
                         elif start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start,
-                                                          len(content_length + part_length),
+                                                          content_length + part_length,
                                                           value=part[start:],
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
