@@ -44,7 +44,6 @@ def test_node_only_tagging():
 
 
 def test_tag_multiple_regex_matches():
-
     doc_string = "Mary had a little lamb, little lamb, little lamb.  Mary had a little lamb whose fleece was white as snow."
 
     document = Document.from_text(doc_string)
@@ -68,7 +67,8 @@ def test_tag_multiple_regex_matches():
     # Run the multiple tag test again, but this time pass in a tag_uuid
     document = Document.from_text(doc_string)
     pipeline = Pipeline(document)
-    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE', content_re=r'(little)', node_only=False, node_tag_uuid=str(uuid.uuid4())))
+    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE', content_re=r'(little)', node_only=False,
+                                 node_tag_uuid=str(uuid.uuid4())))
     context = pipeline.run()
 
     # Now each of the feature values should have the same UUID
@@ -91,7 +91,6 @@ def test_tag_multiple_regex_matches():
 
 
 def test_tag_copy():
-
     doc_string = "Mary had a little lamb, little lamb, little lamb.  Mary had a little lamb whose fleece was white as snow."
     # data setup - creating a single tag with multiple matches...and then copying it
     document = Document.from_text(doc_string)
@@ -156,12 +155,15 @@ def test_tag_copy():
     # now we need to test that when features are related (indicated by the same tag_uuid), they remain related when copying
     document = Document.from_text(doc_string)  # starting with a clean document
     pipeline = Pipeline(document)
-    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='FLEECE_INFO', content_re=r'((white|snow))', node_only=False, node_tag_uuid=str(uuid.uuid4())))
+    pipeline.add_step(
+        NodeTagger(selector='//*', tag_to_apply='FLEECE_INFO', content_re=r'((white|snow))', node_only=False,
+                   node_tag_uuid=str(uuid.uuid4())))
     context = pipeline.run()
 
     # now, let's copy the SIZE tags and create new ones called LAMB_INFO
-    pipeline = Pipeline(document)   # reusing the previously tagged document & testing out the NodeTagCopy action
-    pipeline.add_step(NodeTagCopy(selector='//*[hasTag("FLEECE_INFO")]', existing_tag_name='FLEECE_INFO', new_tag_name='WOOL_INFO'))
+    pipeline = Pipeline(document)  # reusing the previously tagged document & testing out the NodeTagCopy action
+    pipeline.add_step(
+        NodeTagCopy(selector='//*[hasTag("FLEECE_INFO")]', existing_tag_name='FLEECE_INFO', new_tag_name='WOOL_INFO'))
     context = pipeline.run()
 
     # The feature values should have the same UUID - for both WOOL_INFO and FLEECE_INFO
@@ -196,3 +198,19 @@ def test_tag_with_grouped_values():
 
         assert len(orig_org_ners) == len(grouped_tags)
         assert collections.Counter(grouped_tags) == collections.Counter(orig_org_ners)
+
+
+def test_tagging_issue_with_html():
+    kdxa_doc = Document.from_kdxa(get_test_directory() + 'tagging_issue.kdxa')
+
+    print(kdxa_doc.content_node.get_all_content())
+    print(kdxa_doc.content_node.get_all_content()[2422:2449])
+
+    assert "American dental association" == kdxa_doc.content_node.get_all_content()[2422:2449]
+
+    # Now we tag the same location and try and get the content from the tag
+    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(2422, 2449))
+
+    print(kdxa_doc.select_as_node("//*[hasTag('test_tag')]").get_all_content())
+
+    assert "American dental association" == kdxa_doc.select_as_node("//*[hasTag('test_tag')]").get_all_content()
