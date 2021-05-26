@@ -724,7 +724,7 @@ class ContentNode(object):
                     s += self.children[part].get_all_content(separator)
                     s += separator
 
-        return s.strip()
+        return s
 
     def move_child_to_parent(self, target_child, target_parent):
         &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
@@ -1177,7 +1177,8 @@ class ContentNode(object):
                 # Now we need to go through the content parts and we need to make sure we understand
                 # our offset
                 for part in node_to_check.content_parts:
-                    if isinstance(part, str) and len(part) &gt; 0:
+                    print(f&#34;part:{part}&#34;)
+                    if isinstance(part, str):
                         # It is just content
                         if start &lt; len(part) and end &lt; len(part):
                             node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
@@ -1191,7 +1192,7 @@ class ContentNode(object):
                                                           len(node_to_check.content),
                                                           value=part[start:],
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
-                        end = end - len(part) + len(separator)
+                        end = end - (len(part) + len(separator))
                         content_length = content_length + len(part) + len(separator)
                         start = 0 if start - len(part) - len(separator) &lt; 0 else start - len(
                             part) - len(separator)
@@ -1200,12 +1201,13 @@ class ContentNode(object):
                         child_node = node_to_check.children[part]
                         result = tag_node_position(child_node, start, end, node_data, tag_uuid)
                         content_length = content_length + result
-                        if result &lt; 0 or (end - result) &lt; 0:
+                        if result &lt; 0 or (end - result) &lt;= 0:
                             return -1
                         else:
-                            end = end - result
-                            start = 0 if start - result &lt; 0 else start - result
-
+                            end = end - (result + len(separator))
+                            start = 0 if start - result &lt; 0 else start - (result + len(separator))
+                    else:
+                        raise Exception(&#34;Invalid part?&#34;)
             else:
                 if node_to_check.content and len(node_to_check.content) &gt; 0:
                     if start &lt; len(node_to_check.content) and end &lt; len(node_to_check.content):
@@ -4097,7 +4099,7 @@ ensure that the correct mixins are applied.</p>
                     s += self.children[part].get_all_content(separator)
                     s += separator
 
-        return s.strip()
+        return s
 
     def move_child_to_parent(self, target_child, target_parent):
         &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
@@ -4550,7 +4552,8 @@ ensure that the correct mixins are applied.</p>
                 # Now we need to go through the content parts and we need to make sure we understand
                 # our offset
                 for part in node_to_check.content_parts:
-                    if isinstance(part, str) and len(part) &gt; 0:
+                    print(f&#34;part:{part}&#34;)
+                    if isinstance(part, str):
                         # It is just content
                         if start &lt; len(part) and end &lt; len(part):
                             node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
@@ -4564,7 +4567,7 @@ ensure that the correct mixins are applied.</p>
                                                           len(node_to_check.content),
                                                           value=part[start:],
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
-                        end = end - len(part) + len(separator)
+                        end = end - (len(part) + len(separator))
                         content_length = content_length + len(part) + len(separator)
                         start = 0 if start - len(part) - len(separator) &lt; 0 else start - len(
                             part) - len(separator)
@@ -4573,12 +4576,13 @@ ensure that the correct mixins are applied.</p>
                         child_node = node_to_check.children[part]
                         result = tag_node_position(child_node, start, end, node_data, tag_uuid)
                         content_length = content_length + result
-                        if result &lt; 0 or (end - result) &lt; 0:
+                        if result &lt; 0 or (end - result) &lt;= 0:
                             return -1
                         else:
-                            end = end - result
-                            start = 0 if start - result &lt; 0 else start - result
-
+                            end = end - (result + len(separator))
+                            start = 0 if start - result &lt; 0 else start - (result + len(separator))
+                    else:
+                        raise Exception(&#34;Invalid part?&#34;)
             else:
                 if node_to_check.content and len(node_to_check.content) &gt; 0:
                     if start &lt; len(node_to_check.content) and end &lt; len(node_to_check.content):
@@ -6033,7 +6037,7 @@ value:</p>
                 s += self.children[part].get_all_content(separator)
                 s += separator
 
-    return s.strip()</code></pre>
+    return s</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_all_tags"><code class="name flex">
@@ -7839,7 +7843,8 @@ tag_uuid: str:
             # Now we need to go through the content parts and we need to make sure we understand
             # our offset
             for part in node_to_check.content_parts:
-                if isinstance(part, str) and len(part) &gt; 0:
+                print(f&#34;part:{part}&#34;)
+                if isinstance(part, str):
                     # It is just content
                     if start &lt; len(part) and end &lt; len(part):
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
@@ -7853,7 +7858,7 @@ tag_uuid: str:
                                                       len(node_to_check.content),
                                                       value=part[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
-                    end = end - len(part) + len(separator)
+                    end = end - (len(part) + len(separator))
                     content_length = content_length + len(part) + len(separator)
                     start = 0 if start - len(part) - len(separator) &lt; 0 else start - len(
                         part) - len(separator)
@@ -7862,12 +7867,13 @@ tag_uuid: str:
                     child_node = node_to_check.children[part]
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid)
                     content_length = content_length + result
-                    if result &lt; 0 or (end - result) &lt; 0:
+                    if result &lt; 0 or (end - result) &lt;= 0:
                         return -1
                     else:
-                        end = end - result
-                        start = 0 if start - result &lt; 0 else start - result
-
+                        end = end - (result + len(separator))
+                        start = 0 if start - result &lt; 0 else start - (result + len(separator))
+                else:
+                    raise Exception(&#34;Invalid part?&#34;)
         else:
             if node_to_check.content and len(node_to_check.content) &gt; 0:
                 if start &lt; len(node_to_check.content) and end &lt; len(node_to_check.content):
