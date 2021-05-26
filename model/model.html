@@ -1190,7 +1190,7 @@ class ContentNode(object):
                         elif start &lt; part_length &lt;= end:
                             node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                       Tag(original_start,
-                                                          len(content_length + part_length),
+                                                          content_length + part_length,
                                                           value=part[start:],
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
@@ -4579,7 +4579,7 @@ ensure that the correct mixins are applied.</p>
                         elif start &lt; part_length &lt;= end:
                             node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                       Tag(original_start,
-                                                          len(content_length + part_length),
+                                                          content_length + part_length,
                                                           value=part[start:],
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
@@ -7884,7 +7884,7 @@ tag_uuid: str:
                     elif start &lt; part_length &lt;= end:
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(original_start,
-                                                      len(content_length + part_length),
+                                                      content_length + part_length,
                                                       value=part[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
