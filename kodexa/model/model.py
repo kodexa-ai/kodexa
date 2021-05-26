@@ -1173,8 +1173,8 @@ class ContentNode(object):
                             end = end - result
                             start = 0 if start - result < 0 else start - result
 
-            elif node_to_check.content:
-                if len(node_to_check.content) > 0:
+            else:
+                if node_to_check.content and len(node_to_check.content) > 0:
                     if start < len(node_to_check.content) and end < len(node_to_check.content):
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start, end,
@@ -1188,10 +1188,10 @@ class ContentNode(object):
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                end = end - len(node_to_check.content) + len(separator)
-                content_length = len(node_to_check.content) + len(separator)
-                start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
-                    node_to_check.content) - len(separator)
+                    end = end - len(node_to_check.content) + len(separator)
+                    content_length = len(node_to_check.content) + len(separator)
+                    start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
+                        node_to_check.content) - len(separator)
 
                 for child_node in node_to_check.children:
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid)
