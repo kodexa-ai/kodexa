@@ -695,7 +695,7 @@ class ContentNode(object):
                     s += self.children[part].get_all_content(separator)
                     s += separator
 
-        return s.strip()
+        return s
 
     def move_child_to_parent(self, target_child, target_parent):
         """This will move the target_child, which must be a child of the node, to a new parent.
@@ -1148,7 +1148,8 @@ class ContentNode(object):
                 # Now we need to go through the content parts and we need to make sure we understand
                 # our offset
                 for part in node_to_check.content_parts:
-                    if isinstance(part, str) and len(part) > 0:
+                    print(f"part:{part}")
+                    if isinstance(part, str):
                         # It is just content
                         if start < len(part) and end < len(part):
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1162,7 +1163,7 @@ class ContentNode(object):
                                                           len(node_to_check.content),
                                                           value=part[start:],
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
-                        end = end - len(part) + len(separator)
+                        end = end - (len(part) + len(separator))
                         content_length = content_length + len(part) + len(separator)
                         start = 0 if start - len(part) - len(separator) < 0 else start - len(
                             part) - len(separator)
@@ -1171,12 +1172,13 @@ class ContentNode(object):
                         child_node = node_to_check.children[part]
                         result = tag_node_position(child_node, start, end, node_data, tag_uuid)
                         content_length = content_length + result
-                        if result < 0 or (end - result) < 0:
+                        if result < 0 or (end - result) <= 0:
                             return -1
                         else:
-                            end = end - result
-                            start = 0 if start - result < 0 else start - result
-
+                            end = end - (result + len(separator))
+                            start = 0 if start - result < 0 else start - (result + len(separator))
+                    else:
+                        raise Exception("Invalid part?")
             else:
                 if node_to_check.content and len(node_to_check.content) > 0:
                     if start < len(node_to_check.content) and end < len(node_to_check.content):
