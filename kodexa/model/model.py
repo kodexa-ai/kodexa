@@ -1169,7 +1169,6 @@ class ContentNode(object):
                         part_length = part_length + 1
 
                         end = end - part_length
-                        print(f"Part {part_length}")
                         content_length = content_length + part_length
                         offset = offset + part_length
                         start = 0 if start - part_length < 0 else start - part_length
