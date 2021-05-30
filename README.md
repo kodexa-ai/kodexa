@@ -1,6 +1,6 @@
 # Kodexa
 
-[![Build](https://github.com/kodexa-ai/kodexa/actions/workflows/main.yml/badge.svg)](https://github.com/kodexa-ai/kodexa/actions/workflows/main.yml)
+[![Python Package Using Anaconda](https://github.com/kodexa-ai/kodexa/actions/workflows/feature.yml/badge.svg?branch=release-3.3)](https://github.com/kodexa-ai/kodexa/actions/workflows/feature.yml)
 
 The Kodexa Content Framework framework is designed to allow you to work with a wide range of unstructured and semi-structured content and enables you to work with the Kodexa Platform (https://platform.kodexa.com).
 
