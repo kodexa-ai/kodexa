@@ -143,7 +143,7 @@ def test_feature_find():
     document.content_node.children[1].add_feature('test', 'test', 'fishstick')
 
     assert document.get_root().find_with_feature_value('test', 'test', 'cheese') is not None
-    assert document.get_root().children[1].get_all_content() == 'cheeseburger'
+    assert document.get_root().children[1].get_all_content() == 'cheeseburger '
 
 
 def test_finder_and_tag():

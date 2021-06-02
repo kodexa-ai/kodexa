@@ -1,3 +1,5 @@
+import pytest
+
 from kodexa import Document, Pipeline, NodeTagger, NodeTagCopy
 import os
 import uuid
@@ -44,7 +46,6 @@ def test_node_only_tagging():
 
 
 def test_tag_multiple_regex_matches():
-
     doc_string = "Mary had a little lamb, little lamb, little lamb.  Mary had a little lamb whose fleece was white as snow."
 
     document = Document.from_text(doc_string)
@@ -68,7 +69,8 @@ def test_tag_multiple_regex_matches():
     # Run the multiple tag test again, but this time pass in a tag_uuid
     document = Document.from_text(doc_string)
     pipeline = Pipeline(document)
-    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE', content_re=r'(little)', node_only=False, node_tag_uuid=str(uuid.uuid4())))
+    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE', content_re=r'(little)', node_only=False,
+                                 node_tag_uuid=str(uuid.uuid4())))
     context = pipeline.run()
 
     # Now each of the feature values should have the same UUID
@@ -91,7 +93,6 @@ def test_tag_multiple_regex_matches():
 
 
 def test_tag_copy():
-
     doc_string = "Mary had a little lamb, little lamb, little lamb.  Mary had a little lamb whose fleece was white as snow."
     # data setup - creating a single tag with multiple matches...and then copying it
     document = Document.from_text(doc_string)
@@ -156,12 +157,15 @@ def test_tag_copy():
     # now we need to test that when features are related (indicated by the same tag_uuid), they remain related when copying
     document = Document.from_text(doc_string)  # starting with a clean document
     pipeline = Pipeline(document)
-    pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='FLEECE_INFO', content_re=r'((white|snow))', node_only=False, node_tag_uuid=str(uuid.uuid4())))
+    pipeline.add_step(
+        NodeTagger(selector='//*', tag_to_apply='FLEECE_INFO', content_re=r'((white|snow))', node_only=False,
+                   node_tag_uuid=str(uuid.uuid4())))
     context = pipeline.run()
 
     # now, let's copy the SIZE tags and create new ones called LAMB_INFO
-    pipeline = Pipeline(document)   # reusing the previously tagged document & testing out the NodeTagCopy action
-    pipeline.add_step(NodeTagCopy(selector='//*[hasTag("FLEECE_INFO")]', existing_tag_name='FLEECE_INFO', new_tag_name='WOOL_INFO'))
+    pipeline = Pipeline(document)  # reusing the previously tagged document & testing out the NodeTagCopy action
+    pipeline.add_step(
+        NodeTagCopy(selector='//*[hasTag("FLEECE_INFO")]', existing_tag_name='FLEECE_INFO', new_tag_name='WOOL_INFO'))
     context = pipeline.run()
 
     # The feature values should have the same UUID - for both WOOL_INFO and FLEECE_INFO
@@ -180,19 +184,28 @@ def test_tag_copy():
     assert len(list(uuid_intersection)) == 0
 
 
-def test_tag_with_grouped_values():
-    kdxa_doc = Document.from_kdxa(get_test_directory() + 'CityOfRaleigh_ocr.kdxa')
+def test_tagging_issue_with_html():
+    kdxa_doc = Document.from_kdxa(get_test_directory() + 'tagging_issue.kdxa')
 
-    # This CSV contains the NER labels and the string offsets that we expect to find on the first page (generated via spaCy)
-    ner_df = pd.read_csv(get_test_directory() + 'city_of_raleigh_ners.csv')
+    # print(kdxa_doc.content_node.get_all_content())
+    assert "IIJ" == kdxa_doc.content_node.get_all_content()[4277:4280]
 
-    for i, row in ner_df.iterrows():
-        kdxa_doc.select('//page')[0].tag(row['entity_label'], fixed_position=(row['start_offset'], row['end_offset']))
+    print(kdxa_doc.content_node.get_all_content()[4200:4400])
+    print("-----")
+    print(kdxa_doc.content_node.get_all_content()[4160 + 116:4400])
+    # Now we tag the same location and try and get the content from the tag
+    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(4277, 4280))
 
-    # now let's check the entities that were tagged
-    for ent_label in ner_df.entity_label.unique():
-        grouped_tags = kdxa_doc.select('//page')[0].get_related_tag_values(ent_label, True)
-        orig_org_ners = ner_df.loc[ner_df['entity_label'] == ent_label]['entity_text'].to_list()
+    print("-------")
 
-        assert len(orig_org_ners) == len(grouped_tags)
-        assert collections.Counter(grouped_tags) == collections.Counter(orig_org_ners)
+    node = kdxa_doc.select('//*[hasTag("test_tag")]')[0]
+    feature = node.get_feature_value("tag", "test_tag")
+    print(feature)
+    all_content = node.get_all_content()
+
+    print(node.get_all_content()[feature.start:feature.end])
+    print(node.get_all_content()[feature.start - 20:feature.end + 20])
+    print(kdxa_doc.select_as_node("//*[hasTag('test_tag')]").get_all_content())
+
+    print(kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content().index('ers. IIJ'))
+    assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content()[feature.start:feature.end]
