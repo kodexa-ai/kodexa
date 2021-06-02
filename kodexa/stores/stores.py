@@ -578,30 +578,28 @@ class RemoteModelStore(ModelStore, RemoteStore):
             logger.error(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content, force_replace=False) -> ContentObject:
+    def put(self, path: str, content) -> DocumentFamily:
         """Put the content into the model store at the given path
 
         Args:
           path: The path you wish to put the content at
           content: The content for that object
-          force_replace: overwrite the existing object if it is there (defaulted to False)
-          path: str:
 
         Returns:
-
+          the document family that was created
         """
         from kodexa import KodexaPlatform
         import requests
         try:
             files = {"file": content}
-            data = {"path": path, "forceReplace": force_replace}
+            data = {"path": path}
             content_object_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/contents",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
             if content_object_response.status_code == 200:
-                return ContentObject.from_dict(content_object_response.json())
+                return DocumentFamily.from_dict(content_object_response.json())
             elif content_object_response.status_code == 400:
                 from addict import Dict
                 bad_request = Dict(json.loads(content_object_response.text))
