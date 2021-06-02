@@ -1166,7 +1166,7 @@ class ContentNode(object):
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
-                        part_length = part_length + 1
+                        part_length = part_length + len(separator)
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1182,7 +1182,7 @@ class ContentNode(object):
                         else:
                             # Even if we didn't have anything we have a separator
 
-                            result = result + 1
+                            result = result
                             offset = offset + result
                             end = end - result
                             start = 0 if start - result < 0 else start - result
@@ -1205,8 +1205,8 @@ class ContentNode(object):
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content) + len(separator)
-                    content_length = len(node_to_check.content) + len(separator)
+                    end = end - len(node_to_check.content)
+                    content_length = len(node_to_check.content)
                     start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
                         node_to_check.content) - len(separator)
 
@@ -1217,11 +1217,11 @@ class ContentNode(object):
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result
-                        start = 0 if start - result < 0 else start - result
+                        end = end - result + len(separator)
+                        start = 0 if start - result < 0 else start - (result+len(separator))
 
             if len(node_to_check.get_all_content()) != content_length:
-                raise Exception("There is a problem in the structure? Length mismatch")
+                raise Exception(f"There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content())} != {content_length})")
             return content_length
 
         if content_re:
