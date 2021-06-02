@@ -592,11 +592,10 @@ class RemoteModelStore(ModelStore, RemoteStore):
         import requests
         try:
             files = {"file": content}
-            data = {"path": path}
             content_object_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
-                files=files, data=data)
+                files=files)
 
             if content_object_response.status_code == 200:
                 return DocumentFamily.from_dict(content_object_response.json())
