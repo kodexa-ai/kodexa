@@ -676,13 +676,26 @@ class ContentNode(object):
             "This string is made up of multiple nodes"
         """
         s = ""
-        if self.get_content():
+        if self.get_content() and not self.content_parts:
             s += self.get_content()
             s += separator
-        for child in self.children:
-            s += child.get_all_content(separator)
-            s += separator
-        return s.strip()
+            for child in self.children:
+                s += child.get_all_content(separator)
+                s += separator
+        elif not self.get_content() and not self.content_parts:
+            for child in self.children:
+                s += child.get_all_content(separator)
+                s += separator
+        elif len(self.content_parts) > 0:
+            for part in self.content_parts:
+                if isinstance(part, str):
+                    s += part
+                    s += separator
+                if isinstance(part, int):
+                    s += self.children[part].get_all_content(separator)
+                    s += separator
+
+        return s
 
     def move_child_to_parent(self, target_child, target_parent):
         """This will move the target_child, which must be a child of the node, to a new parent.
@@ -1114,7 +1127,7 @@ class ContentNode(object):
             else:
                 return str(uuid.uuid4())
 
-        def tag_node_position(node_to_check, start, end, node_data, tag_uuid):
+        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0):
             """
 
             Args:
@@ -1129,10 +1142,56 @@ class ContentNode(object):
             """
 
             content_length = 0
+            original_start = start
+            original_end = end
+            # We need to work out if we are dealing with content parts or just content
+            if node_to_check.content_parts and len(node_to_check.content_parts) > 0:
+                # Now we need to go through the content parts and we need to make sure we understand
+                # our offset
+                for part in node_to_check.content_parts:
+                    if isinstance(part, str):
+                        # It is just content
+                        part_length = len(part)
+                        if start < part_length and end < part_length:
+                            node_to_check.add_feature('tag', tag_to_apply,
+                                                      Tag(original_start, original_end,
+                                                          part[start:end],
+                                                          data=node_data, uuid=tag_uuid, confidence=confidence))
+                            return -1
+                        elif start < part_length <= end:
+                            node_to_check.add_feature('tag', tag_to_apply,
+                                                      Tag(original_start,
+                                                          content_length + part_length,
+                                                          value=part[start:],
+                                                          data=node_data, uuid=tag_uuid, confidence=confidence))
 
-            # Make sure we have content on the node
-            if node_to_check.content:
-                if len(node_to_check.content) > 0:
+                        # Add the separator
+                        part_length = part_length + 1
+
+                        end = end - part_length
+                        content_length = content_length + part_length
+                        offset = offset + part_length
+                        start = 0 if start - part_length < 0 else start - part_length
+
+                    elif isinstance(part, int):
+                        child_node = node_to_check.children[part]
+                        result = tag_node_position(child_node, start, end, node_data, tag_uuid,
+                                                   offset=offset)
+                        if result < 0 or (end - result) <= 0:
+                            return -1
+                        else:
+                            # Even if we didn't have anything we have a separator
+
+                            result = result + 1
+                            offset = offset + result
+                            end = end - result
+                            start = 0 if start - result < 0 else start - result
+
+                            content_length = content_length + result
+                    else:
+                        raise Exception("Invalid part?")
+            else:
+                if node_to_check.content and len(node_to_check.content) > 0:
                     if start < len(node_to_check.content) and end < len(node_to_check.content):
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start, end,
@@ -1146,20 +1205,23 @@ class ContentNode(object):
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                end = end - len(node_to_check.content) + len(separator)
-                content_length = len(node_to_check.content) + len(separator)
-                start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
-                    node_to_check.content) - len(separator)
+                    end = end - len(node_to_check.content) + len(separator)
+                    content_length = len(node_to_check.content) + len(separator)
+                    start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
+                        node_to_check.content) - len(separator)
 
-            for child_node in node_to_check.children:
-                result = tag_node_position(child_node, start, end, node_data, tag_uuid)
-                content_length = content_length + result
-                if result < 0 or (end - result) < 0:
-                    return -1
-                else:
-                    end = end - result
-                    start = 0 if start - result < 0 else start - result
+                for child_node in node_to_check.children:
+                    result = tag_node_position(child_node, start, end, node_data, tag_uuid)
 
+                    if result < 0 or (end - result) < 0:
+                        return -1
+                    else:
+                        content_length = content_length + result + len(separator)
+                        end = end - result
+                        start = 0 if start - result < 0 else start - result
+
+            if len(node_to_check.get_all_content()) != content_length:
+                raise Exception("There is a problem in the structure? Length mismatch")
             return content_length
 
         if content_re:
@@ -1167,7 +1229,7 @@ class ContentNode(object):
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid))
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0)
 
             else:
                 if not content_re:
@@ -2986,14 +3048,14 @@ class ModelStore:
         """
         pass
 
-    def put(self, path: str, content: Any, force_replace: bool = False):
+    def put(self, path: str, content: Any) -> DocumentFamily:
         """
 
         Args:
           path (str): The path to put the content at
           content: The content to put in the store
-          force_replace (bool): Replace the file stored at the path (Default false)
         Returns:
+          The document family that was created
 
         """
         pass
