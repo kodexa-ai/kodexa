@@ -621,11 +621,10 @@ class RemoteModelStore(ModelStore, RemoteStore):
         import requests
         try:
             files = {&#34;file&#34;: content}
-            data = {&#34;path&#34;: path}
             content_object_response = requests.post(
-                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;,
+                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/fs/{path}&#34;,
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
-                files=files, data=data)
+                files=files)
 
             if content_object_response.status_code == 200:
                 return DocumentFamily.from_dict(content_object_response.json())
@@ -1312,11 +1311,10 @@ in an instance of the Kodexa platform</p></div>
         import requests
         try:
             files = {&#34;file&#34;: content}
-            data = {&#34;path&#34;: path}
             content_object_response = requests.post(
-                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;,
+                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/fs/{path}&#34;,
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
-                files=files, data=data)
+                files=files)
 
             if content_object_response.status_code == 200:
                 return DocumentFamily.from_dict(content_object_response.json())
@@ -1536,11 +1534,10 @@ in an instance of the Kodexa platform</p></div>
     import requests
     try:
         files = {&#34;file&#34;: content}
-        data = {&#34;path&#34;: path}
         content_object_response = requests.post(
-            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;,
+            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/fs/{path}&#34;,
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
-            files=files, data=data)
+            files=files)
 
         if content_object_response.status_code == 200:
             return DocumentFamily.from_dict(content_object_response.json())
