@@ -3048,14 +3048,14 @@ class ModelStore:
         """
         pass
 
-    def put(self, path: str, content: Any, force_replace: bool = False):
+    def put(self, path: str, content: Any) -> DocumentFamily:
         """
 
         Args:
           path (str): The path to put the content at
           content: The content to put in the store
-          force_replace (bool): Replace the file stored at the path (Default false)
         Returns:
+          The document family that was created
 
         """
         pass
