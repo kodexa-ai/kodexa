@@ -607,30 +607,28 @@ class RemoteModelStore(ModelStore, RemoteStore):
             logger.error(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content, force_replace=False) -&gt; ContentObject:
+    def put(self, path: str, content) -&gt; DocumentFamily:
         &#34;&#34;&#34;Put the content into the model store at the given path
 
         Args:
           path: The path you wish to put the content at
           content: The content for that object
-          force_replace: overwrite the existing object if it is there (defaulted to False)
-          path: str:
 
         Returns:
-
+          the document family that was created
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
         try:
             files = {&#34;file&#34;: content}
-            data = {&#34;path&#34;: path, &#34;forceReplace&#34;: force_replace}
+            data = {&#34;path&#34;: path}
             content_object_response = requests.post(
-                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
+                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;,
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
             if content_object_response.status_code == 200:
-                return ContentObject.from_dict(content_object_response.json())
+                return DocumentFamily.from_dict(content_object_response.json())
             elif content_object_response.status_code == 400:
                 from addict import Dict
                 bad_request = Dict(json.loads(content_object_response.text))
@@ -1300,30 +1298,28 @@ in an instance of the Kodexa platform</p></div>
             logger.error(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content, force_replace=False) -&gt; ContentObject:
+    def put(self, path: str, content) -&gt; DocumentFamily:
         &#34;&#34;&#34;Put the content into the model store at the given path
 
         Args:
           path: The path you wish to put the content at
           content: The content for that object
-          force_replace: overwrite the existing object if it is there (defaulted to False)
-          path: str:
 
         Returns:
-
+          the document family that was created
         &#34;&#34;&#34;
         from kodexa import KodexaPlatform
         import requests
         try:
             files = {&#34;file&#34;: content}
-            data = {&#34;path&#34;: path, &#34;forceReplace&#34;: force_replace}
+            data = {&#34;path&#34;: path}
             content_object_response = requests.post(
-                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
+                f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;,
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
             if content_object_response.status_code == 200:
-                return ContentObject.from_dict(content_object_response.json())
+                return DocumentFamily.from_dict(content_object_response.json())
             elif content_object_response.status_code == 400:
                 from addict import Dict
                 bad_request = Dict(json.loads(content_object_response.text))
@@ -1509,7 +1505,7 @@ in an instance of the Kodexa platform</p></div>
 </details>
 </dd>
 <dt id="kodexa.stores.stores.RemoteModelStore.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, path: str, content, force_replace=False) ‑> <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a></span>
+<span>def <span class="ident">put</span></span>(<span>self, path: str, content) ‑> <a title="kodexa.model.model.DocumentFamily" href="../model/model.html#kodexa.model.model.DocumentFamily">DocumentFamily</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Put the content into the model store at the given path</p>
@@ -1519,40 +1515,35 @@ in an instance of the Kodexa platform</p></div>
 <dd>The path you wish to put the content at</dd>
 <dt><strong><code>content</code></strong></dt>
 <dd>The content for that object</dd>
-<dt><strong><code>force_replace</code></strong></dt>
-<dd>overwrite the existing object if it is there (defaulted to False)</dd>
-<dt><strong><code>path</code></strong></dt>
-<dd>str:</dd>
 </dl>
-<p>Returns:</p></div>
+<h2 id="returns">Returns</h2>
+<p>the document family that was created</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, content, force_replace=False) -&gt; ContentObject:
+<pre><code class="python">def put(self, path: str, content) -&gt; DocumentFamily:
     &#34;&#34;&#34;Put the content into the model store at the given path
 
     Args:
       path: The path you wish to put the content at
       content: The content for that object
-      force_replace: overwrite the existing object if it is there (defaulted to False)
-      path: str:
 
     Returns:
-
+      the document family that was created
     &#34;&#34;&#34;
     from kodexa import KodexaPlatform
     import requests
     try:
         files = {&#34;file&#34;: content}
-        data = {&#34;path&#34;: path, &#34;forceReplace&#34;: force_replace}
+        data = {&#34;path&#34;: path}
         content_object_response = requests.post(
-            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/contents&#34;,
+            f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families&#34;,
             headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
             files=files, data=data)
 
         if content_object_response.status_code == 200:
-            return ContentObject.from_dict(content_object_response.json())
+            return DocumentFamily.from_dict(content_object_response.json())
         elif content_object_response.status_code == 400:
             from addict import Dict
             bad_request = Dict(json.loads(content_object_response.text))
