@@ -695,7 +695,7 @@ class ContentNode(object):
                     s += self.children[part].get_all_content(separator)
                     s += separator
 
-        return s
+        return s.strip()
 
     def move_child_to_parent(self, target_child, target_parent):
         """This will move the target_child, which must be a child of the node, to a new parent.
