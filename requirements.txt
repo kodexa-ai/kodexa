@@ -4,7 +4,7 @@ texttable
 addict==2.2.1
 requests==2.24.0
 msgpack==1.0.0
-urllib3==1.25.9
+urllib3>=1.26.5
 wheel
 ply
 pytest
