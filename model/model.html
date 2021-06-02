@@ -724,7 +724,7 @@ class ContentNode(object):
                     s += self.children[part].get_all_content(separator)
                     s += separator
 
-        return s
+        return s.strip()
 
     def move_child_to_parent(self, target_child, target_parent):
         &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
@@ -1195,7 +1195,7 @@ class ContentNode(object):
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
-                        part_length = part_length + 1
+                        part_length = part_length + len(separator)
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1211,7 +1211,7 @@ class ContentNode(object):
                         else:
                             # Even if we didn&#39;t have anything we have a separator
 
-                            result = result + 1
+                            result = result
                             offset = offset + result
                             end = end - result
                             start = 0 if start - result &lt; 0 else start - result
@@ -1234,8 +1234,8 @@ class ContentNode(object):
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content) + len(separator)
-                    content_length = len(node_to_check.content) + len(separator)
+                    end = end - len(node_to_check.content)
+                    content_length = len(node_to_check.content)
                     start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
                         node_to_check.content) - len(separator)
 
@@ -1246,11 +1246,11 @@ class ContentNode(object):
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result
-                        start = 0 if start - result &lt; 0 else start - result
+                        end = end - result + len(separator)
+                        start = 0 if start - result &lt; 0 else start - (result+len(separator))
 
             if len(node_to_check.get_all_content()) != content_length:
-                raise Exception(&#34;There is a problem in the structure? Length mismatch&#34;)
+                raise Exception(f&#34;There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content())} != {content_length})&#34;)
             return content_length
 
         if content_re:
@@ -4113,7 +4113,7 @@ ensure that the correct mixins are applied.</p>
                     s += self.children[part].get_all_content(separator)
                     s += separator
 
-        return s
+        return s.strip()
 
     def move_child_to_parent(self, target_child, target_parent):
         &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
@@ -4584,7 +4584,7 @@ ensure that the correct mixins are applied.</p>
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
-                        part_length = part_length + 1
+                        part_length = part_length + len(separator)
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -4600,7 +4600,7 @@ ensure that the correct mixins are applied.</p>
                         else:
                             # Even if we didn&#39;t have anything we have a separator
 
-                            result = result + 1
+                            result = result
                             offset = offset + result
                             end = end - result
                             start = 0 if start - result &lt; 0 else start - result
@@ -4623,8 +4623,8 @@ ensure that the correct mixins are applied.</p>
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content) + len(separator)
-                    content_length = len(node_to_check.content) + len(separator)
+                    end = end - len(node_to_check.content)
+                    content_length = len(node_to_check.content)
                     start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
                         node_to_check.content) - len(separator)
 
@@ -4635,11 +4635,11 @@ ensure that the correct mixins are applied.</p>
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result
-                        start = 0 if start - result &lt; 0 else start - result
+                        end = end - result + len(separator)
+                        start = 0 if start - result &lt; 0 else start - (result+len(separator))
 
             if len(node_to_check.get_all_content()) != content_length:
-                raise Exception(&#34;There is a problem in the structure? Length mismatch&#34;)
+                raise Exception(f&#34;There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content())} != {content_length})&#34;)
             return content_length
 
         if content_re:
@@ -6065,7 +6065,7 @@ value:</p>
                 s += self.children[part].get_all_content(separator)
                 s += separator
 
-    return s</code></pre>
+    return s.strip()</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_all_tags"><code class="name flex">
@@ -7889,7 +7889,7 @@ tag_uuid: str:
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
                     # Add the separator
-                    part_length = part_length + 1
+                    part_length = part_length + len(separator)
 
                     end = end - part_length
                     content_length = content_length + part_length
@@ -7905,7 +7905,7 @@ tag_uuid: str:
                     else:
                         # Even if we didn&#39;t have anything we have a separator
 
-                        result = result + 1
+                        result = result
                         offset = offset + result
                         end = end - result
                         start = 0 if start - result &lt; 0 else start - result
@@ -7928,8 +7928,8 @@ tag_uuid: str:
                                                   value=node_to_check.content[start:],
                                                   data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                end = end - len(node_to_check.content) + len(separator)
-                content_length = len(node_to_check.content) + len(separator)
+                end = end - len(node_to_check.content)
+                content_length = len(node_to_check.content)
                 start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
                     node_to_check.content) - len(separator)
 
@@ -7940,11 +7940,11 @@ tag_uuid: str:
                     return -1
                 else:
                     content_length = content_length + result + len(separator)
-                    end = end - result
-                    start = 0 if start - result &lt; 0 else start - result
+                    end = end - result + len(separator)
+                    start = 0 if start - result &lt; 0 else start - (result+len(separator))
 
         if len(node_to_check.get_all_content()) != content_length:
-            raise Exception(&#34;There is a problem in the structure? Length mismatch&#34;)
+            raise Exception(f&#34;There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content())} != {content_length})&#34;)
         return content_length
 
     if content_re:
