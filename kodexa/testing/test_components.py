@@ -18,7 +18,7 @@ class TestAction:
 class TestAssistant(Assistant):
     """ """
 
-    def process_event(self, event: BaseEvent, context: AssistantContext = None) -> AssistantResponse:
+    def process_event(self, event: BaseEvent, context: AssistantContext = None) -> 'AssistantResponse':
         """
 
         Args:

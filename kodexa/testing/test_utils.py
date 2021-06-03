@@ -73,7 +73,7 @@ def simplify_node(node: ContentNode):
     }
 
 
-def simplify_document(document: Document) -> dict:
+def simplify_document(document: Document) -> 'dict':
     """
 
     Args:
@@ -239,7 +239,7 @@ class AssistantTestHarness:
         for store in self.stores:
             store.register_listener(self)
 
-    def test_assistant_event(self, assistant_event: AssistantEvent) -> AssistantResponse:
+    def test_assistant_event(self, assistant_event: AssistantEvent) -> 'AssistantResponse':
         """
         Pass an assistant event into the assistant
 
@@ -251,7 +251,7 @@ class AssistantTestHarness:
 
         return self.assistant.process_event(assistant_event, assistant_context)
 
-    def test_scheduled_event(self, scheduled_event: AssistantEvent) -> AssistantResponse:
+    def test_scheduled_event(self, scheduled_event: AssistantEvent) -> 'AssistantResponse':
         """
         Pass a scheduled event into the assistant
 
@@ -313,7 +313,7 @@ class AssistantTestHarness:
         """
         pass
 
-    def get_store(self, event: ContentEvent) -> DocumentStore:
+    def get_store(self, event: ContentEvent) -> 'DocumentStore':
         """
         Get a document store for the event (based on the document family ID)
 
@@ -426,7 +426,7 @@ class ExtensionPackUtil:
         raise Exception("Unable to find the action " + action_slug)
 
     def get_assistant_test_harness(self, assistant_slug, assistant_metadata: AssistantMetadata, options=None,
-                                   stores=None) -> AssistantTestHarness:
+                                   stores=None) -> 'AssistantTestHarness':
         """Provides a local test harness that can be used to validate the functionality
         of an assistant in a test case
 

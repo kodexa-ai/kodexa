@@ -92,7 +92,7 @@ class InMemoryStoreProvider:
         """
         return self.stores[name] if name in self.stores else None
 
-    def get_store_names(self) -> KeysView:
+    def get_store_names(self) -> 'KeysView':
         """ """
         return self.stores.keys()
 
@@ -134,11 +134,11 @@ class PipelineContext:
         self.content_object = None
         self.document_store = None
 
-    def get_context(self) -> Dict:
+    def get_context(self) -> 'Dict':
         """ """
         return self.context
 
-    def get_content_objects(self) -> List[ContentObject]:
+    def get_content_objects(self) -> 'List[ContentObject]':
         """ """
         return self.content_objects
 
@@ -178,7 +178,7 @@ class PipelineContext:
         """
         self.store_provider.put_store(name, store)
 
-    def get_store_names(self) -> KeysView:
+    def get_store_names(self) -> 'KeysView':
         """
 
         Args:
@@ -201,7 +201,7 @@ class PipelineContext:
         """
         self.current_document = current_document
 
-    def get_current_document(self) -> Document:
+    def get_current_document(self) -> 'Document':
         """Get the current document that is being processed in the pipeline
 
         :return: The current document, or None
@@ -226,7 +226,7 @@ class PipelineContext:
         """
         self.output_document = output_document
 
-    def get_store(self, name: str, default: Store = None) -> Store:
+    def get_store(self, name: str, default: Store = None) -> 'Store':
         """Get a store with given name from the context
 
         Args:
@@ -883,7 +883,7 @@ class Pipeline:
         return Pipeline(Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(file_path: str, *args, **kwargs) -> Pipeline:
+    def from_file(file_path: str, *args, **kwargs) -> 'Pipeline':
         """Create a new pipeline using a file path as a source
 
         Args:
@@ -899,7 +899,7 @@ class Pipeline:
         return Pipeline(Document.from_file(file_path), *args, **kwargs)
 
     @staticmethod
-    def from_text(text: str, *args, **kwargs) -> Pipeline:
+    def from_text(text: str, *args, **kwargs) -> 'Pipeline':
         """Build a new pipeline and provide text as the basic to create a document
 
         Args:
@@ -916,7 +916,7 @@ class Pipeline:
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
-                    unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -> Pipeline:
+                    unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -> 'Pipeline':
         """Create a pipeline that will run against a set of local files from a folder
 
         Args:

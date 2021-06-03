@@ -223,7 +223,7 @@ class KodexaPlatform:
     """
 
     @staticmethod
-    def get_access_token() -> str:
+    def get_access_token() -> 'str':
         """
         Returns the access token
 
@@ -237,7 +237,7 @@ class KodexaPlatform:
         return access_token if access_token is not None else kodexa_config['access_token']
 
     @staticmethod
-    def get_url() -> str:
+    def get_url() -> 'str':
         """
         Returns the URL to use to access a Kodexa Platform
 
@@ -283,7 +283,7 @@ class KodexaPlatform:
             os.environ["KODEXA_URL"] = url
 
     @staticmethod
-    def get_access_token_details() -> Dict:
+    def get_access_token_details() -> 'Dict':
         """
         Pull the access token details (including a list of the available organizations)
 
@@ -1044,7 +1044,7 @@ class RemotePipeline:
         return self.context
 
     @staticmethod
-    def from_url(slug: str, url, headers=None, *args, **kwargs) -> RemotePipeline:
+    def from_url(slug: str, url, headers=None, *args, **kwargs) -> 'RemotePipeline':
         """Build a new pipeline with the input being a document created from the given URL
 
         Args:
@@ -1062,7 +1062,7 @@ class RemotePipeline:
         return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -> RemotePipeline:
+    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -> 'RemotePipeline':
         """Create a new pipeline using a file path as a source
 
         Args:
@@ -1082,7 +1082,7 @@ class RemotePipeline:
         return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
 
     @staticmethod
-    def from_text(slug: str, text: str, *args, **kwargs) -> RemotePipeline:
+    def from_text(slug: str, text: str, *args, **kwargs) -> 'RemotePipeline':
         """Build a new pipeline and provide text as the basic to create a document
 
         Args:
@@ -1106,7 +1106,7 @@ class RemotePipeline:
     def from_folder(slug: str, folder_path: str, filename_filter: str = "*", recursive: bool = False,
                     unpack: bool = False,
                     relative: bool = False,
-                    caller_path: str = get_caller_dir()) -> RemotePipeline:
+                    caller_path: str = get_caller_dir()) -> 'RemotePipeline':
         """Create a pipeline that will run against a set of local files from a folder
 
         Args:

@@ -49,7 +49,7 @@ class InMemoryDocumentSink:
         """
         self.documents.append(document)
 
-    def get_document(self, index: int) -> Document:
+    def get_document(self, index: int) -> 'Document':
         """Get document at given index
 
         Args:

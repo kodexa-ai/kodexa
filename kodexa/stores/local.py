@@ -144,7 +144,7 @@ class LocalDocumentStore(DocumentStore):
             if document.source.original_filename is not None:
                 self.put(document.source.original_filename, document)
 
-    def get_ref(self) -> str:
+    def get_ref(self) -> 'str':
         """ """
         return self.store_path
 
@@ -205,13 +205,13 @@ class LocalDocumentStore(DocumentStore):
         with open(os.path.join(self.store_path, 'metastore.json'), 'w') as f:
             f.write(jsonpickle.encode(self.metastore))
 
-    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
+    def get_family(self, document_family_id: str) -> 'Optional[DocumentFamily]':
         for family in self.metastore:
             if family.id == document_family_id:
                 return family
         return None
 
-    def get_by_uuid(self, uuid: str) -> Optional[Document]:
+    def get_by_uuid(self, uuid: str) -> 'Optional[Document]':
         """
 
         Args:
@@ -227,7 +227,7 @@ class LocalDocumentStore(DocumentStore):
                     return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
         return None
 
-    def get_by_path(self, path: str) -> Optional[Document]:
+    def get_by_path(self, path: str) -> 'Optional[Document]':
         """Return the latest document in the family at the given path
 
         Args:
@@ -242,12 +242,12 @@ class LocalDocumentStore(DocumentStore):
                 return Document.from_kdxa(os.path.join(self.store_path, family.get_latest_content().id) + ".kdxa")
         return None
 
-    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
+    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> 'List[DocumentFamily]':
 
         # TODO implement query
         return self.metastore
 
-    def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
+    def get_family_by_path(self, path: str) -> 'Optional[DocumentFamily]':
         """
 
         Args:
@@ -261,7 +261,7 @@ class LocalDocumentStore(DocumentStore):
                 return family
         return None
 
-    def get_latest_document(self, path: str) -> Optional[Document]:
+    def get_latest_document(self, path: str) -> 'Optional[Document]':
         """
 
         Args:
@@ -275,7 +275,7 @@ class LocalDocumentStore(DocumentStore):
                 return self.get_document_by_content_object(family, family.content_objects[-1])
         return None
 
-    def list_objects(self) -> List[ContentObject]:
+    def list_objects(self) -> 'List[ContentObject]':
         """ """
         co_list: List[ContentObject] = []
         for family in self.metastore:
@@ -283,7 +283,7 @@ class LocalDocumentStore(DocumentStore):
 
         return co_list
 
-    def count(self) -> int:
+    def count(self) -> 'int':
         """Returns a count of the number of document families
 
         :return:
@@ -327,7 +327,7 @@ class LocalDocumentStore(DocumentStore):
                 self.write_metastore()
 
     def get_document_by_content_object(self, document_family: DocumentFamily,
-                                       content_object: ContentObject) -> Document:
+                                       content_object: ContentObject) -> 'Document':
         """
 
         Args:
@@ -341,7 +341,7 @@ class LocalDocumentStore(DocumentStore):
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
 
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -> Optional[DocumentFamily]:
+                               document: Document) -> 'Optional[DocumentFamily]':
 
         for co in document_family.content_objects:
             if co.id == content_object_id:
@@ -354,7 +354,7 @@ class LocalDocumentStore(DocumentStore):
         return None
 
 
-    def put(self, path: str, document: Document, force_replace: bool = False) -> DocumentFamily:
+    def put(self, path: str, document: Document, force_replace: bool = False) -> 'DocumentFamily':
         """
 
         Args:

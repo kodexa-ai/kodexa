@@ -268,7 +268,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         """
         return self.get_ref()
 
-    def get_ref(self) -> str:
+    def get_ref(self) -> 'str':
         """Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
         :return: The reference
@@ -312,7 +312,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 "Unable to decode the JSON response")
             raise
 
-    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
+    def get_family(self, document_family_id: str) -> 'Optional[DocumentFamily]':
         from kodexa import KodexaPlatform
         try:
             logger.info(f"Getting document family id {document_family_id}")
@@ -333,7 +333,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise
 
     def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
-                                       document: Document) -> ContentObject:
+                                       document: Document) -> 'ContentObject':
         from kodexa import KodexaPlatform
         try:
             logger.info(f"Putting document to family id {document_family_id}")
@@ -374,7 +374,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
     def register_listener(self, listener):
         pass
 
-    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
+    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> 'List[DocumentFamily]':
         params = {
             'page': page,
             'pageSize': page_size,
@@ -390,7 +390,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             return []
 
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -> DocumentFamily:
+                               document: Document) -> 'DocumentFamily':
         from kodexa import KodexaPlatform
         try:
             logger.info(f"Replacing document in family {document_family.id} content object {content_object_id}")
@@ -413,7 +413,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 "Unable to decode the JSON response")
             raise
 
-    def put(self, path: str, document: Document) -> DocumentFamily:
+    def put(self, path: str, document: Document) -> 'DocumentFamily':
         from kodexa import KodexaPlatform
         try:
             logger.info(f"Putting document to path {path}")
@@ -437,7 +437,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 "Unable to decode the JSON response")
             raise
 
-    def put_native(self, path: str, content) -> DocumentFamily:
+    def put_native(self, path: str, content) -> 'DocumentFamily':
         from kodexa import KodexaPlatform
         try:
             logger.info(f"Putting native content to path {path}")
@@ -461,18 +461,18 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 "Unable to decode the JSON response")
             raise
 
-    def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
+    def get_family_by_path(self, path: str) -> 'Optional[DocumentFamily]':
         get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/fs/{path}", params={"meta": True})
         return DocumentFamily.from_dict(get_response.json()) if get_response is not None else None
 
-    def count(self) -> int:
+    def count(self) -> 'int':
         get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/families")
         if get_response is not None:
             return get_response.json()['totalElements']
         else:
             return 0
 
-    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> 'Optional[Document]':
         get_response = self._base_get(
             f"api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content")
         if get_response is not None:
@@ -480,7 +480,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         else:
             return None
 
-    def _base_get(self, api_path: str, params: Optional[dict] = None) -> Optional[Response]:
+    def _base_get(self, api_path: str, params: Optional[dict] = None) -> 'Optional[Response]':
         if params is None:
             params = {}
         from kodexa import KodexaPlatform
@@ -518,7 +518,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
     def __init__(self, ref: str):
         self.ref = ref
 
-    def get_ref(self) -> str:
+    def get_ref(self) -> 'str':
         """
         Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
@@ -578,7 +578,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
             logger.error(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content) -> DocumentFamily:
+    def put(self, path: str, content) -> 'DocumentFamily':
         """Put the content into the model store at the given path
 
         Args:
@@ -647,7 +647,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
                 "Unable to JSON decode the response?")
             raise
 
-    def get_content_metadata(self) -> ModelContentMetadata:
+    def get_content_metadata(self) -> 'ModelContentMetadata':
         """
         Gets the latest model content metadata for the model store
 

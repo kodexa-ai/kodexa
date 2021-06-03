@@ -148,7 +148,7 @@ class Store:
 class RemoteStore:
     """A remote store is one that refers to a Kodexa platform  instance"""
 
-    def get_ref(self) -> str:
+    def get_ref(self) -> 'str':
         """Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
         :return: The reference
@@ -343,7 +343,7 @@ class ContentNode(object):
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
         return new_content_node
 
-    def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -> 'ContentNode':
+    def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -> ''ContentNode'':
         """Convenience method to allow you to quick add a child node with a type and content
 
         Args:
@@ -1966,7 +1966,7 @@ class Document(object):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
-    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
+    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ''ContentClassification'':
         """Add a content classification to the document
 
         Args:
@@ -2302,7 +2302,7 @@ class Document(object):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector: str, variables: Optional[dict] = None) -> List[ContentNode]:
+    def select(self, selector: str, variables: Optional[dict] = None) -> ''List[ContentNode]'':
         """Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
@@ -2326,7 +2326,7 @@ class Document(object):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None) -> ContentNode:
+    def select_as_node(self, selector, variables=None) -> ''ContentNode'':
         """Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
@@ -2346,7 +2346,7 @@ class Document(object):
         else:
             return self.create_node(node_type='results')
 
-    def get_labels(self) -> List[str]:
+    def get_labels(self) -> ''List[str]'':
         """
 
         Args:
@@ -2541,7 +2541,7 @@ class DocumentTransition:
                                         execution_id=transition_dict.get('executionId'))
         return transition
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> 'dict':
         """
         Convert the transition to a dictionary to match REST API
 
@@ -2591,7 +2591,7 @@ class DocumentFamily:
         self.labels: List[str] = []
         """The labels from the latest content object"""
 
-    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ''ContentEvent'':
         """
 
         Args:
@@ -2617,7 +2617,7 @@ class DocumentFamily:
         new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
         return new_event
 
-    def get_latest_content(self) -> ContentObject:
+    def get_latest_content(self) -> ''ContentObject'':
         """Returns the latest content object that we have in place
 
         Returns:
@@ -2625,7 +2625,7 @@ class DocumentFamily:
         """
         return self.content_objects[-1]
 
-    def get_content_objects(self) -> List[ContentObject]:
+    def get_content_objects(self) -> ''List[ContentObject]'':
         """Returns all the content objects in the family
 
         Returns:
@@ -2635,7 +2635,7 @@ class DocumentFamily:
         """
         return self.content_objects
 
-    def get_document_count(self) -> int:
+    def get_document_count(self) -> 'int':
         """
         Count of content objects in the family
 
@@ -2680,7 +2680,7 @@ class DocumentFamily:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> 'dict':
         """
         Convert the document family to a dictionary to match REST API
 
@@ -2706,7 +2706,7 @@ class DocumentStore:
     """
 
     @abc.abstractmethod
-    def get_ref(self) -> str:
+    def get_ref(self) -> 'str':
         """
         Returns the reference (org-slug/store-slug:version)
 
@@ -2717,7 +2717,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> 'Optional[Document]':
         """Get a Document based on the ID of the ContentObject
 
         Args:
@@ -2732,7 +2732,7 @@ class DocumentStore:
 
     @abc.abstractmethod
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -> Optional[DocumentFamily]:
+                               document: Document) -> 'Optional[DocumentFamily]':
         """Replace the document in a specific content object in a document family.
 
         Args:
@@ -2759,7 +2759,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
+    def get_family(self, document_family_id: str) -> 'Optional[DocumentFamily]':
         """
         Returns a document family based on the ID
 
@@ -2890,7 +2890,7 @@ class DocumentStore:
         print(table)
 
     @abc.abstractmethod
-    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
+    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> 'List[DocumentFamily]':
         """
         Query the document families
 
@@ -2906,7 +2906,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document) -> DocumentFamily:
+    def put(self, path: str, document: Document) -> 'DocumentFamily':
         """Puts a new document in the store with the given path.
 
         There mustn't be a family in the path, this method will create a new family based around the
@@ -2922,7 +2922,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
+    def get_family_by_path(self, path: str) -> 'Optional[DocumentFamily]':
         """
         Returns the document family (or None is not available) for a specific path in the store
 
@@ -2936,7 +2936,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def count(self) -> int:
+    def count(self) -> 'int':
         """The number of document families in the store
 
         Returns:
@@ -2957,7 +2957,7 @@ class DocumentStore:
         """
         return True
 
-    def get_latest_document_in_family(self, document_family: DocumentFamily) -> Optional[Document]:
+    def get_latest_document_in_family(self, document_family: DocumentFamily) -> 'Optional[Document]':
         """
         Returns the latest instance
         Args:
@@ -3016,7 +3016,7 @@ class ModelContentMetadata:
                                                       model_content_dict['deployment'])
         return model_content_metadata
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> 'dict':
         """
         Convert the ModelContentMetadata to a dictionary to match REST API
 
@@ -3048,7 +3048,7 @@ class ModelStore:
         """
         pass
 
-    def put(self, path: str, content: Any) -> DocumentFamily:
+    def put(self, path: str, content: Any) -> 'DocumentFamily':
         """
 
         Args:
@@ -3068,7 +3068,7 @@ class ModelStore:
         """
         pass
 
-    def get_content_metadata(self) -> ModelContentMetadata:
+    def get_content_metadata(self) -> 'ModelContentMetadata':
         """
         Gets the latest model content metadata for the model store
 

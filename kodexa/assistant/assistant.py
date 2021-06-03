@@ -56,7 +56,7 @@ class AssistantContext:
             options = {}
         return self.extension_pack_util.get_step(step, options)
 
-    def get_store(self, event: ContentEvent) -> DocumentStore:
+    def get_store(self, event: ContentEvent) -> 'DocumentStore':
         """
         Get a document store for the event (based on the document family ID)
 
@@ -135,7 +135,7 @@ class Assistant:
 
     from kodexa.model.model import BaseEvent
 
-    def process_event(self, event: BaseEvent, context: AssistantContext) -> AssistantResponse:
+    def process_event(self, event: BaseEvent, context: AssistantContext) -> 'AssistantResponse':
         """The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
