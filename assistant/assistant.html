@@ -87,7 +87,7 @@ class AssistantContext:
             options = {}
         return self.extension_pack_util.get_step(step, options)
 
-    def get_store(self, event: ContentEvent) -&gt; DocumentStore:
+    def get_store(self, event: ContentEvent) -&gt; &#39;DocumentStore&#39;:
         &#34;&#34;&#34;
         Get a document store for the event (based on the document family ID)
 
@@ -166,7 +166,7 @@ class Assistant:
 
     from kodexa.model.model import BaseEvent
 
-    def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; AssistantResponse:
+    def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; &#39;AssistantResponse&#39;:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -214,7 +214,7 @@ that is working with set of content</p></div>
 
     from kodexa.model.model import BaseEvent
 
-    def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; AssistantResponse:
+    def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; &#39;AssistantResponse&#39;:
         &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
         The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -276,7 +276,7 @@ the context for the assistant</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; AssistantResponse:
+<pre><code class="python">def process_event(self, event: BaseEvent, context: AssistantContext) -&gt; &#39;AssistantResponse&#39;:
     &#34;&#34;&#34;The assistant will need to examine the event to determine if it wants to respond
 
     The event will focus on a specific content object (that will be stored and available).  Based on the
@@ -360,7 +360,7 @@ while processing an event</p>
             options = {}
         return self.extension_pack_util.get_step(step, options)
 
-    def get_store(self, event: ContentEvent) -&gt; DocumentStore:
+    def get_store(self, event: ContentEvent) -&gt; &#39;DocumentStore&#39;:
         &#34;&#34;&#34;
         Get a document store for the event (based on the document family ID)
 
@@ -432,7 +432,7 @@ assistant, this allows you to build pipelines when you don't know the owning org
 </details>
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantContext.get_store"><code class="name flex">
-<span>def <span class="ident">get_store</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>) ‑> <a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a></span>
+<span>def <span class="ident">get_store</span></span>(<span>self, event: <a title="kodexa.model.model.ContentEvent" href="../model/model.html#kodexa.model.model.ContentEvent">ContentEvent</a>) ‑> DocumentStore</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a document store for the event (based on the document family ID)</p>
@@ -447,7 +447,7 @@ assistant, this allows you to build pipelines when you don't know the owning org
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_store(self, event: ContentEvent) -&gt; DocumentStore:
+<pre><code class="python">def get_store(self, event: ContentEvent) -&gt; &#39;DocumentStore&#39;:
     &#34;&#34;&#34;
     Get a document store for the event (based on the document family ID)
 
