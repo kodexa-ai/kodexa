@@ -343,7 +343,7 @@ class ContentNode(object):
             new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
         return new_content_node
 
-    def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -> ''ContentNode'':
+    def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -> 'ContentNode':
         """Convenience method to allow you to quick add a child node with a type and content
 
         Args:
@@ -1966,7 +1966,7 @@ class Document(object):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
-    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ''ContentClassification'':
+    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> 'ContentClassification':
         """Add a content classification to the document
 
         Args:
@@ -2302,7 +2302,7 @@ class Document(object):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector: str, variables: Optional[dict] = None) -> ''List[ContentNode]'':
+    def select(self, selector: str, variables: Optional[dict] = None) -> 'List[ContentNode]':
         """Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
@@ -2326,7 +2326,7 @@ class Document(object):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None) -> ''ContentNode'':
+    def select_as_node(self, selector, variables=None) -> 'ContentNode':
         """Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
@@ -2346,7 +2346,7 @@ class Document(object):
         else:
             return self.create_node(node_type='results')
 
-    def get_labels(self) -> ''List[str]'':
+    def get_labels(self) -> 'List[str]':
         """
 
         Args:
@@ -2591,7 +2591,7 @@ class DocumentFamily:
         self.labels: List[str] = []
         """The labels from the latest content object"""
 
-    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ''ContentEvent'':
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> 'ContentEvent':
         """
 
         Args:
@@ -2617,7 +2617,7 @@ class DocumentFamily:
         new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
         return new_event
 
-    def get_latest_content(self) -> ''ContentObject'':
+    def get_latest_content(self) -> 'ContentObject':
         """Returns the latest content object that we have in place
 
         Returns:
@@ -2625,7 +2625,7 @@ class DocumentFamily:
         """
         return self.content_objects[-1]
 
-    def get_content_objects(self) -> ''List[ContentObject]'':
+    def get_content_objects(self) -> 'List[ContentObject]':
         """Returns all the content objects in the family
 
         Returns:
