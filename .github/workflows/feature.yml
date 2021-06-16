@@ -32,7 +32,7 @@ jobs:
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --statistics
-          mypy kodexa
+          mypy --install-types kodexa
       - name: Test with pytest
         run: |
           pytest
