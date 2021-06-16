@@ -177,7 +177,7 @@ class Store:
 class RemoteStore:
     &#34;&#34;&#34;A remote store is one that refers to a Kodexa platform  instance&#34;&#34;&#34;
 
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
         :return: The reference
@@ -724,7 +724,7 @@ class ContentNode(object):
                     s += self.children[part].get_all_content(separator)
                     s += separator
 
-        return s
+        return s.strip()
 
     def move_child_to_parent(self, target_child, target_parent):
         &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
@@ -1195,7 +1195,7 @@ class ContentNode(object):
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
-                        part_length = part_length + 1
+                        part_length = part_length + len(separator)
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1211,7 +1211,7 @@ class ContentNode(object):
                         else:
                             # Even if we didn&#39;t have anything we have a separator
 
-                            result = result + 1
+                            result = result
                             offset = offset + result
                             end = end - result
                             start = 0 if start - result &lt; 0 else start - result
@@ -1234,8 +1234,8 @@ class ContentNode(object):
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content) + len(separator)
-                    content_length = len(node_to_check.content) + len(separator)
+                    end = end - len(node_to_check.content)
+                    content_length = len(node_to_check.content)
                     start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
                         node_to_check.content) - len(separator)
 
@@ -1246,11 +1246,11 @@ class ContentNode(object):
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result
-                        start = 0 if start - result &lt; 0 else start - result
+                        end = end - result + len(separator)
+                        start = 0 if start - result &lt; 0 else start - (result+len(separator))
 
             if len(node_to_check.get_all_content()) != content_length:
-                raise Exception(&#34;There is a problem in the structure? Length mismatch&#34;)
+                raise Exception(f&#34;There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content())} != {content_length})&#34;)
             return content_length
 
         if content_re:
@@ -1995,7 +1995,7 @@ class Document(object):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
-    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; &#39;ContentClassification&#39;:
+    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
         &#34;&#34;&#34;Add a content classification to the document
 
         Args:
@@ -2331,7 +2331,7 @@ class Document(object):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector: str, variables: Optional[dict] = None) -&gt; &#39;List[ContentNode]&#39;:
+    def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
         &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
@@ -2355,7 +2355,7 @@ class Document(object):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None) -&gt; &#39;ContentNode&#39;:
+    def select_as_node(self, selector, variables=None) -&gt; ContentNode:
         &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
@@ -2375,7 +2375,7 @@ class Document(object):
         else:
             return self.create_node(node_type=&#39;results&#39;)
 
-    def get_labels(self) -&gt; &#39;List[str]&#39;:
+    def get_labels(self) -&gt; List[str]:
         &#34;&#34;&#34;
 
         Args:
@@ -2570,7 +2570,7 @@ class DocumentTransition:
                                         execution_id=transition_dict.get(&#39;executionId&#39;))
         return transition
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the transition to a dictionary to match REST API
 
@@ -2620,7 +2620,7 @@ class DocumentFamily:
         self.labels: List[str] = []
         &#34;&#34;&#34;The labels from the latest content object&#34;&#34;&#34;
 
-    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; &#39;ContentEvent&#39;:
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
         &#34;&#34;&#34;
 
         Args:
@@ -2646,7 +2646,7 @@ class DocumentFamily:
         new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
         return new_event
 
-    def get_latest_content(self) -&gt; &#39;ContentObject&#39;:
+    def get_latest_content(self) -&gt; ContentObject:
         &#34;&#34;&#34;Returns the latest content object that we have in place
 
         Returns:
@@ -2654,7 +2654,7 @@ class DocumentFamily:
         &#34;&#34;&#34;
         return self.content_objects[-1]
 
-    def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+    def get_content_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;Returns all the content objects in the family
 
         Returns:
@@ -2664,7 +2664,7 @@ class DocumentFamily:
         &#34;&#34;&#34;
         return self.content_objects
 
-    def get_document_count(self) -&gt; &#39;int&#39;:
+    def get_document_count(self) -&gt; int:
         &#34;&#34;&#34;
         Count of content objects in the family
 
@@ -2709,7 +2709,7 @@ class DocumentFamily:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the document family to a dictionary to match REST API
 
@@ -2735,7 +2735,7 @@ class DocumentStore:
     &#34;&#34;&#34;
 
     @abc.abstractmethod
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34;
         Returns the reference (org-slug/store-slug:version)
 
@@ -2746,7 +2746,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
         Args:
@@ -2761,7 +2761,7 @@ class DocumentStore:
 
     @abc.abstractmethod
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -&gt; &#39;Optional[DocumentFamily]&#39;:
+                               document: Document) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;Replace the document in a specific content object in a document family.
 
         Args:
@@ -2788,7 +2788,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns a document family based on the ID
 
@@ -2919,7 +2919,7 @@ class DocumentStore:
         print(table)
 
     @abc.abstractmethod
-    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; &#39;List[DocumentFamily]&#39;:
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
         &#34;&#34;&#34;
         Query the document families
 
@@ -2935,7 +2935,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, document: Document) -&gt; DocumentFamily:
         &#34;&#34;&#34;Puts a new document in the store with the given path.
 
         There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -2951,7 +2951,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns the document family (or None is not available) for a specific path in the store
 
@@ -2965,7 +2965,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def count(self) -&gt; &#39;int&#39;:
+    def count(self) -&gt; int:
         &#34;&#34;&#34;The number of document families in the store
 
         Returns:
@@ -2986,7 +2986,7 @@ class DocumentStore:
         &#34;&#34;&#34;
         return True
 
-    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; &#39;Optional[Document]&#39;:
+    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
         &#34;&#34;&#34;
         Returns the latest instance
         Args:
@@ -3045,7 +3045,7 @@ class ModelContentMetadata:
                                                       model_content_dict[&#39;deployment&#39;])
         return model_content_metadata
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the ModelContentMetadata to a dictionary to match REST API
 
@@ -3077,7 +3077,7 @@ class ModelStore:
         &#34;&#34;&#34;
         pass
 
-    def put(self, path: str, content: Any) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, content: Any) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
         Args:
@@ -3097,7 +3097,7 @@ class ModelStore:
         &#34;&#34;&#34;
         pass
 
-    def get_content_metadata(self) -&gt; &#39;ModelContentMetadata&#39;:
+    def get_content_metadata(self) -&gt; ModelContentMetadata:
         &#34;&#34;&#34;
         Gets the latest model content metadata for the model store
 
@@ -4113,7 +4113,7 @@ ensure that the correct mixins are applied.</p>
                     s += self.children[part].get_all_content(separator)
                     s += separator
 
-        return s
+        return s.strip()
 
     def move_child_to_parent(self, target_child, target_parent):
         &#34;&#34;&#34;This will move the target_child, which must be a child of the node, to a new parent.
@@ -4584,7 +4584,7 @@ ensure that the correct mixins are applied.</p>
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
-                        part_length = part_length + 1
+                        part_length = part_length + len(separator)
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -4600,7 +4600,7 @@ ensure that the correct mixins are applied.</p>
                         else:
                             # Even if we didn&#39;t have anything we have a separator
 
-                            result = result + 1
+                            result = result
                             offset = offset + result
                             end = end - result
                             start = 0 if start - result &lt; 0 else start - result
@@ -4623,8 +4623,8 @@ ensure that the correct mixins are applied.</p>
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content) + len(separator)
-                    content_length = len(node_to_check.content) + len(separator)
+                    end = end - len(node_to_check.content)
+                    content_length = len(node_to_check.content)
                     start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
                         node_to_check.content) - len(separator)
 
@@ -4635,11 +4635,11 @@ ensure that the correct mixins are applied.</p>
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result
-                        start = 0 if start - result &lt; 0 else start - result
+                        end = end - result + len(separator)
+                        start = 0 if start - result &lt; 0 else start - (result+len(separator))
 
             if len(node_to_check.get_all_content()) != content_length:
-                raise Exception(&#34;There is a problem in the structure? Length mismatch&#34;)
+                raise Exception(f&#34;There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content())} != {content_length})&#34;)
             return content_length
 
         if content_re:
@@ -6065,7 +6065,7 @@ value:</p>
                 s += self.children[part].get_all_content(separator)
                 s += separator
 
-    return s</code></pre>
+    return s.strip()</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_all_tags"><code class="name flex">
@@ -7889,7 +7889,7 @@ tag_uuid: str:
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
                     # Add the separator
-                    part_length = part_length + 1
+                    part_length = part_length + len(separator)
 
                     end = end - part_length
                     content_length = content_length + part_length
@@ -7905,7 +7905,7 @@ tag_uuid: str:
                     else:
                         # Even if we didn&#39;t have anything we have a separator
 
-                        result = result + 1
+                        result = result
                         offset = offset + result
                         end = end - result
                         start = 0 if start - result &lt; 0 else start - result
@@ -7928,8 +7928,8 @@ tag_uuid: str:
                                                   value=node_to_check.content[start:],
                                                   data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                end = end - len(node_to_check.content) + len(separator)
-                content_length = len(node_to_check.content) + len(separator)
+                end = end - len(node_to_check.content)
+                content_length = len(node_to_check.content)
                 start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
                     node_to_check.content) - len(separator)
 
@@ -7940,11 +7940,11 @@ tag_uuid: str:
                     return -1
                 else:
                     content_length = content_length + result + len(separator)
-                    end = end - result
-                    start = 0 if start - result &lt; 0 else start - result
+                    end = end - result + len(separator)
+                    start = 0 if start - result &lt; 0 else start - (result+len(separator))
 
         if len(node_to_check.get_all_content()) != content_length:
-            raise Exception(&#34;There is a problem in the structure? Length mismatch&#34;)
+            raise Exception(f&#34;There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content())} != {content_length})&#34;)
         return content_length
 
     if content_re:
@@ -8520,7 +8520,7 @@ def from_dict(cls, co_dict):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
-    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; &#39;ContentClassification&#39;:
+    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
         &#34;&#34;&#34;Add a content classification to the document
 
         Args:
@@ -8856,7 +8856,7 @@ def from_dict(cls, co_dict):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector: str, variables: Optional[dict] = None) -&gt; &#39;List[ContentNode]&#39;:
+    def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
         &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
@@ -8880,7 +8880,7 @@ def from_dict(cls, co_dict):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None) -&gt; &#39;ContentNode&#39;:
+    def select_as_node(self, selector, variables=None) -&gt; ContentNode:
         &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
@@ -8900,7 +8900,7 @@ def from_dict(cls, co_dict):
         else:
             return self.create_node(node_type=&#39;results&#39;)
 
-    def get_labels(self) -&gt; &#39;List[str]&#39;:
+    def get_labels(self) -&gt; List[str]:
         &#34;&#34;&#34;
 
         Args:
@@ -9295,7 +9295,7 @@ taxonomy_ref(Optional[str]): the reference to the taxonomy</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; &#39;ContentClassification&#39;:
+<pre><code class="python">def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
     &#34;&#34;&#34;Add a content classification to the document
 
     Args:
@@ -9479,7 +9479,7 @@ index: int:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_labels(self) -&gt; &#39;List[str]&#39;:
+<pre><code class="python">def get_labels(self) -&gt; List[str]:
     &#34;&#34;&#34;
 
     Args:
@@ -9578,7 +9578,7 @@ If no matches found, list is empty.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(self, selector: str, variables: Optional[dict] = None) -&gt; &#39;List[ContentNode]&#39;:
+<pre><code class="python">def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
     &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
     Args:
@@ -9629,7 +9629,7 @@ All ContentNodes on this Document that match the selector value are added as the
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select_as_node(self, selector, variables=None) -&gt; &#39;ContentNode&#39;:
+<pre><code class="python">def select_as_node(self, selector, variables=None) -&gt; ContentNode:
     &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
     Args:
@@ -9898,7 +9898,7 @@ document as its first entry</p>
         self.labels: List[str] = []
         &#34;&#34;&#34;The labels from the latest content object&#34;&#34;&#34;
 
-    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; &#39;ContentEvent&#39;:
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
         &#34;&#34;&#34;
 
         Args:
@@ -9924,7 +9924,7 @@ document as its first entry</p>
         new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
         return new_event
 
-    def get_latest_content(self) -&gt; &#39;ContentObject&#39;:
+    def get_latest_content(self) -&gt; ContentObject:
         &#34;&#34;&#34;Returns the latest content object that we have in place
 
         Returns:
@@ -9932,7 +9932,7 @@ document as its first entry</p>
         &#34;&#34;&#34;
         return self.content_objects[-1]
 
-    def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+    def get_content_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;Returns all the content objects in the family
 
         Returns:
@@ -9942,7 +9942,7 @@ document as its first entry</p>
         &#34;&#34;&#34;
         return self.content_objects
 
-    def get_document_count(self) -&gt; &#39;int&#39;:
+    def get_document_count(self) -&gt; int:
         &#34;&#34;&#34;
         Count of content objects in the family
 
@@ -9987,7 +9987,7 @@ document as its first entry</p>
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the document family to a dictionary to match REST API
 
@@ -10111,7 +10111,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; &#39;ContentEvent&#39;:
+<pre><code class="python">def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
     &#34;&#34;&#34;
 
     Args:
@@ -10149,7 +10149,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+<pre><code class="python">def get_content_objects(self) -&gt; List[ContentObject]:
     &#34;&#34;&#34;Returns all the content objects in the family
 
     Returns:
@@ -10171,7 +10171,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_document_count(self) -&gt; &#39;int&#39;:
+<pre><code class="python">def get_document_count(self) -&gt; int:
     &#34;&#34;&#34;
     Count of content objects in the family
 
@@ -10193,7 +10193,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_latest_content(self) -&gt; &#39;ContentObject&#39;:
+<pre><code class="python">def get_latest_content(self) -&gt; ContentObject:
     &#34;&#34;&#34;Returns the latest content object that we have in place
 
     Returns:
@@ -10213,7 +10213,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_dict(self) -&gt; &#39;dict&#39;:
+<pre><code class="python">def to_dict(self) -&gt; dict:
     &#34;&#34;&#34;
     Convert the document family to a dictionary to match REST API
 
@@ -10273,7 +10273,7 @@ def from_dict(cls, family_dict: dict):
     &#34;&#34;&#34;
 
     @abc.abstractmethod
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34;
         Returns the reference (org-slug/store-slug:version)
 
@@ -10284,7 +10284,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
         Args:
@@ -10299,7 +10299,7 @@ def from_dict(cls, family_dict: dict):
 
     @abc.abstractmethod
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -&gt; &#39;Optional[DocumentFamily]&#39;:
+                               document: Document) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;Replace the document in a specific content object in a document family.
 
         Args:
@@ -10326,7 +10326,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns a document family based on the ID
 
@@ -10457,7 +10457,7 @@ def from_dict(cls, family_dict: dict):
         print(table)
 
     @abc.abstractmethod
-    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; &#39;List[DocumentFamily]&#39;:
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
         &#34;&#34;&#34;
         Query the document families
 
@@ -10473,7 +10473,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, document: Document) -&gt; DocumentFamily:
         &#34;&#34;&#34;Puts a new document in the store with the given path.
 
         There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -10489,7 +10489,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns the document family (or None is not available) for a specific path in the store
 
@@ -10503,7 +10503,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def count(self) -&gt; &#39;int&#39;:
+    def count(self) -&gt; int:
         &#34;&#34;&#34;The number of document families in the store
 
         Returns:
@@ -10524,7 +10524,7 @@ def from_dict(cls, family_dict: dict):
         &#34;&#34;&#34;
         return True
 
-    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; &#39;Optional[Document]&#39;:
+    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
         &#34;&#34;&#34;
         Returns the latest instance
         Args:
@@ -10630,7 +10630,7 @@ def add_related_document_to_family(self, document_family_id: str, transition: Do
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def count(self) -&gt; &#39;int&#39;:
+def count(self) -&gt; int:
     &#34;&#34;&#34;The number of document families in the store
 
     Returns:
@@ -10685,7 +10685,7 @@ content_object_id(str): the ID of the ContentObject</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; &#39;Optional[Document]&#39;:
+def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
     &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
     Args:
@@ -10751,7 +10751,7 @@ def get_document_by_content_object(self, document_family: DocumentFamily, conten
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
     &#34;&#34;&#34;
     Returns a document family based on the ID
 
@@ -10782,7 +10782,7 @@ def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
     &#34;&#34;&#34;
     Returns the document family (or None is not available) for a specific path in the store
 
@@ -10812,7 +10812,7 @@ def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; &#39;Optional[Document]&#39;:
+<pre><code class="python">def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
     &#34;&#34;&#34;
     Returns the latest instance
     Args:
@@ -10843,7 +10843,7 @@ def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_ref(self) -&gt; &#39;str&#39;:
+def get_ref(self) -&gt; str:
     &#34;&#34;&#34;
     Returns the reference (org-slug/store-slug:version)
 
@@ -10910,7 +10910,7 @@ document</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def put(self, path: str, document: Document) -&gt; &#39;DocumentFamily&#39;:
+def put(self, path: str, document: Document) -&gt; DocumentFamily:
     &#34;&#34;&#34;Puts a new document in the store with the given path.
 
     There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -11000,7 +11000,7 @@ def put_native(self, path: str, content):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; &#39;List[DocumentFamily]&#39;:
+def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
     &#34;&#34;&#34;
     Query the document families
 
@@ -11070,7 +11070,7 @@ document(Document): the document to replace the content object with</p>
 </summary>
 <pre><code class="python">@abc.abstractmethod
 def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                           document: Document) -&gt; &#39;Optional[DocumentFamily]&#39;:
+                           document: Document) -&gt; Optional[DocumentFamily]:
     &#34;&#34;&#34;Replace the document in a specific content object in a document family.
 
     Args:
@@ -11154,7 +11154,7 @@ in the transition as well at the type of transition that exists</p>
                                         execution_id=transition_dict.get(&#39;executionId&#39;))
         return transition
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the transition to a dictionary to match REST API
 
@@ -11238,7 +11238,7 @@ def from_dict(cls, transition_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_dict(self) -&gt; &#39;dict&#39;:
+<pre><code class="python">def to_dict(self) -&gt; dict:
     &#34;&#34;&#34;
     Convert the transition to a dictionary to match REST API
 
@@ -11336,7 +11336,7 @@ def from_dict(cls, transition_dict: dict):
                                                       model_content_dict[&#39;deployment&#39;])
         return model_content_metadata
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the ModelContentMetadata to a dictionary to match REST API
 
@@ -11423,7 +11423,7 @@ def from_dict(cls, model_content_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_dict(self) -&gt; &#39;dict&#39;:
+<pre><code class="python">def to_dict(self) -&gt; dict:
     &#34;&#34;&#34;
     Convert the ModelContentMetadata to a dictionary to match REST API
 
@@ -11466,7 +11466,7 @@ def from_dict(cls, model_content_dict: dict):
         &#34;&#34;&#34;
         pass
 
-    def put(self, path: str, content: Any) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, content: Any) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
         Args:
@@ -11486,7 +11486,7 @@ def from_dict(cls, model_content_dict: dict):
         &#34;&#34;&#34;
         pass
 
-    def get_content_metadata(self) -&gt; &#39;ModelContentMetadata&#39;:
+    def get_content_metadata(self) -&gt; ModelContentMetadata:
         &#34;&#34;&#34;
         Gets the latest model content metadata for the model store
 
@@ -11537,7 +11537,7 @@ def from_dict(cls, model_content_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_content_metadata(self) -&gt; &#39;ModelContentMetadata&#39;:
+<pre><code class="python">def get_content_metadata(self) -&gt; ModelContentMetadata:
     &#34;&#34;&#34;
     Gets the latest model content metadata for the model store
 
@@ -11563,7 +11563,7 @@ def from_dict(cls, model_content_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, content: Any) -&gt; &#39;DocumentFamily&#39;:
+<pre><code class="python">def put(self, path: str, content: Any) -&gt; DocumentFamily:
     &#34;&#34;&#34;
 
     Args:
@@ -11610,7 +11610,7 @@ instance</p></div>
 <pre><code class="python">class RemoteStore:
     &#34;&#34;&#34;A remote store is one that refers to a Kodexa platform  instance&#34;&#34;&#34;
 
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
         :return: The reference
@@ -11680,7 +11680,7 @@ instance</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_ref(self) -&gt; &#39;str&#39;:
+<pre><code class="python">def get_ref(self) -&gt; str:
     &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
     :return: The reference
