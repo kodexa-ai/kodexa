@@ -8,11 +8,14 @@ class Taxon:
 
     def __init__(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
                  value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
-                 metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
+                 metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True,
+                 taxon_type: str = None, type_features: dict = None):
         if options is None:
             options = []
         if node_types is None:
             node_types = []
+        if type_features is None:
+            type_features = {}
         self.id = id if id and len(id) > 0 else str(uuid.uuid4())
         self.name: str = name
         self.label: str = label
@@ -24,6 +27,8 @@ class Taxon:
         self.node_types = node_types
         self.options = options
         self.enabled = enabled
+        self.taxon_type = taxon_type
+        self.type_features = type_features
 
     @staticmethod
     def from_dict(dict_taxon):
@@ -40,6 +45,8 @@ class Taxon:
                           options=dict_taxon.get('options', None), enabled=dict_taxon.get('enabled', False),
                           value_path=dict_taxon['valuePath'] if 'valuePath' in dict_taxon else None,
                           data_path=dict_taxon['dataPath'] if 'dataPath' in dict_taxon else None,
+                          taxon_type=dict_taxon['taxonType'] if 'taxonType' in dict_taxon else None,
+                          type_features=dict_taxon['typeFeatures'] if 'typeFeatures' in dict_taxon else None,
                           metadata_path=dict_taxon['metadataPath'] if 'metadataPath' in dict_taxon else None)
 
         if 'children' in dict_taxon:
@@ -52,7 +59,8 @@ class Taxon:
         """ """
         dict = {'id': self.id, 'name': self.name, 'color': self.color, 'valuePath': self.value_path,
                 'label': self.label, 'nodeTypes': self.node_types, 'options': self.options, 'enabled': self.enabled,
-                'dataPath': self.data_path, 'metadataPath': self.metadata_path, 'children': []}
+                'dataPath': self.data_path, 'metadataPath': self.metadata_path, 'children': [],
+                'taxonType': self.taxon_type, 'typeFeatures': self.type_features}
 
         for child in self.children:
             dict['children'].append(child.to_dict())
@@ -90,7 +98,7 @@ class Taxonomy:
 
         """
 
-        new_taxon = Taxon(label, name, id=id, color=color, value_path=value_path, data_path=data_path, 
+        new_taxon = Taxon(label, name, id=id, color=color, value_path=value_path, data_path=data_path,
                           options=options, metadata_path=metadata_path, node_types=node_types, enabled=enabled)
 
         self.taxons.append(new_taxon)
