@@ -26,14 +26,15 @@ def test_fixed_tagging_with_child():
     # Hello Philip Dodds
     # 012345678901234567
 
-    doc.content_node.tag('name', fixed_position=[6, 11], separator=" ")
+    doc.content_node.tag('name', fixed_position=[6, 12], separator=" ")
 
-    doc.content_node.tag('lastName', fixed_position=[13, 17], separator=" ")
+    doc.content_node.tag('lastName', fixed_position=[13, 18], separator=" ")
     print(doc.content_node.tag_text_tree())
 
     assert doc.content_node.get_tag_values('name', include_children=True)[0] == 'Philip'
     assert doc.content_node.get_tag_values('lastName', include_children=True)[0] == 'Dodds'
-
+    assert doc.content_node.get_all_content()[6:12] == 'Philip'
+    assert doc.content_node.get_all_content()[13:18] == 'Dodds'
 
 def test_node_only_tagging():
     doc = Document.from_text("Hello World")

@@ -663,11 +663,12 @@ class ContentNode(object):
         new_node.children = self.select(selector, variables)
         return new_node
 
-    def get_all_content(self, separator=" "):
+    def get_all_content(self, separator=" ", strip=True):
         """Get this node's content, concatenated with all of its children's content.
 
         Args:
-          separator(str, optional, optional): The separator to use in joining content together; defaults to " ".
+          separator(str, optional): The separator to use in joining content together; defaults to " ".
+          strip(boolean, optional): Strip the result
 
         Returns:
           str: The complete content for this node concatenated with the content of all child nodes.
@@ -680,11 +681,11 @@ class ContentNode(object):
             s += self.get_content()
             s += separator
             for child in self.children:
-                s += child.get_all_content(separator)
+                s += child.get_all_content(separator, strip=strip)
                 s += separator
         elif not self.get_content() and not self.content_parts:
             for child in self.children:
-                s += child.get_all_content(separator)
+                s += child.get_all_content(separator, strip=strip)
                 s += separator
         elif len(self.content_parts) > 0:
             for part in self.content_parts:
@@ -692,10 +693,10 @@ class ContentNode(object):
                     s += part
                     s += separator
                 if isinstance(part, int):
-                    s += self.children[part].get_all_content(separator)
+                    s += self.children[part].get_all_content(separator, strip=strip)
                     s += separator
 
-        return s.strip()
+        return s.strip() if strip else s
 
     def move_child_to_parent(self, target_child, target_parent):
         """This will move the target_child, which must be a child of the node, to a new parent.
@@ -1206,7 +1207,7 @@ class ContentNode(object):
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
                     end = end - len(node_to_check.content)
-                    content_length = len(node_to_check.content)
+                    content_length = len(node_to_check.content) + len(separator)
                     start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
                         node_to_check.content) - len(separator)
 
@@ -1216,12 +1217,13 @@ class ContentNode(object):
                     if result < 0 or (end - result) < 0:
                         return -1
                     else:
-                        content_length = content_length + result
+                        content_length = content_length + result + len(separator)
                         end = end - result + len(separator)
-                        start = 0 if start - result < 0 else start - (result+len(separator))
+                        start = 0 if start - (result + len(separator)) < 0 else start - (result + len(separator))
 
-            if len(node_to_check.get_all_content()) != content_length:
-                raise Exception(f"There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content())} != {content_length})")
+            if len(node_to_check.get_all_content(strip=False)) != content_length:
+                raise Exception(
+                    f"There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content(strip=False))} != {content_length})")
             return content_length
 
         if content_re:
