@@ -204,3 +204,10 @@ def test_fax_tagging():
 
     kdxa_doc.select_as_node("//line").tag('cheesy', fixed_position=[5, 30])
     print(kdxa_doc.select_as_node("//line").get_all_content())
+
+
+def test_fax2tagging():
+    kdxa_doc = Document.from_kdxa(get_test_directory() + 'fax2.kdxa')
+
+    kdxa_doc.content_node.tag("phone", use_all_content=True, fixed_position=[171, 183])
+    assert kdxa_doc.select_as_node("//*[hasTag('phone')]").get_all_content() == '785-368-1772'

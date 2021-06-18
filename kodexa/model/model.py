@@ -967,7 +967,6 @@ class ContentNode(object):
                 if type(existing_tag_values) == list:
 
                     for val in existing_tag_values:
-
                         tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=val['uuid'],
                                   data=val['data'])
                         node.add_feature('tag', new_tag_name, tag)
@@ -1198,10 +1197,9 @@ class ContentNode(object):
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content)
                     content_length = len(node_to_check.content) + len(separator)
-                    start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
-                        node_to_check.content) - len(separator)
+                    end = end - content_length
+                    start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - content_length
 
                 for child_node in node_to_check.children:
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid)
@@ -1210,7 +1208,7 @@ class ContentNode(object):
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result + len(separator)
+                        end = end - (result + len(separator))
                         start = 0 if start - (result + len(separator)) < 0 else start - (result + len(separator))
 
             if len(node_to_check.get_all_content(strip=False)) != content_length:
@@ -1458,7 +1456,7 @@ class ContentNode(object):
         result = False
         if include_children:
             for child in self.children:
-                if child.has_tag(tag,True):
+                if child.has_tag(tag, True):
                     result = True
         return result
 
