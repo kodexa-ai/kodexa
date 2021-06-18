@@ -189,7 +189,7 @@ def test_tagging_issue_with_html():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'tagging_issue.kdxa')
 
     print(kdxa_doc.content_node.get_all_content())
-   # assert "IIJ" == kdxa_doc.content_node.get_all_content()[4277:4280]
+    # assert "IIJ" == kdxa_doc.content_node.get_all_content()[4277:4280]
 
     print(kdxa_doc.content_node.get_all_content()[4200:4400])
     print("-----")
@@ -210,3 +210,10 @@ def test_tagging_issue_with_html():
 
     print(kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content().index('ers. IIJ'))
     assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content()[feature.start:feature.end]
+
+
+def test_fax_tagging():
+    kdxa_doc = Document.from_kdxa(get_test_directory() + 'fax.kdxa')
+
+    kdxa_doc.select_as_node("//line").tag('cheesy', fixed_position=[5, 30])
+    print(kdxa_doc.select_as_node("//line").get_all_content())
