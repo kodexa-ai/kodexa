@@ -1445,12 +1445,12 @@ class ContentNode(object):
         """
         return len([i.value for i in self.get_features_of_type("tag")]) > 0
 
-    def has_tag(self, tag):
+    def has_tag(self, tag, include_children=False):
         """Determine if this node has a tag with the specified name.
 
         Args:
-          str: tag: The name of the tag.
-          tag:
+          tag(str): The name of the tag.
+          include_children(bool): should we include child nodes
 
         Returns:
           bool: True if node has a tag by the specified name; else, False;
@@ -1463,7 +1463,12 @@ class ContentNode(object):
         for feature in self.get_features():
             if feature.feature_type == 'tag' and feature.name == tag:
                 return True
-        return False
+        result = False
+        if include_children:
+            for child in self.children:
+                if child.has_tag(tag,True):
+                    result = True
+        return result
 
     def find(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=1,
              tag_name_re=None, use_all_content=False):
