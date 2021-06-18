@@ -995,22 +995,14 @@ class ContentNode(object):
             if existing_tag_values:
                 if type(existing_tag_values) == list:
 
-                    # It&#39;s possible to have multiple features with the same tag name that also share the same uuid.
-                    # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
-                    sorted_tag_values = sorted(existing_tag_values, key=lambda k: k[&#39;uuid&#39;])
-                    previous_uuid = None
-                    new_uuid = None
-                    for val in sorted_tag_values:
-                        if previous_uuid is None or previous_uuid != val[&#39;uuid&#39;]:
-                            new_uuid = str(uuid.uuid4())
+                    for val in existing_tag_values:
 
-                        previous_uuid = val[&#39;uuid&#39;]
-                        tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=new_uuid,
+                        tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
                                   data=val[&#39;data&#39;])
                         node.add_feature(&#39;tag&#39;, new_tag_name, tag)
                 else:
                     tag = Tag(start=existing_tag_values[&#39;start&#39;], end=existing_tag_values[&#39;end&#39;],
-                              value=existing_tag_values[&#39;value&#39;], uuid=str(uuid.uuid4()),
+                              value=existing_tag_values[&#39;value&#39;], uuid=existing_tag_values[&#39;uuid&#39;],
                               data=existing_tag_values[&#39;data&#39;])
                     node.add_feature(&#39;tag&#39;, new_tag_name, tag)
 
@@ -1273,7 +1265,7 @@ class ContentNode(object):
                         else:
                             content = None
                     else:
-                        content = node.get_all_content(separator=separator)
+                        content = node.get_all_content(separator=separator, strip=False)
 
                     if content is not None:
                         matches = pattern.finditer(content)
@@ -4391,22 +4383,14 @@ ensure that the correct mixins are applied.</p>
             if existing_tag_values:
                 if type(existing_tag_values) == list:
 
-                    # It&#39;s possible to have multiple features with the same tag name that also share the same uuid.
-                    # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
-                    sorted_tag_values = sorted(existing_tag_values, key=lambda k: k[&#39;uuid&#39;])
-                    previous_uuid = None
-                    new_uuid = None
-                    for val in sorted_tag_values:
-                        if previous_uuid is None or previous_uuid != val[&#39;uuid&#39;]:
-                            new_uuid = str(uuid.uuid4())
+                    for val in existing_tag_values:
 
-                        previous_uuid = val[&#39;uuid&#39;]
-                        tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=new_uuid,
+                        tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
                                   data=val[&#39;data&#39;])
                         node.add_feature(&#39;tag&#39;, new_tag_name, tag)
                 else:
                     tag = Tag(start=existing_tag_values[&#39;start&#39;], end=existing_tag_values[&#39;end&#39;],
-                              value=existing_tag_values[&#39;value&#39;], uuid=str(uuid.uuid4()),
+                              value=existing_tag_values[&#39;value&#39;], uuid=existing_tag_values[&#39;uuid&#39;],
                               data=existing_tag_values[&#39;data&#39;])
                     node.add_feature(&#39;tag&#39;, new_tag_name, tag)
 
@@ -4669,7 +4653,7 @@ ensure that the correct mixins are applied.</p>
                         else:
                             content = None
                     else:
-                        content = node.get_all_content(separator=separator)
+                        content = node.get_all_content(separator=separator, strip=False)
 
                     if content is not None:
                         matches = pattern.finditer(content)
@@ -5652,22 +5636,14 @@ This must be different from the existing_tag_name.</dd>
         if existing_tag_values:
             if type(existing_tag_values) == list:
 
-                # It&#39;s possible to have multiple features with the same tag name that also share the same uuid.
-                # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
-                sorted_tag_values = sorted(existing_tag_values, key=lambda k: k[&#39;uuid&#39;])
-                previous_uuid = None
-                new_uuid = None
-                for val in sorted_tag_values:
-                    if previous_uuid is None or previous_uuid != val[&#39;uuid&#39;]:
-                        new_uuid = str(uuid.uuid4())
+                for val in existing_tag_values:
 
-                    previous_uuid = val[&#39;uuid&#39;]
-                    tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=new_uuid,
+                    tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
                               data=val[&#39;data&#39;])
                     node.add_feature(&#39;tag&#39;, new_tag_name, tag)
             else:
                 tag = Tag(start=existing_tag_values[&#39;start&#39;], end=existing_tag_values[&#39;end&#39;],
-                          value=existing_tag_values[&#39;value&#39;], uuid=str(uuid.uuid4()),
+                          value=existing_tag_values[&#39;value&#39;], uuid=existing_tag_values[&#39;uuid&#39;],
                           data=existing_tag_values[&#39;data&#39;])
                 node.add_feature(&#39;tag&#39;, new_tag_name, tag)</code></pre>
 </details>
@@ -7984,7 +7960,7 @@ tag_uuid: str:
                     else:
                         content = None
                 else:
-                    content = node.get_all_content(separator=separator)
+                    content = node.get_all_content(separator=separator, strip=False)
 
                 if content is not None:
                     matches = pattern.finditer(content)
