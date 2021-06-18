@@ -996,7 +996,6 @@ class ContentNode(object):
                 if type(existing_tag_values) == list:
 
                     for val in existing_tag_values:
-
                         tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
                                   data=val[&#39;data&#39;])
                         node.add_feature(&#39;tag&#39;, new_tag_name, tag)
@@ -1227,10 +1226,9 @@ class ContentNode(object):
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content)
                     content_length = len(node_to_check.content) + len(separator)
-                    start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
-                        node_to_check.content) - len(separator)
+                    end = end - content_length
+                    start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - content_length
 
                 for child_node in node_to_check.children:
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid)
@@ -1239,7 +1237,7 @@ class ContentNode(object):
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result + len(separator)
+                        end = end - (result + len(separator))
                         start = 0 if start - (result + len(separator)) &lt; 0 else start - (result + len(separator))
 
             if len(node_to_check.get_all_content(strip=False)) != content_length:
@@ -1487,7 +1485,7 @@ class ContentNode(object):
         result = False
         if include_children:
             for child in self.children:
-                if child.has_tag(tag,True):
+                if child.has_tag(tag, True):
                     result = True
         return result
 
@@ -4384,7 +4382,6 @@ ensure that the correct mixins are applied.</p>
                 if type(existing_tag_values) == list:
 
                     for val in existing_tag_values:
-
                         tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
                                   data=val[&#39;data&#39;])
                         node.add_feature(&#39;tag&#39;, new_tag_name, tag)
@@ -4615,10 +4612,9 @@ ensure that the correct mixins are applied.</p>
                                                       value=node_to_check.content[start:],
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content)
                     content_length = len(node_to_check.content) + len(separator)
-                    start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
-                        node_to_check.content) - len(separator)
+                    end = end - content_length
+                    start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - content_length
 
                 for child_node in node_to_check.children:
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid)
@@ -4627,7 +4623,7 @@ ensure that the correct mixins are applied.</p>
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result + len(separator)
+                        end = end - (result + len(separator))
                         start = 0 if start - (result + len(separator)) &lt; 0 else start - (result + len(separator))
 
             if len(node_to_check.get_all_content(strip=False)) != content_length:
@@ -4875,7 +4871,7 @@ ensure that the correct mixins are applied.</p>
         result = False
         if include_children:
             for child in self.children:
-                if child.has_tag(tag,True):
+                if child.has_tag(tag, True):
                     result = True
         return result
 
@@ -5637,7 +5633,6 @@ This must be different from the existing_tag_name.</dd>
             if type(existing_tag_values) == list:
 
                 for val in existing_tag_values:
-
                     tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
                               data=val[&#39;data&#39;])
                     node.add_feature(&#39;tag&#39;, new_tag_name, tag)
@@ -7100,7 +7095,7 @@ include_children(bool): should we include child nodes</p>
     result = False
     if include_children:
         for child in self.children:
-            if child.has_tag(tag,True):
+            if child.has_tag(tag, True):
                 result = True
     return result</code></pre>
 </details>
@@ -7922,10 +7917,9 @@ tag_uuid: str:
                                                   value=node_to_check.content[start:],
                                                   data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                end = end - len(node_to_check.content)
                 content_length = len(node_to_check.content) + len(separator)
-                start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - len(
-                    node_to_check.content) - len(separator)
+                end = end - content_length
+                start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - content_length
 
             for child_node in node_to_check.children:
                 result = tag_node_position(child_node, start, end, node_data, tag_uuid)
@@ -7934,7 +7928,7 @@ tag_uuid: str:
                     return -1
                 else:
                     content_length = content_length + result + len(separator)
-                    end = end - result + len(separator)
+                    end = end - (result + len(separator))
                     start = 0 if start - (result + len(separator)) &lt; 0 else start - (result + len(separator))
 
         if len(node_to_check.get_all_content(strip=False)) != content_length:
