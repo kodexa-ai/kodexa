@@ -1474,12 +1474,12 @@ class ContentNode(object):
         &#34;&#34;&#34;
         return len([i.value for i in self.get_features_of_type(&#34;tag&#34;)]) &gt; 0
 
-    def has_tag(self, tag):
+    def has_tag(self, tag, include_children=False):
         &#34;&#34;&#34;Determine if this node has a tag with the specified name.
 
         Args:
-          str: tag: The name of the tag.
-          tag:
+          tag(str): The name of the tag.
+          include_children(bool): should we include child nodes
 
         Returns:
           bool: True if node has a tag by the specified name; else, False;
@@ -1492,7 +1492,12 @@ class ContentNode(object):
         for feature in self.get_features():
             if feature.feature_type == &#39;tag&#39; and feature.name == tag:
                 return True
-        return False
+        result = False
+        if include_children:
+            for child in self.children:
+                if child.has_tag(tag,True):
+                    result = True
+        return result
 
     def find(self, content_re=&#34;.*&#34;, node_type_re=&#34;.*&#34;, direction=FindDirection.CHILDREN, tag_name=None, instance=1,
              tag_name_re=None, use_all_content=False):
@@ -4865,12 +4870,12 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;
         return len([i.value for i in self.get_features_of_type(&#34;tag&#34;)]) &gt; 0
 
-    def has_tag(self, tag):
+    def has_tag(self, tag, include_children=False):
         &#34;&#34;&#34;Determine if this node has a tag with the specified name.
 
         Args:
-          str: tag: The name of the tag.
-          tag:
+          tag(str): The name of the tag.
+          include_children(bool): should we include child nodes
 
         Returns:
           bool: True if node has a tag by the specified name; else, False;
@@ -4883,7 +4888,12 @@ ensure that the correct mixins are applied.</p>
         for feature in self.get_features():
             if feature.feature_type == &#39;tag&#39; and feature.name == tag:
                 return True
-        return False
+        result = False
+        if include_children:
+            for child in self.children:
+                if child.has_tag(tag,True):
+                    result = True
+        return result
 
     def find(self, content_re=&#34;.*&#34;, node_type_re=&#34;.*&#34;, direction=FindDirection.CHILDREN, tag_name=None, instance=1,
              tag_name_re=None, use_all_content=False):
@@ -7072,16 +7082,13 @@ skip_virtual(bool, optional, optional): Skip virtual nodes and return the next r
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.has_tag"><code class="name flex">
-<span>def <span class="ident">has_tag</span></span>(<span>self, tag)</span>
+<span>def <span class="ident">has_tag</span></span>(<span>self, tag, include_children=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Determine if this node has a tag with the specified name.</p>
 <h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>str</code></strong></dt>
-<dd>tag: The name of the tag.</dd>
-</dl>
-<p>tag:</p>
+<p>tag(str): The name of the tag.
+include_children(bool): should we include child nodes</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>bool</code></dt>
@@ -7096,12 +7103,12 @@ skip_virtual(bool, optional, optional): Skip virtual nodes and return the next r
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def has_tag(self, tag):
+<pre><code class="python">def has_tag(self, tag, include_children=False):
     &#34;&#34;&#34;Determine if this node has a tag with the specified name.
 
     Args:
-      str: tag: The name of the tag.
-      tag:
+      tag(str): The name of the tag.
+      include_children(bool): should we include child nodes
 
     Returns:
       bool: True if node has a tag by the specified name; else, False;
@@ -7114,7 +7121,12 @@ skip_virtual(bool, optional, optional): Skip virtual nodes and return the next r
     for feature in self.get_features():
         if feature.feature_type == &#39;tag&#39; and feature.name == tag:
             return True
-    return False</code></pre>
+    result = False
+    if include_children:
+        for child in self.children:
+            if child.has_tag(tag,True):
+                result = True
+    return result</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.has_tags"><code class="name flex">
