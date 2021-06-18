@@ -36,6 +36,7 @@ def test_fixed_tagging_with_child():
     assert doc.content_node.get_all_content()[6:12] == 'Philip'
     assert doc.content_node.get_all_content()[13:18] == 'Dodds'
 
+
 def test_node_only_tagging():
     doc = Document.from_text("Hello World")
 
@@ -124,17 +125,11 @@ def test_tag_copy():
     # we should now have 4 feature values for 'LAMB_INFO' and 4 feature values for 'SIZE' - all with different UUIDs
     size_feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE')
     assert type(size_feature_values) == list and len(size_feature_values) == 4
-    size_features_uuids = set(dic['uuid'] for dic in size_feature_values)
-    assert len(list(size_features_uuids)) == 4
 
     lamb_info_feature_values = context.output_document.get_root().get_feature_value('tag', 'LAMB_INFO')
     assert type(lamb_info_feature_values) == list and len(lamb_info_feature_values) == 4
     lamb_info_features_uuids = set(dic['uuid'] for dic in lamb_info_feature_values)
     assert len(list(lamb_info_features_uuids)) == 4
-
-    # the uuids for the SIZE and LAMB_INFO features should all be unique
-    uuid_intersection = size_features_uuids.intersection(lamb_info_features_uuids)
-    assert len(list(uuid_intersection)) == 0
 
     # Now test that tagging the entire node, rather than references within the node, only produce 1 feature
     document = Document.from_text(doc_string)  # starting with a clean document
@@ -151,9 +146,6 @@ def test_tag_copy():
     assert type(size_2_feature_values) != list
     lamb_info_2_feature_values = context.output_document.get_root().get_feature_value('tag', 'LAMB_INFO_2')
     assert type(lamb_info_2_feature_values) != list
-
-    # the uuids for the SIZE_2 and LAMB_INFO_2 features should be different
-    assert size_2_feature_values['uuid'] != lamb_info_2_feature_values['uuid']
 
     # now we need to test that when features are related (indicated by the same tag_uuid), they remain related when copying
     document = Document.from_text(doc_string)  # starting with a clean document
@@ -177,12 +169,6 @@ def test_tag_copy():
 
     fleece_info_values = context.output_document.get_root().get_feature_value('tag', 'FLEECE_INFO')
     assert type(fleece_info_values) == list and len(fleece_info_values) == 2
-    fleece_uuids = set(dic['uuid'] for dic in fleece_info_values)
-    assert len(list(fleece_uuids)) == 1
-
-    # the uuids for the WOOL_INFO and FLEECE_INFO features should be unique
-    uuid_intersection = fleece_uuids.intersection(wool_uuids)
-    assert len(list(uuid_intersection)) == 0
 
 
 @pytest.mark.skip
