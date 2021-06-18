@@ -1236,7 +1236,7 @@ class ContentNode(object):
                         else:
                             content = None
                     else:
-                        content = node.get_all_content(separator=separator)
+                        content = node.get_all_content(separator=separator, strip=False)
 
                     if content is not None:
                         matches = pattern.finditer(content)
