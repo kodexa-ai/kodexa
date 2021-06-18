@@ -966,22 +966,14 @@ class ContentNode(object):
             if existing_tag_values:
                 if type(existing_tag_values) == list:
 
-                    # It's possible to have multiple features with the same tag name that also share the same uuid.
-                    # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
-                    sorted_tag_values = sorted(existing_tag_values, key=lambda k: k['uuid'])
-                    previous_uuid = None
-                    new_uuid = None
-                    for val in sorted_tag_values:
-                        if previous_uuid is None or previous_uuid != val['uuid']:
-                            new_uuid = str(uuid.uuid4())
+                    for val in existing_tag_values:
 
-                        previous_uuid = val['uuid']
-                        tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=new_uuid,
+                        tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=val['uuid'],
                                   data=val['data'])
                         node.add_feature('tag', new_tag_name, tag)
                 else:
                     tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'],
-                              value=existing_tag_values['value'], uuid=str(uuid.uuid4()),
+                              value=existing_tag_values['value'], uuid=existing_tag_values['uuid'],
                               data=existing_tag_values['data'])
                     node.add_feature('tag', new_tag_name, tag)
 
