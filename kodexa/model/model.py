@@ -1068,7 +1068,7 @@ class ContentNode(object):
 
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None):
+            fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None):
         """This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -1094,6 +1094,7 @@ class ContentNode(object):
             If no tag_uuid is provided, a new uuid is generated for each tag instance.
               tag_uuid: str:  (Default value = None)
           confidence: The confidence in the tag (0-1)
+          value: The value you wish to store with the tag, this allows you to provide text that isn't part of the content but represents the data you wish tagged
 
         Returns:
 
@@ -1226,7 +1227,7 @@ class ContentNode(object):
             else:
                 if not content_re:
                     node.add_feature('tag', tag_to_apply,
-                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1244,7 +1245,7 @@ class ContentNode(object):
                             # simply need to know if there are any matches
                             if any(True for _ in matches):
                                 node.add_feature('tag', tag_to_apply,
-                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
                         else:
                             for match in matches:
                                 start_offset = match.span()[0]
