@@ -1097,7 +1097,7 @@ class ContentNode(object):
 
     def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None):
+            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None):
         &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -1123,6 +1123,7 @@ class ContentNode(object):
             If no tag_uuid is provided, a new uuid is generated for each tag instance.
               tag_uuid: str:  (Default value = None)
           confidence: The confidence in the tag (0-1)
+          value: The value you wish to store with the tag, this allows you to provide text that isn&#39;t part of the content but represents the data you wish tagged
 
         Returns:
 
@@ -1255,7 +1256,7 @@ class ContentNode(object):
             else:
                 if not content_re:
                     node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1273,7 +1274,7 @@ class ContentNode(object):
                             # simply need to know if there are any matches
                             if any(True for _ in matches):
                                 node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
                         else:
                             for match in matches:
                                 start_offset = match.span()[0]
@@ -4483,7 +4484,7 @@ ensure that the correct mixins are applied.</p>
 
     def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None):
+            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None):
         &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -4509,6 +4510,7 @@ ensure that the correct mixins are applied.</p>
             If no tag_uuid is provided, a new uuid is generated for each tag instance.
               tag_uuid: str:  (Default value = None)
           confidence: The confidence in the tag (0-1)
+          value: The value you wish to store with the tag, this allows you to provide text that isn&#39;t part of the content but represents the data you wish tagged
 
         Returns:
 
@@ -4641,7 +4643,7 @@ ensure that the correct mixins are applied.</p>
             else:
                 if not content_re:
                     node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -4659,7 +4661,7 @@ ensure that the correct mixins are applied.</p>
                             # simply need to know if there are any matches
                             if any(True for _ in matches):
                                 node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
                         else:
                             for match in matches:
                                 start_offset = match.span()[0]
@@ -7738,7 +7740,7 @@ value:</p>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.tag"><code class="name flex">
-<span>def <span class="ident">tag</span></span>(<span>self, tag_to_apply, selector='.', content_re=None, use_all_content=False, node_only=None, fixed_position=None, data=None, separator=' ', tag_uuid: str = None, confidence=None)</span>
+<span>def <span class="ident">tag</span></span>(<span>self, tag_to_apply, selector='.', content_re=None, use_all_content=False, node_only=None, fixed_position=None, data=None, separator=' ', tag_uuid: str = None, confidence=None, value=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This will tag (see Feature Tagging) the expression groups identified by the regular expression.</p>
@@ -7778,6 +7780,8 @@ tag_uuid: str:
 (Default value = None)</dd>
 <dt><strong><code>confidence</code></strong></dt>
 <dd>The confidence in the tag (0-1)</dd>
+<dt><strong><code>value</code></strong></dt>
+<dd>The value you wish to store with the tag, this allows you to provide text that isn't part of the content but represents the data you wish tagged</dd>
 </dl>
 <p>Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; document.content_node.tag('is_cheese')
@@ -7788,7 +7792,7 @@ tag_uuid: str:
 </summary>
 <pre><code class="python">def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
         use_all_content=False, node_only=None,
-        fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None):
+        fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None):
     &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -7814,6 +7818,7 @@ tag_uuid: str:
         If no tag_uuid is provided, a new uuid is generated for each tag instance.
           tag_uuid: str:  (Default value = None)
       confidence: The confidence in the tag (0-1)
+      value: The value you wish to store with the tag, this allows you to provide text that isn&#39;t part of the content but represents the data you wish tagged
 
     Returns:
 
@@ -7946,7 +7951,7 @@ tag_uuid: str:
         else:
             if not content_re:
                 node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
             else:
                 if not use_all_content:
                     if node.content:
@@ -7964,7 +7969,7 @@ tag_uuid: str:
                         # simply need to know if there are any matches
                         if any(True for _ in matches):
                             node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                             Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                             Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
                     else:
                         for match in matches:
                             start_offset = match.span()[0]
