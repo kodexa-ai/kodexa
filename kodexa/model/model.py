@@ -1122,7 +1122,7 @@ class ContentNode(object):
             else:
                 return str(uuid.uuid4())
 
-        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0):
+        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
             """
 
             Args:
@@ -1150,14 +1150,14 @@ class ContentNode(object):
                         if start < part_length and end < part_length:
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start, original_end,
-                                                          part[start:end],
+                                                          part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
                             return -1
                         elif start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start,
                                                           content_length + part_length,
-                                                          value=part[start:],
+                                                          value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
@@ -1171,7 +1171,7 @@ class ContentNode(object):
                     elif isinstance(part, int):
                         child_node = node_to_check.children[part]
                         result = tag_node_position(child_node, start, end, node_data, tag_uuid,
-                                                   offset=offset)
+                                                   offset=offset, value=value)
                         if result < 0 or (end - result) <= 0:
                             return -1
                         else:
@@ -1190,14 +1190,14 @@ class ContentNode(object):
                     if start < len(node_to_check.content) and end < len(node_to_check.content):
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start, end,
-                                                      node_to_check.content[start:end],
+                                                      node_to_check.content[start:end] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
                         return -1
                     elif start < len(node_to_check.content) <= end:
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
-                                                      value=node_to_check.content[start:],
+                                                      value=node_to_check.content[start:] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
                     content_length = len(node_to_check.content) + len(separator)
@@ -1205,7 +1205,7 @@ class ContentNode(object):
                     start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - content_length
 
                 for child_node in node_to_check.children:
-                    result = tag_node_position(child_node, start, end, node_data, tag_uuid)
+                    result = tag_node_position(child_node, start, end, node_data, tag_uuid, value=value)
 
                     if result < 0 or (end - result) < 0:
                         return -1
@@ -1224,7 +1224,8 @@ class ContentNode(object):
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0)
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0,
+                                  value=value)
 
             else:
                 if not content_re:
@@ -1250,16 +1251,18 @@ class ContentNode(object):
                                                          value=value))
                             else:
                                 if matches:
-                                    node.add_feature('tag', tag_to_apply,
-                                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
-                                                         value=value))
+                                    for match in matches:
+                                        start_offset = match.span()[0]
+                                        end_offset = match.span()[1]
+                                        tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
 
                         else:
                             search_match = pattern.search(content)
                             if search_match is not None:
                                 start_offset = search_match.span()[0]
                                 end_offset = search_match.span()[1]
-                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
+                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                  value=value)
 
     def get_tags(self):
         """Returns a list of the names of the tags on the given node
