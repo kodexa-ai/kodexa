@@ -1068,7 +1068,8 @@ class ContentNode(object):
 
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None):
+            fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
+            use_match=True):
         """This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -1095,6 +1096,7 @@ class ContentNode(object):
               tag_uuid: str:  (Default value = None)
           confidence: The confidence in the tag (0-1)
           value: The value you wish to store with the tag, this allows you to provide text that isn't part of the content but represents the data you wish tagged
+          use_match: If True (default) we will use match for regex matching, if False we will use search
 
         Returns:
 
@@ -1218,7 +1220,7 @@ class ContentNode(object):
             return content_length
 
         if content_re:
-            pattern = re.compile(content_re)
+            pattern = re.compile(content_re.replace(' ', '\s+') if use_all_content else content_re)
 
         for node in self.select(selector):
             if fixed_position:
@@ -1238,18 +1240,25 @@ class ContentNode(object):
                         content = node.get_all_content(separator=separator, strip=False)
 
                     if content is not None:
-                        matches = pattern.finditer(content)
+                        if use_match:
+                            matches = pattern.finditer(content)
 
-                        if node_only:
-                            # If we are only tagging the node we
-                            # simply need to know if there are any matches
-                            if any(True for _ in matches):
-                                node.add_feature('tag', tag_to_apply,
-                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
+                            if node_only:
+                                if any(True for _ in matches):
+                                    node.add_feature('tag', tag_to_apply,
+                                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
+                                                         value=value))
+                            else:
+                                if matches:
+                                    node.add_feature('tag', tag_to_apply,
+                                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
+                                                         value=value))
+
                         else:
-                            for match in matches:
-                                start_offset = match.span()[0]
-                                end_offset = match.span()[1]
+                            search_match = pattern.search(content)
+                            if search_match is not None:
+                                start_offset = search_match.span()[0]
+                                end_offset = search_match.span()[1]
                                 tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
 
     def get_tags(self):
