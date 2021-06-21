@@ -1097,7 +1097,8 @@ class ContentNode(object):
 
     def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None):
+            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None,
+            use_match=True):
         &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -1124,6 +1125,7 @@ class ContentNode(object):
               tag_uuid: str:  (Default value = None)
           confidence: The confidence in the tag (0-1)
           value: The value you wish to store with the tag, this allows you to provide text that isn&#39;t part of the content but represents the data you wish tagged
+          use_match: If True (default) we will use match for regex matching, if False we will use search
 
         Returns:
 
@@ -1149,7 +1151,7 @@ class ContentNode(object):
             else:
                 return str(uuid.uuid4())
 
-        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0):
+        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
             &#34;&#34;&#34;
 
             Args:
@@ -1177,14 +1179,14 @@ class ContentNode(object):
                         if start &lt; part_length and end &lt; part_length:
                             node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                       Tag(original_start, original_end,
-                                                          part[start:end],
+                                                          part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
                             return -1
                         elif start &lt; part_length &lt;= end:
                             node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                       Tag(original_start,
                                                           content_length + part_length,
-                                                          value=part[start:],
+                                                          value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
@@ -1198,7 +1200,7 @@ class ContentNode(object):
                     elif isinstance(part, int):
                         child_node = node_to_check.children[part]
                         result = tag_node_position(child_node, start, end, node_data, tag_uuid,
-                                                   offset=offset)
+                                                   offset=offset, value=value)
                         if result &lt; 0 or (end - result) &lt;= 0:
                             return -1
                         else:
@@ -1217,14 +1219,14 @@ class ContentNode(object):
                     if start &lt; len(node_to_check.content) and end &lt; len(node_to_check.content):
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(start, end,
-                                                      node_to_check.content[start:end],
+                                                      node_to_check.content[start:end] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
                         return -1
                     elif start &lt; len(node_to_check.content) &lt;= end:
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
-                                                      value=node_to_check.content[start:],
+                                                      value=node_to_check.content[start:] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
                     content_length = len(node_to_check.content) + len(separator)
@@ -1232,7 +1234,7 @@ class ContentNode(object):
                     start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - content_length
 
                 for child_node in node_to_check.children:
-                    result = tag_node_position(child_node, start, end, node_data, tag_uuid)
+                    result = tag_node_position(child_node, start, end, node_data, tag_uuid, value=value)
 
                     if result &lt; 0 or (end - result) &lt; 0:
                         return -1
@@ -1247,11 +1249,12 @@ class ContentNode(object):
             return content_length
 
         if content_re:
-            pattern = re.compile(content_re)
+            pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content else content_re)
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0)
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0,
+                                  value=value)
 
             else:
                 if not content_re:
@@ -1267,19 +1270,29 @@ class ContentNode(object):
                         content = node.get_all_content(separator=separator, strip=False)
 
                     if content is not None:
-                        matches = pattern.finditer(content)
+                        if use_match:
+                            matches = pattern.finditer(content)
 
-                        if node_only:
-                            # If we are only tagging the node we
-                            # simply need to know if there are any matches
-                            if any(True for _ in matches):
-                                node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
+                            if node_only:
+                                if any(True for _ in matches):
+                                    node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
+                                                         value=value))
+                            else:
+                                if matches:
+                                    for match in matches:
+                                        start_offset = match.span()[0]
+                                        end_offset = match.span()[1]
+                                        tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                          value=value)
+
                         else:
-                            for match in matches:
-                                start_offset = match.span()[0]
-                                end_offset = match.span()[1]
-                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
+                            search_match = pattern.search(content)
+                            if search_match is not None:
+                                start_offset = search_match.span()[0]
+                                end_offset = search_match.span()[1]
+                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                  value=value)
 
     def get_tags(self):
         &#34;&#34;&#34;Returns a list of the names of the tags on the given node
@@ -4484,7 +4497,8 @@ ensure that the correct mixins are applied.</p>
 
     def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None):
+            fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None,
+            use_match=True):
         &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -4511,6 +4525,7 @@ ensure that the correct mixins are applied.</p>
               tag_uuid: str:  (Default value = None)
           confidence: The confidence in the tag (0-1)
           value: The value you wish to store with the tag, this allows you to provide text that isn&#39;t part of the content but represents the data you wish tagged
+          use_match: If True (default) we will use match for regex matching, if False we will use search
 
         Returns:
 
@@ -4536,7 +4551,7 @@ ensure that the correct mixins are applied.</p>
             else:
                 return str(uuid.uuid4())
 
-        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0):
+        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
             &#34;&#34;&#34;
 
             Args:
@@ -4564,14 +4579,14 @@ ensure that the correct mixins are applied.</p>
                         if start &lt; part_length and end &lt; part_length:
                             node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                       Tag(original_start, original_end,
-                                                          part[start:end],
+                                                          part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
                             return -1
                         elif start &lt; part_length &lt;= end:
                             node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                       Tag(original_start,
                                                           content_length + part_length,
-                                                          value=part[start:],
+                                                          value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
@@ -4585,7 +4600,7 @@ ensure that the correct mixins are applied.</p>
                     elif isinstance(part, int):
                         child_node = node_to_check.children[part]
                         result = tag_node_position(child_node, start, end, node_data, tag_uuid,
-                                                   offset=offset)
+                                                   offset=offset, value=value)
                         if result &lt; 0 or (end - result) &lt;= 0:
                             return -1
                         else:
@@ -4604,14 +4619,14 @@ ensure that the correct mixins are applied.</p>
                     if start &lt; len(node_to_check.content) and end &lt; len(node_to_check.content):
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(start, end,
-                                                      node_to_check.content[start:end],
+                                                      node_to_check.content[start:end] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
                         return -1
                     elif start &lt; len(node_to_check.content) &lt;= end:
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
-                                                      value=node_to_check.content[start:],
+                                                      value=node_to_check.content[start:] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
                     content_length = len(node_to_check.content) + len(separator)
@@ -4619,7 +4634,7 @@ ensure that the correct mixins are applied.</p>
                     start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - content_length
 
                 for child_node in node_to_check.children:
-                    result = tag_node_position(child_node, start, end, node_data, tag_uuid)
+                    result = tag_node_position(child_node, start, end, node_data, tag_uuid, value=value)
 
                     if result &lt; 0 or (end - result) &lt; 0:
                         return -1
@@ -4634,11 +4649,12 @@ ensure that the correct mixins are applied.</p>
             return content_length
 
         if content_re:
-            pattern = re.compile(content_re)
+            pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content else content_re)
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0)
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0,
+                                  value=value)
 
             else:
                 if not content_re:
@@ -4654,19 +4670,29 @@ ensure that the correct mixins are applied.</p>
                         content = node.get_all_content(separator=separator, strip=False)
 
                     if content is not None:
-                        matches = pattern.finditer(content)
+                        if use_match:
+                            matches = pattern.finditer(content)
 
-                        if node_only:
-                            # If we are only tagging the node we
-                            # simply need to know if there are any matches
-                            if any(True for _ in matches):
-                                node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
+                            if node_only:
+                                if any(True for _ in matches):
+                                    node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
+                                                         value=value))
+                            else:
+                                if matches:
+                                    for match in matches:
+                                        start_offset = match.span()[0]
+                                        end_offset = match.span()[1]
+                                        tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                          value=value)
+
                         else:
-                            for match in matches:
-                                start_offset = match.span()[0]
-                                end_offset = match.span()[1]
-                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
+                            search_match = pattern.search(content)
+                            if search_match is not None:
+                                start_offset = search_match.span()[0]
+                                end_offset = search_match.span()[1]
+                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                  value=value)
 
     def get_tags(self):
         &#34;&#34;&#34;Returns a list of the names of the tags on the given node
@@ -7740,7 +7766,7 @@ value:</p>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.tag"><code class="name flex">
-<span>def <span class="ident">tag</span></span>(<span>self, tag_to_apply, selector='.', content_re=None, use_all_content=False, node_only=None, fixed_position=None, data=None, separator=' ', tag_uuid: str = None, confidence=None, value=None)</span>
+<span>def <span class="ident">tag</span></span>(<span>self, tag_to_apply, selector='.', content_re=None, use_all_content=False, node_only=None, fixed_position=None, data=None, separator=' ', tag_uuid: str = None, confidence=None, value=None, use_match=True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This will tag (see Feature Tagging) the expression groups identified by the regular expression.</p>
@@ -7782,6 +7808,8 @@ tag_uuid: str:
 <dd>The confidence in the tag (0-1)</dd>
 <dt><strong><code>value</code></strong></dt>
 <dd>The value you wish to store with the tag, this allows you to provide text that isn't part of the content but represents the data you wish tagged</dd>
+<dt><strong><code>use_match</code></strong></dt>
+<dd>If True (default) we will use match for regex matching, if False we will use search</dd>
 </dl>
 <p>Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; document.content_node.tag('is_cheese')
@@ -7792,7 +7820,8 @@ tag_uuid: str:
 </summary>
 <pre><code class="python">def tag(self, tag_to_apply, selector=&#34;.&#34;, content_re=None,
         use_all_content=False, node_only=None,
-        fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None):
+        fixed_position=None, data=None, separator=&#34; &#34;, tag_uuid: str = None, confidence=None, value=None,
+        use_match=True):
     &#34;&#34;&#34;This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -7819,6 +7848,7 @@ tag_uuid: str:
           tag_uuid: str:  (Default value = None)
       confidence: The confidence in the tag (0-1)
       value: The value you wish to store with the tag, this allows you to provide text that isn&#39;t part of the content but represents the data you wish tagged
+      use_match: If True (default) we will use match for regex matching, if False we will use search
 
     Returns:
 
@@ -7844,7 +7874,7 @@ tag_uuid: str:
         else:
             return str(uuid.uuid4())
 
-    def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0):
+    def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
         &#34;&#34;&#34;
 
         Args:
@@ -7872,14 +7902,14 @@ tag_uuid: str:
                     if start &lt; part_length and end &lt; part_length:
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(original_start, original_end,
-                                                      part[start:end],
+                                                      part[start:end] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
                         return -1
                     elif start &lt; part_length &lt;= end:
                         node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                                   Tag(original_start,
                                                       content_length + part_length,
-                                                      value=part[start:],
+                                                      value=part[start:] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
                     # Add the separator
@@ -7893,7 +7923,7 @@ tag_uuid: str:
                 elif isinstance(part, int):
                     child_node = node_to_check.children[part]
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid,
-                                               offset=offset)
+                                               offset=offset, value=value)
                     if result &lt; 0 or (end - result) &lt;= 0:
                         return -1
                     else:
@@ -7912,14 +7942,14 @@ tag_uuid: str:
                 if start &lt; len(node_to_check.content) and end &lt; len(node_to_check.content):
                     node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                               Tag(start, end,
-                                                  node_to_check.content[start:end],
+                                                  node_to_check.content[start:end] if value is None else value,
                                                   data=node_data, uuid=tag_uuid, confidence=confidence))
                     return -1
                 elif start &lt; len(node_to_check.content) &lt;= end:
                     node_to_check.add_feature(&#39;tag&#39;, tag_to_apply,
                                               Tag(start,
                                                   len(node_to_check.content),
-                                                  value=node_to_check.content[start:],
+                                                  value=node_to_check.content[start:] if value is None else value,
                                                   data=node_data, uuid=tag_uuid, confidence=confidence))
 
                 content_length = len(node_to_check.content) + len(separator)
@@ -7927,7 +7957,7 @@ tag_uuid: str:
                 start = 0 if start - len(node_to_check.content) - len(separator) &lt; 0 else start - content_length
 
             for child_node in node_to_check.children:
-                result = tag_node_position(child_node, start, end, node_data, tag_uuid)
+                result = tag_node_position(child_node, start, end, node_data, tag_uuid, value=value)
 
                 if result &lt; 0 or (end - result) &lt; 0:
                     return -1
@@ -7942,11 +7972,12 @@ tag_uuid: str:
         return content_length
 
     if content_re:
-        pattern = re.compile(content_re)
+        pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content else content_re)
 
     for node in self.select(selector):
         if fixed_position:
-            tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0)
+            tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0,
+                              value=value)
 
         else:
             if not content_re:
@@ -7962,19 +7993,29 @@ tag_uuid: str:
                     content = node.get_all_content(separator=separator, strip=False)
 
                 if content is not None:
-                    matches = pattern.finditer(content)
+                    if use_match:
+                        matches = pattern.finditer(content)
 
-                    if node_only:
-                        # If we are only tagging the node we
-                        # simply need to know if there are any matches
-                        if any(True for _ in matches):
-                            node.add_feature(&#39;tag&#39;, tag_to_apply,
-                                             Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
+                        if node_only:
+                            if any(True for _ in matches):
+                                node.add_feature(&#39;tag&#39;, tag_to_apply,
+                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
+                                                     value=value))
+                        else:
+                            if matches:
+                                for match in matches:
+                                    start_offset = match.span()[0]
+                                    end_offset = match.span()[1]
+                                    tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                      value=value)
+
                     else:
-                        for match in matches:
-                            start_offset = match.span()[0]
-                            end_offset = match.span()[1]
-                            tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))</code></pre>
+                        search_match = pattern.search(content)
+                        if search_match is not None:
+                            start_offset = search_match.span()[0]
+                            end_offset = search_match.span()[1]
+                            tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                              value=value)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.tag_nodes_to"><code class="name flex">
