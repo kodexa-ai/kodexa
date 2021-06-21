@@ -1254,7 +1254,8 @@ class ContentNode(object):
                                     for match in matches:
                                         start_offset = match.span()[0]
                                         end_offset = match.span()[1]
-                                        tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
+                                        tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                          value=value)
 
                         else:
                             search_match = pattern.search(content)
