@@ -14,7 +14,6 @@ from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
-
 from kodexa.mixins import registry
 
 
@@ -1220,7 +1219,7 @@ class ContentNode(object):
             return content_length
 
         if content_re:
-            pattern = re.compile(content_re.replace(' ', '\s+') if use_all_content else content_re)
+            pattern = re.compile(content_re.replace(' ', '\s+') if use_all_content and not node_only else content_re)
 
         for node in self.select(selector):
             if fixed_position:
@@ -1238,7 +1237,9 @@ class ContentNode(object):
                         else:
                             content = None
                     else:
-                        content = node.get_all_content(separator=separator, strip=False)
+                        content = node.get_all_content(separator=separator,
+                                                       strip=False) if not node_only else node.get_all_content(
+                            separator=separator)
 
                     if content is not None:
                         if use_match:
