@@ -1,5 +1,3 @@
-import io
-
 from kodexa import get_source
 from kodexa.model import DocumentMetadata, Document
 from kodexa.testing.test_utils import compare_document
