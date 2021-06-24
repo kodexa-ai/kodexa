@@ -2212,7 +2212,7 @@ class Document(object):
                     clean[k] = v
             return clean
 
-        return {'version': Document.CURRENT_VERSION, 'm': self.metadata,
+        return {'version': Document.CURRENT_VERSION, 'metadata': self.metadata,
                 'cn': self.content_node.to_dict() if self.content_node else None,
                 's': clean_none_values(dataclasses.asdict(self.source)),
                 'mx': self._mixins,
