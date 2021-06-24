@@ -34,8 +34,6 @@ Provides classes and utilities to allow you to interact with an instance of the 
 platform.
 &#34;&#34;&#34;
 
-from __future__ import annotations
-
 import errno
 import json
 import logging
@@ -256,7 +254,7 @@ class KodexaPlatform:
     &#34;&#34;&#34;
 
     @staticmethod
-    def get_access_token() -&gt; str:
+    def get_access_token() -&gt; &#39;str&#39;:
         &#34;&#34;&#34;
         Returns the access token
 
@@ -270,7 +268,7 @@ class KodexaPlatform:
         return access_token if access_token is not None else kodexa_config[&#39;access_token&#39;]
 
     @staticmethod
-    def get_url() -&gt; str:
+    def get_url() -&gt; &#39;str&#39;:
         &#34;&#34;&#34;
         Returns the URL to use to access a Kodexa Platform
 
@@ -316,7 +314,7 @@ class KodexaPlatform:
             os.environ[&#34;KODEXA_URL&#34;] = url
 
     @staticmethod
-    def get_access_token_details() -&gt; Dict:
+    def get_access_token_details() -&gt; &#39;Dict&#39;:
         &#34;&#34;&#34;
         Pull the access token details (including a list of the available organizations)
 
@@ -1077,7 +1075,7 @@ class RemotePipeline:
         return self.context
 
     @staticmethod
-    def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; RemotePipeline:
+    def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
         &#34;&#34;&#34;Build a new pipeline with the input being a document created from the given URL
 
         Args:
@@ -1095,7 +1093,7 @@ class RemotePipeline:
         return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; RemotePipeline:
+    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
         &#34;&#34;&#34;Create a new pipeline using a file path as a source
 
         Args:
@@ -1115,7 +1113,7 @@ class RemotePipeline:
         return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
 
     @staticmethod
-    def from_text(slug: str, text: str, *args, **kwargs) -&gt; RemotePipeline:
+    def from_text(slug: str, text: str, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
         &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
         Args:
@@ -1139,7 +1137,7 @@ class RemotePipeline:
     def from_folder(slug: str, folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False,
                     unpack: bool = False,
                     relative: bool = False,
-                    caller_path: str = get_caller_dir()) -&gt; RemotePipeline:
+                    caller_path: str = get_caller_dir()) -&gt; &#39;RemotePipeline&#39;:
         &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
         Args:
@@ -1523,7 +1521,7 @@ components</p>
     &#34;&#34;&#34;
 
     @staticmethod
-    def get_access_token() -&gt; str:
+    def get_access_token() -&gt; &#39;str&#39;:
         &#34;&#34;&#34;
         Returns the access token
 
@@ -1537,7 +1535,7 @@ components</p>
         return access_token if access_token is not None else kodexa_config[&#39;access_token&#39;]
 
     @staticmethod
-    def get_url() -&gt; str:
+    def get_url() -&gt; &#39;str&#39;:
         &#34;&#34;&#34;
         Returns the URL to use to access a Kodexa Platform
 
@@ -1583,7 +1581,7 @@ components</p>
             os.environ[&#34;KODEXA_URL&#34;] = url
 
     @staticmethod
-    def get_access_token_details() -&gt; Dict:
+    def get_access_token_details() -&gt; &#39;Dict&#39;:
         &#34;&#34;&#34;
         Pull the access token details (including a list of the available organizations)
 
@@ -2491,7 +2489,7 @@ def get(cls, object_type, ref, path=None):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def get_access_token() -&gt; str:
+def get_access_token() -&gt; &#39;str&#39;:
     &#34;&#34;&#34;
     Returns the access token
 
@@ -2516,7 +2514,7 @@ def get_access_token() -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def get_access_token_details() -&gt; Dict:
+def get_access_token_details() -&gt; &#39;Dict&#39;:
     &#34;&#34;&#34;
     Pull the access token details (including a list of the available organizations)
 
@@ -2654,7 +2652,7 @@ def get_server_info(cls):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def get_url() -&gt; str:
+def get_url() -&gt; &#39;str&#39;:
     &#34;&#34;&#34;
     Returns the URL to use to access a Kodexa Platform
 
@@ -2918,7 +2916,7 @@ def undeploy(object_type: str, ref: str):
 </dd>
 <dt id="kodexa.cloud.kodexa.PipelineMetadataBuilder"><code class="flex name class">
 <span>class <span class="ident">PipelineMetadataBuilder</span></span>
-<span>(</span><span>pipeline: Pipeline)</span>
+<span>(</span><span>pipeline: <a title="kodexa.pipeline.pipeline.Pipeline" href="../pipeline/pipeline.html#kodexa.pipeline.pipeline.Pipeline">Pipeline</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build a metadata representation of the pipeline for passing to an instance of the
@@ -2993,7 +2991,7 @@ Kodexa platform</p>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.cloud.kodexa.PipelineMetadataBuilder.build_steps"><code class="name flex">
-<span>def <span class="ident">build_steps</span></span>(<span>self, pipeline_metadata: Dict)</span>
+<span>def <span class="ident">build_steps</span></span>(<span>self, pipeline_metadata: addict.addict.Dict)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build up the pipeline metadata definition (extending the argument) based on the pipeline.</p>
@@ -3156,7 +3154,7 @@ instance for execution</p>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.cloud.kodexa.RemoteAction.end_processing"><code class="name flex">
-<span>def <span class="ident">end_processing</span></span>(<span>self, pipeline_context: PipelineContext)</span>
+<span>def <span class="ident">end_processing</span></span>(<span>self, pipeline_context: <a title="kodexa.pipeline.pipeline.PipelineContext" href="../pipeline/pipeline.html#kodexa.pipeline.pipeline.PipelineContext">PipelineContext</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -3373,7 +3371,7 @@ Returns:</p></div>
         return self.context
 
     @staticmethod
-    def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; RemotePipeline:
+    def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
         &#34;&#34;&#34;Build a new pipeline with the input being a document created from the given URL
 
         Args:
@@ -3391,7 +3389,7 @@ Returns:</p></div>
         return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; RemotePipeline:
+    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
         &#34;&#34;&#34;Create a new pipeline using a file path as a source
 
         Args:
@@ -3411,7 +3409,7 @@ Returns:</p></div>
         return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
 
     @staticmethod
-    def from_text(slug: str, text: str, *args, **kwargs) -&gt; RemotePipeline:
+    def from_text(slug: str, text: str, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
         &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
         Args:
@@ -3435,7 +3433,7 @@ Returns:</p></div>
     def from_folder(slug: str, folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False,
                     unpack: bool = False,
                     relative: bool = False,
-                    caller_path: str = get_caller_dir()) -&gt; RemotePipeline:
+                    caller_path: str = get_caller_dir()) -&gt; &#39;RemotePipeline&#39;:
         &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
         Args:
@@ -3515,7 +3513,7 @@ Returns:</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; RemotePipeline:
+def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
     &#34;&#34;&#34;Create a new pipeline using a file path as a source
 
     Args:
@@ -3589,7 +3587,7 @@ def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) 
 def from_folder(slug: str, folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False,
                 unpack: bool = False,
                 relative: bool = False,
-                caller_path: str = get_caller_dir()) -&gt; RemotePipeline:
+                caller_path: str = get_caller_dir()) -&gt; &#39;RemotePipeline&#39;:
     &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
     Args:
@@ -3644,7 +3642,7 @@ def from_folder(slug: str, folder_path: str, filename_filter: str = &#34;*&#34;,
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def from_text(slug: str, text: str, *args, **kwargs) -&gt; RemotePipeline:
+def from_text(slug: str, text: str, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
     &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
     Args:
@@ -3690,7 +3688,7 @@ def from_text(slug: str, text: str, *args, **kwargs) -&gt; RemotePipeline:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; RemotePipeline:
+def from_url(slug: str, url, headers=None, *args, **kwargs) -&gt; &#39;RemotePipeline&#39;:
     &#34;&#34;&#34;Build a new pipeline with the input being a document created from the given URL
 
     Args:
@@ -3796,7 +3794,7 @@ sink</p>
 </details>
 </dd>
 <dt id="kodexa.cloud.kodexa.RemotePipeline.to_store"><code class="name flex">
-<span>def <span class="ident">to_store</span></span>(<span>self, document_store: DocumentStore, processing_mode: str = 'update')</span>
+<span>def <span class="ident">to_store</span></span>(<span>self, document_store: <a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>, processing_mode: str = 'update')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Allows you to provide the sink store easily</p>
@@ -4205,7 +4203,7 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.cloud.kodexa.RemoteSession.merge_stores"><code class="name flex">
-<span>def <span class="ident">merge_stores</span></span>(<span>self, execution, context: PipelineContext)</span>
+<span>def <span class="ident">merge_stores</span></span>(<span>self, execution, context: <a title="kodexa.pipeline.pipeline.PipelineContext" href="../pipeline/pipeline.html#kodexa.pipeline.pipeline.PipelineContext">PipelineContext</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Merge the stores between an execution and a context</p>

@@ -26,9 +26,7 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from __future__ import annotations
-
-import inspect
+<pre><code class="python">import inspect
 import logging
 import os
 import sys
@@ -122,7 +120,7 @@ class InMemoryStoreProvider:
         &#34;&#34;&#34;
         return self.stores[name] if name in self.stores else None
 
-    def get_store_names(self) -&gt; KeysView:
+    def get_store_names(self) -&gt; &#39;KeysView&#39;:
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.stores.keys()
 
@@ -164,11 +162,11 @@ class PipelineContext:
         self.content_object = None
         self.document_store = None
 
-    def get_context(self) -&gt; Dict:
+    def get_context(self) -&gt; &#39;Dict&#39;:
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.context
 
-    def get_content_objects(self) -&gt; List[ContentObject]:
+    def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.content_objects
 
@@ -208,7 +206,7 @@ class PipelineContext:
         &#34;&#34;&#34;
         self.store_provider.put_store(name, store)
 
-    def get_store_names(self) -&gt; KeysView:
+    def get_store_names(self) -&gt; &#39;KeysView&#39;:
         &#34;&#34;&#34;
 
         Args:
@@ -231,7 +229,7 @@ class PipelineContext:
         &#34;&#34;&#34;
         self.current_document = current_document
 
-    def get_current_document(self) -&gt; Document:
+    def get_current_document(self) -&gt; &#39;Document&#39;:
         &#34;&#34;&#34;Get the current document that is being processed in the pipeline
 
         :return: The current document, or None
@@ -256,7 +254,7 @@ class PipelineContext:
         &#34;&#34;&#34;
         self.output_document = output_document
 
-    def get_store(self, name: str, default: Store = None) -&gt; Store:
+    def get_store(self, name: str, default: Store = None) -&gt; &#39;Store&#39;:
         &#34;&#34;&#34;Get a store with given name from the context
 
         Args:
@@ -913,7 +911,7 @@ class Pipeline:
         return Pipeline(Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
+    def from_file(file_path: str, *args, **kwargs) -&gt; &#39;Pipeline&#39;:
         &#34;&#34;&#34;Create a new pipeline using a file path as a source
 
         Args:
@@ -929,7 +927,7 @@ class Pipeline:
         return Pipeline(Document.from_file(file_path), *args, **kwargs)
 
     @staticmethod
-    def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
+    def from_text(text: str, *args, **kwargs) -&gt; &#39;Pipeline&#39;:
         &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
         Args:
@@ -946,7 +944,7 @@ class Pipeline:
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False, relative: bool = False,
-                    unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; Pipeline:
+                    unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; &#39;Pipeline&#39;:
         &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
         Args:
@@ -1080,7 +1078,7 @@ and from the pipeline</p>
 <h3>Methods</h3>
 <dl>
 <dt id="kodexa.pipeline.pipeline.InMemoryContentProvider.get_content"><code class="name flex">
-<span>def <span class="ident">get_content</span></span>(<span>self, content_object: ContentObject)</span>
+<span>def <span class="ident">get_content</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -1106,7 +1104,7 @@ and from the pipeline</p>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.InMemoryContentProvider.put_content"><code class="name flex">
-<span>def <span class="ident">put_content</span></span>(<span>self, content_object: ContentObject, content)</span>
+<span>def <span class="ident">put_content</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>, content)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -1173,7 +1171,7 @@ Returns:</p></div>
         &#34;&#34;&#34;
         return self.stores[name] if name in self.stores else None
 
-    def get_store_names(self) -&gt; KeysView:
+    def get_store_names(self) -&gt; &#39;KeysView&#39;:
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.stores.keys()</code></pre>
 </details>
@@ -1211,13 +1209,13 @@ Returns:</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_store_names(self) -&gt; KeysView:
+<pre><code class="python">def get_store_names(self) -&gt; &#39;KeysView&#39;:
     &#34;&#34;&#34; &#34;&#34;&#34;
     return self.stores.keys()</code></pre>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.InMemoryStoreProvider.put_store"><code class="name flex">
-<span>def <span class="ident">put_store</span></span>(<span>self, name: str, store: Store)</span>
+<span>def <span class="ident">put_store</span></span>(<span>self, name: str, store: <a title="kodexa.model.model.Store" href="../model/model.html#kodexa.model.model.Store">Store</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -1300,7 +1298,7 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.LabelStep.process"><code class="name flex">
-<span>def <span class="ident">process</span></span>(<span>self, document: Document)</span>
+<span>def <span class="ident">process</span></span>(<span>self, document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -1703,7 +1701,7 @@ Returns:</p></div>
         return Pipeline(Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
+    def from_file(file_path: str, *args, **kwargs) -&gt; &#39;Pipeline&#39;:
         &#34;&#34;&#34;Create a new pipeline using a file path as a source
 
         Args:
@@ -1719,7 +1717,7 @@ Returns:</p></div>
         return Pipeline(Document.from_file(file_path), *args, **kwargs)
 
     @staticmethod
-    def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
+    def from_text(text: str, *args, **kwargs) -&gt; &#39;Pipeline&#39;:
         &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
         Args:
@@ -1736,7 +1734,7 @@ Returns:</p></div>
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False, relative: bool = False,
-                    unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; Pipeline:
+                    unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; &#39;Pipeline&#39;:
         &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
         Args:
@@ -1794,7 +1792,7 @@ Returns:</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
+def from_file(file_path: str, *args, **kwargs) -&gt; &#39;Pipeline&#39;:
     &#34;&#34;&#34;Create a new pipeline using a file path as a source
 
     Args:
@@ -1857,7 +1855,7 @@ def from_file(file_path: str, *args, **kwargs) -&gt; Pipeline:
 </summary>
 <pre><code class="python">@staticmethod
 def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive: bool = False, relative: bool = False,
-                unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; Pipeline:
+                unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -&gt; &#39;Pipeline&#39;:
     &#34;&#34;&#34;Create a pipeline that will run against a set of local files from a folder
 
     Args:
@@ -1884,7 +1882,7 @@ def from_folder(folder_path: str, filename_filter: str = &#34;*&#34;, recursive:
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.Pipeline.from_store"><code class="name flex">
-<span>def <span class="ident">from_store</span></span>(<span>store: DocumentStore, subscription=None, *args, **kwargs)</span>
+<span>def <span class="ident">from_store</span></span>(<span>store: <a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>, subscription=None, *args, **kwargs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build a new pipeline with the input documents from a document store</p>
@@ -1947,7 +1945,7 @@ def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def from_text(text: str, *args, **kwargs) -&gt; Pipeline:
+def from_text(text: str, *args, **kwargs) -&gt; &#39;Pipeline&#39;:
     &#34;&#34;&#34;Build a new pipeline and provide text as the basic to create a document
 
     Args:
@@ -2142,7 +2140,7 @@ pipeline you can also use a shorthand</p>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.Pipeline.add_store"><code class="name flex">
-<span>def <span class="ident">add_store</span></span>(<span>self, name: str, store: Store, extracted_labelled=False)</span>
+<span>def <span class="ident">add_store</span></span>(<span>self, name: str, store: <a title="kodexa.model.model.Store" href="../model/model.html#kodexa.model.model.Store">Store</a>, extracted_labelled=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add the store to the pipeline so that it is available to the pipeline</p>
@@ -2412,7 +2410,7 @@ sink</p>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.Pipeline.to_store"><code class="name flex">
-<span>def <span class="ident">to_store</span></span>(<span>self, document_store: DocumentStore, processing_mode: str = 'update')</span>
+<span>def <span class="ident">to_store</span></span>(<span>self, document_store: <a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>, processing_mode: str = 'update')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Allows you to provide the sink store easily</p>
@@ -2547,11 +2545,11 @@ It can be made available to steps/functions so they can interact with it.</p>
         self.content_object = None
         self.document_store = None
 
-    def get_context(self) -&gt; Dict:
+    def get_context(self) -&gt; &#39;Dict&#39;:
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.context
 
-    def get_content_objects(self) -&gt; List[ContentObject]:
+    def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.content_objects
 
@@ -2591,7 +2589,7 @@ It can be made available to steps/functions so they can interact with it.</p>
         &#34;&#34;&#34;
         self.store_provider.put_store(name, store)
 
-    def get_store_names(self) -&gt; KeysView:
+    def get_store_names(self) -&gt; &#39;KeysView&#39;:
         &#34;&#34;&#34;
 
         Args:
@@ -2614,7 +2612,7 @@ It can be made available to steps/functions so they can interact with it.</p>
         &#34;&#34;&#34;
         self.current_document = current_document
 
-    def get_current_document(self) -&gt; Document:
+    def get_current_document(self) -&gt; &#39;Document&#39;:
         &#34;&#34;&#34;Get the current document that is being processed in the pipeline
 
         :return: The current document, or None
@@ -2639,7 +2637,7 @@ It can be made available to steps/functions so they can interact with it.</p>
         &#34;&#34;&#34;
         self.output_document = output_document
 
-    def get_store(self, name: str, default: Store = None) -&gt; Store:
+    def get_store(self, name: str, default: Store = None) -&gt; &#39;Store&#39;:
         &#34;&#34;&#34;Get a store with given name from the context
 
         Args:
@@ -2714,7 +2712,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.PipelineContext.get_content"><code class="name flex">
-<span>def <span class="ident">get_content</span></span>(<span>self, content_object: ContentObject)</span>
+<span>def <span class="ident">get_content</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -2748,7 +2746,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_content_objects(self) -&gt; List[ContentObject]:
+<pre><code class="python">def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
     &#34;&#34;&#34; &#34;&#34;&#34;
     return self.content_objects</code></pre>
 </details>
@@ -2762,7 +2760,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_context(self) -&gt; Dict:
+<pre><code class="python">def get_context(self) -&gt; &#39;Dict&#39;:
     &#34;&#34;&#34; &#34;&#34;&#34;
     return self.context</code></pre>
 </details>
@@ -2779,7 +2777,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_current_document(self) -&gt; Document:
+<pre><code class="python">def get_current_document(self) -&gt; &#39;Document&#39;:
     &#34;&#34;&#34;Get the current document that is being processed in the pipeline
 
     :return: The current document, or None
@@ -2793,7 +2791,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.PipelineContext.get_store"><code class="name flex">
-<span>def <span class="ident">get_store</span></span>(<span>self, name: str, default: Store = None) ‑> <a title="kodexa.model.model.Store" href="../model/model.html#kodexa.model.model.Store">Store</a></span>
+<span>def <span class="ident">get_store</span></span>(<span>self, name: str, default: <a title="kodexa.model.model.Store" href="../model/model.html#kodexa.model.model.Store">Store</a> = None) ‑> <a title="kodexa.model.model.Store" href="../model/model.html#kodexa.model.model.Store">Store</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a store with given name from the context</p>
@@ -2815,7 +2813,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_store(self, name: str, default: Store = None) -&gt; Store:
+<pre><code class="python">def get_store(self, name: str, default: Store = None) -&gt; &#39;Store&#39;:
     &#34;&#34;&#34;Get a store with given name from the context
 
     Args:
@@ -2848,7 +2846,7 @@ It can be made available to steps/functions so they can interact with it.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_store_names(self) -&gt; KeysView:
+<pre><code class="python">def get_store_names(self) -&gt; &#39;KeysView&#39;:
     &#34;&#34;&#34;
 
     Args:
@@ -2893,7 +2891,7 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.PipelineContext.put_content"><code class="name flex">
-<span>def <span class="ident">put_content</span></span>(<span>self, content_object: ContentObject, content)</span>
+<span>def <span class="ident">put_content</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>, content)</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="args">Args</h2>
@@ -2921,7 +2919,7 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.PipelineContext.set_current_document"><code class="name flex">
-<span>def <span class="ident">set_current_document</span></span>(<span>self, current_document: Document)</span>
+<span>def <span class="ident">set_current_document</span></span>(<span>self, current_document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the Document that is currently being processed in the pipeline</p>
@@ -2951,7 +2949,7 @@ Returns:</p></div>
 </details>
 </dd>
 <dt id="kodexa.pipeline.pipeline.PipelineContext.set_output_document"><code class="name flex">
-<span>def <span class="ident">set_output_document</span></span>(<span>self, output_document: Document)</span>
+<span>def <span class="ident">set_output_document</span></span>(<span>self, output_document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Set the output document from the pipeline</p>
@@ -3546,7 +3544,7 @@ Returns:</p></div>
 </dd>
 <dt id="kodexa.pipeline.pipeline.PipelineStore"><code class="flex name class">
 <span>class <span class="ident">PipelineStore</span></span>
-<span>(</span><span>name: str, store: Store, extracted_labelled: bool = False)</span>
+<span>(</span><span>name: str, store: <a title="kodexa.model.model.Store" href="../model/model.html#kodexa.model.model.Store">Store</a>, extracted_labelled: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
