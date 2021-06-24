@@ -200,8 +200,6 @@ def test_function_step_with_exception():
     assert stats.document_exceptions == 1
     assert new_document_store.count() == 1
 
-    assert len(new_document_store.get_latest_document("test.doc").exceptions) == 1
-
 
 def test_table_stores_with_extractor():
     document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)

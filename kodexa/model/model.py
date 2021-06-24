@@ -372,7 +372,7 @@ class ContentNode(object):
                                              feature_type_name.split(':')[1],
                                              dict_feature['v'], dict_feature['s'], True)
             for dict_child in content_node_dict['ch']:
-                new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
+                new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['i'])
         return new_content_node
 
     def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -> 'ContentNode':
@@ -2241,7 +2241,7 @@ class Document(object):
         new_document.uuid = doc_dict['uuid'] if 'uuid' in doc_dict else str(
             uuid.uuid5(uuid.NAMESPACE_DNS, 'kodexa.com'))
         new_document.version = doc_dict.get('version', Document.PREVIOUS_VERSION)
-        if doc_dict['version'] != Document.CURRENT_VERSION:
+        if 'version' not in doc_dict or doc_dict['version'] != Document.CURRENT_VERSION:
             for mixin in doc_dict['mixins']:
                 registry.add_mixin_to_document(mixin, new_document)
             if 'content_node' in doc_dict and doc_dict['content_node']:
