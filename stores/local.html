@@ -174,7 +174,7 @@ class LocalDocumentStore(DocumentStore):
             if document.source.original_filename is not None:
                 self.put(document.source.original_filename, document)
 
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.store_path
 
@@ -235,13 +235,13 @@ class LocalDocumentStore(DocumentStore):
         with open(os.path.join(self.store_path, &#39;metastore.json&#39;), &#39;w&#39;) as f:
             f.write(jsonpickle.encode(self.metastore))
 
-    def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
         for family in self.metastore:
             if family.id == document_family_id:
                 return family
         return None
 
-    def get_by_uuid(self, uuid: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_by_uuid(self, uuid: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;
 
         Args:
@@ -257,7 +257,7 @@ class LocalDocumentStore(DocumentStore):
                     return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
         return None
 
-    def get_by_path(self, path: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_by_path(self, path: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Return the latest document in the family at the given path
 
         Args:
@@ -272,12 +272,12 @@ class LocalDocumentStore(DocumentStore):
                 return Document.from_kdxa(os.path.join(self.store_path, family.get_latest_content().id) + &#34;.kdxa&#34;)
         return None
 
-    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; &#39;List[DocumentFamily]&#39;:
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
 
         # TODO implement query
         return self.metastore
 
-    def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
 
         Args:
@@ -291,7 +291,7 @@ class LocalDocumentStore(DocumentStore):
                 return family
         return None
 
-    def get_latest_document(self, path: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_latest_document(self, path: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;
 
         Args:
@@ -305,7 +305,7 @@ class LocalDocumentStore(DocumentStore):
                 return self.get_document_by_content_object(family, family.content_objects[-1])
         return None
 
-    def list_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+    def list_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34; &#34;&#34;&#34;
         co_list: List[ContentObject] = []
         for family in self.metastore:
@@ -313,7 +313,7 @@ class LocalDocumentStore(DocumentStore):
 
         return co_list
 
-    def count(self) -&gt; &#39;int&#39;:
+    def count(self) -&gt; int:
         &#34;&#34;&#34;Returns a count of the number of document families
 
         :return:
@@ -357,7 +357,7 @@ class LocalDocumentStore(DocumentStore):
                 self.write_metastore()
 
     def get_document_by_content_object(self, document_family: DocumentFamily,
-                                       content_object: ContentObject) -&gt; &#39;Document&#39;:
+                                       content_object: ContentObject) -&gt; Document:
         &#34;&#34;&#34;
 
         Args:
@@ -371,7 +371,7 @@ class LocalDocumentStore(DocumentStore):
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
 
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -&gt; &#39;Optional[DocumentFamily]&#39;:
+                               document: Document) -&gt; Optional[DocumentFamily]:
 
         for co in document_family.content_objects:
             if co.id == content_object_id:
@@ -384,7 +384,7 @@ class LocalDocumentStore(DocumentStore):
         return None
 
 
-    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
         Args:
@@ -750,7 +750,7 @@ class TableDataStore(Store):
             if document.source.original_filename is not None:
                 self.put(document.source.original_filename, document)
 
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34; &#34;&#34;&#34;
         return self.store_path
 
@@ -811,13 +811,13 @@ class TableDataStore(Store):
         with open(os.path.join(self.store_path, &#39;metastore.json&#39;), &#39;w&#39;) as f:
             f.write(jsonpickle.encode(self.metastore))
 
-    def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
         for family in self.metastore:
             if family.id == document_family_id:
                 return family
         return None
 
-    def get_by_uuid(self, uuid: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_by_uuid(self, uuid: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;
 
         Args:
@@ -833,7 +833,7 @@ class TableDataStore(Store):
                     return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
         return None
 
-    def get_by_path(self, path: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_by_path(self, path: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Return the latest document in the family at the given path
 
         Args:
@@ -848,12 +848,12 @@ class TableDataStore(Store):
                 return Document.from_kdxa(os.path.join(self.store_path, family.get_latest_content().id) + &#34;.kdxa&#34;)
         return None
 
-    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; &#39;List[DocumentFamily]&#39;:
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
 
         # TODO implement query
         return self.metastore
 
-    def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
 
         Args:
@@ -867,7 +867,7 @@ class TableDataStore(Store):
                 return family
         return None
 
-    def get_latest_document(self, path: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_latest_document(self, path: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;
 
         Args:
@@ -881,7 +881,7 @@ class TableDataStore(Store):
                 return self.get_document_by_content_object(family, family.content_objects[-1])
         return None
 
-    def list_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+    def list_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34; &#34;&#34;&#34;
         co_list: List[ContentObject] = []
         for family in self.metastore:
@@ -889,7 +889,7 @@ class TableDataStore(Store):
 
         return co_list
 
-    def count(self) -&gt; &#39;int&#39;:
+    def count(self) -&gt; int:
         &#34;&#34;&#34;Returns a count of the number of document families
 
         :return:
@@ -933,7 +933,7 @@ class TableDataStore(Store):
                 self.write_metastore()
 
     def get_document_by_content_object(self, document_family: DocumentFamily,
-                                       content_object: ContentObject) -&gt; &#39;Document&#39;:
+                                       content_object: ContentObject) -&gt; Document:
         &#34;&#34;&#34;
 
         Args:
@@ -947,7 +947,7 @@ class TableDataStore(Store):
         return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + &#34;.kdxa&#34;)
 
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -&gt; &#39;Optional[DocumentFamily]&#39;:
+                               document: Document) -&gt; Optional[DocumentFamily]:
 
         for co in document_family.content_objects:
             if co.id == content_object_id:
@@ -960,7 +960,7 @@ class TableDataStore(Store):
         return None
 
 
-    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
         Args:
@@ -1093,7 +1093,7 @@ class TableDataStore(Store):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def count(self) -&gt; &#39;int&#39;:
+<pre><code class="python">def count(self) -&gt; int:
     &#34;&#34;&#34;Returns a count of the number of document families
 
     :return:
@@ -1158,7 +1158,7 @@ class TableDataStore(Store):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_by_path(self, path: str) -&gt; &#39;Optional[Document]&#39;:
+<pre><code class="python">def get_by_path(self, path: str) -&gt; Optional[Document]:
     &#34;&#34;&#34;Return the latest document in the family at the given path
 
     Args:
@@ -1188,7 +1188,7 @@ class TableDataStore(Store):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_by_uuid(self, uuid: str) -&gt; &#39;Optional[Document]&#39;:
+<pre><code class="python">def get_by_uuid(self, uuid: str) -&gt; Optional[Document]:
     &#34;&#34;&#34;
 
     Args:
@@ -1223,7 +1223,7 @@ class TableDataStore(Store):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_document_by_content_object(self, document_family: DocumentFamily,
-                                   content_object: ContentObject) -&gt; &#39;Document&#39;:
+                                   content_object: ContentObject) -&gt; Document:
     &#34;&#34;&#34;
 
     Args:
@@ -1251,7 +1251,7 @@ class TableDataStore(Store):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+<pre><code class="python">def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
     &#34;&#34;&#34;
 
     Args:
@@ -1280,7 +1280,7 @@ class TableDataStore(Store):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_latest_document(self, path: str) -&gt; &#39;Optional[Document]&#39;:
+<pre><code class="python">def get_latest_document(self, path: str) -&gt; Optional[Document]:
     &#34;&#34;&#34;
 
     Args:
@@ -1318,7 +1318,7 @@ class TableDataStore(Store):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def list_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+<pre><code class="python">def list_objects(self) -&gt; List[ContentObject]:
     &#34;&#34;&#34; &#34;&#34;&#34;
     co_list: List[ContentObject] = []
     for family in self.metastore:
@@ -1400,7 +1400,7 @@ class TableDataStore(Store):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, document: Document, force_replace: bool = False) -&gt; &#39;DocumentFamily&#39;:
+<pre><code class="python">def put(self, path: str, document: Document, force_replace: bool = False) -&gt; DocumentFamily:
     &#34;&#34;&#34;
 
     Args:

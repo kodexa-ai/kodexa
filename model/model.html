@@ -177,7 +177,7 @@ class Store:
 class RemoteStore:
     &#34;&#34;&#34;A remote store is one that refers to a Kodexa platform  instance&#34;&#34;&#34;
 
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
         :return: The reference
@@ -269,9 +269,7 @@ class ContentNode(object):
                  content_parts: Optional[List[Any]] = None):
         if content_parts is None:
             content_parts = []
-
-        self._node_type_id: int = document.content_meta.resolve_node_type_id(node_type)
-
+        self.node_type: str = node_type
         &#34;&#34;&#34;The node type (ie. line, page, cell etc)&#34;&#34;&#34;
         self.content: Optional[str] = content
         &#34;&#34;&#34;The content of the node&#34;&#34;&#34;
@@ -285,18 +283,13 @@ class ContentNode(object):
         &#34;&#34;&#34;The UUID of the content node&#34;&#34;&#34;
         self.virtual: bool = False
         &#34;&#34;&#34;Is the node virtual (ie. it doesn&#39;t actually exist in the document)&#34;&#34;&#34;
-
         # Added for performance
-        self._feature_map: Dict[int, ContentFeature] = {}
+        self._feature_map: Dict[str, ContentFeature] = {}
 
         self.parent: Optional[ContentNode] = None
         &#34;&#34;&#34;The parent content node&#34;&#34;&#34;
         self.children: List[ContentNode] = []
         &#34;&#34;&#34;The child content nodes of this content node&#34;&#34;&#34;
-
-    @property
-    def node_type(self):
-        return self.document.content_meta.resolve_node_type_from_id(self._node_type_id)
 
     def __str__(self):
         return f&#34;ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [&#34; + str(
@@ -324,19 +317,14 @@ class ContentNode(object):
 
         &gt;&gt;&gt; node.to_dict()
         &#34;&#34;&#34;
-        new_dict = {&#39;nid&#39;: self._node_type_id,
-                    &#39;f&#39;: [],
-                    &#39;i&#39;: self.index, &#39;ch&#39;: [], &#39;uuid&#39;: self.uuid}
-
-        if self.content is not None and self.content != &#39;&#39;:
-            new_dict[&#39;c&#39;] = self.content
-        if len(self.content_parts) &gt; 0:
-            new_dict[&#39;cp&#39;] = self.content_parts
+        new_dict = {&#39;node_type&#39;: self.node_type, &#39;content&#39;: self.content, &#39;content_parts&#39;: self.content_parts,
+                    &#39;features&#39;: [],
+                    &#39;index&#39;: self.index, &#39;children&#39;: [], &#39;uuid&#39;: self.uuid}
         for feature in self.get_features():
-            new_dict[&#39;f&#39;].append(feature.to_dict())
+            new_dict[&#39;features&#39;].append(feature.to_dict())
 
         for child in self.children:
-            new_dict[&#39;ch&#39;].append(child.to_dict())
+            new_dict[&#39;children&#39;].append(child.to_dict())
         return new_dict
 
     @staticmethod
@@ -344,8 +332,10 @@ class ContentNode(object):
         &#34;&#34;&#34;Build a new ContentNode from a dictionary representtion.
 
         Args:
-          document (Document): The Kodexa document from which the new ContentNode will be created (not added).
-          content_node_dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
+          Document: document: The Kodexa document from which the new ContentNode will be created (not added).
+          dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
+          document:
+          content_node_dict: Dict:
 
         Returns:
           ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
@@ -353,55 +343,33 @@ class ContentNode(object):
         &gt;&gt;&gt; ContentNode.from_dict(document, content_node_dict)
         &#34;&#34;&#34;
 
-        if document.version != Document.CURRENT_VERSION:
-            node_type = content_node_dict[&#39;type&#39;] if document.version == Document.PREVIOUS_VERSION else \
-                content_node_dict[
-                    &#39;node_type&#39;]
+        node_type = content_node_dict[&#39;type&#39;] if document.version == Document.PREVIOUS_VERSION else content_node_dict[
+            &#39;node_type&#39;]
 
-            new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
-                &#39;content&#39;] if &#39;content&#39; in content_node_dict else None)
-            if &#39;uuid&#39; in content_node_dict:
-                new_content_node.uuid = content_node_dict[&#39;uuid&#39;]
-            if &#39;index&#39; in content_node_dict:
-                new_content_node.index = content_node_dict[&#39;index&#39;]
-            if &#39;content_parts&#39; in content_node_dict:
-                new_content_node.content_parts = content_node_dict[&#39;content_parts&#39;]
+        new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
+            &#39;content&#39;] if &#39;content&#39; in content_node_dict else None)
+        if &#39;uuid&#39; in content_node_dict:
+            new_content_node.uuid = content_node_dict[&#39;uuid&#39;]
 
-            for dict_feature in content_node_dict[&#39;features&#39;]:
+        if &#39;content_parts&#39; in content_node_dict:
+            new_content_node.content_parts = content_node_dict[&#39;content_parts&#39;]
 
-                feature_type_name_id = dict_feature.get(&#39;fid&#39;)
-                if feature_type_name_id is None:
-                    feature_type_name_id = document.content_meta.resolve_feature_type_name_id(
-                        dict_feature[&#39;name&#39;].split(&#34;:&#34;)[0], dict_feature[&#39;name&#39;].split(&#34;:&#34;)[1])
-                feature_type_name = document.content_meta.resolve_feature_type_name_from_id(feature_type_name_id)
+        for dict_feature in content_node_dict[&#39;features&#39;]:
 
-                new_content_node.add_feature(feature_type_name.split(&#39;:&#39;)[0],
-                                             feature_type_name.split(&#39;:&#39;)[1],
+            feature_type = dict_feature[&#39;name&#39;].split(&#39;:&#39;)[0]
+            if feature_type == &#39;tag&#39;:
+                new_content_node.add_feature(feature_type,
+                                             dict_feature[&#39;name&#39;].split(&#39;:&#39;)[1],
+                                             dict_feature[&#39;value&#39;], dict_feature[&#39;single&#39;], True)
+            else:
+
+                # TODO we should convert to Tag?
+                new_content_node.add_feature(feature_type,
+                                             dict_feature[&#39;name&#39;].split(&#39;:&#39;)[1],
                                              dict_feature[&#39;value&#39;], dict_feature[&#39;single&#39;], True)
 
-            for dict_child in content_node_dict[&#39;children&#39;]:
-                new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;index&#39;])
-        else:
-            new_content_node = document.create_node(
-                node_type=document.content_meta.resolve_node_type_from_id(content_node_dict[&#39;nid&#39;]),
-                content=content_node_dict.get(&#39;c&#39;, None))
-            new_content_node.content_parts = content_node_dict.get(&#39;cp&#39;, [])
-            new_content_node.content_parts = content_node_dict.get(&#39;uuid&#39;, None)
-            if &#39;i&#39; in content_node_dict:
-                new_content_node.index = content_node_dict.get(&#39;i&#39;, None)
-            for dict_feature in content_node_dict[&#39;f&#39;]:
-
-                feature_type_name_id = dict_feature.get(&#39;fid&#39;)
-                if feature_type_name_id is None:
-                    feature_type_name_id = document.content_meta.resolve_feature_type_name_id(
-                        dict_feature[&#39;name&#39;].split(&#34;:&#34;)[0], dict_feature[&#39;name&#39;].split(&#34;:&#34;)[1])
-                feature_type_name = document.content_meta.resolve_feature_type_name_from_id(feature_type_name_id)
-
-                new_content_node.add_feature(feature_type_name.split(&#39;:&#39;)[0],
-                                             feature_type_name.split(&#39;:&#39;)[1],
-                                             dict_feature[&#39;v&#39;], dict_feature[&#39;s&#39;], True)
-            for dict_child in content_node_dict[&#39;ch&#39;]:
-                new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;i&#39;])
+        for dict_child in content_node_dict[&#39;children&#39;]:
+            new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;index&#39;])
         return new_content_node
 
     def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -&gt; &#39;ContentNode&#39;:
@@ -481,11 +449,14 @@ class ContentNode(object):
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
         Args:
-          feature_type (str): The type of feature to be added to the node.
-          name (str): The name of the feature.
-          value (Any): The value of the feature.
+          str: feature_type: The type of feature to be added to the node.
+          str: name: The name of the feature.
+          Any: value: The value of the feature.
           single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
           serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
+          feature_type:
+          name:
+          value:
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -502,9 +473,8 @@ class ContentNode(object):
         else:
             # Make sure that we treat the value as list all the time
             new_feature = ContentFeature(feature_type, name,
-                                         [value] if single and not serialized else value, single=single,
-                                         document=self.document)
-            self._feature_map[new_feature._feature_type_name_id] = new_feature
+                                         [value] if single and not serialized else value, single=single)
+            self._feature_map[new_feature.feature_type + &#34;:&#34; + new_feature.name] = new_feature
             return new_feature
 
     def delete_children(self, nodes: Optional[List] = None,
@@ -549,8 +519,10 @@ class ContentNode(object):
         &#34;&#34;&#34;Gets the value for the given feature.
 
         Args:
-          feature_type (str): The type of the feature.
-          name (str): The name of the feature.
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type:
+          name:
 
         Returns:
           ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
@@ -558,8 +530,7 @@ class ContentNode(object):
         &gt;&gt;&gt; new_page.get_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
            1
         &#34;&#34;&#34;
-
-        return self._feature_map.get(self.document.content_meta.resolve_feature_type_name_id(feature_type, name))
+        return self._feature_map[feature_type + &#34;:&#34; + name] if feature_type + &#34;:&#34; + name in self._feature_map else None
 
     def get_features_of_type(self, feature_type):
         &#34;&#34;&#34;Get all features of a specific type.
@@ -580,8 +551,10 @@ class ContentNode(object):
         &#34;&#34;&#34;Determines if a feature with the given feature and name exists on this content node.
 
         Args:
-          feature_type: The type of the feature.
-          name: The name of the feature.
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type:
+          name:
 
         Returns:
           bool: True if the feature is present; else, False.
@@ -589,7 +562,7 @@ class ContentNode(object):
         &gt;&gt;&gt; new_page.has_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
            True
         &#34;&#34;&#34;
-        return self.document.content_meta.resolve_feature_type_name_id(feature_type, name) in self._feature_map
+        return feature_type + &#34;:&#34; + name in self._feature_map
 
     def get_features(self):
         &#34;&#34;&#34;Get all features on this ContentNode.
@@ -602,22 +575,22 @@ class ContentNode(object):
         &#34;&#34;&#34;
         return list(self._feature_map.values())
 
-    def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
+    def remove_feature(self, feature_type, name):
         &#34;&#34;&#34;Removes the feature with the given name and type from this node.
 
         Args:
-          feature_type: The type of the feature.
-          name: The name of the feature.
-          include_children (bool): Iterate and remove feature from child nodes (default false)
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type:
+          name:
 
         Returns:
 
         &gt;&gt;&gt; new_page.remove_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
         &#34;&#34;&#34;
-        self._feature_map.pop(self.document.content_meta.resolve_feature_type_name_id(feature_type, name), None)
-        if include_children:
-            for child in self.children:
-                child.remove_feature(feature_type, name, include_children)
+        results = self.get_feature(feature_type, name)
+        if results:
+            del self._feature_map[feature_type + &#34;:&#34; + name]
 
     def get_feature_value(self, feature_type, name):
         &#34;&#34;&#34;Get the value for a feature with the given name and type on this ContentNode.
@@ -1276,7 +1249,7 @@ class ContentNode(object):
             return content_length
 
         if content_re:
-            pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content and not node_only else content_re)
+            pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content else content_re)
 
         for node in self.select(selector):
             if fixed_position:
@@ -1294,9 +1267,7 @@ class ContentNode(object):
                         else:
                             content = None
                     else:
-                        content = node.get_all_content(separator=separator,
-                                                       strip=False) if not node_only else node.get_all_content(
-                            separator=separator)
+                        content = node.get_all_content(separator=separator, strip=False)
 
                     if content is not None:
                         if use_match:
@@ -1879,26 +1850,20 @@ class ContentNode(object):
 class ContentFeature(object):
     &#34;&#34;&#34;A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode&#34;&#34;&#34;
 
-    def __init__(self, feature_type, name, value, document, single=True):
-
-        self._feature_type_name_id = document.content_meta.resolve_feature_type_name_id(feature_type, name)
-        self._document = document
+    def __init__(self, feature_type, name, value, description=None, single=True):
+        self.feature_type = feature_type
+        &#34;&#34;&#34;The type of feature, a logical name to group feature types together (ie. spatial)&#34;&#34;&#34;
+        self.name = name
+        &#34;&#34;&#34;The name of the feature (ie. bbox)&#34;&#34;&#34;
         self.value = value
-        &#34;&#34;&#34;The value of the feature (any serializable object)&#34;&#34;&#34;
-
+        &#34;&#34;&#34;A value of the feature, this can be any JSON serializable data object&#34;&#34;&#34;
+        self.description = description
+        &#34;&#34;&#34;Description of the feature (Optional)&#34;&#34;&#34;
         self.single = single
         &#34;&#34;&#34;Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false&#34;&#34;&#34;
 
-    @property
-    def name(self):
-        return self._document.content_meta.resolve_feature_type_name_from_id(self._feature_type_name_id).split(&#39;:&#39;)[1]
-
-    @property
-    def feature_type(self):
-        return self._document.content_meta.resolve_feature_type_name_from_id(self._feature_type_name_id).split(&#39;:&#39;)[0]
-
     def __str__(self):
-        return f&#34;Feature [name_type_id=&#39;{self._feature_type_name_id}&#39; value=&#39;{self.value}&#39; single=&#39;{self.single}&#39;]&#34;
+        return f&#34;Feature [type=&#39;{self.feature_type}&#39; name=&#39;{self.name}&#39; value=&#39;{self.value}&#39; single=&#39;{self.single}&#39;]&#34;
 
     def to_dict(self):
         &#34;&#34;&#34;Create a dictionary representing this ContentFeature&#39;s structure and content.
@@ -1907,7 +1872,7 @@ class ContentFeature(object):
 
         &gt;&gt;&gt; node.to_dict()
         &#34;&#34;&#34;
-        return {&#39;fid&#39;: self._feature_type_name_id, &#39;v&#39;: self.value, &#39;s&#39;: self.single}
+        return {&#39;name&#39;: self.feature_type + &#39;:&#39; + self.name, &#39;value&#39;: self.value, &#39;single&#39;: self.single}
 
     def get_value(self):
         &#34;&#34;&#34;Get the value from the feature. This method will handle the single flag
@@ -1989,53 +1954,11 @@ class ContentClassification(object):
                                      selector=dict_val.get(&#39;selector&#39;), confidence=dict_val.get(&#39;confidence&#39;))
 
 
-class ContentMetaStore(object):
-    &#34;&#34;&#34;Handles the storage of metadata for our document, including node type, feature types etc&#34;&#34;&#34;
-
-    def __init__(self):
-        self._node_types = []
-        self._feature_type_names = []
-
-    def resolve_node_type_id(self, node_type):
-        try:
-            return self._node_types.index(node_type)
-        except:
-            self._node_types.append(node_type)
-            return len(self._node_types) - 1
-
-    def resolve_feature_type_name_id(self, feature_type, feature_name):
-        feature_type_name = feature_type + &#34;:&#34; + feature_name
-        try:
-            return self._feature_type_names.index(feature_type_name)
-        except:
-            self._feature_type_names.append(feature_type_name)
-            return len(self._feature_type_names) - 1
-
-    def resolve_feature_type_name_from_id(self, feature_type_name_id):
-        return self._feature_type_names[feature_type_name_id]
-
-    def resolve_node_type_from_id(self, node_type_id):
-        return self._node_types[node_type_id]
-
-    def to_dict(self):
-        return {
-            &#39;node_types&#39;: self._node_types,
-            &#39;feature_name_types&#39;: self._feature_type_names
-        }
-
-    @staticmethod
-    def from_dict(meta_dict):
-        content_meta = ContentMetaStore()
-        content_meta._node_types = meta_dict[&#39;node_types&#39;]
-        content_meta._feature_type_names = meta_dict[&#39;feature_name_types&#39;]
-        return content_meta
-
-
 class Document(object):
     &#34;&#34;&#34;A Document is a collection of metadata and a set of content nodes.&#34;&#34;&#34;
 
     PREVIOUS_VERSION: str = &#34;1.0.0&#34;
-    CURRENT_VERSION: str = &#34;4.0.0&#34;
+    CURRENT_VERSION: str = &#34;2.0.0&#34;
 
     def __str__(self):
         return f&#34;kodexa://{self.uuid}&#34;
@@ -2083,10 +2006,7 @@ class Document(object):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
-        # We want to store meta information (node types, feature type/name etc as content meta
-        self.content_meta: ContentMetaStore = ContentMetaStore()
-
-    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; &#39;ContentClassification&#39;:
+    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
         &#34;&#34;&#34;Add a content classification to the document
 
         Args:
@@ -2242,14 +2162,15 @@ class Document(object):
             return clean
 
         return {&#39;version&#39;: Document.CURRENT_VERSION, &#39;metadata&#39;: self.metadata,
-                &#39;cn&#39;: self.content_node.to_dict() if self.content_node else None,
-                &#39;s&#39;: clean_none_values(dataclasses.asdict(self.source)),
-                &#39;mx&#39;: self._mixins,
-                &#39;t&#39;: self.taxonomies,
-                &#39;c&#39;: [content_class.to_dict() for content_class in self.classes],
-                &#39;l&#39;: self.labels,
-                &#39;uuid&#39;: self.uuid,
-                &#39;meta&#39;: self.content_meta.to_dict()}
+                &#39;content_node&#39;: self.content_node.to_dict() if self.content_node else None,
+                &#39;source&#39;: clean_none_values(dataclasses.asdict(self.source)),
+                &#39;mixins&#39;: self._mixins,
+                &#39;taxonomies&#39;: self.taxonomies,
+                &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
+                &#39;exceptions&#39;: self.exceptions,
+                &#39;log&#39;: self.log,
+                &#39;labels&#39;: self.labels,
+                &#39;uuid&#39;: self.uuid}
 
     @staticmethod
     def from_dict(doc_dict):
@@ -2265,42 +2186,25 @@ class Document(object):
         &gt;&gt;&gt; Document.from_dict(doc_dict)
         &#34;&#34;&#34;
         new_document = Document(DocumentMetadata(doc_dict[&#39;metadata&#39;]))
-        if &#39;meta&#39; in doc_dict:
-            new_document.content_meta = ContentMetaStore.from_dict(doc_dict[&#39;meta&#39;])
+        for mixin in doc_dict[&#39;mixins&#39;]:
+            registry.add_mixin_to_document(mixin, new_document)
+        new_document.version = doc_dict[&#39;version&#39;] if &#39;version&#39; in doc_dict and doc_dict[
+            &#39;version&#39;] else Document.PREVIOUS_VERSION  # some older docs don&#39;t have a version or it&#39;s None
+        new_document.log = doc_dict[&#39;log&#39;] if &#39;log&#39; in doc_dict else []
+        new_document.exceptions = doc_dict[&#39;exceptions&#39;] if &#39;exceptions&#39; in doc_dict else []
         new_document.uuid = doc_dict[&#39;uuid&#39;] if &#39;uuid&#39; in doc_dict else str(
             uuid.uuid5(uuid.NAMESPACE_DNS, &#39;kodexa.com&#39;))
-        new_document.version = doc_dict.get(&#39;version&#39;, Document.PREVIOUS_VERSION)
-        if &#39;version&#39; not in doc_dict or doc_dict[&#39;version&#39;] != Document.CURRENT_VERSION:
-            for mixin in doc_dict[&#39;mixins&#39;]:
-                registry.add_mixin_to_document(mixin, new_document)
-            if &#39;content_node&#39; in doc_dict and doc_dict[&#39;content_node&#39;]:
-                new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;content_node&#39;])
-            if &#39;source&#39; in doc_dict and doc_dict[&#39;source&#39;]:
-                new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
-            if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
-                new_document.labels = doc_dict[&#39;labels&#39;]
-            if &#39;taxonomies&#39; in doc_dict and doc_dict[&#39;taxonomies&#39;]:
-                new_document.labels = doc_dict[&#39;taxonomies&#39;]
-            if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
-                new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
-                                        doc_dict[&#39;classes&#39;]]
-        else:
-            for mixin in doc_dict[&#39;mx&#39;]:
-                registry.add_mixin_to_document(mixin, new_document)
-            if &#39;cn&#39; in doc_dict and doc_dict[&#39;cn&#39;]:
-                new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;cn&#39;])
-            if &#39;s&#39; in doc_dict and doc_dict[&#39;s&#39;]:
-                new_document.source = SourceMetadata.from_dict(doc_dict[&#39;s&#39;])
-            if &#39;l&#39; in doc_dict and doc_dict[&#39;l&#39;]:
-                new_document.labels = doc_dict[&#39;l&#39;]
-            if &#39;t&#39; in doc_dict and doc_dict[&#39;t&#39;]:
-                new_document.labels = doc_dict[&#39;t&#39;]
-            if &#39;c&#39; in doc_dict and doc_dict[&#39;c&#39;]:
-                new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
-                                        doc_dict[&#39;c&#39;]]
-
-        # Document will be upgraded
-        new_document.version = Document.CURRENT_VERSION
+        if &#39;content_node&#39; in doc_dict and doc_dict[&#39;content_node&#39;]:
+            new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;content_node&#39;])
+        if &#39;source&#39; in doc_dict and doc_dict[&#39;source&#39;]:
+            new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
+        if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
+            new_document.labels = doc_dict[&#39;labels&#39;]
+        if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
+            new_document.labels = doc_dict[&#39;taxomomies&#39;]
+        if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
+            new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                    doc_dict[&#39;classes&#39;]]
         return new_document
 
     @staticmethod
@@ -2438,7 +2342,7 @@ class Document(object):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector: str, variables: Optional[dict] = None) -&gt; &#39;List[ContentNode]&#39;:
+    def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
         &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
@@ -2462,7 +2366,7 @@ class Document(object):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None) -&gt; &#39;ContentNode&#39;:
+    def select_as_node(self, selector, variables=None) -&gt; ContentNode:
         &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
@@ -2482,7 +2386,7 @@ class Document(object):
         else:
             return self.create_node(node_type=&#39;results&#39;)
 
-    def get_labels(self) -&gt; &#39;List[str]&#39;:
+    def get_labels(self) -&gt; List[str]:
         &#34;&#34;&#34;
 
         Args:
@@ -2677,7 +2581,7 @@ class DocumentTransition:
                                         execution_id=transition_dict.get(&#39;executionId&#39;))
         return transition
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the transition to a dictionary to match REST API
 
@@ -2727,7 +2631,7 @@ class DocumentFamily:
         self.labels: List[str] = []
         &#34;&#34;&#34;The labels from the latest content object&#34;&#34;&#34;
 
-    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; &#39;ContentEvent&#39;:
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
         &#34;&#34;&#34;
 
         Args:
@@ -2753,7 +2657,7 @@ class DocumentFamily:
         new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
         return new_event
 
-    def get_latest_content(self) -&gt; &#39;ContentObject&#39;:
+    def get_latest_content(self) -&gt; ContentObject:
         &#34;&#34;&#34;Returns the latest content object that we have in place
 
         Returns:
@@ -2761,7 +2665,7 @@ class DocumentFamily:
         &#34;&#34;&#34;
         return self.content_objects[-1]
 
-    def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+    def get_content_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;Returns all the content objects in the family
 
         Returns:
@@ -2771,7 +2675,7 @@ class DocumentFamily:
         &#34;&#34;&#34;
         return self.content_objects
 
-    def get_document_count(self) -&gt; &#39;int&#39;:
+    def get_document_count(self) -&gt; int:
         &#34;&#34;&#34;
         Count of content objects in the family
 
@@ -2816,7 +2720,7 @@ class DocumentFamily:
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the document family to a dictionary to match REST API
 
@@ -2842,7 +2746,7 @@ class DocumentStore:
     &#34;&#34;&#34;
 
     @abc.abstractmethod
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34;
         Returns the reference (org-slug/store-slug:version)
 
@@ -2853,7 +2757,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
         Args:
@@ -2868,7 +2772,7 @@ class DocumentStore:
 
     @abc.abstractmethod
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -&gt; &#39;Optional[DocumentFamily]&#39;:
+                               document: Document) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;Replace the document in a specific content object in a document family.
 
         Args:
@@ -2895,7 +2799,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns a document family based on the ID
 
@@ -3026,7 +2930,7 @@ class DocumentStore:
         print(table)
 
     @abc.abstractmethod
-    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; &#39;List[DocumentFamily]&#39;:
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
         &#34;&#34;&#34;
         Query the document families
 
@@ -3042,7 +2946,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, document: Document) -&gt; DocumentFamily:
         &#34;&#34;&#34;Puts a new document in the store with the given path.
 
         There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -3058,7 +2962,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns the document family (or None is not available) for a specific path in the store
 
@@ -3072,7 +2976,7 @@ class DocumentStore:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def count(self) -&gt; &#39;int&#39;:
+    def count(self) -&gt; int:
         &#34;&#34;&#34;The number of document families in the store
 
         Returns:
@@ -3093,7 +2997,7 @@ class DocumentStore:
         &#34;&#34;&#34;
         return True
 
-    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; &#39;Optional[Document]&#39;:
+    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
         &#34;&#34;&#34;
         Returns the latest instance
         Args:
@@ -3152,7 +3056,7 @@ class ModelContentMetadata:
                                                       model_content_dict[&#39;deployment&#39;])
         return model_content_metadata
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the ModelContentMetadata to a dictionary to match REST API
 
@@ -3184,7 +3088,7 @@ class ModelStore:
         &#34;&#34;&#34;
         pass
 
-    def put(self, path: str, content: Any) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, content: Any) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
         Args:
@@ -3204,7 +3108,7 @@ class ModelStore:
         &#34;&#34;&#34;
         pass
 
-    def get_content_metadata(self) -&gt; &#39;ModelContentMetadata&#39;:
+    def get_content_metadata(self) -&gt; ModelContentMetadata:
         &#34;&#34;&#34;
         Gets the latest model content metadata for the model store
 
@@ -3598,7 +3502,7 @@ def from_dict(cls, event_dict: dict):
 </dd>
 <dt id="kodexa.model.model.ContentFeature"><code class="flex name class">
 <span>class <span class="ident">ContentFeature</span></span>
-<span>(</span><span>feature_type, name, value, document, single=True)</span>
+<span>(</span><span>feature_type, name, value, description=None, single=True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode</p></div>
@@ -3609,26 +3513,20 @@ def from_dict(cls, event_dict: dict):
 <pre><code class="python">class ContentFeature(object):
     &#34;&#34;&#34;A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode&#34;&#34;&#34;
 
-    def __init__(self, feature_type, name, value, document, single=True):
-
-        self._feature_type_name_id = document.content_meta.resolve_feature_type_name_id(feature_type, name)
-        self._document = document
+    def __init__(self, feature_type, name, value, description=None, single=True):
+        self.feature_type = feature_type
+        &#34;&#34;&#34;The type of feature, a logical name to group feature types together (ie. spatial)&#34;&#34;&#34;
+        self.name = name
+        &#34;&#34;&#34;The name of the feature (ie. bbox)&#34;&#34;&#34;
         self.value = value
-        &#34;&#34;&#34;The value of the feature (any serializable object)&#34;&#34;&#34;
-
+        &#34;&#34;&#34;A value of the feature, this can be any JSON serializable data object&#34;&#34;&#34;
+        self.description = description
+        &#34;&#34;&#34;Description of the feature (Optional)&#34;&#34;&#34;
         self.single = single
         &#34;&#34;&#34;Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false&#34;&#34;&#34;
 
-    @property
-    def name(self):
-        return self._document.content_meta.resolve_feature_type_name_from_id(self._feature_type_name_id).split(&#39;:&#39;)[1]
-
-    @property
-    def feature_type(self):
-        return self._document.content_meta.resolve_feature_type_name_from_id(self._feature_type_name_id).split(&#39;:&#39;)[0]
-
     def __str__(self):
-        return f&#34;Feature [name_type_id=&#39;{self._feature_type_name_id}&#39; value=&#39;{self.value}&#39; single=&#39;{self.single}&#39;]&#34;
+        return f&#34;Feature [type=&#39;{self.feature_type}&#39; name=&#39;{self.name}&#39; value=&#39;{self.value}&#39; single=&#39;{self.single}&#39;]&#34;
 
     def to_dict(self):
         &#34;&#34;&#34;Create a dictionary representing this ContentFeature&#39;s structure and content.
@@ -3637,7 +3535,7 @@ def from_dict(cls, event_dict: dict):
 
         &gt;&gt;&gt; node.to_dict()
         &#34;&#34;&#34;
-        return {&#39;fid&#39;: self._feature_type_name_id, &#39;v&#39;: self.value, &#39;s&#39;: self.single}
+        return {&#39;name&#39;: self.feature_type + &#39;:&#39; + self.name, &#39;value&#39;: self.value, &#39;single&#39;: self.single}
 
     def get_value(self):
         &#34;&#34;&#34;Get the value from the feature. This method will handle the single flag
@@ -3652,29 +3550,17 @@ def from_dict(cls, event_dict: dict):
 </details>
 <h3>Instance variables</h3>
 <dl>
+<dt id="kodexa.model.model.ContentFeature.description"><code class="name">var <span class="ident">description</span></code></dt>
+<dd>
+<div class="desc"><p>Description of the feature (Optional)</p></div>
+</dd>
 <dt id="kodexa.model.model.ContentFeature.feature_type"><code class="name">var <span class="ident">feature_type</span></code></dt>
 <dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def feature_type(self):
-    return self._document.content_meta.resolve_feature_type_name_from_id(self._feature_type_name_id).split(&#39;:&#39;)[0]</code></pre>
-</details>
+<div class="desc"><p>The type of feature, a logical name to group feature types together (ie. spatial)</p></div>
 </dd>
 <dt id="kodexa.model.model.ContentFeature.name"><code class="name">var <span class="ident">name</span></code></dt>
 <dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def name(self):
-    return self._document.content_meta.resolve_feature_type_name_from_id(self._feature_type_name_id).split(&#39;:&#39;)[1]</code></pre>
-</details>
+<div class="desc"><p>The name of the feature (ie. bbox)</p></div>
 </dd>
 <dt id="kodexa.model.model.ContentFeature.single"><code class="name">var <span class="ident">single</span></code></dt>
 <dd>
@@ -3682,7 +3568,7 @@ def name(self):
 </dd>
 <dt id="kodexa.model.model.ContentFeature.value"><code class="name">var <span class="ident">value</span></code></dt>
 <dd>
-<div class="desc"><p>The value of the feature (any serializable object)</p></div>
+<div class="desc"><p>A value of the feature, this can be any JSON serializable data object</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -3733,158 +3619,7 @@ def name(self):
 
     &gt;&gt;&gt; node.to_dict()
     &#34;&#34;&#34;
-    return {&#39;fid&#39;: self._feature_type_name_id, &#39;v&#39;: self.value, &#39;s&#39;: self.single}</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="kodexa.model.model.ContentMetaStore"><code class="flex name class">
-<span>class <span class="ident">ContentMetaStore</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Handles the storage of metadata for our document, including node type, feature types etc</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class ContentMetaStore(object):
-    &#34;&#34;&#34;Handles the storage of metadata for our document, including node type, feature types etc&#34;&#34;&#34;
-
-    def __init__(self):
-        self._node_types = []
-        self._feature_type_names = []
-
-    def resolve_node_type_id(self, node_type):
-        try:
-            return self._node_types.index(node_type)
-        except:
-            self._node_types.append(node_type)
-            return len(self._node_types) - 1
-
-    def resolve_feature_type_name_id(self, feature_type, feature_name):
-        feature_type_name = feature_type + &#34;:&#34; + feature_name
-        try:
-            return self._feature_type_names.index(feature_type_name)
-        except:
-            self._feature_type_names.append(feature_type_name)
-            return len(self._feature_type_names) - 1
-
-    def resolve_feature_type_name_from_id(self, feature_type_name_id):
-        return self._feature_type_names[feature_type_name_id]
-
-    def resolve_node_type_from_id(self, node_type_id):
-        return self._node_types[node_type_id]
-
-    def to_dict(self):
-        return {
-            &#39;node_types&#39;: self._node_types,
-            &#39;feature_name_types&#39;: self._feature_type_names
-        }
-
-    @staticmethod
-    def from_dict(meta_dict):
-        content_meta = ContentMetaStore()
-        content_meta._node_types = meta_dict[&#39;node_types&#39;]
-        content_meta._feature_type_names = meta_dict[&#39;feature_name_types&#39;]
-        return content_meta</code></pre>
-</details>
-<h3>Static methods</h3>
-<dl>
-<dt id="kodexa.model.model.ContentMetaStore.from_dict"><code class="name flex">
-<span>def <span class="ident">from_dict</span></span>(<span>meta_dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@staticmethod
-def from_dict(meta_dict):
-    content_meta = ContentMetaStore()
-    content_meta._node_types = meta_dict[&#39;node_types&#39;]
-    content_meta._feature_type_names = meta_dict[&#39;feature_name_types&#39;]
-    return content_meta</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="kodexa.model.model.ContentMetaStore.resolve_feature_type_name_from_id"><code class="name flex">
-<span>def <span class="ident">resolve_feature_type_name_from_id</span></span>(<span>self, feature_type_name_id)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def resolve_feature_type_name_from_id(self, feature_type_name_id):
-    return self._feature_type_names[feature_type_name_id]</code></pre>
-</details>
-</dd>
-<dt id="kodexa.model.model.ContentMetaStore.resolve_feature_type_name_id"><code class="name flex">
-<span>def <span class="ident">resolve_feature_type_name_id</span></span>(<span>self, feature_type, feature_name)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def resolve_feature_type_name_id(self, feature_type, feature_name):
-    feature_type_name = feature_type + &#34;:&#34; + feature_name
-    try:
-        return self._feature_type_names.index(feature_type_name)
-    except:
-        self._feature_type_names.append(feature_type_name)
-        return len(self._feature_type_names) - 1</code></pre>
-</details>
-</dd>
-<dt id="kodexa.model.model.ContentMetaStore.resolve_node_type_from_id"><code class="name flex">
-<span>def <span class="ident">resolve_node_type_from_id</span></span>(<span>self, node_type_id)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def resolve_node_type_from_id(self, node_type_id):
-    return self._node_types[node_type_id]</code></pre>
-</details>
-</dd>
-<dt id="kodexa.model.model.ContentMetaStore.resolve_node_type_id"><code class="name flex">
-<span>def <span class="ident">resolve_node_type_id</span></span>(<span>self, node_type)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def resolve_node_type_id(self, node_type):
-    try:
-        return self._node_types.index(node_type)
-    except:
-        self._node_types.append(node_type)
-        return len(self._node_types) - 1</code></pre>
-</details>
-</dd>
-<dt id="kodexa.model.model.ContentMetaStore.to_dict"><code class="name flex">
-<span>def <span class="ident">to_dict</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def to_dict(self):
-    return {
-        &#39;node_types&#39;: self._node_types,
-        &#39;feature_name_types&#39;: self._feature_type_names
-    }</code></pre>
+    return {&#39;name&#39;: self.feature_type + &#39;:&#39; + self.name, &#39;value&#39;: self.value, &#39;single&#39;: self.single}</code></pre>
 </details>
 </dd>
 </dl>
@@ -3934,9 +3669,7 @@ ensure that the correct mixins are applied.</p>
                  content_parts: Optional[List[Any]] = None):
         if content_parts is None:
             content_parts = []
-
-        self._node_type_id: int = document.content_meta.resolve_node_type_id(node_type)
-
+        self.node_type: str = node_type
         &#34;&#34;&#34;The node type (ie. line, page, cell etc)&#34;&#34;&#34;
         self.content: Optional[str] = content
         &#34;&#34;&#34;The content of the node&#34;&#34;&#34;
@@ -3950,18 +3683,13 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;The UUID of the content node&#34;&#34;&#34;
         self.virtual: bool = False
         &#34;&#34;&#34;Is the node virtual (ie. it doesn&#39;t actually exist in the document)&#34;&#34;&#34;
-
         # Added for performance
-        self._feature_map: Dict[int, ContentFeature] = {}
+        self._feature_map: Dict[str, ContentFeature] = {}
 
         self.parent: Optional[ContentNode] = None
         &#34;&#34;&#34;The parent content node&#34;&#34;&#34;
         self.children: List[ContentNode] = []
         &#34;&#34;&#34;The child content nodes of this content node&#34;&#34;&#34;
-
-    @property
-    def node_type(self):
-        return self.document.content_meta.resolve_node_type_from_id(self._node_type_id)
 
     def __str__(self):
         return f&#34;ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [&#34; + str(
@@ -3989,19 +3717,14 @@ ensure that the correct mixins are applied.</p>
 
         &gt;&gt;&gt; node.to_dict()
         &#34;&#34;&#34;
-        new_dict = {&#39;nid&#39;: self._node_type_id,
-                    &#39;f&#39;: [],
-                    &#39;i&#39;: self.index, &#39;ch&#39;: [], &#39;uuid&#39;: self.uuid}
-
-        if self.content is not None and self.content != &#39;&#39;:
-            new_dict[&#39;c&#39;] = self.content
-        if len(self.content_parts) &gt; 0:
-            new_dict[&#39;cp&#39;] = self.content_parts
+        new_dict = {&#39;node_type&#39;: self.node_type, &#39;content&#39;: self.content, &#39;content_parts&#39;: self.content_parts,
+                    &#39;features&#39;: [],
+                    &#39;index&#39;: self.index, &#39;children&#39;: [], &#39;uuid&#39;: self.uuid}
         for feature in self.get_features():
-            new_dict[&#39;f&#39;].append(feature.to_dict())
+            new_dict[&#39;features&#39;].append(feature.to_dict())
 
         for child in self.children:
-            new_dict[&#39;ch&#39;].append(child.to_dict())
+            new_dict[&#39;children&#39;].append(child.to_dict())
         return new_dict
 
     @staticmethod
@@ -4009,8 +3732,10 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;Build a new ContentNode from a dictionary representtion.
 
         Args:
-          document (Document): The Kodexa document from which the new ContentNode will be created (not added).
-          content_node_dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
+          Document: document: The Kodexa document from which the new ContentNode will be created (not added).
+          dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
+          document:
+          content_node_dict: Dict:
 
         Returns:
           ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
@@ -4018,55 +3743,33 @@ ensure that the correct mixins are applied.</p>
         &gt;&gt;&gt; ContentNode.from_dict(document, content_node_dict)
         &#34;&#34;&#34;
 
-        if document.version != Document.CURRENT_VERSION:
-            node_type = content_node_dict[&#39;type&#39;] if document.version == Document.PREVIOUS_VERSION else \
-                content_node_dict[
-                    &#39;node_type&#39;]
+        node_type = content_node_dict[&#39;type&#39;] if document.version == Document.PREVIOUS_VERSION else content_node_dict[
+            &#39;node_type&#39;]
 
-            new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
-                &#39;content&#39;] if &#39;content&#39; in content_node_dict else None)
-            if &#39;uuid&#39; in content_node_dict:
-                new_content_node.uuid = content_node_dict[&#39;uuid&#39;]
-            if &#39;index&#39; in content_node_dict:
-                new_content_node.index = content_node_dict[&#39;index&#39;]
-            if &#39;content_parts&#39; in content_node_dict:
-                new_content_node.content_parts = content_node_dict[&#39;content_parts&#39;]
+        new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
+            &#39;content&#39;] if &#39;content&#39; in content_node_dict else None)
+        if &#39;uuid&#39; in content_node_dict:
+            new_content_node.uuid = content_node_dict[&#39;uuid&#39;]
 
-            for dict_feature in content_node_dict[&#39;features&#39;]:
+        if &#39;content_parts&#39; in content_node_dict:
+            new_content_node.content_parts = content_node_dict[&#39;content_parts&#39;]
 
-                feature_type_name_id = dict_feature.get(&#39;fid&#39;)
-                if feature_type_name_id is None:
-                    feature_type_name_id = document.content_meta.resolve_feature_type_name_id(
-                        dict_feature[&#39;name&#39;].split(&#34;:&#34;)[0], dict_feature[&#39;name&#39;].split(&#34;:&#34;)[1])
-                feature_type_name = document.content_meta.resolve_feature_type_name_from_id(feature_type_name_id)
+        for dict_feature in content_node_dict[&#39;features&#39;]:
 
-                new_content_node.add_feature(feature_type_name.split(&#39;:&#39;)[0],
-                                             feature_type_name.split(&#39;:&#39;)[1],
+            feature_type = dict_feature[&#39;name&#39;].split(&#39;:&#39;)[0]
+            if feature_type == &#39;tag&#39;:
+                new_content_node.add_feature(feature_type,
+                                             dict_feature[&#39;name&#39;].split(&#39;:&#39;)[1],
+                                             dict_feature[&#39;value&#39;], dict_feature[&#39;single&#39;], True)
+            else:
+
+                # TODO we should convert to Tag?
+                new_content_node.add_feature(feature_type,
+                                             dict_feature[&#39;name&#39;].split(&#39;:&#39;)[1],
                                              dict_feature[&#39;value&#39;], dict_feature[&#39;single&#39;], True)
 
-            for dict_child in content_node_dict[&#39;children&#39;]:
-                new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;index&#39;])
-        else:
-            new_content_node = document.create_node(
-                node_type=document.content_meta.resolve_node_type_from_id(content_node_dict[&#39;nid&#39;]),
-                content=content_node_dict.get(&#39;c&#39;, None))
-            new_content_node.content_parts = content_node_dict.get(&#39;cp&#39;, [])
-            new_content_node.content_parts = content_node_dict.get(&#39;uuid&#39;, None)
-            if &#39;i&#39; in content_node_dict:
-                new_content_node.index = content_node_dict.get(&#39;i&#39;, None)
-            for dict_feature in content_node_dict[&#39;f&#39;]:
-
-                feature_type_name_id = dict_feature.get(&#39;fid&#39;)
-                if feature_type_name_id is None:
-                    feature_type_name_id = document.content_meta.resolve_feature_type_name_id(
-                        dict_feature[&#39;name&#39;].split(&#34;:&#34;)[0], dict_feature[&#39;name&#39;].split(&#34;:&#34;)[1])
-                feature_type_name = document.content_meta.resolve_feature_type_name_from_id(feature_type_name_id)
-
-                new_content_node.add_feature(feature_type_name.split(&#39;:&#39;)[0],
-                                             feature_type_name.split(&#39;:&#39;)[1],
-                                             dict_feature[&#39;v&#39;], dict_feature[&#39;s&#39;], True)
-            for dict_child in content_node_dict[&#39;ch&#39;]:
-                new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;i&#39;])
+        for dict_child in content_node_dict[&#39;children&#39;]:
+            new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;index&#39;])
         return new_content_node
 
     def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -&gt; &#39;ContentNode&#39;:
@@ -4146,11 +3849,14 @@ ensure that the correct mixins are applied.</p>
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
         Args:
-          feature_type (str): The type of feature to be added to the node.
-          name (str): The name of the feature.
-          value (Any): The value of the feature.
+          str: feature_type: The type of feature to be added to the node.
+          str: name: The name of the feature.
+          Any: value: The value of the feature.
           single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
           serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
+          feature_type:
+          name:
+          value:
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -4167,9 +3873,8 @@ ensure that the correct mixins are applied.</p>
         else:
             # Make sure that we treat the value as list all the time
             new_feature = ContentFeature(feature_type, name,
-                                         [value] if single and not serialized else value, single=single,
-                                         document=self.document)
-            self._feature_map[new_feature._feature_type_name_id] = new_feature
+                                         [value] if single and not serialized else value, single=single)
+            self._feature_map[new_feature.feature_type + &#34;:&#34; + new_feature.name] = new_feature
             return new_feature
 
     def delete_children(self, nodes: Optional[List] = None,
@@ -4214,8 +3919,10 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;Gets the value for the given feature.
 
         Args:
-          feature_type (str): The type of the feature.
-          name (str): The name of the feature.
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type:
+          name:
 
         Returns:
           ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
@@ -4223,8 +3930,7 @@ ensure that the correct mixins are applied.</p>
         &gt;&gt;&gt; new_page.get_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
            1
         &#34;&#34;&#34;
-
-        return self._feature_map.get(self.document.content_meta.resolve_feature_type_name_id(feature_type, name))
+        return self._feature_map[feature_type + &#34;:&#34; + name] if feature_type + &#34;:&#34; + name in self._feature_map else None
 
     def get_features_of_type(self, feature_type):
         &#34;&#34;&#34;Get all features of a specific type.
@@ -4245,8 +3951,10 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;Determines if a feature with the given feature and name exists on this content node.
 
         Args:
-          feature_type: The type of the feature.
-          name: The name of the feature.
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type:
+          name:
 
         Returns:
           bool: True if the feature is present; else, False.
@@ -4254,7 +3962,7 @@ ensure that the correct mixins are applied.</p>
         &gt;&gt;&gt; new_page.has_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
            True
         &#34;&#34;&#34;
-        return self.document.content_meta.resolve_feature_type_name_id(feature_type, name) in self._feature_map
+        return feature_type + &#34;:&#34; + name in self._feature_map
 
     def get_features(self):
         &#34;&#34;&#34;Get all features on this ContentNode.
@@ -4267,22 +3975,22 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;
         return list(self._feature_map.values())
 
-    def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
+    def remove_feature(self, feature_type, name):
         &#34;&#34;&#34;Removes the feature with the given name and type from this node.
 
         Args:
-          feature_type: The type of the feature.
-          name: The name of the feature.
-          include_children (bool): Iterate and remove feature from child nodes (default false)
+          str: feature_type: The type of the feature.
+          str: name: The name of the feature.
+          feature_type:
+          name:
 
         Returns:
 
         &gt;&gt;&gt; new_page.remove_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
         &#34;&#34;&#34;
-        self._feature_map.pop(self.document.content_meta.resolve_feature_type_name_id(feature_type, name), None)
-        if include_children:
-            for child in self.children:
-                child.remove_feature(feature_type, name, include_children)
+        results = self.get_feature(feature_type, name)
+        if results:
+            del self._feature_map[feature_type + &#34;:&#34; + name]
 
     def get_feature_value(self, feature_type, name):
         &#34;&#34;&#34;Get the value for a feature with the given name and type on this ContentNode.
@@ -4941,7 +4649,7 @@ ensure that the correct mixins are applied.</p>
             return content_length
 
         if content_re:
-            pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content and not node_only else content_re)
+            pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content else content_re)
 
         for node in self.select(selector):
             if fixed_position:
@@ -4959,9 +4667,7 @@ ensure that the correct mixins are applied.</p>
                         else:
                             content = None
                     else:
-                        content = node.get_all_content(separator=separator,
-                                                       strip=False) if not node_only else node.get_all_content(
-                            separator=separator)
+                        content = node.get_all_content(separator=separator, strip=False)
 
                     if content is not None:
                         if use_match:
@@ -5549,11 +5255,14 @@ ensure that the correct mixins are applied.</p>
 <div class="desc"><p>Build a new ContentNode from a dictionary representtion.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>document</code></strong> :&ensp;<code><a title="kodexa.model.model.Document" href="#kodexa.model.model.Document">Document</a></code></dt>
-<dd>The Kodexa document from which the new ContentNode will be created (not added).</dd>
-<dt><strong><code>content_node_dict</code></strong></dt>
+<dt><strong><code>Document</code></strong></dt>
+<dd>document: The Kodexa document from which the new ContentNode will be created (not added).</dd>
+<dt><strong><code>dict</code></strong></dt>
 <dd>content_node_dict: The dictionary-structured representation of a ContentNode.
 This value will be unpacked into a ContentNode.</dd>
+<dt>document:</dt>
+<dt><strong><code>content_node_dict</code></strong></dt>
+<dd>Dict:</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -5571,8 +5280,10 @@ def from_dict(document, content_node_dict: Dict):
     &#34;&#34;&#34;Build a new ContentNode from a dictionary representtion.
 
     Args:
-      document (Document): The Kodexa document from which the new ContentNode will be created (not added).
-      content_node_dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
+      Document: document: The Kodexa document from which the new ContentNode will be created (not added).
+      dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
+      document:
+      content_node_dict: Dict:
 
     Returns:
       ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
@@ -5580,55 +5291,33 @@ def from_dict(document, content_node_dict: Dict):
     &gt;&gt;&gt; ContentNode.from_dict(document, content_node_dict)
     &#34;&#34;&#34;
 
-    if document.version != Document.CURRENT_VERSION:
-        node_type = content_node_dict[&#39;type&#39;] if document.version == Document.PREVIOUS_VERSION else \
-            content_node_dict[
-                &#39;node_type&#39;]
+    node_type = content_node_dict[&#39;type&#39;] if document.version == Document.PREVIOUS_VERSION else content_node_dict[
+        &#39;node_type&#39;]
 
-        new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
-            &#39;content&#39;] if &#39;content&#39; in content_node_dict else None)
-        if &#39;uuid&#39; in content_node_dict:
-            new_content_node.uuid = content_node_dict[&#39;uuid&#39;]
-        if &#39;index&#39; in content_node_dict:
-            new_content_node.index = content_node_dict[&#39;index&#39;]
-        if &#39;content_parts&#39; in content_node_dict:
-            new_content_node.content_parts = content_node_dict[&#39;content_parts&#39;]
+    new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
+        &#39;content&#39;] if &#39;content&#39; in content_node_dict else None)
+    if &#39;uuid&#39; in content_node_dict:
+        new_content_node.uuid = content_node_dict[&#39;uuid&#39;]
 
-        for dict_feature in content_node_dict[&#39;features&#39;]:
+    if &#39;content_parts&#39; in content_node_dict:
+        new_content_node.content_parts = content_node_dict[&#39;content_parts&#39;]
 
-            feature_type_name_id = dict_feature.get(&#39;fid&#39;)
-            if feature_type_name_id is None:
-                feature_type_name_id = document.content_meta.resolve_feature_type_name_id(
-                    dict_feature[&#39;name&#39;].split(&#34;:&#34;)[0], dict_feature[&#39;name&#39;].split(&#34;:&#34;)[1])
-            feature_type_name = document.content_meta.resolve_feature_type_name_from_id(feature_type_name_id)
+    for dict_feature in content_node_dict[&#39;features&#39;]:
 
-            new_content_node.add_feature(feature_type_name.split(&#39;:&#39;)[0],
-                                         feature_type_name.split(&#39;:&#39;)[1],
+        feature_type = dict_feature[&#39;name&#39;].split(&#39;:&#39;)[0]
+        if feature_type == &#39;tag&#39;:
+            new_content_node.add_feature(feature_type,
+                                         dict_feature[&#39;name&#39;].split(&#39;:&#39;)[1],
+                                         dict_feature[&#39;value&#39;], dict_feature[&#39;single&#39;], True)
+        else:
+
+            # TODO we should convert to Tag?
+            new_content_node.add_feature(feature_type,
+                                         dict_feature[&#39;name&#39;].split(&#39;:&#39;)[1],
                                          dict_feature[&#39;value&#39;], dict_feature[&#39;single&#39;], True)
 
-        for dict_child in content_node_dict[&#39;children&#39;]:
-            new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;index&#39;])
-    else:
-        new_content_node = document.create_node(
-            node_type=document.content_meta.resolve_node_type_from_id(content_node_dict[&#39;nid&#39;]),
-            content=content_node_dict.get(&#39;c&#39;, None))
-        new_content_node.content_parts = content_node_dict.get(&#39;cp&#39;, [])
-        new_content_node.content_parts = content_node_dict.get(&#39;uuid&#39;, None)
-        if &#39;i&#39; in content_node_dict:
-            new_content_node.index = content_node_dict.get(&#39;i&#39;, None)
-        for dict_feature in content_node_dict[&#39;f&#39;]:
-
-            feature_type_name_id = dict_feature.get(&#39;fid&#39;)
-            if feature_type_name_id is None:
-                feature_type_name_id = document.content_meta.resolve_feature_type_name_id(
-                    dict_feature[&#39;name&#39;].split(&#34;:&#34;)[0], dict_feature[&#39;name&#39;].split(&#34;:&#34;)[1])
-            feature_type_name = document.content_meta.resolve_feature_type_name_from_id(feature_type_name_id)
-
-            new_content_node.add_feature(feature_type_name.split(&#39;:&#39;)[0],
-                                         feature_type_name.split(&#39;:&#39;)[1],
-                                         dict_feature[&#39;v&#39;], dict_feature[&#39;s&#39;], True)
-        for dict_child in content_node_dict[&#39;ch&#39;]:
-            new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;i&#39;])
+    for dict_child in content_node_dict[&#39;children&#39;]:
+        new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child[&#39;index&#39;])
     return new_content_node</code></pre>
 </details>
 </dd>
@@ -5657,15 +5346,7 @@ def from_dict(document, content_node_dict: Dict):
 </dd>
 <dt id="kodexa.model.model.ContentNode.node_type"><code class="name">var <span class="ident">node_type</span></code></dt>
 <dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def node_type(self):
-    return self.document.content_meta.resolve_node_type_from_id(self._node_type_id)</code></pre>
-</details>
+<div class="desc"><p>The node type (ie. line, page, cell etc)</p></div>
 </dd>
 <dt id="kodexa.model.model.ContentNode.parent"><code class="name">var <span class="ident">parent</span></code></dt>
 <dd>
@@ -5772,15 +5453,18 @@ Returns:</p>
 <p>Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>feature_type</code></strong> :&ensp;<code>str</code></dt>
-<dd>The type of feature to be added to the node.</dd>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the feature.</dd>
-<dt><strong><code>value</code></strong> :&ensp;<code>Any</code></dt>
-<dd>The value of the feature.</dd>
+<dt><strong><code>str</code></strong></dt>
+<dd>feature_type: The type of feature to be added to the node.</dd>
+<dt><strong><code>str</code></strong></dt>
+<dd>name: The name of the feature.</dd>
+<dt><strong><code>Any</code></strong></dt>
+<dd>value: The value of the feature.</dd>
 </dl>
 <p>single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
-serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.</p>
+serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
+feature_type:
+name:
+value:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code></dt>
@@ -5800,11 +5484,14 @@ serialized(bool, optional, optional): Indicates that the value is/is not already
     Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
     Args:
-      feature_type (str): The type of feature to be added to the node.
-      name (str): The name of the feature.
-      value (Any): The value of the feature.
+      str: feature_type: The type of feature to be added to the node.
+      str: name: The name of the feature.
+      Any: value: The value of the feature.
       single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
       serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
+      feature_type:
+      name:
+      value:
 
     Returns:
       ContentFeature: The feature that was added to this ContentNode.
@@ -5821,9 +5508,8 @@ serialized(bool, optional, optional): Indicates that the value is/is not already
     else:
         # Make sure that we treat the value as list all the time
         new_feature = ContentFeature(feature_type, name,
-                                     [value] if single and not serialized else value, single=single,
-                                     document=self.document)
-        self._feature_map[new_feature._feature_type_name_id] = new_feature
+                                     [value] if single and not serialized else value, single=single)
+        self._feature_map[new_feature.feature_type + &#34;:&#34; + new_feature.name] = new_feature
         return new_feature</code></pre>
 </details>
 </dd>
@@ -6536,11 +6222,13 @@ strip(boolean, optional): Strip the result</p>
 <div class="desc"><p>Gets the value for the given feature.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>feature_type</code></strong> :&ensp;<code>str</code></dt>
-<dd>The type of the feature.</dd>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the feature.</dd>
+<dt><strong><code>str</code></strong></dt>
+<dd>feature_type: The type of the feature.</dd>
+<dt><strong><code>str</code></strong></dt>
+<dd>name: The name of the feature.</dd>
 </dl>
+<p>feature_type:
+name:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code> or <code>None</code></dt>
@@ -6558,8 +6246,10 @@ If no feature is found, None is returned.</dd>
     &#34;&#34;&#34;Gets the value for the given feature.
 
     Args:
-      feature_type (str): The type of the feature.
-      name (str): The name of the feature.
+      str: feature_type: The type of the feature.
+      str: name: The name of the feature.
+      feature_type:
+      name:
 
     Returns:
       ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
@@ -6567,8 +6257,7 @@ If no feature is found, None is returned.</dd>
     &gt;&gt;&gt; new_page.get_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
        1
     &#34;&#34;&#34;
-
-    return self._feature_map.get(self.document.content_meta.resolve_feature_type_name_id(feature_type, name))</code></pre>
+    return self._feature_map[feature_type + &#34;:&#34; + name] if feature_type + &#34;:&#34; + name in self._feature_map else None</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_feature_value"><code class="name flex">
@@ -7292,11 +6981,13 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
 <div class="desc"><p>Determines if a feature with the given feature and name exists on this content node.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>The type of the feature.</dd>
-<dt><strong><code>name</code></strong></dt>
-<dd>The name of the feature.</dd>
+<dt><strong><code>str</code></strong></dt>
+<dd>feature_type: The type of the feature.</dd>
+<dt><strong><code>str</code></strong></dt>
+<dd>name: The name of the feature.</dd>
 </dl>
+<p>feature_type:
+name:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>bool</code></dt>
@@ -7313,8 +7004,10 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
     &#34;&#34;&#34;Determines if a feature with the given feature and name exists on this content node.
 
     Args:
-      feature_type: The type of the feature.
-      name: The name of the feature.
+      str: feature_type: The type of the feature.
+      str: name: The name of the feature.
+      feature_type:
+      name:
 
     Returns:
       bool: True if the feature is present; else, False.
@@ -7322,7 +7015,7 @@ content of this node match you can end up with a list of lists i.e. [[start1,end
     &gt;&gt;&gt; new_page.has_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
        True
     &#34;&#34;&#34;
-    return self.document.content_meta.resolve_feature_type_name_id(feature_type, name) in self._feature_map</code></pre>
+    return feature_type + &#34;:&#34; + name in self._feature_map</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.has_next_node"><code class="name flex">
@@ -7704,42 +7397,42 @@ traverse(Traverse(enum), optional, optional): The transition you'd like to trave
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.remove_feature"><code class="name flex">
-<span>def <span class="ident">remove_feature</span></span>(<span>self, feature_type: str, name: str, include_children: bool = False)</span>
+<span>def <span class="ident">remove_feature</span></span>(<span>self, feature_type, name)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Removes the feature with the given name and type from this node.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>feature_type</code></strong></dt>
-<dd>The type of the feature.</dd>
-<dt><strong><code>name</code></strong></dt>
-<dd>The name of the feature.</dd>
-<dt><strong><code>include_children</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Iterate and remove feature from child nodes (default false)</dd>
+<dt><strong><code>str</code></strong></dt>
+<dd>feature_type: The type of the feature.</dd>
+<dt><strong><code>str</code></strong></dt>
+<dd>name: The name of the feature.</dd>
 </dl>
-<p>Returns:</p>
+<p>feature_type:
+name:
+Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; new_page.remove_feature('pagination','pageNum')
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
+<pre><code class="python">def remove_feature(self, feature_type, name):
     &#34;&#34;&#34;Removes the feature with the given name and type from this node.
 
     Args:
-      feature_type: The type of the feature.
-      name: The name of the feature.
-      include_children (bool): Iterate and remove feature from child nodes (default false)
+      str: feature_type: The type of the feature.
+      str: name: The name of the feature.
+      feature_type:
+      name:
 
     Returns:
 
     &gt;&gt;&gt; new_page.remove_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
     &#34;&#34;&#34;
-    self._feature_map.pop(self.document.content_meta.resolve_feature_type_name_id(feature_type, name), None)
-    if include_children:
-        for child in self.children:
-            child.remove_feature(feature_type, name, include_children)</code></pre>
+    results = self.get_feature(feature_type, name)
+    if results:
+        del self._feature_map[feature_type + &#34;:&#34; + name]</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.remove_tag"><code class="name flex">
@@ -8279,7 +7972,7 @@ tag_uuid: str:
         return content_length
 
     if content_re:
-        pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content and not node_only else content_re)
+        pattern = re.compile(content_re.replace(&#39; &#39;, &#39;\s+&#39;) if use_all_content else content_re)
 
     for node in self.select(selector):
         if fixed_position:
@@ -8297,9 +7990,7 @@ tag_uuid: str:
                     else:
                         content = None
                 else:
-                    content = node.get_all_content(separator=separator,
-                                                   strip=False) if not node_only else node.get_all_content(
-                        separator=separator)
+                    content = node.get_all_content(separator=separator, strip=False)
 
                 if content is not None:
                     if use_match:
@@ -8487,19 +8178,14 @@ tag_uuid: str:
 
     &gt;&gt;&gt; node.to_dict()
     &#34;&#34;&#34;
-    new_dict = {&#39;nid&#39;: self._node_type_id,
-                &#39;f&#39;: [],
-                &#39;i&#39;: self.index, &#39;ch&#39;: [], &#39;uuid&#39;: self.uuid}
-
-    if self.content is not None and self.content != &#39;&#39;:
-        new_dict[&#39;c&#39;] = self.content
-    if len(self.content_parts) &gt; 0:
-        new_dict[&#39;cp&#39;] = self.content_parts
+    new_dict = {&#39;node_type&#39;: self.node_type, &#39;content&#39;: self.content, &#39;content_parts&#39;: self.content_parts,
+                &#39;features&#39;: [],
+                &#39;index&#39;: self.index, &#39;children&#39;: [], &#39;uuid&#39;: self.uuid}
     for feature in self.get_features():
-        new_dict[&#39;f&#39;].append(feature.to_dict())
+        new_dict[&#39;features&#39;].append(feature.to_dict())
 
     for child in self.children:
-        new_dict[&#39;ch&#39;].append(child.to_dict())
+        new_dict[&#39;children&#39;].append(child.to_dict())
     return new_dict</code></pre>
 </details>
 </dd>
@@ -8821,7 +8507,7 @@ def from_dict(cls, co_dict):
     &#34;&#34;&#34;A Document is a collection of metadata and a set of content nodes.&#34;&#34;&#34;
 
     PREVIOUS_VERSION: str = &#34;1.0.0&#34;
-    CURRENT_VERSION: str = &#34;4.0.0&#34;
+    CURRENT_VERSION: str = &#34;2.0.0&#34;
 
     def __str__(self):
         return f&#34;kodexa://{self.uuid}&#34;
@@ -8869,10 +8555,7 @@ def from_dict(cls, co_dict):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
-        # We want to store meta information (node types, feature type/name etc as content meta
-        self.content_meta: ContentMetaStore = ContentMetaStore()
-
-    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; &#39;ContentClassification&#39;:
+    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
         &#34;&#34;&#34;Add a content classification to the document
 
         Args:
@@ -9028,14 +8711,15 @@ def from_dict(cls, co_dict):
             return clean
 
         return {&#39;version&#39;: Document.CURRENT_VERSION, &#39;metadata&#39;: self.metadata,
-                &#39;cn&#39;: self.content_node.to_dict() if self.content_node else None,
-                &#39;s&#39;: clean_none_values(dataclasses.asdict(self.source)),
-                &#39;mx&#39;: self._mixins,
-                &#39;t&#39;: self.taxonomies,
-                &#39;c&#39;: [content_class.to_dict() for content_class in self.classes],
-                &#39;l&#39;: self.labels,
-                &#39;uuid&#39;: self.uuid,
-                &#39;meta&#39;: self.content_meta.to_dict()}
+                &#39;content_node&#39;: self.content_node.to_dict() if self.content_node else None,
+                &#39;source&#39;: clean_none_values(dataclasses.asdict(self.source)),
+                &#39;mixins&#39;: self._mixins,
+                &#39;taxonomies&#39;: self.taxonomies,
+                &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
+                &#39;exceptions&#39;: self.exceptions,
+                &#39;log&#39;: self.log,
+                &#39;labels&#39;: self.labels,
+                &#39;uuid&#39;: self.uuid}
 
     @staticmethod
     def from_dict(doc_dict):
@@ -9051,42 +8735,25 @@ def from_dict(cls, co_dict):
         &gt;&gt;&gt; Document.from_dict(doc_dict)
         &#34;&#34;&#34;
         new_document = Document(DocumentMetadata(doc_dict[&#39;metadata&#39;]))
-        if &#39;meta&#39; in doc_dict:
-            new_document.content_meta = ContentMetaStore.from_dict(doc_dict[&#39;meta&#39;])
+        for mixin in doc_dict[&#39;mixins&#39;]:
+            registry.add_mixin_to_document(mixin, new_document)
+        new_document.version = doc_dict[&#39;version&#39;] if &#39;version&#39; in doc_dict and doc_dict[
+            &#39;version&#39;] else Document.PREVIOUS_VERSION  # some older docs don&#39;t have a version or it&#39;s None
+        new_document.log = doc_dict[&#39;log&#39;] if &#39;log&#39; in doc_dict else []
+        new_document.exceptions = doc_dict[&#39;exceptions&#39;] if &#39;exceptions&#39; in doc_dict else []
         new_document.uuid = doc_dict[&#39;uuid&#39;] if &#39;uuid&#39; in doc_dict else str(
             uuid.uuid5(uuid.NAMESPACE_DNS, &#39;kodexa.com&#39;))
-        new_document.version = doc_dict.get(&#39;version&#39;, Document.PREVIOUS_VERSION)
-        if &#39;version&#39; not in doc_dict or doc_dict[&#39;version&#39;] != Document.CURRENT_VERSION:
-            for mixin in doc_dict[&#39;mixins&#39;]:
-                registry.add_mixin_to_document(mixin, new_document)
-            if &#39;content_node&#39; in doc_dict and doc_dict[&#39;content_node&#39;]:
-                new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;content_node&#39;])
-            if &#39;source&#39; in doc_dict and doc_dict[&#39;source&#39;]:
-                new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
-            if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
-                new_document.labels = doc_dict[&#39;labels&#39;]
-            if &#39;taxonomies&#39; in doc_dict and doc_dict[&#39;taxonomies&#39;]:
-                new_document.labels = doc_dict[&#39;taxonomies&#39;]
-            if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
-                new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
-                                        doc_dict[&#39;classes&#39;]]
-        else:
-            for mixin in doc_dict[&#39;mx&#39;]:
-                registry.add_mixin_to_document(mixin, new_document)
-            if &#39;cn&#39; in doc_dict and doc_dict[&#39;cn&#39;]:
-                new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;cn&#39;])
-            if &#39;s&#39; in doc_dict and doc_dict[&#39;s&#39;]:
-                new_document.source = SourceMetadata.from_dict(doc_dict[&#39;s&#39;])
-            if &#39;l&#39; in doc_dict and doc_dict[&#39;l&#39;]:
-                new_document.labels = doc_dict[&#39;l&#39;]
-            if &#39;t&#39; in doc_dict and doc_dict[&#39;t&#39;]:
-                new_document.labels = doc_dict[&#39;t&#39;]
-            if &#39;c&#39; in doc_dict and doc_dict[&#39;c&#39;]:
-                new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
-                                        doc_dict[&#39;c&#39;]]
-
-        # Document will be upgraded
-        new_document.version = Document.CURRENT_VERSION
+        if &#39;content_node&#39; in doc_dict and doc_dict[&#39;content_node&#39;]:
+            new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;content_node&#39;])
+        if &#39;source&#39; in doc_dict and doc_dict[&#39;source&#39;]:
+            new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
+        if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
+            new_document.labels = doc_dict[&#39;labels&#39;]
+        if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
+            new_document.labels = doc_dict[&#39;taxomomies&#39;]
+        if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
+            new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                    doc_dict[&#39;classes&#39;]]
         return new_document
 
     @staticmethod
@@ -9224,7 +8891,7 @@ def from_dict(cls, co_dict):
         url_document.source.headers = headers
         return url_document
 
-    def select(self, selector: str, variables: Optional[dict] = None) -&gt; &#39;List[ContentNode]&#39;:
+    def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
         &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
@@ -9248,7 +8915,7 @@ def from_dict(cls, co_dict):
         else:
             return []
 
-    def select_as_node(self, selector, variables=None) -&gt; &#39;ContentNode&#39;:
+    def select_as_node(self, selector, variables=None) -&gt; ContentNode:
         &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
         Args:
@@ -9268,7 +8935,7 @@ def from_dict(cls, co_dict):
         else:
             return self.create_node(node_type=&#39;results&#39;)
 
-    def get_labels(self) -&gt; &#39;List[str]&#39;:
+    def get_labels(self) -&gt; List[str]:
         &#34;&#34;&#34;
 
         Args:
@@ -9328,42 +8995,25 @@ def from_dict(doc_dict):
     &gt;&gt;&gt; Document.from_dict(doc_dict)
     &#34;&#34;&#34;
     new_document = Document(DocumentMetadata(doc_dict[&#39;metadata&#39;]))
-    if &#39;meta&#39; in doc_dict:
-        new_document.content_meta = ContentMetaStore.from_dict(doc_dict[&#39;meta&#39;])
+    for mixin in doc_dict[&#39;mixins&#39;]:
+        registry.add_mixin_to_document(mixin, new_document)
+    new_document.version = doc_dict[&#39;version&#39;] if &#39;version&#39; in doc_dict and doc_dict[
+        &#39;version&#39;] else Document.PREVIOUS_VERSION  # some older docs don&#39;t have a version or it&#39;s None
+    new_document.log = doc_dict[&#39;log&#39;] if &#39;log&#39; in doc_dict else []
+    new_document.exceptions = doc_dict[&#39;exceptions&#39;] if &#39;exceptions&#39; in doc_dict else []
     new_document.uuid = doc_dict[&#39;uuid&#39;] if &#39;uuid&#39; in doc_dict else str(
         uuid.uuid5(uuid.NAMESPACE_DNS, &#39;kodexa.com&#39;))
-    new_document.version = doc_dict.get(&#39;version&#39;, Document.PREVIOUS_VERSION)
-    if &#39;version&#39; not in doc_dict or doc_dict[&#39;version&#39;] != Document.CURRENT_VERSION:
-        for mixin in doc_dict[&#39;mixins&#39;]:
-            registry.add_mixin_to_document(mixin, new_document)
-        if &#39;content_node&#39; in doc_dict and doc_dict[&#39;content_node&#39;]:
-            new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;content_node&#39;])
-        if &#39;source&#39; in doc_dict and doc_dict[&#39;source&#39;]:
-            new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
-        if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
-            new_document.labels = doc_dict[&#39;labels&#39;]
-        if &#39;taxonomies&#39; in doc_dict and doc_dict[&#39;taxonomies&#39;]:
-            new_document.labels = doc_dict[&#39;taxonomies&#39;]
-        if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
-            new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
-                                    doc_dict[&#39;classes&#39;]]
-    else:
-        for mixin in doc_dict[&#39;mx&#39;]:
-            registry.add_mixin_to_document(mixin, new_document)
-        if &#39;cn&#39; in doc_dict and doc_dict[&#39;cn&#39;]:
-            new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;cn&#39;])
-        if &#39;s&#39; in doc_dict and doc_dict[&#39;s&#39;]:
-            new_document.source = SourceMetadata.from_dict(doc_dict[&#39;s&#39;])
-        if &#39;l&#39; in doc_dict and doc_dict[&#39;l&#39;]:
-            new_document.labels = doc_dict[&#39;l&#39;]
-        if &#39;t&#39; in doc_dict and doc_dict[&#39;t&#39;]:
-            new_document.labels = doc_dict[&#39;t&#39;]
-        if &#39;c&#39; in doc_dict and doc_dict[&#39;c&#39;]:
-            new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
-                                    doc_dict[&#39;c&#39;]]
-
-    # Document will be upgraded
-    new_document.version = Document.CURRENT_VERSION
+    if &#39;content_node&#39; in doc_dict and doc_dict[&#39;content_node&#39;]:
+        new_document.content_node = ContentNode.from_dict(new_document, doc_dict[&#39;content_node&#39;])
+    if &#39;source&#39; in doc_dict and doc_dict[&#39;source&#39;]:
+        new_document.source = SourceMetadata.from_dict(doc_dict[&#39;source&#39;])
+    if &#39;labels&#39; in doc_dict and doc_dict[&#39;labels&#39;]:
+        new_document.labels = doc_dict[&#39;labels&#39;]
+    if &#39;taxomomies&#39; in doc_dict and doc_dict[&#39;taxomomies&#39;]:
+        new_document.labels = doc_dict[&#39;taxomomies&#39;]
+    if &#39;classes&#39; in doc_dict and doc_dict[&#39;classes&#39;]:
+        new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                doc_dict[&#39;classes&#39;]]
     return new_document</code></pre>
 </details>
 </dd>
@@ -9680,7 +9330,7 @@ taxonomy_ref(Optional[str]): the reference to the taxonomy</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; &#39;ContentClassification&#39;:
+<pre><code class="python">def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
     &#34;&#34;&#34;Add a content classification to the document
 
     Args:
@@ -9864,7 +9514,7 @@ index: int:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_labels(self) -&gt; &#39;List[str]&#39;:
+<pre><code class="python">def get_labels(self) -&gt; List[str]:
     &#34;&#34;&#34;
 
     Args:
@@ -9963,7 +9613,7 @@ If no matches found, list is empty.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select(self, selector: str, variables: Optional[dict] = None) -&gt; &#39;List[ContentNode]&#39;:
+<pre><code class="python">def select(self, selector: str, variables: Optional[dict] = None) -&gt; List[ContentNode]:
     &#34;&#34;&#34;Execute a selector on the root node and then return a list of the matching nodes.
 
     Args:
@@ -10014,7 +9664,7 @@ All ContentNodes on this Document that match the selector value are added as the
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def select_as_node(self, selector, variables=None) -&gt; &#39;ContentNode&#39;:
+<pre><code class="python">def select_as_node(self, selector, variables=None) -&gt; ContentNode:
     &#34;&#34;&#34;Execute a selector on the root node and then return new ContentNode with the results set as its children.
 
     Args:
@@ -10084,14 +9734,15 @@ All ContentNodes on this Document that match the selector value are added as the
         return clean
 
     return {&#39;version&#39;: Document.CURRENT_VERSION, &#39;metadata&#39;: self.metadata,
-            &#39;cn&#39;: self.content_node.to_dict() if self.content_node else None,
-            &#39;s&#39;: clean_none_values(dataclasses.asdict(self.source)),
-            &#39;mx&#39;: self._mixins,
-            &#39;t&#39;: self.taxonomies,
-            &#39;c&#39;: [content_class.to_dict() for content_class in self.classes],
-            &#39;l&#39;: self.labels,
-            &#39;uuid&#39;: self.uuid,
-            &#39;meta&#39;: self.content_meta.to_dict()}</code></pre>
+            &#39;content_node&#39;: self.content_node.to_dict() if self.content_node else None,
+            &#39;source&#39;: clean_none_values(dataclasses.asdict(self.source)),
+            &#39;mixins&#39;: self._mixins,
+            &#39;taxonomies&#39;: self.taxonomies,
+            &#39;classes&#39;: [content_class.to_dict() for content_class in self.classes],
+            &#39;exceptions&#39;: self.exceptions,
+            &#39;log&#39;: self.log,
+            &#39;labels&#39;: self.labels,
+            &#39;uuid&#39;: self.uuid}</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.Document.to_json"><code class="name flex">
@@ -10282,7 +9933,7 @@ document as its first entry</p>
         self.labels: List[str] = []
         &#34;&#34;&#34;The labels from the latest content object&#34;&#34;&#34;
 
-    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; &#39;ContentEvent&#39;:
+    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
         &#34;&#34;&#34;
 
         Args:
@@ -10308,7 +9959,7 @@ document as its first entry</p>
         new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
         return new_event
 
-    def get_latest_content(self) -&gt; &#39;ContentObject&#39;:
+    def get_latest_content(self) -&gt; ContentObject:
         &#34;&#34;&#34;Returns the latest content object that we have in place
 
         Returns:
@@ -10316,7 +9967,7 @@ document as its first entry</p>
         &#34;&#34;&#34;
         return self.content_objects[-1]
 
-    def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+    def get_content_objects(self) -&gt; List[ContentObject]:
         &#34;&#34;&#34;Returns all the content objects in the family
 
         Returns:
@@ -10326,7 +9977,7 @@ document as its first entry</p>
         &#34;&#34;&#34;
         return self.content_objects
 
-    def get_document_count(self) -&gt; &#39;int&#39;:
+    def get_document_count(self) -&gt; int:
         &#34;&#34;&#34;
         Count of content objects in the family
 
@@ -10371,7 +10022,7 @@ document as its first entry</p>
             document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the document family to a dictionary to match REST API
 
@@ -10495,7 +10146,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; &#39;ContentEvent&#39;:
+<pre><code class="python">def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -&gt; ContentEvent:
     &#34;&#34;&#34;
 
     Args:
@@ -10533,7 +10184,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_content_objects(self) -&gt; &#39;List[ContentObject]&#39;:
+<pre><code class="python">def get_content_objects(self) -&gt; List[ContentObject]:
     &#34;&#34;&#34;Returns all the content objects in the family
 
     Returns:
@@ -10555,7 +10206,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_document_count(self) -&gt; &#39;int&#39;:
+<pre><code class="python">def get_document_count(self) -&gt; int:
     &#34;&#34;&#34;
     Count of content objects in the family
 
@@ -10577,7 +10228,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_latest_content(self) -&gt; &#39;ContentObject&#39;:
+<pre><code class="python">def get_latest_content(self) -&gt; ContentObject:
     &#34;&#34;&#34;Returns the latest content object that we have in place
 
     Returns:
@@ -10597,7 +10248,7 @@ def from_dict(cls, family_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_dict(self) -&gt; &#39;dict&#39;:
+<pre><code class="python">def to_dict(self) -&gt; dict:
     &#34;&#34;&#34;
     Convert the document family to a dictionary to match REST API
 
@@ -10657,7 +10308,7 @@ def from_dict(cls, family_dict: dict):
     &#34;&#34;&#34;
 
     @abc.abstractmethod
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34;
         Returns the reference (org-slug/store-slug:version)
 
@@ -10668,7 +10319,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; &#39;Optional[Document]&#39;:
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
         &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
         Args:
@@ -10683,7 +10334,7 @@ def from_dict(cls, family_dict: dict):
 
     @abc.abstractmethod
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -&gt; &#39;Optional[DocumentFamily]&#39;:
+                               document: Document) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;Replace the document in a specific content object in a document family.
 
         Args:
@@ -10710,7 +10361,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns a document family based on the ID
 
@@ -10841,7 +10492,7 @@ def from_dict(cls, family_dict: dict):
         print(table)
 
     @abc.abstractmethod
-    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; &#39;List[DocumentFamily]&#39;:
+    def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
         &#34;&#34;&#34;
         Query the document families
 
@@ -10857,7 +10508,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put(self, path: str, document: Document) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, document: Document) -&gt; DocumentFamily:
         &#34;&#34;&#34;Puts a new document in the store with the given path.
 
         There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -10873,7 +10524,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+    def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
         &#34;&#34;&#34;
         Returns the document family (or None is not available) for a specific path in the store
 
@@ -10887,7 +10538,7 @@ def from_dict(cls, family_dict: dict):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def count(self) -&gt; &#39;int&#39;:
+    def count(self) -&gt; int:
         &#34;&#34;&#34;The number of document families in the store
 
         Returns:
@@ -10908,7 +10559,7 @@ def from_dict(cls, family_dict: dict):
         &#34;&#34;&#34;
         return True
 
-    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; &#39;Optional[Document]&#39;:
+    def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
         &#34;&#34;&#34;
         Returns the latest instance
         Args:
@@ -11014,7 +10665,7 @@ def add_related_document_to_family(self, document_family_id: str, transition: Do
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def count(self) -&gt; &#39;int&#39;:
+def count(self) -&gt; int:
     &#34;&#34;&#34;The number of document families in the store
 
     Returns:
@@ -11069,7 +10720,7 @@ content_object_id(str): the ID of the ContentObject</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; &#39;Optional[Document]&#39;:
+def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -&gt; Optional[Document]:
     &#34;&#34;&#34;Get a Document based on the ID of the ContentObject
 
     Args:
@@ -11135,7 +10786,7 @@ def get_document_by_content_object(self, document_family: DocumentFamily, conten
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+def get_family(self, document_family_id: str) -&gt; Optional[DocumentFamily]:
     &#34;&#34;&#34;
     Returns a document family based on the ID
 
@@ -11166,7 +10817,7 @@ def get_family(self, document_family_id: str) -&gt; &#39;Optional[DocumentFamily
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;:
+def get_family_by_path(self, path: str) -&gt; Optional[DocumentFamily]:
     &#34;&#34;&#34;
     Returns the document family (or None is not available) for a specific path in the store
 
@@ -11196,7 +10847,7 @@ def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; &#39;Optional[Document]&#39;:
+<pre><code class="python">def get_latest_document_in_family(self, document_family: DocumentFamily) -&gt; Optional[Document]:
     &#34;&#34;&#34;
     Returns the latest instance
     Args:
@@ -11227,7 +10878,7 @@ def get_family_by_path(self, path: str) -&gt; &#39;Optional[DocumentFamily]&#39;
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def get_ref(self) -&gt; &#39;str&#39;:
+def get_ref(self) -&gt; str:
     &#34;&#34;&#34;
     Returns the reference (org-slug/store-slug:version)
 
@@ -11294,7 +10945,7 @@ document</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def put(self, path: str, document: Document) -&gt; &#39;DocumentFamily&#39;:
+def put(self, path: str, document: Document) -&gt; DocumentFamily:
     &#34;&#34;&#34;Puts a new document in the store with the given path.
 
     There mustn&#39;t be a family in the path, this method will create a new family based around the
@@ -11384,7 +11035,7 @@ def put_native(self, path: str, content):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@abc.abstractmethod
-def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; &#39;List[DocumentFamily]&#39;:
+def query_families(self, query: str = &#34;*&#34;, page: int = 1, page_size: int = 100) -&gt; List[DocumentFamily]:
     &#34;&#34;&#34;
     Query the document families
 
@@ -11454,7 +11105,7 @@ document(Document): the document to replace the content object with</p>
 </summary>
 <pre><code class="python">@abc.abstractmethod
 def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                           document: Document) -&gt; &#39;Optional[DocumentFamily]&#39;:
+                           document: Document) -&gt; Optional[DocumentFamily]:
     &#34;&#34;&#34;Replace the document in a specific content object in a document family.
 
     Args:
@@ -11538,7 +11189,7 @@ in the transition as well at the type of transition that exists</p>
                                         execution_id=transition_dict.get(&#39;executionId&#39;))
         return transition
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the transition to a dictionary to match REST API
 
@@ -11622,7 +11273,7 @@ def from_dict(cls, transition_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_dict(self) -&gt; &#39;dict&#39;:
+<pre><code class="python">def to_dict(self) -&gt; dict:
     &#34;&#34;&#34;
     Convert the transition to a dictionary to match REST API
 
@@ -11720,7 +11371,7 @@ def from_dict(cls, transition_dict: dict):
                                                       model_content_dict[&#39;deployment&#39;])
         return model_content_metadata
 
-    def to_dict(self) -&gt; &#39;dict&#39;:
+    def to_dict(self) -&gt; dict:
         &#34;&#34;&#34;
         Convert the ModelContentMetadata to a dictionary to match REST API
 
@@ -11807,7 +11458,7 @@ def from_dict(cls, model_content_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_dict(self) -&gt; &#39;dict&#39;:
+<pre><code class="python">def to_dict(self) -&gt; dict:
     &#34;&#34;&#34;
     Convert the ModelContentMetadata to a dictionary to match REST API
 
@@ -11850,7 +11501,7 @@ def from_dict(cls, model_content_dict: dict):
         &#34;&#34;&#34;
         pass
 
-    def put(self, path: str, content: Any) -&gt; &#39;DocumentFamily&#39;:
+    def put(self, path: str, content: Any) -&gt; DocumentFamily:
         &#34;&#34;&#34;
 
         Args:
@@ -11870,7 +11521,7 @@ def from_dict(cls, model_content_dict: dict):
         &#34;&#34;&#34;
         pass
 
-    def get_content_metadata(self) -&gt; &#39;ModelContentMetadata&#39;:
+    def get_content_metadata(self) -&gt; ModelContentMetadata:
         &#34;&#34;&#34;
         Gets the latest model content metadata for the model store
 
@@ -11921,7 +11572,7 @@ def from_dict(cls, model_content_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_content_metadata(self) -&gt; &#39;ModelContentMetadata&#39;:
+<pre><code class="python">def get_content_metadata(self) -&gt; ModelContentMetadata:
     &#34;&#34;&#34;
     Gets the latest model content metadata for the model store
 
@@ -11947,7 +11598,7 @@ def from_dict(cls, model_content_dict: dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, path: str, content: Any) -&gt; &#39;DocumentFamily&#39;:
+<pre><code class="python">def put(self, path: str, content: Any) -&gt; DocumentFamily:
     &#34;&#34;&#34;
 
     Args:
@@ -11994,7 +11645,7 @@ instance</p></div>
 <pre><code class="python">class RemoteStore:
     &#34;&#34;&#34;A remote store is one that refers to a Kodexa platform  instance&#34;&#34;&#34;
 
-    def get_ref(self) -&gt; &#39;str&#39;:
+    def get_ref(self) -&gt; str:
         &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
         :return: The reference
@@ -12064,7 +11715,7 @@ instance</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_ref(self) -&gt; &#39;str&#39;:
+<pre><code class="python">def get_ref(self) -&gt; str:
     &#34;&#34;&#34;Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
 
     :return: The reference
@@ -12637,23 +12288,13 @@ Returns:</p></div>
 <li>
 <h4><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code></h4>
 <ul class="two-column">
+<li><code><a title="kodexa.model.model.ContentFeature.description" href="#kodexa.model.model.ContentFeature.description">description</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.feature_type" href="#kodexa.model.model.ContentFeature.feature_type">feature_type</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.get_value" href="#kodexa.model.model.ContentFeature.get_value">get_value</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.name" href="#kodexa.model.model.ContentFeature.name">name</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.single" href="#kodexa.model.model.ContentFeature.single">single</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.to_dict" href="#kodexa.model.model.ContentFeature.to_dict">to_dict</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.value" href="#kodexa.model.model.ContentFeature.value">value</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="kodexa.model.model.ContentMetaStore" href="#kodexa.model.model.ContentMetaStore">ContentMetaStore</a></code></h4>
-<ul class="">
-<li><code><a title="kodexa.model.model.ContentMetaStore.from_dict" href="#kodexa.model.model.ContentMetaStore.from_dict">from_dict</a></code></li>
-<li><code><a title="kodexa.model.model.ContentMetaStore.resolve_feature_type_name_from_id" href="#kodexa.model.model.ContentMetaStore.resolve_feature_type_name_from_id">resolve_feature_type_name_from_id</a></code></li>
-<li><code><a title="kodexa.model.model.ContentMetaStore.resolve_feature_type_name_id" href="#kodexa.model.model.ContentMetaStore.resolve_feature_type_name_id">resolve_feature_type_name_id</a></code></li>
-<li><code><a title="kodexa.model.model.ContentMetaStore.resolve_node_type_from_id" href="#kodexa.model.model.ContentMetaStore.resolve_node_type_from_id">resolve_node_type_from_id</a></code></li>
-<li><code><a title="kodexa.model.model.ContentMetaStore.resolve_node_type_id" href="#kodexa.model.model.ContentMetaStore.resolve_node_type_id">resolve_node_type_id</a></code></li>
-<li><code><a title="kodexa.model.model.ContentMetaStore.to_dict" href="#kodexa.model.model.ContentMetaStore.to_dict">to_dict</a></code></li>
 </ul>
 </li>
 <li>
