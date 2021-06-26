@@ -27,10 +27,8 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import hashlib
-import os
 import pathlib
 import sqlite3
-import tempfile
 
 import msgpack
 
@@ -62,6 +60,8 @@ class SqliteDocumentPersistence(object):
             path = pathlib.Path(filename)
             if path.exists():
                 # At this point we need to load the db
+
+                # TODO switch to implementation
                 path.unlink()
         else:
             filename = &#39;:memory:&#39;
@@ -173,6 +173,8 @@ class SqliteDocumentPersistence(object):
             path = pathlib.Path(filename)
             if path.exists():
                 # At this point we need to load the db
+
+                # TODO switch to implementation
                 path.unlink()
         else:
             filename = &#39;:memory:&#39;

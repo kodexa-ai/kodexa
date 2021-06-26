@@ -1963,7 +1963,8 @@ class Document(object):
     def __str__(self):
         return f&#34;kodexa://{self.uuid}&#34;
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
+                 kddb_path: str = None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -2008,8 +2009,7 @@ class Document(object):
 
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
-        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self)
-
+        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self, filename=kddb_path)
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
         &#34;&#34;&#34;Add a content classification to the document
@@ -2089,6 +2089,16 @@ class Document(object):
         &#34;&#34;&#34;Get the root content node for the document (same as content_node)&#34;&#34;&#34;
         return self.content_node
 
+    def save_to_kddb(self, file_path: str):
+        &#34;&#34;&#34;Write the document to a new Kodexa Document Database file
+
+        Args:
+            file_path (str): the file path to write the KDDB file
+            &#34;&#34;&#34;
+
+        # TODO
+        pass
+
     def to_kdxa(self, file_path: str):
         &#34;&#34;&#34;Write the document to the kdxa format (msgpack) which can be
         used with the Kodexa platform
@@ -2103,6 +2113,19 @@ class Document(object):
         &#34;&#34;&#34;
         with open(file_path, &#39;wb&#39;) as outfile:
             msgpack.pack(self.to_dict(), outfile, use_bin_type=True)
+
+    @staticmethod
+    def open_kddb(file_path):
+        &#34;&#34;&#34;
+        Opens a Kodexa Document Database.
+
+        This is the Kodexa V4 default way to store documents, it provides high-performance
+        and also the ability to handle very large document objects
+
+        :param file_path: The file path
+        :return: The Document instance
+        &#34;&#34;&#34;
+        return Document(kddb_path=file_path)
 
     @staticmethod
     def from_kdxa(file_path):
@@ -8500,7 +8523,7 @@ def from_dict(cls, co_dict):
 </dd>
 <dt id="kodexa.model.model.Document"><code class="flex name class">
 <span>class <span class="ident">Document</span></span>
-<span>(</span><span>metadata=None, content_node: <a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a> = None, source=None, ref: str = None)</span>
+<span>(</span><span>metadata=None, content_node: <a title="kodexa.model.model.ContentNode" href="#kodexa.model.model.ContentNode">ContentNode</a> = None, source=None, ref: str = None, kddb_path: str = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A Document is a collection of metadata and a set of content nodes.</p></div>
@@ -8517,7 +8540,8 @@ def from_dict(cls, co_dict):
     def __str__(self):
         return f&#34;kodexa://{self.uuid}&#34;
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
+                 kddb_path: str = None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -8562,8 +8586,7 @@ def from_dict(cls, co_dict):
 
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
-        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self)
-
+        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self, filename=kddb_path)
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -&gt; ContentClassification:
         &#34;&#34;&#34;Add a content classification to the document
@@ -8643,6 +8666,16 @@ def from_dict(cls, co_dict):
         &#34;&#34;&#34;Get the root content node for the document (same as content_node)&#34;&#34;&#34;
         return self.content_node
 
+    def save_to_kddb(self, file_path: str):
+        &#34;&#34;&#34;Write the document to a new Kodexa Document Database file
+
+        Args:
+            file_path (str): the file path to write the KDDB file
+            &#34;&#34;&#34;
+
+        # TODO
+        pass
+
     def to_kdxa(self, file_path: str):
         &#34;&#34;&#34;Write the document to the kdxa format (msgpack) which can be
         used with the Kodexa platform
@@ -8657,6 +8690,19 @@ def from_dict(cls, co_dict):
         &#34;&#34;&#34;
         with open(file_path, &#39;wb&#39;) as outfile:
             msgpack.pack(self.to_dict(), outfile, use_bin_type=True)
+
+    @staticmethod
+    def open_kddb(file_path):
+        &#34;&#34;&#34;
+        Opens a Kodexa Document Database.
+
+        This is the Kodexa V4 default way to store documents, it provides high-performance
+        and also the ability to handle very large document objects
+
+        :param file_path: The file path
+        :return: The Document instance
+        &#34;&#34;&#34;
+        return Document(kddb_path=file_path)
 
     @staticmethod
     def from_kdxa(file_path):
@@ -9276,6 +9322,33 @@ def from_url(cls, url, headers=None):
     return url_document</code></pre>
 </details>
 </dd>
+<dt id="kodexa.model.model.Document.open_kddb"><code class="name flex">
+<span>def <span class="ident">open_kddb</span></span>(<span>file_path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Opens a Kodexa Document Database.</p>
+<p>This is the Kodexa V4 default way to store documents, it provides high-performance
+and also the ability to handle very large document objects</p>
+<p>:param file_path: The file path
+:return: The Document instance</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def open_kddb(file_path):
+    &#34;&#34;&#34;
+    Opens a Kodexa Document Database.
+
+    This is the Kodexa V4 default way to store documents, it provides high-performance
+    and also the ability to handle very large document objects
+
+    :param file_path: The file path
+    :return: The Document instance
+    &#34;&#34;&#34;
+    return Document(kddb_path=file_path)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
@@ -9595,6 +9668,31 @@ index: int:
     &#34;&#34;&#34;
     self.labels.remove(label)
     return self</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.Document.save_to_kddb"><code class="name flex">
+<span>def <span class="ident">save_to_kddb</span></span>(<span>self, file_path: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Write the document to a new Kodexa Document Database file</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>the file path to write the KDDB file</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_to_kddb(self, file_path: str):
+    &#34;&#34;&#34;Write the document to a new Kodexa Document Database file
+
+    Args:
+        file_path (str): the file path to write the KDDB file
+        &#34;&#34;&#34;
+
+    # TODO
+    pass</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.Document.select"><code class="name flex">
@@ -12434,7 +12532,9 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.Document.labels" href="#kodexa.model.model.Document.labels">labels</a></code></li>
 <li><code><a title="kodexa.model.model.Document.log" href="#kodexa.model.model.Document.log">log</a></code></li>
 <li><code><a title="kodexa.model.model.Document.metadata" href="#kodexa.model.model.Document.metadata">metadata</a></code></li>
+<li><code><a title="kodexa.model.model.Document.open_kddb" href="#kodexa.model.model.Document.open_kddb">open_kddb</a></code></li>
 <li><code><a title="kodexa.model.model.Document.remove_label" href="#kodexa.model.model.Document.remove_label">remove_label</a></code></li>
+<li><code><a title="kodexa.model.model.Document.save_to_kddb" href="#kodexa.model.model.Document.save_to_kddb">save_to_kddb</a></code></li>
 <li><code><a title="kodexa.model.model.Document.select" href="#kodexa.model.model.Document.select">select</a></code></li>
 <li><code><a title="kodexa.model.model.Document.select_as_node" href="#kodexa.model.model.Document.select_as_node">select_as_node</a></code></li>
 <li><code><a title="kodexa.model.model.Document.source" href="#kodexa.model.model.Document.source">source</a></code></li>
