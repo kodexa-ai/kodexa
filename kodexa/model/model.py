@@ -1977,6 +1977,11 @@ class Document(object):
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
 
+        # Start persistence layer
+        from kodexa.model import SqliteDocumentPersistence
+        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self)
+
+
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
 
