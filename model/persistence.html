@@ -37,7 +37,8 @@ from kodexa.model import Document, ContentNode
 # Heavily used SQL
 
 FEATURE_INSERT = &#34;INSERT INTO f (cn_id, f_type, fvalue_id) VALUES (?,?,?)&#34;
-CONTENT_NODE_INSERT = &#34;INSERT INTO cn (pid, content, nt) VALUES (?,?,?)&#34;
+CONTENT_NODE_INSERT = &#34;INSERT INTO cn (pid, nt) VALUES (?,?)&#34;
+CONTENT_NODE_PART_INSERT = &#34;INSERT INTO cnp (cn_id, pos, content, content_idx) VALUES (?,?,?,?)&#34;
 NOTE_TYPE_INSERT = &#34;insert into n_type(name) values (?)&#34;
 NODE_TYPE_LOOKUP = &#34;select id from n_type where name = ?&#34;
 FEATURE_VALUE_LOOKUP = &#34;select id from f_value where hash=?&#34;
@@ -47,7 +48,6 @@ FEATURE_TYPE_LOOKUP = &#34;select id from f_type where name = ?&#34;
 
 
 class SqliteDocumentPersistence(object):
-
     &#34;&#34;&#34;
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     &#34;&#34;&#34;
@@ -76,7 +76,10 @@ class SqliteDocumentPersistence(object):
     def __build_db(self):
         cursor = self.connection.cursor()
         cursor.execute(&#34;CREATE TABLE version (id text primary key)&#34;)
-        cursor.execute(&#34;CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, content text)&#34;)
+        cursor.execute(&#34;CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER)&#34;)
+        cursor.execute(
+            &#34;CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)&#34;)
+
         cursor.execute(&#34;CREATE TABLE n_type (id integer primary key, name text)&#34;)
         cursor.execute(&#34;CREATE TABLE f_type (id integer primary key, name text)&#34;)
         cursor.execute(
@@ -86,6 +89,9 @@ class SqliteDocumentPersistence(object):
 
         cursor.execute(&#34;CREATE UNIQUE INDEX n_type_uk ON n_type(name);&#34;)
         cursor.execute(&#34;CREATE UNIQUE INDEX f_type_uk ON f_type(name);&#34;)
+        cursor.execute(&#34;CREATE INDEX cn_perf ON cn(nt);&#34;)
+        cursor.execute(&#34;CREATE INDEX cnp_perf ON cnp(cn_id);&#34;)
+
         cursor.execute(&#34;CREATE INDEX f_value_hash ON f_value(hash);&#34;)
 
         if self.document.content_node:
@@ -126,9 +132,17 @@ class SqliteDocumentPersistence(object):
 
     def __insert_node(self, node: ContentNode, cursor):
         cn_values = [node.parent.uuid if node.parent else None,
-                     node.content,
                      self.__resolve_n_type(node.node_type, cursor)]
         node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
+
+        if node.content_parts is None or (node.content is not None and len(node.content_parts) == 0):
+            cn_parts_values = [node.uuid, 0, node.content, None]
+            cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+        else:
+            for idx, part in enumerate(node.content_parts):
+                cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
+                                   part if not isinstance(part, str) else None]
+                cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
         # Work through the features
         for feature in node.get_features():
@@ -161,7 +175,6 @@ class SqliteDocumentPersistence(object):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SqliteDocumentPersistence(object):
-
     &#34;&#34;&#34;
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     &#34;&#34;&#34;
@@ -190,7 +203,10 @@ class SqliteDocumentPersistence(object):
     def __build_db(self):
         cursor = self.connection.cursor()
         cursor.execute(&#34;CREATE TABLE version (id text primary key)&#34;)
-        cursor.execute(&#34;CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, content text)&#34;)
+        cursor.execute(&#34;CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER)&#34;)
+        cursor.execute(
+            &#34;CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)&#34;)
+
         cursor.execute(&#34;CREATE TABLE n_type (id integer primary key, name text)&#34;)
         cursor.execute(&#34;CREATE TABLE f_type (id integer primary key, name text)&#34;)
         cursor.execute(
@@ -200,6 +216,9 @@ class SqliteDocumentPersistence(object):
 
         cursor.execute(&#34;CREATE UNIQUE INDEX n_type_uk ON n_type(name);&#34;)
         cursor.execute(&#34;CREATE UNIQUE INDEX f_type_uk ON f_type(name);&#34;)
+        cursor.execute(&#34;CREATE INDEX cn_perf ON cn(nt);&#34;)
+        cursor.execute(&#34;CREATE INDEX cnp_perf ON cnp(cn_id);&#34;)
+
         cursor.execute(&#34;CREATE INDEX f_value_hash ON f_value(hash);&#34;)
 
         if self.document.content_node:
@@ -240,9 +259,17 @@ class SqliteDocumentPersistence(object):
 
     def __insert_node(self, node: ContentNode, cursor):
         cn_values = [node.parent.uuid if node.parent else None,
-                     node.content,
                      self.__resolve_n_type(node.node_type, cursor)]
         node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
+
+        if node.content_parts is None or (node.content is not None and len(node.content_parts) == 0):
+            cn_parts_values = [node.uuid, 0, node.content, None]
+            cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+        else:
+            for idx, part in enumerate(node.content_parts):
+                cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
+                                   part if not isinstance(part, str) else None]
+                cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
         # Work through the features
         for feature in node.get_features():
