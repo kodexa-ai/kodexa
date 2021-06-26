@@ -9,7 +9,8 @@ from kodexa.model import Document, ContentNode
 # Heavily used SQL
 
 FEATURE_INSERT = "INSERT INTO f (cn_id, f_type, fvalue_id) VALUES (?,?,?)"
-CONTENT_NODE_INSERT = "INSERT INTO cn (pid, content, nt) VALUES (?,?,?)"
+CONTENT_NODE_INSERT = "INSERT INTO cn (pid, nt) VALUES (?,?)"
+CONTENT_NODE_PART_INSERT = "INSERT INTO cnp (cn_id, pos, content, content_idx) VALUES (?,?,?,?)"
 NOTE_TYPE_INSERT = "insert into n_type(name) values (?)"
 NODE_TYPE_LOOKUP = "select id from n_type where name = ?"
 FEATURE_VALUE_LOOKUP = "select id from f_value where hash=?"
@@ -19,7 +20,6 @@ FEATURE_TYPE_LOOKUP = "select id from f_type where name = ?"
 
 
 class SqliteDocumentPersistence(object):
-
     """
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     """
@@ -48,7 +48,10 @@ class SqliteDocumentPersistence(object):
     def __build_db(self):
         cursor = self.connection.cursor()
         cursor.execute("CREATE TABLE version (id text primary key)")
-        cursor.execute("CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, content text)")
+        cursor.execute("CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER)")
+        cursor.execute(
+            "CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)")
+
         cursor.execute("CREATE TABLE n_type (id integer primary key, name text)")
         cursor.execute("CREATE TABLE f_type (id integer primary key, name text)")
         cursor.execute(
@@ -58,6 +61,9 @@ class SqliteDocumentPersistence(object):
 
         cursor.execute("CREATE UNIQUE INDEX n_type_uk ON n_type(name);")
         cursor.execute("CREATE UNIQUE INDEX f_type_uk ON f_type(name);")
+        cursor.execute("CREATE INDEX cn_perf ON cn(nt);")
+        cursor.execute("CREATE INDEX cnp_perf ON cnp(cn_id);")
+
         cursor.execute("CREATE INDEX f_value_hash ON f_value(hash);")
 
         if self.document.content_node:
@@ -98,9 +104,17 @@ class SqliteDocumentPersistence(object):
 
     def __insert_node(self, node: ContentNode, cursor):
         cn_values = [node.parent.uuid if node.parent else None,
-                     node.content,
                      self.__resolve_n_type(node.node_type, cursor)]
         node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
+
+        if node.content_parts is None or (node.content is not None and len(node.content_parts) == 0):
+            cn_parts_values = [node.uuid, 0, node.content, None]
+            cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+        else:
+            for idx, part in enumerate(node.content_parts):
+                cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
+                                   part if not isinstance(part, str) else None]
+                cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
         # Work through the features
         for feature in node.get_features():
