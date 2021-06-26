@@ -1934,7 +1934,8 @@ class Document(object):
     def __str__(self):
         return f"kodexa://{self.uuid}"
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
+                 kddb_path: str = None):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -1979,8 +1980,7 @@ class Document(object):
 
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
-        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self)
-
+        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self, filename=kddb_path)
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
@@ -2060,6 +2060,16 @@ class Document(object):
         """Get the root content node for the document (same as content_node)"""
         return self.content_node
 
+    def save_to_kddb(self, file_path: str):
+        """Write the document to a new Kodexa Document Database file
+
+        Args:
+            file_path (str): the file path to write the KDDB file
+            """
+
+        # TODO
+        pass
+
     def to_kdxa(self, file_path: str):
         """Write the document to the kdxa format (msgpack) which can be
         used with the Kodexa platform
@@ -2074,6 +2084,19 @@ class Document(object):
         """
         with open(file_path, 'wb') as outfile:
             msgpack.pack(self.to_dict(), outfile, use_bin_type=True)
+
+    @staticmethod
+    def open_kddb(file_path):
+        """
+        Opens a Kodexa Document Database.
+
+        This is the Kodexa V4 default way to store documents, it provides high-performance
+        and also the ability to handle very large document objects
+
+        :param file_path: The file path
+        :return: The Document instance
+        """
+        return Document(kddb_path=file_path)
 
     @staticmethod
     def from_kdxa(file_path):
