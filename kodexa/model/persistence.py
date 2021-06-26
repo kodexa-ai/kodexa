@@ -1,8 +1,6 @@
 import hashlib
-import os
 import pathlib
 import sqlite3
-import tempfile
 
 import msgpack
 
@@ -34,6 +32,8 @@ class SqliteDocumentPersistence(object):
             path = pathlib.Path(filename)
             if path.exists():
                 # At this point we need to load the db
+
+                # TODO switch to implementation
                 path.unlink()
         else:
             filename = ':memory:'
