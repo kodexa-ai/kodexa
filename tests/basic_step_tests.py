@@ -77,7 +77,7 @@ def test_tag_key_value_include_exclude():
 @pytest.mark.skip
 def test_rollup_of_pdf():
     # first test - collapsing words and lines up to their common parent
-    test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
+    test_doc = Document.from_kdxa(get_test_directory() + '20200709.kdxa')
 
     # how many pre-rollup lines?
     assert len(test_doc.select('//line')) == 3824
@@ -106,7 +106,7 @@ def test_rollup_of_pdf():
     assert len(collapsed_doc.select("//content-area")[12].get_all_content()) == 235
 
     # second test - just collapse the line up to its parent (content-area) - roll up the line's children
-    test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
+    test_doc = Document.from_kdxa(get_test_directory() + '20200709.kdxa')
 
     rollup_pipeline = Pipeline(test_doc)
     rollup_pipeline.add_step(
@@ -128,7 +128,7 @@ def test_rollup_of_pdf():
     assert len(collapsed_doc.select("//content-area")[12].get_all_content()) == 235
 
     # third test - select specific nodes in which we'll do the roll ups
-    test_doc = Document.from_kdxa(get_test_directory() + '20200709loanboss.kdxa')
+    test_doc = Document.from_kdxa(get_test_directory() + '20200709.kdxa')
 
     node_selector = "//content-area[contentRegex('.*LOAN AGREEMENT.*', true)]"
 
