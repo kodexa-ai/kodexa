@@ -10,6 +10,7 @@ import os
 import re
 import uuid
 from enum import Enum
+from pathlib import Path
 from typing import Any, List, Optional
 
 import msgpack
@@ -2067,8 +2068,13 @@ class Document(object):
             file_path (str): the file path to write the KDDB file
             """
 
-        # TODO
-        pass
+        # Re-initialize the persistence layer and delete the file
+        from kodexa.model import SqliteDocumentPersistence
+
+        if Path(file_path).exists():
+            Path(file_path).unlink()
+
+        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self, filename=file_path)
 
     def to_kdxa(self, file_path: str):
         """Write the document to the kdxa format (msgpack) which can be

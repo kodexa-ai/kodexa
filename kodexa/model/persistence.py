@@ -19,6 +19,7 @@ FEATURE_TYPE_LOOKUP = "select id from f_type where name = ?"
 
 
 class SqliteDocumentPersistence(object):
+
     """
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     """
