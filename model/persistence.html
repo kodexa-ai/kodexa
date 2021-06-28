@@ -26,7 +26,8 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import hashlib
+<pre><code class="python">import dataclasses
+import hashlib
 import pathlib
 import sqlite3
 
@@ -37,7 +38,7 @@ from kodexa.model import Document, ContentNode
 # Heavily used SQL
 
 FEATURE_INSERT = &#34;INSERT INTO f (cn_id, f_type, fvalue_id) VALUES (?,?,?)&#34;
-CONTENT_NODE_INSERT = &#34;INSERT INTO cn (pid, nt) VALUES (?,?)&#34;
+CONTENT_NODE_INSERT = &#34;INSERT INTO cn (pid, nt, idx) VALUES (?,?,?)&#34;
 CONTENT_NODE_PART_INSERT = &#34;INSERT INTO cnp (cn_id, pos, content, content_idx) VALUES (?,?,?,?)&#34;
 NOTE_TYPE_INSERT = &#34;insert into n_type(name) values (?)&#34;
 NODE_TYPE_LOOKUP = &#34;select id from n_type where name = ?&#34;
@@ -45,6 +46,10 @@ FEATURE_VALUE_LOOKUP = &#34;select id from f_value where hash=?&#34;
 FEATURE_VALUE_INSERT = &#34;insert into f_value(binary_value, hash, single) values (?,?,?)&#34;
 FEATURE_TYPE_INSERT = &#34;insert into f_type(name) values (?)&#34;
 FEATURE_TYPE_LOOKUP = &#34;select id from f_type where name = ?&#34;
+METADATA_INSERT = &#34;insert into metadata(id,metadata) values (1,?)&#34;
+METADATA_DELETE = &#34;delete from metadata where id=1&#34;
+VERSION_INSERT = &#34;insert into version(id,version) values (1,&#39;4.0.0&#39;)&#34;
+VERSION_DELETE = &#34;delete from version where id=1&#34;
 
 
 class SqliteDocumentPersistence(object):
@@ -61,9 +66,9 @@ class SqliteDocumentPersistence(object):
             path = pathlib.Path(filename)
             if path.exists():
                 # At this point we need to load the db
+                is_new = False
 
-                # TODO switch to implementation
-                path.unlink()
+                pass
         else:
             filename = &#39;:memory:&#39;
 
@@ -75,8 +80,9 @@ class SqliteDocumentPersistence(object):
 
     def __build_db(self):
         cursor = self.connection.cursor()
-        cursor.execute(&#34;CREATE TABLE version (id text primary key)&#34;)
-        cursor.execute(&#34;CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER)&#34;)
+        cursor.execute(&#34;CREATE TABLE version (id integer primary key, version text)&#34;)
+        cursor.execute(&#34;CREATE TABLE metadata (id integer primary key, metadata text)&#34;)
+        cursor.execute(&#34;CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, idx INTEGER)&#34;)
         cursor.execute(
             &#34;CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)&#34;)
 
@@ -93,6 +99,8 @@ class SqliteDocumentPersistence(object):
         cursor.execute(&#34;CREATE INDEX cnp_perf ON cnp(cn_id);&#34;)
 
         cursor.execute(&#34;CREATE INDEX f_value_hash ON f_value(hash);&#34;)
+
+        self.__update_metadata(cursor)
 
         if self.document.content_node:
             self.__insert_node(self.document.content_node, cursor)
@@ -132,7 +140,7 @@ class SqliteDocumentPersistence(object):
 
     def __insert_node(self, node: ContentNode, cursor):
         cn_values = [node.parent.uuid if node.parent else None,
-                     self.__resolve_n_type(node.node_type, cursor)]
+                     self.__resolve_n_type(node.node_type, cursor), node.index]
         node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
         if node.content_parts is None or (node.content is not None and len(node.content_parts) == 0):
@@ -152,7 +160,31 @@ class SqliteDocumentPersistence(object):
                                           f_values).lastrowid
 
         for child in node.children:
-            self.__insert_node(child, cursor)</code></pre>
+            self.__insert_node(child, cursor)
+
+    def __clean_none_values(self, d):
+        clean = {}
+        for k, v in d.items():
+            if isinstance(v, dict):
+                nested = self.__clean_none_values(v)
+                if len(nested.keys()) &gt; 0:
+                    clean[k] = nested
+            elif v is not None:
+                clean[k] = v
+        return clean
+
+    def __update_metadata(self, cursor):
+        document_metadata = {&#39;version&#39;: Document.CURRENT_VERSION, &#39;metadata&#39;: self.document.metadata,
+                             &#39;source&#39;: self.__clean_none_values(dataclasses.asdict(self.document.source)),
+                             &#39;mixins&#39;: self.document.get_mixins(),
+                             &#39;taxonomies&#39;: self.document.taxonomies,
+                             &#39;classes&#39;: [content_class.to_dict() for content_class in self.document.classes],
+                             &#39;labels&#39;: self.document.labels,
+                             &#39;uuid&#39;: self.document.uuid}
+        cursor.execute(VERSION_DELETE)
+        cursor.execute(VERSION_INSERT)
+        cursor.execute(METADATA_DELETE)
+        cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])</code></pre>
 </details>
 </section>
 <section>
@@ -188,9 +220,9 @@ class SqliteDocumentPersistence(object):
             path = pathlib.Path(filename)
             if path.exists():
                 # At this point we need to load the db
+                is_new = False
 
-                # TODO switch to implementation
-                path.unlink()
+                pass
         else:
             filename = &#39;:memory:&#39;
 
@@ -202,8 +234,9 @@ class SqliteDocumentPersistence(object):
 
     def __build_db(self):
         cursor = self.connection.cursor()
-        cursor.execute(&#34;CREATE TABLE version (id text primary key)&#34;)
-        cursor.execute(&#34;CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER)&#34;)
+        cursor.execute(&#34;CREATE TABLE version (id integer primary key, version text)&#34;)
+        cursor.execute(&#34;CREATE TABLE metadata (id integer primary key, metadata text)&#34;)
+        cursor.execute(&#34;CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, idx INTEGER)&#34;)
         cursor.execute(
             &#34;CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)&#34;)
 
@@ -220,6 +253,8 @@ class SqliteDocumentPersistence(object):
         cursor.execute(&#34;CREATE INDEX cnp_perf ON cnp(cn_id);&#34;)
 
         cursor.execute(&#34;CREATE INDEX f_value_hash ON f_value(hash);&#34;)
+
+        self.__update_metadata(cursor)
 
         if self.document.content_node:
             self.__insert_node(self.document.content_node, cursor)
@@ -259,7 +294,7 @@ class SqliteDocumentPersistence(object):
 
     def __insert_node(self, node: ContentNode, cursor):
         cn_values = [node.parent.uuid if node.parent else None,
-                     self.__resolve_n_type(node.node_type, cursor)]
+                     self.__resolve_n_type(node.node_type, cursor), node.index]
         node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
         if node.content_parts is None or (node.content is not None and len(node.content_parts) == 0):
@@ -279,7 +314,31 @@ class SqliteDocumentPersistence(object):
                                           f_values).lastrowid
 
         for child in node.children:
-            self.__insert_node(child, cursor)</code></pre>
+            self.__insert_node(child, cursor)
+
+    def __clean_none_values(self, d):
+        clean = {}
+        for k, v in d.items():
+            if isinstance(v, dict):
+                nested = self.__clean_none_values(v)
+                if len(nested.keys()) &gt; 0:
+                    clean[k] = nested
+            elif v is not None:
+                clean[k] = v
+        return clean
+
+    def __update_metadata(self, cursor):
+        document_metadata = {&#39;version&#39;: Document.CURRENT_VERSION, &#39;metadata&#39;: self.document.metadata,
+                             &#39;source&#39;: self.__clean_none_values(dataclasses.asdict(self.document.source)),
+                             &#39;mixins&#39;: self.document.get_mixins(),
+                             &#39;taxonomies&#39;: self.document.taxonomies,
+                             &#39;classes&#39;: [content_class.to_dict() for content_class in self.document.classes],
+                             &#39;labels&#39;: self.document.labels,
+                             &#39;uuid&#39;: self.document.uuid}
+        cursor.execute(VERSION_DELETE)
+        cursor.execute(VERSION_INSERT)
+        cursor.execute(METADATA_DELETE)
+        cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
