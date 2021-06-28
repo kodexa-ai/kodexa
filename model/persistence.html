@@ -30,10 +30,12 @@
 import hashlib
 import pathlib
 import sqlite3
+import uuid
 
 import msgpack
 
-from kodexa.model import Document, ContentNode
+from kodexa.model import Document, ContentNode, SourceMetadata
+from kodexa.model.model import ContentClassification, DocumentMetadata
 
 # Heavily used SQL
 
@@ -59,6 +61,10 @@ class SqliteDocumentPersistence(object):
 
     def __init__(self, document: Document, filename: str = None):
         self.document = document
+
+        self.node_types = {}
+        self.feature_type_names = {}
+
         import sqlite3
 
         is_new = True
@@ -67,8 +73,6 @@ class SqliteDocumentPersistence(object):
             if path.exists():
                 # At this point we need to load the db
                 is_new = False
-
-                pass
         else:
             filename = &#39;:memory:&#39;
 
@@ -77,6 +81,8 @@ class SqliteDocumentPersistence(object):
 
         if is_new:
             self.__build_db()
+        else:
+            self.__load_document()
 
     def __build_db(self):
         cursor = self.connection.cursor()
@@ -184,7 +190,71 @@ class SqliteDocumentPersistence(object):
         cursor.execute(VERSION_DELETE)
         cursor.execute(VERSION_INSERT)
         cursor.execute(METADATA_DELETE)
-        cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])</code></pre>
+        cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])
+
+    def __load_document(self):
+        cursor = self.connection.cursor()
+        for n_type in cursor.execute(&#34;select id,name from n_type&#34;):
+            self.node_types[n_type[0]] = n_type[1]
+        for f_type in cursor.execute(&#34;select id,name from f_type&#34;):
+            self.feature_type_names[f_type[0]] = f_type[1]
+
+        metadata = msgpack.unpackb(cursor.execute(&#34;select * from metadata&#34;).fetchone()[1])
+        self.document.metadata = DocumentMetadata(metadata[&#39;metadata&#39;])
+        for mixin in metadata[&#39;mixins&#39;]:
+            from kodexa.mixins import registry
+            registry.add_mixin_to_document(mixin, self.document)
+        self.document.version = metadata[&#39;version&#39;] if &#39;version&#39; in metadata and metadata[
+            &#39;version&#39;] else Document.PREVIOUS_VERSION  # some older docs don&#39;t have a version or it&#39;s None
+
+        self.uuid = metadata[&#39;uuid&#39;] if &#39;uuid&#39; in metadata else str(
+            uuid.uuid5(uuid.NAMESPACE_DNS, &#39;kodexa.com&#39;))
+        if &#39;source&#39; in metadata and metadata[&#39;source&#39;]:
+            self.document.source = SourceMetadata.from_dict(metadata[&#39;source&#39;])
+        if &#39;labels&#39; in metadata and metadata[&#39;labels&#39;]:
+            self.document.labels = metadata[&#39;labels&#39;]
+        if &#39;taxomomies&#39; in metadata and metadata[&#39;taxomomies&#39;]:
+            self.document.taxonomies = metadata[&#39;taxomomies&#39;]
+        if &#39;classes&#39; in metadata and metadata[&#39;classes&#39;]:
+            self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                     metadata[&#39;classes&#39;]]
+
+        self.document.content_node = self.__build_node(
+            cursor.execute(&#34;select id, pid, nt, idx from cn where pid is null&#34;).fetchone(),
+            cursor)
+        cursor.close()
+
+    def __build_node(self, node_row, cursor):
+        new_node = ContentNode(self.document, self.node_types[node_row[2]])
+        new_node.uuid = node_row[0]
+        new_node.index = node_row[3]
+
+        content_parts = cursor.execute(&#34;select cn_id, pos, content, content_idx from cnp where cn_id = ? order by pos&#34;,
+                                       [new_node.uuid]).fetchall()
+
+        content = &#34;&#34;
+        for content_part in content_parts:
+            if content_part[3] is None:
+                content = content + content_part[2]
+                new_node.content_parts.append(content_part[2])
+            else:
+                new_node.content_parts.append(content_part[3])
+
+        new_node.content = content
+
+        # We need to get the features back
+        for feature in cursor.execute(&#34;select id, cn_id, f_type, fvalue_id from f where cn_id = ?&#34;,
+                                      [new_node.uuid]).fetchall():
+            feature_type_name = self.feature_type_names[feature[2]]
+            f_value = cursor.execute(&#34;select binary_value, single from f_value where id = ?&#34;, [feature[3]]).fetchone()
+            new_node.add_feature(feature_type_name.split(&#39;:&#39;)[0], feature_type_name.split(&#39;:&#39;)[1],
+                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1)
+
+        # We need to get the child nodes
+        for child_node in cursor.execute(&#34;select id, pid, nt, idx from cn where pid = ?&#34;, [new_node.uuid]).fetchall():
+            new_node.add_child(self.__build_node(child_node, cursor))
+
+        return new_node</code></pre>
 </details>
 </section>
 <section>
@@ -213,6 +283,10 @@ class SqliteDocumentPersistence(object):
 
     def __init__(self, document: Document, filename: str = None):
         self.document = document
+
+        self.node_types = {}
+        self.feature_type_names = {}
+
         import sqlite3
 
         is_new = True
@@ -221,8 +295,6 @@ class SqliteDocumentPersistence(object):
             if path.exists():
                 # At this point we need to load the db
                 is_new = False
-
-                pass
         else:
             filename = &#39;:memory:&#39;
 
@@ -231,6 +303,8 @@ class SqliteDocumentPersistence(object):
 
         if is_new:
             self.__build_db()
+        else:
+            self.__load_document()
 
     def __build_db(self):
         cursor = self.connection.cursor()
@@ -338,7 +412,71 @@ class SqliteDocumentPersistence(object):
         cursor.execute(VERSION_DELETE)
         cursor.execute(VERSION_INSERT)
         cursor.execute(METADATA_DELETE)
-        cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])</code></pre>
+        cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])
+
+    def __load_document(self):
+        cursor = self.connection.cursor()
+        for n_type in cursor.execute(&#34;select id,name from n_type&#34;):
+            self.node_types[n_type[0]] = n_type[1]
+        for f_type in cursor.execute(&#34;select id,name from f_type&#34;):
+            self.feature_type_names[f_type[0]] = f_type[1]
+
+        metadata = msgpack.unpackb(cursor.execute(&#34;select * from metadata&#34;).fetchone()[1])
+        self.document.metadata = DocumentMetadata(metadata[&#39;metadata&#39;])
+        for mixin in metadata[&#39;mixins&#39;]:
+            from kodexa.mixins import registry
+            registry.add_mixin_to_document(mixin, self.document)
+        self.document.version = metadata[&#39;version&#39;] if &#39;version&#39; in metadata and metadata[
+            &#39;version&#39;] else Document.PREVIOUS_VERSION  # some older docs don&#39;t have a version or it&#39;s None
+
+        self.uuid = metadata[&#39;uuid&#39;] if &#39;uuid&#39; in metadata else str(
+            uuid.uuid5(uuid.NAMESPACE_DNS, &#39;kodexa.com&#39;))
+        if &#39;source&#39; in metadata and metadata[&#39;source&#39;]:
+            self.document.source = SourceMetadata.from_dict(metadata[&#39;source&#39;])
+        if &#39;labels&#39; in metadata and metadata[&#39;labels&#39;]:
+            self.document.labels = metadata[&#39;labels&#39;]
+        if &#39;taxomomies&#39; in metadata and metadata[&#39;taxomomies&#39;]:
+            self.document.taxonomies = metadata[&#39;taxomomies&#39;]
+        if &#39;classes&#39; in metadata and metadata[&#39;classes&#39;]:
+            self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                     metadata[&#39;classes&#39;]]
+
+        self.document.content_node = self.__build_node(
+            cursor.execute(&#34;select id, pid, nt, idx from cn where pid is null&#34;).fetchone(),
+            cursor)
+        cursor.close()
+
+    def __build_node(self, node_row, cursor):
+        new_node = ContentNode(self.document, self.node_types[node_row[2]])
+        new_node.uuid = node_row[0]
+        new_node.index = node_row[3]
+
+        content_parts = cursor.execute(&#34;select cn_id, pos, content, content_idx from cnp where cn_id = ? order by pos&#34;,
+                                       [new_node.uuid]).fetchall()
+
+        content = &#34;&#34;
+        for content_part in content_parts:
+            if content_part[3] is None:
+                content = content + content_part[2]
+                new_node.content_parts.append(content_part[2])
+            else:
+                new_node.content_parts.append(content_part[3])
+
+        new_node.content = content
+
+        # We need to get the features back
+        for feature in cursor.execute(&#34;select id, cn_id, f_type, fvalue_id from f where cn_id = ?&#34;,
+                                      [new_node.uuid]).fetchall():
+            feature_type_name = self.feature_type_names[feature[2]]
+            f_value = cursor.execute(&#34;select binary_value, single from f_value where id = ?&#34;, [feature[3]]).fetchone()
+            new_node.add_feature(feature_type_name.split(&#39;:&#39;)[0], feature_type_name.split(&#39;:&#39;)[1],
+                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1)
+
+        # We need to get the child nodes
+        for child_node in cursor.execute(&#34;select id, pid, nt, idx from cn where pid = ?&#34;, [new_node.uuid]).fetchall():
+            new_node.add_child(self.__build_node(child_node, cursor))
+
+        return new_node</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>

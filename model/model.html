@@ -2328,6 +2328,16 @@ class Document(object):
         return content_node
 
     @classmethod
+    def from_kddb(cls, kddb_path):
+        &#34;&#34;&#34;
+        Loads a document from a Kodexa Document Database (KDDB) file
+
+        :param kddb_path: path to the file
+        :return: the document
+        &#34;&#34;&#34;
+        return Document(kddb_path=kddb_path)
+
+    @classmethod
     def from_file(cls, file, unpack: bool = False):
         &#34;&#34;&#34;Creates a Document that has a &#39;file-handle&#39; connector to the specified file.
 
@@ -8910,6 +8920,16 @@ def from_dict(cls, co_dict):
         return content_node
 
     @classmethod
+    def from_kddb(cls, kddb_path):
+        &#34;&#34;&#34;
+        Loads a document from a Kodexa Document Database (KDDB) file
+
+        :param kddb_path: path to the file
+        :return: the document
+        &#34;&#34;&#34;
+        return Document(kddb_path=kddb_path)
+
+    @classmethod
     def from_file(cls, file, unpack: bool = False):
         &#34;&#34;&#34;Creates a Document that has a &#39;file-handle&#39; connector to the specified file.
 
@@ -9166,6 +9186,28 @@ def from_json(json_string):
     &gt;&gt;&gt; Document.from_json(json_string)
     &#34;&#34;&#34;
     return Document.from_dict(json.loads(json_string))</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.Document.from_kddb"><code class="name flex">
+<span>def <span class="ident">from_kddb</span></span>(<span>kddb_path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Loads a document from a Kodexa Document Database (KDDB) file</p>
+<p>:param kddb_path: path to the file
+:return: the document</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_kddb(cls, kddb_path):
+    &#34;&#34;&#34;
+    Loads a document from a Kodexa Document Database (KDDB) file
+
+    :param kddb_path: path to the file
+    :return: the document
+    &#34;&#34;&#34;
+    return Document(kddb_path=kddb_path)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.Document.from_kdxa"><code class="name flex">
@@ -12538,6 +12580,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.Document.from_dict" href="#kodexa.model.model.Document.from_dict">from_dict</a></code></li>
 <li><code><a title="kodexa.model.model.Document.from_file" href="#kodexa.model.model.Document.from_file">from_file</a></code></li>
 <li><code><a title="kodexa.model.model.Document.from_json" href="#kodexa.model.model.Document.from_json">from_json</a></code></li>
+<li><code><a title="kodexa.model.model.Document.from_kddb" href="#kodexa.model.model.Document.from_kddb">from_kddb</a></code></li>
 <li><code><a title="kodexa.model.model.Document.from_kdxa" href="#kodexa.model.model.Document.from_kdxa">from_kdxa</a></code></li>
 <li><code><a title="kodexa.model.model.Document.from_msgpack" href="#kodexa.model.model.Document.from_msgpack">from_msgpack</a></code></li>
 <li><code><a title="kodexa.model.model.Document.from_text" href="#kodexa.model.model.Document.from_text">from_text</a></code></li>
