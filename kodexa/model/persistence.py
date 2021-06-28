@@ -2,10 +2,12 @@ import dataclasses
 import hashlib
 import pathlib
 import sqlite3
+import uuid
 
 import msgpack
 
-from kodexa.model import Document, ContentNode
+from kodexa.model import Document, ContentNode, SourceMetadata
+from kodexa.model.model import ContentClassification, DocumentMetadata
 
 # Heavily used SQL
 
@@ -31,6 +33,10 @@ class SqliteDocumentPersistence(object):
 
     def __init__(self, document: Document, filename: str = None):
         self.document = document
+
+        self.node_types = {}
+        self.feature_type_names = {}
+
         import sqlite3
 
         is_new = True
@@ -39,8 +45,6 @@ class SqliteDocumentPersistence(object):
             if path.exists():
                 # At this point we need to load the db
                 is_new = False
-
-                pass
         else:
             filename = ':memory:'
 
@@ -49,6 +53,8 @@ class SqliteDocumentPersistence(object):
 
         if is_new:
             self.__build_db()
+        else:
+            self.__load_document()
 
     def __build_db(self):
         cursor = self.connection.cursor()
@@ -157,3 +163,67 @@ class SqliteDocumentPersistence(object):
         cursor.execute(VERSION_INSERT)
         cursor.execute(METADATA_DELETE)
         cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])
+
+    def __load_document(self):
+        cursor = self.connection.cursor()
+        for n_type in cursor.execute("select id,name from n_type"):
+            self.node_types[n_type[0]] = n_type[1]
+        for f_type in cursor.execute("select id,name from f_type"):
+            self.feature_type_names[f_type[0]] = f_type[1]
+
+        metadata = msgpack.unpackb(cursor.execute("select * from metadata").fetchone()[1])
+        self.document.metadata = DocumentMetadata(metadata['metadata'])
+        for mixin in metadata['mixins']:
+            from kodexa.mixins import registry
+            registry.add_mixin_to_document(mixin, self.document)
+        self.document.version = metadata['version'] if 'version' in metadata and metadata[
+            'version'] else Document.PREVIOUS_VERSION  # some older docs don't have a version or it's None
+
+        self.uuid = metadata['uuid'] if 'uuid' in metadata else str(
+            uuid.uuid5(uuid.NAMESPACE_DNS, 'kodexa.com'))
+        if 'source' in metadata and metadata['source']:
+            self.document.source = SourceMetadata.from_dict(metadata['source'])
+        if 'labels' in metadata and metadata['labels']:
+            self.document.labels = metadata['labels']
+        if 'taxomomies' in metadata and metadata['taxomomies']:
+            self.document.taxonomies = metadata['taxomomies']
+        if 'classes' in metadata and metadata['classes']:
+            self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
+                                     metadata['classes']]
+
+        self.document.content_node = self.__build_node(
+            cursor.execute("select id, pid, nt, idx from cn where pid is null").fetchone(),
+            cursor)
+        cursor.close()
+
+    def __build_node(self, node_row, cursor):
+        new_node = ContentNode(self.document, self.node_types[node_row[2]])
+        new_node.uuid = node_row[0]
+        new_node.index = node_row[3]
+
+        content_parts = cursor.execute("select cn_id, pos, content, content_idx from cnp where cn_id = ? order by pos",
+                                       [new_node.uuid]).fetchall()
+
+        content = ""
+        for content_part in content_parts:
+            if content_part[3] is None:
+                content = content + content_part[2]
+                new_node.content_parts.append(content_part[2])
+            else:
+                new_node.content_parts.append(content_part[3])
+
+        new_node.content = content
+
+        # We need to get the features back
+        for feature in cursor.execute("select id, cn_id, f_type, fvalue_id from f where cn_id = ?",
+                                      [new_node.uuid]).fetchall():
+            feature_type_name = self.feature_type_names[feature[2]]
+            f_value = cursor.execute("select binary_value, single from f_value where id = ?", [feature[3]]).fetchone()
+            new_node.add_feature(feature_type_name.split(':')[0], feature_type_name.split(':')[1],
+                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1)
+
+        # We need to get the child nodes
+        for child_node in cursor.execute("select id, pid, nt, idx from cn where pid = ?", [new_node.uuid]).fetchall():
+            new_node.add_child(self.__build_node(child_node, cursor))
+
+        return new_node
