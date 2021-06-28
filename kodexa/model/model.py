@@ -2299,6 +2299,16 @@ class Document(object):
         return content_node
 
     @classmethod
+    def from_kddb(cls, kddb_path):
+        """
+        Loads a document from a Kodexa Document Database (KDDB) file
+
+        :param kddb_path: path to the file
+        :return: the document
+        """
+        return Document(kddb_path=kddb_path)
+
+    @classmethod
     def from_file(cls, file, unpack: bool = False):
         """Creates a Document that has a 'file-handle' connector to the specified file.
 
