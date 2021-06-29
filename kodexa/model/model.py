@@ -1981,7 +1981,8 @@ class Document(object):
 
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
-        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self, filename=kddb_path)
+        self.__persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
+                                                                                        filename=kddb_path)
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
@@ -2074,7 +2075,8 @@ class Document(object):
         if Path(file_path).exists():
             Path(file_path).unlink()
 
-        self.persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self, filename=file_path)
+        self.__persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
+                                                                                        filename=file_path)
 
     def to_kdxa(self, file_path: str):
         """Write the document to the kdxa format (msgpack) which can be
@@ -2103,6 +2105,16 @@ class Document(object):
         :return: The Document instance
         """
         return Document(kddb_path=file_path)
+
+    def close(self):
+        """
+        Close the document and clean up the resources
+        """
+        self.__persistence_layer.close()s
+
+    def to_kddb(self):
+        """Convert this document object structure into a KDDB and return a bytes-like object"""
+        return self.__persistence_layer.get_bytes()
 
     @staticmethod
     def from_kdxa(file_path):

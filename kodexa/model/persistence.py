@@ -2,6 +2,7 @@ import dataclasses
 import hashlib
 import pathlib
 import sqlite3
+import tempfile
 import uuid
 
 import msgpack
@@ -41,12 +42,14 @@ class SqliteDocumentPersistence(object):
 
         is_new = True
         if filename is not None:
+            self.is_tmp = False
             path = pathlib.Path(filename)
             if path.exists():
                 # At this point we need to load the db
                 is_new = False
         else:
-            filename = ':memory:'
+            new_file, filename = tempfile.mkstemp()
+            self.is_tmp = True
 
         self.current_filename = filename
         self.connection = sqlite3.connect(filename)
@@ -55,6 +58,10 @@ class SqliteDocumentPersistence(object):
             self.__build_db()
         else:
             self.__load_document()
+
+    def close(self):
+        if self.is_tmp:
+            pathlib.Path(self.current_filename).unlink()
 
     def __build_db(self):
         cursor = self.connection.cursor()
@@ -227,3 +234,7 @@ class SqliteDocumentPersistence(object):
             new_node.add_child(self.__build_node(child_node, cursor))
 
         return new_node
+
+    def get_bytes(self):
+        with open(self.current_filename, 'rb') as f:
+            return f.read()
