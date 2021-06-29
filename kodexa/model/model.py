@@ -2110,7 +2110,7 @@ class Document(object):
         """
         Close the document and clean up the resources
         """
-        self.__persistence_layer.close()s
+        self.__persistence_layer.close()
 
     def to_kddb(self):
         """Convert this document object structure into a KDDB and return a bytes-like object"""
