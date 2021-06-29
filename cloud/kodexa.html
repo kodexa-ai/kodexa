@@ -869,16 +869,16 @@ class RemoteSession:
         if attach_source:
             logger.debug(&#34;Attaching source to call&#34;)
             files[&#34;file&#34;] = get_source(document)
-            files[&#34;file_document&#34;] = document.to_msgpack()
+            files[&#34;file_document&#34;] = document.to_kddb()
         else:
-            files[&#34;document&#34;] = document.to_msgpack()
+            files[&#34;document&#34;] = document.to_kddb()
 
         data = {&#34;options&#34;: json.dumps(options), &#34;document_metadata_json&#34;: json.dumps(document.metadata),
                 &#34;context&#34;: json.dumps(context.context)}
 
         logger.info(f&#34;Executing session {self.cloud_session.id}&#34;)
         r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute&#34;,
-                          params={self.session_type: self.slug},
+                          params={self.session_type: self.slug, &#34;documentVersion&#34;: document.version},
                           data=data,
                           headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()}, files=files)
         try:
@@ -3908,16 +3908,16 @@ sink</p>
         if attach_source:
             logger.debug(&#34;Attaching source to call&#34;)
             files[&#34;file&#34;] = get_source(document)
-            files[&#34;file_document&#34;] = document.to_msgpack()
+            files[&#34;file_document&#34;] = document.to_kddb()
         else:
-            files[&#34;document&#34;] = document.to_msgpack()
+            files[&#34;document&#34;] = document.to_kddb()
 
         data = {&#34;options&#34;: json.dumps(options), &#34;document_metadata_json&#34;: json.dumps(document.metadata),
                 &#34;context&#34;: json.dumps(context.context)}
 
         logger.info(f&#34;Executing session {self.cloud_session.id}&#34;)
         r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute&#34;,
-                          params={self.session_type: self.slug},
+                          params={self.session_type: self.slug, &#34;documentVersion&#34;: document.version},
                           data=data,
                           headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()}, files=files)
         try:
@@ -4069,16 +4069,16 @@ Returns:</p></div>
     if attach_source:
         logger.debug(&#34;Attaching source to call&#34;)
         files[&#34;file&#34;] = get_source(document)
-        files[&#34;file_document&#34;] = document.to_msgpack()
+        files[&#34;file_document&#34;] = document.to_kddb()
     else:
-        files[&#34;document&#34;] = document.to_msgpack()
+        files[&#34;document&#34;] = document.to_kddb()
 
     data = {&#34;options&#34;: json.dumps(options), &#34;document_metadata_json&#34;: json.dumps(document.metadata),
             &#34;context&#34;: json.dumps(context.context)}
 
     logger.info(f&#34;Executing session {self.cloud_session.id}&#34;)
     r = requests.post(f&#34;{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute&#34;,
-                      params={self.session_type: self.slug},
+                      params={self.session_type: self.slug, &#34;documentVersion&#34;: document.version},
                       data=data,
                       headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()}, files=files)
     try:

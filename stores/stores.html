@@ -368,8 +368,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.info(f&#34;Putting document to family id {document_family_id}&#34;)
 
             data = {&#39;transitionType&#39;: transition.transition_type.value,
+                    &#39;documentVersion&#39;: document.version,
                     &#39;sourceContentObjectId&#39;: transition.source_content_object_id}
-            files = {&#34;document&#34;: document.to_msgpack()}
+            files = {&#34;document&#34;: document.to_kddb()}
             document_family_response = requests.post(
                 f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families/{document_family_id}/objects&#34;,
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
@@ -424,9 +425,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         try:
             logger.info(f&#34;Replacing document in family {document_family.id} content object {content_object_id}&#34;)
 
-            files = {&#34;document&#34;: document.to_msgpack()}
+            files = {&#34;document&#34;: document.to_kddb()}
             content_object_replace = requests.put(
                 f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families/{document_family.id}/objects/{content_object_id}/content&#34;,
+
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
                 files=files)
 
@@ -447,8 +449,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         try:
             logger.info(f&#34;Putting document to path {path}&#34;)
 
-            files = {&#34;document&#34;: document.to_msgpack()}
-            data = {&#34;path&#34;: path}
+            files = {&#34;document&#34;: document.to_kddb()}
+            data = {&#34;path&#34;: path, &#34;documentVersion&#34;: document.version}
             document_family_response = requests.post(
                 f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/fs/{path}&#34;,
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
@@ -940,8 +942,9 @@ in an instance of the Kodexa platform</p></div>
             logger.info(f&#34;Putting document to family id {document_family_id}&#34;)
 
             data = {&#39;transitionType&#39;: transition.transition_type.value,
+                    &#39;documentVersion&#39;: document.version,
                     &#39;sourceContentObjectId&#39;: transition.source_content_object_id}
-            files = {&#34;document&#34;: document.to_msgpack()}
+            files = {&#34;document&#34;: document.to_kddb()}
             document_family_response = requests.post(
                 f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families/{document_family_id}/objects&#34;,
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
@@ -996,9 +999,10 @@ in an instance of the Kodexa platform</p></div>
         try:
             logger.info(f&#34;Replacing document in family {document_family.id} content object {content_object_id}&#34;)
 
-            files = {&#34;document&#34;: document.to_msgpack()}
+            files = {&#34;document&#34;: document.to_kddb()}
             content_object_replace = requests.put(
                 f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/families/{document_family.id}/objects/{content_object_id}/content&#34;,
+
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
                 files=files)
 
@@ -1019,8 +1023,8 @@ in an instance of the Kodexa platform</p></div>
         try:
             logger.info(f&#34;Putting document to path {path}&#34;)
 
-            files = {&#34;document&#34;: document.to_msgpack()}
-            data = {&#34;path&#34;: path}
+            files = {&#34;document&#34;: document.to_kddb()}
+            data = {&#34;path&#34;: path, &#34;documentVersion&#34;: document.version}
             document_family_response = requests.post(
                 f&#34;{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(&#39;:&#39;, &#39;/&#39;)}/fs/{path}&#34;,
                 headers={&#34;x-access-token&#34;: KodexaPlatform.get_access_token()},
