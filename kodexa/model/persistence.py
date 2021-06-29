@@ -32,11 +32,12 @@ class SqliteDocumentPersistence(object):
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     """
 
-    def __init__(self, document: Document, filename: str = None):
+    def __init__(self, document: Document, filename: str = None, delete_on_close=False):
         self.document = document
 
         self.node_types = {}
         self.feature_type_names = {}
+        self.delete_on_close = delete_on_close
 
         import sqlite3
 
@@ -60,7 +61,7 @@ class SqliteDocumentPersistence(object):
             self.__load_document()
 
     def close(self):
-        if self.is_tmp:
+        if self.is_tmp or self.delete_on_close:
             pathlib.Path(self.current_filename).unlink()
 
     def __build_db(self):
