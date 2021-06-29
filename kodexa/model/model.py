@@ -1937,7 +1937,7 @@ class Document(object):
         return f"kodexa://{self.uuid}"
 
     def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
-                 kddb_path: str = None):
+                 kddb_path: str = None, delete_on_close=False):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -1945,6 +1945,8 @@ class Document(object):
 
         # Mix-ins are going away - so we will allow people to turn them off as needed
         self.disable_mixin_methods = False
+
+        self.delete_on_close = delete_on_close
 
         # The ref is not stored and is used when we have
         # initialized a document from a remote store and want
@@ -1983,7 +1985,8 @@ class Document(object):
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
         self.__persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
-                                                                                        filename=kddb_path)
+                                                                                        filename=kddb_path,
+                                                                                        delete_on_close=delete_on_close)
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
@@ -2312,14 +2315,23 @@ class Document(object):
         return content_node
 
     @classmethod
-    def from_kddb(cls, kddb_path):
+    def from_kddb(cls, input):
         """
         Loads a document from a Kodexa Document Database (KDDB) file
 
-        :param kddb_path: path to the file
+        :param input: if a string we will load the file at that path, if bytes we will create a temp file and
+                    load the KDDB to it
         :return: the document
         """
-        return Document(kddb_path=kddb_path)
+        if isinstance(input, str):
+            return Document(kddb_path=input)
+        else:
+            # We will assume the input is of byte type
+            import tempfile
+            fp, filename = tempfile.TemporaryFile()
+            fp.write(input)
+            fp.close()
+            return Document(kddb_path=filename, delete_on_close=True)
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
