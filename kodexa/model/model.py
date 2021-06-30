@@ -2328,10 +2328,10 @@ class Document(object):
         else:
             # We will assume the input is of byte type
             import tempfile
-            fp, filename = tempfile.TemporaryFile()
+            fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False)
             fp.write(input)
             fp.close()
-            return Document(kddb_path=filename, delete_on_close=True)
+            return Document(kddb_path=fp.name, delete_on_close=True)
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
