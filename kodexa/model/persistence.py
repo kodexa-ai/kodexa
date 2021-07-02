@@ -241,10 +241,10 @@ class SqliteDocumentPersistence(object):
 
     def __rebuild_from_document(self):
         cursor = self.connection.cursor()
-        cursor.execute("TRUNCATE TABLE cn")
-        cursor.execute("TRUNCATE TABLE cnp")
-        cursor.execute("TRUNCATE TABLE f")
-        cursor.execute("TRUNCATE TABLE f_value")
+        cursor.execute("DELETE FROM cn")
+        cursor.execute("DELETE FROM cnp")
+        cursor.execute("DELETE FROM f")
+        cursor.execute("DELETE FROM f_value")
 
         self.__update_metadata(cursor)
         if self.document.content_node:
