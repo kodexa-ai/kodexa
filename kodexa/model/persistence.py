@@ -250,6 +250,8 @@ class SqliteDocumentPersistence(object):
         if self.document.content_node:
             self.__insert_node(self.document.content_node, cursor)
 
+        cursor.close()
+
     def get_bytes(self):
 
         # TODO we need to make this an option?
