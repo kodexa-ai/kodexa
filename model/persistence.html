@@ -269,10 +269,10 @@ class SqliteDocumentPersistence(object):
 
     def __rebuild_from_document(self):
         cursor = self.connection.cursor()
-        cursor.execute(&#34;TRUNCATE TABLE cn&#34;)
-        cursor.execute(&#34;TRUNCATE TABLE cnp&#34;)
-        cursor.execute(&#34;TRUNCATE TABLE f&#34;)
-        cursor.execute(&#34;TRUNCATE TABLE f_value&#34;)
+        cursor.execute(&#34;DELETE FROM cn&#34;)
+        cursor.execute(&#34;DELETE FROM cnp&#34;)
+        cursor.execute(&#34;DELETE FROM f&#34;)
+        cursor.execute(&#34;DELETE FROM f_value&#34;)
 
         self.__update_metadata(cursor)
         if self.document.content_node:
@@ -522,10 +522,10 @@ class SqliteDocumentPersistence(object):
 
     def __rebuild_from_document(self):
         cursor = self.connection.cursor()
-        cursor.execute(&#34;TRUNCATE TABLE cn&#34;)
-        cursor.execute(&#34;TRUNCATE TABLE cnp&#34;)
-        cursor.execute(&#34;TRUNCATE TABLE f&#34;)
-        cursor.execute(&#34;TRUNCATE TABLE f_value&#34;)
+        cursor.execute(&#34;DELETE FROM cn&#34;)
+        cursor.execute(&#34;DELETE FROM cnp&#34;)
+        cursor.execute(&#34;DELETE FROM f&#34;)
+        cursor.execute(&#34;DELETE FROM f_value&#34;)
 
         self.__update_metadata(cursor)
         if self.document.content_node:
