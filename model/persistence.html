@@ -227,9 +227,11 @@ class SqliteDocumentPersistence(object):
             self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
                                      metadata[&#39;classes&#39;]]
 
-        self.document.content_node = self.__build_node(
-            cursor.execute(&#34;select id, pid, nt, idx from cn where pid is null&#34;).fetchone(),
-            cursor)
+        root_node = cursor.execute(&#34;select id, pid, nt, idx from cn where pid is null&#34;).fetchone()
+        if root_node:
+            self.document.content_node = self.__build_node(
+                root_node,
+                cursor)
         cursor.close()
 
     def __build_node(self, node_row, cursor):
@@ -460,9 +462,11 @@ class SqliteDocumentPersistence(object):
             self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
                                      metadata[&#39;classes&#39;]]
 
-        self.document.content_node = self.__build_node(
-            cursor.execute(&#34;select id, pid, nt, idx from cn where pid is null&#34;).fetchone(),
-            cursor)
+        root_node = cursor.execute(&#34;select id, pid, nt, idx from cn where pid is null&#34;).fetchone()
+        if root_node:
+            self.document.content_node = self.__build_node(
+                root_node,
+                cursor)
         cursor.close()
 
     def __build_node(self, node_row, cursor):
