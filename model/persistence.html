@@ -82,6 +82,7 @@ class SqliteDocumentPersistence(object):
 
         self.current_filename = filename
         self.connection = sqlite3.connect(filename)
+        self.connection.execute(&#34;PRAGMA journal_mode=OFF;&#34;)
 
         if is_new:
             self.__build_db()
@@ -266,7 +267,22 @@ class SqliteDocumentPersistence(object):
 
         return new_node
 
+    def __rebuild_from_document(self):
+        cursor = self.connection.cursor()
+        cursor.execute(&#34;TRUNCATE TABLE cn&#34;)
+        cursor.execute(&#34;TRUNCATE TABLE cnp&#34;)
+        cursor.execute(&#34;TRUNCATE TABLE f&#34;)
+        cursor.execute(&#34;TRUNCATE TABLE f_value&#34;)
+
+        self.__update_metadata(cursor)
+        if self.document.content_node:
+            self.__insert_node(self.document.content_node, cursor)
+
     def get_bytes(self):
+
+        # TODO we need to make this an option?
+        self.__rebuild_from_document()
+
         with open(self.current_filename, &#39;rb&#39;) as f:
             return f.read()</code></pre>
 </details>
@@ -317,6 +333,7 @@ class SqliteDocumentPersistence(object):
 
         self.current_filename = filename
         self.connection = sqlite3.connect(filename)
+        self.connection.execute(&#34;PRAGMA journal_mode=OFF;&#34;)
 
         if is_new:
             self.__build_db()
@@ -501,7 +518,22 @@ class SqliteDocumentPersistence(object):
 
         return new_node
 
+    def __rebuild_from_document(self):
+        cursor = self.connection.cursor()
+        cursor.execute(&#34;TRUNCATE TABLE cn&#34;)
+        cursor.execute(&#34;TRUNCATE TABLE cnp&#34;)
+        cursor.execute(&#34;TRUNCATE TABLE f&#34;)
+        cursor.execute(&#34;TRUNCATE TABLE f_value&#34;)
+
+        self.__update_metadata(cursor)
+        if self.document.content_node:
+            self.__insert_node(self.document.content_node, cursor)
+
     def get_bytes(self):
+
+        # TODO we need to make this an option?
+        self.__rebuild_from_document()
+
         with open(self.current_filename, &#39;rb&#39;) as f:
             return f.read()</code></pre>
 </details>
@@ -545,6 +577,10 @@ class SqliteDocumentPersistence(object):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_bytes(self):
+
+    # TODO we need to make this an option?
+    self.__rebuild_from_document()
+
     with open(self.current_filename, &#39;rb&#39;) as f:
         return f.read()</code></pre>
 </details>
