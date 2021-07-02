@@ -199,9 +199,11 @@ class SqliteDocumentPersistence(object):
             self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
                                      metadata['classes']]
 
-        self.document.content_node = self.__build_node(
-            cursor.execute("select id, pid, nt, idx from cn where pid is null").fetchone(),
-            cursor)
+        root_node = cursor.execute("select id, pid, nt, idx from cn where pid is null").fetchone()
+        if root_node:
+            self.document.content_node = self.__build_node(
+                root_node,
+                cursor)
         cursor.close()
 
     def __build_node(self, node_row, cursor):
