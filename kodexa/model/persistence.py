@@ -54,6 +54,7 @@ class SqliteDocumentPersistence(object):
 
         self.current_filename = filename
         self.connection = sqlite3.connect(filename)
+        self.connection.execute("PRAGMA journal_mode=OFF;")
 
         if is_new:
             self.__build_db()
@@ -238,6 +239,21 @@ class SqliteDocumentPersistence(object):
 
         return new_node
 
+    def __rebuild_from_document(self):
+        cursor = self.connection.cursor()
+        cursor.execute("TRUNCATE TABLE cn")
+        cursor.execute("TRUNCATE TABLE cnp")
+        cursor.execute("TRUNCATE TABLE f")
+        cursor.execute("TRUNCATE TABLE f_value")
+
+        self.__update_metadata(cursor)
+        if self.document.content_node:
+            self.__insert_node(self.document.content_node, cursor)
+
     def get_bytes(self):
+
+        # TODO we need to make this an option?
+        self.__rebuild_from_document()
+
         with open(self.current_filename, 'rb') as f:
             return f.read()
