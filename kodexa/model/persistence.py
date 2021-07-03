@@ -54,7 +54,7 @@ class SqliteDocumentPersistence(object):
 
         self.current_filename = filename
         self.connection = sqlite3.connect(filename)
-        self.connection.execute("PRAGMA journal_mode=OFF;")
+        self.connection.execute("PRAGMA journal_mode=OFF")
 
         if is_new:
             self.__build_db()
@@ -161,7 +161,7 @@ class SqliteDocumentPersistence(object):
         return clean
 
     def __update_metadata(self, cursor):
-        document_metadata = {'version': Document.CURRENT_VERSION, 'metadata': self.document.metadata,
+        document_metadata = {'version': Document.CURRENT_VERSION, 'metadata': self.document.metadata.to_dict(),
                              'source': self.__clean_none_values(dataclasses.asdict(self.document.source)),
                              'mixins': self.document.get_mixins(),
                              'taxonomies': self.document.taxonomies,
@@ -251,6 +251,7 @@ class SqliteDocumentPersistence(object):
             self.__insert_node(self.document.content_node, cursor)
 
         cursor.close()
+        self.connection.commit()
 
     def get_bytes(self):
 
