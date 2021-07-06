@@ -250,7 +250,7 @@ def test_basic_text_pipeline():
     pipeline.run()
     doc = pipeline.context.output_document
 
-    assert len(doc.get_root().get_all_content()) == 743
+    assert len(doc.get_root().get_all_content()) == 742
 
 
 # TODO having problems with CI

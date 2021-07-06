@@ -1,10 +1,10 @@
-setuptools==46.1.3
-twine==3.1.1
+setuptools~=46.1.3
+twine~=3.1.1
 texttable
-addict==2.2.1
-requests>=2.25.0
-msgpack==1.0.0
-urllib3>=1.26.5
+addict~=2.2.1
+requests
+msgpack~=1.0.0
+urllib3
 wheel
 ply
 pytest
@@ -14,7 +14,7 @@ pyyaml
 anytree
 mypy
 simpleeval
-deepdiff==5.0.2
+deepdiff~=5.0.2
 click
 jinja2
 flake8

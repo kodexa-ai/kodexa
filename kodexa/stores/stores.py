@@ -339,8 +339,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.info(f"Putting document to family id {document_family_id}")
 
             data = {'transitionType': transition.transition_type.value,
+                    'documentVersion': document.version,
                     'sourceContentObjectId': transition.source_content_object_id}
-            files = {"document": document.to_msgpack()}
+            files = {"document": document.to_kddb()}
             document_family_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}/objects",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
@@ -395,9 +396,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         try:
             logger.info(f"Replacing document in family {document_family.id} content object {content_object_id}")
 
-            files = {"document": document.to_msgpack()}
+            files = {"document": document.to_kddb()}
             content_object_replace = requests.put(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content",
+
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files)
 
@@ -418,8 +420,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         try:
             logger.info(f"Putting document to path {path}")
 
-            files = {"document": document.to_msgpack()}
-            data = {"path": path}
+            files = {"document": document.to_kddb()}
+            data = {"path": path, "documentVersion": document.version}
             document_family_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},

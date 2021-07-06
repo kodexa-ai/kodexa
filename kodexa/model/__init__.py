@@ -14,3 +14,4 @@ Document families allow the organization of documents based on transitions and a
 from .model import ContentEvent, ContentFeature, ContentNode, ContentObject, ContentType, Document, DocumentActor, \
     DocumentFamily, DocumentMetadata, DocumentStore, DocumentTransition, ModelStore, RemoteStore, SourceMetadata, Store, \
     TransitionType
+from .persistence import SqliteDocumentPersistence

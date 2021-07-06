@@ -10,11 +10,11 @@ import os
 import re
 import uuid
 from enum import Enum
+from pathlib import Path
 from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
-
 from kodexa.mixins import registry
 
 
@@ -663,11 +663,12 @@ class ContentNode(object):
         new_node.children = self.select(selector, variables)
         return new_node
 
-    def get_all_content(self, separator=" "):
+    def get_all_content(self, separator=" ", strip=True):
         """Get this node's content, concatenated with all of its children's content.
 
         Args:
-          separator(str, optional, optional): The separator to use in joining content together; defaults to " ".
+          separator(str, optional): The separator to use in joining content together; defaults to " ".
+          strip(boolean, optional): Strip the result
 
         Returns:
           str: The complete content for this node concatenated with the content of all child nodes.
@@ -680,11 +681,11 @@ class ContentNode(object):
             s += self.get_content()
             s += separator
             for child in self.children:
-                s += child.get_all_content(separator)
+                s += child.get_all_content(separator, strip=strip)
                 s += separator
         elif not self.get_content() and not self.content_parts:
             for child in self.children:
-                s += child.get_all_content(separator)
+                s += child.get_all_content(separator, strip=strip)
                 s += separator
         elif len(self.content_parts) > 0:
             for part in self.content_parts:
@@ -692,10 +693,10 @@ class ContentNode(object):
                     s += part
                     s += separator
                 if isinstance(part, int):
-                    s += self.children[part].get_all_content(separator)
+                    s += self.children[part].get_all_content(separator, strip=strip)
                     s += separator
 
-        return s
+        return s.strip() if strip else s
 
     def move_child_to_parent(self, target_child, target_parent):
         """This will move the target_child, which must be a child of the node, to a new parent.
@@ -965,22 +966,13 @@ class ContentNode(object):
             if existing_tag_values:
                 if type(existing_tag_values) == list:
 
-                    # It's possible to have multiple features with the same tag name that also share the same uuid.
-                    # If we DO have features with the same UUID, we need to make sure that their copies also share the same UUID.
-                    sorted_tag_values = sorted(existing_tag_values, key=lambda k: k['uuid'])
-                    previous_uuid = None
-                    new_uuid = None
-                    for val in sorted_tag_values:
-                        if previous_uuid is None or previous_uuid != val['uuid']:
-                            new_uuid = str(uuid.uuid4())
-
-                        previous_uuid = val['uuid']
-                        tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=new_uuid,
+                    for val in existing_tag_values:
+                        tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=val['uuid'],
                                   data=val['data'])
                         node.add_feature('tag', new_tag_name, tag)
                 else:
                     tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'],
-                              value=existing_tag_values['value'], uuid=str(uuid.uuid4()),
+                              value=existing_tag_values['value'], uuid=existing_tag_values['uuid'],
                               data=existing_tag_values['data'])
                     node.add_feature('tag', new_tag_name, tag)
 
@@ -1076,7 +1068,8 @@ class ContentNode(object):
 
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
-            fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None):
+            fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
+            use_match=True):
         """This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -1102,6 +1095,8 @@ class ContentNode(object):
             If no tag_uuid is provided, a new uuid is generated for each tag instance.
               tag_uuid: str:  (Default value = None)
           confidence: The confidence in the tag (0-1)
+          value: The value you wish to store with the tag, this allows you to provide text that isn't part of the content but represents the data you wish tagged
+          use_match: If True (default) we will use match for regex matching, if False we will use search
 
         Returns:
 
@@ -1127,7 +1122,7 @@ class ContentNode(object):
             else:
                 return str(uuid.uuid4())
 
-        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0):
+        def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
             """
 
             Args:
@@ -1155,18 +1150,18 @@ class ContentNode(object):
                         if start < part_length and end < part_length:
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start, original_end,
-                                                          part[start:end],
+                                                          part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
                             return -1
                         elif start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start,
                                                           content_length + part_length,
-                                                          value=part[start:],
+                                                          value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence))
 
                         # Add the separator
-                        part_length = part_length + 1
+                        part_length = part_length + len(separator)
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1176,13 +1171,13 @@ class ContentNode(object):
                     elif isinstance(part, int):
                         child_node = node_to_check.children[part]
                         result = tag_node_position(child_node, start, end, node_data, tag_uuid,
-                                                   offset=offset)
+                                                   offset=offset, value=value)
                         if result < 0 or (end - result) <= 0:
                             return -1
                         else:
                             # Even if we didn't have anything we have a separator
 
-                            result = result + 1
+                            result = result
                             offset = offset + result
                             end = end - result
                             start = 0 if start - result < 0 else start - result
@@ -1195,46 +1190,47 @@ class ContentNode(object):
                     if start < len(node_to_check.content) and end < len(node_to_check.content):
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start, end,
-                                                      node_to_check.content[start:end],
+                                                      node_to_check.content[start:end] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
                         return -1
                     elif start < len(node_to_check.content) <= end:
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
-                                                      value=node_to_check.content[start:],
+                                                      value=node_to_check.content[start:] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence))
 
-                    end = end - len(node_to_check.content) + len(separator)
                     content_length = len(node_to_check.content) + len(separator)
-                    start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - len(
-                        node_to_check.content) - len(separator)
+                    end = end - content_length
+                    start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - content_length
 
                 for child_node in node_to_check.children:
-                    result = tag_node_position(child_node, start, end, node_data, tag_uuid)
+                    result = tag_node_position(child_node, start, end, node_data, tag_uuid, value=value)
 
                     if result < 0 or (end - result) < 0:
                         return -1
                     else:
                         content_length = content_length + result + len(separator)
-                        end = end - result
-                        start = 0 if start - result < 0 else start - result
+                        end = end - (result + len(separator))
+                        start = 0 if start - (result + len(separator)) < 0 else start - (result + len(separator))
 
-            if len(node_to_check.get_all_content()) != content_length:
-                raise Exception("There is a problem in the structure? Length mismatch")
+            if len(node_to_check.get_all_content(strip=False)) != content_length:
+                raise Exception(
+                    f"There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content(strip=False))} != {content_length})")
             return content_length
 
         if content_re:
-            pattern = re.compile(content_re)
+            pattern = re.compile(content_re.replace(' ', '\s+') if use_all_content and not node_only else content_re)
 
         for node in self.select(selector):
             if fixed_position:
-                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0)
+                tag_node_position(node, fixed_position[0], fixed_position[1], data, get_tag_uuid(tag_uuid), 0,
+                                  value=value)
 
             else:
                 if not content_re:
                     node.add_feature('tag', tag_to_apply,
-                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1242,22 +1238,34 @@ class ContentNode(object):
                         else:
                             content = None
                     else:
-                        content = node.get_all_content(separator=separator)
+                        content = node.get_all_content(separator=separator,
+                                                       strip=False) if not node_only else node.get_all_content(
+                            separator=separator)
 
                     if content is not None:
-                        matches = pattern.finditer(content)
+                        if use_match:
+                            matches = pattern.finditer(content)
 
-                        if node_only:
-                            # If we are only tagging the node we
-                            # simply need to know if there are any matches
-                            if any(True for _ in matches):
-                                node.add_feature('tag', tag_to_apply,
-                                                 Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence))
+                            if node_only:
+                                if any(True for _ in matches):
+                                    node.add_feature('tag', tag_to_apply,
+                                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
+                                                         value=value))
+                            else:
+                                if matches:
+                                    for match in matches:
+                                        start_offset = match.span()[0]
+                                        end_offset = match.span()[1]
+                                        tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                          value=value)
+
                         else:
-                            for match in matches:
-                                start_offset = match.span()[0]
-                                end_offset = match.span()[1]
-                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid))
+                            search_match = pattern.search(content)
+                            if search_match is not None:
+                                start_offset = search_match.span()[0]
+                                end_offset = search_match.span()[1]
+                                tag_node_position(node, start_offset, end_offset, data, get_tag_uuid(tag_uuid),
+                                                  value=value)
 
     def get_tags(self):
         """Returns a list of the names of the tags on the given node
@@ -1443,12 +1451,12 @@ class ContentNode(object):
         """
         return len([i.value for i in self.get_features_of_type("tag")]) > 0
 
-    def has_tag(self, tag):
+    def has_tag(self, tag, include_children=False):
         """Determine if this node has a tag with the specified name.
 
         Args:
-          str: tag: The name of the tag.
-          tag:
+          tag(str): The name of the tag.
+          include_children(bool): should we include child nodes
 
         Returns:
           bool: True if node has a tag by the specified name; else, False;
@@ -1461,7 +1469,12 @@ class ContentNode(object):
         for feature in self.get_features():
             if feature.feature_type == 'tag' and feature.name == tag:
                 return True
-        return False
+        result = False
+        if include_children:
+            for child in self.children:
+                if child.has_tag(tag, True):
+                    result = True
+        return result
 
     def find(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=1,
              tag_name_re=None, use_all_content=False):
@@ -1923,7 +1936,8 @@ class Document(object):
     def __str__(self):
         return f"kodexa://{self.uuid}"
 
-    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None):
+    def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
+                 kddb_path: str = None, delete_on_close=False):
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -1931,6 +1945,8 @@ class Document(object):
 
         # Mix-ins are going away - so we will allow people to turn them off as needed
         self.disable_mixin_methods = False
+
+        self.delete_on_close = delete_on_close
 
         # The ref is not stored and is used when we have
         # initialized a document from a remote store and want
@@ -1965,6 +1981,12 @@ class Document(object):
 
         # Make sure we apply all the mixins
         registry.apply_to_document(self)
+
+        # Start persistence layer
+        from kodexa.model import SqliteDocumentPersistence
+        self.__persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
+                                                                                        filename=kddb_path,
+                                                                                        delete_on_close=delete_on_close)
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
@@ -2044,6 +2066,22 @@ class Document(object):
         """Get the root content node for the document (same as content_node)"""
         return self.content_node
 
+    def save_to_kddb(self, file_path: str):
+        """Write the document to a new Kodexa Document Database file
+
+        Args:
+            file_path (str): the file path to write the KDDB file
+            """
+
+        # Re-initialize the persistence layer and delete the file
+        from kodexa.model import SqliteDocumentPersistence
+
+        if Path(file_path).exists():
+            Path(file_path).unlink()
+
+        self.__persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
+                                                                                        filename=file_path)
+
     def to_kdxa(self, file_path: str):
         """Write the document to the kdxa format (msgpack) which can be
         used with the Kodexa platform
@@ -2058,6 +2096,29 @@ class Document(object):
         """
         with open(file_path, 'wb') as outfile:
             msgpack.pack(self.to_dict(), outfile, use_bin_type=True)
+
+    @staticmethod
+    def open_kddb(file_path):
+        """
+        Opens a Kodexa Document Database.
+
+        This is the Kodexa V4 default way to store documents, it provides high-performance
+        and also the ability to handle very large document objects
+
+        :param file_path: The file path
+        :return: The Document instance
+        """
+        return Document(kddb_path=file_path)
+
+    def close(self):
+        """
+        Close the document and clean up the resources
+        """
+        self.__persistence_layer.close()
+
+    def to_kddb(self):
+        """Convert this document object structure into a KDDB and return a bytes-like object"""
+        return self.__persistence_layer.get_bytes()
 
     @staticmethod
     def from_kdxa(file_path):
@@ -2252,6 +2313,25 @@ class Document(object):
                 if callable(add_features_to_virtual_node):
                     add_features_to_virtual_node(content_node)
         return content_node
+
+    @classmethod
+    def from_kddb(cls, input):
+        """
+        Loads a document from a Kodexa Document Database (KDDB) file
+
+        :param input: if a string we will load the file at that path, if bytes we will create a temp file and
+                    load the KDDB to it
+        :return: the document
+        """
+        if isinstance(input, str):
+            return Document(kddb_path=input)
+        else:
+            # We will assume the input is of byte type
+            import tempfile
+            fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False)
+            fp.write(input)
+            fp.close()
+            return Document(kddb_path=fp.name, delete_on_close=True)
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
