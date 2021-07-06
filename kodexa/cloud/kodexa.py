@@ -838,16 +838,16 @@ class RemoteSession:
         if attach_source:
             logger.debug("Attaching source to call")
             files["file"] = get_source(document)
-            files["file_document"] = document.to_msgpack()
+            files["file_document"] = document.to_kddb()
         else:
-            files["document"] = document.to_msgpack()
+            files["document"] = document.to_kddb()
 
         data = {"options": json.dumps(options), "document_metadata_json": json.dumps(document.metadata),
                 "context": json.dumps(context.context)}
 
         logger.info(f"Executing session {self.cloud_session.id}")
         r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
-                          params={self.session_type: self.slug},
+                          params={self.session_type: self.slug, "documentVersion": document.version},
                           data=data,
                           headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files)
         try:
