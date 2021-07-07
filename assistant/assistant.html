@@ -35,6 +35,8 @@ instance of the Kodexa platform
 &#34;&#34;&#34;
 from typing import List, Optional
 
+from kodexa.model import ContentObject, Document
+
 
 class AssistantMetadata:
     &#34;&#34;&#34;
@@ -56,7 +58,7 @@ class AssistantContext:
     from kodexa.model.model import ContentEvent, DocumentStore
 
     def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;,
-                 stores: List[DocumentStore] = []):
+                 stores=None, content_provider=None):
         &#34;&#34;&#34;
         Initialize the context based with a path to the kodexa file
 
@@ -64,11 +66,34 @@ class AssistantContext:
             metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
             stores: A list of the stores that are available to the assistant (note these are local stores usually)
+            content_provider: the content provider will have a get/put content method to allow interaction with caches
         &#34;&#34;&#34;
+        if stores is None:
+            stores = []
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
         self.metadata: AssistantMetadata = metadata
         self.stores = stores
+        self.content_provider = content_provider
+
+    def get_content(self, content_object: ContentObject):
+        &#34;&#34;&#34;
+        Puts a content object using the content provider
+
+        :param content_object: Content Object to put
+        &#34;&#34;&#34;
+        if self.content_provider:
+            self.content_provider.get_content(content_object)
+
+    def put_content(self, content_object: ContentObject, content):
+        &#34;&#34;&#34;
+        Puts the content object and its content based through the content provider
+
+        :param content_object: The content object
+        :param content: the content
+        &#34;&#34;&#34;
+        if self.content_provider:
+            self.content_provider.put_content(content_object, content)
 
     def get_step(self, step: str, options=None):
         &#34;&#34;&#34;
@@ -134,7 +159,8 @@ class AssistantResponse:
     event.
     &#34;&#34;&#34;
 
-    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None,
+                 output_document: Document = None):
         &#34;&#34;&#34;
         Initialize the response from the assistant
 
@@ -143,6 +169,7 @@ class AssistantResponse:
                        event was raised
             text: the to be presented with the response
             available_intents: a list of the available intents that you can return for this document
+            output_document: the output document, if the assistant has created a document directly
         &#34;&#34;&#34;
         if available_intents is None:
             available_intents = []
@@ -157,6 +184,9 @@ class AssistantResponse:
 
         self.available_intents = available_intents
         &#34;&#34;&#34;Any available intentions that the assistant will further respond to&#34;&#34;&#34;
+
+        self.output_document = output_document
+        &#34;&#34;&#34;The output document, if the assistant has directly created one&#34;&#34;&#34;
 
 
 class Assistant:
@@ -302,7 +332,7 @@ the context for the assistant</dd>
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantContext"><code class="flex name class">
 <span>class <span class="ident">AssistantContext</span></span>
-<span>(</span><span>metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>, path_to_kodexa_metadata: str = 'kodexa.yml', stores: List[<a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>] = [])</span>
+<span>(</span><span>metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>, path_to_kodexa_metadata: str = 'kodexa.yml', stores=None, content_provider=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The Assistant Context provides a way to interact with additional services and capabilities
@@ -316,6 +346,8 @@ while processing an event</p>
 <dd>the path to the kodexa.yml (note it can also open a kodexa.json)</dd>
 <dt><strong><code>stores</code></strong></dt>
 <dd>A list of the stores that are available to the assistant (note these are local stores usually)</dd>
+<dt><strong><code>content_provider</code></strong></dt>
+<dd>the content provider will have a get/put content method to allow interaction with caches</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -329,7 +361,7 @@ while processing an event</p>
     from kodexa.model.model import ContentEvent, DocumentStore
 
     def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = &#39;kodexa.yml&#39;,
-                 stores: List[DocumentStore] = []):
+                 stores=None, content_provider=None):
         &#34;&#34;&#34;
         Initialize the context based with a path to the kodexa file
 
@@ -337,11 +369,34 @@ while processing an event</p>
             metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
             stores: A list of the stores that are available to the assistant (note these are local stores usually)
+            content_provider: the content provider will have a get/put content method to allow interaction with caches
         &#34;&#34;&#34;
+        if stores is None:
+            stores = []
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
         self.metadata: AssistantMetadata = metadata
         self.stores = stores
+        self.content_provider = content_provider
+
+    def get_content(self, content_object: ContentObject):
+        &#34;&#34;&#34;
+        Puts a content object using the content provider
+
+        :param content_object: Content Object to put
+        &#34;&#34;&#34;
+        if self.content_provider:
+            self.content_provider.get_content(content_object)
+
+    def put_content(self, content_object: ContentObject, content):
+        &#34;&#34;&#34;
+        Puts the content object and its content based through the content provider
+
+        :param content_object: The content object
+        :param content: the content
+        &#34;&#34;&#34;
+        if self.content_provider:
+            self.content_provider.put_content(content_object, content)
 
     def get_step(self, step: str, options=None):
         &#34;&#34;&#34;
@@ -394,6 +449,26 @@ in a store, and can be relayed for a reaction</p></div>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="kodexa.assistant.assistant.AssistantContext.get_content"><code class="name flex">
+<span>def <span class="ident">get_content</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Puts a content object using the content provider</p>
+<p>:param content_object: Content Object to put</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_content(self, content_object: ContentObject):
+    &#34;&#34;&#34;
+    Puts a content object using the content provider
+
+    :param content_object: Content Object to put
+    &#34;&#34;&#34;
+    if self.content_provider:
+        self.content_provider.get_content(content_object)</code></pre>
+</details>
+</dd>
 <dt id="kodexa.assistant.assistant.AssistantContext.get_step"><code class="name flex">
 <span>def <span class="ident">get_step</span></span>(<span>self, step: str, options=None)</span>
 </code></dt>
@@ -466,6 +541,28 @@ assistant, this allows you to build pipelines when you don't know the owning org
         return RemoteDocumentStore(event.document_family.store_ref)
 
     raise Exception(f&#34;Unable to get store ref {event.document_family.store_ref}&#34;)</code></pre>
+</details>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantContext.put_content"><code class="name flex">
+<span>def <span class="ident">put_content</span></span>(<span>self, content_object: <a title="kodexa.model.model.ContentObject" href="../model/model.html#kodexa.model.model.ContentObject">ContentObject</a>, content)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Puts the content object and its content based through the content provider</p>
+<p>:param content_object: The content object
+:param content: the content</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def put_content(self, content_object: ContentObject, content):
+    &#34;&#34;&#34;
+    Puts the content object and its content based through the content provider
+
+    :param content_object: The content object
+    :param content: the content
+    &#34;&#34;&#34;
+    if self.content_provider:
+        self.content_provider.put_content(content_object, content)</code></pre>
 </details>
 </dd>
 </dl>
@@ -556,7 +653,7 @@ assistant, this allows you to build pipelines when you don't know the owning org
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantResponse"><code class="flex name class">
 <span>class <span class="ident">AssistantResponse</span></span>
-<span>(</span><span>pipelines: List[<a title="kodexa.assistant.assistant.AssistantPipeline" href="#kodexa.assistant.assistant.AssistantPipeline">AssistantPipeline</a>] = None, text: Union[str, NoneType] = None, available_intents=None)</span>
+<span>(</span><span>pipelines: List[<a title="kodexa.assistant.assistant.AssistantPipeline" href="#kodexa.assistant.assistant.AssistantPipeline">AssistantPipeline</a>] = None, text: Union[str, NoneType] = None, available_intents=None, output_document: <a title="kodexa.model.model.Document" href="../model/model.html#kodexa.model.model.Document">Document</a> = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>An assistant response allows you to provide the response from an assistant to a specific
@@ -571,6 +668,8 @@ event was raised</dd>
 <dd>the to be presented with the response</dd>
 <dt><strong><code>available_intents</code></strong></dt>
 <dd>a list of the available intents that you can return for this document</dd>
+<dt><strong><code>output_document</code></strong></dt>
+<dd>the output document, if the assistant has created a document directly</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -582,7 +681,8 @@ event was raised</dd>
     event.
     &#34;&#34;&#34;
 
-    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None,
+                 output_document: Document = None):
         &#34;&#34;&#34;
         Initialize the response from the assistant
 
@@ -591,6 +691,7 @@ event was raised</dd>
                        event was raised
             text: the to be presented with the response
             available_intents: a list of the available intents that you can return for this document
+            output_document: the output document, if the assistant has created a document directly
         &#34;&#34;&#34;
         if available_intents is None:
             available_intents = []
@@ -604,13 +705,20 @@ event was raised</dd>
         &#34;&#34;&#34;The text that will be provided back to the user from the assistant&#34;&#34;&#34;
 
         self.available_intents = available_intents
-        &#34;&#34;&#34;Any available intentions that the assistant will further respond to&#34;&#34;&#34;</code></pre>
+        &#34;&#34;&#34;Any available intentions that the assistant will further respond to&#34;&#34;&#34;
+
+        self.output_document = output_document
+        &#34;&#34;&#34;The output document, if the assistant has directly created one&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
 <dt id="kodexa.assistant.assistant.AssistantResponse.available_intents"><code class="name">var <span class="ident">available_intents</span></code></dt>
 <dd>
 <div class="desc"><p>Any available intentions that the assistant will further respond to</p></div>
+</dd>
+<dt id="kodexa.assistant.assistant.AssistantResponse.output_document"><code class="name">var <span class="ident">output_document</span></code></dt>
+<dd>
+<div class="desc"><p>The output document, if the assistant has directly created one</p></div>
 </dd>
 <dt id="kodexa.assistant.assistant.AssistantResponse.pipelines"><code class="name">var <span class="ident">pipelines</span></code></dt>
 <dd>
@@ -647,11 +755,13 @@ event was raised</dd>
 </li>
 <li>
 <h4><code><a title="kodexa.assistant.assistant.AssistantContext" href="#kodexa.assistant.assistant.AssistantContext">AssistantContext</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="kodexa.assistant.assistant.AssistantContext.ContentEvent" href="#kodexa.assistant.assistant.AssistantContext.ContentEvent">ContentEvent</a></code></li>
 <li><code><a title="kodexa.assistant.assistant.AssistantContext.DocumentStore" href="#kodexa.assistant.assistant.AssistantContext.DocumentStore">DocumentStore</a></code></li>
+<li><code><a title="kodexa.assistant.assistant.AssistantContext.get_content" href="#kodexa.assistant.assistant.AssistantContext.get_content">get_content</a></code></li>
 <li><code><a title="kodexa.assistant.assistant.AssistantContext.get_step" href="#kodexa.assistant.assistant.AssistantContext.get_step">get_step</a></code></li>
 <li><code><a title="kodexa.assistant.assistant.AssistantContext.get_store" href="#kodexa.assistant.assistant.AssistantContext.get_store">get_store</a></code></li>
+<li><code><a title="kodexa.assistant.assistant.AssistantContext.put_content" href="#kodexa.assistant.assistant.AssistantContext.put_content">put_content</a></code></li>
 </ul>
 </li>
 <li>
@@ -675,6 +785,7 @@ event was raised</dd>
 <h4><code><a title="kodexa.assistant.assistant.AssistantResponse" href="#kodexa.assistant.assistant.AssistantResponse">AssistantResponse</a></code></h4>
 <ul class="">
 <li><code><a title="kodexa.assistant.assistant.AssistantResponse.available_intents" href="#kodexa.assistant.assistant.AssistantResponse.available_intents">available_intents</a></code></li>
+<li><code><a title="kodexa.assistant.assistant.AssistantResponse.output_document" href="#kodexa.assistant.assistant.AssistantResponse.output_document">output_document</a></code></li>
 <li><code><a title="kodexa.assistant.assistant.AssistantResponse.pipelines" href="#kodexa.assistant.assistant.AssistantResponse.pipelines">pipelines</a></code></li>
 <li><code><a title="kodexa.assistant.assistant.AssistantResponse.text" href="#kodexa.assistant.assistant.AssistantResponse.text">text</a></code></li>
 </ul>

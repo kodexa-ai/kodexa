@@ -249,7 +249,7 @@ class AssistantTestHarness:
     &#34;&#34;&#34;
 
     def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str,
-                 metadata: AssistantMetadata):
+                 metadata: AssistantMetadata, content_provider=None):
         &#34;&#34;&#34;
         Initialize the test harness
 
@@ -258,11 +258,13 @@ class AssistantTestHarness:
             stores: the list of stores (usually LocalDocumentStore) that we will use to monitor for events
             kodexa_metadata_path (str): the path to the kodexa.yml (or kodexa.json)
             metadata (AssistantMetadata): the assistant metadata to use for this assistant
+            content_provider: optional provider for content
         &#34;&#34;&#34;
         self.assistant = assistant
         self.stores = stores
         self.kodexa_metadata_path = kodexa_metadata_path
         self.metadata = metadata
+        self.content_provider = content_provider
 
         for store in self.stores:
             store.register_listener(self)
@@ -275,7 +277,8 @@ class AssistantTestHarness:
         :return: the response from the event
         &#34;&#34;&#34;
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores,
+                                             self.content_provider)
 
         return self.assistant.process_event(assistant_event, assistant_context)
 
@@ -287,7 +290,8 @@ class AssistantTestHarness:
         :return: the response from the assistant
         &#34;&#34;&#34;
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores,
+                                             self.content_provider)
 
         return self.assistant.process_event(scheduled_event, assistant_context)
 
@@ -827,7 +831,7 @@ to compare the data (usually in a test)</p>
 <dl>
 <dt id="kodexa.testing.test_utils.AssistantTestHarness"><code class="flex name class">
 <span>class <span class="ident">AssistantTestHarness</span></span>
-<span>(</span><span>assistant: <a title="kodexa.assistant.assistant.Assistant" href="../assistant/assistant.html#kodexa.assistant.assistant.Assistant">Assistant</a>, stores: List[<a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>], kodexa_metadata_path: str, metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>)</span>
+<span>(</span><span>assistant: <a title="kodexa.assistant.assistant.Assistant" href="../assistant/assistant.html#kodexa.assistant.assistant.Assistant">Assistant</a>, stores: List[<a title="kodexa.model.model.DocumentStore" href="../model/model.html#kodexa.model.model.DocumentStore">DocumentStore</a>], kodexa_metadata_path: str, metadata: <a title="kodexa.assistant.assistant.AssistantMetadata" href="../assistant/assistant.html#kodexa.assistant.assistant.AssistantMetadata">AssistantMetadata</a>, content_provider=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A test harness to allow the testing of assistants in unit tests and offline for development</p>
@@ -845,6 +849,8 @@ to compare the data (usually in a test)</p>
 <dd>the path to the kodexa.yml (or kodexa.json)</dd>
 <dt><strong><code>metadata</code></strong> :&ensp;<code>AssistantMetadata</code></dt>
 <dd>the assistant metadata to use for this assistant</dd>
+<dt><strong><code>content_provider</code></strong></dt>
+<dd>optional provider for content</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -860,7 +866,7 @@ to compare the data (usually in a test)</p>
     &#34;&#34;&#34;
 
     def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str,
-                 metadata: AssistantMetadata):
+                 metadata: AssistantMetadata, content_provider=None):
         &#34;&#34;&#34;
         Initialize the test harness
 
@@ -869,11 +875,13 @@ to compare the data (usually in a test)</p>
             stores: the list of stores (usually LocalDocumentStore) that we will use to monitor for events
             kodexa_metadata_path (str): the path to the kodexa.yml (or kodexa.json)
             metadata (AssistantMetadata): the assistant metadata to use for this assistant
+            content_provider: optional provider for content
         &#34;&#34;&#34;
         self.assistant = assistant
         self.stores = stores
         self.kodexa_metadata_path = kodexa_metadata_path
         self.metadata = metadata
+        self.content_provider = content_provider
 
         for store in self.stores:
             store.register_listener(self)
@@ -886,7 +894,8 @@ to compare the data (usually in a test)</p>
         :return: the response from the event
         &#34;&#34;&#34;
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores,
+                                             self.content_provider)
 
         return self.assistant.process_event(assistant_event, assistant_context)
 
@@ -898,7 +907,8 @@ to compare the data (usually in a test)</p>
         :return: the response from the assistant
         &#34;&#34;&#34;
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores,
+                                             self.content_provider)
 
         return self.assistant.process_event(scheduled_event, assistant_context)
 
@@ -1108,7 +1118,8 @@ through them in turn (note in the platform this might be in parallel)</p>
     :return: the response from the event
     &#34;&#34;&#34;
     from kodexa import AssistantContext
-    assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+    assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores,
+                                         self.content_provider)
 
     return self.assistant.process_event(assistant_event, assistant_context)</code></pre>
 </details>
@@ -1132,7 +1143,8 @@ through them in turn (note in the platform this might be in parallel)</p>
     :return: the response from the assistant
     &#34;&#34;&#34;
     from kodexa import AssistantContext
-    assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+    assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores,
+                                         self.content_provider)
 
     return self.assistant.process_event(scheduled_event, assistant_context)</code></pre>
 </details>
