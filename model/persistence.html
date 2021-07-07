@@ -113,7 +113,7 @@ class SqliteDocumentPersistence(object):
         cursor.execute(&#34;CREATE INDEX cn_perf ON cn(nt);&#34;)
         cursor.execute(&#34;CREATE INDEX cn_perf2 ON cn(pid);&#34;)
         cursor.execute(&#34;CREATE INDEX cnp_perf ON cnp(cn_id, pos);&#34;)
-        cursor.execute(&#34;CREATE INDEX f_perf ON cnp(cn_id);&#34;)
+        cursor.execute(&#34;CREATE INDEX f_perf ON f(cn_id);&#34;)
         cursor.execute(&#34;CREATE INDEX f_value_hash ON f_value(hash);&#34;)
 
         self.__update_metadata(cursor)
@@ -368,7 +368,7 @@ class SqliteDocumentPersistence(object):
         cursor.execute(&#34;CREATE INDEX cn_perf ON cn(nt);&#34;)
         cursor.execute(&#34;CREATE INDEX cn_perf2 ON cn(pid);&#34;)
         cursor.execute(&#34;CREATE INDEX cnp_perf ON cnp(cn_id, pos);&#34;)
-        cursor.execute(&#34;CREATE INDEX f_perf ON cnp(cn_id);&#34;)
+        cursor.execute(&#34;CREATE INDEX f_perf ON f(cn_id);&#34;)
         cursor.execute(&#34;CREATE INDEX f_value_hash ON f_value(hash);&#34;)
 
         self.__update_metadata(cursor)
