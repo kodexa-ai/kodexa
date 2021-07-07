@@ -260,7 +260,7 @@ class SqliteDocumentPersistence(object):
             feature_type_name = self.feature_type_names[feature[2]]
             f_value = cursor.execute(&#34;select binary_value, single from f_value where id = ?&#34;, [feature[3]]).fetchone()
             new_node.add_feature(feature_type_name.split(&#39;:&#39;)[0], feature_type_name.split(&#39;:&#39;)[1],
-                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1)
+                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1, serialized=True)
 
         # We need to get the child nodes
         for child_node in cursor.execute(&#34;select id, pid, nt, idx from cn where pid = ?&#34;, [new_node.uuid]).fetchall():
@@ -515,7 +515,7 @@ class SqliteDocumentPersistence(object):
             feature_type_name = self.feature_type_names[feature[2]]
             f_value = cursor.execute(&#34;select binary_value, single from f_value where id = ?&#34;, [feature[3]]).fetchone()
             new_node.add_feature(feature_type_name.split(&#39;:&#39;)[0], feature_type_name.split(&#39;:&#39;)[1],
-                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1)
+                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1, serialized=True)
 
         # We need to get the child nodes
         for child_node in cursor.execute(&#34;select id, pid, nt, idx from cn where pid = ?&#34;, [new_node.uuid]).fetchall():
