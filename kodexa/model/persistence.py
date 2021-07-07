@@ -232,7 +232,7 @@ class SqliteDocumentPersistence(object):
             feature_type_name = self.feature_type_names[feature[2]]
             f_value = cursor.execute("select binary_value, single from f_value where id = ?", [feature[3]]).fetchone()
             new_node.add_feature(feature_type_name.split(':')[0], feature_type_name.split(':')[1],
-                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1)
+                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1, serialized=True)
 
         # We need to get the child nodes
         for child_node in cursor.execute("select id, pid, nt, idx from cn where pid = ?", [new_node.uuid]).fetchall():
