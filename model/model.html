@@ -575,16 +575,14 @@ class ContentNode(object):
         &#34;&#34;&#34;
         return list(self._feature_map.values())
 
-    def remove_feature(self, feature_type, name):
+    def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
         &#34;&#34;&#34;Removes the feature with the given name and type from this node.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+          include_children (bool): also remove the feature from nodes children
 
-        Returns:
 
         &gt;&gt;&gt; new_page.remove_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
         &#34;&#34;&#34;
@@ -592,14 +590,16 @@ class ContentNode(object):
         if results:
             del self._feature_map[feature_type + &#34;:&#34; + name]
 
-    def get_feature_value(self, feature_type, name):
+        if include_children:
+            for child in self.get_children():
+                child.remove_feature(feature_type, name, include_children)
+
+    def get_feature_value(self, feature_type: str, name: str) -&gt; Optional[Any]:
         &#34;&#34;&#34;Get the value for a feature with the given name and type on this ContentNode.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
 
         Returns:
           Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
@@ -1852,16 +1852,14 @@ class ContentNode(object):
 class ContentFeature(object):
     &#34;&#34;&#34;A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode&#34;&#34;&#34;
 
-    def __init__(self, feature_type, name, value, description=None, single=True):
-        self.feature_type = feature_type
+    def __init__(self, feature_type: str, name: str, value: Any, single: bool = True):
+        self.feature_type: str = feature_type
         &#34;&#34;&#34;The type of feature, a logical name to group feature types together (ie. spatial)&#34;&#34;&#34;
-        self.name = name
+        self.name: str = name
         &#34;&#34;&#34;The name of the feature (ie. bbox)&#34;&#34;&#34;
-        self.value = value
-        &#34;&#34;&#34;A value of the feature, this can be any JSON serializable data object&#34;&#34;&#34;
-        self.description = description
+        self.value: Any = value
         &#34;&#34;&#34;Description of the feature (Optional)&#34;&#34;&#34;
-        self.single = single
+        self.single: bool = single
         &#34;&#34;&#34;Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false&#34;&#34;&#34;
 
     def __str__(self):
@@ -3571,7 +3569,7 @@ def from_dict(cls, event_dict: dict):
 </dd>
 <dt id="kodexa.model.model.ContentFeature"><code class="flex name class">
 <span>class <span class="ident">ContentFeature</span></span>
-<span>(</span><span>feature_type, name, value, description=None, single=True)</span>
+<span>(</span><span>feature_type: str, name: str, value: Any, single: bool = True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode</p></div>
@@ -3582,16 +3580,14 @@ def from_dict(cls, event_dict: dict):
 <pre><code class="python">class ContentFeature(object):
     &#34;&#34;&#34;A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode&#34;&#34;&#34;
 
-    def __init__(self, feature_type, name, value, description=None, single=True):
-        self.feature_type = feature_type
+    def __init__(self, feature_type: str, name: str, value: Any, single: bool = True):
+        self.feature_type: str = feature_type
         &#34;&#34;&#34;The type of feature, a logical name to group feature types together (ie. spatial)&#34;&#34;&#34;
-        self.name = name
+        self.name: str = name
         &#34;&#34;&#34;The name of the feature (ie. bbox)&#34;&#34;&#34;
-        self.value = value
-        &#34;&#34;&#34;A value of the feature, this can be any JSON serializable data object&#34;&#34;&#34;
-        self.description = description
+        self.value: Any = value
         &#34;&#34;&#34;Description of the feature (Optional)&#34;&#34;&#34;
-        self.single = single
+        self.single: bool = single
         &#34;&#34;&#34;Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false&#34;&#34;&#34;
 
     def __str__(self):
@@ -3619,10 +3615,6 @@ def from_dict(cls, event_dict: dict):
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="kodexa.model.model.ContentFeature.description"><code class="name">var <span class="ident">description</span></code></dt>
-<dd>
-<div class="desc"><p>Description of the feature (Optional)</p></div>
-</dd>
 <dt id="kodexa.model.model.ContentFeature.feature_type"><code class="name">var <span class="ident">feature_type</span></code></dt>
 <dd>
 <div class="desc"><p>The type of feature, a logical name to group feature types together (ie. spatial)</p></div>
@@ -3637,7 +3629,7 @@ def from_dict(cls, event_dict: dict):
 </dd>
 <dt id="kodexa.model.model.ContentFeature.value"><code class="name">var <span class="ident">value</span></code></dt>
 <dd>
-<div class="desc"><p>A value of the feature, this can be any JSON serializable data object</p></div>
+<div class="desc"><p>Description of the feature (Optional)</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -4044,16 +4036,14 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;
         return list(self._feature_map.values())
 
-    def remove_feature(self, feature_type, name):
+    def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
         &#34;&#34;&#34;Removes the feature with the given name and type from this node.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+          include_children (bool): also remove the feature from nodes children
 
-        Returns:
 
         &gt;&gt;&gt; new_page.remove_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
         &#34;&#34;&#34;
@@ -4061,14 +4051,16 @@ ensure that the correct mixins are applied.</p>
         if results:
             del self._feature_map[feature_type + &#34;:&#34; + name]
 
-    def get_feature_value(self, feature_type, name):
+        if include_children:
+            for child in self.get_children():
+                child.remove_feature(feature_type, name, include_children)
+
+    def get_feature_value(self, feature_type: str, name: str) -&gt; Optional[Any]:
         &#34;&#34;&#34;Get the value for a feature with the given name and type on this ContentNode.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
 
         Returns:
           Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
@@ -6332,19 +6324,17 @@ If no feature is found, None is returned.</dd>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_feature_value"><code class="name flex">
-<span>def <span class="ident">get_feature_value</span></span>(<span>self, feature_type, name)</span>
+<span>def <span class="ident">get_feature_value</span></span>(<span>self, feature_type: str, name: str) ‑> Union[Any, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the value for a feature with the given name and type on this ContentNode.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>str</code></strong></dt>
-<dd>feature_type: The type of the feature.</dd>
-<dt><strong><code>str</code></strong></dt>
-<dd>name: The name of the feature.</dd>
+<dt><strong><code>feature_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The type of the feature.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the feature.</dd>
 </dl>
-<p>feature_type:
-name:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>Any</code> or <code>None</code></dt>
@@ -6357,14 +6347,12 @@ name:</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_feature_value(self, feature_type, name):
+<pre><code class="python">def get_feature_value(self, feature_type: str, name: str) -&gt; Optional[Any]:
     &#34;&#34;&#34;Get the value for a feature with the given name and type on this ContentNode.
 
     Args:
-      str: feature_type: The type of the feature.
-      str: name: The name of the feature.
-      feature_type:
-      name:
+      feature_type (str): The type of the feature.
+      name (str): The name of the feature.
 
     Returns:
       Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
@@ -7468,42 +7456,43 @@ traverse(Traverse(enum), optional, optional): The transition you'd like to trave
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.remove_feature"><code class="name flex">
-<span>def <span class="ident">remove_feature</span></span>(<span>self, feature_type, name)</span>
+<span>def <span class="ident">remove_feature</span></span>(<span>self, feature_type: str, name: str, include_children: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Removes the feature with the given name and type from this node.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>str</code></strong></dt>
-<dd>feature_type: The type of the feature.</dd>
-<dt><strong><code>str</code></strong></dt>
-<dd>name: The name of the feature.</dd>
+<dt><strong><code>feature_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The type of the feature.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the feature.</dd>
+<dt><strong><code>include_children</code></strong> :&ensp;<code>bool</code></dt>
+<dd>also remove the feature from nodes children</dd>
 </dl>
-<p>feature_type:
-name:
-Returns:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; new_page.remove_feature('pagination','pageNum')
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def remove_feature(self, feature_type, name):
+<pre><code class="python">def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
     &#34;&#34;&#34;Removes the feature with the given name and type from this node.
 
     Args:
-      str: feature_type: The type of the feature.
-      str: name: The name of the feature.
-      feature_type:
-      name:
+      feature_type (str): The type of the feature.
+      name (str): The name of the feature.
+      include_children (bool): also remove the feature from nodes children
 
-    Returns:
 
     &gt;&gt;&gt; new_page.remove_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
     &#34;&#34;&#34;
     results = self.get_feature(feature_type, name)
     if results:
-        del self._feature_map[feature_type + &#34;:&#34; + name]</code></pre>
+        del self._feature_map[feature_type + &#34;:&#34; + name]
+
+    if include_children:
+        for child in self.get_children():
+            child.remove_feature(feature_type, name, include_children)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.remove_tag"><code class="name flex">
@@ -12548,7 +12537,6 @@ Returns:</p></div>
 <li>
 <h4><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code></h4>
 <ul class="two-column">
-<li><code><a title="kodexa.model.model.ContentFeature.description" href="#kodexa.model.model.ContentFeature.description">description</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.feature_type" href="#kodexa.model.model.ContentFeature.feature_type">feature_type</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.get_value" href="#kodexa.model.model.ContentFeature.get_value">get_value</a></code></li>
 <li><code><a title="kodexa.model.model.ContentFeature.name" href="#kodexa.model.model.ContentFeature.name">name</a></code></li>
