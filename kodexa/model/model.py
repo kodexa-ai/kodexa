@@ -546,16 +546,14 @@ class ContentNode(object):
         """
         return list(self._feature_map.values())
 
-    def remove_feature(self, feature_type, name):
+    def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
         """Removes the feature with the given name and type from this node.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+          include_children (bool): also remove the feature from nodes children
 
-        Returns:
 
         >>> new_page.remove_feature('pagination','pageNum')
         """
@@ -563,14 +561,16 @@ class ContentNode(object):
         if results:
             del self._feature_map[feature_type + ":" + name]
 
-    def get_feature_value(self, feature_type, name):
+        if include_children:
+            for child in self.get_children():
+                child.remove_feature(feature_type, name, include_children)
+
+    def get_feature_value(self, feature_type: str, name: str) -> Optional[Any]:
         """Get the value for a feature with the given name and type on this ContentNode.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
 
         Returns:
           Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
@@ -1823,16 +1823,14 @@ class ContentNode(object):
 class ContentFeature(object):
     """A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode"""
 
-    def __init__(self, feature_type, name, value, description=None, single=True):
-        self.feature_type = feature_type
+    def __init__(self, feature_type: str, name: str, value: Any, single: bool = True):
+        self.feature_type: str = feature_type
         """The type of feature, a logical name to group feature types together (ie. spatial)"""
-        self.name = name
+        self.name: str = name
         """The name of the feature (ie. bbox)"""
-        self.value = value
-        """A value of the feature, this can be any JSON serializable data object"""
-        self.description = description
+        self.value: Any = value
         """Description of the feature (Optional)"""
-        self.single = single
+        self.single: bool = single
         """Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false"""
 
     def __str__(self):
