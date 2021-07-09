@@ -187,6 +187,7 @@ class Tag(Dict):
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
                  uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
+                 index: Optional[int] = None,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
@@ -201,6 +202,8 @@ class Tag(Dict):
         """The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID"""
         self.confidence: Optional[float] = confidence
         """The confidence of the tag in a range of 0-1"""
+        self.index: Optional[int] = index
+        """The tag index, this is used to allow us to order tags, and understand the ordering of parent child tag relationships"""
 
 
 class FindDirection(Enum):
@@ -1069,7 +1072,7 @@ class ContentNode(object):
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
-            use_match=True):
+            use_match=True, index=None):
         """This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
 
@@ -1097,8 +1100,7 @@ class ContentNode(object):
           confidence: The confidence in the tag (0-1)
           value: The value you wish to store with the tag, this allows you to provide text that isn't part of the content but represents the data you wish tagged
           use_match: If True (default) we will use match for regex matching, if False we will use search
-
-        Returns:
+          index: The index for the tag
 
         >>> document.content_node.tag('is_cheese')
         """
@@ -1151,14 +1153,16 @@ class ContentNode(object):
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start, original_end,
                                                           part[start:end] if value is None else value,
-                                                          data=node_data, uuid=tag_uuid, confidence=confidence))
+                                                          data=node_data, uuid=tag_uuid, confidence=confidence,
+                                                          index=index))
                             return -1
                         elif start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start,
                                                           content_length + part_length,
                                                           value=part[start:] if value is None else value,
-                                                          data=node_data, uuid=tag_uuid, confidence=confidence))
+                                                          data=node_data, uuid=tag_uuid, confidence=confidence,
+                                                          index=index))
 
                         # Add the separator
                         part_length = part_length + len(separator)
@@ -1191,14 +1195,16 @@ class ContentNode(object):
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start, end,
                                                       node_to_check.content[start:end] if value is None else value,
-                                                      data=node_data, uuid=tag_uuid, confidence=confidence))
+                                                      data=node_data, uuid=tag_uuid, confidence=confidence,
+                                                      index=index))
                         return -1
                     elif start < len(node_to_check.content) <= end:
                         node_to_check.add_feature('tag', tag_to_apply,
                                                   Tag(start,
                                                       len(node_to_check.content),
                                                       value=node_to_check.content[start:] if value is None else value,
-                                                      data=node_data, uuid=tag_uuid, confidence=confidence))
+                                                      data=node_data, uuid=tag_uuid, confidence=confidence,
+                                                      index=index))
 
                     content_length = len(node_to_check.content) + len(separator)
                     end = end - content_length
@@ -1230,7 +1236,8 @@ class ContentNode(object):
             else:
                 if not content_re:
                     node.add_feature('tag', tag_to_apply,
-                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value))
+                                     Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value,
+                                         index=index))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1250,7 +1257,7 @@ class ContentNode(object):
                                 if any(True for _ in matches):
                                     node.add_feature('tag', tag_to_apply,
                                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
-                                                         value=value))
+                                                         value=value, index=index))
                             else:
                                 if matches:
                                     for match in matches:
