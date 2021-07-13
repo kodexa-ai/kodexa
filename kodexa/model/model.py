@@ -1206,7 +1206,7 @@ class ContentNode(object):
                                                       data=node_data, uuid=tag_uuid, confidence=confidence,
                                                       index=index))
 
-                    content_length = len(node_to_check.content) + len(separator)
+                    content_lengtlh = len(node_to_check.content) + len(separator)
                     end = end - content_length
                     start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - content_length
 

@@ -364,7 +364,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             Optional[Document]:
         get_response = self._base_get(
             f"api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object.id}/content")
-        return Document.from_msgpack(get_response.content) if get_response is not None else None
+        return Document.from_kddb(get_response.content) if get_response is not None else None
 
     def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
             Any:
@@ -478,7 +478,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         get_response = self._base_get(
             f"api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content")
         if get_response is not None:
-            return Document.from_msgpack(get_response.content)
+            return Document.from_kddb(get_response.content)
         else:
             return None
 
