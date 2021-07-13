@@ -190,7 +190,7 @@ def test_basic_tagging():
     assert isinstance(doc.content_node.get_tag('cheese'), list)
 
 
-def test_basic_tagging():
+def test_basic_tagging2():
     doc = Document.from_text('It is going to be a great day')
     doc.content_node.tag('cheese', fixed_position=[1, 2])
     assert isinstance(doc.content_node.get_tag('cheese'), list)

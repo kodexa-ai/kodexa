@@ -4,6 +4,8 @@ instance of the Kodexa platform
 """
 from typing import List, Optional
 
+from kodexa.model import ContentObject, Document
+
 
 class AssistantMetadata:
     """
@@ -25,7 +27,7 @@ class AssistantContext:
     from kodexa.model.model import ContentEvent, DocumentStore
 
     def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = 'kodexa.yml',
-                 stores: List[DocumentStore] = []):
+                 stores=None, content_provider=None):
         """
         Initialize the context based with a path to the kodexa file
 
@@ -33,11 +35,34 @@ class AssistantContext:
             metadata (AssistantMetadata): metadata for the assistant being setup in context
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
             stores: A list of the stores that are available to the assistant (note these are local stores usually)
+            content_provider: the content provider will have a get/put content method to allow interaction with caches
         """
+        if stores is None:
+            stores = []
         from kodexa.testing import ExtensionPackUtil
         self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
         self.metadata: AssistantMetadata = metadata
         self.stores = stores
+        self.content_provider = content_provider
+
+    def get_content(self, content_object: ContentObject):
+        """
+        Puts a content object using the content provider
+
+        :param content_object: Content Object to put
+        """
+        if self.content_provider:
+            self.content_provider.get_content(content_object)
+
+    def put_content(self, content_object: ContentObject, content):
+        """
+        Puts the content object and its content based through the content provider
+
+        :param content_object: The content object
+        :param content: the content
+        """
+        if self.content_provider:
+            self.content_provider.put_content(content_object, content)
 
     def get_step(self, step: str, options=None):
         """
@@ -103,7 +128,8 @@ class AssistantResponse:
     event.
     """
 
-    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None,
+                 output_document: Document = None):
         """
         Initialize the response from the assistant
 
@@ -112,6 +138,7 @@ class AssistantResponse:
                        event was raised
             text: the to be presented with the response
             available_intents: a list of the available intents that you can return for this document
+            output_document: the output document, if the assistant has created a document directly
         """
         if available_intents is None:
             available_intents = []
@@ -126,6 +153,9 @@ class AssistantResponse:
 
         self.available_intents = available_intents
         """Any available intentions that the assistant will further respond to"""
+
+        self.output_document = output_document
+        """The output document, if the assistant has directly created one"""
 
 
 class Assistant:

@@ -221,7 +221,7 @@ class AssistantTestHarness:
     """
 
     def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str,
-                 metadata: AssistantMetadata):
+                 metadata: AssistantMetadata, content_provider=None):
         """
         Initialize the test harness
 
@@ -230,11 +230,13 @@ class AssistantTestHarness:
             stores: the list of stores (usually LocalDocumentStore) that we will use to monitor for events
             kodexa_metadata_path (str): the path to the kodexa.yml (or kodexa.json)
             metadata (AssistantMetadata): the assistant metadata to use for this assistant
+            content_provider: optional provider for content
         """
         self.assistant = assistant
         self.stores = stores
         self.kodexa_metadata_path = kodexa_metadata_path
         self.metadata = metadata
+        self.content_provider = content_provider
 
         for store in self.stores:
             store.register_listener(self)
@@ -247,7 +249,8 @@ class AssistantTestHarness:
         :return: the response from the event
         """
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores,
+                                             self.content_provider)
 
         return self.assistant.process_event(assistant_event, assistant_context)
 
@@ -259,7 +262,8 @@ class AssistantTestHarness:
         :return: the response from the assistant
         """
         from kodexa import AssistantContext
-        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores)
+        assistant_context = AssistantContext(self.metadata, self.kodexa_metadata_path, self.stores,
+                                             self.content_provider)
 
         return self.assistant.process_event(scheduled_event, assistant_context)
 
