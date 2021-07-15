@@ -44,6 +44,7 @@ from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
+
 from kodexa.mixins import registry
 
 
@@ -452,14 +453,11 @@ class ContentNode(object):
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
         Args:
-          str: feature_type: The type of feature to be added to the node.
-          str: name: The name of the feature.
-          Any: value: The value of the feature.
-          single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
-          serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-          feature_type:
-          name:
-          value:
+          feature_type (str): The type of feature to be added to the node.
+          name (str): The name of the feature.
+          value (Any): The value of the feature.
+          single(boolean): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
+          serialized(boolean): Indicates that the value is/is not already serialized; defaults to False.
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -522,18 +520,19 @@ class ContentNode(object):
         &#34;&#34;&#34;Gets the value for the given feature.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+
 
         Returns:
           ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
+          Note that if there are more than one instance of the feature you will only get the first one
 
         &gt;&gt;&gt; new_page.get_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
            1
         &#34;&#34;&#34;
         return self._feature_map[feature_type + &#34;:&#34; + name] if feature_type + &#34;:&#34; + name in self._feature_map else None
+
 
     def get_features_of_type(self, feature_type):
         &#34;&#34;&#34;Get all features of a specific type.
@@ -605,7 +604,8 @@ class ContentNode(object):
           name (str): The name of the feature.
 
         Returns:
-          Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
+          Any or None: The value of the feature if it exists on this ContentNode otherwise, None, note this
+          only returns the first value (check single to determine if there are multiple)
 
         &gt;&gt;&gt; new_page.get_feature_value(&#39;pagination&#39;,&#39;pageNum&#39;)
            1
@@ -613,7 +613,25 @@ class ContentNode(object):
         feature = self.get_feature(feature_type, name)
 
         # Need to make sure we handle the idea of a single value for a feature
-        return None if feature is None else feature.value[0] if feature.single else feature.value
+        return None if feature is None else feature.value[0]
+
+    def get_feature_values(self, feature_type: str, name: str) -&gt; Optional[List[Any]]:
+        &#34;&#34;&#34;Get the value for a feature with the given name and type on this ContentNode.
+
+        Args:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+
+        Returns:
+          The list of feature values or None if there is no feature
+
+        &gt;&gt;&gt; new_page.get_feature_value(&#39;pagination&#39;,&#39;pageNum&#39;)
+           1
+        &#34;&#34;&#34;
+        feature = self.get_feature(feature_type, name)
+
+        # Simply return all the feature values
+        return None if feature is None else feature.value
 
     def get_content(self):
         &#34;&#34;&#34;Get the content of this node.
@@ -815,7 +833,7 @@ class ContentNode(object):
         &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
             &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
         &#34;&#34;&#34;
-        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)[0]
+        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)
 
     def set_bbox(self, bbox):
         &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
@@ -994,18 +1012,11 @@ class ContentNode(object):
             return  # do nothing, just exit function
 
         for node in self.select(selector):
-            existing_tag_values = node.get_feature_value(&#39;tag&#39;, existing_tag_name)
+            existing_tag_values = node.get_feature_values(&#39;tag&#39;, existing_tag_name)
             if existing_tag_values:
-                if type(existing_tag_values) == list:
-
-                    for val in existing_tag_values:
-                        tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
-                                  data=val[&#39;data&#39;])
-                        node.add_feature(&#39;tag&#39;, new_tag_name, tag)
-                else:
-                    tag = Tag(start=existing_tag_values[&#39;start&#39;], end=existing_tag_values[&#39;end&#39;],
-                              value=existing_tag_values[&#39;value&#39;], uuid=existing_tag_values[&#39;uuid&#39;],
-                              data=existing_tag_values[&#39;data&#39;])
+                for val in existing_tag_values:
+                    tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
+                              data=val[&#39;data&#39;])
                     node.add_feature(&#39;tag&#39;, new_tag_name, tag)
 
     def collect_nodes_to(self, end_node):
@@ -3917,14 +3928,11 @@ ensure that the correct mixins are applied.</p>
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
         Args:
-          str: feature_type: The type of feature to be added to the node.
-          str: name: The name of the feature.
-          Any: value: The value of the feature.
-          single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
-          serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-          feature_type:
-          name:
-          value:
+          feature_type (str): The type of feature to be added to the node.
+          name (str): The name of the feature.
+          value (Any): The value of the feature.
+          single(boolean): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
+          serialized(boolean): Indicates that the value is/is not already serialized; defaults to False.
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -3987,18 +3995,19 @@ ensure that the correct mixins are applied.</p>
         &#34;&#34;&#34;Gets the value for the given feature.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+
 
         Returns:
           ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
+          Note that if there are more than one instance of the feature you will only get the first one
 
         &gt;&gt;&gt; new_page.get_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
            1
         &#34;&#34;&#34;
         return self._feature_map[feature_type + &#34;:&#34; + name] if feature_type + &#34;:&#34; + name in self._feature_map else None
+
 
     def get_features_of_type(self, feature_type):
         &#34;&#34;&#34;Get all features of a specific type.
@@ -4070,7 +4079,8 @@ ensure that the correct mixins are applied.</p>
           name (str): The name of the feature.
 
         Returns:
-          Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
+          Any or None: The value of the feature if it exists on this ContentNode otherwise, None, note this
+          only returns the first value (check single to determine if there are multiple)
 
         &gt;&gt;&gt; new_page.get_feature_value(&#39;pagination&#39;,&#39;pageNum&#39;)
            1
@@ -4078,7 +4088,25 @@ ensure that the correct mixins are applied.</p>
         feature = self.get_feature(feature_type, name)
 
         # Need to make sure we handle the idea of a single value for a feature
-        return None if feature is None else feature.value[0] if feature.single else feature.value
+        return None if feature is None else feature.value[0]
+
+    def get_feature_values(self, feature_type: str, name: str) -&gt; Optional[List[Any]]:
+        &#34;&#34;&#34;Get the value for a feature with the given name and type on this ContentNode.
+
+        Args:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+
+        Returns:
+          The list of feature values or None if there is no feature
+
+        &gt;&gt;&gt; new_page.get_feature_value(&#39;pagination&#39;,&#39;pageNum&#39;)
+           1
+        &#34;&#34;&#34;
+        feature = self.get_feature(feature_type, name)
+
+        # Simply return all the feature values
+        return None if feature is None else feature.value
 
     def get_content(self):
         &#34;&#34;&#34;Get the content of this node.
@@ -4280,7 +4308,7 @@ ensure that the correct mixins are applied.</p>
         &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
             &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
         &#34;&#34;&#34;
-        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)[0]
+        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)
 
     def set_bbox(self, bbox):
         &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
@@ -4459,18 +4487,11 @@ ensure that the correct mixins are applied.</p>
             return  # do nothing, just exit function
 
         for node in self.select(selector):
-            existing_tag_values = node.get_feature_value(&#39;tag&#39;, existing_tag_name)
+            existing_tag_values = node.get_feature_values(&#39;tag&#39;, existing_tag_name)
             if existing_tag_values:
-                if type(existing_tag_values) == list:
-
-                    for val in existing_tag_values:
-                        tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
-                                  data=val[&#39;data&#39;])
-                        node.add_feature(&#39;tag&#39;, new_tag_name, tag)
-                else:
-                    tag = Tag(start=existing_tag_values[&#39;start&#39;], end=existing_tag_values[&#39;end&#39;],
-                              value=existing_tag_values[&#39;value&#39;], uuid=existing_tag_values[&#39;uuid&#39;],
-                              data=existing_tag_values[&#39;data&#39;])
+                for val in existing_tag_values:
+                    tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
+                              data=val[&#39;data&#39;])
                     node.add_feature(&#39;tag&#39;, new_tag_name, tag)
 
     def collect_nodes_to(self, end_node):
@@ -5527,18 +5548,15 @@ Returns:</p>
 <p>Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>str</code></strong></dt>
-<dd>feature_type: The type of feature to be added to the node.</dd>
-<dt><strong><code>str</code></strong></dt>
-<dd>name: The name of the feature.</dd>
-<dt><strong><code>Any</code></strong></dt>
-<dd>value: The value of the feature.</dd>
+<dt><strong><code>feature_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The type of feature to be added to the node.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the feature.</dd>
+<dt><strong><code>value</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The value of the feature.</dd>
 </dl>
-<p>single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
-serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-feature_type:
-name:
-value:</p>
+<p>single(boolean): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
+serialized(boolean): Indicates that the value is/is not already serialized; defaults to False.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code></dt>
@@ -5558,14 +5576,11 @@ value:</p>
     Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
     Args:
-      str: feature_type: The type of feature to be added to the node.
-      str: name: The name of the feature.
-      Any: value: The value of the feature.
-      single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
-      serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-      feature_type:
-      name:
-      value:
+      feature_type (str): The type of feature to be added to the node.
+      name (str): The name of the feature.
+      value (Any): The value of the feature.
+      single(boolean): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
+      serialized(boolean): Indicates that the value is/is not already serialized; defaults to False.
 
     Returns:
       ContentFeature: The feature that was added to this ContentNode.
@@ -5730,18 +5745,11 @@ This must be different from the existing_tag_name.</dd>
         return  # do nothing, just exit function
 
     for node in self.select(selector):
-        existing_tag_values = node.get_feature_value(&#39;tag&#39;, existing_tag_name)
+        existing_tag_values = node.get_feature_values(&#39;tag&#39;, existing_tag_name)
         if existing_tag_values:
-            if type(existing_tag_values) == list:
-
-                for val in existing_tag_values:
-                    tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
-                              data=val[&#39;data&#39;])
-                    node.add_feature(&#39;tag&#39;, new_tag_name, tag)
-            else:
-                tag = Tag(start=existing_tag_values[&#39;start&#39;], end=existing_tag_values[&#39;end&#39;],
-                          value=existing_tag_values[&#39;value&#39;], uuid=existing_tag_values[&#39;uuid&#39;],
-                          data=existing_tag_values[&#39;data&#39;])
+            for val in existing_tag_values:
+                tag = Tag(start=val[&#39;start&#39;], end=val[&#39;end&#39;], value=val[&#39;value&#39;], uuid=val[&#39;uuid&#39;],
+                          data=val[&#39;data&#39;])
                 node.add_feature(&#39;tag&#39;, new_tag_name, tag)</code></pre>
 </details>
 </dd>
@@ -6296,19 +6304,18 @@ strip(boolean, optional): Strip the result</p>
 <div class="desc"><p>Gets the value for the given feature.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>str</code></strong></dt>
-<dd>feature_type: The type of the feature.</dd>
-<dt><strong><code>str</code></strong></dt>
-<dd>name: The name of the feature.</dd>
+<dt><strong><code>feature_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The type of the feature.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the feature.</dd>
 </dl>
-<p>feature_type:
-name:</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code><a title="kodexa.model.model.ContentFeature" href="#kodexa.model.model.ContentFeature">ContentFeature</a></code> or <code>None</code></dt>
 <dd>The feature with the specified type &amp; name.
 If no feature is found, None is returned.</dd>
 </dl>
+<p>Note that if there are more than one instance of the feature you will only get the first one</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; new_page.get_feature('pagination','pageNum')
    1
 </code></pre></div>
@@ -6320,13 +6327,13 @@ If no feature is found, None is returned.</dd>
     &#34;&#34;&#34;Gets the value for the given feature.
 
     Args:
-      str: feature_type: The type of the feature.
-      str: name: The name of the feature.
-      feature_type:
-      name:
+      feature_type (str): The type of the feature.
+      name (str): The name of the feature.
+
 
     Returns:
       ContentFeature or None: The feature with the specified type &amp; name.  If no feature is found, None is returned.
+      Note that if there are more than one instance of the feature you will only get the first one
 
     &gt;&gt;&gt; new_page.get_feature(&#39;pagination&#39;,&#39;pageNum&#39;)
        1
@@ -6349,8 +6356,9 @@ If no feature is found, None is returned.</dd>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>Any</code> or <code>None</code></dt>
-<dd>The value of the feature if it exists on this ContentNode otherwise, None.</dd>
+<dd>The value of the feature if it exists on this ContentNode otherwise, None, note this</dd>
 </dl>
+<p>only returns the first value (check single to determine if there are multiple)</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; new_page.get_feature_value('pagination','pageNum')
    1
 </code></pre></div>
@@ -6366,7 +6374,8 @@ If no feature is found, None is returned.</dd>
       name (str): The name of the feature.
 
     Returns:
-      Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
+      Any or None: The value of the feature if it exists on this ContentNode otherwise, None, note this
+      only returns the first value (check single to determine if there are multiple)
 
     &gt;&gt;&gt; new_page.get_feature_value(&#39;pagination&#39;,&#39;pageNum&#39;)
        1
@@ -6374,7 +6383,47 @@ If no feature is found, None is returned.</dd>
     feature = self.get_feature(feature_type, name)
 
     # Need to make sure we handle the idea of a single value for a feature
-    return None if feature is None else feature.value[0] if feature.single else feature.value</code></pre>
+    return None if feature is None else feature.value[0]</code></pre>
+</details>
+</dd>
+<dt id="kodexa.model.model.ContentNode.get_feature_values"><code class="name flex">
+<span>def <span class="ident">get_feature_values</span></span>(<span>self, feature_type: str, name: str) ‑> Union[List[Any], NoneType]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the value for a feature with the given name and type on this ContentNode.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>feature_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The type of the feature.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the feature.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The list of feature values or None if there is no feature</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; new_page.get_feature_value('pagination','pageNum')
+   1
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_feature_values(self, feature_type: str, name: str) -&gt; Optional[List[Any]]:
+    &#34;&#34;&#34;Get the value for a feature with the given name and type on this ContentNode.
+
+    Args:
+      feature_type (str): The type of the feature.
+      name (str): The name of the feature.
+
+    Returns:
+      The list of feature values or None if there is no feature
+
+    &gt;&gt;&gt; new_page.get_feature_value(&#39;pagination&#39;,&#39;pageNum&#39;)
+       1
+    &#34;&#34;&#34;
+    feature = self.get_feature(feature_type, name)
+
+    # Simply return all the feature values
+    return None if feature is None else feature.value</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_features"><code class="name flex">
@@ -6811,7 +6860,7 @@ will have the node type of its nearest sibling and will have an index value, but
     &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
         &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
     &#34;&#34;&#34;
-    return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)[0]</code></pre>
+    return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_tag"><code class="name flex">
@@ -12595,6 +12644,7 @@ Returns:</p></div>
 <li><code><a title="kodexa.model.model.ContentNode.get_content" href="#kodexa.model.model.ContentNode.get_content">get_content</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_feature" href="#kodexa.model.model.ContentNode.get_feature">get_feature</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_feature_value" href="#kodexa.model.model.ContentNode.get_feature_value">get_feature_value</a></code></li>
+<li><code><a title="kodexa.model.model.ContentNode.get_feature_values" href="#kodexa.model.model.ContentNode.get_feature_values">get_feature_values</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_features" href="#kodexa.model.model.ContentNode.get_features">get_features</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_features_of_type" href="#kodexa.model.model.ContentNode.get_features_of_type">get_features_of_type</a></code></li>
 <li><code><a title="kodexa.model.model.ContentNode.get_height" href="#kodexa.model.model.ContentNode.get_height">get_height</a></code></li>
