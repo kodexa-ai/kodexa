@@ -15,6 +15,7 @@ from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
+
 from kodexa.mixins import registry
 
 
@@ -493,18 +494,36 @@ class ContentNode(object):
         """Gets the value for the given feature.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+
 
         Returns:
           ContentFeature or None: The feature with the specified type & name.  If no feature is found, None is returned.
+          Note that if there are more than one instance of the feature you will only get the first one
+
+        >>> new_page.get_feature('pagination','pageNum')
+           1
+        """
+        return self._feature_map[feature_type + ":" + name][0] if feature_type + ":" + name in self._feature_map else None
+
+    def get_features(self, feature_type, name):
+        """Gets the values for the given feature.
+
+        Args:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+
+
+        Returns:
+          A list of ContentFeature or None: The feature with the specified type & name.  If no feature is found, None is returned.
+          Note that if there are more than one instance of the feature you will only get the first one
 
         >>> new_page.get_feature('pagination','pageNum')
            1
         """
         return self._feature_map[feature_type + ":" + name] if feature_type + ":" + name in self._feature_map else None
+
 
     def get_features_of_type(self, feature_type):
         """Get all features of a specific type.
@@ -786,7 +805,7 @@ class ContentNode(object):
         >>> document.select.('//page')[0].get_statistics()
             <kodexa.spatial.NodeStatistics object at 0x7f80605e53c8>
         """
-        return self.get_feature_value("spatial", "statistics")[0]
+        return self.get_feature_value("spatial", "statistics")
 
     def set_bbox(self, bbox):
         """Set the bounding box for the node, this is structured as:
