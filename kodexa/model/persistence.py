@@ -238,6 +238,9 @@ class SqliteDocumentPersistence(object):
         for child_node in cursor.execute("select id, pid, nt, idx from cn where pid = ?", [new_node.uuid]).fetchall():
             new_node.add_child(self.__build_node(child_node, cursor))
 
+        from kodexa.mixins import registry
+        registry.add_mixins_to_document_node(self.document, new_node)
+
         return new_node
 
     def __rebuild_from_document(self):
