@@ -59,7 +59,7 @@ def test_tag_multiple_regex_matches():
     assert len(tags) == 1
 
     # we expect 4 tags to be applied, one for each instance of the word 'little'
-    feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE')
+    feature_values = context.output_document.get_root().get_feature_values('tag', 'SIZE')
     assert type(feature_values) == list and len(feature_values) == 4
     assert feature_values[2]['start'] == 37
     assert feature_values[2]['end'] == 43
@@ -76,7 +76,7 @@ def test_tag_multiple_regex_matches():
     context = pipeline.run()
 
     # Now each of the feature values should have the same UUID
-    feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE')
+    feature_values = context.output_document.get_root().get_feature_values('tag', 'SIZE')
     features_uuids = list(set(dic['uuid'] for dic in feature_values))
     assert len(features_uuids) == 1
 
@@ -123,10 +123,10 @@ def test_tag_copy():
     context = pipeline.run()
 
     # we should now have 4 feature values for 'LAMB_INFO' and 4 feature values for 'SIZE' - all with different UUIDs
-    size_feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE')
+    size_feature_values = context.output_document.get_root().get_feature_values('tag', 'SIZE')
     assert type(size_feature_values) == list and len(size_feature_values) == 4
 
-    lamb_info_feature_values = context.output_document.get_root().get_feature_value('tag', 'LAMB_INFO')
+    lamb_info_feature_values = context.output_document.get_root().get_feature_values('tag', 'LAMB_INFO')
     assert type(lamb_info_feature_values) == list and len(lamb_info_feature_values) == 4
     lamb_info_features_uuids = set(dic['uuid'] for dic in lamb_info_feature_values)
     assert len(list(lamb_info_features_uuids)) == 4
@@ -162,12 +162,12 @@ def test_tag_copy():
     context = pipeline.run()
 
     # The feature values should have the same UUID - for both WOOL_INFO and FLEECE_INFO
-    wool_values = context.output_document.get_root().get_feature_value('tag', 'WOOL_INFO')
+    wool_values = context.output_document.get_root().get_feature_values('tag', 'WOOL_INFO')
     assert type(wool_values) == list and len(wool_values) == 2
     wool_uuids = set(dic['uuid'] for dic in wool_values)
     assert len(list(wool_uuids)) == 1
 
-    fleece_info_values = context.output_document.get_root().get_feature_value('tag', 'FLEECE_INFO')
+    fleece_info_values = context.output_document.get_root().get_feature_values('tag', 'FLEECE_INFO')
     assert type(fleece_info_values) == list and len(fleece_info_values) == 2
 
 
