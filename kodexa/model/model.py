@@ -505,23 +505,6 @@ class ContentNode(object):
         >>> new_page.get_feature('pagination','pageNum')
            1
         """
-        return self._feature_map[feature_type + ":" + name][0] if feature_type + ":" + name in self._feature_map else None
-
-    def get_features(self, feature_type, name):
-        """Gets the values for the given feature.
-
-        Args:
-          feature_type (str): The type of the feature.
-          name (str): The name of the feature.
-
-
-        Returns:
-          A list of ContentFeature or None: The feature with the specified type & name.  If no feature is found, None is returned.
-          Note that if there are more than one instance of the feature you will only get the first one
-
-        >>> new_page.get_feature('pagination','pageNum')
-           1
-        """
         return self._feature_map[feature_type + ":" + name] if feature_type + ":" + name in self._feature_map else None
 
 
@@ -595,7 +578,8 @@ class ContentNode(object):
           name (str): The name of the feature.
 
         Returns:
-          Any or None: The value of the feature if it exists on this ContentNode otherwise, None.
+          Any or None: The value of the feature if it exists on this ContentNode otherwise, None, note this
+          only returns the first value (check single to determine if there are multiple)
 
         >>> new_page.get_feature_value('pagination','pageNum')
            1
@@ -603,7 +587,25 @@ class ContentNode(object):
         feature = self.get_feature(feature_type, name)
 
         # Need to make sure we handle the idea of a single value for a feature
-        return None if feature is None else feature.value[0] if feature.single else feature.value
+        return None if feature is None else feature.value[0]
+
+    def get_feature_values(self, feature_type: str, name: str) -> Optional[Any]:
+        """Get the value for a feature with the given name and type on this ContentNode.
+
+        Args:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
+
+        Returns:
+          The list of feature values or None if there is no feature
+
+        >>> new_page.get_feature_value('pagination','pageNum')
+           1
+        """
+        feature = self.get_feature(feature_type, name)
+
+        # Need to make sure we handle the idea of a single value for a feature
+        return None if feature is None else feature.value
 
     def get_content(self):
         """Get the content of this node.
