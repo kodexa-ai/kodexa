@@ -786,7 +786,7 @@ class ContentNode(object):
         >>> document.select.('//page')[0].get_statistics()
             <kodexa.spatial.NodeStatistics object at 0x7f80605e53c8>
         """
-        return self.get_feature_value("spatial", "statistics")
+        return self.get_feature_value("spatial", "statistics")[0]
 
     def set_bbox(self, bbox):
         """Set the bounding box for the node, this is structured as:
