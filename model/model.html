@@ -815,7 +815,7 @@ class ContentNode(object):
         &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
             &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
         &#34;&#34;&#34;
-        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)
+        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)[0]
 
     def set_bbox(self, bbox):
         &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
@@ -4280,7 +4280,7 @@ ensure that the correct mixins are applied.</p>
         &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
             &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
         &#34;&#34;&#34;
-        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)
+        return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)[0]
 
     def set_bbox(self, bbox):
         &#34;&#34;&#34;Set the bounding box for the node, this is structured as:
@@ -6811,7 +6811,7 @@ will have the node type of its nearest sibling and will have an index value, but
     &gt;&gt;&gt; document.select.(&#39;//page&#39;)[0].get_statistics()
         &lt;kodexa.spatial.NodeStatistics object at 0x7f80605e53c8&gt;
     &#34;&#34;&#34;
-    return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)</code></pre>
+    return self.get_feature_value(&#34;spatial&#34;, &#34;statistics&#34;)[0]</code></pre>
 </details>
 </dd>
 <dt id="kodexa.model.model.ContentNode.get_tag"><code class="name flex">
