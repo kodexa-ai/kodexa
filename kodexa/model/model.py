@@ -424,14 +424,11 @@ class ContentNode(object):
         Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
 
         Args:
-          str: feature_type: The type of feature to be added to the node.
-          str: name: The name of the feature.
-          Any: value: The value of the feature.
-          single(bool, optional, optional): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
-          serialized(bool, optional, optional): Indicates that the value is/is not already serialized; defaults to False.
-          feature_type:
-          name:
-          value:
+          feature_type (str): The type of feature to be added to the node.
+          name (str): The name of the feature.
+          value (Any): The value of the feature.
+          single(boolean): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
+          serialized(boolean): Indicates that the value is/is not already serialized; defaults to False.
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -589,7 +586,7 @@ class ContentNode(object):
         # Need to make sure we handle the idea of a single value for a feature
         return None if feature is None else feature.value[0]
 
-    def get_feature_values(self, feature_type: str, name: str) -> Optional[Any]:
+    def get_feature_values(self, feature_type: str, name: str) -> Optional[List[Any]]:
         """Get the value for a feature with the given name and type on this ContentNode.
 
         Args:
@@ -604,7 +601,7 @@ class ContentNode(object):
         """
         feature = self.get_feature(feature_type, name)
 
-        # Need to make sure we handle the idea of a single value for a feature
+        # Simply return all the feature values
         return None if feature is None else feature.value
 
     def get_content(self):
@@ -986,18 +983,11 @@ class ContentNode(object):
             return  # do nothing, just exit function
 
         for node in self.select(selector):
-            existing_tag_values = node.get_feature_value('tag', existing_tag_name)
+            existing_tag_values = node.get_feature_values('tag', existing_tag_name)
             if existing_tag_values:
-                if type(existing_tag_values) == list:
-
-                    for val in existing_tag_values:
-                        tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=val['uuid'],
-                                  data=val['data'])
-                        node.add_feature('tag', new_tag_name, tag)
-                else:
-                    tag = Tag(start=existing_tag_values['start'], end=existing_tag_values['end'],
-                              value=existing_tag_values['value'], uuid=existing_tag_values['uuid'],
-                              data=existing_tag_values['data'])
+                for val in existing_tag_values:
+                    tag = Tag(start=val['start'], end=val['end'], value=val['value'], uuid=val['uuid'],
+                              data=val['data'])
                     node.add_feature('tag', new_tag_name, tag)
 
     def collect_nodes_to(self, end_node):
