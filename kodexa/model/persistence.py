@@ -162,7 +162,8 @@ class SqliteDocumentPersistence(object):
         return clean
 
     def __update_metadata(self, cursor):
-        document_metadata = {'version': Document.CURRENT_VERSION, 'metadata': self.document.metadata.to_dict(),
+        document_metadata = {'uuid': self.uuid, 'version': Document.CURRENT_VERSION,
+                             'metadata': self.document.metadata.to_dict(),
                              'source': self.__clean_none_values(dataclasses.asdict(self.document.source)),
                              'mixins': self.document.get_mixins(),
                              'taxonomies': self.document.taxonomies,
@@ -200,6 +201,7 @@ class SqliteDocumentPersistence(object):
         if 'classes' in metadata and metadata['classes']:
             self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
                                      metadata['classes']]
+        self.uuid = metadata.get('uuid')
 
         root_node = cursor.execute("select id, pid, nt, idx from cn where pid is null").fetchone()
         if root_node:
