@@ -4,7 +4,6 @@ The core model provides definitions for all the base objects in the Kodexa Conte
 import abc
 import dataclasses
 import inspect
-import itertools
 import json
 import os
 import re
@@ -241,14 +240,12 @@ class ContentNode(object):
     """
 
     def __init__(self, document, node_type: str, content: Optional[str] = None,
-                 content_parts: Optional[List[Any]] = None):
+                 content_parts: Optional[List[Any]] = None, parent_uuid: Optional[str] = None):
         if content_parts is None:
             content_parts = []
 
         self.node_type: str = node_type
         """The node type (ie. line, page, cell etc)"""
-        self.content: Optional[str] = content
-        """The content of the node"""
         self.document: Document = document
         """The document that the node belongs to"""
         self.content_parts: List[Any] = content_parts
@@ -259,9 +256,35 @@ class ContentNode(object):
         """The UUID of the content node"""
         self.virtual: bool = False
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
+        self._parent_uuid = parent_uuid
+
+        if content is not None:
+            self.content_parts = [content]
+
+    @property
+    def content(self):
+
+        if len(self.content_parts) == 0:
+            return None
+
+        s = ""
+        for part in self.content_parts:
+            if isinstance(part, str):
+                s += part
+                s += " "
+        return s
+
+    @content.setter
+    def content(self, new_content):
+        self.content_parts = [new_content]
+
+    def __eq__(self, other):
+        if isinstance(other, ContentNode):
+            return self.uuid == other.uuid and (self.uuid is not None and other.uuid is not None)
+        return False
 
     def get_parent(self):
-        return self.document.get_persistence().get_parent(self)
+        return self.document.get_persistence().get_node(self._parent_uuid) if self._parent_uuid else None
 
     def __str__(self):
         return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) [" + str(
@@ -301,12 +324,12 @@ class ContentNode(object):
 
     @staticmethod
     def from_dict(document, content_node_dict: Dict, parent=None):
-        """Build a new ContentNode from a dictionary representtion.
+        """Build a new ContentNode from a dictionary represention.
 
         Args:
           document (Document): The Kodexa document from which the new ContentNode will be created (not added).
           content_node_dict (Dict): The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
-
+          parent (Optional[ContentNode]): Optionally the parent content node
         Returns:
           ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
 
@@ -317,12 +340,12 @@ class ContentNode(object):
             'node_type']
 
         new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
-            'content'] if 'content' in content_node_dict else None)
-        if 'uuid' in content_node_dict:
-            new_content_node.uuid = content_node_dict['uuid']
+            'content'] if 'content' in content_node_dict else None, index=content_node_dict['index'])
 
         if 'content_parts' in content_node_dict:
             new_content_node.content_parts = content_node_dict['content_parts']
+
+        document.get_persistence().add_content_node(new_content_node, parent)
 
         for dict_feature in content_node_dict['features']:
 
@@ -335,8 +358,6 @@ class ContentNode(object):
                 new_content_node.add_feature(feature_type,
                                              dict_feature['name'].split(':')[1],
                                              dict_feature['value'], dict_feature['single'], True)
-
-        document.get_persistence().add_content_node(new_content_node, parent)
 
         for dict_child in content_node_dict['children']:
             ContentNode.from_dict(document, dict_child, new_content_node)
@@ -552,7 +573,6 @@ class ContentNode(object):
         results = self.get_feature(feature_type, name)
         if results:
             self.document.get_persistence().remove_feature(self, feature_type, name)
-            del self._feature_map[feature_type + ":" + name]
 
         if include_children:
             for child in self.get_children():
@@ -647,34 +667,6 @@ class ContentNode(object):
         parsed_selector = parse(selector)
         return parsed_selector.resolve(self, variables)
 
-    def select_as_node(self, selector, variables=None):
-        """Select and return the child nodes of this content node that match the selector value.
-        Matching nodes will be returned as the children of a new proxy content node.
-
-        Note this doesn't impact this content node's children.  They are not adopted by the proxy node,
-        therefore their parents remain intact.
-
-
-        or
-
-        Args:
-          str: selector: The selector (ie. //*)
-          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-          selector:
-
-        Returns:
-          ContentNode: A new proxy ContentNode with the matching (selected) nodes as its children.  If no matches are found, the list of children will be empty.
-
-        >>> document.content_node.select_as_node('//line')
-           ContentNode
-
-        >>> document.get_root().select_as_node('//*[hasTag($tagName)]', {"tagName": "div"})
-           ContentNode
-        """
-        new_node = self.document.create_node(node_type='result')
-        new_node.children = self.select(selector, variables)
-        return new_node
-
     def get_all_content(self, separator=" ", strip=True):
         """Get this node's content, concatenated with all of its children's content.
 
@@ -686,27 +678,24 @@ class ContentNode(object):
           str: The complete content for this node concatenated with the content of all child nodes.
 
         >>> document.content_node.get_all_content()
+
             "This string is made up of multiple nodes"
         """
         s = ""
-        if self.get_content() and not self.content_parts:
-            s += self.get_content()
-            s += separator
-            for child in self.get_children():
+        children = self.get_children()
+        for part in self.content_parts:
+            if isinstance(part, str):
+                s += part
+                s += separator
+            if isinstance(part, int):
+                s += [child.get_all_content(separator, strip=strip) for child in children if child.index == part][0]
+                s += separator
+
+        # We need to determine if we have missing children and add them to the end
+        for child in self.get_children():
+            if child.index not in self.content_parts:
                 s += child.get_all_content(separator, strip=strip)
                 s += separator
-        elif not self.get_content() and not self.content_parts:
-            for child in self.get_children():
-                s += child.get_all_content(separator, strip=strip)
-                s += separator
-        elif len(self.content_parts) > 0:
-            for part in self.content_parts:
-                if isinstance(part, str):
-                    s += part
-                    s += separator
-                if isinstance(part, int):
-                    s += self.get_children()[part].get_all_content(separator, strip=strip)
-                    s += separator
 
         return s.strip() if strip else s
 
@@ -716,12 +705,8 @@ class ContentNode(object):
         It will be added to the end of the parent
 
         Args:
-          ContentNode: target_child: The child node that will be moved to a new parent node (target_parent).
-          ContentNode: target_parent: The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
-          target_child:
-          target_parent:
-
-        Returns:
+          target_child (ContentNode): The child node that will be moved to a new parent node (target_parent).
+          target_parent (ContentNode): The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
 
         >>> # Get first node of type 'line' from the first page
             >>> target_child = document.get_root().select('//page')[0].select('//line')[0]
@@ -737,12 +722,8 @@ class ContentNode(object):
         """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
 
         Args:
-          list: ContentNode] children: A list of ContentNodes that will be added to the end of this node's children collection
-          bool: replace: If True, will remove all current children and replace them with the new list; defaults to True
-          children:
-          replace:  (Default value = False)
-
-        Returns:
+          children (List[ContentNode]): A list of ContentNodes that will be added to the end of this node's children collection
+          replace (bool): If True, will remove all current children and replace them with the new list; defaults to True
 
         >>> # select all nodes of type 'line', then the root node 'adopts' them
             >>> # and replaces all it's existing children with these 'line' nodes.
@@ -805,7 +786,6 @@ class ContentNode(object):
         Args:
           bbox: the bounding box array
 
-        Returns:
 
         >>> document.select.('//page')[0].set_bbox([10,20,50,100])
         """
@@ -818,10 +798,6 @@ class ContentNode(object):
 
 
         :return: the bounding box array
-
-        Args:
-
-        Returns:
 
         >>> document.select.('//page')[0].get_bbox()
             [10,20,50,100]
@@ -1056,21 +1032,6 @@ class ContentNode(object):
         if start_index is not None:
             [node.tag(tag_to_apply) for node in all_nodes[start_index:end_index]]
 
-    def tag_text_tree(self):
-        """
-
-        Args:
-
-        Returns:
-          :return:
-
-        """
-        from anytree import RenderTree
-        result = ""
-        for pre, _, node in RenderTree(self):
-            result = result + ("%s%s" % (pre, f"{node.content} ({node.node_type}) {node.get_tags()}\n"))
-        return result
-
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
@@ -1143,84 +1104,67 @@ class ContentNode(object):
             content_length = 0
             original_start = start
             original_end = end
-            # We need to work out if we are dealing with content parts or just content
-            if node_to_check.content_parts and len(node_to_check.content_parts) > 0:
-                # Now we need to go through the content parts and we need to make sure we understand
-                # our offset
-                for part in node_to_check.content_parts:
-                    if isinstance(part, str):
-                        # It is just content
-                        part_length = len(part)
-                        if start < part_length and end < part_length:
-                            node_to_check.add_feature('tag', tag_to_apply,
-                                                      Tag(original_start, original_end,
-                                                          part[start:end] if value is None else value,
-                                                          data=node_data, uuid=tag_uuid, confidence=confidence,
-                                                          index=index))
-                            return -1
-                        elif start < part_length <= end:
-                            node_to_check.add_feature('tag', tag_to_apply,
-                                                      Tag(original_start,
-                                                          content_length + part_length,
-                                                          value=part[start:] if value is None else value,
-                                                          data=node_data, uuid=tag_uuid, confidence=confidence,
-                                                          index=index))
-
-                        # Add the separator
-                        part_length = part_length + len(separator)
-
-                        end = end - part_length
-                        content_length = content_length + part_length
-                        offset = offset + part_length
-                        start = 0 if start - part_length < 0 else start - part_length
-
-                    elif isinstance(part, int):
-                        child_node = node_to_check.get_children()[part]
-                        result = tag_node_position(child_node, start, end, node_data, tag_uuid,
-                                                   offset=offset, value=value)
-                        if result < 0 or (end - result) <= 0:
-                            return -1
-                        else:
-                            # Even if we didn't have anything we have a separator
-
-                            result = result
-                            offset = offset + result
-                            end = end - result
-                            start = 0 if start - result < 0 else start - result
-
-                            content_length = content_length + result
-                    else:
-                        raise Exception("Invalid part?")
-            else:
-                if node_to_check.content and len(node_to_check.content) > 0:
-                    if start < len(node_to_check.content) and end < len(node_to_check.content):
+            for part in node_to_check.content_parts:
+                if isinstance(part, str):
+                    # It is just content
+                    part_length = len(part)
+                    if start < part_length and end < part_length:
                         node_to_check.add_feature('tag', tag_to_apply,
-                                                  Tag(start, end,
-                                                      node_to_check.content[start:end] if value is None else value,
+                                                  Tag(original_start, original_end,
+                                                      part[start:end] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence,
                                                       index=index))
                         return -1
-                    elif start < len(node_to_check.content) <= end:
+                    elif start < part_length <= end:
                         node_to_check.add_feature('tag', tag_to_apply,
-                                                  Tag(start,
-                                                      len(node_to_check.content),
-                                                      value=node_to_check.content[start:] if value is None else value,
+                                                  Tag(original_start,
+                                                      content_length + part_length,
+                                                      value=part[start:] if value is None else value,
                                                       data=node_data, uuid=tag_uuid, confidence=confidence,
                                                       index=index))
 
-                    content_length = len(node_to_check.content) + len(separator)
-                    end = end - content_length
-                    start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - content_length
+                    # Add the separator
+                    part_length = part_length + len(separator)
 
-                for child_node in node_to_check.get_children():
-                    result = tag_node_position(child_node, start, end, node_data, tag_uuid, value=value)
+                    end = end - part_length
+                    content_length = content_length + part_length
+                    offset = offset + part_length
+                    start = 0 if start - part_length < 0 else start - part_length
 
-                    if result < 0 or (end - result) < 0:
+                elif isinstance(part, int):
+                    child_node = [child for child in node_to_check.get_children() if child.index == part][0]
+                    result = tag_node_position(child_node, start, end, node_data, tag_uuid,
+                                               offset=offset, value=value)
+                    if result < 0 or (end - result) <= 0:
                         return -1
                     else:
-                        content_length = content_length + result + len(separator)
-                        end = end - (result + len(separator))
-                        start = 0 if start - (result + len(separator)) < 0 else start - (result + len(separator))
+                        # Even if we didn't have anything we have a separator
+
+                        result = result
+                        offset = offset + result
+                        end = end - result
+                        start = 0 if start - result < 0 else start - result
+
+                        content_length = content_length + result
+                else:
+                    raise Exception("Invalid part?")
+
+            # We need to determine if we have missing children and add them to the end
+            for child_node in node_to_check.get_children():
+                if child_node.index not in self.content_parts:
+                    result = tag_node_position(child_node, start, end, node_data, tag_uuid,
+                                               offset=offset, value=value)
+
+                    if result < 0 or (end - result) <= 0:
+                        return -1
+                    else:
+                        # Even if we didn't have anything we have a separator
+                        result = result + len(separator)
+                        offset = offset + result
+                        end = end - result
+                        start = 0 if start - result < 0 else start - result
+
+                        content_length = content_length + result
 
             if len(node_to_check.get_all_content(strip=False)) != content_length:
                 raise Exception(
@@ -1304,7 +1248,7 @@ class ContentNode(object):
         """
         values = []
         for tag in self.get_tag(tag_name):
-            values.append(tag.value)
+            values.append(tag['value'])
 
         if include_children:
             for child in self.get_children():
@@ -1316,12 +1260,9 @@ class ContentNode(object):
         """Get the values for a specific tag name, grouped by uuid
 
         Args:
-          tag_name: tag name
-          include_children: include the children of this node
-          value_separator: the string to be used to join related tag values
-          tag_name: str:
-          include_children: bool:  (Default value = False)
-          value_separator: str:  (Default value = ' ')
+          tag_name (str): tag name
+          include_children (bool): include the children of this node
+          value_separator (str): the string to be used to join related tag values
 
         Returns:
           a list of the tag values
@@ -1623,7 +1564,7 @@ class ContentNode(object):
         compiled_node_type_re = re.compile(node_type_re)
 
         while True:
-            node = self.get_parent().get_node_at_index(search_index)
+            node = self.get_parent().get_node_at_index(search_index) if self.get_parent() else None
 
             if not node:
                 return node
@@ -2082,6 +2023,7 @@ class Document(object):
         new_document.exceptions = doc_dict['exceptions'] if 'exceptions' in doc_dict else []
         new_document.uuid = doc_dict['uuid'] if 'uuid' in doc_dict else str(
             uuid.uuid5(uuid.NAMESPACE_DNS, 'kodexa.com'))
+
         if 'content_node' in doc_dict and doc_dict['content_node']:
             new_document.content_node = ContentNode.from_dict(new_document, doc_dict['content_node'])
 
@@ -2167,8 +2109,8 @@ class Document(object):
         >>> document.create_node(node_type='page')
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         """
-        content_node = ContentNode(document=self, node_type=node_type, content=content)
-        content_node.parent = parent
+        content_node = ContentNode(document=self, node_type=node_type, content=content,
+                                   parent_uuid=parent.uuid if parent is not None else None)
         content_node.index = index
         content_node.virtual = virtual
         registry.add_mixins_to_document_node(self, content_node)
@@ -2271,26 +2213,6 @@ class Document(object):
                 return [self.content_node] if bool(result) else []
         else:
             return []
-
-    def select_as_node(self, selector, variables=None) -> ContentNode:
-        """Execute a selector on the root node and then return new ContentNode with the results set as its children.
-
-        Args:
-          selector (str): The selector (ie. //*)
-          variables (Optional[dict]): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
-
-        Returns:
-          ContentNode: A new ContentNode.  All ContentNodes on this Document that match the selector value are added as the children for the returned ContentNode.
-
-        >>> document.select('//line')
-           ContentNode
-        """
-        if variables is None:
-            variables = {}
-        if self.content_node:
-            return self.content_node.select_as_node(selector, variables)
-        else:
-            return self.create_node(node_type='results')
 
     def get_labels(self) -> List[str]:
         """

@@ -16,6 +16,8 @@ FEATURE_INSERT = "INSERT INTO f (cn_id, f_type, fvalue_id) VALUES (?,?,?)"
 FEATURE_DELETE = "DELETE FROM f where cn_id=? and f_type=?"
 
 CONTENT_NODE_INSERT = "INSERT INTO cn (pid, nt, idx) VALUES (?,?,?)"
+CONTENT_NODE_UPDATE = "UPDATE cn set pid=?, nt=?, idx=? WHERE id=?"
+
 CONTENT_NODE_PART_INSERT = "INSERT INTO cnp (cn_id, pos, content, content_idx) VALUES (?,?,?,?)"
 NOTE_TYPE_INSERT = "insert into n_type(name) values (?)"
 NODE_TYPE_LOOKUP = "select id from n_type where name = ?"
@@ -91,12 +93,7 @@ class SqliteDocumentPersistence(object):
         cursor.execute("CREATE INDEX f_value_hash ON f_value(hash);")
 
         self.__update_metadata(cursor)
-
-        if self.document.content_node:
-            self.__insert_node(self.document.content_node, cursor, None)
-
         self.connection.commit()
-
         cursor.close()
 
     def content_node_count(self):
@@ -138,23 +135,19 @@ class SqliteDocumentPersistence(object):
 
         if node.uuid:
             # Delete the existing node
-            cursor.execute("DELETE FROM cn where id=?", [node.uuid])
-
-        cn_values = [parent.uuid if parent else None,
-                     self.__resolve_n_type(node.node_type, cursor), node.index]
-        node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
-
-        if node.content_parts is None or (node.content is not None and len(node.content_parts) == 0):
-            cn_parts_values = [node.uuid, 0, node.content, None]
-            cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+            cn_values = [parent.uuid if parent else None,
+                         self.__resolve_n_type(node.node_type, cursor), node.index, node.uuid]
+            cursor.execute(CONTENT_NODE_UPDATE, cn_values).lastrowid
+            cursor.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
         else:
-            for idx, part in enumerate(node.content_parts):
-                cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
-                                   part if not isinstance(part, str) else None]
-                cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+            cn_values = [parent.uuid if parent else None,
+                         self.__resolve_n_type(node.node_type, cursor), node.index]
+            node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
-        for child in node.get_children():
-            self.__insert_node(child, cursor, node)
+        for idx, part in enumerate(node.content_parts):
+            cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
+                               part if not isinstance(part, str) else None]
+            cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
     def __clean_none_values(self, d):
         clean = {}
@@ -218,7 +211,7 @@ class SqliteDocumentPersistence(object):
 
     def __build_node(self, node_row, cursor):
 
-        new_node = ContentNode(self.document, self.node_types[node_row[2]])
+        new_node = ContentNode(self.document, self.node_types[node_row[2]], parent_uuid=node_row[1])
         new_node.uuid = node_row[0]
         new_node.index = node_row[3]
 
@@ -243,6 +236,8 @@ class SqliteDocumentPersistence(object):
     def add_content_node(self, node, parent):
         cursor = self.connection.cursor()
         self.__insert_node(node, cursor, parent)
+        self.connection.commit()
+        cursor.close()
 
     def add_feature(self, node, feature):
 
@@ -251,6 +246,8 @@ class SqliteDocumentPersistence(object):
                     self.__resolve_feature_value(feature, cursor)]
         feature.uuid = cursor.execute(FEATURE_INSERT,
                                       f_values).lastrowid
+        self.connection.commit()
+        cursor.close()
 
     def remove_feature(self, node, feature_type, name):
 
@@ -259,13 +256,15 @@ class SqliteDocumentPersistence(object):
         feature = ContentFeature(feature_type, name, None)
         f_values = [node.uuid, self.__resolve_f_type(feature, cursor)]
         cursor.execute(FEATURE_DELETE, f_values)
+        self.connection.commit()
+        cursor.close()
 
     def get_children(self, content_node):
 
         # We need to get the child nodes
         cursor = self.connection.cursor()
         children = []
-        for child_node in cursor.execute("select id, pid, nt, idx from cn where pid = ?",
+        for child_node in cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
                                          [content_node.uuid]).fetchall():
             children.append(self.__build_node(child_node, cursor))
         return children
@@ -291,6 +290,8 @@ class SqliteDocumentPersistence(object):
     def update_metadata(self):
         cursor = self.connection.cursor()
         self.__update_metadata(cursor)
+        self.connection.commit()
+        cursor.close()
 
     def __rebuild_from_document(self):
         cursor = self.connection.cursor()
@@ -302,9 +303,8 @@ class SqliteDocumentPersistence(object):
         self.__update_metadata(cursor)
         if self.document.content_node:
             self.__insert_node(self.document.content_node, cursor)
-
-        cursor.close()
         self.connection.commit()
+        cursor.close()
 
     def get_bytes(self):
 
@@ -327,3 +327,6 @@ class SqliteDocumentPersistence(object):
                                            value, single=single))
 
         return features
+
+    def get_node(self, node_id):
+        return self.__get_node(node_id)

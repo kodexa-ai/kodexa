@@ -161,17 +161,17 @@ class RollupTransformer:
             for selected_node in selected_nodes:
 
                 for node_type_re in self.collapse_type_res:
-                    nodes = selected_node.findall(node_type_re=node_type_re)
+                    nodes = selected_node.select(f'//{node_type_re}')
 
                     final_nodes = []
                     node_ids = [node.uuid for node in nodes]
                     # Remove any nodes where the parent node is in the list as well
                     for node in nodes:
-                        if not self.is_node_in_list(node.parent, node_ids):
+                        if not self.is_node_in_list(node.get_parent(), node_ids):
                             final_nodes.append(node)
 
                     for node in final_nodes:
-                        if node.parent:
+                        if node.get_parent():
                             if node.get_parent().content_parts:
 
                                 # We need to insert into the content part that represents the child - then remove the child
@@ -232,8 +232,8 @@ class RollupTransformer:
         if node.uuid in node_ids:
             return True
 
-        if node.parent:
-            return self.is_node_in_list(node.parent, node_ids)
+        if node.get_parent():
+            return self.is_node_in_list(node.get_parent(), node_ids)
         else:
             return False
 
