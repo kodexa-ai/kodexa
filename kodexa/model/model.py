@@ -258,7 +258,7 @@ class ContentNode(object):
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
         self._parent_uuid = parent_uuid
 
-        if content is not None:
+        if content is not None and len(self.content_parts) == 0:
             self.content_parts = [content]
 
     @property
@@ -270,8 +270,10 @@ class ContentNode(object):
         s = ""
         for part in self.content_parts:
             if isinstance(part, str):
+                if s != "":
+                    s += " "
                 s += part
-                s += " "
+
         return s
 
     @content.setter
@@ -342,7 +344,7 @@ class ContentNode(object):
         new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
             'content'] if 'content' in content_node_dict else None, index=content_node_dict['index'])
 
-        if 'content_parts' in content_node_dict:
+        if 'content_parts' in content_node_dict and len(content_node_dict['content_parts']) > 0:
             new_content_node.content_parts = content_node_dict['content_parts']
 
         document.get_persistence().add_content_node(new_content_node, parent)
@@ -1140,7 +1142,7 @@ class ContentNode(object):
                     else:
                         # Even if we didn't have anything we have a separator
 
-                        result = result
+                        result = result + len(separator)
                         offset = offset + result
                         end = end - result
                         start = 0 if start - result < 0 else start - result
@@ -1151,7 +1153,7 @@ class ContentNode(object):
 
             # We need to determine if we have missing children and add them to the end
             for child_node in node_to_check.get_children():
-                if child_node.index not in self.content_parts:
+                if child_node.index not in node_to_check.content_parts:
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid,
                                                offset=offset, value=value)
 
