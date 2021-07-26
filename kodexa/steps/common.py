@@ -172,50 +172,50 @@ class RollupTransformer:
 
                     for node in final_nodes:
                         if node.parent:
-                            if node.parent.content_parts:
+                            if node.get_parent().content_parts:
 
                                 # We need to insert into the content part that represents the child - then remove the child
-                                content_part_index = node.parent.content_parts.index(node.index)
-                                node.parent.content_parts.remove(node.index)
-                                node.parent.content_parts[content_part_index:content_part_index] = node.content_parts
-                                child_node_index = node.parent.children.index(node)
-                                node.parent.children[child_node_index:child_node_index] = node.children
-                                node.parent.children.remove(node)
+                                content_part_index = node.get_parent().content_parts.index(node.index)
+                                node.get_parent().content_parts.remove(node.index)
+                                node.get_parent().content_parts[content_part_index:content_part_index] = node.content_parts
+                                child_node_index = node.get_parent().children.index(node)
+                                node.get_parent().get_children()[child_node_index:child_node_index] = node.get_children()
+                                node.get_parent().remove_child(node)
 
-                                node.parent.content = ""
-                                for content_part in node.parent.content_parts:
+                                node.get_parent().content = ""
+                                for content_part in node.get_parent().content_parts:
                                     if isinstance(content_part, str):
-                                        node.parent.content = node.parent.content + self.separator_character + content_part
+                                        node.get_parent().content = node.get_parent().content + self.separator_character + content_part
 
                             else:
                                 # We just need to bring the content onto the end of the parent content and remove
                                 # this node
                                 if self.get_all_content:
-                                    node.parent.content = node.parent.content + self.separator_character + \
-                                                          node.get_all_content() if node.parent.content else node.get_all_content()
+                                    node.get_parent().content = node.get_parent().content + self.separator_character + \
+                                                          node.get_all_content() if node.get_parent().content else node.get_all_content()
                                 else:
-                                    node.parent.content = node.parent.content + self.separator_character + node.content \
-                                        if node.parent.content else node.content
-                                node.parent.children.remove(node)
+                                    node.get_parent().content = node.get_parent().content + self.separator_character + node.content \
+                                        if node.get_parent().content else node.content
+                                node.get_parent().children.remove(node)
 
                             if self.reindex:
 
                                 # Reindex all the children
                                 idx = 0
-                                for child in node.parent.children:
+                                for child in node.get_parent().get_children():
                                     child.index = idx
                                     idx += 1
                                 # Reindex content parts
-                                if node.parent.content_parts:
+                                if node.get_parent().content_parts:
                                     idx = 0
                                     final_cps = []
-                                    for cp in node.parent.content_parts:
+                                    for cp in node.get_parent().content_parts:
                                         if not isinstance(cp, str):
                                             final_cps.append(idx)
                                             idx += 1
                                         else:
                                             final_cps.append(cp)
-                                    node.parent.content_parts = final_cps
+                                    node.get_parent().content_parts = final_cps
 
         return document
 
@@ -286,5 +286,5 @@ class TagsToKeyValuePairExtractor:
                 else:
                     table_store.add([feature.name, tagged_text])
 
-        for child in node.children:
+        for child in node.get_children():
             self.process_node(table_store, child)

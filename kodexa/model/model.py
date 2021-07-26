@@ -244,6 +244,7 @@ class ContentNode(object):
                  content_parts: Optional[List[Any]] = None):
         if content_parts is None:
             content_parts = []
+
         self.node_type: str = node_type
         """The node type (ie. line, page, cell etc)"""
         self.content: Optional[str] = content
@@ -254,20 +255,16 @@ class ContentNode(object):
         """The children of the content node"""
         self.index: int = 0
         """The index of the content node"""
-        self.uuid: str = str(uuid.uuid4())
+        self.uuid: Optional[str] = None
         """The UUID of the content node"""
         self.virtual: bool = False
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
-        # Added for performance
-        self._feature_map: Dict[str, ContentFeature] = {}
 
-        self.parent: Optional[ContentNode] = None
-        """The parent content node"""
-        self.children: List[ContentNode] = []
-        """The child content nodes of this content node"""
+    def get_parent(self):
+        return self.document.get_persistence().get_parent(self)
 
     def __str__(self):
-        return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.children)} children) [" + str(
+        return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) [" + str(
             self.content) + "]"
 
     def to_json(self):
@@ -298,19 +295,17 @@ class ContentNode(object):
         for feature in self.get_features():
             new_dict['features'].append(feature.to_dict())
 
-        for child in self.children:
+        for child in self.get_children():
             new_dict['children'].append(child.to_dict())
         return new_dict
 
     @staticmethod
-    def from_dict(document, content_node_dict: Dict):
+    def from_dict(document, content_node_dict: Dict, parent=None):
         """Build a new ContentNode from a dictionary representtion.
 
         Args:
-          Document: document: The Kodexa document from which the new ContentNode will be created (not added).
-          dict: content_node_dict: The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
-          document:
-          content_node_dict: Dict:
+          document (Document): The Kodexa document from which the new ContentNode will be created (not added).
+          content_node_dict (Dict): The dictionary-structured representation of a ContentNode.  This value will be unpacked into a ContentNode.
 
         Returns:
           ContentNode: A ContentNode containing the unpacked values from the content_node_dict parameter.
@@ -337,14 +332,15 @@ class ContentNode(object):
                                              dict_feature['name'].split(':')[1],
                                              dict_feature['value'], dict_feature['single'], True)
             else:
-
-                # TODO we should convert to Tag?
                 new_content_node.add_feature(feature_type,
                                              dict_feature['name'].split(':')[1],
                                              dict_feature['value'], dict_feature['single'], True)
 
+        document.get_persistence().add_content_node(new_content_node, parent)
+
         for dict_child in content_node_dict['children']:
-            new_content_node.add_child(ContentNode.from_dict(document, dict_child), dict_child['index'])
+            ContentNode.from_dict(document, dict_child, new_content_node)
+
         return new_content_node
 
     def add_child_content(self, node_type: str, content: str, index: Optional[int] = None) -> 'ContentNode':
@@ -368,9 +364,8 @@ class ContentNode(object):
         """Add a ContentNode as a child of this ContentNode
 
         Args:
-          ContentNode: child: The node that will be added as a child of this node
-          index(int, optional, optional): The index at which this child node should be added; defaults to None.  If None, index is set as the count of child node elements.
-          child:
+          child (ContentNode): The node that will be added as a child of this node
+          index (Optional[int]): The index at which this child node should be added; defaults to None.  If None, index is set as the count of child node elements.
 
         Returns:
 
@@ -379,11 +374,11 @@ class ContentNode(object):
             >>> current_content_node.add_child(new_page)
         """
         if not index:
-            child.index = len(self.children)
+            child.index = len(self.get_children())
         else:
             child.index = index
-        self.children.append(child)
-        child.parent = self
+
+        self.document.get_persistence().add_content_node(child, self)
 
     def get_children(self):
         """Returns a list of the children of this node.
@@ -395,18 +390,15 @@ class ContentNode(object):
 
         >>> node.get_children()
         """
-        return self.children
+        return self.document.get_persistence().get_children(self)
 
     def set_feature(self, feature_type, name, value):
         """Sets a feature for this ContentNode, replacing the value if a feature by this type and name already exists.
 
         Args:
-          str: feature_type: The type of feature to be added to the node.
-          str: name: The name of the feature.
-          Any: value: The value of the feature.
-          feature_type:
-          name:
-          value:
+          feature_type (str): The type of feature to be added to the node.
+          name (str): The name of the feature.
+          value (Any): The value of the feature.
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode
@@ -419,9 +411,11 @@ class ContentNode(object):
         return self.add_feature(feature_type, name, value)
 
     def add_feature(self, feature_type, name, value, single=True, serialized=False):
-        """Add a new feature to this ContentNode.
+        """
+        Add a new feature to this ContentNode.
 
-        Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature; therefore the feature value might become a list.
+        Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature;
+        therefore the feature value might become a list.
 
         Args:
           feature_type (str): The type of feature to be added to the node.
@@ -441,12 +435,14 @@ class ContentNode(object):
             feature = self.get_feature(feature_type, name)
             feature.single = False  # always setting to false if we already have a feature of this type/name
             feature.value.append(value)
+            self.document.get_persistence().remove_feature(self, feature_type, name)
+            self.document.get_persistence().add_feature(self, feature)
             return feature
         else:
             # Make sure that we treat the value as list all the time
             new_feature = ContentFeature(feature_type, name,
                                          [value] if single and not serialized else value, single=single)
-            self._feature_map[new_feature.feature_type + ":" + new_feature.name] = new_feature
+            self.document.get_persistence().add_feature(self, new_feature)
             return new_feature
 
     def delete_children(self, nodes: Optional[List] = None,
@@ -462,13 +458,10 @@ class ContentNode(object):
           exclude_nodes: Optional[List[ContentNode]] a list of content node that are children not to delete
           nodes: Optional[List]:  (Default value = None)
           exclude_nodes: Optional[List]:  (Default value = None)
-
-        Returns:
-
         """
         children_to_delete = []
 
-        for child_node in self.children:
+        for child_node in self.get_children():
             if nodes is not None:
                 for node_to_delete in nodes:
                     if node_to_delete.uuid == child_node.uuid:
@@ -484,7 +477,7 @@ class ContentNode(object):
                 children_to_delete.append(child_node)
 
         for child_to_delete in children_to_delete:
-            if child_to_delete in self.children:
+            if child_to_delete in self.get_children():
                 self.children.remove(child_to_delete)
 
     def get_feature(self, feature_type, name):
@@ -494,7 +487,6 @@ class ContentNode(object):
           feature_type (str): The type of the feature.
           name (str): The name of the feature.
 
-
         Returns:
           ContentFeature or None: The feature with the specified type & name.  If no feature is found, None is returned.
           Note that if there are more than one instance of the feature you will only get the first one
@@ -502,15 +494,17 @@ class ContentNode(object):
         >>> new_page.get_feature('pagination','pageNum')
            1
         """
-        return self._feature_map[feature_type + ":" + name] if feature_type + ":" + name in self._feature_map else None
-
+        hits = [i for i in self.get_features() if i.feature_type == feature_type and i.name == name]
+        if len(hits) > 0:
+            return hits[0]
+        else:
+            return None
 
     def get_features_of_type(self, feature_type):
         """Get all features of a specific type.
 
         Args:
-          str: feature_type: The type of the feature.
-          feature_type:
+          feature_type (str): The type of the feature.
 
         Returns:
           list[ContentFeature]: A list of feature with the specified type.  If no features are found, an empty list is returned.
@@ -520,14 +514,12 @@ class ContentNode(object):
         """
         return [i for i in self.get_features() if i.feature_type == feature_type]
 
-    def has_feature(self, feature_type, name):
+    def has_feature(self, feature_type: str, name: str):
         """Determines if a feature with the given feature and name exists on this content node.
 
         Args:
-          str: feature_type: The type of the feature.
-          str: name: The name of the feature.
-          feature_type:
-          name:
+          feature_type (str): The type of the feature.
+          name (str): The name of the feature.
 
         Returns:
           bool: True if the feature is present; else, False.
@@ -535,18 +527,17 @@ class ContentNode(object):
         >>> new_page.has_feature('pagination','pageNum')
            True
         """
-        return feature_type + ":" + name in self._feature_map
+        return len([i for i in self.get_features() if i.feature_type == feature_type and i.name == name]) > 0
 
     def get_features(self):
         """Get all features on this ContentNode.
-
-        Args:
 
         Returns:
           list[ContentFeature]: A list of the features on this ContentNode.
 
         """
-        return list(self._feature_map.values())
+
+        return self.document.get_persistence().get_features(self)
 
     def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
         """Removes the feature with the given name and type from this node.
@@ -556,11 +547,11 @@ class ContentNode(object):
           name (str): The name of the feature.
           include_children (bool): also remove the feature from nodes children
 
-
         >>> new_page.remove_feature('pagination','pageNum')
         """
         results = self.get_feature(feature_type, name)
         if results:
+            self.document.get_persistence().remove_feature(self, feature_type, name)
             del self._feature_map[feature_type + ":" + name]
 
         if include_children:
@@ -701,11 +692,11 @@ class ContentNode(object):
         if self.get_content() and not self.content_parts:
             s += self.get_content()
             s += separator
-            for child in self.children:
+            for child in self.get_children():
                 s += child.get_all_content(separator, strip=strip)
                 s += separator
         elif not self.get_content() and not self.content_parts:
-            for child in self.children:
+            for child in self.get_children():
                 s += child.get_all_content(separator, strip=strip)
                 s += separator
         elif len(self.content_parts) > 0:
@@ -714,7 +705,7 @@ class ContentNode(object):
                     s += part
                     s += separator
                 if isinstance(part, int):
-                    s += self.children[part].get_all_content(separator, strip=strip)
+                    s += self.get_children()[part].get_all_content(separator, strip=strip)
                     s += separator
 
         return s.strip() if strip else s
@@ -759,7 +750,7 @@ class ContentNode(object):
         """
 
         if replace:
-            for child in self.children:
+            for child in self.get_children():
                 child.parent = None
             self.children = []
 
@@ -845,7 +836,7 @@ class ContentNode(object):
         y_min = None
         y_max = None
 
-        for child in self.children:
+        for child in self.get_children():
             child_bbox = child.get_bbox()
             if child_bbox:
                 if not x_min or x_min > child_bbox[0]:
@@ -1000,7 +991,7 @@ class ContentNode(object):
         Returns:
           list[ContentNode]: A list of sibling nodes between this node and the end_node.
 
-        >>> document.content_node.children[0].collect_nodes_to(end_node=document.content_node.children[5])
+        >>> document.content_node.get_children()[0].collect_nodes_to(end_node=document.content_node.get_children()[5])
         """
         nodes = []
         current_node = self
@@ -1025,7 +1016,7 @@ class ContentNode(object):
 
         Returns:
 
-        >>> document.content_node.children[0].tag_nodes_to(document.content_node.children[5], tag_name='foo')
+        >>> document.content_node.get_children()[0].tag_nodes_to(document.content_node.get_children()[5], tag_name='foo')
         """
         [node.tag(tag_to_apply, tag_uuid=tag_uuid) for node in self.collect_nodes_to(end_node)]
 
@@ -1184,7 +1175,7 @@ class ContentNode(object):
                         start = 0 if start - part_length < 0 else start - part_length
 
                     elif isinstance(part, int):
-                        child_node = node_to_check.children[part]
+                        child_node = node_to_check.get_children()[part]
                         result = tag_node_position(child_node, start, end, node_data, tag_uuid,
                                                    offset=offset, value=value)
                         if result < 0 or (end - result) <= 0:
@@ -1221,7 +1212,7 @@ class ContentNode(object):
                     end = end - content_length
                     start = 0 if start - len(node_to_check.content) - len(separator) < 0 else start - content_length
 
-                for child_node in node_to_check.children:
+                for child_node in node_to_check.get_children():
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid, value=value)
 
                     if result < 0 or (end - result) < 0:
@@ -1452,7 +1443,7 @@ class ContentNode(object):
         """
         tags = []
         tags.extend(self.get_tags())
-        for child in self.children:
+        for child in self.get_children():
             tags.extend(child.get_all_tags())
         return list(set(tags))
 
@@ -1489,90 +1480,10 @@ class ContentNode(object):
                 return True
         result = False
         if include_children:
-            for child in self.children:
+            for child in self.get_children():
                 if child.has_tag(tag, True):
                     result = True
         return result
-
-    def find(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None, instance=1,
-             tag_name_re=None, use_all_content=False):
-        """Return a node related to this node (parent or child) that matches the content and/or node type specified by regular expressions.
-
-        Args:
-          content_re(str, optional, optional): The regular expression to match against the node's content; default is '.*'.
-          node_type_re(str, optional, optional): The regular expression to match against the node's type; default is '.*'.
-          direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-          tag_name(str, optional, optional): The tag name that must exist on the node; default is None.
-          instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
-          tag_name_re(str, optional, optional): The regular expression that will match the tag_name that must exist on the node;  default is None.
-          use_all_content(bool, optional, optional): Match content_re against the content of this node concatenated with the content of its child nodes; default is False.
-
-        Returns:
-          ContentNode or None.: Matching node (if found), or None.
-
-        >>> document.get_root().find(content_re='.*Cheese.*',instance=2)
-            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-        """
-        results = self.findall(content_re, node_type_re, direction, tag_name, tag_name_re, use_all_content)
-        if instance < 1 or len(results) < instance:
-            return None
-        else:
-            return results[instance - 1]
-
-    def find_with_feature_value(self, feature_type, feature_name, value, direction=FindDirection.CHILDREN, instance=1):
-        """Return a node related to this node (parent or child) that has a specific feature type, feature name, and feature value.
-
-        Args:
-          str: feature_type: The feature type.
-          str: feature_name: The feature name.
-          Any: value: The feature value.
-          direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-          instance(int, optional, optional): The instance of the matching node to return (may have multiple matches).  Value must be greater than zero; default is 1.
-          feature_type:
-          feature_name:
-          value:
-
-        Returns:
-          ContentNode or None: Matching node (if found), or None.
-
-        >>> document.content_node.find_with_feature_value(feature_type='tag',feature_name='is_cheese',value=[1,10,'The Cheese has moved'])
-            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-        """
-
-        if instance < 1:
-            return None
-        else:
-            return next(
-                itertools.islice(self.findall_with_feature_value(feature_type, feature_name, value, direction),
-                                 instance - 1, 1), None)
-
-    def findall_with_feature_value(self, feature_type, feature_name, value, direction=FindDirection.CHILDREN):
-        """Get all nodes related to this node (parents or children) that have a specific feature type, feature name, and feature value.
-
-        Args:
-          str: feature_type: The feature type.
-          str: feature_name: The feature name.
-          Any: value: The feature value.
-          direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-          feature_type:
-          feature_name:
-          value:
-
-        Returns:
-          list[ContentNode]: list of the matching content nodes
-
-        >>> document.content_node.findall_with_feature_value(feature_type='tag',feature='is_cheese', value=[1,10,'The Cheese has moved'])
-            [<kodexa.model.model.ContentNode object at 0x7f80605e53c8>]
-        """
-        if self.has_feature(feature_type, feature_name) and value == self.get_feature_value(feature_type, feature_name):
-            yield self
-
-        if direction is FindDirection.CHILDREN:
-            for child in self.get_children():
-                yield from child.findall_with_feature_value(feature_type, feature_name, value, direction)
-        else:
-            if self.parent:
-                yield from self.parent.findall_with_feature_value(feature_type, feature_name, value, direction)
 
     def is_first_child(self):
         """Determines if this node is the first child of its parent or has no parent.
@@ -1601,7 +1512,7 @@ class ContentNode(object):
         if not self.parent:
             return True
         else:
-            return self.index == self.parent.get_last_child_index()
+            return self.index == self.get_parent().get_last_child_index()
 
     def get_last_child_index(self):
         """Returns the max index value for the children of this node. If the node has no children, returns None.
@@ -1613,11 +1524,11 @@ class ContentNode(object):
 
         """
 
-        if not self.children:
+        if not self.get_children():
             return None
 
         max_index = 0
-        for child in self.children:
+        for child in self.get_children():
             if child.index > max_index:
                 max_index = child.index
 
@@ -1639,16 +1550,16 @@ class ContentNode(object):
           ContentNode or None: Node at index, or None if the index is outside the boundaries of child nodes.
 
         """
-        if self.children:
+        if self.get_children():
 
-            if index < self.children[0].index:
-                virtual_node = self.document.create_node(node_type=self.children[0].node_type, virtual=True,
+            if index < self.get_children()[0].index:
+                virtual_node = self.document.create_node(node_type=self.get_children()[0].node_type, virtual=True,
                                                          parent=self,
                                                          index=index)
                 return virtual_node
 
             last_child = None
-            for child in self.children:
+            for child in self.get_children():
                 if child.index < index:
                     last_child = child
                 elif child.index == index:
@@ -1657,7 +1568,7 @@ class ContentNode(object):
                     break
 
             if last_child:
-                if last_child.index is not index and index < self.children[-1].index:
+                if last_child.index is not index and index < self.get_children()[-1].index:
                     virtual_node = self.document.create_node(node_type=last_child.node_type, virtual=True, parent=self,
                                                              index=index)
                     return virtual_node
@@ -1712,13 +1623,13 @@ class ContentNode(object):
         compiled_node_type_re = re.compile(node_type_re)
 
         while True:
-            node = self.parent.get_node_at_index(search_index)
+            node = self.get_parent().get_node_at_index(search_index)
 
             if not node:
                 return node
 
             if compiled_node_type_re.match(node.node_type) and (not skip_virtual or not node.virtual):
-                if (not has_no_content and node.content) or (has_no_content):
+                if (not has_no_content and node.content) or has_no_content:
                     return node
 
             search_index += 1
@@ -1745,7 +1656,7 @@ class ContentNode(object):
         if self.index == 0:
             if traverse == traverse.ALL or traverse == traverse.PARENT and self.parent:
                 # Lets look for a previous node on the parent
-                return self.parent.previous_node(node_type_re, skip_virtual, has_no_content, traverse)
+                return self.get_parent().previous_node(node_type_re, skip_virtual, has_no_content, traverse)
             else:
                 return None
 
@@ -1753,7 +1664,7 @@ class ContentNode(object):
         compiled_node_type_re = re.compile(node_type_re)
 
         while True:
-            node = self.parent.get_node_at_index(search_index)
+            node = self.get_parent().get_node_at_index(search_index)
 
             if not node:
                 return node
@@ -1763,79 +1674,6 @@ class ContentNode(object):
                     return node
 
             search_index -= 1
-
-    def findall(self, content_re=".*", node_type_re=".*", direction=FindDirection.CHILDREN, tag_name=None,
-                tag_name_re=None, use_all_content=False):
-        """Search for related nodes (child or parent) that match the content and/or type specified by regular expressions.
-
-        Args:
-          content_re(str, optional, optional): The regular expression to match against the node's content; default is '.*'.
-          node_type_re(str, optional, optional): The regular expression to match against the node's type; default is '.*'.
-          direction(FindDirection(enum), optional, optional): The direction to search (CHILDREN or PARENT); default is FindDirection.CHILDREN.
-          tag_name(str, optional, optional): The tag name that must exist on the node; default is None.
-          tag_name_re(str, optional, optional): The regular expression that will match the tag_name that must exist on the node;  default is None.
-          use_all_content(bool, optional, optional): Match content_re against the content of this node concatenated with the content of its child nodes; default is False.
-
-        Returns:
-          list[ContentNode]: List of matching content nodes
-
-        >>> document.content_node.findall(content_re='.*Cheese.*')
-            [<kodexa.model.model.ContentNode object at 0x7f80605e53c8>,
-            <kodexa.model.model.ContentNode object at 0x7f80605e53c8>]
-        """
-        value_compiled = re.compile(content_re)
-        node_type_compiled = re.compile(node_type_re)
-        if tag_name_re:
-            tag_name_re_compiled = re.compile(tag_name_re)
-        else:
-            tag_name_re_compiled = None
-        return self.findall_compiled(value_compiled, node_type_compiled, direction, tag_name, tag_name_re_compiled,
-                                     use_all_content)
-
-    def findall_compiled(self, value_re_compiled, node_type_re_compiled, direction, tag_name, tag_name_compiled,
-                         use_all_content):
-        """Search for a node that matches on the value and or type using
-        regular expressions using compiled expressions
-
-        Args:
-          value_re_compiled:
-          node_type_re_compiled:
-          direction:
-          tag_name:
-          tag_name_compiled:
-          use_all_content:
-
-        Returns:
-
-        """
-        hits = []
-
-        if use_all_content:
-            content = self.get_all_content()
-        else:
-            content = "" if not self.get_content() else self.get_content()
-
-        if value_re_compiled.match(content) and node_type_re_compiled.match(self.get_node_type()):
-
-            if tag_name_compiled:
-                for tag_name in self.get_tags():
-                    if tag_name_compiled.match(tag_name):
-                        hits.append(self)
-                        break
-
-            elif not tag_name or self.has_tag(tag_name):
-                hits.append(self)
-
-        if direction is FindDirection.CHILDREN:
-            for child in self.get_children():
-                hits.extend(child.findall_compiled(value_re_compiled, node_type_re_compiled, direction, tag_name,
-                                                   tag_name_compiled, use_all_content))
-        else:
-            if self.parent:
-                hits.extend(self.parent.findall_compiled(value_re_compiled, node_type_re_compiled, direction, tag_name,
-                                                         tag_name_compiled, use_all_content))
-
-        return hits
 
 
 class ContentFeature(object):
@@ -1947,7 +1785,7 @@ class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
 
     PREVIOUS_VERSION: str = "1.0.0"
-    CURRENT_VERSION: str = "2.0.0"
+    CURRENT_VERSION: str = "4.0.0"
 
     def __str__(self):
         return f"kodexa://{self.uuid}"
@@ -1971,7 +1809,7 @@ class Document(object):
 
         self.metadata: DocumentMetadata = metadata
         """Metadata relating to the document"""
-        self.content_node: Optional[ContentNode] = content_node
+        self._content_node: Optional[ContentNode] = content_node
         """The root content node"""
         self.virtual: bool = False
         """Is the document virtual (deprecated)"""
@@ -2000,9 +1838,22 @@ class Document(object):
 
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
-        self.__persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
-                                                                                        filename=kddb_path,
-                                                                                        delete_on_close=delete_on_close)
+        self._persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
+                                                                                       filename=kddb_path,
+                                                                                       delete_on_close=delete_on_close)
+
+    def get_persistence(self):
+        return self._persistence_layer
+
+    @property
+    def content_node(self):
+        """The root content Node"""
+        return self._content_node
+
+    @content_node.setter
+    def content_node(self, value):
+        self._content_node = value
+        self.get_persistence().add_content_node(self._content_node, None)
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
@@ -2233,6 +2084,7 @@ class Document(object):
             uuid.uuid5(uuid.NAMESPACE_DNS, 'kodexa.com'))
         if 'content_node' in doc_dict and doc_dict['content_node']:
             new_document.content_node = ContentNode.from_dict(new_document, doc_dict['content_node'])
+
         if 'source' in doc_dict and doc_dict['source']:
             new_document.source = SourceMetadata.from_dict(doc_dict['source'])
         if 'labels' in doc_dict and doc_dict['labels']:
@@ -2242,6 +2094,8 @@ class Document(object):
         if 'classes' in doc_dict and doc_dict['classes']:
             new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
                                     doc_dict['classes']]
+
+        new_document.get_persistence().update_metadata()
         return new_document
 
     @staticmethod
@@ -2299,17 +2153,13 @@ class Document(object):
         applied to the document will also be available on the new node.
 
         Args:
-          str: node_type: The type of node.
-          str: content: The content for the node; defaults to None.
-          bool: virtual: Indicates if this is a 'real' or 'virtual' node; default is False.  'Real' nodes contain document content.
-        'Virtual' nodes are synthesized as necessary to fill gaps in between non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
-          ContentNode: parent: The parent for this newly created node; default is None;
-          int: index: The index property to be set on this node; default is 0;
-          node_type: str:
-          content: Optional[str]:  (Default value = None)
-          virtual: bool:  (Default value = False)
-          parent: ContentNode:  (Default value = None)
-          index: int:  (Default value = 0)
+          node_type (str): The type of node.
+          content (str): The content for the node; defaults to None.
+          virtual (bool): Indicates if this is a 'real' or 'virtual' node; default is False.  'Real' nodes contain
+                          document content. 'Virtual' nodes are synthesized as necessary to fill gaps in between
+                          non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
+          parent (ContentNode): The parent for this newly created node; default is None;
+          index (int): The index property to be set on this node; default is 0;
 
         Returns:
           ContentNode: This newly created node.
