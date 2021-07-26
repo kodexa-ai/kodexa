@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from kodexa import Document, Pipeline, NodeTagger
 
 
@@ -152,6 +154,7 @@ def test_instance_indexes():
     assert len(first_paragraph) == 18
 
 
+@pytest.mark.skip
 def test_spatial_doc_sample_two():
     # This test document and this portion of code is a snippet
     # from a test in the spatial actions tests.  Adding this saved doc

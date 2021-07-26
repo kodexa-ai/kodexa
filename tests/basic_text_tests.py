@@ -80,7 +80,7 @@ def test_lines_of_text():
     context = pipeline.run()
 
     doc = context.output_document
-    assert len(doc.get_root().children) == 0
+    assert len(doc.get_root().get_children()) == 0
     assert len(doc.get_root().get_all_content()) > 0
 
     # next, test with all content being placed the root's children
@@ -89,5 +89,5 @@ def test_lines_of_text():
     context = pipeline.run()
 
     doc = context.output_document
-    assert len(doc.get_root().children) > 0
+    assert len(doc.get_root().get_children()) > 0
     assert doc.get_root().get_content() == None

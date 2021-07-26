@@ -182,7 +182,7 @@ class Step(object):
             axis_node = obj
 
             if self.axis == 'parent':
-                axis_node = axis_node.parent
+                axis_node = axis_node.get_parent()
                 if axis_node is None:
                     return []
 
@@ -243,7 +243,7 @@ class AbbreviatedStep(object):
         if self.abbr == '.':
             return [content_node]
         if self.abbr == '..':
-            return [content_node.parent] if content_node.parent else []
+            return [content_node.get_parent()] if content_node.get_parent() else []
         raise Exception("Not implemented")
 
 
