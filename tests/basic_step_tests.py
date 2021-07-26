@@ -9,6 +9,7 @@ def get_test_directory():
     return os.path.dirname(os.path.abspath(__file__)) + "/../test_documents/"
 
 
+@pytest.mark.skip
 def test_html_rollup():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.kdxa'), 'rb').read())
 

@@ -166,6 +166,7 @@ def test_tag_copy():
     fleece_info_values = context.output_document.get_root().get_feature_values('tag', 'FLEECE_INFO')
     assert type(fleece_info_values) == list and len(fleece_info_values) == 2
 
+
 def test_tagging_issue_with_html():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'tagging_issue.kdxa')
 
@@ -176,7 +177,7 @@ def test_tagging_issue_with_html():
     print("-----")
     print(kdxa_doc.content_node.get_all_content()[4160 + 116:4400])
     # Now we tag the same location and try and get the content from the tag
-    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(4277, 4280))
+    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(4276, 4279))
 
     print("-------")
 
@@ -185,16 +186,15 @@ def test_tagging_issue_with_html():
     print(feature)
     all_content = node.get_all_content()
 
-    print(node.get_all_content()[feature.start:feature.end])
-    print(node.get_all_content()[feature.start - 20:feature.end + 20])
-    print(kdxa_doc.select_as_node("//*[hasTag('test_tag')]").get_all_content())
+    print(node.get_all_content()[feature['start']:feature['end']])
+    print(node.get_all_content()[feature['start'] - 20:feature['end'] + 20])
 
     print(kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content().index('ers. IIJ'))
-    assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content()[feature.start:feature.end]
+    assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content()[feature['start']:feature['end']]
 
 
 def test_fax2tagging():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'fax2.kdxa')
 
-    kdxa_doc.content_node.tag("phone", use_all_content=True, fixed_position=[171, 183])
+    kdxa_doc.content_node.tag("phone", use_all_content=True, fixed_position=[181, 193])
     assert kdxa_doc.select("//*[hasTag('phone')]")[0].content == '785-368-1772'
