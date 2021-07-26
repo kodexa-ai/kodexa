@@ -31,15 +31,15 @@ def get_test_document_with_three_children():
 def test_get_nodes_between():
     document = get_test_document_with_three_children()
 
-    nodes = document.content_node.children[0].collect_nodes_to(document.content_node.children[2])
+    nodes = document.content_node.get_children()[0].collect_nodes_to(document.content_node.get_children()[2])
     assert len(nodes) == 2
 
 
 def test_tag_nodes_between():
     document = get_test_document_with_three_children()
-
-    document.content_node.children[0].tag_nodes_to(document.content_node.children[2], 'test-tag', 'unit-test-1')
-    assert len(document.content_node.findall(tag_name_re='test-tag')) == 2
+    document.content_node.get_children()[0].tag_nodes_to(document.content_node.get_children()[2], 'test-tag',
+                                                         'unit-test-1')
+    assert len(document.content_node.select('//*[hasTag("test-tag")]')) == 2
 
     compare_document(document, "test_tag_nodes_between.json")
 
@@ -52,7 +52,7 @@ def test_basic_document_with_content_node():
 
 def test_finder():
     document = get_test_document()
-    node = document.get_root().find(node_type_re="bar")
+    node = document.get_root().select("//bar")[0]
     assert node.node_type == 'bar'
 
 
@@ -62,9 +62,8 @@ def test_navigation():
     document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'))
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'))
 
-    assert document.content_node.children[0].next_node().content == 'cheeseburger'
-    assert document.content_node.children[2].previous_node().content == 'cheeseburger'
-    pass
+    assert document.content_node.get_children()[0].next_node().content == 'cheeseburger'
+    assert document.content_node.get_children()[2].previous_node().content == 'cheeseburger'
 
 
 def test_virtual_navigation_with_no_0_index():
@@ -89,14 +88,15 @@ def test_virtual_navigation():
 
     assert document.content_node.get_node_at_index(0).content == "fishstick"
 
-    assert document.content_node.children[0].next_node().content is None
-    assert document.content_node.children[0].next_node().next_node().next_node().index == 3
-    assert document.content_node.children[0].next_node().next_node().next_node().next_node().index == 4
-    assert document.content_node.children[0].next_node().next_node().next_node().next_node().next_node().index == 5
-    assert document.content_node.children[
+    assert document.content_node.get_children()[0].next_node().content is None
+    assert document.content_node.get_children()[0].next_node().next_node().next_node().index == 3
+    assert document.content_node.get_children()[0].next_node().next_node().next_node().next_node().index == 4
+    assert document.content_node.get_children()[
+               0].next_node().next_node().next_node().next_node().next_node().index == 5
+    assert document.content_node.get_children()[
                0].next_node().next_node().next_node().next_node().next_node().next_node() is None
 
-    assert document.content_node.children[0].next_node().next_node().content == 'cheeseburger'
+    assert document.content_node.get_children()[0].next_node().next_node().content == 'cheeseburger'
 
 
 def test_add_feature():
@@ -105,19 +105,19 @@ def test_add_feature():
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
     # add feature accpeting "add_feature" defaults
-    new_feature = document.content_node.children[0].add_feature('test', 'test', 'cheese')
+    new_feature = document.content_node.get_children()[0].add_feature('test', 'test', 'cheese')
     assert len(new_feature.value) == 1
     assert new_feature.value[0] == "cheese"
 
     # adding a 2nd feature with the same type/name
-    another_feature = document.content_node.children[0].add_feature('test', 'test', 'pickels')
+    another_feature = document.content_node.get_children()[0].add_feature('test', 'test', 'pickels')
     assert len(another_feature.value) == 2
     assert another_feature.value[0] == "cheese"
     assert another_feature.value[1] == "pickels"
 
     # adding a 3rd feature with the same type/name - changing default values
-    yet_another_feature = document.content_node.children[0].add_feature('test', 'test', 'lettuce', single=False,
-                                                                        serialized=True)
+    yet_another_feature = document.content_node.get_children()[0].add_feature('test', 'test', 'lettuce', single=False,
+                                                                              serialized=True)
     assert len(yet_another_feature.value) == 3
     assert yet_another_feature.value[0] == "cheese"
     assert yet_another_feature.value[1] == "pickels"
@@ -127,11 +127,12 @@ def test_add_feature():
 
     # Setting a feature with single=False
     # This allows me to set a string as if it was a collection...and later I can't add to it with append.  Not sure that's the desiered behavior
-    new_again = document.content_node.children[0].add_feature('test_2', 'test_2_name', 'sesame_seeds', single=False,
-                                                              serialized=False)
+    new_again = document.content_node.get_children()[0].add_feature('test_2', 'test_2_name', 'sesame_seeds',
+                                                                    single=False,
+                                                                    serialized=False)
 
     # This would fail, as the original value 'seasme_seeds' is not a collection, even though it was stated to be one
-    # new_again_2 = document.content_node.children[0].add_feature('test_2', 'test_2_name', 'special_sauce')
+    # new_again_2 = document.content_node.get_children()[0].add_feature('test_2', 'test_2_name', 'special_sauce')
 
 
 def test_feature_find():
@@ -139,19 +140,18 @@ def test_feature_find():
     document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
-    document.content_node.children[0].add_feature('test', 'test', 'cheese')
-    document.content_node.children[1].add_feature('test', 'test', 'fishstick')
+    document.content_node.get_children()[0].add_feature('test', 'test', 'cheese')
+    document.content_node.get_children()[1].add_feature('test', 'test', 'fishstick')
 
-    assert document.get_root().find_with_feature_value('test', 'test', 'cheese') is not None
-    assert document.get_root().children[1].get_all_content() == 'cheeseburger'
+    assert document.get_root().get_children()[1].get_all_content() == 'cheeseburger'
 
 
 def test_finder_and_tag():
     document = get_test_document()
-    node = document.get_root().find(node_type_re="bar")
+    node = document.get_root().select("//bar")[0]
     assert node.node_type == "bar"
 
-    node = document.get_root().find(node_type_re="bar")
+    node = document.get_root().select('//bar')[0]
     node.tag("sticky", content_re="fish(.*)", tag_uuid='unit-test')
     print(node.to_json())
     assert len(node.get_tags()) == 1
@@ -199,12 +199,12 @@ def test_basic_tagging2():
 def test_doc_from_text():
     doc = Document.from_text('It is going to be a great day')
     assert doc.get_root().content == 'It is going to be a great day'
-    assert len(doc.get_root().children) == 0
+    assert len(doc.get_root().get_children()) == 0
 
     doc = Document.from_text('It is going to be a great day', separator=' ')
-    assert doc.get_root().content == None
-    assert len(doc.get_root().children) == 8
-    assert doc.get_root().children[4].content == 'be'
+    assert doc.get_root().content is None
+    assert len(doc.get_root().get_children()) == 8
+    assert doc.get_root().get_children()[4].content == 'be'
 
 
 def test_get_source():

@@ -8,11 +8,13 @@ import uuid
 import msgpack
 
 from kodexa.model import Document, ContentNode, SourceMetadata
-from kodexa.model.model import ContentClassification, DocumentMetadata
+from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
 # Heavily used SQL
 
 FEATURE_INSERT = "INSERT INTO f (cn_id, f_type, fvalue_id) VALUES (?,?,?)"
+FEATURE_DELETE = "DELETE FROM f where cn_id=? and f_type=?"
+
 CONTENT_NODE_INSERT = "INSERT INTO cn (pid, nt, idx) VALUES (?,?,?)"
 CONTENT_NODE_PART_INSERT = "INSERT INTO cnp (cn_id, pos, content, content_idx) VALUES (?,?,?,?)"
 NOTE_TYPE_INSERT = "insert into n_type(name) values (?)"
@@ -91,7 +93,7 @@ class SqliteDocumentPersistence(object):
         self.__update_metadata(cursor)
 
         if self.document.content_node:
-            self.__insert_node(self.document.content_node, cursor)
+            self.__insert_node(self.document.content_node, cursor, None)
 
         self.connection.commit()
 
@@ -105,13 +107,19 @@ class SqliteDocumentPersistence(object):
         feature_type_name = feature.feature_type + ":" + feature.name
         result = cursor.execute(FEATURE_TYPE_LOOKUP, [feature_type_name]).fetchone()
         if result is None:
-            return cursor.execute(FEATURE_TYPE_INSERT, [feature_type_name]).lastrowid
+            new_feature_type_name_id = cursor.execute(FEATURE_TYPE_INSERT, [feature_type_name]).lastrowid
+            self.feature_type_names[new_feature_type_name_id] = feature_type_name
+            return new_feature_type_name_id
+
         return result[0]
 
     def __resolve_n_type(self, n_type, cursor):
         result = cursor.execute(NODE_TYPE_LOOKUP, [n_type]).fetchone()
         if result is None:
-            return cursor.execute(NOTE_TYPE_INSERT, [n_type]).lastrowid
+            new_type_id = cursor.execute(NOTE_TYPE_INSERT, [n_type]).lastrowid
+            self.node_types[new_type_id] = n_type
+            return new_type_id
+
         return result[0]
 
     def __resolve_feature_value(self, feature, cursor):
@@ -126,8 +134,13 @@ class SqliteDocumentPersistence(object):
             fvalue_id = result[0]
         return fvalue_id
 
-    def __insert_node(self, node: ContentNode, cursor):
-        cn_values = [node.parent.uuid if node.parent else None,
+    def __insert_node(self, node: ContentNode, cursor, parent):
+
+        if node.uuid:
+            # Delete the existing node
+            cursor.execute("DELETE FROM cn where id=?", [node.uuid])
+
+        cn_values = [parent.uuid if parent else None,
                      self.__resolve_n_type(node.node_type, cursor), node.index]
         node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
@@ -140,15 +153,8 @@ class SqliteDocumentPersistence(object):
                                    part if not isinstance(part, str) else None]
                 cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
-        # Work through the features
-        for feature in node.get_features():
-            f_values = [node.uuid, self.__resolve_f_type(feature, cursor),
-                        self.__resolve_feature_value(feature, cursor)]
-            feature.uuid = cursor.execute(FEATURE_INSERT,
-                                          f_values).lastrowid
-
-        for child in node.children:
-            self.__insert_node(child, cursor)
+        for child in node.get_children():
+            self.__insert_node(child, cursor, node)
 
     def __clean_none_values(self, d):
         clean = {}
@@ -162,7 +168,7 @@ class SqliteDocumentPersistence(object):
         return clean
 
     def __update_metadata(self, cursor):
-        document_metadata = {'uuid': self.uuid, 'version': Document.CURRENT_VERSION,
+        document_metadata = {'version': Document.CURRENT_VERSION,
                              'metadata': self.document.metadata.to_dict(),
                              'source': self.__clean_none_values(dataclasses.asdict(self.document.source)),
                              'mixins': self.document.get_mixins(),
@@ -211,6 +217,7 @@ class SqliteDocumentPersistence(object):
         cursor.close()
 
     def __build_node(self, node_row, cursor):
+
         new_node = ContentNode(self.document, self.node_types[node_row[2]])
         new_node.uuid = node_row[0]
         new_node.index = node_row[3]
@@ -228,22 +235,62 @@ class SqliteDocumentPersistence(object):
 
         new_node.content = content
 
-        # We need to get the features back
-        for feature in cursor.execute("select id, cn_id, f_type, fvalue_id from f where cn_id = ?",
-                                      [new_node.uuid]).fetchall():
-            feature_type_name = self.feature_type_names[feature[2]]
-            f_value = cursor.execute("select binary_value, single from f_value where id = ?", [feature[3]]).fetchone()
-            new_node.add_feature(feature_type_name.split(':')[0], feature_type_name.split(':')[1],
-                                 value=msgpack.unpackb(f_value[0]), single=f_value[1] == 1, serialized=True)
-
-        # We need to get the child nodes
-        for child_node in cursor.execute("select id, pid, nt, idx from cn where pid = ?", [new_node.uuid]).fetchall():
-            new_node.add_child(self.__build_node(child_node, cursor))
-
         from kodexa.mixins import registry
         registry.add_mixins_to_document_node(self.document, new_node)
 
         return new_node
+
+    def add_content_node(self, node, parent):
+        cursor = self.connection.cursor()
+        self.__insert_node(node, cursor, parent)
+
+    def add_feature(self, node, feature):
+
+        cursor = self.connection.cursor()
+        f_values = [node.uuid, self.__resolve_f_type(feature, cursor),
+                    self.__resolve_feature_value(feature, cursor)]
+        feature.uuid = cursor.execute(FEATURE_INSERT,
+                                      f_values).lastrowid
+
+    def remove_feature(self, node, feature_type, name):
+
+        cursor = self.connection.cursor()
+
+        feature = ContentFeature(feature_type, name, None)
+        f_values = [node.uuid, self.__resolve_f_type(feature, cursor)]
+        cursor.execute(FEATURE_DELETE, f_values)
+
+    def get_children(self, content_node):
+
+        # We need to get the child nodes
+        cursor = self.connection.cursor()
+        children = []
+        for child_node in cursor.execute("select id, pid, nt, idx from cn where pid = ?",
+                                         [content_node.uuid]).fetchall():
+            children.append(self.__build_node(child_node, cursor))
+        return children
+
+    def __get_node(self, node_id):
+        cursor = self.connection.cursor()
+
+        node_row = cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
+        if node_row:
+            return self.__build_node(node_row, cursor)
+        else:
+            return None
+
+    def get_parent(self, content_node):
+        cursor = self.connection.cursor()
+
+        parent = cursor.execute("select pid from cn where id = ?", [content_node.uuid]).fetchone()
+        if parent:
+            return self.__get_node(parent[0])
+        else:
+            return None
+
+    def update_metadata(self):
+        cursor = self.connection.cursor()
+        self.__update_metadata(cursor)
 
     def __rebuild_from_document(self):
         cursor = self.connection.cursor()
@@ -261,8 +308,22 @@ class SqliteDocumentPersistence(object):
 
     def get_bytes(self):
 
-        # TODO we need to make this an option?
-        self.__rebuild_from_document()
-
         with open(self.current_filename, 'rb') as f:
             return f.read()
+
+    def get_features(self, node):
+        # We need to get the features back
+
+        cursor = self.connection.cursor()
+        features = []
+        for feature in cursor.execute("select id, cn_id, f_type, fvalue_id from f where cn_id = ?",
+                                      [node.uuid]).fetchall():
+            feature_type_name = self.feature_type_names[feature[2]]
+            f_value = cursor.execute("select binary_value, single from f_value where id = ?", [feature[3]]).fetchone()
+
+            single = f_value[1] == 1
+            value = msgpack.unpackb(f_value[0])
+            features.append(ContentFeature(feature_type_name.split(':')[0], feature_type_name.split(':')[1],
+                                           value, single=single))
+
+        return features

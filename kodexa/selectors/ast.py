@@ -152,7 +152,7 @@ class AbsolutePath(object):
         if self.op == '//':
             results = []
             results = results + self.relative.resolve(content_node, variables)
-            for child in content_node.children:
+            for child in content_node.get_children():
                 results = results + self.resolve(child, variables)
             return results
         raise Exception("Not implemented")
