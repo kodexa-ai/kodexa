@@ -258,6 +258,8 @@ class ContentNode(object):
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
         self._parent_uuid = parent_uuid
 
+        self.virtual_parent = None
+
         if content is not None and len(self.content_parts) == 0:
             self.content_parts = [content]
 
@@ -286,6 +288,9 @@ class ContentNode(object):
         return False
 
     def get_parent(self):
+        if self.virtual_parent is not None:
+            return self.virtual_parent
+        
         return self.document.get_persistence().get_node(self._parent_uuid) if self._parent_uuid else None
 
     def __str__(self):
@@ -2125,6 +2130,12 @@ class Document(object):
                                    parent_uuid=parent.uuid if parent is not None else None)
         content_node.index = index
         content_node.virtual = virtual
+
+        if virtual:
+            # We need to push the parent node into the virtual to keep track of it
+            # in case the parent is virtual too
+            content_node.virtual_parent = parent
+
         registry.add_mixins_to_document_node(self, content_node)
         if virtual:
             for mixin_name in self.get_mixins():
