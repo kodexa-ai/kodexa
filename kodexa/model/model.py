@@ -643,16 +643,31 @@ class ContentNode(object):
         """
         return self.node_type
 
+    def select_first(self, selector, variables=None):
+        """Select and return the first child of this node that match the selector value.
+
+        Args:
+          selector (str): The selector (ie. //*)
+          variables (dict, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
+
+        Returns:
+          Optional[ContentNode]: The first matching node or none
+
+        >>> document.get_root().select_first('.')
+           ContentNode
+
+        >>> document.get_root().select_first('//*[hasTag($tagName)]', {"tagName": "div"})
+           ContentNode
+        """
+        result = self.select(selector, variables)
+        return result[0] if len(result) > 0 else None
+
     def select(self, selector, variables=None):
         """Select and return the child nodes of this node that match the selector value.
 
-
-        or
-
         Args:
-          str: selector: The selector (ie. //*)
-          variables(dict, optional, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
-          selector:
+          selector (str): The selector (ie. //*)
+          variables (dict, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
           list[ContentNode]: A list of the matching content nodes.  If no matches are found, the list will be empty.
@@ -1445,22 +1460,18 @@ class ContentNode(object):
     def is_last_child(self):
         """Determines if this node is the last child of its parent or has no parent.
 
-        Args:
-
         Returns:
           bool: True if this node is the last child of its parent or if this node has no parent; else, False;
 
         """
 
-        if not self.parent:
+        if not self.get_parent():
             return True
         else:
             return self.index == self.get_parent().get_last_child_index()
 
     def get_last_child_index(self):
         """Returns the max index value for the children of this node. If the node has no children, returns None.
-
-        Args:
 
         Returns:
           int or None: The max index of the children of this node, or None if there are no children.
@@ -1486,8 +1497,7 @@ class ContentNode(object):
         will have the node type of its nearest sibling and will have an index value, but will have no features or content.
 
         Args:
-          int: index: The index (zero-based) for the child node.
-          index:
+          index (int): The index (zero-based) for the child node.
 
         Returns:
           ContentNode or None: Node at index, or None if the index is outside the boundaries of child nodes.
@@ -2191,6 +2201,25 @@ class Document(object):
         url_document.source.original_path = url
         url_document.source.headers = headers
         return url_document
+
+    def select_first(self, selector, variables=None) -> Optional[ContentNode]:
+        """Select and return the first child of this node that match the selector value.
+
+        Args:
+          selector (str): The selector (ie. //*)
+          variables (dict, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
+
+        Returns:
+          Optional[ContentNode]: The first matching node or none
+
+        >>> document.get_root().select_first('.')
+           ContentNode
+
+        >>> document.get_root().select_first('//*[hasTag($tagName)]', {"tagName": "div"})
+           ContentNode
+        """
+        result = self.select(selector, variables)
+        return result[0] if len(result) > 0 else None
 
     def select(self, selector: str, variables: Optional[dict] = None) -> List[ContentNode]:
         """Execute a selector on the root node and then return a list of the matching nodes.
