@@ -290,7 +290,7 @@ class ContentNode(object):
     def get_parent(self):
         if self.virtual_parent is not None:
             return self.virtual_parent
-        
+
         return self.document.get_persistence().get_node(self._parent_uuid) if self._parent_uuid else None
 
     def __str__(self):
@@ -405,6 +405,10 @@ class ContentNode(object):
             child.index = len(self.get_children())
         else:
             child.index = index
+
+        child._parent_uuid = self.uuid
+        if child.virtual:
+            child.virtual_parent = self
 
         self.document.get_persistence().add_content_node(child, self)
 
