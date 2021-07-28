@@ -248,7 +248,7 @@ class ContentNode(object):
         """The node type (ie. line, page, cell etc)"""
         self.document: Document = document
         """The document that the node belongs to"""
-        self.content_parts: List[Any] = content_parts
+        self._content_parts: List[Any] = content_parts
         """The children of the content node"""
         self.index: int = 0
         """The index of the content node"""
@@ -260,17 +260,25 @@ class ContentNode(object):
 
         self.virtual_parent = None
 
-        if content is not None and len(self.content_parts) == 0:
-            self.content_parts = [content]
+        if content is not None and len(self.get_content_parts()) == 0:
+            self.set_content_parts([content])
+
+    def get_content_parts(self):
+        return self._content_parts
+
+    def set_content_parts(self, content_parts):
+        self._content_parts = content_parts
+        if not self.virtual:
+            self.document.get_persistence().update_content_parts(self, content_parts)
 
     @property
     def content(self):
 
-        if len(self.content_parts) == 0:
+        if len(self.get_content_parts()) == 0:
             return None
 
         s = ""
-        for part in self.content_parts:
+        for part in self.get_content_parts():
             if isinstance(part, str):
                 if s != "":
                     s += " "
@@ -280,7 +288,16 @@ class ContentNode(object):
 
     @content.setter
     def content(self, new_content):
-        self.content_parts = [new_content]
+        if len(self._content_parts) == 0:
+            self.set_content_parts([new_content])
+        else:
+            # We need to remove all the strings and add this one
+            # back at the front
+            parts = self.get_content_parts()
+            filtered_parts = list(filter(lambda part: isinstance(part, int), parts))
+            if new_content is not None and new_content != "":
+                filtered_parts.insert(0, new_content)
+            self.set_content_parts(filtered_parts)
 
     def __eq__(self, other):
         if isinstance(other, ContentNode):
@@ -319,7 +336,7 @@ class ContentNode(object):
 
         >>> node.to_dict()
         """
-        new_dict = {'node_type': self.node_type, 'content': self.content, 'content_parts': self.content_parts,
+        new_dict = {'node_type': self.node_type, 'content': self.content, 'content_parts': self.get_content_parts(),
                     'features': [],
                     'index': self.index, 'children': [], 'uuid': self.uuid}
         for feature in self.get_features():
@@ -350,7 +367,7 @@ class ContentNode(object):
             'content'] if 'content' in content_node_dict else None, index=content_node_dict['index'])
 
         if 'content_parts' in content_node_dict and len(content_node_dict['content_parts']) > 0:
-            new_content_node.content_parts = content_node_dict['content_parts']
+            new_content_node.set_content_parts(content_node_dict['content_parts'])
 
         document.get_persistence().add_content_node(new_content_node, parent)
 
@@ -412,10 +429,13 @@ class ContentNode(object):
 
         self.document.get_persistence().add_content_node(child, self)
 
+    def remove_child(self, content_node):
+        for child in self.get_children():
+            if child == content_node:
+                self.document.get_persistence().remove_content_node(child, self)
+
     def get_children(self):
         """Returns a list of the children of this node.
-
-        Args:
 
         Returns:
           list[ContentNode]: The list of child nodes for this ContentNode.
@@ -708,20 +728,26 @@ class ContentNode(object):
             "This string is made up of multiple nodes"
         """
         s = ""
-        children = self.get_children()
-        for part in self.content_parts:
+        children = self.get_content_parts()
+        for part in children:
             if isinstance(part, str):
+                if s != "":
+                    s += separator
                 s += part
-                s += separator
             if isinstance(part, int):
-                s += [child.get_all_content(separator, strip=strip) for child in children if child.index == part][0]
-                s += separator
+                if s != "":
+                    s += separator
+                s += \
+                    [child.get_all_content(separator, strip=strip) for child in self.get_children() if
+                     child.index == part][
+                        0]
 
         # We need to determine if we have missing children and add them to the end
         for child in self.get_children():
-            if child.index not in self.content_parts:
+            if child.index not in self.get_content_parts():
+                if s != "":
+                    s += separator
                 s += child.get_all_content(separator, strip=strip)
-                s += separator
 
         return s.strip() if strip else s
 
@@ -1009,14 +1035,9 @@ class ContentNode(object):
         """Tag all the nodes from this node to the end_node with the given tag name
 
         Args:
-          ContentNode: end_node: The node to end with
-          str: tag_to_apply: The tag name that will be applied to each node
-          str: tag_uuid: The tag uuid used if you want to group them
-          end_node:
-          tag_to_apply:
-          tag_uuid: str:  (Default value = None)
-
-        Returns:
+          end_node (ContentNode): The node to end with
+          tag_to_apply (str): The tag name that will be applied to each node
+          tag_uuid (str): The tag uuid used if you want to group them
 
         >>> document.content_node.get_children()[0].tag_nodes_to(document.content_node.get_children()[5], tag_name='foo')
         """
@@ -1062,8 +1083,8 @@ class ContentNode(object):
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
             use_match=True, index=None):
-        """This will tag (see Feature Tagging) the expression groups identified by the regular expression.
-
+        """
+        This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
         Note that if you use the flag use_all_content then node_only will default to True if not set, else it
         will default to False
@@ -1100,73 +1121,62 @@ class ContentNode(object):
             node_only = False
 
         def get_tag_uuid(tag_uuid):
-            """
-
-            Args:
-              tag_uuid:
-
-            Returns:
-
-            """
             if tag_uuid:
                 return tag_uuid
             else:
                 return str(uuid.uuid4())
 
         def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
-            """
-
-            Args:
-              node_to_check:
-              start:
-              end:
-              node_data:
-              tag_uuid:
-
-            Returns:
-
-            """
-
             content_length = 0
             original_start = start
             original_end = end
-            for part in node_to_check.content_parts:
+            for part_idx, part in enumerate(node_to_check.get_content_parts()):
                 if isinstance(part, str):
-                    # It is just content
-                    part_length = len(part)
-                    if start < part_length and end < part_length:
-                        node_to_check.add_feature('tag', tag_to_apply,
-                                                  Tag(original_start, original_end,
-                                                      part[start:end] if value is None else value,
-                                                      data=node_data, uuid=tag_uuid, confidence=confidence,
-                                                      index=index))
-                        return -1
-                    elif start < part_length <= end:
-                        node_to_check.add_feature('tag', tag_to_apply,
-                                                  Tag(original_start,
-                                                      content_length + part_length,
-                                                      value=part[start:] if value is None else value,
-                                                      data=node_data, uuid=tag_uuid, confidence=confidence,
-                                                      index=index))
+                    if len(part) > 0:
+                        # It is just content
+                        part_length = len(part)
+                        if part_idx > 0:
+                            end = end - len(separator)
+                            content_length = content_length + len(separator)
+                            offset = offset + len(separator)
+                            start = 0 if start - len(separator) < 0 else start - len(separator)
 
-                    # Add the separator
-                    part_length = part_length + len(separator)
+                        if start < part_length and end < part_length:
+                            node_to_check.add_feature('tag', tag_to_apply,
+                                                      Tag(original_start, original_end,
+                                                          part[start:end] if value is None else value,
+                                                          data=node_data, uuid=tag_uuid, confidence=confidence,
+                                                          index=index))
+                            return -1
+                        elif start < part_length <= end:
+                            node_to_check.add_feature('tag', tag_to_apply,
+                                                      Tag(original_start,
+                                                          content_length + part_length,
+                                                          value=part[start:] if value is None else value,
+                                                          data=node_data, uuid=tag_uuid, confidence=confidence,
+                                                          index=index))
 
-                    end = end - part_length
-                    content_length = content_length + part_length
-                    offset = offset + part_length
-                    start = 0 if start - part_length < 0 else start - part_length
+                        end = end - part_length
+                        content_length = content_length + part_length
+                        offset = offset + part_length
+                        start = 0 if start - part_length < 0 else start - part_length
 
                 elif isinstance(part, int):
                     child_node = [child for child in node_to_check.get_children() if child.index == part][0]
+
+                    if part_idx > 0:
+                        end = end - len(separator)
+                        content_length = content_length + len(separator)
+                        offset = offset + len(separator)
+                        start = 0 if start - len(separator) < 0 else start - len(separator)
+
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid,
                                                offset=offset, value=value)
+
                     if result < 0 or (end - result) <= 0:
                         return -1
                     else:
-                        # Even if we didn't have anything we have a separator
 
-                        result = result + len(separator)
                         offset = offset + result
                         end = end - result
                         start = 0 if start - result < 0 else start - result
@@ -1176,16 +1186,21 @@ class ContentNode(object):
                     raise Exception("Invalid part?")
 
             # We need to determine if we have missing children and add them to the end
-            for child_node in node_to_check.get_children():
-                if child_node.index not in node_to_check.content_parts:
+            for child_idx, child_node in enumerate(node_to_check.get_children()):
+                if child_node.index not in node_to_check.get_content_parts():
+
+                    if content_length > 0:
+                        end = end - len(separator)
+                        content_length = content_length + len(separator)
+                        offset = offset + len(separator)
+                        start = 0 if start - len(separator) < 0 else start - len(separator)
+
                     result = tag_node_position(child_node, start, end, node_data, tag_uuid,
                                                offset=offset, value=value)
 
                     if result < 0 or (end - result) <= 0:
                         return -1
                     else:
-                        # Even if we didn't have anything we have a separator
-                        result = result + len(separator)
                         offset = offset + result
                         end = end - result
                         start = 0 if start - result < 0 else start - result
@@ -1194,7 +1209,8 @@ class ContentNode(object):
 
             if len(node_to_check.get_all_content(strip=False)) != content_length:
                 raise Exception(
-                    f"There is a problem in the structure? Length mismatch ({len(node_to_check.get_all_content(strip=False))} != {content_length})")
+                    f"There is a problem in the structure? (2) Length mismatch ({len(node_to_check.get_all_content(strip=False))} != {content_length})")
+
             return content_length
 
         if content_re:
@@ -1296,16 +1312,6 @@ class ContentNode(object):
         """
 
         def group_tag_values(group_dict, feature_val):
-            """
-            Group the tags by tag UUID
-
-            Args:
-              group_dict:
-              feature_val:
-
-            Returns:
-
-            """
             # we know the names of all these tags are the same, but we want to group them if they share the same uuid
             if feature_val['uuid'] in value_groups.keys():
                 # we've seen this UUID - add it's value to the group
@@ -1339,8 +1345,8 @@ class ContentNode(object):
         """Get the nodes for a specific tag name, grouped by uuid
 
         Args:
-          tag_name: tag name
-          include_children: include the children of this node
+          tag_name (str): tag name
+          include_children (bool): include the children of this node
 
         Returns:
           a list of the tag content nodes

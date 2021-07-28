@@ -144,7 +144,7 @@ class SqliteDocumentPersistence(object):
                          self.__resolve_n_type(node.node_type, cursor), node.index]
             node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
-        for idx, part in enumerate(node.content_parts):
+        for idx, part in enumerate(node.get_content_parts()):
             cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
                                part if not isinstance(part, str) else None]
             cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
@@ -222,9 +222,11 @@ class SqliteDocumentPersistence(object):
         for content_part in content_parts:
             if content_part[3] is None:
                 content = content + content_part[2]
-                new_node.content_parts.append(content_part[2])
+                parts = new_node.get_content_parts()
+                parts.append(content_part[2])
+                new_node.set_content_parts(parts)
             else:
-                new_node.content_parts.append(content_part[3])
+                new_node.get_content_parts().append(content_part[3])
 
         new_node.content = content
 
@@ -330,3 +332,20 @@ class SqliteDocumentPersistence(object):
 
     def get_node(self, node_id):
         return self.__get_node(node_id)
+
+    def update_content_parts(self, node, content_parts):
+        cursor = self.connection.cursor()
+        cursor.execute("delete from cnp where cn_id=?", [node.uuid])
+        for idx, part in enumerate(content_parts):
+            cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
+                               part if not isinstance(part, str) else None]
+            cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+        self.connection.commit()
+        cursor.close()
+
+    def remove_content_node(self, child, parent):
+        cursor = self.connection.cursor()
+        cursor.execute("delete from cnp where cn_id=?", [child.uuid])
+        cursor.execute("delete from cn where id=?", [child.uuid])
+        self.connection.commit()
+        cursor.close()

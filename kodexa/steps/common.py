@@ -172,31 +172,31 @@ class RollupTransformer:
 
                     for node in final_nodes:
                         if node.get_parent():
-                            if node.get_parent().content_parts:
+                            if node.get_parent().get_content_parts():
 
                                 # We need to insert into the content part that represents the child - then remove the child
-                                content_part_index = node.get_parent().content_parts.index(node.index)
-                                node.get_parent().content_parts.remove(node.index)
-                                node.get_parent().content_parts[content_part_index:content_part_index] = node.content_parts
-                                child_node_index = node.get_parent().children.index(node)
+                                content_part_index = node.get_parent().get_content_parts().index(node.index)
+                                parts = node.get_parent().get_content_parts()
+
+                                parts.remove(node.index)
+                                parts[content_part_index:content_part_index] = node.get_content_parts()
+                                node.get_parent().set_content_parts(parts)
+                                child_node_index = node.get_parent().get_children().index(node)
                                 node.get_parent().get_children()[child_node_index:child_node_index] = node.get_children()
                                 node.get_parent().remove_child(node)
-
-                                node.get_parent().content = ""
-                                for content_part in node.get_parent().content_parts:
-                                    if isinstance(content_part, str):
-                                        node.get_parent().content = node.get_parent().content + self.separator_character + content_part
 
                             else:
                                 # We just need to bring the content onto the end of the parent content and remove
                                 # this node
+
+                                node.get_parent().children.remove(node)
+
                                 if self.get_all_content:
                                     node.get_parent().content = node.get_parent().content + self.separator_character + \
                                                           node.get_all_content() if node.get_parent().content else node.get_all_content()
                                 else:
                                     node.get_parent().content = node.get_parent().content + self.separator_character + node.content \
                                         if node.get_parent().content else node.content
-                                node.get_parent().children.remove(node)
 
                             if self.reindex:
 
@@ -206,16 +206,16 @@ class RollupTransformer:
                                     child.index = idx
                                     idx += 1
                                 # Reindex content parts
-                                if node.get_parent().content_parts:
+                                if node.get_parent().get_content_parts():
                                     idx = 0
                                     final_cps = []
-                                    for cp in node.get_parent().content_parts:
+                                    for cp in node.get_parent().get_content_parts():
                                         if not isinstance(cp, str):
                                             final_cps.append(idx)
                                             idx += 1
                                         else:
                                             final_cps.append(cp)
-                                    node.get_parent().content_parts = final_cps
+                                    node.get_parent().set_content_parts(final_cps)
 
         return document
 

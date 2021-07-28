@@ -23,14 +23,15 @@ def test_fixed_tagging_with_child():
     # Hello Philip Dodds
     # 012345678901234567
 
-    # doc.content_node.tag('name', fixed_position=[6, 12], separator=" ")
+    assert doc.content_node.get_all_content(strip=False)[6:12] == 'Philip'
+    assert doc.content_node.get_all_content(strip=False)[13:18] == 'Dodds'
 
-    doc.content_node.tag('lastName', fixed_position=[13, 19], separator=" ")
+    doc.content_node.tag('name', fixed_position=[6, 12], separator=" ")
 
-    # assert doc.content_node.get_tag_values('name', include_children=True)[0] == 'Philip'
+    assert doc.content_node.get_tag_values('name', include_children=True)[0] == 'Philip'
+    doc.content_node.tag('lastName', fixed_position=[13, 18], separator=" ")
+
     assert doc.content_node.get_tag_values('lastName', include_children=True)[0] == 'Dodds'
-    assert doc.content_node.get_all_content()[6:12] == 'Philip'
-    assert doc.content_node.get_all_content()[13:19] == 'Dodds'
 
 
 def test_node_only_tagging():
@@ -170,31 +171,21 @@ def test_tag_copy():
 def test_tagging_issue_with_html():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'tagging_issue.kdxa')
 
-    print(kdxa_doc.content_node.get_all_content())
-    # assert "IIJ" == kdxa_doc.content_node.get_all_content()[4277:4280]
+    all_content = kdxa_doc.content_node.get_all_content(strip=False)
+    assert "IIJ" == all_content[4019:4022]
 
-    print(kdxa_doc.content_node.get_all_content()[4200:4400])
-    print("-----")
-    print(kdxa_doc.content_node.get_all_content()[4160 + 116:4400])
     # Now we tag the same location and try and get the content from the tag
-    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(4276, 4279))
-
-    print("-------")
+    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(4019, 4022))
 
     node = kdxa_doc.select('//*[hasTag("test_tag")]')[0]
     feature = node.get_feature_value("tag", "test_tag")
-    print(feature)
-    all_content = node.get_all_content()
-
-    print(node.get_all_content()[feature['start']:feature['end']])
-    print(node.get_all_content()[feature['start'] - 20:feature['end'] + 20])
-
-    print(kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content().index('ers. IIJ'))
-    assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content()[feature['start']:feature['end']]
+    assert feature['value'] == 'IIJ'
+    assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content(strip=False)[feature['start']:feature['end']]
 
 
 def test_fax2tagging():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'fax2.kdxa')
 
-    kdxa_doc.content_node.tag("phone", use_all_content=True, fixed_position=[181, 193])
+    kdxa_doc.content_node.tag("phone", use_all_content=True, fixed_position=[146, 158])
     assert kdxa_doc.select("//*[hasTag('phone')]")[0].content == '785-368-1772'
+    assert kdxa_doc.select("//*[hasTag('phone')]")[0].get_feature_value("tag", "phone")['value'] == '785-368-1772'

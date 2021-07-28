@@ -68,7 +68,7 @@ def simplify_node(node: ContentNode):
         "node_type": node.node_type,
         "features": [feature.to_dict() for feature in node.get_features()],
         "content": node.content,
-        "content_parts": node.content_parts,
+        "content_parts": node.get_content_parts(),
         "children": [simplify_node(child_node) for child_node in node.get_children()]
     }
 
