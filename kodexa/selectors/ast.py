@@ -330,9 +330,10 @@ class FunctionCall(object):
 
         if self.name == 'hasFeatureValue':
             values = content_node.get_feature_values(args[0], args[1])
-            for value in values:
-                if value == args[2]:
-                    return True
+            if values:
+                for value in values:
+                    if value == args[2]:
+                        return True
             return False
 
         if self.name == 'content':
