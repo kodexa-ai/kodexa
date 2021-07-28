@@ -147,14 +147,9 @@ class RollupTransformer:
         self.get_all_content = get_all_content
 
     def get_name(self):
-        """ """
         return "Rollup Transformer"
 
     def process(self, document):
-        """
-
-        """
-
         if document.get_root():
             # Select those nodes that we want to do the 'rollup' in
             selected_nodes = document.select(self.selector)

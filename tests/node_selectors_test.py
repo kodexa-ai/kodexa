@@ -154,13 +154,13 @@ def test_instance_indexes():
     assert len(first_paragraph) == 18
 
 
-@pytest.mark.skip
 def test_spatial_doc_sample_two():
     # This test document and this portion of code is a snippet
     # from a test in the spatial actions tests.  Adding this saved doc
     # and this section to ensure NodeTagger is tested.
     page_footer_re = r'Page \d+ of \d+$'
-    pipeline = Pipeline(Document.from_kdxa(get_test_directory() + 'before_fail.kdxa'))
+    document = Document.from_kdxa(get_test_directory() + 'before_fail.kdxa')
+    pipeline = Pipeline(document)
 
     pipeline.add_step(
         NodeTagger(selector='//*[typeRegex("line.*")]', content_re=page_footer_re, tag_to_apply='page_footer'))
