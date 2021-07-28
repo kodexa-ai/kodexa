@@ -172,10 +172,10 @@ def test_tagging_issue_with_html():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'tagging_issue.kdxa')
 
     all_content = kdxa_doc.content_node.get_all_content(strip=False)
-    assert "IIJ" == all_content[4019:4022]
+    assert "IIJ" == all_content[707:710]
 
     # Now we tag the same location and try and get the content from the tag
-    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(4019, 4022))
+    kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(707, 710))
 
     node = kdxa_doc.select('//*[hasTag("test_tag")]')[0]
     feature = node.get_feature_value("tag", "test_tag")

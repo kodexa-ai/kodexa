@@ -24,9 +24,8 @@ def test_html_rollup():
     # after rollup
     assert len(document.select('//a')) == 0
     # see where the href rolled up
-    assert len(document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_content_parts()) == 1
-    assert document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_content_parts()[
-               0] == 'The London-headquartered bank is a heavyweight component of the . HSBC shares in Hong Kong closed 2.78% lower.Hang Seng Index'
+    assert document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_all_content() == 'The London-headquartered bank is a heavyweight component of the  Hang Seng Index . HSBC shares in Hong Kong closed 2.78% lower.'
+    assert len(document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_content_parts()) == 3
 
 
 def test_tag_key_value():
