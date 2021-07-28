@@ -93,7 +93,7 @@ class SqliteDocumentPersistence(object):
         cursor.execute("CREATE INDEX f_value_hash ON f_value(hash);")
 
         self.__update_metadata(cursor)
-        self.connection.commit()
+        
         cursor.close()
 
     def content_node_count(self):
@@ -238,7 +238,7 @@ class SqliteDocumentPersistence(object):
     def add_content_node(self, node, parent):
         cursor = self.connection.cursor()
         self.__insert_node(node, cursor, parent)
-        self.connection.commit()
+        
         cursor.close()
 
     def add_feature(self, node, feature):
@@ -248,7 +248,7 @@ class SqliteDocumentPersistence(object):
                     self.__resolve_feature_value(feature, cursor)]
         feature.uuid = cursor.execute(FEATURE_INSERT,
                                       f_values).lastrowid
-        self.connection.commit()
+        
         cursor.close()
 
     def remove_feature(self, node, feature_type, name):
@@ -258,7 +258,7 @@ class SqliteDocumentPersistence(object):
         feature = ContentFeature(feature_type, name, None)
         f_values = [node.uuid, self.__resolve_f_type(feature, cursor)]
         cursor.execute(FEATURE_DELETE, f_values)
-        self.connection.commit()
+        
         cursor.close()
 
     def get_children(self, content_node):
@@ -292,7 +292,7 @@ class SqliteDocumentPersistence(object):
     def update_metadata(self):
         cursor = self.connection.cursor()
         self.__update_metadata(cursor)
-        self.connection.commit()
+        
         cursor.close()
 
     def __rebuild_from_document(self):
@@ -305,7 +305,7 @@ class SqliteDocumentPersistence(object):
         self.__update_metadata(cursor)
         if self.document.content_node:
             self.__insert_node(self.document.content_node, cursor)
-        self.connection.commit()
+        
         cursor.close()
 
     def get_bytes(self):
@@ -340,12 +340,12 @@ class SqliteDocumentPersistence(object):
             cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
                                part if not isinstance(part, str) else None]
             cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
-        self.connection.commit()
+        
         cursor.close()
 
     def remove_content_node(self, child, parent):
         cursor = self.connection.cursor()
         cursor.execute("delete from cnp where cn_id=?", [child.uuid])
         cursor.execute("delete from cn where id=?", [child.uuid])
-        self.connection.commit()
+        
         cursor.close()
