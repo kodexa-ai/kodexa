@@ -241,14 +241,11 @@ class ContentNode(object):
 
     def __init__(self, document, node_type: str, content: Optional[str] = None,
                  content_parts: Optional[List[Any]] = None, parent_uuid: Optional[str] = None):
-        if content_parts is None:
-            content_parts = []
-
         self.node_type: str = node_type
         """The node type (ie. line, page, cell etc)"""
         self.document: Document = document
         """The document that the node belongs to"""
-        self._content_parts: List[Any] = content_parts
+        self._content_parts: Optional[List[Any]] = content_parts
         """The children of the content node"""
         self.index: int = 0
         """The index of the content node"""
@@ -264,6 +261,8 @@ class ContentNode(object):
             self.set_content_parts([content])
 
     def get_content_parts(self):
+        if self._content_parts is None:
+            self._content_parts = self.document.get_persistence().get_content_parts(self)
         return self._content_parts
 
     def set_content_parts(self, content_parts):
@@ -288,7 +287,7 @@ class ContentNode(object):
 
     @content.setter
     def content(self, new_content):
-        if len(self._content_parts) == 0:
+        if len(self.get_content_parts()) == 0:
             self.set_content_parts([new_content])
         else:
             # We need to remove all the strings and add this one

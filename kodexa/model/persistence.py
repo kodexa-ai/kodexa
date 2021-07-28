@@ -209,26 +209,25 @@ class SqliteDocumentPersistence(object):
                 cursor)
         cursor.close()
 
+    def get_content_parts(self, new_node):
+        cursor = self.connection.cursor()
+        content_parts = cursor.execute("select cn_id, pos, content, content_idx from cnp where cn_id = ? order by pos",
+                                       [new_node.uuid]).fetchall()
+
+        parts = []
+        for content_part in content_parts:
+            if content_part[3] is None:
+                parts.append(content_part[2])
+            else:
+                parts.append(content_part[3])
+        cursor.close()
+        return parts
+
     def __build_node(self, node_row, cursor):
 
         new_node = ContentNode(self.document, self.node_types[node_row[2]], parent_uuid=node_row[1])
         new_node.uuid = node_row[0]
         new_node.index = node_row[3]
-
-        content_parts = cursor.execute("select cn_id, pos, content, content_idx from cnp where cn_id = ? order by pos",
-                                       [new_node.uuid]).fetchall()
-
-        content = ""
-        for content_part in content_parts:
-            if content_part[3] is None:
-                content = content + content_part[2]
-                parts = new_node.get_content_parts()
-                parts.append(content_part[2])
-                new_node.set_content_parts(parts)
-            else:
-                new_node.get_content_parts().append(content_part[3])
-
-        new_node.content = content
 
         from kodexa.mixins import registry
         registry.add_mixins_to_document_node(self.document, new_node)
