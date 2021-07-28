@@ -254,7 +254,7 @@ class ContentNode(object):
         self.virtual: bool = False
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
         self._parent_uuid = parent_uuid
-
+        self._children = None
         self.virtual_parent = None
 
         if content is not None and len(self.get_content_parts()) == 0:
@@ -427,11 +427,13 @@ class ContentNode(object):
             child.virtual_parent = self
 
         self.document.get_persistence().add_content_node(child, self)
+        self._children = None
 
     def remove_child(self, content_node):
         for child in self.get_children():
             if child == content_node:
-                self.document.get_persistence().remove_content_node(child, self)
+                self.document.get_persistence().remove_content_node(child)
+        self._children = None
 
     def get_children(self):
         """Returns a list of the children of this node.
@@ -441,7 +443,9 @@ class ContentNode(object):
 
         >>> node.get_children()
         """
-        return self.document.get_persistence().get_children(self)
+        if self._children is None:
+            self._children = self.document.get_persistence().get_children(self)
+        return self._children
 
     def set_feature(self, feature_type, name, value):
         """Sets a feature for this ContentNode, replacing the value if a feature by this type and name already exists.
@@ -530,6 +534,8 @@ class ContentNode(object):
         for child_to_delete in children_to_delete:
             if child_to_delete in self.get_children():
                 self.children.remove(child_to_delete)
+
+        self._children = None
 
     def get_feature(self, feature_type, name):
         """Gets the value for the given feature.
@@ -1765,7 +1771,7 @@ class Document(object):
             source = SourceMetadata()
 
         # Mix-ins are going away - so we will allow people to turn them off as needed
-        self.disable_mixin_methods = False
+        self.disable_mixin_methods = True
 
         self.delete_on_close = delete_on_close
 

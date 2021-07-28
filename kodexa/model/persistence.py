@@ -57,7 +57,7 @@ class SqliteDocumentPersistence(object):
             self.is_tmp = True
 
         self.current_filename = filename
-        self.connection = sqlite3.connect(filename)
+        self.connection = sqlite3.connect(filename, isolation_level=None)
         self.connection.execute("PRAGMA journal_mode=OFF")
 
         if is_new:
@@ -203,9 +203,9 @@ class SqliteDocumentPersistence(object):
                 root_node)
 
     def get_content_parts(self, new_node):
-        cursor = self.connection.cursor()
-        content_parts = cursor.execute("select cn_id, pos, content, content_idx from cnp where cn_id = ? order by pos",
-                                       [new_node.uuid]).fetchall()
+        content_parts = self.connection.cursor().execute(
+            "select cn_id, pos, content, content_idx from cnp where cn_id = ? order by pos",
+            [new_node.uuid]).fetchall()
 
         parts = []
         for content_part in content_parts:
@@ -213,7 +213,6 @@ class SqliteDocumentPersistence(object):
                 parts.append(content_part[2])
             else:
                 parts.append(content_part[3])
-        cursor.close()
         return parts
 
     def __build_node(self, node_row):
@@ -259,9 +258,8 @@ class SqliteDocumentPersistence(object):
             return None
 
     def get_parent(self, content_node):
-        cursor = self.connection.cursor()
 
-        parent = cursor.execute("select pid from cn where id = ?", [content_node.uuid]).fetchone()
+        parent = self.connection.cursor().execute("select pid from cn where id = ?", [content_node.uuid]).fetchone()
         if parent:
             return self.__get_node(parent[0])
         else:
@@ -288,12 +286,12 @@ class SqliteDocumentPersistence(object):
     def get_features(self, node):
         # We need to get the features back
 
-        cursor = self.connection.cursor()
         features = []
-        for feature in cursor.execute("select id, cn_id, f_type, fvalue_id from f where cn_id = ?",
-                                      [node.uuid]).fetchall():
+        for feature in self.connection.cursor().execute("select id, cn_id, f_type, fvalue_id from f where cn_id = ?",
+                                                        [node.uuid]).fetchall():
             feature_type_name = self.feature_type_names[feature[2]]
-            f_value = cursor.execute("select binary_value, single from f_value where id = ?", [feature[3]]).fetchone()
+            f_value = self.connection.cursor().execute("select binary_value, single from f_value where id = ?",
+                                                       [feature[3]]).fetchone()
 
             single = f_value[1] == 1
             value = msgpack.unpackb(f_value[0])
@@ -306,18 +304,14 @@ class SqliteDocumentPersistence(object):
         return self.__get_node(node_id)
 
     def update_content_parts(self, node, content_parts):
-        cursor = self.connection.cursor()
-        cursor.execute("delete from cnp where cn_id=?", [node.uuid])
+        self.connection.cursor().execute("delete from cnp where cn_id=?", [node.uuid])
+
+        all_parts = []
         for idx, part in enumerate(content_parts):
-            cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
-                               part if not isinstance(part, str) else None]
-            cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+            all_parts.append([node.uuid, idx, part if isinstance(part, str) else None,
+                              part if not isinstance(part, str) else None])
+        self.connection.cursor().executemany(CONTENT_NODE_PART_INSERT, all_parts)
 
-        cursor.close()
-
-    def remove_content_node(self, child, parent):
-        cursor = self.connection.cursor()
-        cursor.execute("delete from cnp where cn_id=?", [child.uuid])
-        cursor.execute("delete from cn where id=?", [child.uuid])
-
-        cursor.close()
+    def remove_content_node(self, child):
+        self.connection.cursor().execute("delete from cnp where cn_id=?", [child.uuid])
+        self.connection.cursor().execute("delete from cn where id=?", [child.uuid])
