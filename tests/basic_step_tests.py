@@ -9,14 +9,13 @@ def get_test_directory():
     return os.path.dirname(os.path.abspath(__file__)) + "/../test_documents/"
 
 
-@pytest.mark.skip
 def test_html_rollup():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news.kdxa'), 'rb').read())
 
     # before rollup
     assert document.select('//a')[0].content == 'HSBC'
     assert document.select('//a')[1].content == 'Hang Seng Index'
-    assert len(document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].content_parts) == 1
+    assert len(document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_content_parts()) == 1
 
     # Collapse out all the <a> tags
     step = RollupTransformer(collapse_type_res=["a"])
@@ -25,7 +24,9 @@ def test_html_rollup():
     # after rollup
     assert len(document.select('//a')) == 0
     # see where the href rolled up
-    assert len(document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].content_parts) == 3
+    assert len(document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_content_parts()) == 1
+    assert document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_content_parts()[
+               0] == 'The London-headquartered bank is a heavyweight component of the . HSBC shares in Hong Kong closed 2.78% lower.Hang Seng Index'
 
 
 def test_tag_key_value():
@@ -40,7 +41,6 @@ def test_tag_key_value():
 
 
 def test_tag_key_value_include_exclude():
-
     # Testing include parameter
     include_tags = ['DATE', 'LOC']
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
