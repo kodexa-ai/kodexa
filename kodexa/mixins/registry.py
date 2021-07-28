@@ -71,16 +71,6 @@ def apply_to_document(document):
 
 
 def add_mixins_to_document_node(document, node):
-    """
-
-    Args:
-      document: 
-      node: 
-
-    Returns:
-
-    """
-
     if document.disable_mixin_methods is True:
         return
 

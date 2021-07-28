@@ -70,84 +70,80 @@ class SqliteDocumentPersistence(object):
             pathlib.Path(self.current_filename).unlink()
 
     def __build_db(self):
-        cursor = self.connection.cursor()
-        cursor.execute("CREATE TABLE version (id integer primary key, version text)")
-        cursor.execute("CREATE TABLE metadata (id integer primary key, metadata text)")
-        cursor.execute("CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, idx INTEGER)")
-        cursor.execute(
+        self.connection.execute("CREATE TABLE version (id integer primary key, version text)")
+        self.connection.execute("CREATE TABLE metadata (id integer primary key, metadata text)")
+        self.connection.execute("CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, idx INTEGER)")
+        self.connection.execute(
             "CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)")
 
-        cursor.execute("CREATE TABLE n_type (id integer primary key, name text)")
-        cursor.execute("CREATE TABLE f_type (id integer primary key, name text)")
-        cursor.execute(
+        self.connection.execute("CREATE TABLE n_type (id integer primary key, name text)")
+        self.connection.execute("CREATE TABLE f_type (id integer primary key, name text)")
+        self.connection.execute(
             "CREATE TABLE f_value (id integer primary key, hash integer, binary_value blob, single integer)")
-        cursor.execute(
+        self.connection.execute(
             "CREATE TABLE f (id integer primary key, cn_id integer, f_type INTEGER, fvalue_id integer)")
 
-        cursor.execute("CREATE UNIQUE INDEX n_type_uk ON n_type(name);")
-        cursor.execute("CREATE UNIQUE INDEX f_type_uk ON f_type(name);")
-        cursor.execute("CREATE INDEX cn_perf ON cn(nt);")
-        cursor.execute("CREATE INDEX cn_perf2 ON cn(pid);")
-        cursor.execute("CREATE INDEX cnp_perf ON cnp(cn_id, pos);")
-        cursor.execute("CREATE INDEX f_perf ON f(cn_id);")
-        cursor.execute("CREATE INDEX f_value_hash ON f_value(hash);")
+        self.connection.execute("CREATE UNIQUE INDEX n_type_uk ON n_type(name);")
+        self.connection.execute("CREATE UNIQUE INDEX f_type_uk ON f_type(name);")
+        self.connection.execute("CREATE INDEX cn_perf ON cn(nt);")
+        self.connection.execute("CREATE INDEX cn_perf2 ON cn(pid);")
+        self.connection.execute("CREATE INDEX cnp_perf ON cnp(cn_id, pos);")
+        self.connection.execute("CREATE INDEX f_perf ON f(cn_id);")
+        self.connection.execute("CREATE INDEX f_value_hash ON f_value(hash);")
 
-        self.__update_metadata(cursor)
-        
-        cursor.close()
+        self.__update_metadata()
 
     def content_node_count(self):
-        cursor = self.connection.cursor()
-        cursor.execute("select * from cn").fetchall()
+        self.connection.execute("select * from cn").fetchall()
 
-    def __resolve_f_type(self, feature, cursor):
+    def __resolve_f_type(self, feature):
         feature_type_name = feature.feature_type + ":" + feature.name
-        result = cursor.execute(FEATURE_TYPE_LOOKUP, [feature_type_name]).fetchone()
+        result = self.connection.execute(FEATURE_TYPE_LOOKUP, [feature_type_name]).fetchone()
         if result is None:
-            new_feature_type_name_id = cursor.execute(FEATURE_TYPE_INSERT, [feature_type_name]).lastrowid
+            new_feature_type_name_id = self.connection.execute(FEATURE_TYPE_INSERT, [feature_type_name]).lastrowid
             self.feature_type_names[new_feature_type_name_id] = feature_type_name
             return new_feature_type_name_id
 
         return result[0]
 
-    def __resolve_n_type(self, n_type, cursor):
-        result = cursor.execute(NODE_TYPE_LOOKUP, [n_type]).fetchone()
+    def __resolve_n_type(self, n_type):
+        result = self.connection.execute(NODE_TYPE_LOOKUP, [n_type]).fetchone()
         if result is None:
-            new_type_id = cursor.execute(NOTE_TYPE_INSERT, [n_type]).lastrowid
+            new_type_id = self.connection.execute(NOTE_TYPE_INSERT, [n_type]).lastrowid
             self.node_types[new_type_id] = n_type
             return new_type_id
 
         return result[0]
 
-    def __resolve_feature_value(self, feature, cursor):
+    def __resolve_feature_value(self, feature):
         binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
         hash_value = int(hashlib.sha1(binary_value).hexdigest(), 16) % (10 ** 8)
-        result = cursor.execute(FEATURE_VALUE_LOOKUP, [hash_value]).fetchone()
+        result = self.connection.execute(FEATURE_VALUE_LOOKUP, [hash_value]).fetchone()
         new_row = [binary_value, hash_value, feature.single]
 
         if result is None:
-            fvalue_id = cursor.execute(FEATURE_VALUE_INSERT, new_row).lastrowid
+            fvalue_id = self.connection.execute(FEATURE_VALUE_INSERT, new_row).lastrowid
         else:
             fvalue_id = result[0]
         return fvalue_id
 
-    def __insert_node(self, node: ContentNode, cursor, parent):
+    def __insert_node(self, node: ContentNode, parent):
 
         if node.uuid:
             # Delete the existing node
             cn_values = [parent.uuid if parent else None,
-                         self.__resolve_n_type(node.node_type, cursor), node.index, node.uuid]
-            cursor.execute(CONTENT_NODE_UPDATE, cn_values).lastrowid
-            cursor.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
+                         self.__resolve_n_type(node.node_type), node.index, node.uuid]
+            self.connection.execute(CONTENT_NODE_UPDATE, cn_values).lastrowid
+            self.connection.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
         else:
             cn_values = [parent.uuid if parent else None,
-                         self.__resolve_n_type(node.node_type, cursor), node.index]
-            node.uuid = cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
+                         self.__resolve_n_type(node.node_type), node.index]
+            node.uuid = self.connection.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
         for idx, part in enumerate(node.get_content_parts()):
             cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
                                part if not isinstance(part, str) else None]
-            cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+            self.connection.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
     def __clean_none_values(self, d):
         clean = {}
@@ -160,7 +156,7 @@ class SqliteDocumentPersistence(object):
                 clean[k] = v
         return clean
 
-    def __update_metadata(self, cursor):
+    def __update_metadata(self):
         document_metadata = {'version': Document.CURRENT_VERSION,
                              'metadata': self.document.metadata.to_dict(),
                              'source': self.__clean_none_values(dataclasses.asdict(self.document.source)),
@@ -169,19 +165,18 @@ class SqliteDocumentPersistence(object):
                              'classes': [content_class.to_dict() for content_class in self.document.classes],
                              'labels': self.document.labels,
                              'uuid': self.document.uuid}
-        cursor.execute(VERSION_DELETE)
-        cursor.execute(VERSION_INSERT)
-        cursor.execute(METADATA_DELETE)
-        cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])
+        self.connection.execute(VERSION_DELETE)
+        self.connection.execute(VERSION_INSERT)
+        self.connection.execute(METADATA_DELETE)
+        self.connection.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])
 
     def __load_document(self):
-        cursor = self.connection.cursor()
-        for n_type in cursor.execute("select id,name from n_type"):
+        for n_type in self.connection.execute("select id,name from n_type"):
             self.node_types[n_type[0]] = n_type[1]
-        for f_type in cursor.execute("select id,name from f_type"):
+        for f_type in self.connection.execute("select id,name from f_type"):
             self.feature_type_names[f_type[0]] = f_type[1]
 
-        metadata = msgpack.unpackb(cursor.execute("select * from metadata").fetchone()[1])
+        metadata = msgpack.unpackb(self.connection.execute("select * from metadata").fetchone()[1])
         self.document.metadata = DocumentMetadata(metadata['metadata'])
         for mixin in metadata['mixins']:
             from kodexa.mixins import registry
@@ -202,12 +197,10 @@ class SqliteDocumentPersistence(object):
                                      metadata['classes']]
         self.uuid = metadata.get('uuid')
 
-        root_node = cursor.execute("select id, pid, nt, idx from cn where pid is null").fetchone()
+        root_node = self.connection.execute("select id, pid, nt, idx from cn where pid is null").fetchone()
         if root_node:
             self.document.content_node = self.__build_node(
-                root_node,
-                cursor)
-        cursor.close()
+                root_node)
 
     def get_content_parts(self, new_node):
         cursor = self.connection.cursor()
@@ -223,7 +216,7 @@ class SqliteDocumentPersistence(object):
         cursor.close()
         return parts
 
-    def __build_node(self, node_row, cursor):
+    def __build_node(self, node_row):
 
         new_node = ContentNode(self.document, self.node_types[node_row[2]], parent_uuid=node_row[1])
         new_node.uuid = node_row[0]
@@ -235,47 +228,33 @@ class SqliteDocumentPersistence(object):
         return new_node
 
     def add_content_node(self, node, parent):
-        cursor = self.connection.cursor()
-        self.__insert_node(node, cursor, parent)
-        
-        cursor.close()
+        self.__insert_node(node, parent)
 
     def add_feature(self, node, feature):
-
-        cursor = self.connection.cursor()
-        f_values = [node.uuid, self.__resolve_f_type(feature, cursor),
-                    self.__resolve_feature_value(feature, cursor)]
-        feature.uuid = cursor.execute(FEATURE_INSERT,
-                                      f_values).lastrowid
-        
-        cursor.close()
+        f_values = [node.uuid, self.__resolve_f_type(feature),
+                    self.__resolve_feature_value(feature)]
+        feature.uuid = self.connection.execute(FEATURE_INSERT,
+                                               f_values).lastrowid
 
     def remove_feature(self, node, feature_type, name):
 
-        cursor = self.connection.cursor()
-
         feature = ContentFeature(feature_type, name, None)
-        f_values = [node.uuid, self.__resolve_f_type(feature, cursor)]
-        cursor.execute(FEATURE_DELETE, f_values)
-        
-        cursor.close()
+        f_values = [node.uuid, self.__resolve_f_type(feature)]
+        self.connection.execute(FEATURE_DELETE, f_values)
 
     def get_children(self, content_node):
 
         # We need to get the child nodes
-        cursor = self.connection.cursor()
         children = []
-        for child_node in cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
-                                         [content_node.uuid]).fetchall():
-            children.append(self.__build_node(child_node, cursor))
+        for child_node in self.connection.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
+                                                  [content_node.uuid]).fetchall():
+            children.append(self.__build_node(child_node))
         return children
 
     def __get_node(self, node_id):
-        cursor = self.connection.cursor()
-
-        node_row = cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
+        node_row = self.connection.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
         if node_row:
-            return self.__build_node(node_row, cursor)
+            return self.__build_node(node_row)
         else:
             return None
 
@@ -289,23 +268,17 @@ class SqliteDocumentPersistence(object):
             return None
 
     def update_metadata(self):
-        cursor = self.connection.cursor()
-        self.__update_metadata(cursor)
-        
-        cursor.close()
+        self.__update_metadata()
 
     def __rebuild_from_document(self):
-        cursor = self.connection.cursor()
-        cursor.execute("DELETE FROM cn")
-        cursor.execute("DELETE FROM cnp")
-        cursor.execute("DELETE FROM f")
-        cursor.execute("DELETE FROM f_value")
+        self.connection.execute("DELETE FROM cn")
+        self.connection.execute("DELETE FROM cnp")
+        self.connection.execute("DELETE FROM f")
+        self.connection.execute("DELETE FROM f_value")
 
-        self.__update_metadata(cursor)
+        self.__update_metadata()
         if self.document.content_node:
-            self.__insert_node(self.document.content_node, cursor)
-        
-        cursor.close()
+            self.__insert_node(self.document.content_node)
 
     def get_bytes(self):
 
@@ -339,12 +312,12 @@ class SqliteDocumentPersistence(object):
             cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
                                part if not isinstance(part, str) else None]
             cursor.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
-        
+
         cursor.close()
 
     def remove_content_node(self, child, parent):
         cursor = self.connection.cursor()
         cursor.execute("delete from cnp where cn_id=?", [child.uuid])
         cursor.execute("delete from cn where id=?", [child.uuid])
-        
+
         cursor.close()
