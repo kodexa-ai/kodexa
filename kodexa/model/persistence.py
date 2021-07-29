@@ -57,8 +57,12 @@ class SqliteDocumentPersistence(object):
             self.is_tmp = True
 
         self.current_filename = filename
-        self.cursor = sqlite3.connect(filename, isolation_level=None).cursor()
+        self.connection = sqlite3.connect(filename, isolation_level=None)
+        self.cursor = self.connection.cursor()
         self.cursor.execute("PRAGMA journal_mode=OFF")
+        self.cursor.execute("pragma synchronous = normal")
+        self.cursor.execute("pragma temp_store = memory")
+        self.cursor.execute("pragma mmap_size = 30000000000")
 
         if is_new:
             self.__build_db()
@@ -230,7 +234,7 @@ class SqliteDocumentPersistence(object):
         f_values = [node.uuid, self.__resolve_f_type(feature),
                     self.__resolve_feature_value(feature)]
         feature.uuid = self.cursor.execute(FEATURE_INSERT,
-                                               f_values).lastrowid
+                                           f_values).lastrowid
 
     def remove_feature(self, node, feature_type, name):
 
@@ -243,7 +247,7 @@ class SqliteDocumentPersistence(object):
         # We need to get the child nodes
         children = []
         for child_node in self.cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
-                                                  [content_node.uuid]).fetchall():
+                                              [content_node.uuid]).fetchall():
             children.append(self.__build_node(child_node))
         return children
 
@@ -276,8 +280,11 @@ class SqliteDocumentPersistence(object):
             self.__insert_node(self.document.content_node)
 
     def get_bytes(self):
-
+        self.cursor.execute("pragma optimize")
+        self.cursor.close()
+        self.cursor = self.connection.cursor()
         with open(self.current_filename, 'rb') as f:
+
             return f.read()
 
     def get_features(self, node):
@@ -285,10 +292,10 @@ class SqliteDocumentPersistence(object):
 
         features = []
         for feature in self.cursor.execute("select id, cn_id, f_type, fvalue_id from f where cn_id = ?",
-                                                        [node.uuid]).fetchall():
+                                           [node.uuid]).fetchall():
             feature_type_name = self.feature_type_names[feature[2]]
             f_value = self.cursor.execute("select binary_value, single from f_value where id = ?",
-                                                       [feature[3]]).fetchone()
+                                          [feature[3]]).fetchone()
 
             single = f_value[1] == 1
             value = msgpack.unpackb(f_value[0])
