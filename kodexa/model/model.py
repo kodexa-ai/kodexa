@@ -427,13 +427,13 @@ class ContentNode(object):
             child.virtual_parent = self
 
         self.document.get_persistence().add_content_node(child, self)
-        self._children = None
+        self._children = self.document.get_persistence().get_children(self)
 
     def remove_child(self, content_node):
         for child in self.get_children():
             if child == content_node:
                 self.document.get_persistence().remove_content_node(child)
-        self._children = None
+        self._children = self.document.get_persistence().get_children(self)
 
     def get_children(self):
         """Returns a list of the children of this node.
