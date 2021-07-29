@@ -196,6 +196,11 @@ def test_basic_tagging2():
     assert isinstance(doc.content_node.get_tag('cheese'), list)
 
 
+def test_kbbd():
+    doc = Document.from_text('It is going to be a great day')
+    doc.to_kddb()
+
+
 def test_doc_from_text():
     doc = Document.from_text('It is going to be a great day')
     assert doc.get_root().content == 'It is going to be a great day'
