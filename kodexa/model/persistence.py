@@ -227,6 +227,7 @@ class SqliteDocumentPersistence(object):
         new_node = ContentNode(self.document, self.node_types[node_row[2]], parent_uuid=node_row[1])
         new_node.uuid = node_row[0]
         new_node.index = node_row[3]
+        self.document._node_cache[new_node.uuid] = new_node
         return new_node
 
     def add_content_node(self, node, parent):
@@ -250,15 +251,21 @@ class SqliteDocumentPersistence(object):
         children = []
         for child_node in self.cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
                                               [content_node.uuid]).fetchall():
-            children.append(self.__build_node(child_node))
+            if child_node[0] in self.document._node_cache:
+                children.append(self.document._node_cache[child_node[0]])
+            else:
+                children.append(self.__build_node(child_node))
         return children
 
     def __get_node(self, node_id):
-        node_row = self.cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
-        if node_row:
-            return self.__build_node(node_row)
+        if node_id in self.document._node_cache:
+            children.append(self.document._node_cache[node_id])
         else:
-            return None
+            node_row = self.cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
+            if node_row:
+                return self.__build_node(node_row)
+            else:
+                return None
 
     def get_parent(self, content_node):
 
