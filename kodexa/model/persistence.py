@@ -57,9 +57,9 @@ class SqliteDocumentPersistence(object):
             self.is_tmp = True
 
         self.current_filename = filename
-        self.connection = sqlite3.connect(filename, isolation_level=None)
+        self.connection = sqlite3.connect(filename)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("PRAGMA journal_mode=OFF")
+        self.cursor.execute("PRAGMA journal_mode=WAL")
         self.cursor.execute("pragma synchronous = normal")
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
@@ -149,6 +149,7 @@ class SqliteDocumentPersistence(object):
         for idx, part in enumerate(node.get_content_parts()):
             cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
                                     part if not isinstance(part, str) else None])
+
         self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
     def __clean_none_values(self, d):
@@ -282,7 +283,23 @@ class SqliteDocumentPersistence(object):
     def get_bytes(self):
         self.cursor.execute("pragma optimize")
         self.cursor.close()
+        self.connection.close()
+
+        # We need to open/close the DB to get the WAL
+        self.connection = sqlite3.connect(self.current_filename)
+        self.connection.close()
+
+        self.connection = sqlite3.connect(self.current_filename)
+        self.connection.execute("pragma optimize")
+        self.connection.close()
+
+        self.connection = sqlite3.connect(self.current_filename)
         self.cursor = self.connection.cursor()
+        self.cursor.execute("PRAGMA journal_mode=WAL")
+        self.cursor.execute("pragma synchronous = normal")
+        self.cursor.execute("pragma temp_store = memory")
+        self.cursor.execute("pragma mmap_size = 30000000000")
+
         with open(self.current_filename, 'rb') as f:
 
             return f.read()
