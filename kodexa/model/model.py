@@ -451,6 +451,9 @@ class ContentNode(object):
     def remove_child(self, content_node):
         for child in self.get_children():
             if child == content_node:
+                for grand_child in child.get_children():
+                    child.remove(grand_child)
+
                 self.document._node_cache.delete(child.uuid)
                 self.document.get_persistence().remove_content_node(child)
         self._children = self.document.get_persistence().get_children(self)
