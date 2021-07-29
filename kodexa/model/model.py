@@ -308,7 +308,12 @@ class ContentNode(object):
         if self.virtual_parent is not None:
             return self.virtual_parent
 
-        return self.document.get_persistence().get_node(self._parent_uuid) if self._parent_uuid else None
+        if self._parent_uuid is not None:
+            if self._parent_uuid not in self.document._node_cache:
+                self.document._node_cache[self._parent_uuid] = self.document.get_persistence().get_node(self._parent_uuid)
+            return self.document._node_cache[self._parent_uuid]
+        else:
+            return None
 
     def __str__(self):
         return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) [" + str(
@@ -418,6 +423,11 @@ class ContentNode(object):
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.add_child(new_page)
         """
+        if child in self.get_children():
+            return True
+
+        original_parent = child.get_parent()
+
         if not index:
             child.index = len(self.get_children())
         else:
@@ -428,14 +438,26 @@ class ContentNode(object):
             child.virtual_parent = self
 
         self.document.get_persistence().add_content_node(child, self)
-        self.get_children()
+
+        self.document._node_cache[child.uuid] = child
+
+        if self._children is None:
+            self.get_children()
         self._children.append(child)
+
+        if original_parent:
+            original_parent.refresh_children()
 
     def remove_child(self, content_node):
         for child in self.get_children():
             if child == content_node:
+                self.document._node_cache.delete(child.uuid)
                 self.document.get_persistence().remove_content_node(child)
         self._children = self.document.get_persistence().get_children(self)
+
+    def refresh_children(self):
+        self._children = None
+        self.get_children()
 
     def get_children(self):
         """Returns a list of the children of this node.
@@ -1807,6 +1829,8 @@ class Document(object):
         self.classes: List[ContentClassification] = []
         """A list of the content classifications associated at the document level"""
         self.add_mixin('core')
+
+        self._node_cache = {}
 
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
