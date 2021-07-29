@@ -78,6 +78,13 @@ def test_virtual_navigation_with_no_0_index():
     assert document.content_node.get_node_at_index(0).next_node().content is None
     assert document.content_node.get_node_at_index(0).next_node().next_node().content == 'banana2'
 
+    test_kddb = document.to_kddb()
+    new_kddb = Document.from_kddb(test_kddb)
+
+    assert new_kddb.content_node.get_node_at_index(0).content is None
+    assert new_kddb.content_node.get_node_at_index(0).next_node().content is None
+    assert new_kddb.content_node.get_node_at_index(0).next_node().next_node().content == 'banana2'
+
 
 def test_virtual_navigation():
     document = get_test_document()

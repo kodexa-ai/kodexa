@@ -38,6 +38,7 @@ class SqliteDocumentPersistence(object):
 
     def __init__(self, document: Document, filename: str = None, delete_on_close=False):
         self.document = document
+        self.document._persistence_layer = self
 
         self.node_types = {}
         self.feature_type_names = {}
@@ -283,10 +284,12 @@ class SqliteDocumentPersistence(object):
     def get_bytes(self):
         self.cursor.execute("pragma optimize")
         self.cursor.close()
+        self.connection.commit()
         self.connection.close()
 
         # We need to open/close the DB to get the WAL
         self.connection = sqlite3.connect(self.current_filename)
+        self.connection.commit()
         self.connection.close()
 
         self.connection = sqlite3.connect(self.current_filename)
