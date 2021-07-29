@@ -140,10 +140,12 @@ class SqliteDocumentPersistence(object):
                          self.__resolve_n_type(node.node_type), node.index]
             node.uuid = self.connection.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
+
+        cn_parts_values = []
         for idx, part in enumerate(node.get_content_parts()):
-            cn_parts_values = [node.uuid, idx, part if isinstance(part, str) else None,
-                               part if not isinstance(part, str) else None]
-            self.connection.execute(CONTENT_NODE_PART_INSERT, cn_parts_values)
+            cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
+                                    part if not isinstance(part, str) else None])
+        self.connection.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
     def __clean_none_values(self, d):
         clean = {}
@@ -216,14 +218,9 @@ class SqliteDocumentPersistence(object):
         return parts
 
     def __build_node(self, node_row):
-
         new_node = ContentNode(self.document, self.node_types[node_row[2]], parent_uuid=node_row[1])
         new_node.uuid = node_row[0]
         new_node.index = node_row[3]
-
-        from kodexa.mixins import registry
-        registry.add_mixins_to_document_node(self.document, new_node)
-
         return new_node
 
     def add_content_node(self, node, parent):
