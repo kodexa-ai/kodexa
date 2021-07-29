@@ -775,7 +775,7 @@ class ContentNode(object):
             >>> # Move target_child (line) to the target_parent (sixth page)
             >>> document.get_root().move_child_to_parent(target_child, target_parent)
         """
-        self.children.remove(target_child)
+        self.remove_child(target_child)
         target_parent.add_child(target_child)
 
     def adopt_children(self, children, replace=False):
@@ -792,8 +792,7 @@ class ContentNode(object):
 
         if replace:
             for child in self.get_children():
-                child.parent = None
-            self.children = []
+                child.remove_child(child)
 
         for child in children:
             self.add_child(child)
