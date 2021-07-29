@@ -1919,8 +1919,8 @@ class Document(object):
         if Path(file_path).exists():
             Path(file_path).unlink()
 
-        self.__persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
-                                                                                        filename=file_path)
+        self._persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
+                                                                                       filename=file_path)
 
     def to_kdxa(self, file_path: str):
         """Write the document to the kdxa format (msgpack) which can be
@@ -1954,11 +1954,11 @@ class Document(object):
         """
         Close the document and clean up the resources
         """
-        self.__persistence_layer.close()
+        self.get_persistence().close()
 
     def to_kddb(self):
         """Convert this document object structure into a KDDB and return a bytes-like object"""
-        return self.__persistence_layer.get_bytes()
+        return self.get_persistence().get_bytes()
 
     @staticmethod
     def from_kdxa(file_path):
