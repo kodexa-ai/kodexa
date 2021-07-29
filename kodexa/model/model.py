@@ -538,7 +538,6 @@ class ContentNode(object):
             if child_to_delete in self.get_children():
                 self._children.remove(child_to_delete)
 
-
     def get_feature(self, feature_type, name):
         """Gets the value for the given feature.
 
@@ -1810,14 +1809,12 @@ class Document(object):
         """A list of the content classifications associated at the document level"""
         self.add_mixin('core')
 
-        # Make sure we apply all the mixins
-        registry.apply_to_document(self)
-
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
-        self._persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
-                                                                                       filename=kddb_path,
-                                                                                       delete_on_close=delete_on_close)
+        self._persistence_layer: Optional[SqliteDocumentPersistence] = None
+        SqliteDocumentPersistence(document=self,
+                                  filename=kddb_path,
+                                  delete_on_close=delete_on_close)
 
     def get_persistence(self):
         return self._persistence_layer
