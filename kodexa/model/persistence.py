@@ -282,6 +282,8 @@ class SqliteDocumentPersistence(object):
             self.__insert_node(self.document.content_node)
 
     def get_bytes(self):
+
+        self.__update_metadata()
         self.cursor.execute("pragma optimize")
         self.cursor.close()
         self.connection.commit()
