@@ -255,6 +255,7 @@ class ContentNode(object):
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
         self._parent_uuid = parent_uuid
         self._children = None
+        self._features = None
         self.virtual_parent = None
 
         if content is not None and len(self.get_content_parts()) == 0:
@@ -427,7 +428,8 @@ class ContentNode(object):
             child.virtual_parent = self
 
         self.document.get_persistence().add_content_node(child, self)
-        self._children = self.document.get_persistence().get_children(self)
+        self.get_children()
+        self._children.append(child)
 
     def remove_child(self, content_node):
         for child in self.get_children():
@@ -498,6 +500,7 @@ class ContentNode(object):
             new_feature = ContentFeature(feature_type, name,
                                          [value] if single and not serialized else value, single=single)
             self.document.get_persistence().add_feature(self, new_feature)
+            self._features.append(new_feature)
             return new_feature
 
     def delete_children(self, nodes: Optional[List] = None,
@@ -533,9 +536,8 @@ class ContentNode(object):
 
         for child_to_delete in children_to_delete:
             if child_to_delete in self.get_children():
-                self.children.remove(child_to_delete)
+                self._children.remove(child_to_delete)
 
-        self._children = None
 
     def get_feature(self, feature_type, name):
         """Gets the value for the given feature.
@@ -593,8 +595,9 @@ class ContentNode(object):
           list[ContentFeature]: A list of the features on this ContentNode.
 
         """
-
-        return self.document.get_persistence().get_features(self)
+        if self._features is None:
+            self._features = self.document.get_persistence().get_features(self)
+        return self._features
 
     def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
         """Removes the feature with the given name and type from this node.
@@ -609,6 +612,7 @@ class ContentNode(object):
         results = self.get_feature(feature_type, name)
         if results:
             self.document.get_persistence().remove_feature(self, feature_type, name)
+            self._features.remove(results)
 
         if include_children:
             for child in self.get_children():
