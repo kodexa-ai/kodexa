@@ -1845,6 +1845,8 @@ class Document(object):
         """A list of the content classifications associated at the document level"""
         self.add_mixin('core')
 
+        # In order to track instances that exist in the structure
+        # we hold a first-level cache of nodes
         self._node_cache = {}
 
         # Start persistence layer
