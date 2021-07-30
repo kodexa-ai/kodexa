@@ -1866,6 +1866,7 @@ class Document(object):
 
     @content_node.setter
     def content_node(self, value):
+        value.index = 0
         self._content_node = value
         self.get_persistence().add_content_node(self._content_node, None)
 
@@ -2162,7 +2163,7 @@ class Document(object):
 
     def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
                     parent: ContentNode = None,
-                    index: int = 0):
+                    index: Optional[int] = None):
         """
         Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
         applied to the document will also be available on the new node.
@@ -2174,7 +2175,7 @@ class Document(object):
                           document content. 'Virtual' nodes are synthesized as necessary to fill gaps in between
                           non-consecutively indexed siblings.  Such indexing arises when document content is sparse.
           parent (ContentNode): The parent for this newly created node; default is None;
-          index (int): The index property to be set on this node; default is 0;
+          index (Optional[int)): The index property to be set on this node; default is 0;
 
         Returns:
           ContentNode: This newly created node.
