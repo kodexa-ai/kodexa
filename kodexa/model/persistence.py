@@ -145,7 +145,6 @@ class SqliteDocumentPersistence(object):
                          self.__resolve_n_type(node.node_type), node.index]
             node.uuid = self.cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
-
         cn_parts_values = []
         for idx, part in enumerate(node.get_content_parts()):
             cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
@@ -259,7 +258,7 @@ class SqliteDocumentPersistence(object):
 
     def __get_node(self, node_id):
         if node_id in self.document._node_cache:
-            children.append(self.document._node_cache[node_id])
+            return self.document._node_cache[node_id]
         else:
             node_row = self.cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
             if node_row:
@@ -313,7 +312,6 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma mmap_size = 30000000000")
 
         with open(self.current_filename, 'rb') as f:
-
             return f.read()
 
     def get_features(self, node):
