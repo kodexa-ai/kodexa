@@ -138,19 +138,29 @@ class SqliteDocumentPersistence(object):
             # Delete the existing node
             cn_values = [parent.uuid if parent else None,
                          self.__resolve_n_type(node.node_type), node.index, node.uuid]
+
+            node.get_content_parts()
             self.cursor.execute(CONTENT_NODE_UPDATE, cn_values).lastrowid
             self.cursor.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
+
+            cn_parts_values = []
+            for idx, part in enumerate(node.get_content_parts()):
+                cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
+                                        part if not isinstance(part, str) else None])
+
+            self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
         else:
             cn_values = [parent.uuid if parent else None,
                          self.__resolve_n_type(node.node_type), node.index]
             node.uuid = self.cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
 
-        cn_parts_values = []
-        for idx, part in enumerate(node.get_content_parts()):
-            cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
-                                    part if not isinstance(part, str) else None])
+            cn_parts_values = []
+            for idx, part in enumerate(node.get_content_parts()):
+                cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
+                                        part if not isinstance(part, str) else None])
 
-        self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
+            self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
+
 
     def __clean_none_values(self, d):
         clean = {}
@@ -223,7 +233,7 @@ class SqliteDocumentPersistence(object):
         return parts
 
     def __build_node(self, node_row):
-        new_node = ContentNode(self.document, self.node_types[node_row[2]], parent_uuid=node_row[1])
+        new_node = ContentNode(self.document, self.node_types[node_row[2]], parent=self.get_node(node_row[1]))
         new_node.uuid = node_row[0]
         new_node.index = node_row[3]
         self.document._node_cache[new_node.uuid] = new_node

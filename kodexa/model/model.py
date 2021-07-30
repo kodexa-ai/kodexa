@@ -240,7 +240,7 @@ class ContentNode(object):
     """
 
     def __init__(self, document, node_type: str, content: Optional[str] = None,
-                 content_parts: Optional[List[Any]] = None, parent_uuid: Optional[str] = None):
+                 content_parts: Optional[List[Any]] = None, parent = None):
         self.node_type: str = node_type
         """The node type (ie. line, page, cell etc)"""
         self.document: Document = document
@@ -253,7 +253,8 @@ class ContentNode(object):
         """The UUID of the content node"""
         self.virtual: bool = False
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
-        self._parent_uuid = parent_uuid
+        self._parent_uuid = parent.uuid if parent else None
+        self._parent = parent
         self._children = None
         self._features = None
         self.virtual_parent = None
@@ -307,6 +308,9 @@ class ContentNode(object):
     def get_parent(self):
         if self.virtual_parent is not None:
             return self.virtual_parent
+
+        if self._parent:
+            return self._parent
 
         if self._parent_uuid is not None:
             if self._parent_uuid not in self.document._node_cache:
@@ -423,9 +427,6 @@ class ContentNode(object):
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.add_child(new_page)
         """
-        if child in self.get_children():
-            return True
-
         original_parent = child.get_parent()
 
         if not index:
@@ -438,6 +439,8 @@ class ContentNode(object):
             child.index = index
 
         child._parent_uuid = self.uuid
+        child._parent = self
+
         if child.virtual:
             child.virtual_parent = self
 
@@ -821,17 +824,16 @@ class ContentNode(object):
 
         if replace:
             for child in self.get_children():
-                child.remove_child(child)
+                if child not in children:
+                    child.remove_child(child)
 
         child_idx_base = 0
         for child in self.get_children():
-            child.index = child_idx_base
-            self.add_child(child)
+            self.add_child(child, child_idx_base)
             child_idx_base += 1
 
         for child in children:
-            child.index = child_idx_base
-            self.add_child(child)
+            self.add_child(child, child_idx_base)
             child_idx_base += 1
 
     def remove_tag(self, tag_name):
@@ -2184,7 +2186,7 @@ class Document(object):
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         """
         content_node = ContentNode(document=self, node_type=node_type, content=content,
-                                   parent_uuid=parent.uuid if parent is not None else None)
+                                   parent=parent)
         content_node.index = index
         content_node.virtual = virtual
 
