@@ -400,7 +400,7 @@ class ContentNode(object):
 
         if index is None:
             self.refresh_children()
-            if self.get_children():
+            if len(self.get_children())>0:
                 child.index = self.get_children()[-1].index + 1
             else:
                 child.index = 0
@@ -756,24 +756,6 @@ class ContentNode(object):
 
         return s.strip() if strip else s
 
-    def move_child_to_parent(self, target_child, target_parent):
-        """This will move the target_child, which must be a child of the node, to a new parent.
-
-        It will be added to the end of the parent
-
-        Args:
-          target_child (ContentNode): The child node that will be moved to a new parent node (target_parent).
-          target_parent (ContentNode): The parent node that the target_child will be added to.  The target_child will be added at the end of the children collection.
-
-        >>> # Get first node of type 'line' from the first page
-            >>> target_child = document.get_root().select('//page')[0].select('//line')[0]
-            >>> # Get sixth node of type 'page'
-            >>> target_parent = document.get_root().select('//page')[5]
-            >>> # Move target_child (line) to the target_parent (sixth page)
-            >>> document.get_root().move_child_to_parent(target_child, target_parent)
-        """
-        self.remove_child(target_child)
-        target_parent.add_child(target_child)
 
     def adopt_children(self, children, replace=False):
         """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
@@ -794,11 +776,12 @@ class ContentNode(object):
 
         child_idx_base = 0
         for existing_child in self.get_children():
-            self.add_child(existing_child, child_idx_base)
-            child_idx_base += 1
+            if existing_child not in children:
+                self.add_child(existing_child, child_idx_base)
+                child_idx_base += 1
 
-        for existing_child in children:
-            self.add_child(existing_child, child_idx_base)
+        for new_child in children:
+            self.add_child(new_child, child_idx_base)
             child_idx_base += 1
 
         self.refresh_children()
