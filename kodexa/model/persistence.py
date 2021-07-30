@@ -6,7 +6,6 @@ import tempfile
 import uuid
 
 import msgpack
-
 from kodexa.model import Document, ContentNode, SourceMetadata
 from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
@@ -58,6 +57,7 @@ class SqliteDocumentPersistence(object):
             self.is_tmp = True
 
         self.current_filename = filename
+
         self.connection = sqlite3.connect(filename)
         self.cursor = self.connection.cursor()
         self.cursor.execute("PRAGMA journal_mode=WAL")
@@ -134,12 +134,20 @@ class SqliteDocumentPersistence(object):
 
     def __insert_node(self, node: ContentNode, parent):
 
+        if node.index is None:
+            node.index = 0
+
+        if parent:
+            node._parent_uuid = parent.uuid
+
         if node.uuid:
             # Delete the existing node
             cn_values = [parent.uuid if parent else None,
                          self.__resolve_n_type(node.node_type), node.index, node.uuid]
 
+            # Make sure we load the content parts if we haven't
             node.get_content_parts()
+
             self.cursor.execute(CONTENT_NODE_UPDATE, cn_values).lastrowid
             self.cursor.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
 
@@ -149,6 +157,7 @@ class SqliteDocumentPersistence(object):
                                         part if not isinstance(part, str) else None])
 
             self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
+
         else:
             cn_values = [parent.uuid if parent else None,
                          self.__resolve_n_type(node.node_type), node.index]
@@ -161,6 +170,10 @@ class SqliteDocumentPersistence(object):
 
             self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
+        # for child in node.get_children():
+        #     child._parent = node
+        #     child._parent_uuid = node.uuid
+        #     self.__insert_node(child, node)
 
     def __clean_none_values(self, d):
         clean = {}
@@ -245,8 +258,7 @@ class SqliteDocumentPersistence(object):
     def add_feature(self, node, feature):
         f_values = [node.uuid, self.__resolve_f_type(feature),
                     self.__resolve_feature_value(feature)]
-        feature.uuid = self.cursor.execute(FEATURE_INSERT,
-                                           f_values).lastrowid
+        self.cursor.execute(FEATURE_INSERT, f_values)
 
     def remove_feature(self, node, feature_type, name):
 
@@ -266,7 +278,7 @@ class SqliteDocumentPersistence(object):
                 children.append(self.__build_node(child_node))
         return children
 
-    def __get_node(self, node_id):
+    def get_node(self, node_id):
         if node_id in self.document._node_cache:
             return self.document._node_cache[node_id]
         else:
@@ -295,7 +307,7 @@ class SqliteDocumentPersistence(object):
 
         self.__update_metadata()
         if self.document.content_node:
-            self.__insert_node(self.document.content_node)
+            self.__insert_node(self.document.content_node, None)
 
     def get_bytes(self):
 
@@ -340,9 +352,6 @@ class SqliteDocumentPersistence(object):
                                            value, single=single))
 
         return features
-
-    def get_node(self, node_id):
-        return self.__get_node(node_id)
 
     def update_content_parts(self, node, content_parts):
         self.cursor.execute("delete from cnp where cn_id=?", [node.uuid])
