@@ -14,7 +14,6 @@ from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
-
 from kodexa.mixins import registry
 
 
@@ -111,37 +110,18 @@ class Store:
     """Base definition of a store in Kodexa (deprecated)"""
 
     def get_name(self):
-        """ """
         pass
 
     def merge(self, other_store):
-        """
-
-        Args:
-          other_store:
-
-        Returns:
-
-        """
         pass
 
     def to_dict(self):
-        """ """
         pass
 
     def set_pipeline_context(self, pipeline_context):
-        """
-
-        Args:
-          pipeline_context:
-
-        Returns:
-
-        """
         pass
 
     def count(self):
-        """ """
         pass
 
 
@@ -240,24 +220,24 @@ class ContentNode(object):
     """
 
     def __init__(self, document, node_type: str, content: Optional[str] = None,
-                 content_parts: Optional[List[Any]] = None, parent = None):
+                 content_parts: Optional[List[Any]] = None, parent=None, index: Optional[int] = None,
+                 virtual: bool = False):
         self.node_type: str = node_type
         """The node type (ie. line, page, cell etc)"""
         self.document: Document = document
         """The document that the node belongs to"""
         self._content_parts: Optional[List[Any]] = content_parts
         """The children of the content node"""
-        self.index: int = 0
+        self.index: Optional[int] = index
         """The index of the content node"""
-        self.uuid: Optional[str] = None
-        """The UUID of the content node"""
-        self.virtual: bool = False
+        self.uuid: Optional[int] = None
+        """The ID of the content node"""
+        self.virtual: bool = virtual
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
+
         self._parent_uuid = parent.uuid if parent else None
-        self._parent = parent
         self._children = None
         self._features = None
-        self.virtual_parent = None
 
         if content is not None and len(self.get_content_parts()) == 0:
             self.set_content_parts([content])
@@ -306,21 +286,13 @@ class ContentNode(object):
         return False
 
     def get_parent(self):
-        if self.virtual_parent is not None:
-            return self.virtual_parent
 
-        if self._parent:
-            return self._parent
-
-        if self._parent_uuid is not None:
-            if self._parent_uuid not in self.document._node_cache:
-                self.document._node_cache[self._parent_uuid] = self.document.get_persistence().get_node(self._parent_uuid)
-            return self.document._node_cache[self._parent_uuid]
-        else:
-            return None
+        if self._parent_uuid not in self.document._node_cache:
+            self.document._node_cache[self._parent_uuid] = self.document.get_persistence().get_node(self._parent_uuid)
+        return self.document._node_cache[self._parent_uuid]
 
     def __str__(self):
-        return f"ContentNode [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) [" + str(
+        return f"ContentNode {self.uuid} [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) [" + str(
             self.content) + "]"
 
     def to_json(self):
@@ -373,12 +345,10 @@ class ContentNode(object):
             'node_type']
 
         new_content_node = document.create_node(node_type=node_type, content=content_node_dict[
-            'content'] if 'content' in content_node_dict else None, index=content_node_dict['index'])
+            'content'] if 'content' in content_node_dict else None, index=content_node_dict['index'], parent=parent)
 
         if 'content_parts' in content_node_dict and len(content_node_dict['content_parts']) > 0:
             new_content_node.set_content_parts(content_node_dict['content_parts'])
-
-        document.get_persistence().add_content_node(new_content_node, parent)
 
         for dict_feature in content_node_dict['features']:
 
@@ -409,12 +379,11 @@ class ContentNode(object):
           the new ContentNode
 
         """
-        new_node = self.document.create_node(node_type=node_type)
-        new_node.content = content
+        new_node = self.document.create_node(node_type=node_type, parent=self, content=content)
         self.add_child(new_node, index)
         return new_node
 
-    def add_child(self, child, index=None):
+    def add_child(self, child, index: Optional[int] = None):
         """Add a ContentNode as a child of this ContentNode
 
         Args:
@@ -429,7 +398,7 @@ class ContentNode(object):
         """
         original_parent = child.get_parent()
 
-        if not index:
+        if index is None:
             self.refresh_children()
             if self.get_children():
                 child.index = self.get_children()[-1].index + 1
@@ -439,20 +408,14 @@ class ContentNode(object):
             child.index = index
 
         child._parent_uuid = self.uuid
-        child._parent = self
-
-        if child.virtual:
-            child.virtual_parent = self
 
         self.document.get_persistence().add_content_node(child, self)
-
         self.document._node_cache[child.uuid] = child
 
-        if self._children is None:
-            self.get_children()
-        self._children.append(child)
+        self._children = None
+        self.get_children()
 
-        if original_parent:
+        if original_parent is not None and original_parent.uuid != self.uuid:
             original_parent.refresh_children()
 
     def remove_child(self, content_node):
@@ -463,6 +426,7 @@ class ContentNode(object):
 
                 self.document._node_cache.delete(child.uuid)
                 self.document.get_persistence().remove_content_node(child)
+
         self._children = self.document.get_persistence().get_children(self)
 
     def refresh_children(self):
@@ -479,6 +443,7 @@ class ContentNode(object):
         """
         if self._children is None:
             self._children = self.document.get_persistence().get_children(self)
+
         return self._children
 
     def set_feature(self, feature_type, name, value):
@@ -510,8 +475,8 @@ class ContentNode(object):
           feature_type (str): The type of feature to be added to the node.
           name (str): The name of the feature.
           value (Any): The value of the feature.
-          single(boolean): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
-          serialized(boolean): Indicates that the value is/is not already serialized; defaults to False.
+          single (boolean): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
+          serialized (boolean): Indicates that the value is/is not already serialized; defaults to False.
 
         Returns:
           ContentFeature: The feature that was added to this ContentNode.
@@ -828,13 +793,15 @@ class ContentNode(object):
                     child.remove_child(child)
 
         child_idx_base = 0
-        for child in self.get_children():
-            self.add_child(child, child_idx_base)
+        for existing_child in self.get_children():
+            self.add_child(existing_child, child_idx_base)
             child_idx_base += 1
 
-        for child in children:
-            self.add_child(child, child_idx_base)
+        for existing_child in children:
+            self.add_child(existing_child, child_idx_base)
             child_idx_base += 1
+
+        self.refresh_children()
 
     def remove_tag(self, tag_name):
         """Remove a tag from this content node.
@@ -1582,7 +1549,7 @@ class ContentNode(object):
                     break
 
             if last_child:
-                if last_child.index is not index and index < self.get_children()[-1].index:
+                if last_child.index != index and index < self.get_children()[-1].index:
                     virtual_node = self.document.create_node(node_type=last_child.node_type, virtual=True, parent=self,
                                                              index=index)
                     return virtual_node
@@ -1851,6 +1818,9 @@ class Document(object):
         # we hold a first-level cache of nodes
         self._node_cache = {}
 
+        # The detached cache is holding nodes that haven't been stored yet
+        self._detached_cache = {}
+
         # Start persistence layer
         from kodexa.model import SqliteDocumentPersistence
         self._persistence_layer: Optional[SqliteDocumentPersistence] = None
@@ -1935,7 +1905,7 @@ class Document(object):
 
         """
         new_document = Document()
-        new_document.content_node = new_document.create_node(node_type='text')
+        new_document.content_node = new_document.create_node(node_type='text', index=0)
         if text:
             if separator:
                 for s in text.split(separator):
@@ -2186,22 +2156,11 @@ class Document(object):
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
         """
         content_node = ContentNode(document=self, node_type=node_type, content=content,
-                                   parent=parent)
-        content_node.index = index
-        content_node.virtual = virtual
-
-        if virtual:
-            # We need to push the parent node into the virtual to keep track of it
-            # in case the parent is virtual too
-            content_node.virtual_parent = parent
-
-        registry.add_mixins_to_document_node(self, content_node)
-        if virtual:
-            for mixin_name in self.get_mixins():
-                mixin = registry.get_mixin(mixin_name)
-                add_features_to_virtual_node = getattr(mixin, "add_features_to_virtual_node", None)
-                if callable(add_features_to_virtual_node):
-                    add_features_to_virtual_node(content_node)
+                                   parent=parent, index=index, virtual=virtual)
+        if parent is not None:
+            parent.add_child(content_node, index)
+        else:
+            self.get_persistence().add_content_node(content_node, None)
         return content_node
 
     @classmethod
