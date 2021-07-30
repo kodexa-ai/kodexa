@@ -429,7 +429,11 @@ class ContentNode(object):
         original_parent = child.get_parent()
 
         if not index:
-            child.index = len(self.get_children())
+            self.refresh_children()
+            if self.get_children():
+                child.index = self.get_children()[-1].index + 1
+            else:
+                child.index = 0
         else:
             child.index = index
 
@@ -819,8 +823,16 @@ class ContentNode(object):
             for child in self.get_children():
                 child.remove_child(child)
 
-        for child in children:
+        child_idx_base = 0
+        for child in self.get_children():
+            child.index = child_idx_base
             self.add_child(child)
+            child_idx_base += 1
+
+        for child in children:
+            child.index = child_idx_base
+            self.add_child(child)
+            child_idx_base += 1
 
     def remove_tag(self, tag_name):
         """Remove a tag from this content node.
