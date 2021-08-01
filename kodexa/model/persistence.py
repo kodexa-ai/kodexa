@@ -424,6 +424,7 @@ class PersistenceManager(object):
         self.child_cache = {}
         self.feature_cache = {}
         self.content_parts_cache = {}
+        self.node_parent_cache = {}
 
         self._underlying_persistence = SqliteDocumentPersistence(document, filename, delete_on_close)
 
@@ -458,6 +459,7 @@ class PersistenceManager(object):
         self._underlying_persistence.update_metadata()
 
     def add_content_node(self, node, parent):
+
         if node.index is None:
             node.index = 0
 
@@ -466,11 +468,15 @@ class PersistenceManager(object):
 
         self.node_cache.add_obj(node)
 
-        if parent:
-            if parent.uuid not in self.child_cache:
+        if node.uuid in self.node_parent_cache:
+            self.child_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
+
+        if node._parent_uuid:
+            self.node_parent_cache[node.uuid] = node._parent_uuid
+            if node._parent_uuid not in self.child_cache:
                 self.child_cache[parent.uuid] = [node.uuid]
             else:
-                if node.uuid not in self.child_cache[parent.uuid]:
+                if node.uuid not in self.child_cache[node._parent_uuid]:
                     self.child_cache[parent.uuid].append(node.uuid)
 
     def get_node(self, node_id):
@@ -484,6 +490,18 @@ class PersistenceManager(object):
         return node
 
     def remove_content_node(self, node):
+
+        self.node_cache.remove_obj(node)
+
+        if node._parent_uuid is not None:
+            try:
+                self.child_cache[node._parent_uuid].remove(node.uuid)
+            except ValueError:
+                pass
+
+        self.content_parts_cache.pop(node.uuid, None)
+        self.feature_cache.pop(node.uuid, None)
+
         self._underlying_persistence.remove_content_node(node)
 
     def get_children(self, node):
