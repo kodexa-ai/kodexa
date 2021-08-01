@@ -156,7 +156,7 @@ class RollupTransformer:
             for selected_node in selected_nodes:
 
                 for node_type_re in self.collapse_type_res:
-                    nodes = selected_node.select(f'//{node_type_re}')
+                    nodes = selected_node.select(f'//*[typeRegex("{node_type_re}")]')
 
                     final_nodes = []
                     node_ids = [node.uuid for node in nodes]
@@ -177,18 +177,19 @@ class RollupTransformer:
                                 parts[content_part_index:content_part_index] = node.get_content_parts()
                                 node.get_parent().set_content_parts(parts)
                                 child_node_index = node.get_parent().get_children().index(node)
-                                node.get_parent().get_children()[child_node_index:child_node_index] = node.get_children()
+                                node.get_parent().get_children()[
+                                child_node_index:child_node_index] = node.get_children()
                                 node.get_parent().remove_child(node)
 
                             else:
                                 # We just need to bring the content onto the end of the parent content and remove
                                 # this node
 
-                                node.get_parent().children.remove(node)
+                                node.get_parent().get_children().remove(node)
 
-                                if self.get_all_content:
+                                if self.get_all_content():
                                     node.get_parent().content = node.get_parent().content + self.separator_character + \
-                                                          node.get_all_content() if node.get_parent().content else node.get_all_content()
+                                                                node.get_all_content() if node.get_parent().content else node.get_all_content()
                                 else:
                                     node.get_parent().content = node.get_parent().content + self.separator_character + node.content \
                                         if node.get_parent().content else node.content
