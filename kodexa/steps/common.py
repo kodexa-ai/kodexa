@@ -187,7 +187,7 @@ class RollupTransformer:
 
                                 node.get_parent().get_children().remove(node)
 
-                                if self.get_all_content():
+                                if self.get_all_content:
                                     node.get_parent().content = node.get_parent().content + self.separator_character + \
                                                                 node.get_all_content() if node.get_parent().content else node.get_all_content()
                                 else:
