@@ -16,7 +16,6 @@ import msgpack
 from addict import Dict
 from kodexa.mixins import registry
 
-
 class ContentType(Enum):
     """Types of content object that are supported"""
     DOCUMENT = 'DOCUMENT'
@@ -236,8 +235,6 @@ class ContentNode(object):
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
 
         self._parent_uuid = parent.uuid if parent else None
-        self._children = None
-        self._features = None
 
         if content is not None and len(self.get_content_parts()) == 0:
             self.set_content_parts([content])
@@ -286,10 +283,7 @@ class ContentNode(object):
         return False
 
     def get_parent(self):
-
-        if self._parent_uuid not in self.document._node_cache:
-            self.document._node_cache[self._parent_uuid] = self.document.get_persistence().get_node(self._parent_uuid)
-        return self.document._node_cache[self._parent_uuid]
+        return self.document.get_persistence().get_node(self._parent_uuid)
 
     def __str__(self):
         return f"ContentNode {self.uuid} [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) [" + str(
@@ -399,39 +393,22 @@ class ContentNode(object):
         original_parent = child.get_parent()
 
         if index is None:
-            self.refresh_children()
-            if len(self.get_children())>0:
+            if len(self.get_children()) > 0:
                 child.index = self.get_children()[-1].index + 1
             else:
                 child.index = 0
         else:
             child.index = index
 
-        child._parent_uuid = self.uuid
-
         self.document.get_persistence().add_content_node(child, self)
-        self.document._node_cache[child.uuid] = child
-
-        self._children = None
-        self.get_children()
-
-        if original_parent is not None and original_parent.uuid != self.uuid:
-            original_parent.refresh_children()
 
     def remove_child(self, content_node):
         for child in self.get_children():
             if child == content_node:
                 for grand_child in child.get_children():
-                    child.remove(grand_child)
+                    child.remove_child(grand_child)
 
-                self.document._node_cache.delete(child.uuid)
                 self.document.get_persistence().remove_content_node(child)
-
-        self._children = self.document.get_persistence().get_children(self)
-
-    def refresh_children(self):
-        self._children = None
-        self.get_children()
 
     def get_children(self):
         """Returns a list of the children of this node.
@@ -441,10 +418,7 @@ class ContentNode(object):
 
         >>> node.get_children()
         """
-        if self._children is None:
-            self._children = self.document.get_persistence().get_children(self)
-
-        return self._children
+        return self.document.get_persistence().get_children(self)
 
     def set_feature(self, feature_type, name, value):
         """Sets a feature for this ContentNode, replacing the value if a feature by this type and name already exists.
@@ -497,7 +471,6 @@ class ContentNode(object):
             new_feature = ContentFeature(feature_type, name,
                                          [value] if single and not serialized else value, single=single)
             self.document.get_persistence().add_feature(self, new_feature)
-            self._features.append(new_feature)
             return new_feature
 
     def delete_children(self, nodes: Optional[List] = None,
@@ -533,7 +506,7 @@ class ContentNode(object):
 
         for child_to_delete in children_to_delete:
             if child_to_delete in self.get_children():
-                self._children.remove(child_to_delete)
+                self.document.get_persistence().remove_content_node(child_to_delete)
 
     def get_feature(self, feature_type, name):
         """Gets the value for the given feature.
@@ -591,9 +564,7 @@ class ContentNode(object):
           list[ContentFeature]: A list of the features on this ContentNode.
 
         """
-        if self._features is None:
-            self._features = self.document.get_persistence().get_features(self)
-        return self._features
+        return self.document.get_persistence().get_features(self)
 
     def remove_feature(self, feature_type: str, name: str, include_children: bool = False):
         """Removes the feature with the given name and type from this node.
@@ -605,10 +576,7 @@ class ContentNode(object):
 
         >>> new_page.remove_feature('pagination','pageNum')
         """
-        results = self.get_feature(feature_type, name)
-        if results:
-            self.document.get_persistence().remove_feature(self, feature_type, name)
-            self._features.remove(results)
+        self.document.get_persistence().remove_feature(self, feature_type, name)
 
         if include_children:
             for child in self.get_children():
@@ -783,8 +751,6 @@ class ContentNode(object):
         for new_child in children:
             self.add_child(new_child, child_idx_base)
             child_idx_base += 1
-
-        self.refresh_children()
 
     def remove_tag(self, tag_name):
         """Remove a tag from this content node.
@@ -1795,21 +1761,17 @@ class Document(object):
         """A list of the taxonomy references for this document"""
         self.classes: List[ContentClassification] = []
         """A list of the content classifications associated at the document level"""
+
         self.add_mixin('core')
 
-        # In order to track instances that exist in the structure
-        # we hold a first-level cache of nodes
-        self._node_cache = {}
-
-        # The detached cache is holding nodes that haven't been stored yet
-        self._detached_cache = {}
-
         # Start persistence layer
-        from kodexa.model import SqliteDocumentPersistence
-        self._persistence_layer: Optional[SqliteDocumentPersistence] = None
-        SqliteDocumentPersistence(document=self,
+        from kodexa.model import PersistenceManager
+
+        self._persistence_layer: Optional[PersistenceManager] = PersistenceManager(document=self,
                                   filename=kddb_path,
-                                  delete_on_close=delete_on_close)
+                                  delete_on_close=delete_on_close)\
+
+        self._persistence_layer.initialize()
 
     def get_persistence(self):
         return self._persistence_layer

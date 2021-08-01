@@ -6,6 +6,7 @@ import tempfile
 import uuid
 
 import msgpack
+
 from kodexa.model import Document, ContentNode, SourceMetadata
 from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
@@ -37,7 +38,6 @@ class SqliteDocumentPersistence(object):
 
     def __init__(self, document: Document, filename: str = None, delete_on_close=False):
         self.document = document
-        self.document._persistence_layer = self
 
         self.node_types = {}
         self.feature_type_names = {}
@@ -45,13 +45,13 @@ class SqliteDocumentPersistence(object):
 
         import sqlite3
 
-        is_new = True
+        self.is_new = True
         if filename is not None:
             self.is_tmp = False
             path = pathlib.Path(filename)
             if path.exists():
                 # At this point we need to load the db
-                is_new = False
+                self.is_new = False
         else:
             new_file, filename = tempfile.mkstemp()
             self.is_tmp = True
@@ -65,7 +65,8 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
-        if is_new:
+    def initialize(self):
+        if self.is_new:
             self.__build_db()
         else:
             self.__load_document()
@@ -142,13 +143,13 @@ class SqliteDocumentPersistence(object):
 
         if node.uuid:
             # Delete the existing node
-            cn_values = [parent.uuid if parent else None,
+            cn_values = [node._parent_uuid,
                          self.__resolve_n_type(node.node_type), node.index, node.uuid]
 
             # Make sure we load the content parts if we haven't
             node.get_content_parts()
-
-            self.cursor.execute(CONTENT_NODE_UPDATE, cn_values).lastrowid
+            self.cursor.execute("DELETE FROM cn where id=?", [node.uuid])
+            self.cursor.execute("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", cn_values)
             self.cursor.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
 
             cn_parts_values = []
@@ -249,7 +250,6 @@ class SqliteDocumentPersistence(object):
         new_node = ContentNode(self.document, self.node_types[node_row[2]], parent=self.get_node(node_row[1]))
         new_node.uuid = node_row[0]
         new_node.index = node_row[3]
-        self.document._node_cache[new_node.uuid] = new_node
         return new_node
 
     def add_content_node(self, node, parent):
@@ -272,21 +272,15 @@ class SqliteDocumentPersistence(object):
         children = []
         for child_node in self.cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
                                               [content_node.uuid]).fetchall():
-            if child_node[0] in self.document._node_cache:
-                children.append(self.document._node_cache[child_node[0]])
-            else:
-                children.append(self.__build_node(child_node))
+            children.append(self.__build_node(child_node))
         return children
 
     def get_node(self, node_id):
-        if node_id in self.document._node_cache:
-            return self.document._node_cache[node_id]
+        node_row = self.cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
+        if node_row:
+            return self.__build_node(node_row)
         else:
-            node_row = self.cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
-            if node_row:
-                return self.__build_node(node_row)
-            else:
-                return None
+            return None
 
     def get_parent(self, content_node):
 
@@ -313,7 +307,6 @@ class SqliteDocumentPersistence(object):
 
         self.__update_metadata()
         self.cursor.execute("pragma optimize")
-        self.cursor.close()
         self.connection.commit()
         self.connection.close()
 
@@ -365,3 +358,180 @@ class SqliteDocumentPersistence(object):
     def remove_content_node(self, child):
         self.cursor.execute("delete from cnp where cn_id=?", [child.uuid])
         self.cursor.execute("delete from cn where id=?", [child.uuid])
+
+    def remove_all_features(self, node):
+        self.cursor.execute("delete from f where cn_id=?", [node.uuid])
+
+    def get_next_node_id(self):
+        next_id = self.cursor.execute("select max(id) from cn").fetchone()
+        if next_id[0] is None:
+            return 1
+        else:
+            return next_id[0] + 1
+
+
+class SimpleObjectCache(object):
+    """
+    A simple cache based on ID'd objects, where we will build ID's for new
+    objects, store them and also a dirty flag so that it is easy to pull all
+    dirty objects and store them as needed
+    """
+
+    def __init__(self):
+        self.objs = {}
+        self.next_id = 1
+        self.dirty_objs = set()
+
+    def get_obj(self, id):
+        if id in self.objs:
+            return self.objs[id]
+        else:
+            return None
+
+    def add_obj(self, obj):
+        if obj.uuid is None:
+            obj.uuid = self.next_id
+            self.next_id += 1
+        self.objs[obj.uuid] = obj
+        self.dirty_objs.add(obj.uuid)
+
+    def remove_obj(self, obj):
+        if obj.uuid in self.objs:
+            self.objs.pop(obj.uuid)
+            self.dirty_objs.remove(obj.uuid)
+
+    def get_dirty_objs(self):
+        results = []
+        for id in self.dirty_objs:
+            results.append(self.get_obj(id))
+        return results
+
+    def undirty(self, obj):
+        self.dirty_objs.remove(obj.uuid)
+
+
+class PersistenceManager(object):
+    """
+    The persistence manager supports holding the document and only flushing objects to the persistence layer
+    as needed.
+
+    This is implemented to allow us to work with large complex documents in a performance centered way.
+    """
+
+    def __init__(self, document: Document, filename: str = None, delete_on_close=False):
+        self.document = document
+        self.node_cache = SimpleObjectCache()
+        self.child_cache = {}
+        self.feature_cache = {}
+        self.content_parts_cache = {}
+
+        self._underlying_persistence = SqliteDocumentPersistence(document, filename, delete_on_close)
+
+    def initialize(self):
+        self._underlying_persistence.initialize()
+
+        self.node_cache.next_id = self._underlying_persistence.get_next_node_id()
+
+    def close(self):
+        self._underlying_persistence.close()
+
+    def get_bytes(self):
+
+        # TODO we need to go through an flush anything dirty in the cache
+        # back to the persistence layer
+
+        for node in self.node_cache.get_dirty_objs():
+            if not node.virtual:
+                self._underlying_persistence.add_content_node(node, None)
+                self.node_cache.undirty(node)
+
+        for node_id, features in self.feature_cache.items():
+            node = self.get_node(node_id)
+            if not node.virtual:
+                self._underlying_persistence.remove_all_features(node)
+                for feature in features:
+                    self._underlying_persistence.add_feature(node, feature)
+
+        return self._underlying_persistence.get_bytes()
+
+    def update_metadata(self):
+        self._underlying_persistence.update_metadata()
+
+    def add_content_node(self, node, parent):
+        if node.index is None:
+            node.index = 0
+
+        if parent:
+            node._parent_uuid = parent.uuid
+
+        self.node_cache.add_obj(node)
+
+        if parent:
+            if parent.uuid not in self.child_cache:
+                self.child_cache[parent.uuid] = [node.uuid]
+            else:
+                if node.uuid not in self.child_cache[parent.uuid]:
+                    self.child_cache[parent.uuid].append(node.uuid)
+
+    def get_node(self, node_id):
+
+        node = self.node_cache.get_obj(node_id)
+        if node is None:
+            node = self._underlying_persistence.get_node(node_id)
+            if node is not None:
+                self.node_cache.add_obj(node)
+
+        return node
+
+    def remove_content_node(self, node):
+        self._underlying_persistence.remove_content_node(node)
+
+    def get_children(self, node):
+        if node.uuid in self.child_cache:
+            children = []
+            for child_id in self.child_cache[node.uuid]:
+                children.append(self.get_node(child_id))
+            return sorted(children, key=lambda x: x.index)
+        else:
+            children = self._underlying_persistence.get_children(node)
+            self.child_cache[node.uuid] = [child.uuid for child in children]
+            return sorted(children, key=lambda x: x.index)
+
+    def update_content_parts(self, node, content_parts):
+        if node.uuid is None:
+            return
+        self.content_parts_cache[node.uuid] = content_parts
+
+    def get_content_parts(self, node):
+        if node.uuid is None:
+            return []
+
+        cps = self.content_parts_cache[node.uuid] if node.uuid in self.content_parts_cache else None
+        if cps is None:
+            cps = self._underlying_persistence.get_content_parts(node)
+            if cps is not None:
+                self.content_parts_cache[node.uuid] = cps
+
+        return cps
+
+    def remove_feature(self, node, feature_type, name):
+
+        features = self.get_features(node)
+        new_features = [i for i in features if not (i.feature_type == feature_type and i.name == name)]
+        self.feature_cache[node.uuid] = new_features
+
+    def get_features(self, node):
+
+        if node.uuid not in self.feature_cache:
+            features = self._underlying_persistence.get_features(node)
+            self.feature_cache[node.uuid] = features
+
+        return self.feature_cache[node.uuid]
+
+    def add_feature(self, node, feature):
+
+        if node.uuid not in self.feature_cache:
+            features = self._underlying_persistence.get_features(node)
+            self.feature_cache[node.uuid] = features
+
+        self.feature_cache[node.uuid].append(feature)

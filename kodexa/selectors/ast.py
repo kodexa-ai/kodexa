@@ -159,7 +159,9 @@ class AbsolutePath(object):
 
 
 class Step(object):
-    '''A single step in a relative path. a; @b; text(); parent::foo:bar[5].'''
+    """
+    A single step in a relative path. a; @b; text(); parent::foo:bar[5].
+    """
 
     def __init__(self, axis, node_test, predicates):
         self.axis = axis
