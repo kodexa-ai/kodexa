@@ -6,7 +6,6 @@ import tempfile
 import uuid
 
 import msgpack
-
 from kodexa.model import Document, ContentNode, SourceMetadata
 from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
@@ -380,7 +379,7 @@ class SimpleObjectCache(object):
     def __init__(self):
         self.objs = {}
         self.next_id = 1
-        self.dirty_objs = set()
+        self.dirty_objs = []
 
     def get_obj(self, id):
         if id in self.objs:
@@ -393,12 +392,12 @@ class SimpleObjectCache(object):
             obj.uuid = self.next_id
             self.next_id += 1
         self.objs[obj.uuid] = obj
-        self.dirty_objs.add(obj.uuid)
+        self.dirty_objs.append(obj.uuid)
 
     def remove_obj(self, obj):
         if obj.uuid in self.objs:
             self.objs.pop(obj.uuid)
-            self.dirty_objs.remove(obj.uuid)
+            self.dirty_objs.pop(obj.uuid, None)
 
     def get_dirty_objs(self):
         results = []
@@ -468,16 +467,29 @@ class PersistenceManager(object):
 
         self.node_cache.add_obj(node)
 
-        if node.uuid in self.node_parent_cache:
-            self.child_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
+        update_child_cache=False
 
-        if node._parent_uuid:
+        if node.uuid not in self.node_parent_cache:
             self.node_parent_cache[node.uuid] = node._parent_uuid
+            update_child_cache=True
+
+        if node.uuid in self.node_parent_cache and node._parent_uuid != self.node_parent_cache[node.uuid]:
+
+            # Remove from the old parent
+            self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
+
+            # Add to the new parent
+            self.node_parent_cache[node.uuid] = node._parent_uuid
+            update_child_cache=True
+
+        if update_child_cache:
+
             if node._parent_uuid not in self.child_cache:
-                self.child_cache[parent.uuid] = [node.uuid]
+                self.child_cache[node._parent_uuid] = [node]
             else:
-                if node.uuid not in self.child_cache[node._parent_uuid]:
-                    self.child_cache[parent.uuid].append(node.uuid)
+                if node not in self.child_cache[node._parent_uuid]:
+                    self.child_cache[node._parent_uuid].append(node)
+                    self.child_cache[node._parent_uuid] = sorted(self.child_cache[node._parent_uuid], key=lambda x: x.index)
 
     def get_node(self, node_id):
 
@@ -505,15 +517,10 @@ class PersistenceManager(object):
         self._underlying_persistence.remove_content_node(node)
 
     def get_children(self, node):
-        if node.uuid in self.child_cache:
-            children = []
-            for child_id in self.child_cache[node.uuid]:
-                children.append(self.get_node(child_id))
-            return sorted(children, key=lambda x: x.index)
-        else:
+        if node.uuid not in self.child_cache:
             children = self._underlying_persistence.get_children(node)
-            self.child_cache[node.uuid] = [child.uuid for child in children]
-            return sorted(children, key=lambda x: x.index)
+            self.child_cache[node.uuid] = sorted(children, key=lambda x: x.index)
+        return self.child_cache[node.uuid]
 
     def update_content_parts(self, node, content_parts):
         if node.uuid is None:

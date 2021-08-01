@@ -278,9 +278,7 @@ class ContentNode(object):
             self.set_content_parts(filtered_parts)
 
     def __eq__(self, other):
-        if isinstance(other, ContentNode):
-            return self.uuid == other.uuid and (self.uuid is not None and other.uuid is not None)
-        return False
+        return self.uuid == other.uuid and (self.uuid is not None and other.uuid is not None)
 
     def get_parent(self):
         return self.document.get_persistence().get_node(self._parent_uuid)
@@ -1768,9 +1766,8 @@ class Document(object):
         from kodexa.model import PersistenceManager
 
         self._persistence_layer: Optional[PersistenceManager] = PersistenceManager(document=self,
-                                  filename=kddb_path,
-                                  delete_on_close=delete_on_close)\
-
+                                                                                   filename=kddb_path,
+                                                                                   delete_on_close=delete_on_close)
         self._persistence_layer.initialize()
 
     def get_persistence(self):
