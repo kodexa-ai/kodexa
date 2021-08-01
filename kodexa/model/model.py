@@ -1021,7 +1021,7 @@ class ContentNode(object):
         """
 
         # Could be line, word, or content-area
-        all_nodes = self.findall(node_type_re=node_type_re)
+        all_nodes = self.select("//*[typeRegex('{node_type_re}')]")
 
         start_index_list = [n_idx for n_idx, node in enumerate(all_nodes)
                             if re.compile(start_content_re).match(node.get_all_content()
@@ -1345,7 +1345,7 @@ class ContentNode(object):
         Returns:
           A list tagged location and values for this label in this node
 
-        >>> document.content_node.find(content_re='.*Cheese.*').get_tag('is_cheese')
+        >>> document.content_node.select_first('//*[contentRegex(".*Cheese.*")]').get_tag('is_cheese')
             [0,10,'The Cheese Moved']
         """
         tag_details = self.get_feature_value('tag', tag_name)
@@ -1373,7 +1373,7 @@ class ContentNode(object):
         Returns:
           list[str]: A list of the tag names belonging to this node and/or its children.
 
-        >>> document.content_node.find(content_re='.*Cheese.*').get_all_tags()
+        >>> document.content_node.select_first('//*[contentRegex(".*Cheese.*")]').get_all_tags()
             ['is_cheese']
         """
         tags = []
@@ -1390,7 +1390,7 @@ class ContentNode(object):
         Returns:
           bool: True if node has any tags; else, False;
 
-        >>> document.content_node.find(content_re='.*Cheese.*').has_tags()
+        >>> document.content_node.select_first('//*[contentRegex(".*Cheese.*")]').has_tags()
             True
         """
         return len([i.value for i in self.get_features_of_type("tag")]) > 0
@@ -1405,9 +1405,9 @@ class ContentNode(object):
         Returns:
           bool: True if node has a tag by the specified name; else, False;
 
-        >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_cheese')
+        >>> document.content_node.select_first('//*[contentRegex(".*Cheese.*")]').has_tag('is_cheese')
             True
-            >>> document.content_node.find(content_re='.*Cheese.*').has_tag('is_fish')
+            >>> document.content_node.select_first('//*[contentRegex(".*Cheese.*")]').has_tag('is_fish')
             False
         """
         for feature in self.get_features():
