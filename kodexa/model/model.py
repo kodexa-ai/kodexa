@@ -1020,7 +1020,7 @@ class ContentNode(object):
         """
 
         # Could be line, word, or content-area
-        all_nodes = self.select("//*[typeRegex('{node_type_re}')]")
+        all_nodes = self.select(f"//*[typeRegex('{node_type_re}')]")
 
         start_index_list = [n_idx for n_idx, node in enumerate(all_nodes)
                             if re.compile(start_content_re).match(node.get_all_content()
