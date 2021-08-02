@@ -240,14 +240,10 @@ class ContentNode(object):
             self.set_content_parts([content])
 
     def get_content_parts(self):
-        if self._content_parts is None:
-            self._content_parts = self.document.get_persistence().get_content_parts(self)
-        return self._content_parts
+        return self.document.get_persistence().get_content_parts(self)
 
     def set_content_parts(self, content_parts):
-        self._content_parts = content_parts
-        if not self.virtual:
-            self.document.get_persistence().update_content_parts(self, content_parts)
+        self.document.get_persistence().update_content_parts(self, content_parts)
 
     @property
     def content(self):

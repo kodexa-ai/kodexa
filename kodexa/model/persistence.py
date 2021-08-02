@@ -519,8 +519,6 @@ class PersistenceManager(object):
         return self.child_cache[node.uuid]
 
     def update_content_parts(self, node, content_parts):
-        if node.uuid is None:
-            return
         self.content_parts_cache[node.uuid] = content_parts
 
     def get_content_parts(self, node):
