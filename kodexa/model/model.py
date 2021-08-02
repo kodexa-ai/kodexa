@@ -278,7 +278,7 @@ class ContentNode(object):
             self.set_content_parts(filtered_parts)
 
     def __eq__(self, other):
-        return self.uuid == other.uuid and (self.uuid is not None and other.uuid is not None)
+        return other is not None and self.uuid == other.uuid and (self.uuid is not None and other.uuid is not None)
 
     def get_parent(self):
         return self.document.get_persistence().get_node(self._parent_uuid)
