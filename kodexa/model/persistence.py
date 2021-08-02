@@ -361,6 +361,9 @@ class SqliteDocumentPersistence(object):
     def remove_all_features(self, node):
         self.cursor.execute("delete from f where cn_id=?", [node.uuid])
 
+    def remove_all_features_by_id(self, node_id):
+        self.cursor.execute("delete from f where cn_id=?", [node_id])
+
     def get_next_node_id(self):
         next_id = self.cursor.execute("select max(id) from cn").fetchone()
         if next_id[0] is None:
@@ -447,6 +450,11 @@ class PersistenceManager(object):
 
         for node_id, features in self.feature_cache.items():
             node = self.get_node(node_id)
+
+            if node is None:
+                self._underlying_persistence.remove_all_features_by_id(node_id)
+                continue
+
             if not node.virtual:
                 self._underlying_persistence.remove_all_features(node)
                 for feature in features:
