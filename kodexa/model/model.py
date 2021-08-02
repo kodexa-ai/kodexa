@@ -743,12 +743,12 @@ class ContentNode(object):
             if existing_child not in children:
                 self.add_child(existing_child, child_idx_base)
             else:
-                existing_child.index = child_idx_base
+                existing_child.index = children.index(existing_child)
             child_idx_base += 1
 
         for new_child in children:
             if new_child not in self.get_children():
-                self.add_child(new_child, child_idx_base)
+                self.add_child(new_child, children.index(new_child))
                 child_idx_base += 1
 
     def remove_tag(self, tag_name):
@@ -1764,7 +1764,7 @@ class Document(object):
         self.add_mixin('core')
 
         # Start persistence layer
-        from .persistence import PersistenceManager
+        from kodexa.model import PersistenceManager
 
         self._persistence_layer: Optional[PersistenceManager] = PersistenceManager(document=self,
                                                                                    filename=kddb_path,
