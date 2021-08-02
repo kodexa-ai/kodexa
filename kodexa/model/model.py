@@ -388,8 +388,6 @@ class ContentNode(object):
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.add_child(new_page)
         """
-        original_parent = child.get_parent()
-
         if index is None:
             if len(self.get_children()) > 0:
                 child.index = self.get_children()[-1].index + 1
@@ -744,11 +742,14 @@ class ContentNode(object):
         for existing_child in self.get_children():
             if existing_child not in children:
                 self.add_child(existing_child, child_idx_base)
-                child_idx_base += 1
+            else:
+                existing_child.index = child_idx_base
+            child_idx_base += 1
 
         for new_child in children:
-            self.add_child(new_child, child_idx_base)
-            child_idx_base += 1
+            if new_child not in self.get_children():
+                self.add_child(new_child, child_idx_base)
+                child_idx_base += 1
 
     def remove_tag(self, tag_name):
         """Remove a tag from this content node.
@@ -1763,7 +1764,7 @@ class Document(object):
         self.add_mixin('core')
 
         # Start persistence layer
-        from kodexa.model import PersistenceManager
+        from .persistence import PersistenceManager
 
         self._persistence_layer: Optional[PersistenceManager] = PersistenceManager(document=self,
                                                                                    filename=kddb_path,
@@ -2103,6 +2104,10 @@ class Document(object):
             parent.add_child(content_node, index)
         else:
             self.get_persistence().add_content_node(content_node, None)
+
+        if content is not None and len(content_node.get_content_parts()) == 0:
+            content_node.set_content_parts([content])
+
         return content_node
 
     @classmethod
