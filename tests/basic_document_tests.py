@@ -205,7 +205,11 @@ def test_basic_tagging2():
 
 def test_kbbd():
     doc = Document.from_text('It is going to be a great day')
-    doc.to_kddb()
+    doc.content_node.tag('cheese', fixed_position=[1, 2])
+    doc.content_node.tag('foo', fixed_position=[3, 4])
+    doc2 = doc.from_kddb(doc.to_kddb())
+    assert doc2.content_node.get_all_content() == 'It is going to be a great day'
+    assert len(doc2.content_node.get_features()) == 2
 
 
 def test_doc_from_text():
