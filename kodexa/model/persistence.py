@@ -444,9 +444,11 @@ class PersistenceManager(object):
             if not node.virtual:
                 self._underlying_persistence.add_content_node(node, None)
                 self._underlying_persistence.remove_all_features(node)
-                for feature in self.feature_cache[node.uuid]:
-                    self._underlying_persistence.add_feature(node, feature)
-                self._underlying_persistence.update_content_parts(node, self.content_parts_cache[node.uuid])
+                if node.uuid in self.feature_cache:
+                    for feature in self.feature_cache[node.uuid]:
+                        self._underlying_persistence.add_feature(node, feature)
+                if node.uuid in self.content_parts_cache:
+                    self._underlying_persistence.update_content_parts(node, self.content_parts_cache[node.uuid])
                 self.node_cache.undirty(node)
 
         return self._underlying_persistence.get_bytes()
