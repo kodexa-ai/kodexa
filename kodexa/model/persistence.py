@@ -440,25 +440,14 @@ class PersistenceManager(object):
 
     def get_bytes(self):
 
-        # TODO we need to go through an flush anything dirty in the cache
-        # back to the persistence layer
-
         for node in self.node_cache.get_dirty_objs():
             if not node.virtual:
                 self._underlying_persistence.add_content_node(node, None)
-                self.node_cache.undirty(node)
-
-        for node_id, features in self.feature_cache.items():
-            node = self.get_node(node_id)
-
-            if node is None:
-                self._underlying_persistence.remove_all_features_by_id(node_id)
-                continue
-
-            if not node.virtual:
                 self._underlying_persistence.remove_all_features(node)
-                for feature in features:
+                for feature in self.feature_cache[node.uuid]:
                     self._underlying_persistence.add_feature(node, feature)
+                self._underlying_persistence.update_content_parts(node, self.content_parts_cache[node.uuid])
+                self.node_cache.undirty(node)
 
         return self._underlying_persistence.get_bytes()
 
