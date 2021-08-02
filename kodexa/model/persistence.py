@@ -397,7 +397,7 @@ class SimpleObjectCache(object):
     def remove_obj(self, obj):
         if obj.uuid in self.objs:
             self.objs.pop(obj.uuid)
-            self.dirty_objs.pop(obj.uuid, None)
+            self.dirty_objs.remove(obj.uuid)
 
     def get_dirty_objs(self):
         results = []
@@ -506,10 +506,7 @@ class PersistenceManager(object):
         self.node_cache.remove_obj(node)
 
         if node._parent_uuid is not None:
-            try:
-                self.child_cache[node._parent_uuid].remove(node.uuid)
-            except ValueError:
-                pass
+            self.child_cache[node._parent_uuid].remove(node)
 
         self.content_parts_cache.pop(node.uuid, None)
         self.feature_cache.pop(node.uuid, None)
