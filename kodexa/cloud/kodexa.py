@@ -926,7 +926,7 @@ class RemoteSession:
             doc = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()})
-            return Document.from_msgpack(doc.content)
+            return Document.from_kddb(doc.content)
         else:
             logger.info("No output document")
             return None
