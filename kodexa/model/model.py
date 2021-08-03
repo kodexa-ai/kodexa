@@ -1909,9 +1909,18 @@ class Document(object):
         """
         self.get_persistence().close()
 
-    def to_kddb(self):
-        """Convert this document object structure into a KDDB and return a bytes-like object"""
-        return self.get_persistence().get_bytes()
+    def to_kddb(self, path=None):
+        """
+        Either write this document to a KDDB file or convert this document object structure into a KDDB and return a bytes-like object
+
+        This is dependent on whether you provide a path to write to
+        """
+
+        if path is None:
+            return self.get_persistence().get_bytes()
+        else:
+            with open(path, 'wb') as output_file:
+                output_file.write(self.get_persistence().get_bytes())
 
     @staticmethod
     def from_kdxa(file_path):

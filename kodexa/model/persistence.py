@@ -405,7 +405,9 @@ class SimpleObjectCache(object):
     def get_dirty_objs(self):
         results = []
         for id in self.dirty_objs:
-            results.append(self.get_obj(id))
+            node = self.get_obj(id)
+            if node is not None:
+                results.append(node)
         return results
 
     def undirty(self, obj):
