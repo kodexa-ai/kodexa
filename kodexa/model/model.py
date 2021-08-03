@@ -1778,8 +1778,12 @@ class Document(object):
     @content_node.setter
     def content_node(self, value):
         value.index = 0
+        if value != self._content_node and self.value is not None:
+            self.get_persistence().remove_content_node(self._content_node)
+
         self._content_node = value
-        self.get_persistence().add_content_node(self._content_node, None)
+        if value is not None:
+            self.get_persistence().add_content_node(self._content_node, None)
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
