@@ -16,6 +16,7 @@ import msgpack
 from addict import Dict
 from kodexa.mixins import registry
 
+
 class ContentType(Enum):
     """Types of content object that are supported"""
     DOCUMENT = 'DOCUMENT'
@@ -715,7 +716,6 @@ class ContentNode(object):
                 s += child.get_all_content(separator, strip=strip)
 
         return s.strip() if strip else s
-
 
     def adopt_children(self, children, replace=False):
         """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
@@ -2120,16 +2120,24 @@ class Document(object):
         return content_node
 
     @classmethod
-    def from_kddb(cls, input):
+    def from_kddb(cls, input, detached: bool = False):
         """
         Loads a document from a Kodexa Document Database (KDDB) file
 
-        :param input: if a string we will load the file at that path, if bytes we will create a temp file and
+        Args:
+
+            input: if a string we will load the file at that path, if bytes we will create a temp file and
                     load the KDDB to it
+            detached (bool): if reading from a file we will create a copy so we don't update in place
+
         :return: the document
         """
         if isinstance(input, str):
-            return Document(kddb_path=input)
+            document = Document(kddb_path=input)
+            if detached:
+                return Document.from_kddb(document.to_kddb())
+            else:
+                return document
         else:
             # We will assume the input is of byte type
             import tempfile
