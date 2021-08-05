@@ -395,12 +395,12 @@ class ContentNode(object):
         self.document.get_persistence().add_content_node(child, self)
 
     def remove_child(self, content_node):
-        for child in self.get_children():
-            if child == content_node:
-                for grand_child in child.get_children():
-                    child.remove_child(grand_child)
-
-                self.document.get_persistence().remove_content_node(child)
+        try:
+            child_idx = self.get_children().index(content_node)
+            child = self.get_children()[child_idx]
+            self.document.get_persistence().remove_content_node(child)
+        except ValueError:
+            pass
 
     def get_children(self):
         """Returns a list of the children of this node.
@@ -717,7 +717,7 @@ class ContentNode(object):
         return s.strip() if strip else s
 
 
-    def adopt_children(self, children, replace=False):
+    def adopt_children(self, nodes_to_adopt, replace=False):
         """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
 
         Args:
@@ -730,6 +730,9 @@ class ContentNode(object):
         """
         child_idx_base = 0
 
+        # We need to copy this since we might well mutate
+        # it as we adopt
+        children = nodes_to_adopt.copy()
         for existing_child in self.get_children():
             if existing_child not in children:
                 self.add_child(existing_child, child_idx_base)
@@ -737,13 +740,15 @@ class ContentNode(object):
                 existing_child.index = children.index(existing_child)
             child_idx_base += 1
 
-        for new_child in children:
+        # Copy to avoid mutation
+        for new_child in children.copy():
             if new_child not in self.get_children():
                 self.add_child(new_child, children.index(new_child))
                 child_idx_base += 1
 
         if replace:
-            for child in self.get_children():
+            # Copy to avoid mutation
+            for child in self.get_children().copy():
                 if child not in children:
                     self.remove_child(child)
 
