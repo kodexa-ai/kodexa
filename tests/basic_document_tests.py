@@ -1,8 +1,13 @@
 import io
+import os
 
 from kodexa import get_source
 from kodexa.model import DocumentMetadata, Document
 from kodexa.testing.test_utils import compare_document
+
+
+def get_test_directory():
+    return os.path.dirname(os.path.abspath(__file__)) + "/../test_documents/"
 
 
 def get_test_document():
@@ -229,3 +234,8 @@ def test_get_source():
     with get_source(document) as fh:
         data = fh.read()
         print(data)
+
+
+def test_kddb_conversion():
+    document = Document.from_kddb(Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read()).to_kddb())
+    compare_document(document, "news-kdxa-original.json")
