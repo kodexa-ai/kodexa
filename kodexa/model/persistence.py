@@ -361,9 +361,10 @@ class SqliteDocumentPersistence(object):
     def remove_content_node(self, node):
         def get_all_node_ids(node):
             all_node_ids = []
-            all_node_ids.append(node.uuid)
-            for child in node.get_children():
-                all_node_ids.extend(get_all_node_ids(child))
+            if not node.virtual:
+                all_node_ids.append(node.uuid)
+                for child in node.get_children():
+                    all_node_ids.extend(get_all_node_ids(child))
 
             return all_node_ids
 
