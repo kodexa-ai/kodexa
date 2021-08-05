@@ -16,7 +16,6 @@ import msgpack
 from addict import Dict
 from kodexa.mixins import registry
 
-
 class ContentType(Enum):
     """Types of content object that are supported"""
     DOCUMENT = 'DOCUMENT'
@@ -717,6 +716,7 @@ class ContentNode(object):
 
         return s.strip() if strip else s
 
+
     def adopt_children(self, children, replace=False):
         """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
 
@@ -728,13 +728,8 @@ class ContentNode(object):
             >>> # and replaces all it's existing children with these 'line' nodes.
             >>> document.get_root().adopt_children(document.select('//line'), replace=True)
         """
-
-        if replace:
-            for child in self.get_children():
-                if child not in children:
-                    child.remove_child(child)
-
         child_idx_base = 0
+
         for existing_child in self.get_children():
             if existing_child not in children:
                 self.add_child(existing_child, child_idx_base)
@@ -746,6 +741,11 @@ class ContentNode(object):
             if new_child not in self.get_children():
                 self.add_child(new_child, children.index(new_child))
                 child_idx_base += 1
+
+        if replace:
+            for child in self.get_children():
+                if child not in children:
+                    self.remove_child(child)
 
     def remove_tag(self, tag_name):
         """Remove a tag from this content node.
@@ -2133,7 +2133,8 @@ class Document(object):
         :return: the document
         """
         if isinstance(input, str):
-            document = Document(kddb_path=input)
+            if isinstance(input, str):
+                document = Document(kddb_path=input)
             if detached:
                 return Document.from_kddb(document.to_kddb())
             else:
