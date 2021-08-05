@@ -170,11 +170,6 @@ class SqliteDocumentPersistence(object):
 
             self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
-        # for child in node.get_children():
-        #     child._parent = node
-        #     child._parent_uuid = node.uuid
-        #     self.__insert_node(child, node)
-
     def __clean_none_values(self, d):
         clean = {}
         for k, v in d.items():
@@ -272,6 +267,15 @@ class SqliteDocumentPersistence(object):
         for child_node in self.cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
                                               [content_node.uuid]).fetchall():
             children.append(self.__build_node(child_node))
+        return children
+
+    def get_child_ids(self, content_node):
+
+        # We need to get the child nodes
+        children = []
+        for child_node in self.cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
+                                              [content_node.uuid]).fetchall():
+            children.append(child_node[0])
         return children
 
     def get_node(self, node_id):
@@ -465,6 +469,7 @@ class PersistenceManager(object):
 
         if parent:
             node._parent_uuid = parent.uuid
+            self.node_cache.add_obj(parent)
 
         self.node_cache.add_obj(node)
 
@@ -499,6 +504,9 @@ class PersistenceManager(object):
             node = self._underlying_persistence.get_node(node_id)
             if node is not None:
                 self.node_cache.add_obj(node)
+                if node._parent_uuid:
+                    self.node_parent_cache[node.uuid] = node._parent_uuid
+                    self.get_node(node._parent_uuid)
 
         return node
 
@@ -506,8 +514,8 @@ class PersistenceManager(object):
 
         self.node_cache.remove_obj(node)
 
-        if node._parent_uuid is not None:
-            self.child_cache[node._parent_uuid].remove(node)
+        if node.uuid in self.node_parent_cache:
+            self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
 
         self.content_parts_cache.pop(node.uuid, None)
         self.feature_cache.pop(node.uuid, None)
@@ -516,8 +524,12 @@ class PersistenceManager(object):
 
     def get_children(self, node):
         if node.uuid not in self.child_cache:
-            children = self._underlying_persistence.get_children(node)
-            self.child_cache[node.uuid] = sorted(children, key=lambda x: x.index)
+            child_ids = self._underlying_persistence.get_child_ids(node)
+            new_children = []
+            for child_id in child_ids:
+                new_children.append(self.get_node(child_id))
+
+            self.child_cache[node.uuid] = new_children
         return self.child_cache[node.uuid]
 
     def update_content_parts(self, node, content_parts):
