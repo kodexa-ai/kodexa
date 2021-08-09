@@ -4,7 +4,8 @@ instance of the Kodexa platform
 """
 from typing import List, Optional
 
-from kodexa.model import ContentObject, Document
+from kodexa import Taxonomy
+from kodexa.model import ContentObject, Document, Store
 
 
 class AssistantMetadata:
@@ -104,10 +105,14 @@ class AssistantContext:
 
 class AssistantPipeline:
 
-    def __init__(self, pipeline, description=None, write_back_to_store: bool = False):
+    def __init__(self, pipeline, description=None, write_back_to_store: bool = False,
+                 data_store: Optional[Store] = None,
+                 taxonomies: Optional[List[Taxonomy]] = None):
         self.pipeline = pipeline
         self.description = description
         self.write_back_to_store = write_back_to_store
+        self.data_store = data_store
+        self.taxonomies = taxonomies
 
 
 class AssistantIntent:
