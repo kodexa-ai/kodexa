@@ -104,15 +104,23 @@ class AssistantContext:
 
 
 class AssistantPipeline:
+    """
+    The wrapper for a pipeline that they assistant will request to be executed
+    """
 
     def __init__(self, pipeline, description=None, write_back_to_store: bool = False,
                  data_store: Optional[Store] = None,
                  taxonomies: Optional[List[Taxonomy]] = None):
         self.pipeline = pipeline
+        """The pipeline to execute"""
         self.description = description
+        """Optional description for the pipeline"""
         self.write_back_to_store = write_back_to_store
+        """Should the document be written back to the store from which it was read"""
         self.data_store = data_store
+        """Optionally the datastore that we want to extract the labelled content to"""
         self.taxonomies = taxonomies
+        """Optionally a list of the taxonomies to use when extracting the labels"""
 
 
 class AssistantIntent:
