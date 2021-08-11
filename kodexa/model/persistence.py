@@ -1,5 +1,4 @@
 import dataclasses
-import hashlib
 import pathlib
 import sqlite3
 import tempfile
@@ -122,14 +121,8 @@ class SqliteDocumentPersistence(object):
 
     def __resolve_feature_value(self, feature):
         binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
-        hash_value = int(hashlib.sha1(binary_value).hexdigest(), 16) % (10 ** 8)
-        result = self.cursor.execute(FEATURE_VALUE_LOOKUP, [hash_value]).fetchone()
-        new_row = [binary_value, hash_value, feature.single]
-
-        if result is None:
-            fvalue_id = self.cursor.execute(FEATURE_VALUE_INSERT, new_row).lastrowid
-        else:
-            fvalue_id = result[0]
+        new_row = [binary_value, None, feature.single]
+        fvalue_id = self.cursor.execute(FEATURE_VALUE_INSERT, new_row).lastrowid
         return fvalue_id
 
     def __insert_node(self, node: ContentNode, parent):
