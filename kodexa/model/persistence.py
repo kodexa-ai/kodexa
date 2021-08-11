@@ -365,6 +365,8 @@ class SqliteDocumentPersistence(object):
 
         self.cursor.executemany("delete from cnp where cn_id=?", all_child_ids)
         self.cursor.executemany("delete from cn where id=?", all_child_ids)
+        self.cursor.executemany("delete from f_value where id in (select fvalue_id from f where cn_id=?)",
+                                all_child_ids)
         self.cursor.executemany("delete from f where cn_id=?", all_child_ids)
 
     def remove_all_features(self, node):
@@ -506,7 +508,8 @@ class PersistenceManager(object):
                         self.child_cache[node._parent_uuid].append(node)
                     else:
                         self.child_cache[node._parent_uuid].append(node)
-                        self.child_cache[node._parent_uuid] = sorted(self.child_cache[node._parent_uuid], key=lambda x: x.index)
+                        self.child_cache[node._parent_uuid] = sorted(self.child_cache[node._parent_uuid],
+                                                                     key=lambda x: x.index)
 
     def get_node(self, node_id):
 
