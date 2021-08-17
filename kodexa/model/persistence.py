@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 import pathlib
 import sqlite3
 import tempfile
@@ -8,9 +9,11 @@ import msgpack
 from kodexa.model import Document, ContentNode, SourceMetadata
 from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
+logger = logging.getLogger('kodexa.model.persistence')
+
 # Heavily used SQL
 
-FEATURE_INSERT = "INSERT INTO f (cn_id, f_type, fvalue_id) VALUES (?,?,?)"
+FEATURE_INSERT = "INSERT INTO f (id, cn_id, f_type, fvalue_id) VALUES (?,?,?,?)"
 FEATURE_DELETE = "DELETE FROM f where cn_id=? and f_type=?"
 
 CONTENT_NODE_INSERT = "INSERT INTO cn (pid, nt, idx) VALUES (?,?,?)"
@@ -20,7 +23,7 @@ CONTENT_NODE_PART_INSERT = "INSERT INTO cnp (cn_id, pos, content, content_idx) V
 NOTE_TYPE_INSERT = "insert into n_type(name) values (?)"
 NODE_TYPE_LOOKUP = "select id from n_type where name = ?"
 FEATURE_VALUE_LOOKUP = "select id from f_value where hash=?"
-FEATURE_VALUE_INSERT = "insert into f_value(binary_value, hash, single) values (?,?,?)"
+FEATURE_VALUE_INSERT = "insert into f_value(binary_value, hash, single, id) values (?,?,?,?)"
 FEATURE_TYPE_INSERT = "insert into f_type(name) values (?)"
 FEATURE_TYPE_LOOKUP = "select id from f_type where name = ?"
 METADATA_INSERT = "insert into metadata(id,metadata) values (1,?)"
@@ -38,6 +41,8 @@ class SqliteDocumentPersistence(object):
         self.document = document
 
         self.node_types = {}
+        self.node_type_id_by_name = {}
+        self.feature_type_id_by_name = {}
         self.feature_type_names = {}
         self.delete_on_close = delete_on_close
 
@@ -59,8 +64,6 @@ class SqliteDocumentPersistence(object):
         self.connection = sqlite3.connect(filename)
         self.cursor = self.connection.cursor()
         self.cursor.execute("PRAGMA journal_mode=OFF")
-        self.cursor.execute("PRAGMA locking_mode=exclusive")
-        self.cursor.execute("pragma synchronous = normal")
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
@@ -73,6 +76,13 @@ class SqliteDocumentPersistence(object):
     def close(self):
         if self.is_tmp or self.delete_on_close:
             pathlib.Path(self.current_filename).unlink()
+
+    def get_max_feature_id(self):
+        max_id =  self.cursor.execute("select max(id) from f").fetchone()
+        if max_id[0] is None:
+            return 1
+        else:
+            return max_id[0]
 
     def __build_db(self):
         self.cursor.execute("CREATE TABLE version (id integer primary key, version text)")
@@ -101,32 +111,37 @@ class SqliteDocumentPersistence(object):
     def content_node_count(self):
         self.cursor.execute("select * from cn").fetchall()
 
+    def get_feature_type_id(self, feature):
+        return self.__resolve_f_type(feature)
+
     def __resolve_f_type(self, feature):
         feature_type_name = feature.feature_type + ":" + feature.name
+
+        if feature_type_name in self.feature_type_id_by_name:
+            return self.feature_type_id_by_name[feature_type_name]
+
         result = self.cursor.execute(FEATURE_TYPE_LOOKUP, [feature_type_name]).fetchone()
         if result is None:
             new_feature_type_name_id = self.cursor.execute(FEATURE_TYPE_INSERT, [feature_type_name]).lastrowid
             self.feature_type_names[new_feature_type_name_id] = feature_type_name
+            self.feature_type_id_by_name[feature_type_name] = new_feature_type_name_id
             return new_feature_type_name_id
 
         return result[0]
 
     def __resolve_n_type(self, n_type):
+        if n_type in self.node_type_id_by_name:
+            return self.node_type_id_by_name[n_type]
         result = self.cursor.execute(NODE_TYPE_LOOKUP, [n_type]).fetchone()
         if result is None:
             new_type_id = self.cursor.execute(NOTE_TYPE_INSERT, [n_type]).lastrowid
             self.node_types[new_type_id] = n_type
+            self.node_type_id_by_name[n_type] = new_type_id
             return new_type_id
 
         return result[0]
 
-    def __resolve_feature_value(self, feature):
-        binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
-        new_row = [binary_value, None, feature.single]
-        fvalue_id = self.cursor.execute(FEATURE_VALUE_INSERT, new_row).lastrowid
-        return fvalue_id
-
-    def __insert_node(self, node: ContentNode, parent):
+    def __insert_node(self, node: ContentNode, parent, execute=True):
 
         if node.index is None:
             node.index = 0
@@ -141,28 +156,23 @@ class SqliteDocumentPersistence(object):
 
             # Make sure we load the content parts if we haven't
             node.get_content_parts()
-            self.cursor.execute("DELETE FROM cn where id=?", [node.uuid])
-            self.cursor.execute("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", cn_values)
-            self.cursor.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
+
+            if execute:
+                self.cursor.execute("DELETE FROM cn where id=?", [node.uuid])
+                self.cursor.execute("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", cn_values)
+                self.cursor.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
 
             cn_parts_values = []
             for idx, part in enumerate(node.get_content_parts()):
                 cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
                                         part if not isinstance(part, str) else None])
 
-            self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
+            if execute:
+                self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
+            return ([cn_values], cn_parts_values)
         else:
-            cn_values = [parent.uuid if parent else None,
-                         self.__resolve_n_type(node.node_type), node.index]
-            node.uuid = self.cursor.execute(CONTENT_NODE_INSERT, cn_values).lastrowid
-
-            cn_parts_values = []
-            for idx, part in enumerate(node.get_content_parts()):
-                cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
-                                        part if not isinstance(part, str) else None])
-
-            self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
+            raise "Node must have a UUID?"
 
     def __clean_none_values(self, d):
         clean = {}
@@ -240,13 +250,8 @@ class SqliteDocumentPersistence(object):
         new_node.index = node_row[3]
         return new_node
 
-    def add_content_node(self, node, parent):
-        self.__insert_node(node, parent)
-
-    def add_feature(self, node, feature):
-        f_values = [node.uuid, self.__resolve_f_type(feature),
-                    self.__resolve_feature_value(feature)]
-        self.cursor.execute(FEATURE_INSERT, f_values)
+    def add_content_node(self, node, parent, execute=True):
+        return self.__insert_node(node, parent, execute)
 
     def remove_feature(self, node, feature_type, name):
 
@@ -310,8 +315,6 @@ class SqliteDocumentPersistence(object):
         self.connection = sqlite3.connect(self.current_filename)
         self.cursor = self.connection.cursor()
         self.cursor.execute("PRAGMA journal_mode=OFF")
-        self.cursor.execute("PRAGMA locking_mode=exclusive")
-        self.cursor.execute("pragma synchronous = normal")
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
@@ -386,7 +389,7 @@ class SimpleObjectCache(object):
     def __init__(self):
         self.objs = {}
         self.next_id = 1
-        self.dirty_objs = []
+        self.dirty_objs = set()
 
     def get_obj(self, id):
         if id in self.objs:
@@ -399,7 +402,7 @@ class SimpleObjectCache(object):
             obj.uuid = self.next_id
             self.next_id += 1
         self.objs[obj.uuid] = obj
-        self.dirty_objs.append(obj.uuid)
+        self.dirty_objs.add(obj.uuid)
 
     def remove_obj(self, obj):
         if obj.uuid in self.objs:
@@ -408,7 +411,7 @@ class SimpleObjectCache(object):
 
     def get_dirty_objs(self):
         results = []
-        for id in self.dirty_objs:
+        for id in set(self.dirty_objs):
             node = self.get_obj(id)
             if node is not None:
                 results.append(node)
@@ -447,17 +450,46 @@ class PersistenceManager(object):
 
     def get_bytes(self):
 
-        for node in self.node_cache.get_dirty_objs():
+        all_node_ids = []
+        all_nodes = []
+        all_content_parts = []
+        all_features = []
+        all_feature_values = []
+
+        logger.info("Merging cache to persistance")
+        dirty_nodes = self.node_cache.get_dirty_objs()
+
+        logger.info(f"Identified {len(dirty_nodes)} nodes to update")
+
+        next_feature_id = self._underlying_persistence.get_max_feature_id()+1
+        for node in dirty_nodes:
             if not node.virtual:
-                self._underlying_persistence.add_content_node(node, None)
-                self._underlying_persistence.remove_all_features(node)
+                all_node_ids.append([node.uuid])
+                node_obj, content_parts = self._underlying_persistence.add_content_node(node, None, execute=False)
+                all_nodes.extend(node_obj)
+                all_content_parts.extend(content_parts)
+                # self._underlying_persistence.remove_all_features(node)
                 if node.uuid in self.feature_cache:
                     for feature in self.feature_cache[node.uuid]:
-                        self._underlying_persistence.add_feature(node, feature)
-                if node.uuid in self.content_parts_cache:
-                    self._underlying_persistence.update_content_parts(node, self.content_parts_cache[node.uuid])
+                        binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
+                        all_features.append([next_feature_id, node.uuid, self._underlying_persistence.get_feature_type_id(feature), next_feature_id])
+                        all_feature_values.append([binary_value, None, feature.single, next_feature_id])
+                        next_feature_id = next_feature_id + 1
+
                 self.node_cache.undirty(node)
 
+        logger.info(f"Writing {len(all_node_ids)} nodes")
+        self._underlying_persistence.cursor.executemany("DELETE FROM cn where id=?", all_node_ids)
+        self._underlying_persistence.cursor.executemany("DELETE FROM f where cn_id=?", all_node_ids)
+        self._underlying_persistence.cursor.executemany("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", all_nodes)
+        self._underlying_persistence.cursor.executemany("DELETE FROM cnp where cn_id=?", all_node_ids)
+        logger.info(f"Writing {len(all_content_parts)} content parts")
+
+        self._underlying_persistence.cursor.executemany(CONTENT_NODE_PART_INSERT, all_content_parts)
+
+        logger.info(f"Writing {len(all_features)} features")
+        self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
+        self._underlying_persistence.cursor.executemany(FEATURE_VALUE_INSERT, all_feature_values)
         return self._underlying_persistence.get_bytes()
 
     def update_metadata(self):
