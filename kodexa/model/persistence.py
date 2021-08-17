@@ -58,7 +58,8 @@ class SqliteDocumentPersistence(object):
 
         self.connection = sqlite3.connect(filename)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("PRAGMA journal_mode=WAL")
+        self.cursor.execute("PRAGMA journal_mode=OFF")
+        self.cursor.execute("PRAGMA locking_mode=exclusive")
         self.cursor.execute("pragma synchronous = normal")
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
@@ -306,18 +307,10 @@ class SqliteDocumentPersistence(object):
         self.connection.commit()
         self.connection.close()
 
-        # We need to open/close the DB to get the WAL
-        self.connection = sqlite3.connect(self.current_filename)
-        self.connection.commit()
-        self.connection.close()
-
-        self.connection = sqlite3.connect(self.current_filename)
-        self.connection.execute("pragma optimize")
-        self.connection.close()
-
         self.connection = sqlite3.connect(self.current_filename)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("PRAGMA journal_mode=WAL")
+        self.cursor.execute("PRAGMA journal_mode=OFF")
+        self.cursor.execute("PRAGMA locking_mode=exclusive")
         self.cursor.execute("pragma synchronous = normal")
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
