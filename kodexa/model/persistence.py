@@ -78,11 +78,11 @@ class SqliteDocumentPersistence(object):
             pathlib.Path(self.current_filename).unlink()
 
     def get_max_feature_id(self):
-        max_id =  self.cursor.execute("select max(id) from f").fetchone()
+        max_id = self.cursor.execute("select max(id) from f").fetchone()
         if max_id[0] is None:
             return 1
         else:
-            return max_id[0]
+            return max_id[0] + 1
 
     def __build_db(self):
         self.cursor.execute("CREATE TABLE version (id integer primary key, version text)")
@@ -461,7 +461,7 @@ class PersistenceManager(object):
 
         logger.info(f"Identified {len(dirty_nodes)} nodes to update")
 
-        next_feature_id = self._underlying_persistence.get_max_feature_id()+1
+        next_feature_id = self._underlying_persistence.get_max_feature_id() + 1
         for node in dirty_nodes:
             if not node.virtual:
                 all_node_ids.append([node.uuid])
@@ -472,7 +472,9 @@ class PersistenceManager(object):
                 if node.uuid in self.feature_cache:
                     for feature in self.feature_cache[node.uuid]:
                         binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
-                        all_features.append([next_feature_id, node.uuid, self._underlying_persistence.get_feature_type_id(feature), next_feature_id])
+                        all_features.append(
+                            [next_feature_id, node.uuid, self._underlying_persistence.get_feature_type_id(feature),
+                             next_feature_id])
                         all_feature_values.append([binary_value, None, feature.single, next_feature_id])
                         next_feature_id = next_feature_id + 1
 
