@@ -461,7 +461,7 @@ class PersistenceManager(object):
 
         logger.info(f"Identified {len(dirty_nodes)} nodes to update")
 
-        next_feature_id = self._underlying_persistence.get_max_feature_id() + 1
+        next_feature_id = self._underlying_persistence.get_max_feature_id()
         for node in dirty_nodes:
             if not node.virtual:
                 all_node_ids.append([node.uuid])
@@ -483,6 +483,7 @@ class PersistenceManager(object):
         logger.info(f"Writing {len(all_node_ids)} nodes")
         self._underlying_persistence.cursor.executemany("DELETE FROM cn where id=?", all_node_ids)
         self._underlying_persistence.cursor.executemany("DELETE FROM f where cn_id=?", all_node_ids)
+        self._underlying_persistence.cursor.execute("DELETE FROM f_value where id not in (select id from f)")
         self._underlying_persistence.cursor.executemany("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", all_nodes)
         self._underlying_persistence.cursor.executemany("DELETE FROM cnp where cn_id=?", all_node_ids)
         logger.info(f"Writing {len(all_content_parts)} content parts")
