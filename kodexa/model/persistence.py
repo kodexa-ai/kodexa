@@ -310,6 +310,7 @@ class SqliteDocumentPersistence(object):
         self.__update_metadata()
         self.cursor.execute("pragma optimize")
         self.connection.commit()
+        self.cursor.execute("VACUUM")
         self.connection.close()
 
         self.connection = sqlite3.connect(self.current_filename)
