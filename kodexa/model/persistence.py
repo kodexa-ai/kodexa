@@ -456,6 +456,7 @@ class PersistenceManager(object):
         all_content_parts = []
         all_features = []
         all_feature_values = []
+        node_id_with_features = []
 
         logger.info("Merging cache to persistance")
         dirty_nodes = self.node_cache.get_dirty_objs()
@@ -471,8 +472,8 @@ class PersistenceManager(object):
                 all_content_parts.extend(content_parts)
                 if node.uuid in self.feature_cache:
 
-                    if node.uuid not in self.feature_cache:
-                        self.get_features(node)
+                    if node.uuid in self.feature_cache:
+                        node_id_with_features.append([node.uuid])
 
                     for feature in self.feature_cache[node.uuid]:
                         binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
@@ -486,7 +487,7 @@ class PersistenceManager(object):
 
         logger.info(f"Writing {len(all_node_ids)} nodes")
         self._underlying_persistence.cursor.executemany("DELETE FROM cn where id=?", all_node_ids)
-        self._underlying_persistence.cursor.executemany("DELETE FROM f where cn_id=?", all_node_ids)
+        self._underlying_persistence.cursor.executemany("DELETE FROM f where cn_id=?", node_id_with_features)
         self._underlying_persistence.cursor.execute("DELETE FROM f_value where id not in (select fvalue_id from f)")
         self._underlying_persistence.cursor.executemany("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", all_nodes)
         self._underlying_persistence.cursor.executemany("DELETE FROM cnp where cn_id=?", all_node_ids)
