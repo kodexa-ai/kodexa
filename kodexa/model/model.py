@@ -16,6 +16,7 @@ import msgpack
 from addict import Dict
 from kodexa.mixins import registry
 
+
 class ContentType(Enum):
     """Types of content object that are supported"""
     DOCUMENT = 'DOCUMENT'
@@ -715,7 +716,6 @@ class ContentNode(object):
                 s += child.get_all_content(separator, strip=strip)
 
         return s.strip() if strip else s
-
 
     def adopt_children(self, nodes_to_adopt, replace=False):
         """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
@@ -1867,22 +1867,6 @@ class Document(object):
     def get_root(self):
         """Get the root content node for the document (same as content_node)"""
         return self.content_node
-
-    def save_to_kddb(self, file_path: str):
-        """Write the document to a new Kodexa Document Database file
-
-        Args:
-            file_path (str): the file path to write the KDDB file
-            """
-
-        # Re-initialize the persistence layer and delete the file
-        from kodexa.model import SqliteDocumentPersistence
-
-        if Path(file_path).exists():
-            Path(file_path).unlink()
-
-        self._persistence_layer: SqliteDocumentPersistence = SqliteDocumentPersistence(document=self,
-                                                                                       filename=file_path)
 
     def to_kdxa(self, file_path: str):
         """Write the document to the kdxa format (msgpack) which can be

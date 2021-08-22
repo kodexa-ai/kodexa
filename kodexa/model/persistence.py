@@ -469,8 +469,11 @@ class PersistenceManager(object):
                 node_obj, content_parts = self._underlying_persistence.add_content_node(node, None, execute=False)
                 all_nodes.extend(node_obj)
                 all_content_parts.extend(content_parts)
-                # self._underlying_persistence.remove_all_features(node)
                 if node.uuid in self.feature_cache:
+
+                    if node.uuid not in self.feature_cache:
+                        self.get_features(node)
+
                     for feature in self.feature_cache[node.uuid]:
                         binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
                         all_features.append(
