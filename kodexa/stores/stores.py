@@ -128,7 +128,7 @@ class RemoteTableDataStore(RemoteStore):
         if rows_response.status_code == 200:
             return rows_response.json()
         else:
-            logger.error("Unable to get table from remote store [" + rows_response.text + "], response " + str(
+            logger.warning("Unable to get table from remote store [" + rows_response.text + "], response " + str(
                 rows_response.status_code))
             raise Exception("Unable to get table from remote store  [" + rows_response.text + "], response " + str(
                 rows_response.status_code))
@@ -154,7 +154,7 @@ class RemoteTableDataStore(RemoteStore):
         if doc.status_code == 200:
             return
         else:
-            logger.error("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+            logger.warning("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
             raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
 
     def add(self, row):
@@ -185,7 +185,7 @@ class RemoteTableDataStore(RemoteStore):
         if doc.status_code == 200:
             return
         else:
-            logger.error("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+            logger.warning("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
             raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
 
 
@@ -308,7 +308,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             else:
                 return False
         except JSONDecodeError:
-            logger.error(
+            logger.warning(
                 "Unable to decode the JSON response")
             raise
 
@@ -325,10 +325,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             else:
                 msg = "Get document family failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
-                logger.error(msg)
+                logger.warning(msg)
                 raise Exception(msg)
         except JSONDecodeError:
-            logger.error(
+            logger.warning(
                 "Unable to decode the JSON response")
             raise
 
@@ -353,10 +353,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             else:
                 msg = "Document family create failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
-                logger.error(msg)
+                logger.warning(msg)
                 raise Exception(msg)
         except JSONDecodeError:
-            logger.error(
+            logger.warning(
                 "Unable to decode the JSON response")
             raise
 
@@ -408,10 +408,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             else:
                 msg = "Document replace failed [" + content_object_replace.text + "], response " + str(
                     content_object_replace.status_code)
-                logger.error(msg)
+                logger.warning(msg)
                 raise Exception(msg)
         except JSONDecodeError:
-            logger.error(
+            logger.warning(
                 "Unable to decode the JSON response")
             raise
 
@@ -432,10 +432,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             else:
                 msg = "Document family create failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
-                logger.error(msg)
+                logger.warning(msg)
                 raise Exception(msg)
         except JSONDecodeError:
-            logger.error(
+            logger.warning(
                 "Unable to decode the JSON response")
             raise
 
@@ -456,10 +456,10 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             else:
                 msg = "Document family create failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
-                logger.error(msg)
+                logger.warning(msg)
                 raise Exception(msg)
         except JSONDecodeError:
-            logger.error(
+            logger.warning(
                 "Unable to decode the JSON response")
             raise
 
@@ -501,7 +501,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             return None
         else:
             msg = "Get failed [" + get_response.text + "], response " + str(get_response.status_code)
-            logger.error(msg)
+            logger.warning(msg)
             raise Exception(msg)
 
 
@@ -553,7 +553,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
             return False
         else:
             msg = f"Unable to delete model object {resp.text}, status : {resp.status_code}"
-            logger.error(msg)
+            logger.warning(msg)
             raise Exception(msg)
 
     def get(self, object_path: str):
@@ -577,7 +577,7 @@ class RemoteModelStore(ModelStore, RemoteStore):
             return resp.content
         else:
             msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
-            logger.error(msg)
+            logger.warning(msg)
             raise Exception(msg)
 
     def put(self, path: str, content) -> DocumentFamily:
@@ -610,10 +610,10 @@ class RemoteModelStore(ModelStore, RemoteStore):
             else:
                 msg = "Execution creation failed [" + content_object_response.text + "], response " + str(
                     content_object_response.status_code)
-                logger.error(msg)
+                logger.warning(msg)
                 raise Exception(msg)
         except JSONDecodeError:
-            logger.error(
+            logger.warning(
                 "Unable to JSON decode the response?")
             raise
 
@@ -642,10 +642,10 @@ class RemoteModelStore(ModelStore, RemoteStore):
             else:
                 msg = "Execution creation failed [" + content_object_response.text + "], response " + str(
                     content_object_response.status_code)
-                logger.error(msg)
+                logger.warning(msg)
                 raise Exception(msg)
         except JSONDecodeError:
-            logger.error(
+            logger.warning(
                 "Unable to JSON decode the response?")
             raise
 
@@ -665,5 +665,5 @@ class RemoteModelStore(ModelStore, RemoteStore):
             return ModelContentMetadata.from_dict(resp.json())
         else:
             msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
-            logger.error(msg)
+            logger.warning(msg)
             raise Exception(msg)

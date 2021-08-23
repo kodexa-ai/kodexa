@@ -320,7 +320,7 @@ class KodexaPlatform:
         if response.status_code == 200:
             logger.info("Extension deployed")
         else:
-            logger.error(response.text)
+            logger.warning(response.text)
             raise Exception("Unable to deploy new extension")
 
     @staticmethod
@@ -342,7 +342,7 @@ class KodexaPlatform:
         if response.status_code == 200:
             logger.info("Extension deployed")
         else:
-            logger.error(response.text)
+            logger.warning(response.text)
             raise Exception("Unable to deploy new extension")
 
     @staticmethod
@@ -416,7 +416,7 @@ class KodexaPlatform:
         """
 
         if '/' not in ref:
-            logger.error("A ref must be valid, i.e. org_slug/pipeline_slug:version")
+            logger.warning("A ref must be valid, i.e. org_slug/pipeline_slug:version")
             raise Exception("Invalid slug")
 
         [organization_slug, object_slug, object_version] = KodexaPlatform.resolve_ref(ref)
@@ -512,7 +512,7 @@ class KodexaPlatform:
             access_token = KodexaPlatform.get_access_token_details()
 
             if organization_slug not in access_token.organizationSlugs:
-                logger.error(f"You do not have access to the organization {organization_slug}")
+                logger.warning(f"You do not have access to the organization {organization_slug}")
                 raise Exception("Unable to deploy, no access to organization")
 
             if object_version:
@@ -525,7 +525,7 @@ class KodexaPlatform:
                                              "content-type": "application/json"})
 
             if response.status_code == 401:
-                logger.error(f"You do not have the permissions to access this {metadata_object.type}")
+                logger.warning(f"You do not have the permissions to access this {metadata_object.type}")
                 raise Exception("Not authorized on pipeline")
 
             if response.status_code == 404:
@@ -537,7 +537,7 @@ class KodexaPlatform:
                 if response.status_code == 200:
                     logger.info("Deployed")
                 else:
-                    logger.error(response.text)
+                    logger.warning(response.text)
                     raise Exception("Unable to deploy")
             elif response.status_code == 200:
                 logger.info(f"{ref} already exists")
@@ -550,14 +550,14 @@ class KodexaPlatform:
                     if response.status_code == 200:
                         logger.info("Deployed")
                     else:
-                        logger.error(response.text)
+                        logger.warning(response.text)
                         raise Exception("Unable to deploy and replace")
                 else:
                     logger.warning("Not updating")
                     return
             else:
-                logger.error("Unable to deploy")
-                logger.error(response.content)
+                logger.warning("Unable to deploy")
+                logger.warning(response.content)
 
         return metadata_object
 
@@ -578,7 +578,7 @@ class KodexaPlatform:
         if list_response.status_code == 200:
             return list_response.json()
         else:
-            logger.error(list_response.text)
+            logger.warning(list_response.text)
             raise Exception("Unable to list objects")
 
     @staticmethod
@@ -602,7 +602,7 @@ class KodexaPlatform:
         if response.status_code == 200:
             logger.info(f"Undeployed {object_type_metadata['name']} {ref}")
         else:
-            logger.error(response.text)
+            logger.warning(response.text)
             raise Exception(f"Unable to undeploy {object_type_metadata['name']} {ref}")
 
     @staticmethod
@@ -622,7 +622,7 @@ class KodexaPlatform:
                                           headers={"x-access-token": KodexaPlatform.get_access_token(),
                                                    "content-type": "application/json"})
         if delete_response.status_code != 200:
-            logger.error(delete_response.text)
+            logger.warning(delete_response.text)
             raise Exception("Unable to list objects")
 
     @staticmethod
@@ -641,7 +641,7 @@ class KodexaPlatform:
                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
                                              "content-type": "application/json"})
         if obj_response.status_code != 200:
-            logger.error(obj_response.text)
+            logger.warning(obj_response.text)
             raise Exception(f"Unable to get object {ref}")
         else:
             return obj_response.json()
@@ -752,7 +752,7 @@ class KodexaPlatform:
         elif r.status_code == 200:
             return r.json()
         else:
-            logger.error(r.text)
+            logger.warning(r.text)
             raise Exception("Unable to get server information, check your platform settings")
 
     @classmethod
@@ -777,7 +777,7 @@ class KodexaPlatform:
         elif r.status_code == 200:
             return r.text
         else:
-            logger.error(r.text)
+            logger.warning(r.text)
             raise Exception("Unable to reindex check your reference and platform settings")
 
 
@@ -806,7 +806,7 @@ class RemoteSession:
         elif r.status_code == 200:
             return r.json()
         else:
-            logger.error(r.text)
+            logger.warning(r.text)
             raise Exception("Unable to get action metadata, check your reference and platform settings")
 
     def start(self):
@@ -816,8 +816,8 @@ class RemoteSession:
                           headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if r.status_code != 200:
-            logger.error("Unable to create session")
-            logger.error(r.text)
+            logger.warning("Unable to create session")
+            logger.warning(r.text)
             raise Exception("Unable to create a session, check your URL and access token")
 
         self.cloud_session = Dict(json.loads(r.text))
@@ -854,10 +854,10 @@ class RemoteSession:
             if r.status_code == 200:
                 execution = Dict(json.loads(r.text))
             else:
-                logger.error("Execution creation failed [" + r.text + "], response " + str(r.status_code))
+                logger.warning("Execution creation failed [" + r.text + "], response " + str(r.status_code))
                 raise Exception("Execution creation failed [" + r.text + "], response " + str(r.status_code))
         except JSONDecodeError:
-            logger.error("Unable to handle response [" + r.text + "], response " + str(r.status_code))
+            logger.warning("Unable to handle response [" + r.text + "], response " + str(r.status_code))
             raise
 
         return execution
@@ -881,7 +881,7 @@ class RemoteSession:
             try:
                 execution = Dict(json.loads(r.text))
             except JSONDecodeError:
-                logger.error("Unable to handle response [" + r.text + "]")
+                logger.warning("Unable to handle response [" + r.text + "]")
                 raise
 
             if status != execution.status:
@@ -891,18 +891,18 @@ class RemoteSession:
             time.sleep(1)
 
         if status == "FAILED":
-            logger.error("Execution has failed")
+            logger.warning("Execution has failed")
             for step in execution.steps:
                 if step.status == 'FAILED':
-                    logger.error(f"Step {step.name} has failed. {step.exceptionDetails.message}.")
+                    logger.warning(f"Step {step.name} has failed. {step.exceptionDetails.message}.")
 
                     if step.exceptionDetails.errorType == 'Validation':
-                        logger.error("Additional validation information has been provided:")
+                        logger.warning("Additional validation information has been provided:")
                         for validation_error in step.exceptionDetails.validationErrors:
-                            logger.error(f"- {validation_error.option} : {validation_error.message}")
+                            logger.warning(f"- {validation_error.option} : {validation_error.message}")
 
                     if step.exceptionDetails.help:
-                        logger.error(f"Additional help is available:\n\n{step.exceptionDetails.help}")
+                        logger.warning(f"Additional help is available:\n\n{step.exceptionDetails.help}")
 
             logger.debug(execution)
 
