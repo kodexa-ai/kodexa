@@ -28,6 +28,14 @@ Activate the conda environment with the command:
     conda activate kodexa
     pip install -r requirements.txt
 
+## Building Client and Selector ANTLR
+
+Currently, the build of the OpenAPI client and ANTLR grammar require the tools to be installed on your
+path.
+
+    $ brew install openapi-generator
+    $ brew install antlr
+
 ## License
 
 Apache 2.0
