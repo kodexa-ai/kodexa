@@ -300,7 +300,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.info(f"Deleting document family at path {path}")
 
             document_family_response = requests.delete(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
+                params={"path": path},
                 headers={"x-access-token": KodexaPlatform.get_access_token()}, )
 
             if document_family_response.status_code == 200:
@@ -423,7 +424,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             files = {"document": document.to_kddb()}
             data = {"path": path, "documentVersion": document.version}
             document_family_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
+                params={"path": path},
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
@@ -447,7 +449,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             files = {"file": content}
             data = {"path": path}
             document_family_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
+                params={"path": path},
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files, data=data)
 
@@ -464,7 +467,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise
 
     def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
-        get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/fs/{path}", params={"meta": True})
+        get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/fs",
+                                      params={"path": path, "meta": True})
         return DocumentFamily.from_dict(get_response.json()) if get_response is not None else None
 
     def count(self) -> int:
@@ -544,7 +548,8 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{object_path}",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
+            params={"path": object_path},
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
@@ -570,7 +575,8 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         resp = requests.get(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{object_path}",
+            f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
+            params={"path": object_path},
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
@@ -595,7 +601,8 @@ class RemoteModelStore(ModelStore, RemoteStore):
         try:
             files = {"file": content}
             content_object_response = requests.post(
-                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs/{path}",
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
+                params={"path": path},
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files)
 
