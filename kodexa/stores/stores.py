@@ -447,12 +447,11 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             logger.info(f"Putting native content to path {path}")
 
             files = {"file": content}
-            data = {"path": path}
             document_family_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
                 params={"path": path},
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
-                files=files, data=data)
+                files=files)
 
             if document_family_response.status_code == 200:
                 return DocumentFamily.from_dict(document_family_response.json())
