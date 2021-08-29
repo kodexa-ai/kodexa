@@ -239,3 +239,13 @@ def test_get_source():
 def test_kddb_conversion():
     document = Document.from_kddb(Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read()).to_kddb())
     compare_document(document, "news-kdxa-original.json")
+
+
+def test_document_migration():
+
+    start = Document.from_kdxa(get_test_directory() + 'fax2.kdxa')
+    start.to_kddb(get_test_directory() + 'fax2.kddb')
+    doc = Document.from_kddb(get_test_directory() + 'fax2.kddb')
+
+    doc.to_kddb("/tmp/f2.kddb")
+    doc2 = Document.from_kddb("/tmp/f2.kddb")

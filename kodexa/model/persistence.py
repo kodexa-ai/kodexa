@@ -13,8 +13,8 @@ logger = logging.getLogger('kodexa.model.persistence')
 
 # Heavily used SQL
 
-FEATURE_INSERT = "INSERT INTO f (id, cn_id, f_type, fvalue_id) VALUES (?,?,?,?)"
-FEATURE_DELETE = "DELETE FROM f where cn_id=? and f_type=?"
+FEATURE_INSERT = "INSERT INTO ft (id, cn_id, f_type, binary_value, single, tag_uuid) VALUES (?,?,?,?,?,?)"
+FEATURE_DELETE = "DELETE FROM ft where cn_id=? and f_type=?"
 
 CONTENT_NODE_INSERT = "INSERT INTO cn (pid, nt, idx) VALUES (?,?,?)"
 CONTENT_NODE_UPDATE = "UPDATE cn set pid=?, nt=?, idx=? WHERE id=?"
@@ -22,14 +22,10 @@ CONTENT_NODE_UPDATE = "UPDATE cn set pid=?, nt=?, idx=? WHERE id=?"
 CONTENT_NODE_PART_INSERT = "INSERT INTO cnp (cn_id, pos, content, content_idx) VALUES (?,?,?,?)"
 NOTE_TYPE_INSERT = "insert into n_type(name) values (?)"
 NODE_TYPE_LOOKUP = "select id from n_type where name = ?"
-FEATURE_VALUE_LOOKUP = "select id from f_value where hash=?"
-FEATURE_VALUE_INSERT = "insert into f_value(binary_value, hash, single, id) values (?,?,?,?)"
 FEATURE_TYPE_INSERT = "insert into f_type(name) values (?)"
 FEATURE_TYPE_LOOKUP = "select id from f_type where name = ?"
 METADATA_INSERT = "insert into metadata(id,metadata) values (1,?)"
 METADATA_DELETE = "delete from metadata where id=1"
-VERSION_INSERT = "insert into version(id,version) values (1,'4.0.0')"
-VERSION_DELETE = "delete from version where id=1"
 
 
 class SqliteDocumentPersistence(object):
@@ -78,14 +74,13 @@ class SqliteDocumentPersistence(object):
             pathlib.Path(self.current_filename).unlink()
 
     def get_max_feature_id(self):
-        max_id = self.cursor.execute("select max(id) from f").fetchone()
+        max_id = self.cursor.execute("select max(id) from ft").fetchone()
         if max_id[0] is None:
             return 1
         else:
             return max_id[0] + 1
 
     def __build_db(self):
-        self.cursor.execute("CREATE TABLE version (id integer primary key, version text)")
         self.cursor.execute("CREATE TABLE metadata (id integer primary key, metadata text)")
         self.cursor.execute("CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, idx INTEGER)")
         self.cursor.execute(
@@ -93,18 +88,23 @@ class SqliteDocumentPersistence(object):
 
         self.cursor.execute("CREATE TABLE n_type (id integer primary key, name text)")
         self.cursor.execute("CREATE TABLE f_type (id integer primary key, name text)")
-        self.cursor.execute(
-            "CREATE TABLE f_value (id integer primary key, hash integer, binary_value blob, single integer)")
-        self.cursor.execute(
-            "CREATE TABLE f (id integer primary key, cn_id integer, f_type INTEGER, fvalue_id integer)")
+        self.cursor.execute("""CREATE TABLE ft
+                                    (
+                                        id           integer primary key,
+                                        cn_id        integer,
+                                        f_type       INTEGER,
+                                        binary_value blob,
+                                        single       integer,
+                                        tag_uuid     text
+                                    )""")
 
         self.cursor.execute("CREATE UNIQUE INDEX n_type_uk ON n_type(name);")
         self.cursor.execute("CREATE UNIQUE INDEX f_type_uk ON f_type(name);")
         self.cursor.execute("CREATE INDEX cn_perf ON cn(nt);")
         self.cursor.execute("CREATE INDEX cn_perf2 ON cn(pid);")
         self.cursor.execute("CREATE INDEX cnp_perf ON cnp(cn_id, pos);")
-        self.cursor.execute("CREATE INDEX f_perf ON f(cn_id);")
-        self.cursor.execute("CREATE INDEX f_value_hash ON f_value(hash);")
+        self.cursor.execute("CREATE INDEX f_perf ON ft(cn_id);")
+        self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
 
         self.__update_metadata()
 
@@ -194,8 +194,6 @@ class SqliteDocumentPersistence(object):
                              'classes': [content_class.to_dict() for content_class in self.document.classes],
                              'labels': self.document.labels,
                              'uuid': self.document.uuid}
-        self.cursor.execute(VERSION_DELETE)
-        self.cursor.execute(VERSION_INSERT)
         self.cursor.execute(METADATA_DELETE)
         self.cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])
 
@@ -230,6 +228,26 @@ class SqliteDocumentPersistence(object):
         if root_node:
             self.document.content_node = self.__build_node(
                 root_node)
+
+        if self.document.version == '4.0.0' or self.document == '2.0.0':
+            # We need to migrate this to a 4.0.1 document
+            self.cursor.execute("""CREATE TABLE ft
+                                    (
+                                        id           integer primary key,
+                                        cn_id        integer,
+                                        f_type       INTEGER,
+                                        binary_value blob,
+                                        single       integer,
+                                        tag_uuid     text
+                                    )""")
+            self.cursor.execute("insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.id")
+            # we will create a new feature table
+            self.cursor.execute("drop table f")
+            self.cursor.execute("drop table f_value")
+            self.cursor.execute("CREATE INDEX f_perf ON ft(cn_id);")
+            self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
+            self.document.version = "4.0.1"
+            self.update_metadata()
 
     def get_content_parts(self, new_node):
         content_parts = self.cursor.execute(
@@ -298,8 +316,7 @@ class SqliteDocumentPersistence(object):
     def __rebuild_from_document(self):
         self.cursor.execute("DELETE FROM cn")
         self.cursor.execute("DELETE FROM cnp")
-        self.cursor.execute("DELETE FROM f")
-        self.cursor.execute("DELETE FROM f_value")
+        self.cursor.execute("DELETE FROM ft")
 
         self.__update_metadata()
         if self.document.content_node:
@@ -326,14 +343,11 @@ class SqliteDocumentPersistence(object):
         # We need to get the features back
 
         features = []
-        for feature in self.cursor.execute("select id, cn_id, f_type, fvalue_id from f where cn_id = ?",
+        for feature in self.cursor.execute("select id, cn_id, f_type, binary_value, single from ft where cn_id = ?",
                                            [node.uuid]).fetchall():
             feature_type_name = self.feature_type_names[feature[2]]
-            f_value = self.cursor.execute("select binary_value, single from f_value where id = ?",
-                                          [feature[3]]).fetchone()
-
-            single = f_value[1] == 1
-            value = msgpack.unpackb(f_value[0])
+            single = feature[4] == 1
+            value = msgpack.unpackb(feature[3])
             features.append(ContentFeature(feature_type_name.split(':')[0], feature_type_name.split(':')[1],
                                            value, single=single))
 
@@ -362,15 +376,13 @@ class SqliteDocumentPersistence(object):
 
         self.cursor.executemany("delete from cnp where cn_id=?", all_child_ids)
         self.cursor.executemany("delete from cn where id=?", all_child_ids)
-        self.cursor.executemany("delete from f_value where id in (select fvalue_id from f where cn_id=?)",
-                                all_child_ids)
-        self.cursor.executemany("delete from f where cn_id=?", all_child_ids)
+        self.cursor.executemany("delete from ft where cn_id=?", all_child_ids)
 
     def remove_all_features(self, node):
-        self.cursor.execute("delete from f where cn_id=?", [node.uuid])
+        self.cursor.execute("delete from ft where cn_id=?", [node.uuid])
 
     def remove_all_features_by_id(self, node_id):
-        self.cursor.execute("delete from f where cn_id=?", [node_id])
+        self.cursor.execute("delete from ft where cn_id=?", [node_id])
 
     def get_next_node_id(self):
         next_id = self.cursor.execute("select max(id) from cn").fetchone()
@@ -455,7 +467,6 @@ class PersistenceManager(object):
         all_nodes = []
         all_content_parts = []
         all_features = []
-        all_feature_values = []
         node_id_with_features = []
 
         logger.info("Merging cache to persistance")
@@ -477,18 +488,21 @@ class PersistenceManager(object):
 
                     for feature in self.feature_cache[node.uuid]:
                         binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
+
+                        tag_uuid = None
+                        if feature.feature_type == 'tag' and 'uuid' in feature.value[0]:
+                            tag_uuid = feature.value[0]['uuid']
+
                         all_features.append(
                             [next_feature_id, node.uuid, self._underlying_persistence.get_feature_type_id(feature),
-                             next_feature_id])
-                        all_feature_values.append([binary_value, None, feature.single, next_feature_id])
+                             binary_value, feature.single, tag_uuid])
                         next_feature_id = next_feature_id + 1
 
                 self.node_cache.undirty(node)
 
         logger.info(f"Writing {len(all_node_ids)} nodes")
         self._underlying_persistence.cursor.executemany("DELETE FROM cn where id=?", all_node_ids)
-        self._underlying_persistence.cursor.executemany("DELETE FROM f where cn_id=?", node_id_with_features)
-        self._underlying_persistence.cursor.execute("DELETE FROM f_value where id not in (select fvalue_id from f)")
+        self._underlying_persistence.cursor.executemany("DELETE FROM ft where cn_id=?", node_id_with_features)
         self._underlying_persistence.cursor.executemany("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", all_nodes)
         self._underlying_persistence.cursor.executemany("DELETE FROM cnp where cn_id=?", all_node_ids)
         logger.info(f"Writing {len(all_content_parts)} content parts")
@@ -497,7 +511,6 @@ class PersistenceManager(object):
 
         logger.info(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
-        self._underlying_persistence.cursor.executemany(FEATURE_VALUE_INSERT, all_feature_values)
         return self._underlying_persistence.get_bytes()
 
     def update_metadata(self):
