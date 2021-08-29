@@ -240,7 +240,7 @@ class SqliteDocumentPersistence(object):
                                         single       integer,
                                         tag_uuid     text
                                     )""")
-            self.cursor.execute("insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.id")
+            self.cursor.execute("insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.fvalue_id")
             # we will create a new feature table
             self.cursor.execute("drop table f")
             self.cursor.execute("drop table f_value")
