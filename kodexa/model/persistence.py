@@ -229,7 +229,7 @@ class SqliteDocumentPersistence(object):
             self.document.content_node = self.__build_node(
                 root_node)
 
-        if self.document.version == '4.0.0' or self.document == '2.0.0':
+        if self.document.version != '4.0.1':
             # We need to migrate this to a 4.0.1 document
             self.cursor.execute("""CREATE TABLE ft
                                     (
