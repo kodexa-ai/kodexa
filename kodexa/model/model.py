@@ -1715,7 +1715,7 @@ class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
 
     PREVIOUS_VERSION: str = "1.0.0"
-    CURRENT_VERSION: str = "4.0.0"
+    CURRENT_VERSION: str = "4.0.1"
 
     def __str__(self):
         return f"kodexa://{self.uuid}"
