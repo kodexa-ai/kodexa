@@ -186,7 +186,7 @@ class SqliteDocumentPersistence(object):
         return clean
 
     def __update_metadata(self):
-        document_metadata = {'version': self.document.version,
+        document_metadata = {'version': Document.CURRENT_VERSION,
                              'metadata': self.document.metadata.to_dict(),
                              'source': self.__clean_none_values(dataclasses.asdict(self.document.source)),
                              'mixins': self.document.get_mixins(),
