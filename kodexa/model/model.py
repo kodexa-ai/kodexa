@@ -7,9 +7,8 @@ import inspect
 import json
 import os
 import re
-import uuid
 from enum import Enum
-from pathlib import Path
+import uuid
 from typing import Any, List, Optional
 
 import msgpack
@@ -61,6 +60,8 @@ class ContentObject:
         """The mixins for this object"""
         self.classes: List[ContentClassification] = []
         """A list of the content classifications associated at the document level"""
+        import uuid
+
         self.uuid = str(uuid.uuid4()) if uuid is None else uuid
 
     def to_dict(self):
