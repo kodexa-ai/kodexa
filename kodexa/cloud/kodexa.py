@@ -21,7 +21,6 @@ from appdirs import AppDirs
 from rich import print
 
 from kodexa.assistant import Assistant
-from kodexa.client import ApiClient
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, DocumentStore
@@ -365,11 +364,6 @@ class KodexaPlatform:
             version = ref.split('/')[1].split(":")[1]
 
         return [org_slug, slug, version]
-
-    @staticmethod
-    def get_api_client() -> ApiClient:
-        api_client = ApiClient()
-        return api_client
 
     @staticmethod
     def get_object_instance(ref: str, object_type: str):
