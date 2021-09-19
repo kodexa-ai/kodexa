@@ -31,7 +31,7 @@ class ContentObject:
     """
 
     def __init__(self, name="untitled", id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
-                 store_ref=None, labels=None, mixins=None):
+                 store_ref=None, labels=None, mixins=None, uuid=None):
         if labels is None:
             labels = []
         if metadata is None:
@@ -61,6 +61,7 @@ class ContentObject:
         """The mixins for this object"""
         self.classes: List[ContentClassification] = []
         """A list of the content classifications associated at the document level"""
+        self.uuid = str(uuid.uuid4()) if uuid is None else uuid
 
     def to_dict(self):
         """Convert the content object to a dictionary
@@ -74,6 +75,7 @@ class ContentObject:
         """
         return {
             'id': self.id,
+            'uuid': self.uuid,
             'tags': self.tags,
             'labels': self.labels,
             'content_type': self.content_type.name,
@@ -96,6 +98,7 @@ class ContentObject:
         """
         co = ContentObject(co_dict['path'] if 'path' in co_dict else None)
         co.id = co_dict['id']
+        co.uuid = co_dict['uuid']
         co.labels = co_dict['labels']
         co.metadata = co_dict['metadata']
         co.content_type = ContentType[co_dict['content_type']]
