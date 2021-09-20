@@ -52,7 +52,7 @@ class SqliteDocumentPersistence(object):
                 # At this point we need to load the db
                 self.is_new = False
         else:
-            new_file, filename = tempfile.mkstemp()
+            new_file, filename = tempfile.mkstemp(suffix='.kddb')
             self.is_tmp = True
 
         self.current_filename = filename
@@ -71,6 +71,8 @@ class SqliteDocumentPersistence(object):
 
     def close(self):
         if self.is_tmp or self.delete_on_close:
+            self.cursor.close()
+            self.connection.close()
             pathlib.Path(self.current_filename).unlink()
 
     def get_max_feature_id(self):
