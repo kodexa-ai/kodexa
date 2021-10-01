@@ -341,8 +341,9 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
             data = {'transitionType': transition.transition_type.value,
                     'documentVersion': document.version,
+                    'document': True,
                     'sourceContentObjectId': transition.source_content_object_id}
-            files = {"document": document.to_kddb()}
+            files = {"file": document.to_kddb()}
             document_family_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}/objects",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
@@ -397,7 +398,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         try:
             logger.info(f"Replacing document in family {document_family.id} content object {content_object_id}")
 
-            files = {"document": document.to_kddb()}
+            files = {"file": document.to_kddb()}
             content_object_replace = requests.put(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content",
 
@@ -421,8 +422,8 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
         try:
             logger.info(f"Putting document to path {path}")
 
-            files = {"document": document.to_kddb()}
-            data = {"path": path, "documentVersion": document.version}
+            files = {"file": document.to_kddb()}
+            data = {"path": path, "documentVersion": document.version, "document": True}
             document_family_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
                 params={"path": path},
@@ -449,7 +450,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             files = {"file": content}
             document_family_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
-                params={"path": path},
+                params={"path": path, "document": False},
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files)
 
