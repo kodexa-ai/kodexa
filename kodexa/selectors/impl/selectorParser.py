@@ -1,4 +1,4 @@
-# Generated from resources/selector.g4 by ANTLR 4.9.2
+# Generated from /Users/pdodds/src/kodexa/kodexa/resources/selector.g4 by ANTLR 4.9.1
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -223,7 +223,7 @@ class selectorParser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.9.2")
+        self.checkVersion("4.9.1")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -251,6 +251,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitMain" ):
                 listener.exitMain(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMain" ):
+                return visitor.visitMain(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -297,6 +303,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitLocationPath" ):
                 listener.exitLocationPath(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitLocationPath" ):
+                return visitor.visitLocationPath(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -358,6 +370,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitAbsoluteLocationPathNoroot" ):
                 listener.exitAbsoluteLocationPathNoroot(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAbsoluteLocationPathNoroot" ):
+                return visitor.visitAbsoluteLocationPathNoroot(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -432,6 +450,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitRelativeLocationPath" ):
                 listener.exitRelativeLocationPath(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitRelativeLocationPath" ):
+                return visitor.visitRelativeLocationPath(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -508,6 +532,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitStep" ):
                 listener.exitStep(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitStep" ):
+                return visitor.visitStep(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -580,6 +610,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitAxisSpecifier" ):
                 listener.exitAxisSpecifier(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAxisSpecifier" ):
+                return visitor.visitAxisSpecifier(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -656,6 +692,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitNodeTest" ):
                 listener.exitNodeTest(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitNodeTest" ):
+                return visitor.visitNodeTest(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -734,6 +776,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitPredicate" ):
                 listener.exitPredicate(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitPredicate" ):
+                return visitor.visitPredicate(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -782,6 +830,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitAbbreviatedStep" ):
                 listener.exitAbbreviatedStep(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAbbreviatedStep" ):
+                return visitor.visitAbbreviatedStep(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -829,6 +883,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitExpr" ):
                 listener.exitExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitExpr" ):
+                return visitor.visitExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -891,6 +951,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitPrimaryExpr" ):
                 listener.exitPrimaryExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitPrimaryExpr" ):
+                return visitor.visitPrimaryExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -985,6 +1051,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitFunctionCall" ):
                 listener.exitFunctionCall(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFunctionCall" ):
+                return visitor.visitFunctionCall(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1061,6 +1133,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitUnionExprNoRoot" ):
                 listener.exitUnionExprNoRoot(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitUnionExprNoRoot" ):
+                return visitor.visitUnionExprNoRoot(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1146,6 +1224,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitPathExprNoRoot" ):
                 listener.exitPathExprNoRoot(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitPathExprNoRoot" ):
+                return visitor.visitPathExprNoRoot(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1224,6 +1308,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitFilterExpr" ):
                 listener.exitFilterExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFilterExpr" ):
+                return visitor.visitFilterExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1279,6 +1369,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitOrExpr" ):
                 listener.exitOrExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitOrExpr" ):
+                return visitor.visitOrExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1338,6 +1434,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitAndExpr" ):
                 listener.exitAndExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAndExpr" ):
+                return visitor.visitAndExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1395,6 +1497,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitEqualityExpr" ):
                 listener.exitEqualityExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitEqualityExpr" ):
+                return visitor.visitEqualityExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1483,6 +1591,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitRelationalExpr" ):
                 listener.exitRelationalExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitRelationalExpr" ):
+                return visitor.visitRelationalExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1558,6 +1672,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitAdditiveExpr" ):
                 listener.exitAdditiveExpr(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitAdditiveExpr" ):
+                return visitor.visitAdditiveExpr(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1627,6 +1747,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitMultiplicativeExpr" ):
                 listener.exitMultiplicativeExpr(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitMultiplicativeExpr" ):
+                return visitor.visitMultiplicativeExpr(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1720,6 +1846,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitUnaryExprNoRoot" ):
                 listener.exitUnaryExprNoRoot(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitUnaryExprNoRoot" ):
+                return visitor.visitUnaryExprNoRoot(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1778,6 +1910,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitQName" ):
                 listener.exitQName(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitQName" ):
+                return visitor.visitQName(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -1844,6 +1982,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitFunctionName" ):
                 listener.exitFunctionName(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFunctionName" ):
+                return visitor.visitFunctionName(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1909,6 +2053,12 @@ class selectorParser ( Parser ):
             if hasattr( listener, "exitVariableReference" ):
                 listener.exitVariableReference(self)
 
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitVariableReference" ):
+                return visitor.visitVariableReference(self)
+            else:
+                return visitor.visitChildren(self)
+
 
 
 
@@ -1962,6 +2112,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitNameTest" ):
                 listener.exitNameTest(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitNameTest" ):
+                return visitor.visitNameTest(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
@@ -2032,6 +2188,12 @@ class selectorParser ( Parser ):
         def exitRule(self, listener:ParseTreeListener):
             if hasattr( listener, "exitNCName" ):
                 listener.exitNCName(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitNCName" ):
+                return visitor.visitNCName(self)
+            else:
+                return visitor.visitChildren(self)
 
 
 
