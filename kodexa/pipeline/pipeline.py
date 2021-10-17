@@ -286,7 +286,6 @@ class PipelineStep:
             options = {}
         self.step = step
         self.name = name
-        self.condition = condition
         self.enabled = enabled
         self.options = options
         self.parameterized = parameterized
@@ -324,8 +323,6 @@ class PipelineStep:
                 metadata = self.step.to_dict()
 
             metadata['name'] = self.name
-            metadata['condition'] = self.condition
-            metadata['conditional'] = self.condition is not None
             metadata['parameterized'] = self.parameterized
             metadata['enabled'] = self.enabled
             return metadata
@@ -350,7 +347,7 @@ class PipelineStep:
             if os.path.isfile(cache_name):
                 return Document.from_kdxa(cache_name)
 
-        if self.will_execute(context, document):
+        if self.enabled:
             try:
 
                 context.set_current_document(document)
@@ -369,15 +366,7 @@ class PipelineStep:
                         import collections
 
                         def replace_params(opts, params):
-                            """
 
-                            Args:
-                              opts:
-                              params:
-
-                            Returns:
-
-                            """
                             if isinstance(opts, dict):
                                 for key, val in opts.items():
                                     opts[key] = replace_params(val, params)
@@ -439,28 +428,6 @@ class PipelineStep:
                     return document
         else:
             return document
-
-    def will_execute(self, context, document):
-        """
-
-        Args:
-          context:
-          document:
-
-        Returns:
-
-        """
-        if not self.enabled:
-            return False
-
-        if self.condition:
-            from simpleeval import simple_eval
-            from addict import Dict
-            addict_dict = Dict(context.context)
-            return bool(
-                simple_eval(self.condition, names={'context': addict_dict, 'document': document}))
-
-        return True
 
     def get_cache_name(self, document):
         """
