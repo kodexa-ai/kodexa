@@ -1,4 +1,4 @@
-from kodexa import get_source
+from kodexa import get_source, DocumentStore, Document
 from kodexa.stores import TableDataStore
 
 
@@ -46,10 +46,6 @@ class NodeTagger:
         self.node_tag_uuid = node_tag_uuid
         """The UUID to use on the tag"""
 
-    def get_name(self):
-        """ """
-        return f"Node Tagger [selector='{self.selector}' use_all_content='{self.use_all_content}']"
-
     def process(self, document):
         """
         """
@@ -73,10 +69,6 @@ class NodeTagCopy:
         self.new_tag_name = new_tag_name
         """The new tag name that will be the destination"""
 
-    def get_name(self):
-        """ """
-        return f"Node Tag Copy [selector='{self.selector}' existing_tag_name='{self.existing_tag_name} new_tag_name={self.new_tag_name}']"
-
     def process(self, document):
         """
         """
@@ -94,11 +86,6 @@ class TextParser:
         """The encoding that should be used when attempting to decode data  (default 'utf-8')"""
         self.lines_as_child_nodes = lines_as_child_nodes
         """If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)"""
-
-    @staticmethod
-    def get_name():
-        """ """
-        return "Text Parser"
 
     def decode_text(self, data):
         """
@@ -145,9 +132,6 @@ class RollupTransformer:
         self.selector = selector
         self.separator_character = separator_character if separator_character else ''
         self.get_all_content = get_all_content
-
-    def get_name(self):
-        return "Rollup Transformer"
 
     def process(self, document):
         if document.get_root():
@@ -243,11 +227,6 @@ class TagsToKeyValuePairExtractor:
         self.exclude = exclude
         self.include_node_content = include_node_content
 
-    @staticmethod
-    def get_name():
-        """ """
-        return "Extract Tags to Key/Value"
-
     def get_default_store(self):
         """ """
         if self.include_node_content:
@@ -284,3 +263,14 @@ class TagsToKeyValuePairExtractor:
 
         for child in node.get_children():
             self.process_node(table_store, child)
+
+
+class DocumentStoreWriter:
+    """Writes the document to the provided document store"""
+
+    def __init__(self, document_store: DocumentStore):
+        self.document_store = document_store
+
+    def process(self, document: Document):
+        self.document_store.put(document.source.original_filename, document)
+        return document

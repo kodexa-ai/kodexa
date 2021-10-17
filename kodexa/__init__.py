@@ -12,7 +12,6 @@ from .connectors import FileHandleConnector, FolderConnector, UrlConnector, add_
 from .model import ContentEvent, ContentFeature, ContentNode, Document, DocumentActor, DocumentFamily, DocumentMetadata, \
     DocumentStore, DocumentTransition, RemoteStore, SourceMetadata, TransitionType
 from .pipeline import Pipeline, PipelineContext, PipelineStatistics
-from .sinks import FolderSink, InMemoryDocumentSink
 from .steps import NodeTagCopy, NodeTagger, RollupTransformer, TagsToKeyValuePairExtractor, TextParser, \
     KodexaProcessingException
 from .stores import DataStoreHelper, LocalDocumentStore, LocalModelStore, RemoteDocumentStore, \

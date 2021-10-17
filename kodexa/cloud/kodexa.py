@@ -978,7 +978,6 @@ class RemotePipeline:
             self.connector = [connector]
         else:
             self.connector = connector
-        self.sink = None
         self.context: PipelineContext = PipelineContext()
 
         if auth is None:
@@ -990,23 +989,6 @@ class RemotePipeline:
         self.attach_source = attach_source
         self.parameters = parameters
         self.auth = auth
-
-    def set_sink(self, sink):
-        """Set the sink you wish to use, note that it will replace any currently assigned
-        sink
-
-        Args:
-          sink: the sink for the pipeline
-
-        Returns:
-
-        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.set_sink(ExampleSink())
-        """
-        logger.info(f"Setting sink {sink.get_name()} on {self.slug}")
-        self.sink = sink
-
-        return self
 
     def run(self):
         """ """
@@ -1028,18 +1010,6 @@ class RemotePipeline:
 
             self.context.statistics.processed_document(result_document)
             self.context.context = execution.context
-            if self.sink:
-                logger.info(f"Writing to sink {self.sink.get_name()}")
-                try:
-                    self.sink.sink(result_document)
-                except:
-                    if document:
-                        document.exceptions.append({
-                            "step": self.sink.get_name(),
-                            "exception": sys.exc_info()[0]
-                        })
-                    if self.context.stop_on_exception:
-                        raise
 
         logger.info(f"Completed pipeline {self.slug}")
 
@@ -1133,25 +1103,6 @@ class RemotePipeline:
         """
         return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path,
                                                     unpack=unpack))
-
-    def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
-        """Allows you to provide the sink store easily
-
-        This will wrap the store in a document store sink
-
-        Args:
-          document_store: document store to use
-          processing_mode: the processing mode (update or new)
-          document_store: DocumentStore:
-          processing_mode: str:  (Default value = "update")
-
-        Returns:
-          the pipeline
-
-        """
-        from kodexa.sinks import DocumentStoreSink
-        self.set_sink(DocumentStoreSink(document_store))
-        return self
 
 
 class RemoteAction:

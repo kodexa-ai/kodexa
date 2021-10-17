@@ -5,8 +5,7 @@ import pytest
 from kodexa import RemoteAction
 from kodexa.model import DocumentMetadata, Document
 from kodexa.pipeline import Pipeline
-from kodexa.sinks import FolderSink
-from kodexa.steps.common import TextParser
+from kodexa.steps.common import TextParser, DocumentStoreWriter
 from kodexa.stores import LocalDocumentStore, TableDataStore
 
 
@@ -31,14 +30,7 @@ def test_simplified_remote_action_reference():
     assert isinstance(pipeline.steps[0].step, RemoteAction)
     assert "option" in pipeline.steps[0].step.options
 
-
-def test_basic_folder_sink():
-    pipeline = Pipeline.from_text('cheese burger')
-    pipeline.set_sink(FolderSink('/tmp'))
-    pipeline.run()
-
-
-def test_basic_json_store():
+def test_basic_local_document_store():
     JSON_STORE = "/tmp/test-json-store.jsonkey"
     document_store = LocalDocumentStore(JSON_STORE, force_initialize=True)
     document_store.put("test.doc", create_document())
@@ -52,21 +44,17 @@ def test_pipeline_example():
     document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
     document_store.put("test.doc", create_document())
 
-    new_document_store = LocalDocumentStore("/tmp/test-json-store2", force_initialize=True)
-
-    assert new_document_store.count() == 0
     pipeline = Pipeline(document_store)
-    pipeline.set_sink(new_document_store)
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
-    assert new_document_store.count() == 1
 
 
 def test_class_step_step_with_context():
-    document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
+    document_store = LocalDocumentStore()
     document_store.put('test.doc', create_document())
-    new_document_store = LocalDocumentStore("/tmp/test-json-store2", force_initialize=True)
+
+    new_document_store = LocalDocumentStore()
 
     class MyProcessingStep:
 
@@ -78,15 +66,13 @@ def test_class_step_step_with_context():
             logging.error("Hello")
             return doc
 
-    assert new_document_store.count() == 0
     pipeline = Pipeline(document_store)
     pipeline.add_step(MyProcessingStep())
-    pipeline.set_sink(new_document_store)
-    stats = pipeline.run().statistics
+    pipeline.add_step(DocumentStoreWriter(new_document_store))
+    ctxt = pipeline.run()
 
-    assert stats.documents_processed == 1
-    assert stats.document_exceptions == 0
-    assert new_document_store.count() == 1
+    assert ctxt.statistics.documents_processed == 1
+    assert ctxt.statistics.document_exceptions == 0
     assert new_document_store.get_latest_document("test.doc").metadata.cheese == pipeline.context.execution_id
 
 
@@ -119,7 +105,7 @@ def test_function_step_with_context():
     assert new_document_store.count() == 0
     pipeline = Pipeline(document_store)
     pipeline.add_step(my_function)
-    pipeline.set_sink(new_document_store)
+    pipeline.add_step(DocumentStoreWriter(new_document_store))
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
@@ -141,7 +127,7 @@ def test_function_step():
     assert new_document_store.count() == 0
     pipeline = Pipeline(document_store)
     pipeline.add_step(my_function)
-    pipeline.set_sink(new_document_store)
+    pipeline.add_step(DocumentStoreWriter(new_document_store))
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
@@ -157,9 +143,9 @@ def test_fluent_pipeline():
         return doc
 
     document = create_document()
-    new_document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
+    new_document_store = LocalDocumentStore()
 
-    stats = Pipeline(document).add_step(my_function).add_step(my_function).set_sink(new_document_store).run().statistics
+    stats = Pipeline(document).add_step(my_function).add_step(my_function).add_step(DocumentStoreWriter(new_document_store)).run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
@@ -169,9 +155,9 @@ def test_fluent_pipeline():
 
 def test_url_pipeline():
     document = Document.from_url("http://www.google.com")
-    new_document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
+    new_document_store = LocalDocumentStore()
 
-    stats = Pipeline(document).add_step(TextParser(encoding='ISO-8859-1')).set_sink(new_document_store).run().statistics
+    stats = Pipeline(document).add_step(TextParser(encoding='ISO-8859-1')).add_step(DocumentStoreWriter(new_document_store)).run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
@@ -182,9 +168,9 @@ def test_url_pipeline():
 
 
 def test_function_step_with_exception():
-    document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
+    document_store = LocalDocumentStore()
     document_store.put("test.doc", create_document())
-    new_document_store = LocalDocumentStore("/tmp/test-json-store2", force_initialize=True)
+    new_document_store = LocalDocumentStore()
 
     def my_function(doc):
         doc.metadata.cheese = "fishstick"
@@ -193,7 +179,7 @@ def test_function_step_with_exception():
     assert new_document_store.count() == 0
     pipeline = Pipeline(document_store, stop_on_exception=False)
     pipeline.add_step(my_function)
-    pipeline.set_sink(new_document_store)
+    pipeline.add_step(DocumentStoreWriter(new_document_store))
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1

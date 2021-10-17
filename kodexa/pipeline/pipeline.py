@@ -303,7 +303,7 @@ class PipelineStep:
             from kodexa import RemoteAction
             self.step = RemoteAction(step, options=options, attach_source=attach_source)
         else:
-            logger.info(f"Adding new step {step.get_name()} to pipeline")
+            logger.info(f"Adding new step {type(step)} to pipeline")
 
     def to_dict(self):
         """ """
@@ -405,7 +405,7 @@ class PipelineStep:
                         result_document = step_instance.process(document, context)
 
                 elif not callable(self.step):
-                    logger.info(f"Starting step {self.step.get_name()}")
+                    logger.info(f"Starting step {type(self.step)}")
 
                     if len(signature(self.step.process).parameters) == 1:
                         result_document = self.step.process(document)
@@ -430,7 +430,7 @@ class PipelineStep:
                 logger.warning("Step failed")
                 tt, value, tb = sys.exc_info()
                 document.exceptions.append({
-                    "step": self.step.__name__ if callable(self.step) else self.step.get_name(),
+                    "step": self.step.__name__ if callable(self.step) else type(self.step),
                     "traceback": traceback.format_exception(tt, value, tb)
                 })
                 if context.stop_on_exception:
@@ -566,7 +566,6 @@ class Pipeline:
 
         self.steps: List[PipelineStep] = []
         self.stores: List[PipelineStore] = []
-        self.sink = None
         self.name = name
         self.stop_on_exception = stop_on_exception
         self.logging_level = logging_level
@@ -679,42 +678,6 @@ class Pipeline:
 
         return self
 
-    def set_sink(self, sink):
-        """Set the sink you wish to use, note that it will replace any currently assigned
-        sink
-
-        Args:
-          sink: the sink for the pipeline
-
-        Returns:
-
-        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.set_sink(ExampleSink())
-        """
-        logger.info(f"Setting sink {sink.get_name()} on {self.name}")
-        self.sink = sink
-
-        return self
-
-    def to_store(self, document_store: DocumentStore, processing_mode: str = "update"):
-        """Allows you to provide the sink store easily
-
-        This will wrap the store in a document store sink
-
-        Args:
-          document_store: document store to use
-          processing_mode: the processing mode (update or new)
-          document_store: DocumentStore:
-          processing_mode: str:  (Default value = "update")
-
-        Returns:
-          the pipeline
-
-        """
-        from kodexa.sinks import DocumentStoreSink
-        self.set_sink(DocumentStoreSink(document_store))
-        return self
-
     def to_yaml(self):
         """Will return the YAML representation of any actions that support conversion to YAML
 
@@ -798,12 +761,6 @@ class Pipeline:
             initial_source_metadata = document.source
             lineage_document_uuid = document.uuid
 
-            if self.sink:
-
-                if not self.sink.accept(document):
-                    logger.info("Skipping document, since sink won't accept")
-                    break
-
             for step in self.steps:
                 document = step.execute(self.context, document)
 
@@ -814,22 +771,6 @@ class Pipeline:
                     document.source.lineage_document_uuid = lineage_document_uuid
                 else:
                     document.source.lineage_document_uuid = None
-
-                if self.sink:
-                    logger.info(f"Writing to sink {self.sink.get_name()}")
-                    try:
-                        if len(signature(self.sink.sink).parameters) == 1:
-                            self.sink.sink(document)
-                        else:
-                            self.sink.sink(document, self.context)
-                    except:
-                        if document:
-                            document.exceptions.append({
-                                "step": self.sink.get_name(),
-                                "exception": sys.exc_info()[0]
-                            })
-                        if self.context.stop_on_exception:
-                            raise
 
                 self.context.statistics.processed_document(document)
                 self.context.output_document = document
