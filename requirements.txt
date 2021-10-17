@@ -12,7 +12,6 @@ pytest-runner
 pandas
 pyyaml
 mypy
-simpleeval
 deepdiff~=5.0.2
 click
 jinja2
