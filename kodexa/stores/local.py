@@ -7,6 +7,7 @@ This is useful for unit testing or working locally.
 import logging
 import os
 import shutil
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -19,9 +20,15 @@ logger = logging.getLogger('kodexa.stores')
 
 
 class LocalDocumentStore(DocumentStore):
-    """ """
+    """A Local implementation of a DocumentStore that can be useful for notebooks and development but is not for Production use"""
 
-    def __init__(self, store_path: str, force_initialize: bool = False, mode: str = 'ALL', store_type='DOCUMENT',
+    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
+        pass
+
+    def delete(self, path: str):
+        pass
+
+    def __init__(self, store_path: str = None, force_initialize: bool = False, mode: str = 'ALL', store_type='DOCUMENT',
                  store_purpose='OPERATIONAL'):
         super().__init__(store_type, store_purpose)
 
@@ -30,7 +37,16 @@ class LocalDocumentStore(DocumentStore):
         if mode not in modes:
             raise Exception(f"LocalDocumentStore mode must be one of {','.join(modes)}")
 
-        self.store_path: str = store_path
+        if store_path is None:
+            self.store_path = tempfile.mkdtemp()
+            logger.info(f"Creating new local document store in {store_path} since no path was provided")
+
+            # Create an empty index file
+            self.metastore = []
+            self.write_metastore()
+        else:
+            self.store_path: str = store_path
+
         self.index = 0
         self.metastore: List[DocumentFamily] = []
         self.mode = mode
@@ -38,7 +54,7 @@ class LocalDocumentStore(DocumentStore):
         self.store_type = store_type
         self.store_purpose = store_purpose
 
-        path = Path(store_path)
+        path = Path(self.store_path)
 
         if force_initialize and path.exists():
             shutil.rmtree(store_path)
@@ -56,10 +72,6 @@ class LocalDocumentStore(DocumentStore):
         self.read_metastore()
 
         logger.info(f"Found {len(self.metastore)} documents in {store_path}")
-
-    def get_name(self):
-        """ """
-        return "Local Document Store"
 
     def put_native(self, path: str, content: Any, force_replace=False):
         """
@@ -127,22 +139,6 @@ class LocalDocumentStore(DocumentStore):
         content_object_reference = ContentObjectReference(content_object, self, document, self.metastore[self.index])
         self.index = self.index + 1
         return content_object_reference
-
-    def sink(self, document: Document, context):
-        """
-
-        Args:
-          document: Document:
-          context:
-
-        Returns:
-
-        """
-        if context.document_family:
-            self.put(context.document_family.path, document)
-        else:
-            if document.source.original_filename is not None:
-                self.put(document.source.original_filename, document)
 
     def get_ref(self) -> str:
         """ """
@@ -353,7 +349,6 @@ class LocalDocumentStore(DocumentStore):
 
         return None
 
-
     def put(self, path: str, document: Document, force_replace: bool = False) -> DocumentFamily:
         """
 
@@ -406,9 +401,15 @@ class LocalDocumentStore(DocumentStore):
 class LocalModelStore(ModelStore):
     """ """
 
-    def __init__(self, store_path: str, force_initialize=False):
-        self.store_path = store_path
-        path = Path(store_path)
+    def __init__(self, store_path: str = None, force_initialize=False):
+
+        if store_path is None:
+            self.store_path = tempfile.mkdtemp()
+            logger.info(f"Creating new local model store in {store_path} since no path was provided")
+        else:
+            self.store_path: str = store_path
+
+        path = Path(self.store_path)
 
         if force_initialize and path.exists():
             shutil.rmtree(store_path)

@@ -1,6 +1,6 @@
 import os
 
-from kodexa import InMemoryDocumentSink, Pipeline, FolderConnector, Document, FolderSink
+from kodexa import Pipeline, FolderConnector, LocalDocumentStore
 from kodexa.steps.common import TextParser
 from kodexa.testing.test_utils import compare_document
 
@@ -10,42 +10,13 @@ def get_test_directory():
 
 
 def get_test_pipeline(filename):
-    document_sink = InMemoryDocumentSink()
-
     pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter=filename + '.txt'))
     pipeline.add_step(TextParser())
-    pipeline.set_sink(document_sink)
-    pipeline.run()
+    context = pipeline.run()
 
     # Make sure the finders are available
-    document = document_sink.get_document(0)
+    document = context.output_document
     return document
-
-
-def test_folder_sink_from_file():
-    if os.path.exists('/tmp/hello.txt.kdxa'):
-        os.remove('/tmp/hello.txt.kdxa')
-
-    pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='hello.txt'))
-    pipeline.add_step(TextParser())
-    pipeline.set_sink(FolderSink('/tmp'))
-    pipeline.run()
-
-    assert os.path.exists('/tmp/hello.txt.kdxa') is True
-
-
-def test_caching():
-    if os.path.exists('/tmp/hello.txt.kdxa'):
-        os.remove('/tmp/hello.txt.kdxa')
-
-    pipeline = Pipeline(FolderConnector(path=str(get_test_directory()), file_filter='hello.txt'))
-    pipeline.add_step(TextParser(), cache_path="/tmp")
-    pipeline.set_sink(FolderSink('/tmp'))
-    pipeline.run()
-
-    assert os.path.exists('/tmp/hello.txt.kdxa') is True
-
-    os.remove('/tmp/hello.txt.kdxa')
 
 
 def test_hello_txt():
@@ -59,14 +30,14 @@ def test_hello_txt():
 
 
 def test_folder_connector_unpack_wildcard():
-    document_sink = InMemoryDocumentSink()
+    document_sink = LocalDocumentStore()
     pipeline = Pipeline(
         FolderConnector(path=str(get_test_directory()) + 'folder_unpack_test', file_filter='*.*', unpack=True))
-    pipeline.set_sink(document_sink)
     pipeline.run()
 
     # let's make sure we properly unpacked each document and have all ContentNodes
-    for doc in document_sink.documents:
+    for document_family in document_sink.query_families():
+        doc = document_sink.get_latest_document_in_family(document_family)
         if doc.get_root().get_all_content().find('HSBC') > -1:
             assert len(doc.select("//*")) == 39
         elif doc.get_root().get_all_content().find('flea') > -1:
@@ -90,4 +61,4 @@ def test_lines_of_text():
 
     doc = context.output_document
     assert len(doc.get_root().get_children()) > 0
-    assert doc.get_root().get_content() == None
+    assert doc.get_root().get_content() is None
