@@ -273,15 +273,10 @@ class PipelineStep:
     also the details around the step's use.
 
     It is internally used by the Pipeline and is not a public API
-
-    Args:
-
-    Returns:
-
     """
 
-    def __init__(self, step, enabled=False, condition=None, name=None, options=None, attach_source=False,
-                 parameterized=False, cache_path=None):
+    def __init__(self, step, enabled=False, name=None, options=None, attach_source=False,
+                 parameterized=False, step_type='ACTION'):
         if options is None:
             options = {}
         self.step = step
@@ -289,7 +284,7 @@ class PipelineStep:
         self.enabled = enabled
         self.options = options
         self.parameterized = parameterized
-        self.cache_path = cache_path
+        self.step_type = step_type
 
         if str(type(self.step)) == "<class 'type'>":
             logger.info(f"Adding new step class {step.__name__} to pipeline")
@@ -341,12 +336,6 @@ class PipelineStep:
         """
 
         start = time.perf_counter()
-        if self.cache_path:
-            # Check to see if we have a cached file
-            cache_name = self.get_cache_name(document)
-            if os.path.isfile(cache_name):
-                return Document.from_kdxa(cache_name)
-
         if self.enabled:
             try:
 
@@ -408,9 +397,6 @@ class PipelineStep:
                     else:
                         result_document = self.step(document, context)
 
-                if self.cache_path and result_document:
-                    result_document.to_kdxa(self.get_cache_name(result_document))
-
                 end = time.perf_counter()
                 logger.info(f"Step completed (f{end - start:0.4f}s)")
 
@@ -428,19 +414,6 @@ class PipelineStep:
                     return document
         else:
             return document
-
-    def get_cache_name(self, document):
-        """
-
-        Args:
-          document:
-
-        Returns:
-
-        """
-        file_name = document.source.original_filename \
-            if document.source.original_filename is not None else document.uuid
-        return f"{self.cache_path}/{file_name}.kdxa"
 
     def end_processing(self, context):
         """
@@ -601,12 +574,12 @@ class Pipeline:
         """
         self.steps.append(
             PipelineStep(step=LabelStep(label, remove=True), name=f"Remove label {label}", enabled=enabled,
-                         condition=condition, options=options,
+                         options=options,
                          attach_source=attach_source, parameterized=parameterized, cache_path=cache_path))
         return self
 
-    def add_step(self, step, name=None, enabled=True, condition=None, options=None, attach_source=False,
-                 parameterized=False, cache_path=None):
+    def add_step(self, step, name=None, enabled=True, options=None, attach_source=False,
+                 parameterized=False, step_type='ACTION'):
         """Add the given step to the current pipeline
 
 
@@ -620,13 +593,12 @@ class Pipeline:
           step: the step to add
           name: the name to use to describe the step (default None)
           enabled: is the step enabled (default True)
-          condition: condition to evaluate before executing the step (default None)
           options: options to be passed to the step if it is a simplified remote action (Default value = None)
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline's parameters to the options (Default value = False)
-          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-
+          step_type: the type of step to add, can either be an ACTION or MODEL
         Returns:
+          the instance of the pipeline
 
         >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
             >>> pipeline.add_step(ExampleStep())
@@ -640,8 +612,9 @@ class Pipeline:
         """
         if options is None:
             options = {}
-        self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, condition=condition, options=options,
-                                       attach_source=attach_source, parameterized=parameterized, cache_path=cache_path))
+        self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, options=options,
+                                       attach_source=attach_source, parameterized=parameterized,
+                                       step_type=step_type))
 
         return self
 
