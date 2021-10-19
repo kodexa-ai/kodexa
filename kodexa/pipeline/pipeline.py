@@ -320,28 +320,18 @@ class PipelineStep:
             metadata['name'] = self.name
             metadata['parameterized'] = self.parameterized
             metadata['enabled'] = self.enabled
+            metadata['stepType'] = self.step_type
             return metadata
         except AttributeError as e:
             raise Exception("All steps must implement to_dict() for deployment", e)
 
     def execute(self, context, document):
-        """
-
-        Args:
-          context:
-          document:
-
-        Returns:
-
-        """
 
         start = time.perf_counter()
         if self.enabled:
             try:
 
                 context.set_current_document(document)
-
-                result_document = None
                 logger.info(f"Starting step")
                 if str(type(self.step)) == "<class 'type'>":
 
@@ -416,14 +406,6 @@ class PipelineStep:
             return document
 
     def end_processing(self, context):
-        """
-
-        Args:
-          context:
-
-        Returns:
-
-        """
         try:
             self.step.end_processing(context)
         except:
