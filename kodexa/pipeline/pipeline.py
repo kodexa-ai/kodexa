@@ -537,11 +537,9 @@ class Pipeline:
         Args:
           label: label to add
           enabled: is the step enabled (default True)
-          condition: condition to evaluate before executing the step (default None)
           options: options to be passed to the step if it is a simplified remote action (Default value = None)
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline's parameters to the options (Default value = False)
-          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
           label: str:
 
         Returns:
@@ -549,24 +547,22 @@ class Pipeline:
 
         """
         self.steps.append(
-            PipelineStep(step=LabelStep(label), name=f"Add label {label}", enabled=enabled, condition=condition,
+            PipelineStep(step=LabelStep(label), name=f"Add label {label}", enabled=enabled,
                          options=options,
-                         attach_source=attach_source, parameterized=parameterized, cache_path=cache_path))
+                         attach_source=attach_source, parameterized=parameterized))
         return self
 
-    def remove_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
-                     parameterized=False, cache_path=None):
+    def remove_label(self, label: str, enabled=True, options=None, attach_source=False,
+                     parameterized=False):
         """Adds a label to the document
 
         Args:
           label: label to remove
           enabled: is the step enabled (default True)
-          condition: condition to evaluate before executing the step (default None)
           options: options to be passed to the step if it is a simplified remote action (Default value = None)
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
           parameterized: apply the pipeline's parameters to the options (Default value = False)
-          cache_path: cache the document locally, note this is only for local pipelines (Default value = None)
-          label: str:
+          label: str: the label to add
 
         Returns:
           the pipeline
@@ -575,7 +571,7 @@ class Pipeline:
         self.steps.append(
             PipelineStep(step=LabelStep(label, remove=True), name=f"Remove label {label}", enabled=enabled,
                          options=options,
-                         attach_source=attach_source, parameterized=parameterized, cache_path=cache_path))
+                         attach_source=attach_source, parameterized=parameterized))
         return self
 
     def add_step(self, step, name=None, enabled=True, options=None, attach_source=False,
