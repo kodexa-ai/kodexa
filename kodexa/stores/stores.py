@@ -158,14 +158,6 @@ class RemoteTableDataStore(RemoteStore):
             raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
 
     def add(self, row):
-        """
-
-        Args:
-          row:
-
-        Returns:
-
-        """
         from kodexa import KodexaPlatform
 
         url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"

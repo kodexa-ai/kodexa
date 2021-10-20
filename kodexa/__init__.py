@@ -6,7 +6,7 @@ data.
 .. include:: ./documentation.md
 """
 from .assistant import Assistant, AssistantContext, AssistantResponse
-from .cloud import KodexaPlatform, RemoteAction, RemotePipeline, RemoteSession
+from .platform import KodexaPlatform, RemoteAction, RemotePipeline, RemoteSession
 from .connectors import FileHandleConnector, FolderConnector, UrlConnector, add_connector, get_connector, \
     get_connectors, get_source, registered_connectors
 from .model import ContentEvent, ContentFeature, ContentNode, Document, DocumentActor, DocumentFamily, DocumentMetadata, \

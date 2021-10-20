@@ -18,12 +18,18 @@ import requests
 import yaml
 from addict import Dict
 from appdirs import AppDirs
+from kodexa_api import ApiClient, Configuration
+from kodexa_api.api.account_api import AccountApi
+from kodexa_api.api.extension_packs_api import ExtensionPacksApi
+from kodexa_api.api.platform_overview_api import PlatformOverviewApi
+from kodexa_api.api.stores_api import StoresApi
+from kodexa_api.model.access_token_details import AccessTokenDetails
 from rich import print
 
 from kodexa.assistant import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
-from kodexa.model import Document, DocumentStore
+from kodexa.model import Document
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
@@ -213,8 +219,34 @@ def resolve_object_type(obj_type):
         sys.exit(1)
 
 
+class KodexaClient:
+    """
+    The Kodexa Client is a wrapper around the OpenAPI generated client to allow for interaction with an instance of
+    Kodexa
+    """
+
+    def __init__(self, kodexa_url: str, access_token: str):
+        self.kodexa_url = kodexa_url
+        self.access_token = access_token
+        configuration = Configuration(host=self.kodexa_url, access_token=self.access_token)
+        self.api_client = ApiClient(configuration)
+
+    def platform_overview(self) -> PlatformOverviewApi:
+        return PlatformOverviewApi(self.api_client)
+
+    def stores(self) -> StoresApi:
+        return StoresApi(self.api_client)
+
+    def extension_packs(self) -> ExtensionPacksApi:
+        return ExtensionPacksApi(self.api_client)
+
+    def account(self) -> AccountApi:
+        return AccountApi(self.api_client)
+
+
 class KodexaPlatform:
-    """The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
+    """
+    The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
     components
 
     Note it also can be used to get your access token and Kodexa platform URL using:
@@ -223,6 +255,10 @@ class KodexaPlatform:
     * Environment variables (KODEXA_ACCESS_TOKEN and KODEXA_URL)
 
     """
+
+    @staticmethod
+    def get_kodexa_client() -> KodexaClient:
+        return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
     def get_access_token() -> str:
@@ -284,35 +320,22 @@ class KodexaPlatform:
         if url is not None:
             os.environ["KODEXA_URL"] = url
 
-    @staticmethod
-    def get_access_token_details() -> Dict:
+    @classmethod
+    def get_access_token_details(cls) -> AccessTokenDetails:
         """
         Pull the access token details (including a list of the available organizations)
 
         Returns: Dict: details of the access token
 
         """
-        response = requests.get(
-            f"{KodexaPlatform.get_url()}/api/account/accessToken",
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
-        if response.status_code == 200:
-            return Dict(response.json())
-        else:
-            if response.status_code == 404:
-                raise Exception("Unable to find access token")
-            else:
-                raise Exception("An error occurred connecting to the Kodexa platform")
+        return cls.get_kodexa_client().account().validate_token()
 
-    @staticmethod
-    def deploy_extension(metadata):
-        """
+    @classmethod
+    def deploy_extension(cls, metadata):
 
-        Args:
-          metadata:
+        return cls.get_kodexa_client().extension_packs().deploy()
 
-        Returns:
 
-        """
         response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{metadata['orgSlug']}",
                                  json=metadata.to_dict(),
                                  headers={"x-access-token": KodexaPlatform.get_access_token(),
@@ -325,15 +348,6 @@ class KodexaPlatform:
 
     @staticmethod
     def deploy_extension_from_uri(path, organisation_slug):
-        """
-
-        Args:
-          path:
-          organisation_slug:
-
-        Returns:
-
-        """
         url = f"{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}"
         logger.info(f"Publishing extension pack to organization {organisation_slug}")
         response = requests.post(url,
@@ -347,14 +361,7 @@ class KodexaPlatform:
 
     @staticmethod
     def resolve_ref(ref: str):
-        """
 
-        Args:
-          ref: str:
-
-        Returns:
-
-        """
         org_slug = ref.split('/')[0]
         slug = ref.split('/')[1].split(":")[0]
 
@@ -367,15 +374,6 @@ class KodexaPlatform:
 
     @staticmethod
     def get_object_instance(ref: str, object_type: str):
-        """
-
-        Args:
-          ref: str:
-          object_type: str:
-
-        Returns:
-
-        """
         object_type, object_type_metadata = resolve_object_type(object_type)
 
         if object_type == 'taxonomies':
