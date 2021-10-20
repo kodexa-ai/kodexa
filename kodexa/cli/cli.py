@@ -17,7 +17,7 @@ import click
 from rich import print
 
 from kodexa.cli.documentation import generate_site
-from kodexa.cloud.kodexa import ExtensionHelper, KodexaPlatform
+from kodexa.platform.kodexa import ExtensionHelper, KodexaPlatform
 
 LOGGING_LEVELS = {
     0: logging.NOTSET,
