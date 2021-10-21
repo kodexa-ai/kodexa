@@ -1,4 +1,5 @@
 """
-Out of the box integration with the Kodexa platform, enabling the universe of content services that are available
+Out of the box integration with the Kodexa platform
 """
 from .kodexa import RemoteSession, RemotePipeline, RemoteAction, KodexaPlatform
+from .domain import *
