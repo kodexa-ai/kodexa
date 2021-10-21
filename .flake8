@@ -3,4 +3,4 @@ max-line-length = 250
 per-file-ignores =
     # line too long
     ./kodexa/selectors/parsetab.py: E231,
-exclude = ./kodexa/platform/domain
+exclude = ./kodexa/platform/domain.py
