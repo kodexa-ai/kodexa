@@ -600,12 +600,13 @@ class RemoteModelStore(ModelStore, RemoteStore):
             logger.warning(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content) -> DocumentFamily:
+    def put(self, path: str, content, replace=False) -> DocumentFamily:
         """Put the content into the model store at the given path
 
         Args:
           path: The path you wish to put the content at
           content: The content for that object
+          replace: Replace the content if it exists
 
         Returns:
           the document family that was created
@@ -614,6 +615,13 @@ class RemoteModelStore(ModelStore, RemoteStore):
         import requests
         try:
             files = {"file": content}
+
+            if replace:
+                requests.delete(
+                    f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
+                    params={"path": path},
+                    headers={"x-access-token": KodexaPlatform.get_access_token()})
+
             content_object_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
                 params={"path": path},

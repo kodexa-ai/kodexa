@@ -2863,19 +2863,20 @@ class DocumentStore:
 class ModelContentMetadata:
     """Represents the metadata that can be stored with a model"""
 
-    def __init__(self, state: str = 'PENDING', parameters=None, final_statistics=None, build_statistics=None,
+    def __init__(self, model_runtime_ref, state: str = 'PENDING', options=None, final_statistics=None, build_statistics=None,
                  deployment=None):
+        self.model_runtime_ref = model_runtime_ref
         if deployment is None:
             deployment = {}
         if build_statistics is None:
             build_statistics = {}
         if final_statistics is None:
             final_statistics = {}
-        if parameters is None:
-            parameters = {}
+        if options is None:
+            options = []
         self.state = state
         """The state of the model"""
-        self.parameters: dict = parameters
+        self.options: List = options
         """Parameters used in building the model"""
         self.final_statistics: dict = final_statistics
         """Final statistics from the model"""
@@ -2894,10 +2895,11 @@ class ModelContentMetadata:
         Returns: A ModelContentMetadata object
 
         """
-        model_content_metadata = ModelContentMetadata(model_content_dict['state'], model_content_dict['parameters'],
-                                                      model_content_dict['finalStatistics'],
-                                                      model_content_dict['buildStatistics'],
-                                                      model_content_dict['deployment'])
+        model_content_metadata = ModelContentMetadata(model_content_dict.get('modelRuntimeRef'),
+                                                      state = model_content_dict.get('state', None),
+                                                      options = model_content_dict.get('options', None),
+                                                      build_statistics = model_content_dict.get('buildStatistics', None),
+                                                      deployment = model_content_dict.get('deployment', None))
         return model_content_metadata
 
     def to_dict(self) -> dict:
@@ -2910,7 +2912,8 @@ class ModelContentMetadata:
         return {
             'type': 'model',
             'state': self.state,
-            'parameters': self.parameters,
+            'modelRuntimeRef': self.model_runtime_ref,
+            'options': self.options,
             'finalStatistics': self.final_statistics,
             'buildStatistics': self.build_statistics,
             'deployment': self.deployment
@@ -2932,12 +2935,13 @@ class ModelStore:
         """
         pass
 
-    def put(self, path: str, content: Any) -> DocumentFamily:
+    def put(self, path: str, content: Any, replace=False) -> DocumentFamily:
         """
 
         Args:
           path (str): The path to put the content at
           content: The content to put in the store
+          replace: Replace the object if it exists
         Returns:
           The document family that was created
 

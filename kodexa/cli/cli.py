@@ -17,6 +17,7 @@ import click
 from rich import print
 
 from kodexa.cli.documentation import generate_site
+from kodexa.model.model import ModelContentMetadata
 from kodexa.platform.kodexa import ExtensionHelper, KodexaPlatform
 
 LOGGING_LEVELS = {
@@ -79,18 +80,45 @@ def cli(info: Info, verbose: int):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @cli.command()
 @pass_info
+def push_model(_: Info, path: str, url: str, org: str, token: str):
+    """Deploy extension pack to a Kodexa platform instance
+    """
+
+    print("Pushing model from path", path)
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+
+    # We need to open the model.yml - upload the contents
+    # and then update the metadata
+    with open(path+"/model.yml", "r") as model_meta_file:
+        import yaml
+        model_meta = yaml.safe_load(model_meta_file)
+
+    slug = model_meta["slug"]
+    version = model_meta["version"]
+
+    from kodexa import RemoteModelStore
+    ref = f"{org}/{slug}:{version}"
+    remote_model_store = RemoteModelStore(ref)
+    KodexaPlatform.deploy(ref, remote_model_store)
+
+    for path in model_meta["contents"]:
+        with open(path, 'rb') as path_content:
+            remote_model_store.put(path, path_content, replace=True)
+
+    remote_model_store.set_content_metadata(ModelContentMetadata.from_dict(model_meta['metadata']))
+
+    print("Pushed model :tada:")
+
+
+@click.option('--path', default=os.getcwd(), help='Path to folder containing kodexa.yml')
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--org', help='The slug for the organization to deploy to')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@cli.command()
+@pass_info
 def deploy(_: Info, path: str, url: str, org: str, token: str):
     """Deploy extension pack to a Kodexa platform instance
-
-    Args:
-      _: Info: 
-      path: str: 
-      url: str: 
-      org: str: 
-      token: str: 
-
-    Returns:
-
     """
 
     print("Starting deployment from path", path)

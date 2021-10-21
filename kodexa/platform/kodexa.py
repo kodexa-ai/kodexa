@@ -285,6 +285,26 @@ class KodexaPlatform:
         if url is not None:
             os.environ["KODEXA_URL"] = url
 
+    @staticmethod
+    def get_access_token_details() -> Dict:
+        """
+        Pull the access token details (including a list of the available organizations)
+
+        Returns: Dict: details of the access token
+
+        """
+        response = requests.get(
+            f"{KodexaPlatform.get_url()}/api/account/accessToken",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if response.status_code == 200:
+            return Dict(response.json())
+        else:
+            if response.status_code == 404:
+                raise Exception("Unable to find access token")
+            else:
+                raise Exception("An error occurred connecting to the Kodexa platform")
+
+
     @classmethod
     def deploy_extension(cls, metadata):
         response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{metadata['orgSlug']}",
