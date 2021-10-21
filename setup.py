@@ -21,7 +21,7 @@ setup(name='kodexa',
       url='https://www.github.com/kodexa-ai/kodexa',
       packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.pipeline', 'kodexa.taxonomy',
                 'kodexa.stores', 'kodexa.model', 'kodexa.steps', 'kodexa.selectors',
-                'kodexa.assistant', 'kodexa.cloud', 'kodexa.testing', 'kodexa.cli',
+                'kodexa.assistant', 'kodexa.platform', 'kodexa.testing', 'kodexa.cli',
                 'kodexa.cli.templates'],
       install_requires=[
           'addict~=2.2.1',
