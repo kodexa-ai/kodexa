@@ -5,7 +5,7 @@ instance of the Kodexa platform
 from typing import List, Optional
 
 from kodexa.taxonomy import Taxonomy
-from kodexa.model import ContentObject, Document, Store
+from kodexa.model import Document, Store
 
 
 class AssistantMetadata:

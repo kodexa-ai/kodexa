@@ -14,98 +14,8 @@ from typing import Any, List, Optional
 import msgpack
 from addict import Dict
 from kodexa.mixins import registry
-
-
-class ContentType(Enum):
-    """Types of content object that are supported"""
-    DOCUMENT = 'DOCUMENT'
-    NATIVE = 'NATIVE'
-
-
-class ContentObject:
-    """A ContentObject is a reference to a type of document, this can be either a native file (say a PDF etc) or it can be
-    a Kodexa document.
-
-    The content object allows us to capture metadata about the document or the native file without changing it
-    """
-
-    def __init__(self, name="untitled", id=None, content_type=ContentType.DOCUMENT, tags=None, metadata=None,
-                 store_ref=None, labels=None, mixins=None, new_uuid=None):
-        if labels is None:
-            labels = []
-        if metadata is None:
-            metadata = {}
-        if tags is None:
-            tags = []
-        if mixins is None:
-            mixins = []
-        from kodexa.pipeline import new_id
-        self.id = new_id() if id is None else id
-        """The unique ID for the content object"""
-        self.name = name
-        """The name/path of the content object"""
-        self.content_type = content_type
-        """The type of content the object refers to"""
-        self.tags = tags
-        """A list of the tags related to the object"""
-        self.store_ref = store_ref
-        """The reference to the store holding this content object"""
-        self.metadata = metadata
-        """A dictionary of the metadata"""
-        self.labels = labels
-        """A list of the labels related to the object"""
-        self.path = name
-        """.. deprecated::"""
-        self.mixins = mixins
-        """The mixins for this object"""
-        self.classes: List[ContentClassification] = []
-        """A list of the content classifications associated at the document level"""
-        self.uuid = str(uuid.uuid4()) if new_uuid is None else new_uuid
-
-    def to_dict(self):
-        """Convert the content object to a dictionary
-
-        :return: dictionary
-
-        Args:
-
-        Returns:
-
-        """
-        return {
-            'id': self.id,
-            'uuid': self.uuid,
-            'tags': self.tags,
-            'labels': self.labels,
-            'content_type': self.content_type.name,
-            'metadata': self.metadata,
-            'name': self.name,
-            'store_ref': self.store_ref,
-            'mixins': self.mixins,
-            'classes': [content_class.to_dict() for content_class in self.classes],
-        }
-
-    @classmethod
-    def from_dict(cls, co_dict):
-        """Create a content object from a dictionary
-
-        Args:
-          co_dict (dict): The content object as a dictionary
-
-        Returns:
-          A content object
-        """
-        co = ContentObject(co_dict['path'] if 'path' in co_dict else None)
-        co.id = co_dict['id']
-        co.uuid = co_dict['uuid']
-        co.labels = co_dict['labels']
-        co.metadata = co_dict['metadata']
-        co.content_type = ContentType[co_dict['content_type']]
-        co.mixins = co_dict['mixins']
-        if 'classes' in co_dict and co_dict['classes']:
-            co.classes = [ContentClassification.from_dict(content_class) for content_class in
-                          co_dict['classes']]
-        return co
+from kodexa.model.objects import ModelContentMetadata, ContentObject, ContentType, DocumentTransition, ContentEvent, \
+    ObjectEventType
 
 
 class Store:
@@ -2242,204 +2152,6 @@ class Document(object):
         return self.labels
 
 
-class TransitionType(Enum):
-    """
-    The type of transition
-    """
-    DERIVED = 'DERIVED'
-    """A transition that derived a new document"""
-    FRAGMENT = 'FRAGMENT'
-    """A transition that placed a fragment of the document in another document"""
-
-
-class BaseEvent:
-    """
-    The base for all events within Kodexa
-    """
-    pass
-
-
-class ContentEventType(Enum):
-    """
-    The type of event that occurred on the content
-    """
-    NEW_OBJECT = 'NEW_OBJECT'
-    DERIVED_DOCUMENT = 'DERIVED_DOCUMENT'
-
-
-class ScheduledEvent(BaseEvent):
-    """A scheduled event is sent to an assistant when a scheduled has been met"""
-
-    type = "scheduled"
-
-    def __init__(self, last_date=None, next_date=None):
-        self.last_date = last_date
-        self.next_date = next_date
-
-    @classmethod
-    def from_dict(cls, event_dict: dict):
-        return ScheduledEvent(event_dict.get('lastDate'), event_dict.get('nextDate'))
-
-    def to_dict(self):
-        return {
-            'type': self.type,
-            'lastDate': self.last_date,
-            'nextDate': self.next_date
-        }
-
-
-class ContentEvent(BaseEvent):
-    """A content event represents a change, update or deletion that has occurred in a document family
-    in a store, and can be relayed for a reaction
-    """
-
-    type = "content"
-
-    def __init__(self, content_object: ContentObject, event_type: ContentEventType, document_family):
-        """
-        Initialize a content event
-        Args:
-            content_object: the content object on which the event occurred
-            event_type: the type of event
-            document_family: the document family to which the object belongs
-        """
-        self.content_object = content_object
-        """The content object that raised the event"""
-        self.event_type = event_type
-        """The event type"""
-        self.document_family: DocumentFamily = document_family
-        """The document family containing the content object"""
-
-    @classmethod
-    def from_dict(cls, event_dict: dict):
-        return ContentEvent(ContentObject.from_dict(event_dict['contentObject']),
-                            ContentEventType[event_dict['eventType']],
-                            DocumentFamily.from_dict(event_dict['documentFamily']))
-
-    def to_dict(self):
-        return {
-            'contentObject': self.content_object.to_dict(),
-            'documentFamily': self.document_family.to_dict(),
-            'eventType': self.event_type,
-            'type': self.type
-        }
-
-
-class AssistantEvent(BaseEvent):
-    type = "assistant"
-
-    """
-    A assistant event represents an interaction, usually from a user or an API, to evaluate
-    and respond to a document
-    """
-
-    def __init__(self, content_object: Optional[ContentObject], event_type: str):
-        """
-        Initialize a content event
-        Args:
-            content_object: the content object on which the event occurred
-            event_type: the type of event
-        """
-        self.content_object = content_object
-        """The assistant event"""
-        self.event_type = event_type
-        """The event type"""
-
-    @classmethod
-    def from_dict(cls, event_dict: dict):
-        if 'contentObject' in event_dict:
-            return AssistantEvent(ContentObject.from_dict(event_dict['contentObject']),
-                                  event_dict['eventType'])
-        else:
-            return AssistantEvent(None, event_dict['eventType'])
-
-    def to_dict(self):
-        return {
-            'contentObject': self.content_object.to_dict() if self.content_object is not None else None,
-            'eventType': self.event_type,
-            'type': self.type
-        }
-
-
-class DocumentActor:
-    """A document actor is something that can create a new document in a family and is
-    part of the document transition
-    """
-
-    def __init__(self, actor_id: str, actor_type: str):
-        """
-        Initialize a document actor
-
-        Args:
-            actor_id: the ID of the actor (this typically has meaning within the scope of the actor type)
-            actor_type: the type of actor
-        """
-        self.actor_id = actor_id
-        """The ID of the actor (based on the type)"""
-        self.actor_type = actor_type
-        """The type of actor"""
-
-
-class DocumentTransition:
-    """
-    A document transition represents a link between two documents and tries to capture the actor that was involved
-    in the transition as well at the type of transition that exists
-    """
-
-    def __init__(self, transition_type: TransitionType, source_content_object_id: str,
-                 destination_content_object_id: Optional[str] = None,
-                 actor: Optional[DocumentActor] = None, execution_id: Optional[str] = None):
-        """
-        Create a document transition
-
-        Args:
-            transition_type:TransitionType: the type of transition
-            source_content_object_id:str: the ID of the source content object
-            destination_content_object_id:Optional[str] the ID of the destination content object
-            actor (Optional[DocumentActor]): the actor (Defaults to None)
-            execution_id (Optional[str]): the ID of the execution that created this transition
-        """
-        self.transition_type = transition_type
-        """The type of transition"""
-        self.source_content_object_id = source_content_object_id
-        """The ID of the source content object"""
-        self.destination_content_object_id = destination_content_object_id
-        """The ID of the destination content object"""
-        self.actor = actor
-        """The actor in the transition"""
-        self.execution_id = execution_id
-        """The ID of the execution that created this transition"""
-
-    @classmethod
-    def from_dict(cls, transition_dict: dict):
-        """
-        Converts a dictionary from a REST call back into a DocumentTransition
-        Args:
-            transition_dict: Dictionary
-
-        Returns: A document transition
-
-        """
-        transition = DocumentTransition(transition_dict['transitionType'], transition_dict['sourceContentObjectId'],
-                                        transition_dict['destinationContentObjectId'],
-                                        execution_id=transition_dict.get('executionId'))
-        return transition
-
-    def to_dict(self) -> dict:
-        """
-        Convert the transition to a dictionary to match REST API
-
-        Returns:
-            dictionary of transition
-        """
-        return {
-            'transitionType': self.transition_type,
-            'sourceContentObjectId': self.source_content_object_id,
-            'destinationContentObjectId': self.destination_content_object_id,
-            'executionId': self.execution_id
-        }
-
-
 class DocumentFamily:
     """A document family represents a collection of related documents which together represent different views of the same
     source material
@@ -2498,7 +2210,7 @@ class DocumentFamily:
             transition.destination_content_object_id = new_content_object.id
             self.transitions.append(transition)
 
-        new_event = ContentEvent(new_content_object, ContentEventType.NEW_OBJECT, self)
+        new_event = ContentEvent(new_content_object, ObjectEventType.NEW_OBJECT, self)
         return new_event
 
     def get_latest_content(self) -> ContentObject:
@@ -2559,9 +2271,9 @@ class DocumentFamily:
             document_family.mixins = []
 
         for co_dict in family_dict['contentObjects']:
-            document_family.content_objects.append(ContentObject.from_dict(co_dict))
+            document_family.content_objects.append(ContentObject.parse_obj(co_dict))
         for transition_dict in family_dict['transitions']:
-            document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
+            document_family.transitions.append(DocumentTransition.parse_obj(transition_dict))
         return document_family
 
     def to_dict(self) -> dict:
@@ -2575,8 +2287,8 @@ class DocumentFamily:
             'id': self.id,
             'storeRef': self.store_ref,
             'path': self.path,
-            'contentObjects': [co.to_dict() for co in self.content_objects],
-            'transitions': [transition.to_dict() for transition in self.transitions]}
+            'contentObjects': [co.dict() for co in self.content_objects],
+            'transitions': [transition.dict() for transition in self.transitions]}
 
 
 class DocumentStore:
@@ -2858,66 +2570,6 @@ class DocumentStore:
             document.ref = f"{self.get_ref()}/{document_family.id}/{last_co.id}"
 
         return document
-
-
-class ModelContentMetadata:
-    """Represents the metadata that can be stored with a model"""
-
-    def __init__(self, model_runtime_ref, state: str = 'PENDING', options=None, final_statistics=None, build_statistics=None,
-                 deployment=None):
-        self.model_runtime_ref = model_runtime_ref
-        if deployment is None:
-            deployment = {}
-        if build_statistics is None:
-            build_statistics = {}
-        if final_statistics is None:
-            final_statistics = {}
-        if options is None:
-            options = []
-        self.state = state
-        """The state of the model"""
-        self.options: List = options
-        """Parameters used in building the model"""
-        self.final_statistics: dict = final_statistics
-        """Final statistics from the model"""
-        self.build_statistics: dict = build_statistics
-        """Statistics while building from the model"""
-        self.deployment: dict = deployment
-        """Metadata from the deployment of the model"""
-
-    @classmethod
-    def from_dict(cls, model_content_dict: dict):
-        """
-        Converts a dictionary from a REST call back into ModelContentMetadata
-        Args:
-            model_content_dict: Dictionary
-
-        Returns: A ModelContentMetadata object
-
-        """
-        model_content_metadata = ModelContentMetadata(model_content_dict.get('modelRuntimeRef'),
-                                                      state = model_content_dict.get('state', None),
-                                                      options = model_content_dict.get('options', None),
-                                                      build_statistics = model_content_dict.get('buildStatistics', None),
-                                                      deployment = model_content_dict.get('deployment', None))
-        return model_content_metadata
-
-    def to_dict(self) -> dict:
-        """
-        Convert the ModelContentMetadata to a dictionary to match REST API
-
-        Returns:
-            dictionary of model content metadata
-        """
-        return {
-            'type': 'model',
-            'state': self.state,
-            'modelRuntimeRef': self.model_runtime_ref,
-            'options': self.options,
-            'finalStatistics': self.final_statistics,
-            'buildStatistics': self.build_statistics,
-            'deployment': self.deployment
-        }
 
 
 class ModelStore:
