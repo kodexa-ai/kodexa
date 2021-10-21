@@ -4,8 +4,9 @@ instance of the Kodexa platform
 """
 from typing import List, Optional
 
+from kodexa.model.objects import BaseEvent
 from kodexa.taxonomy import Taxonomy
-from kodexa.model import Document, Store
+from kodexa.model import Document, Store, ContentObject
 
 
 class AssistantMetadata:
@@ -25,7 +26,7 @@ class AssistantContext:
     while processing an event
     """
 
-    from kodexa.model.model import ContentEvent, DocumentStore
+    from kodexa.model import ContentEvent, DocumentStore
 
     def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = 'kodexa.yml',
                  stores=None, content_provider=None):
@@ -175,8 +176,6 @@ class Assistant:
     """An assistant is a rich-API to allow you to work with a reactive content store or with an end user
     that is working with set of content
     """
-
-    from kodexa.model.model import BaseEvent
 
     def process_event(self, event: BaseEvent, context: AssistantContext) -> AssistantResponse:
         """The assistant will need to examine the event to determine if it wants to respond
