@@ -213,6 +213,18 @@ def resolve_object_type(obj_type):
         sys.exit(1)
 
 
+class KodexaClient:
+    """
+    A helper client that makes it a bit easier to work with the API on the platform
+
+    We wanted to use the OpenAPI V3 generator but it isn't yet able to cope with the structure
+    """
+
+    def __init__(self, url=None, access_token=None):
+        self.url = url
+        self.access_token = access_token
+
+
 class KodexaPlatform:
     """
     The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
@@ -303,7 +315,6 @@ class KodexaPlatform:
                 raise Exception("Unable to find access token")
             else:
                 raise Exception("An error occurred connecting to the Kodexa platform")
-
 
     @classmethod
     def deploy_extension(cls, metadata):
