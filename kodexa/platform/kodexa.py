@@ -286,16 +286,6 @@ class KodexaPlatform:
             os.environ["KODEXA_URL"] = url
 
     @classmethod
-    def get_access_token_details(cls) -> AccessTokenDetails:
-        """
-        Pull the access token details (including a list of the available organizations)
-
-        Returns: Dict: details of the access tokenrome
-
-        """
-        return cls.get_kodexa_client().account().validate_token()
-
-    @classmethod
     def deploy_extension(cls, metadata):
         response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{metadata['orgSlug']}",
                                  json=metadata.to_dict(),
