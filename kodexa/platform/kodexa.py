@@ -18,11 +18,6 @@ import requests
 import yaml
 from addict import Dict
 from appdirs import AppDirs
-from kodexa_api import ApiClient, Configuration
-from kodexa_api.api.account_api import AccountApi
-from kodexa_api.api.extension_packs_api import ExtensionPacksApi
-from kodexa_api.api.platform_overview_api import PlatformOverviewApi
-from kodexa_api.api.stores_api import StoresApi
 from kodexa_api.model.access_token_details import AccessTokenDetails
 from rich import print
 
