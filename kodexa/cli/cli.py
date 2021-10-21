@@ -100,7 +100,7 @@ def push_model(_: Info, path: str, url: str, org: str, token: str):
     from kodexa import RemoteModelStore
     ref = f"{org}/{slug}:{version}"
     remote_model_store = RemoteModelStore(ref)
-    KodexaPlatform.deploy(ref, remote_model_store)
+    KodexaPlatform.deploy(ref, remote_model_store, force_replace=True)
 
     for path in model_meta["contents"]:
         with open(path, 'rb') as path_content:
