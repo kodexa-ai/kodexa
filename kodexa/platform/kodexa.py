@@ -219,31 +219,6 @@ def resolve_object_type(obj_type):
         sys.exit(1)
 
 
-class KodexaClient:
-    """
-    The Kodexa Client is a wrapper around the OpenAPI generated client to allow for interaction with an instance of
-    Kodexa
-    """
-
-    def __init__(self, kodexa_url: str, access_token: str):
-        self.kodexa_url = kodexa_url
-        self.access_token = access_token
-        configuration = Configuration(host=self.kodexa_url, access_token=self.access_token)
-        self.api_client = ApiClient(configuration)
-
-    def platform_overview(self) -> PlatformOverviewApi:
-        return PlatformOverviewApi(self.api_client)
-
-    def stores(self) -> StoresApi:
-        return StoresApi(self.api_client)
-
-    def extension_packs(self) -> ExtensionPacksApi:
-        return ExtensionPacksApi(self.api_client)
-
-    def account(self) -> AccountApi:
-        return AccountApi(self.api_client)
-
-
 class KodexaPlatform:
     """
     The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
@@ -255,10 +230,6 @@ class KodexaPlatform:
     * Environment variables (KODEXA_ACCESS_TOKEN and KODEXA_URL)
 
     """
-
-    @staticmethod
-    def get_kodexa_client() -> KodexaClient:
-        return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
     def get_access_token() -> str:
@@ -279,7 +250,7 @@ class KodexaPlatform:
         """
         Returns the URL to use to access a Kodexa Platform
 
-        The URL should be in the form https://my-server.my-company.com
+        The URL should be in the form https://my-company.kodexa.ai
 
         >>> access_token = KodexaPlatform.get_url()
 
@@ -325,17 +296,13 @@ class KodexaPlatform:
         """
         Pull the access token details (including a list of the available organizations)
 
-        Returns: Dict: details of the access token
+        Returns: Dict: details of the access tokenrome
 
         """
         return cls.get_kodexa_client().account().validate_token()
 
     @classmethod
     def deploy_extension(cls, metadata):
-
-        return cls.get_kodexa_client().extension_packs().deploy()
-
-
         response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{metadata['orgSlug']}",
                                  json=metadata.to_dict(),
                                  headers={"x-access-token": KodexaPlatform.get_access_token(),

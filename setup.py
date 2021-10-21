@@ -36,7 +36,9 @@ setup(name='kodexa',
           'jinja2',
           'rich',
           'appdirs',
-          'jsonpickle'
+          'jsonpickle',
+          'antlr4-python3-runtime',
+          'datamodel-code-generator'
       ],
       entry_points="""
         [console_scripts]

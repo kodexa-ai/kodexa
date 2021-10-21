@@ -2960,6 +2960,14 @@ class ModelStore:
         """
         pass
 
+    def list_contents(self) -> List[str]:
+        """
+        Returns a list of the objects that have been uploaded into this model store
+        
+        :return: a list of the object names
+        """
+        pass
+
 
 class ContentObjectReference:
     """ """

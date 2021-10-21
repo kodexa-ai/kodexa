@@ -506,6 +506,28 @@ class RemoteModelStore(ModelStore, RemoteStore):
     A remote model store allows you to store artifacts from your model
     """
 
+    def _base_get(self, api_path: str, params: Optional[dict] = None) -> Optional[Response]:
+        if params is None:
+            params = {}
+        from kodexa import KodexaPlatform
+
+        url = f"{KodexaPlatform.get_url()}/{api_path}"
+        logger.info(f"Accessing {url}")
+
+        get_response = requests.get(
+            url,
+            params=params,
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if get_response.status_code == 200:
+            return get_response
+        elif get_response.status_code == 404:
+            return None
+        else:
+            msg = "Get failed [" + get_response.text + "], response " + str(get_response.status_code)
+            logger.warning(msg)
+            raise Exception(msg)
+
     def to_dict(self):
         """ """
         return {
@@ -666,3 +688,20 @@ class RemoteModelStore(ModelStore, RemoteStore):
             msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
             logger.warning(msg)
             raise Exception(msg)
+
+    def list_contents(self) -> List[str]:
+
+        # TODO this needs to be cleaned up a bit
+        params = {
+            'page': 1,
+            'pageSize': 1000,
+            'query': '*'
+        }
+        get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/families", params=params)
+        if get_response is not None:
+            paths = []
+            for fam_dict in get_response.json()['content']:
+                paths.append(fam_dict['path'])
+            return paths
+        else:
+            return []
