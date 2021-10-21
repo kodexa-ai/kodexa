@@ -18,7 +18,6 @@ import requests
 import yaml
 from addict import Dict
 from appdirs import AppDirs
-from kodexa_api.model.access_token_details import AccessTokenDetails
 from rich import print
 
 from kodexa.assistant import Assistant
