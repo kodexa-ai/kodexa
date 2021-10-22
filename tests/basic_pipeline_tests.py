@@ -3,7 +3,7 @@ import logging
 import pytest
 
 from kodexa import RemoteAction
-from kodexa.model import DocumentMetadata, Document
+from kodexa.model import DocumentMetadata, Document, ContentObject, ContentType
 from kodexa.pipeline import Pipeline
 from kodexa.steps.common import TextParser, DocumentStoreWriter
 from kodexa.stores import LocalDocumentStore, TableDataStore
@@ -30,6 +30,7 @@ def test_simplified_remote_action_reference():
     assert isinstance(pipeline.steps[0].step, RemoteAction)
     assert "option" in pipeline.steps[0].step.options
 
+
 def test_basic_local_document_store():
     JSON_STORE = "/tmp/test-json-store.jsonkey"
     document_store = LocalDocumentStore(JSON_STORE, force_initialize=True)
@@ -38,6 +39,13 @@ def test_basic_local_document_store():
     new_document_store = LocalDocumentStore(JSON_STORE)
 
     assert (new_document_store.count() == 1)
+
+
+def test_co():
+    # Just confirm the Pydantic Constructor
+    new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})
+    new_content_object.content_type = ContentType.document
+    assert new_content_object.content_type == ContentType.document
 
 
 def test_pipeline_example():
@@ -145,7 +153,8 @@ def test_fluent_pipeline():
     document = create_document()
     new_document_store = LocalDocumentStore()
 
-    stats = Pipeline(document).add_step(my_function).add_step(my_function).add_step(DocumentStoreWriter(new_document_store)).run().statistics
+    stats = Pipeline(document).add_step(my_function).add_step(my_function).add_step(
+        DocumentStoreWriter(new_document_store)).run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
@@ -157,7 +166,8 @@ def test_url_pipeline():
     document = Document.from_url("http://www.google.com")
     new_document_store = LocalDocumentStore()
 
-    stats = Pipeline(document).add_step(TextParser(encoding='ISO-8859-1')).add_step(DocumentStoreWriter(new_document_store)).run().statistics
+    stats = Pipeline(document).add_step(TextParser(encoding='ISO-8859-1')).add_step(
+        DocumentStoreWriter(new_document_store)).run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0

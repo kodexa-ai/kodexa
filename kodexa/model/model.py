@@ -7,14 +7,15 @@ import inspect
 import json
 import os
 import re
-from enum import Enum
 import uuid
+from enum import Enum
 from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
+
 from kodexa.mixins import registry
-from kodexa.model.objects import ModelContentMetadata, ContentObject, ContentType, DocumentTransition, ContentEvent, \
+from kodexa.model.objects import ModelContentMetadata, ContentObject, DocumentTransition, ContentEvent, \
     ObjectEventType
 
 
@@ -2197,9 +2198,9 @@ class DocumentFamily:
         Returns:
           A new content event
         """
-        new_content_object = ContentObject()
+        new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})
+        new_content_object.id = str(uuid.uuid4())
         new_content_object.store_ref = self.store_ref
-        new_content_object.content_type = ContentType.DOCUMENT
         new_content_object.metadata = document.metadata
         new_content_object.labels = document.labels
         new_content_object.mixins = document.get_mixins()
@@ -2210,7 +2211,10 @@ class DocumentFamily:
             transition.destination_content_object_id = new_content_object.id
             self.transitions.append(transition)
 
-        new_event = ContentEvent(new_content_object, ObjectEventType.NEW_OBJECT, self)
+        new_event = ContentEvent()
+        new_event.content_object = new_content_object
+        new_event.object_event_type = ObjectEventType.new_object
+        new_event.document_family = self
         return new_event
 
     def get_latest_content(self) -> ContentObject:

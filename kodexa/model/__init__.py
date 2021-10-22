@@ -12,7 +12,7 @@ and much more....
 Document families allow the organization of documents based on transitions and actors
 """
 from .model import ContentFeature, ContentNode, Document, \
-    DocumentFamily, DocumentMetadata, DocumentStore, ModelStore, RemoteStore, SourceMetadata, Store
+    DocumentFamily, DocumentMetadata, DocumentStore, ModelStore, RemoteStore, SourceMetadata, Store, ContentObjectReference
 from .objects import ContentObject, ContentType, ModelContentMetadata, DocumentContentMetadata, \
-    ContentEvent, TransitionType, DocumentActor, DocumentTransition
+    ContentEvent, TransitionType, DocumentActor, DocumentTransition, AssistantEvent, ActorType
 from .persistence import SqliteDocumentPersistence, PersistenceManager

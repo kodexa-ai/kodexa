@@ -9,7 +9,7 @@ from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
     TableDataStore, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
-from kodexa.model.model import AssistantEvent, ContentObjectReference, DocumentStore
+from kodexa.model import AssistantEvent, ContentObjectReference, DocumentStore, ActorType
 
 logger = logging.getLogger('kodexa.testing')
 
@@ -299,8 +299,10 @@ class AssistantTestHarness:
 
                 if pipeline_context.output_document is not None and assistant_pipeline.write_back_to_store:
                     # We need to build the transition between the old and the new
-                    document_relationship = DocumentTransition(TransitionType.DERIVED, event.content_object.id, None,
-                                                               DocumentActor("testing", "assistant"))
+                    document_relationship = DocumentTransition()
+                    document_relationship.transition_type = TransitionType.derived
+                    document_relationship.source_content_object_id = event.content_object.id
+                    document_relationship.actor = DocumentActor(actorId="testing", actorType=ActorType.assistant)
 
                     store.add_related_document_to_family(event.document_family.id, document_relationship,
                                                          pipeline_context.output_document)

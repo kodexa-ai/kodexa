@@ -20,7 +20,8 @@ logger = logging.getLogger('kodexa.stores')
 
 
 class LocalDocumentStore(DocumentStore):
-    """A Local implementation of a DocumentStore that can be useful for notebooks and development but is not for Production use"""
+    """A Local implementation of a DocumentStore that can be useful for notebooks and development
+       but is not for Production use"""
 
     def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
         pass
