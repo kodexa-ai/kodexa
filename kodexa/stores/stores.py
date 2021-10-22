@@ -212,6 +212,7 @@ class DataStoreHelper:
                     return LocalDocumentStore(dict['data']['path'])
             elif 'MODEL' == dict['type']:
                 if 'ref' in dict:
+                    from kodexa import KodexaPlatform
                     return KodexaPlatform.get_object_instance(dict['ref'], RemoteModelStore)
                 else:
                     return LocalModelStore(dict['data']['path'])
@@ -591,6 +592,7 @@ class RemoteModelStore(ModelStore):
             'pageSize': 1000,
             'query': '*'
         }
+        from kodexa import KodexaPlatform
         get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/families",
                                                        params=params)
         if get_response is not None:
