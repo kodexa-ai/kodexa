@@ -419,10 +419,6 @@ class LabelStep(object):
         self.label = label
         self.remove = remove
 
-    def get_name(self):
-        """ """
-        return f"Remove label {self.label}" if self.remove else f"Add label {self.label}"
-
     def process(self, document: Document):
         """
 

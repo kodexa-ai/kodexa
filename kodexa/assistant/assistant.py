@@ -2,10 +2,11 @@
 Provides the high-level classes and definition for an Assistant that can be implemented in Kodexa and run on an
 instance of the Kodexa platform
 """
+import uuid
+from typing import List, Optional
 
-from kodexa import DocumentStore, KodexaPlatform
-from kodexa.model import ContentObject
-from kodexa.model.objects import BaseEvent, AssistantResponse
+from kodexa.model import ContentObject, DocumentStore, Document
+from kodexa.model.objects import BaseEvent, Store, Taxonomy
 
 
 class AssistantMetadata:
@@ -18,6 +19,74 @@ class AssistantMetadata:
         """The ID of the assistant"""
         self.assistant_name = assistant_name
         """The name of the assistant"""
+
+
+class AssistantPipeline:
+    """
+    The wrapper for a pipeline that they assistant will request to be executed
+    """
+
+    def __init__(self, pipeline, description=None, write_back_to_store: bool = False,
+                 data_store: Optional[Store] = None,
+                 taxonomies: Optional[List[Taxonomy]] = None):
+        self.pipeline = pipeline
+        """The pipeline to execute"""
+        self.description = description
+        """Optional description for the pipeline"""
+        self.write_back_to_store = write_back_to_store
+        """Should the document be written back to the store from which it was read"""
+        self.data_store = data_store
+        """Optionally the datastore that we want to extract the labelled content to"""
+        self.taxonomies = taxonomies
+        """Optionally a list of the taxonomies to use when extracting the labels"""
+
+
+class AssistantIntent:
+    """
+    The representation of an available intention from the assistant
+    """
+
+    def __init__(self, intent_id: str, text: str):
+        self.intent_id = intent_id
+        """The ID of the intention"""
+        self.text = text
+        """Text description of the intention"""
+
+
+class AssistantResponse:
+    """
+    An assistant response allows you to provide the response from an assistant to a specific
+    event.
+    """
+
+    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None,
+                 output_document: Document = None):
+        """
+        Initialize the response from the assistant
+
+        Args:
+            pipelines: zero or more pipelines that you want executed on the content object for which the
+                       event was raised
+            text: the to be presented with the response
+            available_intents: a list of the available intents that you can return for this document
+            output_document: the output document, if the assistant has created a document directly
+        """
+        if available_intents is None:
+            available_intents = []
+        if pipelines is None:
+            pipelines = []
+
+        self.pipelines = pipelines
+        """The list of pipelines that you wish to have executed against the content object from the event"""
+
+        self.text = text
+        """The text that will be provided back to the user from the assistant"""
+
+        self.available_intents = available_intents
+        """Any available intentions that the assistant will further respond to"""
+
+        self.output_document = output_document
+        """The output document, if the assistant has directly created one"""
 
 
 class AssistantContext:
@@ -93,10 +162,11 @@ class AssistantContext:
           The instance of the document store
         """
         for store in self.stores:
-            if event.document_family.store_ref == store.get_ref():
+            if event.document_family.store_ref == store.ref:
                 return store
 
         if event.document_family.store_ref is not None:
+            from kodexa import KodexaPlatform
             KodexaPlatform.get_object_instance(event.document_family.store_ref, DocumentStore)
 
         raise Exception(f"Unable to get store ref {event.document_family.store_ref}")

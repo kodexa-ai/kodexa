@@ -15,5 +15,5 @@ from .model import ContentFeature, ContentNode, Document, \
     DocumentFamily, DocumentMetadata, DocumentStore, ModelStore, SourceMetadata, Store, ContentObjectReference
 from .objects import ContentObject, ContentType, ModelContentMetadata, DocumentContentMetadata, \
     ContentEvent, TransitionType, DocumentActor, DocumentTransition, AssistantEvent, ActorType, StoreType, StorePurpose, \
-    Taxonomy, ExtensionPack, AssistantResponse, AssistantDefinition, AssistantPipeline, AssistantSchedule
+    Taxonomy, ExtensionPack, AssistantDefinition, AssistantSchedule
 from .persistence import SqliteDocumentPersistence, PersistenceManager

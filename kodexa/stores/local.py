@@ -8,13 +8,16 @@ import logging
 import os
 import shutil
 import tempfile
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import jsonpickle
+from pydantic import Field
 
 from kodexa.model import ContentEvent, ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, \
     ModelStore, Store
+from kodexa.model.objects import ObjectEventType
 
 logger = logging.getLogger('kodexa.stores')
 
@@ -23,47 +26,60 @@ class LocalDocumentStore(DocumentStore):
     """A Local implementation of a DocumentStore that can be useful for notebooks and development
        but is not for Production use"""
 
+    store_path: Optional[str] = Field(
+        None, description='The path to the local storage'
+    )
+
+    metastore: Optional[List] = Field(
+        None, description='The metadata for the store'
+    )
+
+    listeners: Optional[List] = Field(
+        None, description='Current local listeners'
+    )
+
+    index: Optional[int] = Field(
+        None, description='Current index'
+    )
+
     def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
         pass
 
     def delete(self, path: str):
         pass
 
-    def __init__(self, store_path: str = None, force_initialize: bool = False, mode: str = 'ALL', store_type='DOCUMENT',
-                 store_purpose='OPERATIONAL'):
-        super().__init__(store_type, store_purpose)
+    def __init__(self, *args, **kwargs):
+        if 'slug' not in kwargs:
+            kwargs['slug'] = 'local'
+        if 'type' not in kwargs:
+            kwargs['type'] = 'DOCUMENT'
+        if 'name' not in kwargs:
+            kwargs['name'] = 'Local Document Store'
+        if 'store_ref' not in kwargs:
+            kwargs['store_ref'] = 'local/local'
+        super().__init__(*args, **kwargs)
 
-        modes = ['ALL', 'ONLY_NEW']
-
-        if mode not in modes:
-            raise Exception(f"LocalDocumentStore mode must be one of {','.join(modes)}")
-
-        if store_path is None:
+        if self.store_path is None:
             self.store_path = tempfile.mkdtemp()
-            logger.info(f"Creating new local document store in {store_path} since no path was provided")
+            logger.info(f"Creating new local document store in {self.store_path} since no path was provided")
 
             # Create an empty index file
             self.metastore = []
             self.write_metastore()
-        else:
-            self.store_path: str = store_path
 
         self.index = 0
         self.metastore: List[DocumentFamily] = []
-        self.mode = mode
         self.listeners: List = []
-        self.store_type = store_type
-        self.store_purpose = store_purpose
 
         path = Path(self.store_path)
 
-        if force_initialize and path.exists():
-            shutil.rmtree(store_path)
+        if kwargs.get('force_initialize', False) and path.exists():
+            shutil.rmtree(self.store_path)
 
         if path.is_file():
             raise Exception("Unable to load store, since it is pointing to a file?")
         elif not path.exists():
-            logger.info(f"Creating new local document store in {store_path}")
+            logger.info(f"Creating new local document store in {self.store_path}")
             path.mkdir(parents=True)
 
             # Create an empty index file
@@ -72,7 +88,7 @@ class LocalDocumentStore(DocumentStore):
 
         self.read_metastore()
 
-        logger.info(f"Found {len(self.metastore)} documents in {store_path}")
+        logger.info(f"Found {len(self.metastore)} documents in {self.store_path}")
 
     def put_native(self, path: str, content: Any, force_replace=False):
         """
@@ -80,6 +96,7 @@ class LocalDocumentStore(DocumentStore):
         Args:
           path (str): The path to the native file
           content (Any): The content to store
+          force_replace (bool): Replace the object in the store
         Returns:
 
         """
@@ -91,7 +108,7 @@ class LocalDocumentStore(DocumentStore):
         family = self.get_family_by_path(path)
 
         if family is None:
-            family = DocumentFamily(path, self.get_ref())
+            family = DocumentFamily(path, self.store_ref)
             self.metastore.append(family)
 
         from kodexa.model import ContentType
@@ -103,8 +120,44 @@ class LocalDocumentStore(DocumentStore):
         document = Document()
         document.source.connector = "document-store"
         document.source.headers = {"ref": family.store_ref, "family": family.id, "id": native_content_object.id}
-        content_event = family.add_document(document)
+        content_event = self.add_document(family, document)
         document.to_kdxa(os.path.join(self.store_path, content_event.content_object.id) + ".kdxa")
+
+    def add_document(self, family, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
+        """
+
+        Args:
+          family: DocumentFamily:
+          document: Document:
+          transition: DocumentTransition:  (Default value = None)
+
+        Returns:
+          A new content event
+        """
+        new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})
+        new_content_object.id = str(uuid.uuid4())
+        new_content_object.store_ref = family.store_ref
+        new_content_object.metadata = document.metadata
+        new_content_object.labels = document.labels
+        new_content_object.mixins = document.get_mixins()
+
+        if family.content_objects is None:
+            family.content_objects = []
+        family.content_objects.append(new_content_object)
+
+        if transition is not None:
+            transition.destination_content_object_id = new_content_object.id
+
+            if family.transitions is None:
+                family.transitions = []
+
+            family.transitions.append(transition)
+
+        new_event = ContentEvent()
+        new_event.content_object = new_content_object
+        new_event.object_event_type = ObjectEventType.new_object
+        new_event.document_family = family
+        return new_event
 
     def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
             Any:
@@ -245,14 +298,6 @@ class LocalDocumentStore(DocumentStore):
         return self.metastore
 
     def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
-        """
-
-        Args:
-          path: str:
-
-        Returns:
-
-        """
         for family in self.metastore:
             if family.path == path:
                 return family
@@ -319,7 +364,7 @@ class LocalDocumentStore(DocumentStore):
         self.read_metastore()
         for family in self.metastore:
             if family.id == document_family_id:
-                new_event = family.add_document(document, transition)
+                new_event = self.add_document(family, document, transition)
                 document.to_kdxa(os.path.join(self.store_path, new_event.content_object.id) + ".kdxa")
                 self.write_metastore()
 
@@ -364,8 +409,8 @@ class LocalDocumentStore(DocumentStore):
 
         # We can only add a document if it doesn't already exist as a family
         if self.get_family_by_path(path) is None:
-            new_document_family = DocumentFamily(path, self.get_ref())
-            new_event = new_document_family.add_document(document)
+            new_document_family = DocumentFamily(path=path)
+            new_event = self.add_document(new_document_family, document)
             document.to_kdxa(os.path.join(self.store_path, new_event.content_object.id) + ".kdxa")
 
             self.metastore.append(new_document_family)
@@ -400,21 +445,39 @@ class LocalDocumentStore(DocumentStore):
 
 
 class LocalModelStore(ModelStore):
-    """ """
+    store_path: Optional[str] = Field(
+        None, description='The path to the local storage'
+    )
 
-    def __init__(self, store_path: str = None, force_initialize=False):
+    metastore: Optional[List] = Field(
+        None, description='The metadata for the store'
+    )
 
-        if store_path is None:
+    listeners: Optional[List] = Field(
+        None, description='Current local listeners'
+    )
+
+    index: Optional[int] = Field(
+        None, description='Current index'
+    )
+
+    def __init__(self, *args, **kwargs):
+        if 'slug' not in kwargs:
+            kwargs['slug'] = 'local'
+        if 'type' not in kwargs:
+            kwargs['type'] = 'DOCUMENT'
+        if 'name' not in kwargs:
+            kwargs['name'] = 'Local Document Store'
+        super().__init__(*args, **kwargs)
+
+        if self.store_path is None:
             self.store_path = tempfile.mkdtemp()
-            logger.info(f"Creating new local model store in {store_path} since no path was provided")
-        else:
-            self.store_path: str = store_path
+            logger.info(f"Creating new local model store in {self.store_path} since no path was provided")
 
         path = Path(self.store_path)
 
-        if force_initialize and path.exists():
-            shutil.rmtree(store_path)
-
+        if kwargs.get('force_initialize', False) and path.exists():
+            shutil.rmtree(self.store_path)
         if path.is_file():
             raise Exception("Unable to load store, since it is pointing to a file?")
         elif not path.exists():
@@ -469,8 +532,24 @@ class TableDataStore(Store):
 
     """
 
-    def __init__(self, columns=None, rows=None):
+    columns: Optional[List] = Field(
+        None, description='The columns in this store'
+    )
 
+    rows: Optional[List] = Field(
+        None, description='The rows in this store'
+    )
+
+    pipeline_context: Optional[Any] = Field(
+        None, description='The context for the pipeline'
+    )
+
+    def __init__(self, columns=None, rows=None, **data: Any):
+        data['slug'] = 'local'
+        data['type'] = 'TABLE'
+        data['version'] = '1.0.0'
+        data['name'] = 'Local Store'
+        super().__init__(**data)
         if rows is None:
             rows = []
         if columns is None:
@@ -478,9 +557,7 @@ class TableDataStore(Store):
         self.columns: List[str] = columns
         self.rows: List[List] = rows
 
-        from kodexa.pipeline import PipelineContext
-
-        self.pipeline_context: Optional[PipelineContext] = None
+        self.pipeline_context = None
 
     """
     Return the store as a dict for serialization

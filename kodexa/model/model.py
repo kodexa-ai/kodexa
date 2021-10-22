@@ -1717,6 +1717,7 @@ class Document(object):
 
         """
         new_document = Document()
+        new_document.source.original_filename = f'text-{uuid.uuid4()}'
         new_document.content_node = new_document.create_node(node_type='text', index=0)
         if text:
             if separator:
@@ -2104,42 +2105,6 @@ class Document(object):
         return self.labels
 
 
-#
-# Lets add a new method to the DocumentFamily to as a helper
-#
-def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
-    """
-
-    Args:
-      document: Document:
-      transition: DocumentTransition:  (Default value = None)
-
-    Returns:
-      A new content event
-    """
-    new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})
-    new_content_object.id = str(uuid.uuid4())
-    new_content_object.store_ref = self.store_ref
-    new_content_object.metadata = document.metadata
-    new_content_object.labels = document.labels
-    new_content_object.mixins = document.get_mixins()
-
-    self.content_objects.append(new_content_object)
-
-    if transition is not None:
-        transition.destination_content_object_id = new_content_object.id
-        self.transitions.append(transition)
-
-    new_event = ContentEvent()
-    new_event.content_object = new_content_object
-    new_event.object_event_type = ObjectEventType.new_object
-    new_event.document_family = self
-    return new_event
-
-
-DocumentFamily.add_document = add_document
-
-
 class DocumentStore(Store):
     """
     A document store supports storing, listing and retrieving Kodexa documents and document families
@@ -2176,9 +2141,9 @@ class DocumentStore(Store):
         """Replace the document in a specific content object in a document family.
 
         Args:
-          document_family(DocumentFamily): The document family
-          content_object_id(str): the ID of the ContentObject
-          document(Document): the document to replace the content object with
+          document_family (DocumentFamily): The document family
+          content_object_id (str): the ID of the ContentObject
+          document (Document): the document to replace the content object with
 
         Returns:
           The document family (or None if it wasn't found)

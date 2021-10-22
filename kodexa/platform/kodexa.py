@@ -22,16 +22,14 @@ from appdirs import AppDirs
 from requests import Response
 from rich import print
 
-from kodexa import RemoteDataStore
 from kodexa.assistant import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
-from kodexa.model.objects import AssistantDefinition, Action
+from kodexa.model.objects import AssistantDefinition, Action, Taxonomy
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
-from kodexa.stores import RemoteDocumentStore
+from kodexa.stores import RemoteDocumentStore, RemoteDataStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
-from kodexa.taxonomy import Taxonomy
 
 logger = logging.getLogger('kodexa.platform')
 
@@ -90,7 +88,7 @@ class PipelineMetadataBuilder:
         """
         self.pipeline = pipeline
 
-    def build_steps(self, pipeline_metadata: Dict):
+    def build_steps(self, pipeline_metadata: PipelineMetadata):
         """
         Build up the pipeline metadata definition (extending the argument) based on the pipeline.
 
@@ -110,7 +108,7 @@ class PipelineMetadataBuilder:
 
             if isinstance(pipeline_store.store, RemoteDocumentStore):
                 pipeline_metadata.metadata.stores.append(
-                    {"name": pipeline_store.name, "ref": pipeline_store.store.get_ref(), "storeType": "DOCUMENT"})
+                    {"name": pipeline_store.name, "ref": pipeline_store.store.ref, "storeType": "DOCUMENT"})
             else:
                 raise Exception("Pipeline refers to a non-remote store, deployment of local stores is not supported")
 
@@ -440,8 +438,6 @@ class KodexaPlatform:
         metadata_object.name = name
         metadata_object.description = description
 
-        object_url = None
-
         from kodexa import RemoteDataStore
 
         if isinstance(kodexa_object, Pipeline):
@@ -583,16 +579,6 @@ class KodexaPlatform:
 
     @staticmethod
     def undeploy(object_type: str, ref: str):
-        """
-
-        Args:
-          object_type: str:
-          ref: str:
-
-        Returns:
-
-        """
-
         object_type, object_type_metadata = resolve_object_type(object_type)
 
         url_ref = ref.replace(':', '/')
@@ -607,15 +593,6 @@ class KodexaPlatform:
 
     @staticmethod
     def delete_object(ref, object_type):
-        """
-
-        Args:
-          ref:
-          object_type:
-
-        Returns:
-
-        """
         # Generate a URL ref
         url_ref = ref.replace(':', '/')
         delete_response = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
@@ -679,15 +656,6 @@ class KodexaPlatform:
 
     @classmethod
     def delete(cls, object_type, ref):
-        """
-
-        Args:
-          object_type:
-          ref:
-
-        Returns:
-
-        """
         object_type, object_type_metadata = resolve_object_type(object_type)
         print(f"Deleting {object_type_metadata['name']} [bold]{ref}[/bold]")
 
@@ -699,16 +667,6 @@ class KodexaPlatform:
 
     @classmethod
     def login(cls, kodexa_url, username, password):
-        """
-
-        Args:
-          kodexa_url:
-          username:
-          password:
-
-        Returns:
-
-        """
         from requests.auth import HTTPBasicAuth
         obj_response = requests.get(f"{kodexa_url}/api/account/me/token",
                                     auth=HTTPBasicAuth(username, password),
@@ -738,15 +696,6 @@ class KodexaPlatform:
 
     @classmethod
     def reindex(cls, object_type, ref):
-        """
-
-        Args:
-          object_type:
-          ref:
-
-        Returns:
-
-        """
         object_type, object_type_metadata = resolve_object_type(object_type)
         print(f"Reindexing {object_type_metadata['name']} [bold]{ref}[/bold]")
         url_ref = ref.replace(':', '/')
@@ -804,17 +753,6 @@ class RemoteSession:
         self.cloud_session = Dict(json.loads(r.text))
 
     def execution_action(self, document, options, attach_source, context):
-        """
-
-        Args:
-          document:
-          options:
-          attach_source:
-          context:
-
-        Returns:
-
-        """
         files = {}
         if attach_source:
             logger.debug("Attaching source to call")
@@ -844,16 +782,6 @@ class RemoteSession:
         return execution
 
     def wait_for_execution(self, execution):
-        """
-        Wait for the remote execution to complete
-
-        Args:
-          execution:
-
-        Returns:
-
-        """
-
         status = execution.status
         while execution.status == "PENDING" or execution.status == "RUNNING":
             r = requests.get(
@@ -1112,16 +1040,6 @@ class RemoteAction:
         return f"Remote Action ({self.slug})"
 
     def process(self, document, context):
-        """
-        Process the remove action
-
-        Args:
-          document:
-          context:
-
-        Returns:
-
-        """
         cloud_session = RemoteSession("service", self.slug)
         cloud_session.start()
 
@@ -1177,14 +1095,6 @@ class ExtensionHelper:
 
     @staticmethod
     def load_metadata(path):
-        """
-
-        Args:
-          path:
-
-        Returns:
-
-        """
 
         if os.path.exists(os.path.join(path, 'dharma.json')):
             dharma_metadata_file = open(os.path.join(path, 'dharma.json'))
