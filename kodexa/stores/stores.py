@@ -405,11 +405,13 @@ class RemoteDocumentStore(DocumentStore):
             raise
 
     def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
+        from kodexa import KodexaPlatform
         get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/fs",
                                                        params={"path": path, "meta": True})
         return DocumentFamily.parse_obj(get_response.json()) if get_response is not None else None
 
     def count(self) -> int:
+        from kodexa import KodexaPlatform
         get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/families")
         if get_response is not None:
             return get_response.json()['totalElements']
@@ -417,6 +419,7 @@ class RemoteDocumentStore(DocumentStore):
             return 0
 
     def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
+        from kodexa import KodexaPlatform
         get_response = KodexaPlatform.get_client().get(
             f"api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content")
         if get_response is not None:
