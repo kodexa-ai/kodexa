@@ -10,6 +10,7 @@ from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentT
     TableDataStore, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
 from kodexa.model import AssistantEvent, ContentObjectReference, DocumentStore, ActorType
+from kodexa.model.objects import ScheduledEvent
 
 logger = logging.getLogger('kodexa.testing')
 
@@ -255,7 +256,7 @@ class AssistantTestHarness:
 
         return self.assistant.process_event(assistant_event, assistant_context)
 
-    def test_scheduled_event(self, scheduled_event: AssistantEvent) -> AssistantResponse:
+    def test_scheduled_event(self, scheduled_event: ScheduledEvent) -> AssistantResponse:
         """
         Pass a scheduled event into the assistant
 

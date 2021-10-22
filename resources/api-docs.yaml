@@ -8353,24 +8353,29 @@ components:
               type: string
               description: The reference to the extension pack (if the metadata object
                 was created by an extension pack)
-            The assistant can be scheduled:
+            schedulable:
               type: boolean
-            The assistant is reactive to content changes:
+              description: The assistant can be scheduled
+            reactive:
               type: boolean
-            The implementation of the assistant:
+              description: The assistant is reactive to content changes
+            assistant:
               $ref: '#/components/schemas/AssistantImplementation'
-            Additional metadata for the assistant:
+            metadata:
               $ref: '#/components/schemas/AssistantMetadata'
-            Services used by the assistant:
+            services:
               type: array
+              description: Services used by the assistant
               items:
                 $ref: '#/components/schemas/SlugBasedMetadata'
-            Taxonomies that the assistant uses:
+            processingTaxonomies:
               type: array
+              description: Taxonomies that the assistant uses
               items:
                 $ref: '#/components/schemas/AssistantTaxonomy'
-            Options for the assistant:
+            options:
               type: array
+              description: Options for the assistant
               items:
                 $ref: '#/components/schemas/Option'
             additionalTaxonOptions:
@@ -8379,28 +8384,34 @@ components:
                 when the assistant is part of the project
               items:
                 $ref: '#/components/schemas/Option'
-            Event types that the assistant is able to response to:
+            eventTypes:
               type: array
+              description: Event types that the assistant is able to response to
               items:
                 $ref: '#/components/schemas/EventType'
             eventFilters:
               type: array
               items:
                 $ref: '#/components/schemas/EventFilter'
-            The default schedules that the assistant has:
+            defaultSchedules:
               type: array
+              description: The default schedules that the assistant has
               items:
                 $ref: '#/components/schemas/ScheduleDefinition'
-            The default subscriptions that the assistant has:
+            defaultSubscriptions:
               type: array
+              description: The default subscriptions that the assistant has
               items:
                 $ref: '#/components/schemas/EventSubscription'
-            The full description of the assistant:
+            fullDescription:
               type: string
-            A help URL where you can learn more about the assistant:
+              description: The full description of the assistant
+            helpUrl:
               type: string
-            The category of assistant:
+              description: A help URL where you can learn more about the assistant
+            category:
               type: string
+              description: The category of assistant
               enum:
                 - TASK
                 - DOCUMENT
@@ -8414,6 +8425,7 @@ components:
           type: string
         class:
           type: string
+      description: The implementation of the assistant
     AssistantMetadata:
       type: object
       properties:
@@ -8431,11 +8443,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Option'
+      description: Additional metadata for the assistant
     AssistantTaxonomy:
       type: object
       properties:
         ref:
           type: string
+      description: Taxonomies that the assistant uses
     Avatar:
       type: object
       properties:
@@ -8634,6 +8648,7 @@ components:
         type:
           type: string
           description: The type of subscription object
+      description: The default subscriptions that the assistant has
       discriminator:
         propertyName: type
         mapping:
@@ -8651,6 +8666,7 @@ components:
           type: string
         contentObject:
           type: boolean
+      description: Event types that the assistant is able to response to
     ExtensionPack:
       required:
         - description
@@ -8724,6 +8740,7 @@ components:
           type: string
         imageUrl:
           type: string
+      description: A list of associated tags
     MixinSubscription:
       required:
         - type
@@ -8956,6 +8973,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EventSubscription'
+      description: The assistants that will be created with the project template
     ProjectDashboard:
       type: object
       properties:
@@ -8969,6 +8987,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DashboardRow'
+      description: The dashboards that will be created with the project template
     ProjectStore:
       type: object
       properties:
@@ -8990,6 +9009,7 @@ components:
           enum:
             - OPERATIONAL
             - TRAINING
+      description: The stores that will be created with the project template
     ProjectTaxonomy:
       type: object
       properties:
@@ -9011,6 +9031,7 @@ components:
           description: The hierarchical structure of taxon's in this taxonomy
           items:
             $ref: '#/components/schemas/Taxon'
+      description: The taxonomies that will be created with the project template
     ProjectTemplate:
       required:
         - name
@@ -9025,26 +9046,32 @@ components:
               type: string
               description: The reference to the extension pack (if the metadata object
                 was created by an extension pack)
-            The stores that will be created with the project template:
+            stores:
               type: array
+              description: The stores that will be created with the project template
               items:
                 $ref: '#/components/schemas/ProjectStore'
-            The assistants that will be created with the project template:
+            assistants:
               type: array
+              description: The assistants that will be created with the project template
               items:
                 $ref: '#/components/schemas/ProjectAssistant'
-            The taxonomies that will be created with the project template:
+            taxonomies:
               type: array
+              description: The taxonomies that will be created with the project template
               items:
                 $ref: '#/components/schemas/ProjectTaxonomy'
-            The dashboards that will be created with the project template:
+            dashboards:
               type: array
+              description: The dashboards that will be created with the project template
               items:
                 $ref: '#/components/schemas/ProjectDashboard'
-            A help URL where you can learn more about the assistant:
+            helpUrl:
               type: string
-            The category of project template:
+              description: A help URL where you can learn more about the assistant
+            category:
               type: string
+              description: The category of project template
               enum:
                 - TASK
                 - DOCUMENT
@@ -9074,6 +9101,7 @@ components:
         nextEvent:
           type: string
           format: date-time
+      description: The default schedules that the assistant has
     SelectionOption:
       type: object
       properties:
@@ -9125,10 +9153,12 @@ components:
         publicAccess:
           type: boolean
           description: Is the metadata object publicly accessible by other organizations
-        URL of image for assistant:
+        imageUrl:
           type: string
-        A list of associated tags:
+          description: URL of image for assistant
+        metadataTag:
           type: array
+          description: A list of associated tags
           items:
             $ref: '#/components/schemas/MetadataTag'
       discriminator:
@@ -10913,18 +10943,23 @@ components:
     QueryContext:
       type: object
       properties:
-        Page size (default 20):
+        pageSize:
           type: integer
+          description: Page size (default 20)
           format: int32
-        Page number (default 1):
+        page:
           type: integer
+          description: Page number (default 1)
           format: int32
-        Sorts to apply:
+        sort:
           type: string
-        Simple filter to apply:
+          description: Sorts to apply
+        filter:
           type: string
-        Simple query to apply (if available):
+          description: Simple filter to apply
+        query:
           type: string
+          description: Simple query to apply (if available)
     PageUser:
       type: object
       properties:
@@ -10950,11 +10985,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     Pageable:
@@ -11009,11 +11044,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageTaxonomy:
@@ -11041,11 +11076,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageStore:
@@ -11073,11 +11108,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageDocumentFamily:
@@ -11105,11 +11140,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     AssistantEvent:
@@ -11247,11 +11282,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageSession:
@@ -11279,11 +11314,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageExecution:
@@ -11311,11 +11346,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageRole:
@@ -11343,11 +11378,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageProject:
@@ -11375,11 +11410,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageAssistant:
@@ -11407,11 +11442,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PagePlatformEvent:
@@ -11439,11 +11474,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageProjectTemplate:
@@ -11471,11 +11506,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PagePipeline:
@@ -11503,11 +11538,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageOrganization:
@@ -11535,11 +11570,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageModelRuntime:
@@ -11567,11 +11602,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageMembership:
@@ -11599,11 +11634,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageLabel:
@@ -11631,11 +11666,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageExtensionPack:
@@ -11663,11 +11698,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageDashboard:
@@ -11695,11 +11730,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageCredential:
@@ -11727,11 +11762,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageAssistantDefinition:
@@ -11759,11 +11794,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageAction:
@@ -11791,11 +11826,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     AccessTokenDetails:
@@ -11836,11 +11871,11 @@ components:
           type: boolean
         last:
           type: boolean
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     BulkDelete:
