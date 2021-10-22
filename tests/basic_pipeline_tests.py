@@ -33,10 +33,10 @@ def test_simplified_remote_action_reference():
 
 def test_basic_local_document_store():
     JSON_STORE = "/tmp/test-json-store.jsonkey"
-    document_store = LocalDocumentStore(JSON_STORE, force_initialize=True)
+    document_store = LocalDocumentStore(store_path=JSON_STORE, force_initialize=True)
     document_store.put("test.doc", create_document())
 
-    new_document_store = LocalDocumentStore(JSON_STORE)
+    new_document_store = LocalDocumentStore(store_path=JSON_STORE)
 
     assert (new_document_store.count() == 1)
 
@@ -49,7 +49,7 @@ def test_co():
 
 
 def test_pipeline_example():
-    document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
+    document_store = LocalDocumentStore()
     document_store.put("test.doc", create_document())
 
     pipeline = Pipeline(document_store)
@@ -101,9 +101,9 @@ def test_enabled_steps():
 
 
 def test_function_step_with_context():
-    document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
+    document_store = LocalDocumentStore()
     document_store.put("test.doc", create_document())
-    new_document_store = LocalDocumentStore("/tmp/test-json-store2", force_initialize=True)
+    new_document_store = LocalDocumentStore()
 
     def my_function(doc, context):
         doc.metadata.cheese = context.execution_id
@@ -123,9 +123,9 @@ def test_function_step_with_context():
 
 
 def test_function_step():
-    document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
+    document_store = LocalDocumentStore()
     document_store.put("test.doc", create_document())
-    new_document_store = LocalDocumentStore("/tmp/test-json-store2", force_initialize=True)
+    new_document_store = LocalDocumentStore()
 
     def my_function(doc):
         doc.metadata.cheese = "fishstick"
@@ -200,7 +200,7 @@ def test_function_step_with_exception():
 
 
 def test_table_stores_with_extractor():
-    document_store = LocalDocumentStore("/tmp/test-json-store", force_initialize=True)
+    document_store = LocalDocumentStore()
     document_store.put("test.doc", create_document())
     pipeline = Pipeline(document_store, stop_on_exception=False)
     pipeline.add_store('output', TableDataStore(columns=['cheese']))

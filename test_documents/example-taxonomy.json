@@ -1,6 +1,8 @@
 {
   "taxonomyType": "CONTENT",
   "enabled": true,
+  "slug": "demo",
+  "name": "demo",
   "ref": "kodexa-demo/8a8a8319773af8f201773f92170c0028-content:1.0.0",
   "taxons": [
     {

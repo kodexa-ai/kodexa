@@ -16,4 +16,3 @@ from .steps import NodeTagCopy, NodeTagger, RollupTransformer, TagsToKeyValuePai
     KodexaProcessingException
 from .stores import DataStoreHelper, LocalDocumentStore, LocalModelStore, RemoteDocumentStore, \
     RemoteModelStore, RemoteDataStore, TableDataStore
-from .taxonomy import RemoteTaxonomy, Taxon, Taxonomy

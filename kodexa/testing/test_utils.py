@@ -233,7 +233,8 @@ class AssistantTestHarness:
             content_provider: optional provider for content
         """
         self.assistant = assistant
-        self.stores = stores
+        from kodexa.model import Store
+        self.stores: List[Store] = stores
         self.kodexa_metadata_path = kodexa_metadata_path
         self.metadata = metadata
         self.content_provider = content_provider
@@ -330,7 +331,7 @@ class AssistantTestHarness:
           The instance of the document store
         """
         for store in self.stores:
-            if event.document_family.store_ref == store.get_ref():
+            if event.document_family.store_ref == store.ref:
                 return store
 
         raise Exception(f"Unable to get store ref {event.document_family.store_ref}")
