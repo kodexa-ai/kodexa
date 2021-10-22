@@ -88,7 +88,7 @@ class PipelineMetadataBuilder:
         """
         self.pipeline = pipeline
 
-    def build_steps(self, pipeline_metadata: PipelineMetadata):
+    def build_steps(self, pipeline_metadata: Dict):
         """
         Build up the pipeline metadata definition (extending the argument) based on the pipeline.
 
