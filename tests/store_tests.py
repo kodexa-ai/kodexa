@@ -18,7 +18,8 @@ def test_basic_local_document_store():
     assert family is not None
 
     lds.add_related_document_to_family(family.id,
-                                       DocumentTransition(TransitionType.DERIVED, family.get_latest_content().id),
+                                       DocumentTransition(transitionType=TransitionType.derived,
+                                                          sourceContentObjectId=family.get_latest_content().id),
                                        Document.from_text('Hello again world'))
 
     assert lds.get_family_by_path("my_document.txt").get_document_count() == 2

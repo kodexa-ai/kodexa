@@ -1,6 +1,6 @@
 from kodexa.assistant import Assistant, AssistantContext, AssistantResponse
 from kodexa.assistant.assistant import AssistantPipeline
-from kodexa.model.model import BaseEvent
+from kodexa.model.objects import BaseEvent
 from kodexa.pipeline import Pipeline
 
 

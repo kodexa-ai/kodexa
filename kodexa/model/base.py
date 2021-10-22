@@ -7,4 +7,4 @@ def to_camel(string: str) -> str:
 
 class KodexaBaseModel(BaseModel):
     class Config:
-        alias_generator = to_camel
+        use_enum_values = True
