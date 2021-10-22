@@ -8394,7 +8394,7 @@ components:
             The default subscriptions that the assistant has:
               type: array
               items:
-                $ref: '#/components/schemas/AssistantSubscription'
+                $ref: '#/components/schemas/EventSubscription'
             The full description of the assistant:
               type: string
             A help URL where you can learn more about the assistant:
@@ -8431,22 +8431,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Option'
-    AssistantSubscription:
-      required:
-        - type
-      type: object
-      properties:
-        id:
-          type: string
-        type:
-          type: string
-          description: The type of subscription object
-      discriminator:
-        propertyName: type
-        mapping:
-          path: '#/components/schemas/PathSubscription'
-          label: '#/components/schemas/LabelSubscription'
-          mixin: '#/components/schemas/MixinSubscription'
     AssistantTaxonomy:
       type: object
       properties:
@@ -8640,6 +8624,22 @@ components:
           type: string
         caseSensitive:
           type: boolean
+    EventSubscription:
+      required:
+        - type
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          description: The type of subscription object
+      discriminator:
+        propertyName: type
+        mapping:
+          path: '#/components/schemas/PathSubscription'
+          label: '#/components/schemas/LabelSubscription'
+          mixin: '#/components/schemas/MixinSubscription'
     EventType:
       type: object
       properties:
@@ -8708,7 +8708,7 @@ components:
         - type
       type: object
       allOf:
-        - $ref: '#/components/schemas/AssistantSubscription'
+        - $ref: '#/components/schemas/EventSubscription'
         - type: object
           properties:
             labels:
@@ -8729,7 +8729,7 @@ components:
         - type
       type: object
       allOf:
-        - $ref: '#/components/schemas/AssistantSubscription'
+        - $ref: '#/components/schemas/EventSubscription'
         - type: object
           properties:
             mixins:
@@ -8817,7 +8817,7 @@ components:
         - type
       type: object
       allOf:
-        - $ref: '#/components/schemas/AssistantSubscription'
+        - $ref: '#/components/schemas/EventSubscription'
         - type: object
           properties:
             path:
@@ -8955,7 +8955,7 @@ components:
           uniqueItems: true
           type: array
           items:
-            $ref: '#/components/schemas/AssistantSubscription'
+            $ref: '#/components/schemas/EventSubscription'
     ProjectDashboard:
       type: object
       properties:
@@ -9481,7 +9481,7 @@ components:
               description: Final statistics from the model
             deployment:
               $ref: '#/components/schemas/DeploymentMetadata'
-            An optional taxonomy that can be provided to support labeling:
+            taxonomy:
               $ref: '#/components/schemas/Taxonomy'
             additionalTaxonOptions:
               type: array
@@ -11126,8 +11126,6 @@ components:
                 type: object
             eventType:
               type: string
-            accessToken:
-              type: string
     BaseEvent:
       type: object
       properties:
@@ -11139,6 +11137,7 @@ components:
           assistant: '#/components/schemas/AssistantEvent'
           content: '#/components/schemas/ContentEvent'
           scheduled: '#/components/schemas/ScheduledEvent'
+          modelTrain: '#/components/schemas/ModelTrainEvent'
     ContentEvent:
       type: object
       allOf:
@@ -11154,8 +11153,10 @@ components:
               enum:
                 - NEW_OBJECT
                 - DERIVED_OBJECT
-            accessToken:
-              type: string
+    ModelTrainEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
     PlatformEvent:
       type: object
       properties:
@@ -11202,6 +11203,7 @@ components:
             - $ref: '#/components/schemas/BaseEvent'
             - $ref: '#/components/schemas/AssistantEvent'
             - $ref: '#/components/schemas/ContentEvent'
+            - $ref: '#/components/schemas/ModelTrainEvent'
             - $ref: '#/components/schemas/ScheduledEvent'
         processingTime:
           type: integer
@@ -11220,8 +11222,6 @@ components:
             nextEvent:
               type: string
               format: date-time
-            accessToken:
-              type: string
     PageDataObject:
       type: object
       properties:
