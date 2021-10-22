@@ -10,10 +10,10 @@ from .platform import KodexaPlatform, RemoteAction, RemotePipeline, RemoteSessio
 from .connectors import FileHandleConnector, FolderConnector, UrlConnector, add_connector, get_connector, \
     get_connectors, get_source, registered_connectors
 from .model import ContentEvent, ContentFeature, ContentNode, Document, DocumentActor, DocumentFamily, DocumentMetadata, \
-    DocumentStore, DocumentTransition, RemoteStore, SourceMetadata, TransitionType
+    DocumentStore, DocumentTransition, SourceMetadata, TransitionType
 from .pipeline import Pipeline, PipelineContext, PipelineStatistics
 from .steps import NodeTagCopy, NodeTagger, RollupTransformer, TagsToKeyValuePairExtractor, TextParser, \
     KodexaProcessingException
 from .stores import DataStoreHelper, LocalDocumentStore, LocalModelStore, RemoteDocumentStore, \
-    RemoteModelStore, RemoteTableDataStore, TableDataStore
+    RemoteModelStore, RemoteDataStore, TableDataStore
 from .taxonomy import RemoteTaxonomy, Taxon, Taxonomy
