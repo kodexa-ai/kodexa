@@ -12,18 +12,22 @@ import os
 import sys
 import time
 from json import JSONDecodeError
+from typing import Optional
 
 import jsonpickle
 import requests
 import yaml
 from addict import Dict
 from appdirs import AppDirs
+from requests import Response
 from rich import print
 
+from kodexa import RemoteDataStore
 from kodexa.assistant import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
-from kodexa.model import Document
+from kodexa.model import Document, ExtensionPack
+from kodexa.model.objects import AssistantDefinition, Action
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
@@ -156,37 +160,38 @@ DEFAULT_COLUMNS = {
 OBJECT_TYPES = {
     "extensionPacks": {
         "name": "extension pack",
-        "plural": "extension packs"
+        "plural": "extension packs",
+        "type": ExtensionPack
     },
     "pipelines": {
         "name": "pipeline",
-        "plural": "pipelines"
+        "plural": "pipelines",
+        "type": Pipeline
     },
     "assistants": {
         "name": "assistant",
-        "plural": "assistants"
+        "plural": "assistants",
+        "type": AssistantDefinition
     },
     "actions": {
         "name": "action",
-        "plural": "actions"
+        "plural": "actions",
+        "type": Action
     },
     "stores": {
         "name": "store",
         "plural": "stores"
     },
-    "connectors": {
-        "name": "connector",
-        "plural": "connectors"
-    },
     "taxonomies": {
         "name": "taxonomy",
-        "plural": "taxonomies"
+        "plural": "taxonomies",
+        "type": Taxonomy
     }
 }
 
 
 def resolve_object_type(obj_type):
-    """Takes part of an object type (ie. pipelin) and then resolves the object type (pipelines)
+    """Takes part of an object type (ie. pipeline) and then resolves the object type (pipelines)
 
     Args:
       obj_type: part of the object type
@@ -197,6 +202,10 @@ def resolve_object_type(obj_type):
     """
     hits = []
     keys = []
+
+    if not isinstance(obj_type, str):
+        obj_type = str(obj_type).lower()
+
     for target_type in OBJECT_TYPES.keys():
         if obj_type in target_type:
             hits.append(OBJECT_TYPES[target_type])
@@ -224,6 +233,27 @@ class KodexaClient:
         self.url = url
         self.access_token = access_token
 
+    def get(self, api_path: str, params: Optional[dict] = None) -> Optional[Response]:
+        if params is None:
+            params = {}
+
+        url = f"{self.url}/{api_path}"
+        logger.info(f"Accessing {url}")
+
+        get_response = requests.get(
+            url,
+            params=params,
+            headers={"x-access-token": self.access_token})
+
+        if get_response.status_code == 200:
+            return get_response
+        elif get_response.status_code == 404:
+            return None
+        else:
+            msg = "Get failed [" + get_response.text + "], response " + str(get_response.status_code)
+            logger.warning(msg)
+            raise Exception(msg)
+
 
 class KodexaPlatform:
     """
@@ -236,6 +266,10 @@ class KodexaPlatform:
     * Environment variables (KODEXA_ACCESS_TOKEN and KODEXA_URL)
 
     """
+
+    @staticmethod
+    def get_client() -> KodexaClient:
+        return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
     def get_access_token() -> str:
@@ -355,22 +389,32 @@ class KodexaPlatform:
         return [org_slug, slug, version]
 
     @staticmethod
-    def get_object_instance(ref: str, object_type: str):
+    def __build_object(ref, object_type_metadata, object_class):
+        from kodexa import KodexaPlatform
+        url = f"{KodexaPlatform.get_url()}/api/{object_type_metadata.plural}/{ref.replace(':', '/')}"
+
+        import requests
+        response = requests.get(url,
+                                headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                         "content-type": "application/json"})
+
+        return object_class.parse_obj(response.json())
+
+    @staticmethod
+    def get_object_instance(ref: str, object_type):
         object_type, object_type_metadata = resolve_object_type(object_type)
 
-        if object_type == 'taxonomies':
-            from kodexa import RemoteTaxonomy
-            return RemoteTaxonomy.get(ref)
+        if object_type_metadata.type is Taxonomy:
+            KodexaPlatform.__build_object(ref, object_type_metadata, Taxonomy)
         if object_type == 'stores':
             # We need to work out what type of store we have
             obj_info = KodexaPlatform.get_object(ref, object_type)
             if obj_info['storeType'] == 'TABLE':
-                from kodexa import RemoteTableDataStore
-                return RemoteTableDataStore(ref)
+                return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDataStore)
             if obj_info['storeType'] == 'DOCUMENT':
-                return RemoteDocumentStore(ref)
+                KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDocumentStore)
             if obj_info['storeType'] == 'MODEL':
-                return RemoteModelStore(ref)
+                KodexaPlatform.__build_object(ref, object_type_metadata, RemoteModelStore)
 
         # TODO - there are other things we need?
         raise Exception(f"Unable to get a local instance of {ref} of type {object_type}")
@@ -378,22 +422,6 @@ class KodexaPlatform:
     @staticmethod
     def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
                options=None, public=False, force_replace=False, dry_run=False, print_yaml=False):
-        """
-
-        Args:
-          ref: str:
-          kodexa_object:
-          name: str:  (Default value = None)
-          description: str:  (Default value = None)
-          options:  (Default value = None)
-          public:  (Default value = False)
-          force_replace:  (Default value = False)
-          dry_run:  (Default value = False)
-          print_yaml:  (Default value = False)
-
-        Returns:
-
-        """
 
         if '/' not in ref:
             logger.warning("A ref must be valid, i.e. org_slug/pipeline_slug:version")
@@ -414,7 +442,7 @@ class KodexaPlatform:
 
         object_url = None
 
-        from kodexa import RemoteTableDataStore
+        from kodexa import RemoteDataStore
 
         if isinstance(kodexa_object, Pipeline):
 
@@ -455,7 +483,7 @@ class KodexaPlatform:
             metadata_object.description = 'A model store' if metadata_object.description is None else metadata_object.description
             metadata_object.type = 'store'
             metadata_object.storeType = 'MODEL'
-        elif isinstance(kodexa_object, RemoteTableDataStore):
+        elif isinstance(kodexa_object, RemoteDataStore):
             object_url = 'stores'
             metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
             metadata_object.description = 'A table data store' if metadata_object.description is None else metadata_object.description
@@ -543,15 +571,7 @@ class KodexaPlatform:
 
     @staticmethod
     def list_objects(organization_slug, object_type):
-        """
 
-        Args:
-          organization_slug:
-          object_type:
-
-        Returns:
-
-        """
         list_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}",
                                      headers={"x-access-token": KodexaPlatform.get_access_token(),
                                               "content-type": "application/json"})
@@ -607,15 +627,6 @@ class KodexaPlatform:
 
     @staticmethod
     def get_object(ref, object_type):
-        """
-
-        Args:
-          ref:
-          object_type:
-
-        Returns:
-
-        """
         url_ref = ref.replace(':', '/')
         obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
@@ -628,16 +639,6 @@ class KodexaPlatform:
 
     @classmethod
     def get(cls, object_type, ref, path=None):
-        """
-
-        Args:
-          object_type:
-          ref:
-          path:  (Default value = None)
-
-        Returns:
-
-        """
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 

@@ -2,6 +2,8 @@ import random
 import uuid
 from typing import List, Optional
 
+from kodexa.model import Taxonomy
+
 
 class Taxon:
     """ """
@@ -67,91 +69,3 @@ class Taxon:
 
         return dict
 
-
-class Taxonomy:
-    """ """
-
-    def __init__(self, taxonomy_type='CONTENT', enabled: bool = True, ref: str = ""):
-        self.taxons: List[Taxon] = []
-        self.taxonomy_type = taxonomy_type
-        self.enabled = enabled
-        self.ref = ref
-
-    def add_taxon(self, label: str, name: str, id: Optional[str] = None, color: Optional[str] = None,
-                  value_path: Optional[str] = None, data_path: Optional[str] = None, options: List = None,
-                  metadata_path: Optional[str] = None, node_types: List = None, enabled: bool = True):
-        """
-
-        Args:
-          label: str: 
-          name: str: 
-          id: Optional[str]:  (Default value = None)
-          color: Optional[str]:  (Default value = None)
-          value_path: Optional[str]:  (Default value = None)
-          data_path: Optional[str]:  (Default value = None)
-          options: List:  (Default value = None)
-          metadata_path: Optional[str]:  (Default value = None)
-          node_types: List:  (Default value = None)
-          enabled: bool:  (Default value = True)
-
-        Returns:
-
-        """
-
-        new_taxon = Taxon(label, name, id=id, color=color, value_path=value_path, data_path=data_path,
-                          options=options, metadata_path=metadata_path, node_types=node_types, enabled=enabled)
-
-        self.taxons.append(new_taxon)
-        return new_taxon
-
-    @staticmethod
-    def from_dict(dict_taxonomy):
-        """
-
-        Args:
-          dict_taxonomy: 
-
-        Returns:
-
-        """
-        new_taxonomy = Taxonomy(ref=dict_taxonomy['ref'], enabled=dict_taxonomy['enabled'],
-                                taxonomy_type=dict_taxonomy['taxonomyType'])
-
-        if 'taxons' in dict_taxonomy:
-            for taxon_dict in dict_taxonomy['taxons']:
-                new_taxonomy.taxons.append(Taxon.from_dict(taxon_dict))
-
-        return new_taxonomy
-
-    def to_dict(self):
-        """ """
-        dict = {'taxonomyType': self.taxonomy_type, 'enabled': self.enabled, 'ref': self.ref, 'taxons': []}
-
-        for child in self.taxons:
-            dict['taxons'].append(child.to_dict())
-
-        return dict
-
-
-class RemoteTaxonomy:
-    """ """
-
-    @staticmethod
-    def get(ref: str):
-        """
-
-        Args:
-          ref: str: 
-
-        Returns:
-
-        """
-        from kodexa import KodexaPlatform
-        url = f"{KodexaPlatform.get_url()}/api/taxonomies/{ref.replace(':', '/')}"
-
-        import requests
-        response = requests.get(url,
-                                headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                         "content-type": "application/json"})
-
-        return Taxonomy.from_dict(response.json())

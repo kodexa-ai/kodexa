@@ -16,56 +16,7 @@ from addict import Dict
 
 from kodexa.mixins import registry
 from kodexa.model.objects import ModelContentMetadata, ContentObject, DocumentTransition, ContentEvent, \
-    ObjectEventType
-
-
-class Store:
-    """Base definition of a store in Kodexa (deprecated)"""
-
-    def get_name(self):
-        pass
-
-    def merge(self, other_store):
-        pass
-
-    def to_dict(self):
-        pass
-
-    def set_pipeline_context(self, pipeline_context):
-        pass
-
-    def count(self):
-        pass
-
-
-class RemoteStore:
-    """A remote store is one that refers to a Kodexa platform  instance"""
-
-    def get_ref(self) -> str:
-        """Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
-        :return: The reference
-
-        Args:
-
-        Returns:
-
-        """
-        pass
-
-    def delete_contents(self):
-        """Delete the contents of the store"""
-        from kodexa import KodexaPlatform
-        import requests
-        resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/fs",
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
-
-        if resp.status_code == 200:
-            return resp.content
-        else:
-            msg = f"Unable to delete families {resp.text}, status : {resp.status_code}"
-            raise Exception(msg)
+    ObjectEventType, Store, DocumentFamily
 
 
 class DocumentMetadata(Dict):
@@ -2153,154 +2104,43 @@ class Document(object):
         return self.labels
 
 
-class DocumentFamily:
-    """A document family represents a collection of related documents which together represent different views of the same
-    source material
-
-    This approach allows parsed representations to he linked to native, derived representations, labelled etc all to be
-    part of a family of content views that can be used together to understand the document and its content
-
+#
+# Lets add a new method to the DocumentFamily to as a helper
+#
+def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
     """
 
-    def __init__(self, path: str, store_ref: str):
-        """
-        Creates a new document family at the given path and optionally with the
-        document as its first entry
+    Args:
+      document: Document:
+      transition: DocumentTransition:  (Default value = None)
 
-        Args:
-            path (str): the path at which this document family exists (i.e. my-file.pdf)
-            store_ref (str): the reference to the store holding this family
-        """
-        self.id: str = str(uuid.uuid4())
-        """The ID of this document family"""
-        self.transitions: List[DocumentTransition] = []
-        """A list of the transitions within the document family"""
-        self.content_objects: List[ContentObject] = []
-        """A list of the content objects in the document family"""
-        self.path = path
-        """The path for this document family in the store (akin to a filename)"""
-        self.store_ref = store_ref
-        """The reference to the store containing the document family"""
-        self.classes: List[ContentClassification] = []
-        """The content classifications from the latest content object"""
-        self.mixins: List[str] = []
-        """The mixins from the latest content object"""
-        self.labels: List[str] = []
-        """The labels from the latest content object"""
+    Returns:
+      A new content event
+    """
+    new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})
+    new_content_object.id = str(uuid.uuid4())
+    new_content_object.store_ref = self.store_ref
+    new_content_object.metadata = document.metadata
+    new_content_object.labels = document.labels
+    new_content_object.mixins = document.get_mixins()
 
-    def add_document(self, document: Document, transition: Optional[DocumentTransition] = None) -> ContentEvent:
-        """
+    self.content_objects.append(new_content_object)
 
-        Args:
-          document: Document:
-          transition: DocumentTransition:  (Default value = None)
+    if transition is not None:
+        transition.destination_content_object_id = new_content_object.id
+        self.transitions.append(transition)
 
-        Returns:
-          A new content event
-        """
-        new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})
-        new_content_object.id = str(uuid.uuid4())
-        new_content_object.store_ref = self.store_ref
-        new_content_object.metadata = document.metadata
-        new_content_object.labels = document.labels
-        new_content_object.mixins = document.get_mixins()
-
-        self.content_objects.append(new_content_object)
-
-        if transition is not None:
-            transition.destination_content_object_id = new_content_object.id
-            self.transitions.append(transition)
-
-        new_event = ContentEvent()
-        new_event.content_object = new_content_object
-        new_event.object_event_type = ObjectEventType.new_object
-        new_event.document_family = self
-        return new_event
-
-    def get_latest_content(self) -> ContentObject:
-        """Returns the latest content object that we have in place
-
-        Returns:
-            The latest content object in the family
-        """
-        return self.content_objects[-1]
-
-    def get_content_objects(self) -> List[ContentObject]:
-        """Returns all the content objects in the family
-
-        Returns:
-            a list of the content objects
+    new_event = ContentEvent()
+    new_event.content_object = new_content_object
+    new_event.object_event_type = ObjectEventType.new_object
+    new_event.document_family = self
+    return new_event
 
 
-        """
-        return self.content_objects
-
-    def get_document_count(self) -> int:
-        """
-        Count of content objects in the family
-
-        Returns:
-          number of documents in the family
-
-        """
-        return len(self.content_objects)
-
-    @classmethod
-    def from_dict(cls, family_dict: dict):
-        """
-        Convert a dictionary from a REST call into the Document Family
-
-        Args:
-            param: the document family object as a dictionary
-
-        Returns:
-            An instance of the document family
-        """
-        document_family = DocumentFamily(family_dict['path'], family_dict['storeRef'])
-        document_family.id = family_dict['id']
-        document_family.content_objects = []
-
-        if 'classes' in family_dict:
-            for co_class in family_dict['classes']:
-                document_family.classes.append(ContentClassification.from_dict(co_class))
-
-        if 'labels' in family_dict:
-            document_family.labels = family_dict['labels']
-        else:
-            document_family.labels = []
-
-        if 'mixins' in family_dict:
-            document_family.mixins = family_dict['mixins']
-        else:
-            document_family.mixins = []
-
-        for co_dict in family_dict['contentObjects']:
-            document_family.content_objects.append(ContentObject.parse_obj(co_dict))
-        for transition_dict in family_dict['transitions']:
-            document_family.transitions.append(DocumentTransition.parse_obj(transition_dict))
-        return document_family
-
-    def to_dict(self) -> dict:
-        """
-        Convert the document family to a dictionary to match REST API
-
-        Returns:
-            dictionary of document family
-        """
-        return {
-            'id': self.id,
-            'storeRef': self.store_ref,
-            'path': self.path,
-            'contentObjects': [co.dict() for co in self.content_objects],
-            'transitions': [transition.dict() for transition in self.transitions]}
+DocumentFamily.add_document = add_document
 
 
-class DocumentStore:
-
-    def __init__(self, store_type='DOCUMENT', store_purpose='OPERATIONAL'):
-        self.store_type = store_type
-        self.store_purpose = store_purpose
-
+class DocumentStore(Store):
     """
     A document store supports storing, listing and retrieving Kodexa documents and document families
     """
@@ -2576,7 +2416,7 @@ class DocumentStore:
         return document
 
 
-class ModelStore:
+class ModelStore(Store):
     """A model store supports storing and retrieving of a ML models"""
 
     def get(self, path: str):
