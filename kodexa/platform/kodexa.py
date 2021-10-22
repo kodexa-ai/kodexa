@@ -26,7 +26,7 @@ from kodexa.assistant import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
-from kodexa.model.objects import AssistantDefinition, Action, Taxonomy
+from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
@@ -96,7 +96,7 @@ class PipelineMetadataBuilder:
         instance for execution
 
         Args:
-          pipeline_metadata: Dict: The dictionary that will hold the metadata represenation of the pipeline
+          pipeline_metadata: Dict: The dictionary that will hold the metadata representation of the pipeline
 
         Returns: The updated pipeline_metadata
 
@@ -179,6 +179,16 @@ OBJECT_TYPES = {
     "stores": {
         "name": "store",
         "plural": "stores"
+    },
+    "modelRuntimes": {
+        "name": "modelRuntime",
+        "plural": "modelRuntimes",
+        "type": ModelRuntime
+    },
+    "credentials": {
+        "name": "credential",
+        "plural": "credentials",
+        "type": Credential
     },
     "taxonomies": {
         "name": "taxonomy",
@@ -594,6 +604,7 @@ class KodexaPlatform:
     @staticmethod
     def delete_object(ref, object_type):
         # Generate a URL ref
+        object_type, object_type_metadata = resolve_object_type(object_type)
         url_ref = ref.replace(':', '/')
         delete_response = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
                                           headers={"x-access-token": KodexaPlatform.get_access_token(),
@@ -604,6 +615,7 @@ class KodexaPlatform:
 
     @staticmethod
     def get_object(ref, object_type):
+        object_type, object_type_metadata = resolve_object_type(object_type)
         url_ref = ref.replace(':', '/')
         obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
@@ -612,7 +624,11 @@ class KodexaPlatform:
             logger.warning(obj_response.text)
             raise Exception(f"Unable to get object {ref}")
         else:
-            return obj_response.json()
+            obj_json = obj_response.json()
+            if 'type' in object_type_metadata:
+                return object_type_metadata['type'].parse_obj(obj_json)
+            else:
+                return obj_json
 
     @classmethod
     def get(cls, object_type, ref, path=None):
