@@ -6,6 +6,7 @@ platform.
 from __future__ import annotations
 
 import errno
+import io
 import json
 import logging
 import os
@@ -26,7 +27,8 @@ from kodexa.assistant import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
-from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential
+from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, SessionEvent, \
+    ContentObject
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
@@ -1124,3 +1126,88 @@ class ExtensionHelper:
         else:
             raise Exception("Unable to find a kodexa.yml file describing your extension")
         return dharma_metadata
+
+
+class EventHelper:
+
+    def __init__(self, event: SessionEvent):
+        self.event: SessionEvent = event
+
+    def get_content_object(self, content_object_id: str):
+        logger.info(
+            f"Getting content object {content_object_id} in event {self.event.id} in execution {self.event.execution_id}")
+
+        co_response = requests.get(
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/objects/{content_object_id}",
+            headers={'x-access-token': KodexaPlatform.get_access_token()}, timeout=300)
+        if co_response.status_code != 200:
+            logger.error(f"Response {co_response.status_code} {co_response.text}")
+            raise Exception(f"Unable to find content object {content_object_id} in execution {self.event.execution_id}")
+        return io.BytesIO(co_response.content)
+
+    def put_content_object(self, content_object: ContentObject, content) -> ContentObject:
+        files = {
+            "content": content
+        }
+        data = {
+            "contentObjectJson": json.dumps(content_object.dict())
+        }
+        logger.info("Posting back content object to execution object")
+        co_response = requests.post(
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/objects",
+            data=data,
+            headers={'x-access-token': KodexaPlatform.get_access_token()},
+            files=files, timeout=300)
+
+        if co_response.status_code != 200:
+            logger.info("Unable to post back object")
+            logger.error(co_response.text)
+            raise Exception("Unable to post back content object")
+
+        logger.info("Object posted back")
+
+        return ContentObject.parse_obj(co_response.json())
+
+    def build_pipeline_context(self) -> PipelineContext:
+        context = PipelineContext(context={}, content_provider=self,
+                                  store_provider=self, execution_id=self.event.execution_id)
+
+        if self.event.store_ref and self.event.document_family_id:
+            logger.info("We have storeRef and document family")
+            rds: RemoteDocumentStore = KodexaPlatform.get_object_instance(self.event.store_ref, 'store')
+            document_family = rds.get_family(self.event.document_family_id)
+
+            context.document_family = document_family
+            context.document_store = rds
+
+        return context
+
+    def get_input_document(self, context):
+        for content_object in self.event.content_objects:
+
+            if content_object.id == self.event.input_id:
+                input_document_bytes = self.get_content_object(self.event.input_id)
+                logger.info("Loading KDDB document")
+                input_document = Document.from_kddb(input_document_bytes.read())
+                logger.info("Loaded KDDB document")
+                context.content_object = content_object
+                input_document.uuid = context.content_object.id
+
+                if content_object.store_ref is not None:
+                    context.document_store = KodexaPlatform.get_object_instance(content_object.store_ref, 'store')
+
+
+class SessionConnector:
+    event_helper = None
+
+    @classmethod
+    def get_name(cls):
+        return "cloud-content"
+
+    @classmethod
+    def get_source(cls, document):
+        if cls.event_helper is None:
+            raise Exception("The event_helper needs to be set to use this connector")
+
+        logger.info(f"Getting content object {document.source.original_path}")
+        return cls.event_helper.get_content_object(document.source.original_path)

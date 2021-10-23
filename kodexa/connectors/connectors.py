@@ -217,44 +217,6 @@ class UrlConnector:
 registered_connectors: Dict[str, Type] = {}
 
 
-class CacheConnector:
-    """A Cache Connector can be used to inject caching of content
-    in front of a connector, you must extend this type to implement
-    a cache
-
-    Args:
-
-    Returns:
-
-    """
-
-    def is_cached(self, source: SourceMetadata):
-        """
-
-        Args:
-          source: SourceMetadata:
-
-        Returns:
-
-        """
-        return False
-
-    def get_source(self, document: Document):
-        """
-
-        Args:
-          document: Document:
-
-        Returns:
-
-        """
-        pass
-
-
-# The registered caches
-registered_caches: List[CacheConnector] = []
-
-
 def get_connectors():
     """
 
@@ -267,34 +229,7 @@ def get_connectors():
     return registered_connectors.keys()
 
 
-def add_cache(cache_connector: CacheConnector):
-    """Register a cache connector, this can intercept a source request and
-    determine if there is already an object in a cache that holds it
-
-    Args:
-      cache_connector: return:
-      cache_connector: CacheConnector:
-
-    Returns:
-
-    """
-    registered_caches.append(cache_connector)
-
-
 def get_connector(connector: str, source: SourceMetadata):
-    """
-
-    Args:
-      connector: str:
-      source: SourceMetadata:
-
-    Returns:
-
-    """
-    # Adding support for cache connectors
-    for cache_connector in registered_caches:
-        if cache_connector.is_cached(source):
-            return cache_connector
 
     if connector in registered_connectors:
         logger.info(f"Getting registered connector {connector}")
@@ -305,26 +240,12 @@ def get_connector(connector: str, source: SourceMetadata):
 
 
 def add_connector(connector):
-    """
 
-    Args:
-      connector:
-
-    Returns:
-
-    """
     registered_connectors[connector.get_name()] = connector
 
 
 def get_source(document):
-    """
 
-    Args:
-      document:
-
-    Returns:
-
-    """
     connector = get_connector(document.source.connector,
                               document.source)
     return connector.get_source(document)
@@ -356,14 +277,7 @@ class DocumentStoreConnector(object):
 
     @staticmethod
     def get_source(document):
-        """
 
-        Args:
-          document:
-
-        Returns:
-
-        """
         from kodexa import RemoteDocumentStore
         remote_document_store = RemoteDocumentStore(document.source.headers['ref'])
         family = remote_document_store.get_family(document.source.headers['family'])
