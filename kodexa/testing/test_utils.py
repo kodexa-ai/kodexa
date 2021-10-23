@@ -422,7 +422,7 @@ class ExtensionPackUtil:
 
                 import types
 
-                def general_to_dict():
+                def general_to_dict(self):
                     return {
                         'ref': f'./{action_slug}',
                         'options': options
@@ -455,7 +455,7 @@ class ExtensionPackUtil:
         return AssistantTestHarness(assistant, stores, self.file_path, assistant_metadata)
 
     def get_assistant(self, assistant_slug, options=None):
-        """Create an instance of an assistant from the kodexa metadata
+        """Create an instance of an assistant from the Kodexa metadata
 
         Args:
           assistant_slug: param options:
