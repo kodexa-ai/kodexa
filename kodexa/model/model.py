@@ -15,8 +15,21 @@ import msgpack
 from addict import Dict
 
 from kodexa.mixins import registry
-from kodexa.model.objects import ModelContentMetadata, ContentObject, DocumentTransition, ContentEvent, \
-    ObjectEventType, Store, DocumentFamily
+from kodexa.model.objects import ModelContentMetadata, ContentObject, DocumentTransition, Store, DocumentFamily
+
+
+class Ref:
+
+    def __init__(self, ref: str):
+        self.ref: str = ref
+        first_part = ref
+        self.version:Optional[str] = None
+        self.slug:str = ""
+        self.org_slug:str = ""
+
+        if ':' in ref:
+            (first_part, self.version) = ref.split(":")
+        (self.org_slug, self.slug) = first_part.split("/")
 
 
 class DocumentMetadata(Dict):

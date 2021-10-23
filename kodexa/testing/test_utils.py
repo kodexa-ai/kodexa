@@ -422,7 +422,7 @@ class ExtensionPackUtil:
 
                 import types
 
-                def general_to_dict(self):
+                def general_to_dict():
                     return {
                         'ref': f'./{action_slug}',
                         'options': options
