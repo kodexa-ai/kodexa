@@ -10,7 +10,7 @@ from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentT
     TableDataStore, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
 from kodexa.model import AssistantEvent, ContentObjectReference, DocumentStore, ActorType
-from kodexa.model.objects import ScheduledEvent
+from kodexa.model.objects import ScheduledEvent, ExceptionDetails
 
 logger = logging.getLogger('kodexa.testing')
 
@@ -343,6 +343,22 @@ class OptionException(Exception):
     An exception that is raised when there is a problem with a requests option
     """
     pass
+
+
+class ExceptionBuilder:
+    """
+    A helper to build an exception details from the last exception
+    """
+
+    @staticmethod
+    def build_exception_details():
+        import sys
+        import better_exceptions
+        et, ev, tb = sys.exc_info()
+        return ExceptionDetails(**{'errorType': et.__name__, 'errorMessage': str(ev),
+                                                'message': "An unexpected exception has occurred",
+                                                'help': "\n".join(
+                                                    better_exceptions.format_exception(*sys.exc_info()))})
 
 
 class ExtensionPackUtil:

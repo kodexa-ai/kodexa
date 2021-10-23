@@ -27,7 +27,6 @@ setup(name='kodexa',
           'addict~=2.2.1',
           'requests',
           'msgpack~=1.0.0',
-          'kodexa-api~=4.0.0',
           'urllib3',
           'pyyaml',
           'ply',
@@ -38,7 +37,8 @@ setup(name='kodexa',
           'appdirs',
           'jsonpickle',
           'antlr4-python3-runtime',
-          'datamodel-code-generator'
+          'datamodel-code-generator',
+          'better-exceptions'
       ],
       entry_points="""
         [console_scripts]
