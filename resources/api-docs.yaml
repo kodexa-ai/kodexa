@@ -25,8 +25,6 @@ tags:
       platform
   - name: Roles
     description: Provides ability to interact with the roles on the platform
-  - name: Sessions
-    description: Provides ability to interact with the active sessions and executions
   - name: Dashboards
     description: Provides ability to interact with the dashboards that have been registered
   - name: Memberships
@@ -47,6 +45,8 @@ tags:
   - name: Project Templates
     description: Provides ability to interact with the project templates registered
       on the platform
+  - name: Executions
+    description: Provides ability to search and interact with executions
   - name: Labels
     description: Provides ability to interact with the labels on the platform
   - name: Platform Events
@@ -4038,6 +4038,64 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ExtensionPack'
+  /api/extensionPacks/{organizationSlug}/{slug}/{version}/_queueDetail:
+    put:
+      tags:
+        - Extension Packs
+      description: Purge the work queue for this extension pack
+      operationId: getQueueDetails
+      parameters:
+        - name: organizationSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/QueueDetail'
+  /api/extensionPacks/{organizationSlug}/{slug}/{version}/_purgeQueue:
+    put:
+      tags:
+        - Extension Packs
+      description: Purge the work queue for this extension pack
+      operationId: purgeQueue
+      parameters:
+        - name: organizationSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExtensionPack'
   /api/extensionPacks/{organizationSlug}/{slug}/{version}/_deploy:
     put:
       tags:
@@ -5767,177 +5825,6 @@ paths:
       responses:
         "200":
           description: OK
-  /api/sessions/{sessionId}/executions/{executionId}/stores/{storeId}:
-    get:
-      tags:
-        - Sessions
-      description: Get the data and structure of a session store
-      operationId: getExecutionStore
-      parameters:
-        - name: x-access-token
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: storeId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: executionId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SessionStore'
-    post:
-      tags:
-        - Sessions
-      description: Update a execution-based store content
-      operationId: updateExecutionStore
-      parameters:
-        - name: x-access-token
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: storeId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: executionId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SessionStore'
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SessionStore'
-  /api/sessions/{sessionId}/events:
-    post:
-      tags:
-        - Sessions
-      description: "Pass, and process, a new event in the session"
-      operationId: processEvent
-      parameters:
-        - name: x-access-token
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExecutionEvent'
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Execution'
-  /api/sessions/{id}/executions/{executionId}/logs:
-    get:
-      tags:
-        - Sessions
-      description: Get logs for the specified execution in the session
-      operationId: getExecutionLogs
-      parameters:
-        - name: x-access-token
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: executionId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                uniqueItems: true
-                type: array
-                items:
-                  $ref: '#/components/schemas/ExecutionLogEntry'
-    post:
-      tags:
-        - Sessions
-      description: Add log entries to an execution
-      operationId: addLogEntriesToExecution
-      parameters:
-        - name: x-access-token
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: executionId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/ExecutionLogEntry'
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Execution'
   /api/roles:
     get:
       tags:
@@ -7907,112 +7794,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PageDataObject'
-  /api/sessions:
-    get:
-      tags:
-        - Sessions
-      description: Get a list of the sessions by access token
-      operationId: listSessions
-      parameters:
-        - name: x-access-token
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: queryContext
-          in: query
-          required: true
-          schema:
-            $ref: '#/components/schemas/QueryContext'
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/PageSession'
-  /api/sessions/{sessionId}:
-    get:
-      tags:
-        - Sessions
-      description: Get the specific session
-      operationId: getSession
-      parameters:
-        - name: x-access-token
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Session'
-  /api/sessions/{id}/executions:
-    get:
-      tags:
-        - Sessions
-      description: Gets paginated list of executions in the session
-      operationId: listExecutions
-      parameters:
-        - name: x-access-token
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: queryContext
-          in: query
-          required: true
-          schema:
-            $ref: '#/components/schemas/QueryContext'
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/PageExecution'
-  /api/sessions/{id}/executions/{executionId}:
-    get:
-      tags:
-        - Sessions
-      description: Get the specified execution in the session
-      operationId: getExecution
-      parameters:
-        - name: x-access-token
-          in: header
-          required: false
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: executionId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Execution'
   /api/projects/{id}/assistants/{assistantId}/events:
     get:
       tags:
@@ -8042,6 +7823,24 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PagePlatformEvent'
+  /api/executions:
+    get:
+      tags:
+        - Executions
+      operationId: query
+      parameters:
+        - name: context
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/QueryContext'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageExecution'
   /api/events/{organizationSlug}:
     get:
       tags:
@@ -8386,13 +8185,10 @@ components:
                 $ref: '#/components/schemas/Option'
             eventTypes:
               type: array
-              description: Event types that the assistant is able to response to
+              description: Custom event types that the assistant is able to response
+                to
               items:
-                $ref: '#/components/schemas/EventType'
-            eventFilters:
-              type: array
-              items:
-                $ref: '#/components/schemas/EventFilter'
+                $ref: '#/components/schemas/CustomEvent'
             defaultSchedules:
               type: array
               description: The default schedules that the assistant has
@@ -8505,6 +8301,18 @@ components:
               type: string
               description: The reference to the extension pack (if the metadata object
                 was created by an extension pack)
+    CustomEvent:
+      type: object
+      properties:
+        name:
+          type: string
+        icon:
+          type: string
+        label:
+          type: string
+        contentObject:
+          type: boolean
+      description: Custom event types that the assistant is able to response to
     Dashboard:
       required:
         - name
@@ -8629,15 +8437,6 @@ components:
         path:
           type: string
           description: The path to the data
-    EventFilter:
-      type: object
-      properties:
-        eventType:
-          type: string
-        path:
-          type: string
-        caseSensitive:
-          type: boolean
     EventSubscription:
       required:
         - type
@@ -8655,18 +8454,6 @@ components:
           path: '#/components/schemas/PathSubscription'
           label: '#/components/schemas/LabelSubscription'
           mixin: '#/components/schemas/MixinSubscription'
-    EventType:
-      type: object
-      properties:
-        name:
-          type: string
-        icon:
-          type: string
-        label:
-          type: string
-        contentObject:
-          type: boolean
-      description: Event types that the assistant is able to response to
     ExtensionPack:
       required:
         - description
@@ -9614,8 +9401,6 @@ components:
         size:
           type: integer
           format: int64
-        storeRef:
-          type: string
         createdDate:
           type: string
           format: date-time
@@ -9624,6 +9409,8 @@ components:
           type: string
           format: date-time
           writeOnly: true
+        storeRef:
+          type: string
         documentFamilyId:
           type: string
       description: An ordered list of the content objects in the document family
@@ -10285,6 +10072,15 @@ components:
           $ref: '#/components/schemas/Organization'
         user:
           $ref: '#/components/schemas/User'
+    QueueDetail:
+      type: object
+      properties:
+        messageCount:
+          type: integer
+          format: int64
+        inflight:
+          type: integer
+          format: int64
     DeploymentOptions:
       type: object
       properties:
@@ -10450,26 +10246,20 @@ components:
           description: End position
           format: int32
       description: Entities identified in search content
-    SessionStore:
+    AssistantEvent:
       type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        storeType:
-          type: string
-          enum:
-            - DOCUMENT
-            - TABLE
-            - DICTIONARY
-            - MODEL
-        ref:
-          type: string
-        data:
-          type: object
-          additionalProperties:
-            type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          properties:
+            contentObject:
+              $ref: '#/components/schemas/ContentObject'
+            options:
+              type: object
+              additionalProperties:
+                type: object
+            eventType:
+              type: string
     AssistantExecution:
       type: object
       properties:
@@ -10507,9 +10297,17 @@ components:
             - FAILED
             - REQUESTED
             - SKIPPED
+            - CANCELLING
             - CANCELLED
         exceptionDetails:
           $ref: '#/components/schemas/ExceptionDetails'
+        event:
+          oneOf:
+            - $ref: '#/components/schemas/BaseEvent'
+            - $ref: '#/components/schemas/AssistantEvent'
+            - $ref: '#/components/schemas/ContentEvent'
+            - $ref: '#/components/schemas/ModelTrainEvent'
+            - $ref: '#/components/schemas/ScheduledEvent'
         response:
           $ref: '#/components/schemas/AssistantExecutionResponse'
         startDate:
@@ -10545,6 +10343,33 @@ components:
           type: array
           items:
             type: string
+    BaseEvent:
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          assistant: '#/components/schemas/AssistantEvent'
+          content: '#/components/schemas/ContentEvent'
+          scheduled: '#/components/schemas/ScheduledEvent'
+          modelTrain: '#/components/schemas/ModelTrainEvent'
+    ContentEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          properties:
+            contentObject:
+              $ref: '#/components/schemas/ContentObject'
+            documentFamily:
+              $ref: '#/components/schemas/DocumentFamily'
+            objectEventType:
+              type: string
+              enum:
+                - NEW_OBJECT
+                - DERIVED_OBJECT
     ExceptionDetails:
       type: object
       properties:
@@ -10582,6 +10407,96 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ValidationError'
+    Execution:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique ID of the document family
+        uuid:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        updatedOn:
+          type: string
+          format: date-time
+        orgSlug:
+          type: string
+        assistant:
+          $ref: '#/components/schemas/Assistant'
+        description:
+          type: string
+        targets:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionTarget'
+        session:
+          $ref: '#/components/schemas/Session'
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        processingTime:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum:
+            - PENDING
+            - RUNNING
+            - SUCCEEDED
+            - FAILED
+            - REQUESTED
+            - SKIPPED
+            - CANCELLING
+            - CANCELLED
+        exceptionDetails:
+          $ref: '#/components/schemas/ExceptionDetails'
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionStep'
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+        customOptions:
+          type: object
+          additionalProperties:
+            type: object
+        context:
+          type: object
+          additionalProperties:
+            type: object
+        childExecutions:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Execution'
+        stores:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionStore'
+        inputId:
+          type: string
+        outputId:
+          type: string
+        documentFamily:
+          $ref: '#/components/schemas/DocumentFamily'
+        numberOfSteps:
+          type: integer
+          format: int32
+        stepsCompleted:
+          type: integer
+          format: int32
+        statusText:
+          type: string
+        statusFull:
+          type: string
     ExecutionEvent:
       required:
         - id
@@ -10668,6 +10583,7 @@ components:
             - FAILED
             - REQUESTED
             - SKIPPED
+            - CANCELLING
             - CANCELLED
         exceptionDetails:
           $ref: '#/components/schemas/ExceptionDetails'
@@ -10730,95 +10646,6 @@ components:
           type: string
         containerName:
           type: string
-    Execution:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The unique ID of the document family
-        uuid:
-          type: string
-        createdOn:
-          type: string
-          format: date-time
-        updatedOn:
-          type: string
-          format: date-time
-        orgSlug:
-          type: string
-        assistant:
-          $ref: '#/components/schemas/Assistant'
-        description:
-          type: string
-        targets:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionTarget'
-        session:
-          $ref: '#/components/schemas/Session'
-        startDate:
-          type: string
-          format: date-time
-        endDate:
-          type: string
-          format: date-time
-        processingTime:
-          type: integer
-          format: int64
-        status:
-          type: string
-          enum:
-            - PENDING
-            - RUNNING
-            - SUCCEEDED
-            - FAILED
-            - REQUESTED
-            - SKIPPED
-            - CANCELLED
-        exceptionDetails:
-          $ref: '#/components/schemas/ExceptionDetails'
-        steps:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionStep'
-        parameters:
-          type: object
-          additionalProperties:
-            type: object
-        customOptions:
-          type: object
-          additionalProperties:
-            type: object
-        context:
-          type: object
-          additionalProperties:
-            type: object
-        childExecutions:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/Execution'
-        stores:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/SessionStore'
-        inputId:
-          type: string
-        outputId:
-          type: string
-        documentFamily:
-          $ref: '#/components/schemas/DocumentFamily'
-        numberOfSteps:
-          type: integer
-          format: int32
-        stepsCompleted:
-          type: integer
-          format: int32
-        statusText:
-          type: string
-        statusFull:
-          type: string
     ExecutionTarget:
       type: object
       properties:
@@ -10840,6 +10667,29 @@ components:
           type: array
           items:
             type: string
+    ModelTrainEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+    PreparedExecutionEvent:
+      type: object
+      properties:
+        execution:
+          $ref: '#/components/schemas/Execution'
+        event:
+          $ref: '#/components/schemas/ExecutionEvent'
+    ScheduledEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          properties:
+            lastEvent:
+              type: string
+              format: date-time
+            nextEvent:
+              type: string
+              format: date-time
     Session:
       required:
         - state
@@ -10868,29 +10718,26 @@ components:
         lastAccessed:
           type: string
           format: date-time
-    ExecutionLogEntry:
+    SessionStore:
       type: object
       properties:
         id:
           type: string
-          description: The unique ID of the document family
-        uuid:
+        name:
           type: string
-        createdOn:
+        storeType:
           type: string
-          format: date-time
-        updatedOn:
+          enum:
+            - DOCUMENT
+            - TABLE
+            - DICTIONARY
+            - MODEL
+        ref:
           type: string
-          format: date-time
-        entry:
-          type: string
-    PreparedExecutionEvent:
-      type: object
-      properties:
-        execution:
-          $ref: '#/components/schemas/Execution'
-        event:
-          $ref: '#/components/schemas/ExecutionEvent'
+        data:
+          type: object
+          additionalProperties:
+            type: object
     LoginRequest:
       required:
         - email
@@ -11003,11 +10850,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11062,11 +10909,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11094,11 +10941,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11126,11 +10973,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11158,62 +11005,17 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
           type: boolean
         empty:
           type: boolean
-    AssistantEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
-        - type: object
-          properties:
-            contentObject:
-              $ref: '#/components/schemas/ContentObject'
-            options:
-              type: object
-              additionalProperties:
-                type: object
-            eventType:
-              type: string
-    BaseEvent:
-      type: object
-      properties:
-        type:
-          type: string
-      discriminator:
-        propertyName: type
-        mapping:
-          assistant: '#/components/schemas/AssistantEvent'
-          content: '#/components/schemas/ContentEvent'
-          scheduled: '#/components/schemas/ScheduledEvent'
-          modelTrain: '#/components/schemas/ModelTrainEvent'
-    ContentEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
-        - type: object
-          properties:
-            contentObject:
-              $ref: '#/components/schemas/ContentObject'
-            documentFamily:
-              $ref: '#/components/schemas/DocumentFamily'
-            objectEventType:
-              type: string
-              enum:
-                - NEW_OBJECT
-                - DERIVED_OBJECT
-    ModelTrainEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
     PlatformEvent:
       type: object
       properties:
@@ -11252,6 +11054,7 @@ components:
             - FAILED
             - REQUESTED
             - SKIPPED
+            - CANCELLING
             - CANCELLED
         exceptionDetail:
           $ref: '#/components/schemas/ExceptionDetails'
@@ -11267,18 +11070,6 @@ components:
           format: int64
         documentFamily:
           $ref: '#/components/schemas/DocumentFamily'
-    ScheduledEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
-        - type: object
-          properties:
-            lastEvent:
-              type: string
-              format: date-time
-            nextEvent:
-              type: string
-              format: date-time
     PageDataObject:
       type: object
       properties:
@@ -11300,75 +11091,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        empty:
-          type: boolean
-    PageSession:
-      type: object
-      properties:
-        totalPages:
-          type: integer
-          format: int32
-        totalElements:
-          type: integer
-          format: int64
-        size:
-          type: integer
-          format: int32
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/Session'
-        number:
-          type: integer
-          format: int32
-        sort:
-          $ref: '#/components/schemas/Sort'
         pageable:
           $ref: '#/components/schemas/Pageable'
-        numberOfElements:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
-        empty:
-          type: boolean
-    PageExecution:
-      type: object
-      properties:
-        totalPages:
-          type: integer
-          format: int32
-        totalElements:
-          type: integer
-          format: int64
-        size:
-          type: integer
-          format: int32
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/Execution'
-        number:
-          type: integer
-          format: int32
-        sort:
-          $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
-        numberOfElements:
-          type: integer
-          format: int32
         first:
           type: boolean
         last:
@@ -11396,11 +11123,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11428,11 +11155,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11460,11 +11187,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11492,11 +11219,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11524,11 +11251,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11556,11 +11283,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11588,11 +11315,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11620,11 +11347,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11652,11 +11379,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11684,11 +11411,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11716,11 +11443,43 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+    PageExecution:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Execution'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/Sort'
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11748,11 +11507,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11780,11 +11539,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11812,11 +11571,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11844,11 +11603,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11889,11 +11648,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
