@@ -5861,7 +5861,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SessionEvent'
+              $ref: '#/components/schemas/Event'
         required: true
       responses:
         "200":
@@ -8388,11 +8388,7 @@ components:
               type: array
               description: Event types that the assistant is able to response to
               items:
-                $ref: '#/components/schemas/EventType'
-            eventFilters:
-              type: array
-              items:
-                $ref: '#/components/schemas/EventFilter'
+                $ref: '#/components/schemas/CustomEventDefinition'
             defaultSchedules:
               type: array
               description: The default schedules that the assistant has
@@ -8505,6 +8501,18 @@ components:
               type: string
               description: The reference to the extension pack (if the metadata object
                 was created by an extension pack)
+    CustomEventDefinition:
+      type: object
+      properties:
+        name:
+          type: string
+        icon:
+          type: string
+        label:
+          type: string
+        contentObject:
+          type: boolean
+      description: Event types that the assistant is able to response to
     Dashboard:
       required:
         - name
@@ -8629,15 +8637,6 @@ components:
         path:
           type: string
           description: The path to the data
-    EventFilter:
-      type: object
-      properties:
-        eventType:
-          type: string
-        path:
-          type: string
-        caseSensitive:
-          type: boolean
     EventSubscription:
       required:
         - type
@@ -8655,18 +8654,6 @@ components:
           path: '#/components/schemas/PathSubscription'
           label: '#/components/schemas/LabelSubscription'
           mixin: '#/components/schemas/MixinSubscription'
-    EventType:
-      type: object
-      properties:
-        name:
-          type: string
-        icon:
-          type: string
-        label:
-          type: string
-        contentObject:
-          type: boolean
-      description: Event types that the assistant is able to response to
     ExtensionPack:
       required:
         - description
@@ -8829,6 +8816,22 @@ components:
             $ref: '#/components/schemas/PossibleValue'
       description: This are additional properties that can be set on a label when
         the assistant is part of the project
+    Overlay:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the taxon
+        name:
+          type: string
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/OverlayCondition'
+      description: "Overlays provide the ability to apply validation, normalization\
+        \ and enrichment"
+    OverlayCondition:
+      type: object
     PathSubscription:
       required:
         - type
@@ -9406,6 +9409,12 @@ components:
               description: The hierarchical structure of taxon's in this taxonomy
               items:
                 $ref: '#/components/schemas/Taxon'
+            overlays:
+              type: array
+              description: "Overlays provide the ability to apply validation, normalization\
+              \ and enrichment"
+              items:
+                $ref: '#/components/schemas/Overlay'
             totalTaxons:
               type: integer
               description: The total number of taxons in the taxonomy
@@ -9433,7 +9442,7 @@ components:
           type: array
           items:
             type: string
-        allDocumentFamilies:
+        all:
           type: boolean
     ContentMetadata:
       type: object
@@ -9592,6 +9601,8 @@ components:
         size:
           type: integer
           format: int64
+        storeRef:
+          type: string
         createdDate:
           type: string
           format: date-time
@@ -9600,8 +9611,6 @@ components:
           type: string
           format: date-time
           writeOnly: true
-        storeRef:
-          type: string
         documentFamilyId:
           type: string
       description: An ordered list of the content objects in the document family
@@ -9848,7 +9857,7 @@ components:
       properties:
         targetStoreRef:
           type: string
-        allDocumentFamilies:
+        all:
           type: boolean
         documentFamilyIds:
           type: array
@@ -10448,6 +10457,20 @@ components:
           type: object
           additionalProperties:
             type: object
+    AssistantEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          properties:
+            contentObject:
+              $ref: '#/components/schemas/ContentObject'
+            options:
+              type: object
+              additionalProperties:
+                type: object
+            eventType:
+              type: string
     AssistantExecution:
       type: object
       properties:
@@ -10488,6 +10511,13 @@ components:
             - CANCELLED
         exceptionDetails:
           $ref: '#/components/schemas/ExceptionDetails'
+        event:
+          oneOf:
+            - $ref: '#/components/schemas/BaseEvent'
+            - $ref: '#/components/schemas/AssistantEvent'
+            - $ref: '#/components/schemas/ContentEvent'
+            - $ref: '#/components/schemas/ModelTrainEvent'
+            - $ref: '#/components/schemas/ScheduledEvent'
         response:
           $ref: '#/components/schemas/AssistantExecutionResponse'
         startDate:
@@ -10523,6 +10553,105 @@ components:
           type: array
           items:
             type: string
+    BaseEvent:
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          assistant: '#/components/schemas/AssistantEvent'
+          content: '#/components/schemas/ContentEvent'
+          scheduled: '#/components/schemas/ScheduledEvent'
+          modelTrain: '#/components/schemas/ModelTrainEvent'
+    ContentEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          properties:
+            contentObject:
+              $ref: '#/components/schemas/ContentObject'
+            documentFamily:
+              $ref: '#/components/schemas/DocumentFamily'
+            objectEventType:
+              type: string
+              enum:
+                - NEW_OBJECT
+                - DERIVED_OBJECT
+    Event:
+      required:
+        - id
+        - sessionId
+        - token
+        - type
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - START_EXECUTION
+            - STEP_UPDATE
+            - ASSISTANT_EVENT
+            - ASSISTANT_RESPONSE
+            - MODEL_TRAIN
+            - MODEL_INFER
+        executionId:
+          type: string
+        storeRef:
+          type: string
+        documentFamilyId:
+          type: string
+        sessionId:
+          type: string
+        token:
+          type: string
+        subType:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionStep'
+        assistant:
+          $ref: '#/components/schemas/AssistantExecution'
+        source:
+          type: object
+          additionalProperties:
+            type: object
+        payload:
+          type: object
+          additionalProperties:
+            type: object
+        contentObjects:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentObject'
+        inputId:
+          type: string
+        targetDeploymentType:
+          type: string
+          enum:
+            - KUBERNETES
+            - AWS_LAMBDA
+            - AZURE_CLOUD_FUNCTION
+            - NONE
+        target:
+          type: string
+        platformUrl:
+          type: string
+        log:
+          type: array
+          items:
+            type: string
+        debug:
+          type: boolean
+        created:
+          type: string
+          format: date-time
     ExceptionDetails:
       type: object
       properties:
@@ -10636,78 +10765,22 @@ components:
           type: string
         containerName:
           type: string
-    SessionEvent:
-      required:
-        - id
-        - sessionId
-        - token
-        - type
+    ModelTrainEvent:
       type: object
-      properties:
-        id:
-          type: string
-        type:
-          type: string
-          enum:
-            - START_EXECUTION
-            - STEP_UPDATE
-            - ASSISTANT_EVENT
-            - ASSISTANT_RESPONSE
-            - MODEL_TRAIN
-            - MODEL_INFER
-        executionId:
-          type: string
-        storeRef:
-          type: string
-        documentFamilyId:
-          type: string
-        sessionId:
-          type: string
-        token:
-          type: string
-        subType:
-          type: string
-        steps:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionStep'
-        assistant:
-          $ref: '#/components/schemas/AssistantExecution'
-        source:
-          type: object
-          additionalProperties:
-            type: object
-        payload:
-          type: object
-          additionalProperties:
-            type: object
-        contentObjects:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentObject'
-        inputId:
-          type: string
-        targetDeploymentType:
-          type: string
-          enum:
-            - KUBERNETES
-            - AWS_LAMBDA
-            - AZURE_CLOUD_FUNCTION
-            - NONE
-        target:
-          type: string
-        platformUrl:
-          type: string
-        log:
-          type: array
-          items:
-            type: string
-        debug:
-          type: boolean
-        created:
-          type: string
-          format: date-time
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+    ScheduledEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          properties:
+            lastEvent:
+              type: string
+              format: date-time
+            nextEvent:
+              type: string
+              format: date-time
     Execution:
       type: object
       properties:
@@ -10868,7 +10941,7 @@ components:
         execution:
           $ref: '#/components/schemas/Execution'
         event:
-          $ref: '#/components/schemas/SessionEvent'
+          $ref: '#/components/schemas/Event'
     LoginRequest:
       required:
         - email
@@ -10985,11 +11058,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     Pageable:
@@ -11044,11 +11117,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageTaxonomy:
@@ -11076,11 +11149,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageStore:
@@ -11108,11 +11181,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageDocumentFamily:
@@ -11140,58 +11213,13 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
-    AssistantEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
-        - type: object
-          properties:
-            contentObject:
-              $ref: '#/components/schemas/ContentObject'
-            options:
-              type: object
-              additionalProperties:
-                type: object
-            eventType:
-              type: string
-    BaseEvent:
-      type: object
-      properties:
-        type:
-          type: string
-      discriminator:
-        propertyName: type
-        mapping:
-          assistant: '#/components/schemas/AssistantEvent'
-          content: '#/components/schemas/ContentEvent'
-          scheduled: '#/components/schemas/ScheduledEvent'
-          modelTrain: '#/components/schemas/ModelTrainEvent'
-    ContentEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
-        - type: object
-          properties:
-            contentObject:
-              $ref: '#/components/schemas/ContentObject'
-            documentFamily:
-              $ref: '#/components/schemas/DocumentFamily'
-            objectEventType:
-              type: string
-              enum:
-                - NEW_OBJECT
-                - DERIVED_OBJECT
-    ModelTrainEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
     PlatformEvent:
       type: object
       properties:
@@ -11245,18 +11273,6 @@ components:
           format: int64
         documentFamily:
           $ref: '#/components/schemas/DocumentFamily'
-    ScheduledEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
-        - type: object
-          properties:
-            lastEvent:
-              type: string
-              format: date-time
-            nextEvent:
-              type: string
-              format: date-time
     PageDataObject:
       type: object
       properties:
@@ -11282,11 +11298,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageSession:
@@ -11314,11 +11330,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageExecution:
@@ -11346,11 +11362,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageRole:
@@ -11378,11 +11394,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageProject:
@@ -11410,11 +11426,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageAssistant:
@@ -11442,11 +11458,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PagePlatformEvent:
@@ -11474,11 +11490,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageProjectTemplate:
@@ -11506,11 +11522,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PagePipeline:
@@ -11538,11 +11554,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageOrganization:
@@ -11570,11 +11586,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageModelRuntime:
@@ -11602,11 +11618,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageMembership:
@@ -11634,11 +11650,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageLabel:
@@ -11666,11 +11682,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageExtensionPack:
@@ -11698,11 +11714,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageDashboard:
@@ -11730,11 +11746,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageCredential:
@@ -11762,11 +11778,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageAssistantDefinition:
@@ -11794,11 +11810,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     PageAction:
@@ -11826,11 +11842,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     AccessTokenDetails:
@@ -11871,11 +11887,11 @@ components:
           type: boolean
         last:
           type: boolean
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         empty:
           type: boolean
     BulkDelete:
