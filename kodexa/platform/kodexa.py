@@ -1133,6 +1133,14 @@ class EventHelper:
     def __init__(self, event: ExecutionEvent):
         self.event: ExecutionEvent = event
 
+    def log(self, message: str):
+        requests.post(
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/log",
+            [
+                {'entry': message}
+            ],
+            headers={'x-access-token': KodexaPlatform.get_access_token()}, timeout=300)
+
     def get_content_object(self, content_object_id: str):
         logger.info(
             f"Getting content object {content_object_id} in event {self.event.id} in execution {self.event.execution_id}")
