@@ -525,12 +525,6 @@ class KodexaPlatform:
         else:
             logger.info(f"Deploying {metadata_object.type} {ref}")
 
-            access_token = KodexaPlatform.get_access_token_details()
-
-            if organization_slug not in access_token.organizationSlugs:
-                logger.warning(f"You do not have access to the organization {organization_slug}")
-                raise Exception("Unable to deploy, no access to organization")
-
             if object_version:
                 url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}/{object_version}"
             else:
