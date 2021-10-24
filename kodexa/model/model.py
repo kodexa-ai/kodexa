@@ -27,6 +27,7 @@ class Ref:
         self.resource: Optional[str] = None
         self.slug: str = ""
         self.org_slug: str = ""
+
         if ':' in ref:
             (first_part, self.version) = ref.split(":")
 
@@ -34,6 +35,8 @@ class Ref:
                 (self.version, self.resource) = self.version.split('/')
 
         (self.org_slug, self.slug) = first_part.split("/")
+
+        self.object_ref = f"{self.org_slug}/{self.slug}:{self.version}" if self.version else f"{self.org_slug}/{self.slug}"
 
 
 class DocumentMetadata(Dict):
