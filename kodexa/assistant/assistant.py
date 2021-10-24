@@ -97,7 +97,7 @@ class AssistantContext:
     from kodexa.model import ContentEvent, DocumentStore
 
     def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = 'kodexa.yml',
-                 stores=None, content_provider=None):
+                 stores=None, content_provider=None, extension_pack_util=None):
         """
         Initialize the context based with a path to the kodexa file
 
@@ -106,11 +106,16 @@ class AssistantContext:
             path_to_kodexa_metadata (str): the path to the kodexa.yml (note it can also open a kodexa.json)
             stores: A list of the stores that are available to the assistant (note these are local stores usually)
             content_provider: the content provider will have a get/put content method to allow interaction with caches
+            extension_pack_util: If you provide the extension pack util we will ignore the path_to_kodexa_metadata and
+                                 use this
         """
         if stores is None:
             stores = []
         from kodexa.testing import ExtensionPackUtil
-        self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
+        if extension_pack_util is None:
+            self.extension_pack_util = ExtensionPackUtil(path_to_kodexa_metadata)
+        else:
+            self.extension_pack_util = extension_pack_util
         self.metadata: AssistantMetadata = metadata
         self.stores = stores
         self.content_provider = content_provider
