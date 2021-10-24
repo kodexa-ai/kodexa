@@ -23,12 +23,16 @@ class Ref:
     def __init__(self, ref: str):
         self.ref: str = ref
         first_part = ref
-        self.version:Optional[str] = None
-        self.slug:str = ""
-        self.org_slug:str = ""
-
+        self.version: Optional[str] = None
+        self.resource: Optional[str] = None
+        self.slug: str = ""
+        self.org_slug: str = ""
         if ':' in ref:
             (first_part, self.version) = ref.split(":")
+
+            if '/' in self.version:
+                (self.version, self.resource) = self.version.split('/')
+
         (self.org_slug, self.slug) = first_part.split("/")
 
 
