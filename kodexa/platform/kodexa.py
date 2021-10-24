@@ -27,7 +27,7 @@ from kodexa.assistant import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
-from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, Event, \
+from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, ExecutionEvent, \
     ContentObject
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
@@ -1130,8 +1130,8 @@ class ExtensionHelper:
 
 class EventHelper:
 
-    def __init__(self, event: Event):
-        self.event: Event = event
+    def __init__(self, event: ExecutionEvent):
+        self.event: ExecutionEvent = event
 
     def get_content_object(self, content_object_id: str):
         logger.info(
