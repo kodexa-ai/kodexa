@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import inspect
 import logging
-import os
 import sys
 import time
 import traceback
@@ -135,6 +134,16 @@ class PipelineContext:
         self.document_family = None
         self.content_object = None
         self.document_store = None
+        self.status_message = None
+        self.status_full_message = None
+        self.cancelled = False
+
+    def update_status(self, status_message: str, status_full_message: Optional[str] = None):
+        self.status_message = status_message
+        self.status_full_message = status_full_message
+
+    def is_cancelled(self) -> bool:
+        return self.cancelled
 
     def get_context(self) -> Dict:
         """ """
