@@ -14,5 +14,5 @@ from .model import ContentEvent, ContentFeature, ContentNode, Document, Document
 from .pipeline import Pipeline, PipelineContext, PipelineStatistics
 from .steps import NodeTagCopy, NodeTagger, RollupTransformer, TagsToKeyValuePairExtractor, TextParser, \
     KodexaProcessingException
-from .stores import DataStoreHelper, LocalDocumentStore, LocalModelStore, RemoteDocumentStore, \
+from .stores import LocalDocumentStore, LocalModelStore, RemoteDocumentStore, \
     RemoteModelStore, RemoteDataStore, TableDataStore

@@ -180,54 +180,14 @@ class RemoteDataStore(Store):
             raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
 
 
-class DataStoreHelper:
-    """
-    A small helper that can convert a dictionary back into a store
-    """
-
-    @staticmethod
-    def from_dict(dict):
-        """Build a new TableDataStore or DictDataStore from a dictionary.
-
-        Args:
-          dict: doc_dict: A dictionary representation of a Kodexa Document.
-
-        Returns:
-          TableDataStore, DictDataStore, or None: A TableDataStore or DictDataStore - driven from 'type' in doc_dict.
-          If 'type' is not present or does not align with one of these two types, None is returend.
-
-        >>> DataStoreHelper.from_dict(doc_dict)
-        """
-
-        if 'type' in dict:
-            if 'TABLE' == dict['type']:
-                columns = dict['data']['columns'] if 'columns' in dict['data'] else None
-                rows = dict['data']['rows'] if 'rows' in dict['data'] else None
-                return TableDataStore(columns=columns, rows=rows)
-            elif 'DOCUMENT' == dict['type']:
-                if 'ref' in dict:
-                    return RemoteDocumentStore(dict['ref'])
-                else:
-                    from kodexa import LocalDocumentStore
-                    return LocalDocumentStore(dict['data']['path'])
-            elif 'MODEL' == dict['type']:
-                if 'ref' in dict:
-                    from kodexa import KodexaPlatform
-                    return KodexaPlatform.get_object_instance(dict['ref'], RemoteModelStore)
-                else:
-                    return LocalModelStore(dict['data']['path'])
-            else:
-                return None
-        else:
-            logger.info("Unknown store")
-            return None
-
-
 class RemoteDocumentStore(DocumentStore):
     """
     Remote Document Stores provide you with all the capabilities of Document storage and relationships
     in an instance of the Kodexa platform
     """
+
+    def get_ref(self) -> str:
+        return self.ref
 
     def delete(self, path: str):
         from kodexa import KodexaPlatform
