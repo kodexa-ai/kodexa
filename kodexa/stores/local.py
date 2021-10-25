@@ -108,7 +108,7 @@ class LocalDocumentStore(DocumentStore):
         family = self.get_family_by_path(path)
 
         if family is None:
-            family = DocumentFamily(path, self.store_ref)
+            family = DocumentFamily(path=path)
             self.metastore.append(family)
 
         from kodexa.model import ContentType
