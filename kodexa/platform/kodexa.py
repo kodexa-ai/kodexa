@@ -1130,7 +1130,7 @@ class EventHelper:
     def log(self, message: str):
         requests.post(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/log",
-            [
+            json=[
                 {'entry': message}
             ],
             headers={'x-access-token': KodexaPlatform.get_access_token()}, timeout=300)
