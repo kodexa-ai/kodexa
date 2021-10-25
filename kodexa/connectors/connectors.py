@@ -282,7 +282,8 @@ class DocumentStoreConnector(object):
         family = remote_document_store.get_family(document.source.headers['family'])
         document_bytes = remote_document_store.get_source_by_content_object(family,
                                                                             ContentObject(
-                                                                                id=document.source.headers['id']))
+                                                                                **{'contentType': 'NATIVE', 'id':
+                                                                                    document.source.headers['id']}))
         if document_bytes is None:
             raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
         else:
