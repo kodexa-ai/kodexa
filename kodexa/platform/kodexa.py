@@ -401,7 +401,7 @@ class KodexaPlatform:
     @staticmethod
     def __build_object(ref, object_type_metadata, object_class):
         from kodexa import KodexaPlatform
-        url = f"{KodexaPlatform.get_url()}/api/{object_type_metadata.plural}/{ref.replace(':', '/')}"
+        url = f"{KodexaPlatform.get_url()}/api/{object_type_metadata['plural']}/{ref.replace(':', '/')}"
 
         import requests
         response = requests.get(url,
