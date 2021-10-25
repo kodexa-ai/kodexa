@@ -111,8 +111,10 @@ class LocalDocumentStore(DocumentStore):
             family = DocumentFamily(path=path)
             self.metastore.append(family)
 
-        from kodexa.model import ContentType
-        native_content_object = ContentObject(content_type=ContentType.NATIVE)
+        native_content_object = ContentObject(**{'contentType':'NATIVE'})
+        native_content_object.id = str(uuid.uuid4()).replace("-", "")
+        if family.content_objects is None:
+            family.content_objects = []
         family.content_objects.append(native_content_object)
         with open(os.path.join(self.store_path, native_content_object.id), 'wb') as file:
             file.write(content)
