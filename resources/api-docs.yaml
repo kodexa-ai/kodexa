@@ -10516,6 +10516,8 @@ components:
         - $ref: '#/components/schemas/BaseEvent'
         - type: object
           properties:
+            type:
+              type: string
             contentObject:
               $ref: '#/components/schemas/ContentObject'
             options:
@@ -10611,6 +10613,7 @@ components:
       properties:
         type:
           type: string
+          description: The type of the event
       discriminator:
         propertyName: type
         mapping:
@@ -10629,6 +10632,8 @@ components:
         - $ref: '#/components/schemas/BaseEvent'
         - type: object
           properties:
+            type:
+              type: string
             contentObject:
               $ref: '#/components/schemas/ContentObject'
             documentFamily:
@@ -10704,8 +10709,6 @@ components:
           type: string
         token:
           type: string
-        subType:
-          type: string
         steps:
           type: array
           items:
@@ -10727,23 +10730,10 @@ components:
             $ref: '#/components/schemas/ContentObject'
         inputId:
           type: string
-        targetDeploymentType:
-          type: string
-          enum:
-            - KUBERNETES
-            - AWS_LAMBDA
-            - AZURE_CLOUD_FUNCTION
-            - NONE
         target:
           type: string
         platformUrl:
           type: string
-        log:
-          type: array
-          items:
-            type: string
-        debug:
-          type: boolean
         created:
           type: string
           format: date-time
@@ -10828,12 +10818,18 @@ components:
       type: object
       allOf:
         - $ref: '#/components/schemas/BaseEvent'
+        - type: object
+          properties:
+            type:
+              type: string
     ScheduledEvent:
       type: object
       allOf:
         - $ref: '#/components/schemas/BaseEvent'
         - type: object
           properties:
+            type:
+              type: string
             lastEvent:
               type: string
               format: date-time
@@ -11112,11 +11108,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11131,24 +11127,24 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
     Sort:
       type: object
       properties:
         empty:
           type: boolean
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
     PageTeam:
       type: object
@@ -11171,11 +11167,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11203,11 +11199,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11235,11 +11231,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11267,11 +11263,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11350,11 +11346,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11382,11 +11378,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11414,11 +11410,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11446,11 +11442,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11478,11 +11474,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11510,11 +11506,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11542,11 +11538,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11574,11 +11570,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11606,11 +11602,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11638,11 +11634,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11670,11 +11666,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11702,11 +11698,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11734,11 +11730,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11766,11 +11762,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11798,11 +11794,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11830,11 +11826,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11862,11 +11858,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11894,11 +11890,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11933,11 +11929,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
