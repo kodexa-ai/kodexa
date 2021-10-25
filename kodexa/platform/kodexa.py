@@ -1152,7 +1152,7 @@ class EventHelper:
             "content": content
         }
         data = {
-            "contentObjectJson": json.dumps(content_object.dict())
+            "contentObjectJson": json.dumps(content_object.dict(by_alias=True))
         }
         logger.info("Posting back content object to execution object")
         co_response = requests.post(
