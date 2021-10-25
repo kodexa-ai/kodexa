@@ -112,7 +112,8 @@ class PipelineContext:
 
     def __init__(self, content_provider=None, store_provider=None,
                  existing_content_objects=None,
-                 context=None, execution_id=None):
+                 context=None, execution_id=None,
+                 status_handler=None, cancellation_handler=None):
         if content_provider is None:
             content_provider = InMemoryContentProvider()
         if store_provider is None:
@@ -134,16 +135,18 @@ class PipelineContext:
         self.document_family = None
         self.content_object = None
         self.document_store = None
-        self.status_message = None
-        self.status_full_message = None
-        self.cancelled = False
+        self.status_handler = status_handler
+        self.cancellation_handler = cancellation_handler
 
     def update_status(self, status_message: str, status_full_message: Optional[str] = None):
-        self.status_message = status_message
-        self.status_full_message = status_full_message
+        if self.status_handler is not None:
+            self.status_handler(status_message, status_full_message)
 
     def is_cancelled(self) -> bool:
-        return self.cancelled
+        if self.cancellation_handler is not None:
+            return self.cancellation_handler()
+        else:
+            return False
 
     def get_context(self) -> Dict:
         """ """
