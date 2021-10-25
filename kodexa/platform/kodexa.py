@@ -225,7 +225,7 @@ def resolve_object_type(obj_type):
         return keys[0], hits[0]
 
     if len(hits) == 0:
-        print(":exclaimation: Unable to find object type {obj_type}")
+        print(f":exclaimation: Unable to find object type {obj_type}")
         sys.exit(1)
     else:
         print(f":exclaimation: To many potential matches for object type ({','.join(keys)}")
