@@ -19,13 +19,6 @@ logger = logging.getLogger('kodexa.stores')
 class RemoteDataStore(Store):
     """ """
 
-    def __init__(self, ref: str, columns=None, **data: Any):
-        super().__init__(**data)
-        if columns is None:
-            columns = []
-        self.ref = ref
-        self.columns = columns
-
     def get_ref(self):
         """ """
         return self.ref
