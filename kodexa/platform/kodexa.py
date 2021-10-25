@@ -1212,6 +1212,8 @@ class EventHelper:
                 if content_object.store_ref is not None:
                     context.document_store = KodexaPlatform.get_object_instance(content_object.store_ref, 'store')
 
+                return input_document
+
 
 class SessionConnector:
     event_helper = None
