@@ -12,7 +12,7 @@ import os
 import tempfile
 import urllib
 from os.path import join
-from typing import Dict, List, Type
+from typing import Dict, Type
 
 import requests
 
@@ -230,7 +230,6 @@ def get_connectors():
 
 
 def get_connector(connector: str, source: SourceMetadata):
-
     if connector in registered_connectors:
         logger.info(f"Getting registered connector {connector}")
         return registered_connectors[connector]
@@ -240,12 +239,10 @@ def get_connector(connector: str, source: SourceMetadata):
 
 
 def add_connector(connector):
-
     registered_connectors[connector.get_name()] = connector
 
 
 def get_source(document):
-
     connector = get_connector(document.source.connector,
                               document.source)
     return connector.get_source(document)
@@ -279,14 +276,17 @@ class DocumentStoreConnector(object):
     def get_source(document):
 
         from kodexa import RemoteDocumentStore
-        remote_document_store = RemoteDocumentStore(document.source.headers['ref'])
+        from kodexa import KodexaPlatform
+        remote_document_store: RemoteDocumentStore = KodexaPlatform.get_object_instance(document.source.headers['ref'],
+                                                                                        'store')
         family = remote_document_store.get_family(document.source.headers['family'])
-        bytes = remote_document_store.get_source_by_content_object(family,
-                                                                   ContentObject(id=document.source.headers['id']))
-        if bytes is None:
+        document_bytes = remote_document_store.get_source_by_content_object(family,
+                                                                            ContentObject(
+                                                                                id=document.source.headers['id']))
+        if document_bytes is None:
             raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
         else:
-            return io.BytesIO(bytes)
+            return io.BytesIO(document_bytes)
 
 
 add_connector(FolderConnector)
