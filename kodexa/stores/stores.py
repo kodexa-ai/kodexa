@@ -545,7 +545,7 @@ class RemoteModelStore(ModelStore):
             content_object_response = requests.put(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/metadata",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
-                json=model_content_metadata.dict())
+                json=model_content_metadata.dict(by_alias=True))
 
             if content_object_response.status_code == 200:
                 return model_content_metadata
