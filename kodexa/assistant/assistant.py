@@ -172,7 +172,7 @@ class AssistantContext:
 
         if event.document_family.store_ref is not None:
             from kodexa import KodexaPlatform
-            KodexaPlatform.get_object_instance(event.document_family.store_ref, 'store')
+            return KodexaPlatform.get_object_instance(event.document_family.store_ref, 'store')
 
         raise Exception(f"Unable to get store ref {event.document_family.store_ref}")
 
