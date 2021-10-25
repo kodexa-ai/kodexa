@@ -408,7 +408,7 @@ class KodexaPlatform:
                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
                                          "content-type": "application/json"})
 
-        return object_class.parse_obj(response.json())
+        return object_class(**response.json())
 
     @staticmethod
     def get_object_instance(ref: str, object_type):
