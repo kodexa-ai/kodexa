@@ -1127,7 +1127,8 @@ class EventHelper:
     def __init__(self, event: ExecutionEvent):
         self.event: ExecutionEvent = event
 
-    def get_base_event(self, event_dict: Dict):
+    @staticmethod
+    def get_base_event(event_dict: Dict):
         if event_dict['type'] == 'modelTrain':
             return ModelTrainEvent(**event_dict)
         if event_dict['type'] == 'assistant':

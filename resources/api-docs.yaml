@@ -9660,17 +9660,11 @@ components:
           type: object
           additionalProperties:
             type: object
-        source:
-          $ref: '#/components/schemas/SourceMetadata'
         mixins:
           uniqueItems: true
           type: array
           items:
             type: string
-        contentMetadata:
-          type: object
-          additionalProperties:
-            type: object
         created:
           type: string
           format: date-time
@@ -9680,12 +9674,12 @@ components:
         size:
           type: integer
           format: int64
+        storeRef:
+          type: string
         createdDate:
           type: string
           format: date-time
           writeOnly: true
-        storeRef:
-          type: string
         modifiedDate:
           type: string
           format: date-time
@@ -9902,35 +9896,6 @@ components:
         name:
           type: string
       description: The labels from the latest content object in the family
-    SourceMetadata:
-      type: object
-      properties:
-        checksum:
-          type: string
-        created:
-          type: string
-        connector:
-          type: string
-        cid:
-          type: string
-        headers:
-          type: object
-          additionalProperties:
-            type: object
-        original_filename:
-          type: string
-        original_path:
-          type: string
-        last_modified:
-          type: string
-        mime_type:
-          type: string
-        lineage_document_uuid:
-          type: string
-        document_family_id:
-          type: string
-        source_document_uuid:
-          type: string
     BulkCopy:
       type: object
       properties:
@@ -11166,16 +11131,16 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
     Sort:
       type: object
       properties:
