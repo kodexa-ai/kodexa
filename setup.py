@@ -38,7 +38,9 @@ setup(name='kodexa',
           'jsonpickle',
           'antlr4-python3-runtime',
           'datamodel-code-generator',
-          'better-exceptions'
+          'better-exceptions',
+          'boto3',
+          'awslambdaric'
       ],
       entry_points="""
         [console_scripts]
