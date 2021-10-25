@@ -414,7 +414,7 @@ class KodexaPlatform:
     def get_object_instance(ref: str, object_type):
         object_type, object_type_metadata = resolve_object_type(object_type)
 
-        if object_type_metadata['type'] is Taxonomy:
+        if 'type' in object_type_metadata and object_type_metadata['type'] is Taxonomy:
             return KodexaPlatform.__build_object(ref, object_type_metadata, Taxonomy)
 
         if object_type == 'stores':
