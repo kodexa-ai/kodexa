@@ -6,6 +6,7 @@ This is the Kodexa CLI, it can be used to allow you to work with an instance of 
 
 It supports interacting with the API, listing and viewing components.  Note it can also be used to login and logout
 """
+import glob
 import json
 import logging
 import os
@@ -105,8 +106,10 @@ def push_model(_: Info, path: str, url: str, org: str, token: str):
     KodexaPlatform.deploy(ref, remote_model_store, force_replace=True)
 
     for path in model_meta["contents"]:
-        with open(path, 'rb') as path_content:
-            remote_model_store.put(path, path_content, replace=True)
+        for path_hit in glob.glob(path):
+            print(f"Uploading {path_hit}")
+            with open(path_hit, 'rb') as path_content:
+                remote_model_store.put(path_hit, path_content, replace=True)
 
     remote_model_store.set_content_metadata(ModelContentMetadata.parse_obj(model_meta['metadata']))
 
