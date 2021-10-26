@@ -23,7 +23,6 @@ from appdirs import AppDirs
 from requests import Response
 from rich import print
 
-from kodexa.assistant import Assistant
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
@@ -482,34 +481,34 @@ class KodexaPlatform:
 
         elif isinstance(kodexa_object, LocalDocumentStore) or isinstance(kodexa_object, RemoteDocumentStore):
             object_url = 'stores'
-            metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
-            metadata_object.description = 'A document store' if metadata_object.description is None else metadata_object.description
+            metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
+            metadata_object.description = 'A document store' if kodexa_object.description is None else kodexa_object.description
             metadata_object.type = 'store'
             metadata_object.storeType = 'DOCUMENT'
         elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
             object_url = 'stores'
-            metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
-            metadata_object.description = 'A model store' if metadata_object.description is None else metadata_object.description
+            metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
+            metadata_object.description = 'A model store' if kodexa_object.description is None else kodexa_object.description
             metadata_object.type = 'store'
             metadata_object.storeType = 'MODEL'
         elif isinstance(kodexa_object, RemoteDataStore):
             object_url = 'stores'
-            metadata_object.name = 'New Store' if metadata_object.name is None else metadata_object.name
-            metadata_object.description = 'A table data store' if metadata_object.description is None else metadata_object.description
+            metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
+            metadata_object.description = 'A table data store' if kodexa_object.description is None else kodexa_object.description
             metadata_object.type = 'store'
             metadata_object.storeType = 'TABLE'
         elif isinstance(kodexa_object, Taxonomy):
-            metadata_object.name = 'New Taxonomy' if metadata_object.name is None else metadata_object.name
-            metadata_object.description = 'A new taxonomy' if metadata_object.description is None else metadata_object.description
+            metadata_object.name = 'New Taxonomy' if kodexa_object.name is None else kodexa_object.name
+            metadata_object.description = 'A new taxonomy' if kodexa_object.description is None else kodexa_object.description
             object_url = 'taxonomies'
             metadata_object.type = 'taxonomy'
             metadata_object.enabled = kodexa_object.enabled
             metadata_object.taxonomyType = kodexa_object.taxonomy_type
             metadata_object.taxons = jsonpickle.decode(
                 jsonpickle.encode([taxon.to_dict() for taxon in kodexa_object.taxons], unpicklable=False))
-        elif isinstance(kodexa_object, Assistant):
-            metadata_object.name = 'New Assistant Definition' if metadata_object.name is None else metadata_object.name
-            metadata_object.description = 'A new assistant definition' if metadata_object.description is None else metadata_object.description
+        elif isinstance(kodexa_object, AssistantDefinition):
+            metadata_object.name = 'New Assistant Definition' if kodexa_object.name is None else kodexa_object.name
+            metadata_object.description = 'A new assistant definition' if kodexa_object.description is None else kodexa_object.description
             object_url = 'assistants'
             metadata_object.type = 'assistant'
 
