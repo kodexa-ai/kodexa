@@ -13,6 +13,7 @@ import os
 import os.path
 import tarfile
 from getpass import getpass
+from pathlib import Path
 
 import click
 from rich import print
@@ -108,8 +109,9 @@ def push_model(_: Info, path: str, url: str, org: str, token: str):
     for path in model_meta["contents"]:
         for path_hit in glob.glob(path):
             print(f"Uploading {path_hit}")
-            with open(path_hit, 'rb') as path_content:
-                remote_model_store.put(path_hit, path_content, replace=True)
+            if Path(path).is_file():
+                with open(path_hit, 'rb') as path_content:
+                    remote_model_store.put(path_hit, path_content, replace=True)
 
     remote_model_store.set_content_metadata(ModelContentMetadata.parse_obj(model_meta['metadata']))
 
@@ -223,11 +225,6 @@ def login(_: Info):
     Once successfully logged in, calls to remote actions, pipelines, and workflows will be made to the
     platform that was set via this login function and will use the stored PAT for authentication.
 
-    Args:
-      _: Info: 
-
-    Returns:
-
     """
     try:
         kodexa_url = input("Enter the Kodexa URL (https://platform.kodexa.com): ")
@@ -246,14 +243,8 @@ def login(_: Info):
 @click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
 @pass_info
 def document(_: Info, path: str):
-    """Build markdown documentation for this extension
-
-    Args:
-      _: Info: 
-      path: str: 
-
-    Returns:
-
+    """
+    Build markdown documentation for this extension
     """
     metadata = ExtensionHelper.load_metadata(path)
     print("Metadata loaded")
