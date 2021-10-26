@@ -76,7 +76,7 @@ def cli(info: Info, verbose: int):
 
 @click.option('--path', default=os.getcwd(), help='Path to folder containing kodexa.yml')
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
-@click.option('--org', help='The slug for the organization to deploy to')
+@click.option('--org', help='The slug for the organization to deploy to', required=True)
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @cli.command()
 @pass_info
@@ -96,24 +96,26 @@ def push_model(_: Info, path: str, url: str, org: str, token: str):
 
     slug = model_meta["slug"]
     version = model_meta["version"]
+    model_meta["type"] = "model"
 
     from kodexa import RemoteModelStore
     ref = f"{org}/{slug}:{version}"
-    remote_model_store = RemoteModelStore(ref)
+    model_meta['ref'] = ref
+    remote_model_store = RemoteModelStore.parse_obj(model_meta)
     KodexaPlatform.deploy(ref, remote_model_store, force_replace=True)
 
     for path in model_meta["contents"]:
         with open(path, 'rb') as path_content:
             remote_model_store.put(path, path_content, replace=True)
 
-    remote_model_store.set_content_metadata(ModelContentMetadata.from_dict(model_meta['metadata']))
+    remote_model_store.set_content_metadata(ModelContentMetadata.parse_obj(model_meta['metadata']))
 
     print("Pushed model :tada:")
 
 
 @click.option('--path', default=os.getcwd(), help='Path to folder containing kodexa.yml')
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
-@click.option('--org', help='The slug for the organization to deploy to')
+@click.option('--org', help='The slug for the organization to deploy to', required=True)
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @cli.command()
 @pass_info
@@ -138,25 +140,15 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 
 
 @cli.command()
-@click.argument('object_type')
-@click.argument('ref')
+@click.argument('object_type', required=True)
+@click.argument('ref', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--path', default=None, help='JQ path to content you want')
 @pass_info
 def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = None):
-    """List the instance of the object type
-
-    Args:
-      _: Info: 
-      object_type: str: 
-      ref: str: 
-      url: str: 
-      token: str: 
-      path: str:  (Default value = None)
-
-    Returns:
-
+    """
+    List the instance of the object type
     """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
@@ -164,24 +156,12 @@ def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = N
 
 
 @cli.command()
-@click.argument('object_type')
-@click.argument('ref')
+@click.argument('object_type', required=True)
+@click.argument('ref', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
-    """List the instance of the object type
-
-    Args:
-      _: Info: 
-      object_type: str: 
-      ref: str: 
-      url: str: 
-      token: str: 
-
-    Returns:
-
-    """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.reindex(object_type, ref)
@@ -191,16 +171,6 @@ def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
 @pass_info
 @click.option('--python/--no-python', default=False, help='Print out the header for a Python file')
 def platform(_: Info, python: bool):
-    """Get details of the instance of Kodexa you are using
-
-    Args:
-      _: Info: 
-      python: bool: 
-
-    Returns:
-
-    """
-
     platform_url = KodexaPlatform.get_url()
 
     if platform_url is not None:
@@ -225,18 +195,6 @@ def platform(_: Info, python: bool):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def delete(_: Info, object_type: str, ref: str, url: str, token: str):
-    """Delete object from the platform
-
-    Args:
-      _: Info: 
-      object_type: str: 
-      ref: str: 
-      url: str: 
-      token: str: 
-
-    Returns:
-
-    """
 
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
@@ -247,14 +205,8 @@ def delete(_: Info, object_type: str, ref: str, url: str, token: str):
 @click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
 @pass_info
 def metadata(_: Info, path: str):
-    """Load metadata
-
-    Args:
-      _: Info: 
-      path: str: 
-
-    Returns:
-
+    """
+    Load metadata
     """
     metadata = ExtensionHelper.load_metadata(path)
     print(f"Metadata loaded")
@@ -317,20 +269,7 @@ def document(_: Info, path: str):
 @click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
 def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
-    """Package the extension for Kodexa
 
-    Args:
-      _: Info: 
-      path: str: 
-      output: str: 
-      version: str: 
-      site: bool: 
-      sitedir: str: 
-      url: str: 
-
-    Returns:
-
-    """
     metadata_obj = ExtensionHelper.load_metadata(path)
     print("Preparing to pack")
     try:
