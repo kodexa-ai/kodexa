@@ -109,7 +109,7 @@ def push_model(_: Info, path: str, url: str, org: str, token: str):
     for path in model_meta["contents"]:
         for path_hit in glob.glob(path):
             print(f"Uploading {path_hit}")
-            if Path(path).is_file():
+            if Path(path_hit).is_file():
                 with open(path_hit, 'rb') as path_content:
                     remote_model_store.put(path_hit, path_content, replace=True)
 
