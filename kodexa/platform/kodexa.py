@@ -607,7 +607,7 @@ class KodexaPlatform:
                                                    "content-type": "application/json"})
         if delete_response.status_code != 200:
             logger.warning(delete_response.text)
-            raise Exception("Unable to list objects")
+            raise Exception(f"Unable to delete object {ref}")
 
     @staticmethod
     def get_object(ref, object_type):
