@@ -5089,6 +5089,37 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Store'
+  /api/stores/{orgSlug}/{slug}/{version}/train:
+    post:
+      tags:
+        - Stores
+      description: Train this model
+      operationId: getTaxonomiesByVersion
+      parameters:
+        - name: orgSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelTrainRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
   /api/stores/{orgSlug}/{slug}/{version}/families/{id}/searchContents:
     get:
       tags:
@@ -5454,6 +5485,32 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ContentObject'
+  /api/stores/{orgSlug}/{slug}/train:
+    post:
+      tags:
+        - Stores
+      description: Train this Model
+      operationId: getTaxonomies
+      parameters:
+        - name: orgSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelTrainRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
   /api/stores/{orgSlug}/{slug}/dataObjects:
     get:
       tags:
@@ -9544,6 +9601,27 @@ components:
                 when the model is part of the project
               items:
                 $ref: '#/components/schemas/Option'
+            lastTrainEvent:
+              $ref: '#/components/schemas/ModelTrainEvent'
+    ModelTrainEvent:
+      type: object
+      properties:
+        type:
+          type: string
+        modelStoreRef:
+          type: string
+        options:
+          type: object
+          additionalProperties:
+            type: object
+        trainingStoreRef:
+          type: string
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventSubscription'
+      description: If the model has been trained this will contain the details from
+        that train event
     ContentClassification:
       type: object
       properties:
@@ -9795,9 +9873,9 @@ components:
           type: string
           description: A label for the transition (this can be used later if we want
             to prune based on a label)
-        sourceContentObjectId:
-          type: string
         destinationContentObjectId:
+          type: string
+        sourceContentObjectId:
           type: string
       description: "Provides the definition of a transition for a document, where\
         \ a change was applied by an assistant, user or external process"
@@ -10379,6 +10457,22 @@ components:
           type: string
         organization:
           $ref: '#/components/schemas/Organization'
+    ModelTrainRequest:
+      required:
+        - options
+        - trainingStore
+      type: object
+      properties:
+        options:
+          type: object
+          additionalProperties:
+            type: object
+        trainingStore:
+          $ref: '#/components/schemas/Store'
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventSubscription'
     SearchContent:
       type: object
       properties:
@@ -10552,6 +10646,8 @@ components:
           type: object
           additionalProperties:
             type: object
+        modelTrain:
+          $ref: '#/components/schemas/ModelTrainExecution'
         customOptions:
           type: object
           additionalProperties:
@@ -10674,6 +10770,40 @@ components:
           type: array
           items:
             type: string
+    ModelTrainExecution:
+      type: object
+      properties:
+        serviceName:
+          type: string
+        containerName:
+          type: string
+        options:
+          type: object
+          additionalProperties:
+            type: object
+        optionTypes:
+          type: object
+          additionalProperties:
+            type: string
+        status:
+          type: string
+          enum:
+            - PENDING
+            - RUNNING
+            - SUCCEEDED
+            - FAILED
+            - REQUESTED
+            - SKIPPED
+            - CANCELLING
+            - CANCELLED
+        modelStoreRef:
+          type: string
+        trainingStoreRef:
+          type: string
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventSubscription'
     Session:
       required:
         - state
@@ -10869,6 +10999,8 @@ components:
             $ref: '#/components/schemas/ExecutionStep'
         assistant:
           $ref: '#/components/schemas/AssistantExecution'
+        modelTrain:
+          $ref: '#/components/schemas/ModelTrainExecution'
         source:
           type: object
           additionalProperties:
@@ -10893,16 +11025,6 @@ components:
         created:
           type: string
           format: date-time
-    ModelTrainEvent:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/BaseEvent'
-        - type: object
-          properties:
-            type:
-              type: string
-            storeRef:
-              type: string
     ScheduledEvent:
       type: object
       allOf:
@@ -11045,11 +11167,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11104,11 +11226,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11136,11 +11258,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11168,11 +11290,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11200,11 +11322,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11259,11 +11381,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11291,11 +11413,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11323,11 +11445,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11355,11 +11477,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11387,11 +11509,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11419,11 +11541,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11451,11 +11573,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11483,11 +11605,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11515,11 +11637,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11547,11 +11669,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11579,11 +11701,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11611,11 +11733,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11643,11 +11765,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11675,11 +11797,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11707,11 +11829,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11739,11 +11861,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11771,11 +11893,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11803,11 +11925,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
@@ -11842,11 +11964,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        pageable:
-          $ref: '#/components/schemas/Pageable'
         numberOfElements:
           type: integer
           format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
         first:
           type: boolean
         last:
