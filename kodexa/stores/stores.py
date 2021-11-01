@@ -457,17 +457,18 @@ class RemoteModelStore(ModelStore):
             files = {"file": content}
 
             if replace:
-                requests.delete(
+                delete_response = requests.delete(
                     f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
                     params={"path": path},
                     headers={"x-access-token": KodexaPlatform.get_access_token()})
+                logger.info(f"Deleting {path} ({delete_response.status_code})")
 
             content_object_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
                 params={"path": path},
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files)
-
+            logger.info(f"Uploaded {path} ({content_object_response.status_code})")
             if content_object_response.status_code == 200:
                 return DocumentFamily.parse_obj(content_object_response.json())
             elif content_object_response.status_code == 400:
