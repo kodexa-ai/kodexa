@@ -9875,9 +9875,9 @@ components:
           type: string
           description: A label for the transition (this can be used later if we want
             to prune based on a label)
-        destinationContentObjectId:
-          type: string
         sourceContentObjectId:
+          type: string
+        destinationContentObjectId:
           type: string
       description: "Provides the definition of a transition for a document, where\
         \ a change was applied by an assistant, user or external process"
@@ -10806,6 +10806,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EventSubscription'
+        exceptionDetails:
+          $ref: '#/components/schemas/ExceptionDetails'
     Session:
       required:
         - state
@@ -10985,6 +10987,7 @@ components:
             - ASSISTANT_EVENT
             - ASSISTANT_RESPONSE
             - MODEL_TRAIN
+            - MODEL_TRAIN_UPDATE
         executionId:
           type: string
         storeRef:
@@ -11203,9 +11206,9 @@ components:
       properties:
         empty:
           type: boolean
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
     PageTeam:
       type: object
