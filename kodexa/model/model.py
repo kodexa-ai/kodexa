@@ -1203,12 +1203,13 @@ class ContentNode(object):
 
         return value_strings
 
-    def get_related_tag_nodes(self, tag_name: str, include_children: bool = False):
+    def get_related_tag_nodes(self, tag_name: str, include_children: bool = False, tag_uuid=None):
         """Get the nodes for a specific tag name, grouped by uuid
 
         Args:
           tag_name (str): tag name
           include_children (bool): include the children of this node
+          tag_uuid (optional(str)): if set we will only get nodes related to this tag UUID
 
         Returns:
           a list of the tag content nodes
@@ -1227,6 +1228,9 @@ class ContentNode(object):
             tag_instances = tagged_node.get_tag(tag_name)
 
             for tag_instance in tag_instances:
+                if tag_uuid and tag_instance['uuid'] != tag_uuid:
+                    continue
+
                 if tag_instance['uuid'] not in node_groups:
                     node_groups[tag_instance['uuid']] = [tagged_node]
                 else:
