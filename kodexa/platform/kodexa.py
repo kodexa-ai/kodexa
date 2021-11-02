@@ -724,7 +724,8 @@ class KodexaPlatform:
 
     @classmethod
     def get_tempdir(cls):
-        return os.getenv('KODEXA_TMP', None)
+        import tempfile
+        return os.getenv('KODEXA_TMP', tempfile.gettempdir())
 
 
 class RemoteSession:
