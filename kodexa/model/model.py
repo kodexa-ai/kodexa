@@ -1159,21 +1159,27 @@ class ContentNode(object):
 
         return values
 
-    def get_related_tag_values(self, tag_name: str, include_children: bool = False, value_separator: str = ' '):
+    def get_related_tag_values(self, tag_name: str, include_children: bool = False, value_separator: str = ' ',
+                               tag_uuid=None):
         """Get the values for a specific tag name, grouped by uuid
 
         Args:
           tag_name (str): tag name
           include_children (bool): include the children of this node
           value_separator (str): the string to be used to join related tag values
+          tag_uuid (optional(str)): limit to the given tag uuid
 
         Returns:
           a list of the tag values
 
         """
 
-        def group_tag_values(group_dict, feature_val):
+        def group_tag_values(group_dict, feature_val, tag_uuid):
             # we know the names of all these tags are the same, but we want to group them if they share the same uuid
+
+            if feature_val['uuid'] != tag_uuid:
+                return
+
             if feature_val['uuid'] in value_groups.keys():
                 # we've seen this UUID - add it's value to the group
                 group_dict[feature_val['uuid']].append(feature_val['value'])
@@ -1194,7 +1200,7 @@ class ContentNode(object):
                     tag_feature_vals = [tag_feature_vals]
 
                 for v in tag_feature_vals:
-                    group_tag_values(value_groups, v)
+                    group_tag_values(value_groups, v, tag_uuid)
 
         value_strings = []
         for k in value_groups.keys():
