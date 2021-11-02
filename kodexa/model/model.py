@@ -14,7 +14,6 @@ from typing import Any, List, Optional
 import msgpack
 from addict import Dict
 
-from kodexa import KodexaPlatform
 from kodexa.mixins import registry
 from kodexa.model.objects import ModelContentMetadata, ContentObject, DocumentTransition, Store, DocumentFamily
 
@@ -2036,6 +2035,7 @@ class Document(object):
         else:
             # We will assume the input is of byte type
             import tempfile
+            from kodexa import KodexaPlatform
             fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False, dir=KodexaPlatform.get_tempdir())
             fp.write(input)
             fp.close()
