@@ -92,7 +92,7 @@ def push_model(_: Info, path: str, url: str, org: str, token: str):
 
     # We need to open the model.yml - upload the contents
     # and then update the metadata
-    with open(path+"/model.yml", "r") as model_meta_file:
+    with open(path + "/model.yml", "r") as model_meta_file:
         import yaml
         model_meta = yaml.safe_load(model_meta_file)
 
@@ -105,6 +105,10 @@ def push_model(_: Info, path: str, url: str, org: str, token: str):
     model_meta['ref'] = ref
     remote_model_store = RemoteModelStore.parse_obj(model_meta)
     KodexaPlatform.deploy(ref, remote_model_store, force_replace=True)
+
+    print("Deleting existing contents")
+    for path in remote_model_store.list_contents():
+        remote_model_store.delete(path)
 
     for path in model_meta["contents"]:
         for path_hit in glob.glob(path):
@@ -200,7 +204,6 @@ def platform(_: Info, python: bool):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def delete(_: Info, object_type: str, ref: str, url: str, token: str):
-
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.delete(object_type, ref)
@@ -263,7 +266,6 @@ def document(_: Info, path: str):
 @click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
 def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
-
     metadata_obj = ExtensionHelper.load_metadata(path)
     print("Preparing to pack")
     try:
