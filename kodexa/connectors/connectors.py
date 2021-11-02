@@ -191,7 +191,8 @@ class UrlConnector:
                 for header in document.source.headers:
                     opener.addheaders = [(header, document.source.headers[header])]
                 urllib.request.install_opener(opener)
-            with tempfile.NamedTemporaryFile(delete=True) as tmp_file:
+            from kodexa import KodexaPlatform
+            with tempfile.NamedTemporaryFile(delete=True, dir=KodexaPlatform.get_tempdir()) as tmp_file:
                 urllib.request.urlretrieve(document.source.original_path, tmp_file.name)
 
                 return open(tmp_file.name, 'rb')
