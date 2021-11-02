@@ -60,7 +60,8 @@ class LocalDocumentStore(DocumentStore):
         super().__init__(*args, **kwargs)
 
         if self.store_path is None:
-            self.store_path = tempfile.mkdtemp()
+            from kodexa import KodexaPlatform
+            self.store_path = tempfile.mkdtemp(dir=KodexaPlatform.get_tempdir())
             logger.info(f"Creating new local document store in {self.store_path} since no path was provided")
 
             # Create an empty index file
@@ -473,7 +474,8 @@ class LocalModelStore(ModelStore):
         super().__init__(*args, **kwargs)
 
         if self.store_path is None:
-            self.store_path = tempfile.mkdtemp()
+            from kodexa import KodexaPlatform
+            self.store_path = tempfile.mkdtemp(dir=KodexaPlatform.get_tempdir())
             logger.info(f"Creating new local model store in {self.store_path} since no path was provided")
 
         path = Path(self.store_path)

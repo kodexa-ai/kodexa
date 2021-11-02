@@ -722,6 +722,10 @@ class KodexaPlatform:
             logger.warning(r.text)
             raise Exception("Unable to reindex check your reference and platform settings")
 
+    @classmethod
+    def get_tempdir(cls):
+        return os.getenv('KODEXA_TMP', 'TMPDIR')
+
 
 class RemoteSession:
     """A Session on the Kodexa platform for leveraging pipelines and services"""

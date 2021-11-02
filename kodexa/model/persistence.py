@@ -6,6 +6,7 @@ import tempfile
 import uuid
 
 import msgpack
+
 from kodexa.model import Document, ContentNode, SourceMetadata
 from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
@@ -52,7 +53,8 @@ class SqliteDocumentPersistence(object):
                 # At this point we need to load the db
                 self.is_new = False
         else:
-            new_file, filename = tempfile.mkstemp(suffix='.kddb')
+            from kodexa import KodexaPlatform
+            new_file, filename = tempfile.mkstemp(suffix='.kddb', dir=KodexaPlatform.get_tempdir())
             self.is_tmp = True
 
         self.current_filename = filename
@@ -242,7 +244,8 @@ class SqliteDocumentPersistence(object):
                                         single       integer,
                                         tag_uuid     text
                                     )""")
-            self.cursor.execute("insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.fvalue_id")
+            self.cursor.execute(
+                "insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.fvalue_id")
             # we will create a new feature table
             self.cursor.execute("drop table f")
             self.cursor.execute("drop table f_value")
