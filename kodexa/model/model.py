@@ -1124,6 +1124,21 @@ class ContentNode(object):
         """
         return [i.name for i in self.get_features_of_type("tag")]
 
+    def get_tag_features(self):
+        """Returns a list of the features that are tags on the given node
+
+
+        :return: A list of the tag name
+
+        Args:
+
+        Returns:
+
+        >>> document.content_node.select('*').get_tag_features()
+            [ContentFeature()]
+        """
+        return [i for i in self.get_features_of_type("tag")]
+
     def get_tag_values(self, tag_name, include_children=False):
         """Get the values for a specific tag name
 
