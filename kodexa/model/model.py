@@ -51,7 +51,7 @@ class Tag(Dict):
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
                  uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
-                 index: Optional[int] = None, bbox: Optional[List[int]], **kwargs):
+                 index: Optional[int] = None, bbox: Optional[List[int]] = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
         """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
