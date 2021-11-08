@@ -15,6 +15,7 @@ import time
 from json import JSONDecodeError
 from typing import Optional
 
+import better_exceptions
 import jsonpickle
 import requests
 import yaml
@@ -27,7 +28,7 @@ from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
 from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, ExecutionEvent, \
-    ContentObject, ModelTrainEvent, AssistantEvent, ContentEvent, ScheduledEvent
+    ContentObject, ModelTrainEvent, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
@@ -146,6 +147,17 @@ DEFAULT_COLUMNS = {
         'type',
         'status'
     ],
+    'projects': [
+        'id',
+        'name',
+        'description',
+    ],
+    'executions': [
+        'id',
+        'startDate',
+        'endDate',
+        'status'
+    ],
     'default': [
         'orgSlug',
         'slug',
@@ -177,10 +189,6 @@ OBJECT_TYPES = {
         "plural": "actions",
         "type": Action
     },
-    "stores": {
-        "name": "store",
-        "plural": "stores"
-    },
     "modelRuntimes": {
         "name": "modelRuntime",
         "plural": "modelRuntimes",
@@ -195,6 +203,18 @@ OBJECT_TYPES = {
         "name": "taxonomy",
         "plural": "taxonomies",
         "type": Taxonomy
+    },
+    "projects": {
+        "name": "project",
+        "plural": "projects",
+        "type": Project,
+        "global": True
+    },
+    "executions": {
+        "name": "execution",
+        "plural": "executions",
+        "type": Execution,
+        "global": True
     }
 }
 
@@ -574,7 +594,9 @@ class KodexaPlatform:
     @staticmethod
     def list_objects(organization_slug, object_type):
 
-        list_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}",
+        url = f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}" if organization_slug else f"{KodexaPlatform.get_url()}/api/{object_type}"
+
+        list_response = requests.get(url,
                                      headers={"x-access-token": KodexaPlatform.get_access_token(),
                                               "content-type": "application/json"})
         if list_response.status_code == 200:
@@ -627,14 +649,70 @@ class KodexaPlatform:
                 return obj_json
 
     @classmethod
+    def executions(cls):
+        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/executions",
+                                    headers={"content-type": "application/json",
+                                             "x-access-token": KodexaPlatform.get_access_token()})
+
+        if obj_response.status_code == 200:
+            print("\n")
+            from rich.table import Table
+
+            table = Table(title=f"Listing Executions")
+
+            cols = ['id', 'startDate', 'endDate', 'status', 'name', 'description']
+            for col in cols:
+                table.add_column(col)
+            for object_dict in obj_response.json()['content']:
+                row = []
+
+                for col in cols:
+                    row.append(object_dict[col] if col in object_dict else '')
+                table.add_row(*row)
+
+            print(table)
+        else:
+            print(f"Check your URL and password [{obj_response.status_code}]")
+
+    @classmethod
+    def projects(cls):
+        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects",
+                                    headers={"content-type": "application/json",
+                                             "x-access-token": KodexaPlatform.get_access_token()})
+
+        if obj_response.status_code == 200:
+            print("\n")
+            from rich.table import Table
+
+            table = Table(title=f"Listing Projects")
+
+            cols = ['id', 'organization.slug', 'name', 'description']
+            for col in cols:
+                table.add_column(col)
+            for object_dict in obj_response.json()['content']:
+                row = []
+
+                for col in cols:
+                    row.append(object_dict[col] if col in object_dict else '')
+                table.add_row(*row)
+
+            print(table)
+        else:
+            print(f"Check your URL and password [{obj_response.status_code}]")
+
+    @classmethod
     def get(cls, object_type, ref, path=None):
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
+        if 'global' not in object_type_metadata and not ref:
+            print(":fire: You must provide a ref for this type of resource")
+            return
+
         try:
 
             # If ref is just the org then we will list them
-            if '/' in ref:
+            if ref and ('/' in ref or 'global' in object_type_metadata):
                 obj = KodexaPlatform.get_object(ref, object_type)
 
                 if path is not None:
@@ -665,6 +743,8 @@ class KodexaPlatform:
                 print(table)
         except:
             print(f"\n:exclamation: Failed to get {object_type_metadata['name']} [{sys.exc_info()[0]}]")
+            print("\n".join(
+                better_exceptions.format_exception(*sys.exc_info())))
 
     @classmethod
     def delete(cls, object_type, ref):
