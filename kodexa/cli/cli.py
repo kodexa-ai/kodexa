@@ -14,6 +14,7 @@ import os.path
 import tarfile
 from getpass import getpass
 from pathlib import Path
+from typing import Optional
 
 import click
 from rich import print
@@ -150,12 +151,12 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 
 @cli.command()
 @click.argument('object_type', required=True)
-@click.argument('ref', required=True)
+@click.argument('ref', required=False)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--path', default=None, help='JQ path to content you want')
 @pass_info
-def get(_: Info, object_type: str, ref: str, url: str, token: str, path: str = None):
+def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, path: str = None):
     """
     List the instance of the object type
     """
