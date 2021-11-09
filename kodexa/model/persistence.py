@@ -393,6 +393,13 @@ class SqliteDocumentPersistence(object):
         else:
             return next_id[0] + 1
 
+    def get_content_nodes(self, node_type, parent_node, include_children):
+        nodes = []
+        for raw_node in self.cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
+                                              [parent_node.uuid]).fetchall():
+            nodes.append(self.__build_node(raw_node))
+        return nodes
+
 
 class SimpleObjectCache(object):
     """
@@ -462,6 +469,9 @@ class PersistenceManager(object):
 
     def close(self):
         self._underlying_persistence.close()
+
+    def get_content_nodes(self, node_type, parent_node, include_children):
+        return self._underlying_persistence.get_content_nodes(node_type, parent_node, include_children)
 
     def get_bytes(self):
 

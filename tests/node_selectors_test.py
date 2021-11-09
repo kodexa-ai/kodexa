@@ -144,7 +144,7 @@ def test_parent_axis():
 
 
 def test_instance_indexes():
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    document = Document.from_kddb(Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read()).to_kddb())
     first_paragraph = document.select('(//p)[0]')
     assert len(first_paragraph) == 1
 
