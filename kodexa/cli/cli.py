@@ -166,6 +166,21 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, pat
 
 
 @cli.command()
+@click.argument('ref', required=True)
+@click.argument('query', default="*")
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@click.option('--download/--no-download', default=False, help='Download the KDDB for the lastest in the family')
+@click.option('--page', default=1, help='Page number')
+@click.option('--pageSize', default=10, help='Page size')
+@pass_info
+def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, page: int, pagesize: int):
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+    KodexaPlatform.query(ref, query, download, page, pagesize)
+
+
+@cli.command()
 @click.argument('object_type', required=True)
 @click.argument('ref', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
