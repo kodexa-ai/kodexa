@@ -2419,6 +2419,7 @@ class DocumentStore(Store):
             The last document to be stored in the family or None if there isn't one available
 
         """
+        document_family.content_objects.sort(key=lambda x: x.created_on, reverse=False)
         last_co = document_family.content_objects[-1]
         document = self.get_document_by_content_object(document_family, last_co)
 
