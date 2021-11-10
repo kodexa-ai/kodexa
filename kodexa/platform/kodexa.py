@@ -204,6 +204,10 @@ OBJECT_TYPES = {
         "plural": "taxonomies",
         "type": Taxonomy
     },
+    "stores": {
+        "name": "store",
+        "plural": "stores"
+    },
     "projects": {
         "name": "project",
         "plural": "projects",
@@ -806,6 +810,41 @@ class KodexaPlatform:
     def get_tempdir(cls):
         import tempfile
         return os.getenv('KODEXA_TMP', tempfile.gettempdir())
+
+    @classmethod
+    def query(cls, ref, query, download=False, page=1, page_size=10):
+
+        store = KodexaPlatform.get_object_instance(ref, 'store')
+
+        if isinstance(store, RemoteDocumentStore):
+            if download:
+                families = store.query_families(query, page=page, page_size=page_size)
+                for family in families:
+                    print(f"Downloading {family.path}")
+                    import os
+                    file_path = os.path.join(os.path.splitext(family.path)[0], '.kddb')
+                    directory = os.path.dirname(file_path)
+                    if not os.path.exists(directory):
+                        os.makedirs(directory)
+                    store.get_latest_document_in_family(family).to_kddb(file_path)
+            else:
+                print("\n")
+                from rich.table import Table
+
+                table = Table(title=f"Listing Documents")
+
+                cols = ['id', 'path', 'labels', 'document_status', 'assignments', 'mixins', 'locked']
+                for col in cols:
+                    table.add_column(col)
+
+                families = store.query_families(query)
+                for family in families:
+                    row = []
+                    for col in cols:
+                        row.append(str(getattr(family, col)))
+                    table.add_row(*row)
+
+                print(table)
 
 
 class RemoteSession:
