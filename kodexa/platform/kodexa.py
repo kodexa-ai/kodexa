@@ -822,7 +822,7 @@ class KodexaPlatform:
                 for family in families:
                     print(f"Downloading {family.path}")
                     import os
-                    file_path = os.path.join(os.path.splitext(family.path)[0], '.kddb')
+                    file_path = os.path.splitext(family.path)[0] + '.kddb'
                     directory = os.path.dirname(file_path)
                     if not os.path.exists(directory):
                         os.makedirs(directory)
