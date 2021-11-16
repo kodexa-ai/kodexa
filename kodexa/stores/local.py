@@ -9,6 +9,7 @@ import os
 import shutil
 import tempfile
 import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -114,6 +115,7 @@ class LocalDocumentStore(DocumentStore):
 
         native_content_object = ContentObject(**{'contentType':'NATIVE'})
         native_content_object.id = str(uuid.uuid4()).replace("-", "")
+        native_content_object.created_on = datetime.now()
         if family.content_objects is None:
             family.content_objects = []
         family.content_objects.append(native_content_object)
@@ -139,6 +141,7 @@ class LocalDocumentStore(DocumentStore):
         """
         new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})
         new_content_object.id = str(uuid.uuid4())
+        new_content_object.created_on = datetime.now()
         new_content_object.store_ref = family.store_ref
         new_content_object.metadata = document.metadata
         new_content_object.labels = document.labels
