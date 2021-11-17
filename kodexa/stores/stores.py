@@ -23,11 +23,11 @@ class RemoteDataStore(Store):
         """ """
         return self.ref
 
-    def get_parent_df(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
+    def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
 
         Args:
-          parent (str): The parent taxon (/ is root)
+          path (str): The path to the data object
           query (str): A query to limit the results (Defaults to *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
         Returns:
@@ -35,14 +35,38 @@ class RemoteDataStore(Store):
         """
         import pandas as pd
 
-        table_result = self.get_parent(parent, query, document_family)
-        return pd.DataFrame(table_result['rows'], columns=table_result['columns'])
+        data_objects = self.get_data_objects(path, query, document_family)
 
-    def get_parent(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
+        table_result = {
+            'rows': [],
+            'columns': [],
+            'column_headers': []
+        }
+
+        for data_object in data_objects:
+            if len(table_result['columns']) == 0:
+                for taxon in data_object['taxon']['children']:
+                    if not taxon['group']:
+                        table_result['column_headers'].append(taxon['label'])
+                        table_result['columns'].append(taxon['name'])
+
+            new_row = []
+            for column in table_result['columns']:
+                column_value = None
+                for attribute in data_object['attributes']:
+                    if attribute['tag'] == column:
+                        column_value = attribute['stringValue']
+                new_row.append(column_value)
+
+            table_result['rows'].append(new_row)
+
+        return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
+
+    def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
 
         Args:
-          parent (str): The parent taxon (/ is root)
+          path (str): The path to the data object
           query (str): A query to limit the results (Default *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
         Returns:
@@ -51,47 +75,24 @@ class RemoteDataStore(Store):
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_parent_page_request(parent, 1, document_family=document_family)
+        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family)
 
         # lets work out the last page
         rows = rows + row_response['content']
         total_pages = row_response['totalPages']
 
         for page in range(2, total_pages):
-            row_response = self.get_parent_page_request(parent, page, query=query, document_family=document_family)
+            row_response = self.get_data_objects_page_request(path, page, query=query, document_family=document_family)
             rows = rows + row_response['content']
 
-        # Once we have all the rows we will then get a list of all the columns
-        # and convert this into a more nature form for structured data
+        return rows
 
-        column_names: List[str] = []
-        for row in rows:
-            for key in row['data'].keys():
-                if key not in column_names:
-                    column_names.append(key)
-
-        # Now lets get all the rows and make sure we put them in the same
-        # order as the columns
-
-        new_rows: List[List[str]] = []
-
-        for row in rows:
-            new_row = []
-            for column_name in column_names:
-                new_row.append(row['data'].get(column_name, None))
-            new_rows.append(new_row)
-
-        return {
-            "columns": column_names,
-            "rows": new_rows
-        }
-
-    def get_parent_page_request(self, parent: str, page_number: int = 1, page_size=5000, query="*",
-                                document_family: Optional[DocumentFamily] = None):
+    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
+                                      document_family: Optional[DocumentFamily] = None):
         """
 
         Args:
-          parent (str): The parent taxon (/ is root)
+          path (str): The parent taxon (/ is root)
           page_number (int):  (Default value = 1)
           page_size (int):  (Default value = 5000)
           query (str): The query to limit results (Default *)
@@ -102,11 +103,11 @@ class RemoteDataStore(Store):
         """
         from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         logger.debug(f"Downloading a specific table from {url}")
 
         # We need to go through and pull all the pages
-        params = {"parent": parent, "page": page_number, "pageSize": page_size, "query": query}
+        params = {"path": path, "page": page_number, "pageSize": page_size, "query": query}
 
         if document_family:
             params['documentFamilyId'] = document_family.id
@@ -125,7 +126,7 @@ class RemoteDataStore(Store):
             raise Exception("Unable to get table from remote store  [" + rows_response.text + "], response " + str(
                 rows_response.status_code))
 
-    def add_rows(self, rows):
+    def add_data_objects(self, rows):
         """
 
         Args:
@@ -136,7 +137,7 @@ class RemoteDataStore(Store):
         """
         from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         logger.debug(f"Uploading rows to store {url}")
 
         doc = requests.post(
@@ -146,13 +147,13 @@ class RemoteDataStore(Store):
         if doc.status_code == 200:
             return
         else:
-            logger.warning("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
-            raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+            logger.warning("Unable to post data objects to remote store [" + doc.text + "], response " + str(doc.status_code))
+            raise Exception("Unable to post data objects to remote store [" + doc.text + "], response " + str(doc.status_code))
 
     def add(self, row):
         from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         logger.debug(f"Uploading rows to store {url}")
 
         row_dict = {}
