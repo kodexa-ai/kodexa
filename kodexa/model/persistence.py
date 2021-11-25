@@ -642,5 +642,6 @@ class PersistenceManager(object):
         if node.uuid not in self.feature_cache:
             features = self._underlying_persistence.get_features(node)
             self.feature_cache[node.uuid] = features
+            self.node_cache.add_obj(node)
 
         self.feature_cache[node.uuid].append(feature)
