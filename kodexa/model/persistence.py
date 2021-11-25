@@ -516,6 +516,7 @@ class PersistenceManager(object):
 
         logger.info(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
+
         return self._underlying_persistence.get_bytes()
 
     def update_metadata(self):
@@ -643,5 +644,5 @@ class PersistenceManager(object):
             features = self._underlying_persistence.get_features(node)
             self.feature_cache[node.uuid] = features
             self.node_cache.add_obj(node)
-
+        self.node_cache.add_obj(node)
         self.feature_cache[node.uuid].append(feature)
