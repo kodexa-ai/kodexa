@@ -629,6 +629,7 @@ class PersistenceManager(object):
         features = self.get_features(node)
         new_features = [i for i in features if not (i.feature_type == feature_type and i.name == name)]
         self.feature_cache[node.uuid] = new_features
+        self.node_cache.add_obj(node)
 
     def get_features(self, node):
 
