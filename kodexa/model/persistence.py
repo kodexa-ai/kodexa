@@ -65,6 +65,11 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
+    def update_node(self, node):
+        self.cursor.execute('update cn set idx=?, pid=? where id=?',
+                            [node.index, node._parent_uuid,
+                             node.uuid])
+
     def get_content_nodes(self, node_type, parent_node: ContentNode, include_children):
         nodes = []
 
@@ -393,8 +398,7 @@ class SqliteDocumentPersistence(object):
         if self.document.content_node:
             self.__insert_node(self.document.content_node, None)
 
-    def get_bytes(self):
-
+    def sync(self):
         self.__update_metadata()
         self.cursor.execute("pragma optimize")
         self.connection.commit()
@@ -407,6 +411,8 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
+    def get_bytes(self):
+        self.sync()
         with open(self.current_filename, 'rb') as f:
             return f.read()
 
@@ -437,7 +443,7 @@ class SqliteDocumentPersistence(object):
         def get_all_node_ids(node):
             all_node_ids = []
             if not node.virtual:
-                all_node_ids.append([node.uuid])
+                all_node_ids.extend([node.uuid])
                 for child in node.get_children():
                     all_node_ids.extend(get_all_node_ids(child))
 
@@ -529,6 +535,12 @@ class PersistenceManager(object):
 
         self.node_cache.next_id = self._underlying_persistence.get_next_node_id()
 
+    def get_parent(self, node):
+        if node.uuid in self.node_parent_cache:
+            return self.node_cache.get_obj(self.node_parent_cache[node.uuid])
+        else:
+            return self._underlying_persistence.get_parent(node)
+
     def close(self):
         self._underlying_persistence.close()
 
@@ -538,6 +550,7 @@ class PersistenceManager(object):
         all_content_parts = []
         all_features = []
         node_id_with_features = []
+
 
         logger.info("Merging cache to persistance")
         dirty_nodes = self.node_cache.get_dirty_objs()
@@ -581,6 +594,8 @@ class PersistenceManager(object):
 
         logger.info(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
+
+        self._underlying_persistence.sync()
 
     def get_content_nodes(self, node_type, parent_node, include_children):
         return self._underlying_persistence.get_content_nodes(node_type, parent_node, include_children)
@@ -654,6 +669,7 @@ class PersistenceManager(object):
         if node.uuid in self.node_parent_cache:
             self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
             self.child_id_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
+            del self.node_parent_cache[node.uuid]
 
         self.content_parts_cache.pop(node.uuid, None)
         self.feature_cache.pop(node.uuid, None)
@@ -678,6 +694,9 @@ class PersistenceManager(object):
             self.child_id_cache[node.uuid] = set(child_ids)
 
         return self.child_cache[node.uuid]
+
+    def update_node(self, node):
+        self._underlying_persistence.update_node(node)
 
     def update_content_parts(self, node, content_parts):
         self.content_parts_cache[node.uuid] = content_parts
