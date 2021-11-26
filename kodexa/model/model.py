@@ -163,7 +163,7 @@ class ContentNode(object):
         return other is not None and self.uuid == other.uuid and (self.uuid is not None and other.uuid is not None)
 
     def get_parent(self):
-        return self.document.get_persistence().get_node(self._parent_uuid)
+        return self.document.get_persistence().get_parent(self)
 
     def __str__(self):
         return f"ContentNode {self.uuid} [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) [" + str(
@@ -626,6 +626,8 @@ class ContentNode(object):
                 self.add_child(existing_child, child_idx_base)
             else:
                 existing_child.index = children.index(existing_child)
+                existing_child._parent_uuid = self.uuid
+                self.document.get_persistence().update_node(existing_child)
             child_idx_base += 1
 
         # Copy to avoid mutation

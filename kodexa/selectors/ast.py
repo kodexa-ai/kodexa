@@ -203,11 +203,14 @@ class Step(object):
             axis_node = obj
 
             if self.axis == 'parent':
-                axis_node = axis_node.get_parent()
-                if axis_node is None:
-                    return []
-                else:
-                    return [axis_node.get_parent()]
+                parent = axis_node.get_parent()
+                while parent is not None:
+                    if self.node_test is None:
+                        return [parent]
+                    if self.node_test.test(parent, variables, context):
+                        return [parent]
+                    parent = parent.get_parent()
+                return []
 
             nodes = self.node_test.test(axis_node, variables, context)
 
