@@ -17,7 +17,7 @@ import re
 # the parser at install time, when six installation is not yet available
 from typing import List
 
-from kodexa import ContentNode, ContentFeature
+from kodexa import ContentNode, ContentFeature, Document
 
 __all__ = [
     'UnaryExpression',
@@ -34,6 +34,20 @@ __all__ = [
 ]
 
 
+class SelectorContext:
+
+    def __init__(self, document: Document):
+        self.pattern_cache = {}
+        self.last_op = None
+        self.document: Document = document
+        self.stream = 0
+
+    def cache_pattern(self, pattern):
+        if pattern not in self.pattern_cache:
+            self.pattern_cache[pattern] = re.compile(pattern)
+        return self.pattern_cache[pattern]
+
+
 class PipelineExpression(object):
     '''A pipeline XPath expression'''
 
@@ -45,11 +59,13 @@ class PipelineExpression(object):
         self.right = right
         '''the right side of the pipeline expression'''
 
-    def resolve(self, content_node: ContentNode, variables):
-        left_nodes = self.left.resolve(content_node, variables)
+    def resolve(self, content_node: ContentNode, variables, context: SelectorContext):
+        left_nodes = self.left.resolve(content_node, variables, context)
         result_nodes: List[ContentNode] = []
+        context.stream = context.stream + 1
         for node in left_nodes:
-            result_nodes = result_nodes + self.right.resolve(node, variables)
+            result_nodes.extend(self.right.resolve(node, variables, context))
+        context.stream = context.stream - 1
         return result_nodes
 
 
@@ -77,35 +93,38 @@ class BinaryExpression(object):
         self.right = right
         '''the right side of the binary expression'''
 
-    def resolve(self, content_node: ContentNode, variables):
+    def resolve(self, content_node: ContentNode, variables, context: SelectorContext):
         if self.op == '|':
-            return self.left.resolve(content_node, variables) + self.right.resolve(content_node, variables)
+            return self.left.resolve(content_node, variables, context) + self.right.resolve(content_node, variables,
+                                                                                            context)
         if self.op == '=':
-            return self.get_value(self.left, content_node, variables) == self.get_value(self.right, content_node,
-                                                                                        variables)
+            return self.get_value(self.left, content_node, variables, context) == self.get_value(self.right,
+                                                                                                 content_node,
+                                                                                                 variables, context)
         if self.op == '!=':
-            return self.get_value(self.left, content_node, variables) != self.get_value(self.right, content_node,
-                                                                                        variables)
+            return self.get_value(self.left, content_node, variables, context) != self.get_value(self.right,
+                                                                                                 content_node,
+                                                                                                 variables, context)
         if self.op == 'intersect':
-            left_value = self.get_value(self.left, content_node, variables)
-            right_value = self.get_value(self.right, content_node, variables)
+            left_value = self.get_value(self.left, content_node, variables, context)
+            right_value = self.get_value(self.right, content_node, variables, context)
             if isinstance(left_value, list) and isinstance(right_value, list):
                 intersection_list = [value for value in left_value if value in right_value]
                 return intersection_list
             else:
                 return []
         if self.op == 'and':
-            return bool(self.get_value(self.left, content_node, variables)) and bool(
-                self.get_value(self.right, content_node, variables))
+            return bool(self.get_value(self.left, content_node, variables, context)) and bool(
+                self.get_value(self.right, content_node, variables, context))
         if self.op == 'or':
-            return bool(self.get_value(self.left, content_node, variables)) or bool(
-                self.get_value(self.right, content_node, variables))
+            return bool(self.get_value(self.left, content_node, variables, context)) or bool(
+                self.get_value(self.right, content_node, variables, context))
 
-    def get_value(self, side, content_node, variables):
+    def get_value(self, side, content_node, variables, context: SelectorContext):
         if isinstance(side, FunctionCall):
-            return side.resolve(content_node, variables)
+            return side.resolve(content_node, variables, context)
         if isinstance(side, AbsolutePath):
-            return side.resolve(content_node, variables)
+            return side.resolve(content_node, variables, context)
         else:
             return side
 
@@ -122,8 +141,8 @@ class PredicatedExpression(object):
     def append_predicate(self, pred):
         self.predicates.append(pred)
 
-    def resolve(self, content_node, variables):
-        nodes = self.base.resolve(content_node, variables)
+    def resolve(self, content_node, variables, context: SelectorContext):
+        nodes = self.base.resolve(content_node, variables, context)
         results = []
         for idx, node in enumerate(nodes):
             for predicate in self.predicates:
@@ -146,15 +165,13 @@ class AbsolutePath(object):
         self.relative = relative
         '''the relative path after the absolute root operator'''
 
-    def resolve(self, content_node, variables):
+    def resolve(self, content_node, variables, context: SelectorContext):
         if self.op == '/':
-            return self.relative.resolve(content_node, variables)
+            context.last_op = '/'
+            return self.relative.resolve(content_node, variables, context)
         if self.op == '//':
-            results = []
-            results = results + self.relative.resolve(content_node, variables)
-            for child in content_node.get_children():
-                results = results + self.resolve(child, variables)
-            return results
+            context.last_op = '//'
+            return self.relative.resolve(content_node, variables, context)
         raise Exception("Not implemented")
 
 
@@ -171,7 +188,7 @@ class Step(object):
         self.predicates = predicates
         '''a list of predicates filtering the step'''
 
-    def resolve(self, obj, variables):
+    def resolve(self, obj, variables, context: SelectorContext):
 
         match = True
         if isinstance(obj, ContentFeature):
@@ -180,6 +197,8 @@ class Step(object):
         if obj is None:
             return []
 
+        axis_node = None
+
         if isinstance(obj, ContentNode):
             axis_node = obj
 
@@ -187,21 +206,31 @@ class Step(object):
                 axis_node = axis_node.get_parent()
                 if axis_node is None:
                     return []
+                else:
+                    return [axis_node.get_parent()]
 
-            for predicate in self.predicates:
-                if isinstance(predicate, int):
-                    if predicate == axis_node.index:
-                        match = True
-                elif not predicate.resolve(axis_node, variables):
-                    match = False
+            nodes = self.node_test.test(axis_node, variables, context)
 
-            match = match and self.node_test.test(axis_node, variables)
+            final_nodes = []
+            for node in nodes:
+                match = True
+                for predicate in self.predicates:
+                    if isinstance(predicate, int):
+                        if predicate == node.index:
+                            match = True
+                    elif not predicate.resolve(node, variables, context):
+                        match = False
+
+                if match:
+                    final_nodes.append(node)
+
+            return final_nodes
 
         if match:
             return [axis_node]
         else:
             if self.axis is not None:
-                return self.resolve(axis_node, variables)
+                return self.resolve(axis_node, variables, context)
             else:
                 return []
 
@@ -215,9 +244,13 @@ class NameTest(object):
         self.name = name
         '''the node name used for the test, or *'''
 
-    def test(self, obj, variables):
+    def test(self, obj, variables, context: SelectorContext):
         if isinstance(obj, ContentNode):
-            return self.name == '*' or obj.node_type == self.name
+            if context.stream > 0:
+                if self.name == "*" or self.name == obj.node_type:
+                    return [obj]
+            else:
+                return context.document.get_persistence().get_content_nodes(self.name, obj, context.last_op != '/')
         if isinstance(obj, ContentFeature):
             return self.name == '*' or (obj.feature_type == self.prefix and obj.name == self.name)
         return False
@@ -241,7 +274,7 @@ class AbbreviatedStep(object):
         self.abbr = abbr
         '''the abbreviated step'''
 
-    def resolve(self, content_node, variables):
+    def resolve(self, content_node, variables, context: SelectorContext):
         if self.abbr == '.':
             return [content_node]
         if self.abbr == '..':
@@ -256,7 +289,7 @@ class VariableReference(object):
         self.name = name
         '''a tuple (prefix, localname) containing the variable name'''
 
-    def resolve(self, variables):
+    def resolve(self, variables, context: SelectorContext):
         if self.name[1] in variables:
             return variables[self.name[1]]
         else:
@@ -274,12 +307,12 @@ class FunctionCall(object):
         self.args = args
         '''a list of argument expressions'''
 
-    def resolve(self, content_node, variables):
+    def resolve(self, content_node, variables, context: SelectorContext):
 
         args = []
         for arg in self.args:
             if isinstance(arg, VariableReference):
-                args.append(arg.resolve(variables))
+                args.append(arg.resolve(variables, context))
             else:
                 args.append(arg)
 
@@ -290,7 +323,7 @@ class FunctionCall(object):
             return False
 
         if self.name == 'contentRegex':
-            compiled_pattern = re.compile(args[0])
+            compiled_pattern = context.cache_pattern(args[0])
 
             content_to_test = content_node.content
 
@@ -304,14 +337,14 @@ class FunctionCall(object):
                 return None
 
         if self.name == 'typeRegex':
-            compiled_pattern = re.compile(args[0])
+            compiled_pattern = context.cache_pattern(args[0])
             if content_node.node_type is not None and compiled_pattern.match(content_node.node_type):
                 return content_node.node_type
             else:
                 return None
 
         if self.name == 'tagRegex':
-            compiled_pattern = re.compile(args[0])
+            compiled_pattern = context.cache_pattern(args[0])
             for feature in content_node.get_features_of_type('tag'):
                 if feature.name is not None and compiled_pattern.match(feature.name):
                     return True

@@ -65,6 +65,72 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
+    def get_content_nodes(self, node_type, parent_node: ContentNode, include_children):
+        nodes = []
+
+        results = []
+        if include_children:
+
+            if node_type == "*":
+                query = """
+                            with recursive
+                            parent_node(id, pid, nt, idx) AS (
+                                VALUES (?,?,?,?)
+                                UNION ALL
+                                SELECT cns.id, cns.pid, cns.nt, cns.idx 
+                                FROM cn cns, parent_node
+                                WHERE parent_node.id = cns.pid  
+                            )
+                            SELECT id, pid, nt, idx from parent_node order by parent_node.idx, idx
+                            """
+
+                try:
+                    results = self.cursor.execute(query,
+                                                  [parent_node.uuid,
+                                                   parent_node.get_parent().uuid if parent_node.get_parent() else None,
+                                                   next(key for key, value in self.node_types.items() if
+                                                        value == parent_node.get_node_type()),
+                                                   parent_node.index]).fetchall()
+                except StopIteration:
+                    return []
+            else:
+                query = """
+                                with recursive
+                                parent_node(id, pid, nt, idx) AS (
+                                    VALUES (?,?,?,?)
+                                    UNION ALL
+                                    SELECT cns.id, cns.pid, cns.nt, cns.idx 
+                                    FROM cn cns, parent_node
+                                    WHERE parent_node.id = cns.pid  
+                                )
+                                SELECT id, pid, nt, idx from parent_node where nt=? order by parent_node.idx, idx
+                                """
+
+                try:
+                    results = self.cursor.execute(query,
+                                                  [parent_node.uuid,
+                                                   parent_node.get_parent().uuid if parent_node.get_parent() else None,
+                                                   next(key for key, value in self.node_types.items() if
+                                                        value == parent_node.get_node_type()),
+                                                   parent_node.index,
+                                                   next(key for key, value in self.node_types.items() if
+                                                        value == node_type)]).fetchall()
+                except StopIteration:
+                    return []
+        else:
+            query = "select id, pid, nt, idx from cn where pid=? and nt=? order by idx"
+            try:
+                results = self.cursor.execute(query,
+                                              [parent_node.uuid, next(key for key, value in self.node_types.items() if
+                                                                      value == node_type)]).fetchall()
+            except StopIteration:
+                return []
+
+        for raw_node in list(results):
+            nodes.append(self.__build_node(raw_node))
+
+        return nodes
+
     def initialize(self):
         if self.is_new:
             self.__build_db()
@@ -466,8 +532,7 @@ class PersistenceManager(object):
     def close(self):
         self._underlying_persistence.close()
 
-    def get_bytes(self):
-
+    def flush_cache(self):
         all_node_ids = []
         all_nodes = []
         all_content_parts = []
@@ -517,6 +582,11 @@ class PersistenceManager(object):
         logger.info(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
 
+    def get_content_nodes(self, node_type, parent_node, include_children):
+        return self._underlying_persistence.get_content_nodes(node_type, parent_node, include_children)
+
+    def get_bytes(self):
+        self.flush_cache()
         return self._underlying_persistence.get_bytes()
 
     def update_metadata(self):

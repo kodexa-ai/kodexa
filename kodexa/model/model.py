@@ -561,8 +561,11 @@ class ContentNode(object):
         if variables is None:
             variables = {}
         from kodexa.selectors import parse
+        from kodexa.selectors.ast import SelectorContext
+        context = SelectorContext(self.document)
         parsed_selector = parse(selector)
-        return parsed_selector.resolve(self, variables)
+        self.document.get_persistence().flush_cache()
+        return parsed_selector.resolve(self, variables, context)
 
     def get_all_content(self, separator=" ", strip=True):
         """Get this node's content, concatenated with all of its children's content.
