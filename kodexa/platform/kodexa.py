@@ -13,6 +13,7 @@ import os
 import sys
 import time
 from json import JSONDecodeError
+from pprint import pprint
 from typing import Optional
 
 import better_exceptions
@@ -642,7 +643,11 @@ class KodexaPlatform:
         obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
                                              "content-type": "application/json"})
-        if obj_response.status_code != 200:
+
+        if obj_response.status_code == 404:
+            logger.info(f"Object {ref} not found")
+            return None
+        elif obj_response.status_code != 200:
             logger.warning(obj_response.text)
             raise Exception(f"Unable to get object {ref}")
         else:
@@ -705,7 +710,34 @@ class KodexaPlatform:
             print(f"Check your URL and password [{obj_response.status_code}]")
 
     @classmethod
-    def get(cls, object_type, ref, path=None):
+    def apply(cls, object_type, ref, obj):
+        object_type, object_type_metadata = resolve_object_type(object_type)
+        if ref and not ('/' in ref or 'global' in object_type_metadata):
+            raise Exception(f"Unable to apply {object_type_metadata['name']} since {ref} is not complete")
+
+        url_ref = ref.replace(':', '/')
+        existing = KodexaPlatform.get_object(ref, object_type)
+        if existing is not None:
+
+            obj_response = requests.put(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
+                                        headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                                 "content-type": "application/json"})
+        else:
+            obj_response = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref.split('/')[0]}",
+                                        headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                                 "content-type": "application/json"})
+        if obj_response.status_code != 200:
+            logger.warning(obj_response.text)
+            raise Exception(f"Unable to {'update' if existing is not None else 'create'} object {ref}")
+        else:
+            obj_json = obj_response.json()
+            if 'type' in object_type_metadata:
+                return object_type_metadata['type'].parse_obj(obj_json)
+            else:
+                return obj_json
+
+    @classmethod
+    def get(cls, object_type, ref, path=None, format=None):
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
@@ -723,7 +755,17 @@ class KodexaPlatform:
                     import jq
                     obj = jq.compile(path).input(obj).all()
                 import yaml
-                print(obj)
+                if format == 'yaml':
+                    def represent_none(self, _):
+                        return self.represent_scalar('tag:yaml.org,2002:null', '')
+
+                    yaml.add_representer(type(None), represent_none)
+                    print(yaml.dump(obj.dict(by_alias=True)))
+                elif format == 'json':
+                    print(obj.json(by_alias=True, indent=4))
+                else:
+                    pprint(obj)
+
             else:
                 objects = KodexaPlatform.list_objects(ref, object_type)
                 cols = DEFAULT_COLUMNS['default']
