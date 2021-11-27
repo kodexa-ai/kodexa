@@ -11,12 +11,14 @@ import json
 import logging
 import os
 import os.path
+import sys
 import tarfile
 from getpass import getpass
 from pathlib import Path
 from typing import Optional
 
 import click
+import yaml
 from rich import print
 
 from kodexa.cli.documentation import generate_site
@@ -148,6 +150,41 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 
     print("Deployed extension pack :tada:")
 
+@cli.command()
+@click.argument('object_type', required=True)
+@click.argument('ref', required=False)
+@click.option('--file', help='The path to the file containing the object to apply')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
+@pass_info
+def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, format=None):
+    """Apply an object to a Kodexa platform instance
+    """
+
+    KodexaPlatform.set_access_token(token)
+
+    obj = None
+    if file is None:
+        print("Reading from stdin")
+        if format == 'yaml':
+            obj = yaml.parse(sys.stdin.read())
+        elif format == 'json':
+            obj = json.loads(sys.stdin.read())
+        else:
+            raise Exception("You must provide a format if using stdin")
+    else:
+        print("Reading from file", file)
+        with open(file, 'r') as f:
+            if file.lower().endswith('.json'):
+                obj = json.load(f)
+            elif file.lower().endswith('.yaml'):
+                obj = yaml.parse(f)
+            else:
+                raise Exception("Unsupported file type")
+
+    print("Applying object")
+    KodexaPlatform.apply(object_type, ref, obj)
+    print("Applied object :tada:")
 
 @cli.command()
 @click.argument('object_type', required=True)
@@ -155,14 +192,15 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--path', default=None, help='JQ path to content you want')
+@click.option('--format', default=None, help='The format to output (json, yaml)')
 @pass_info
-def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, path: str = None):
+def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, path: str = None, format=None):
     """
     List the instance of the object type
     """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref, path)
+    KodexaPlatform.get(object_type, ref, path, format)
 
 
 @cli.command()
