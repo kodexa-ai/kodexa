@@ -517,7 +517,8 @@ class SimpleObjectCache(object):
     def remove_obj(self, obj):
         if obj.uuid in self.objs:
             self.objs.pop(obj.uuid)
-            self.dirty_objs.remove(obj.uuid)
+            if obj.uuid in self.dirty_objs:
+                self.dirty_objs.remove(obj.uuid)
 
     def get_dirty_objs(self):
         results = []
