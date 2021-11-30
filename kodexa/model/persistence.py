@@ -615,13 +615,12 @@ class PersistenceManager(object):
         logger.info(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
 
-        self._underlying_persistence.sync()
-
     def get_content_nodes(self, node_type, parent_node, include_children):
         return self._underlying_persistence.get_content_nodes(node_type, parent_node, include_children)
 
     def get_bytes(self):
         self.flush_cache()
+        self._underlying_persistence.sync()
         return self._underlying_persistence.get_bytes()
 
     def update_metadata(self):
