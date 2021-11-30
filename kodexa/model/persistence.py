@@ -652,8 +652,6 @@ class PersistenceManager(object):
             self.node_parent_cache[node.uuid] = node._parent_uuid
             update_child_cache = True
 
-        self._underlying_persistence.add_content_node(node, parent)
-
         if update_child_cache:
 
             if node._parent_uuid not in self.child_cache:
