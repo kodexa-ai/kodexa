@@ -285,8 +285,12 @@ class ContentNode(object):
             child_idx = self.get_children().index(content_node)
             child = self.get_children()[child_idx]
             self.document.get_persistence().remove_content_node(child)
-        except ValueError:
-            pass
+        except ValueError as e:
+            import better_exceptions
+            import sys
+            et, ev, tb = sys.exc_info()
+            print("\n".join(
+                better_exceptions.format_exception(*sys.exc_info())))
 
     def get_children(self):
         """Returns a list of the children of this node.

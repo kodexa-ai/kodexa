@@ -463,7 +463,7 @@ class SqliteDocumentPersistence(object):
         def get_all_node_ids(node):
             all_node_ids = []
             if not node.virtual:
-                all_node_ids.extend([node.uuid])
+                all_node_ids.append([node.uuid])
                 for child in node.get_children():
                     all_node_ids.extend(get_all_node_ids(child))
 
