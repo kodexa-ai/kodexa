@@ -101,11 +101,11 @@ class SqliteDocumentPersistence(object):
                             parent_node(id, pid, nt, idx, path) AS (
                                 VALUES (?,?,?,?,?)
                                 UNION ALL
-                                SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path + "|" + cns.idx as path
+                                SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path || substr('0000000' || cns.idx, -6, 6) 
                                 FROM cn cns, parent_node
                                 WHERE parent_node.id = cns.pid  
                             )
-                            SELECT id, pid, nt, idx, idx from parent_node order by path
+                            SELECT id, pid, nt, idx, path from parent_node order by path
                             """
 
                 try:
@@ -114,7 +114,7 @@ class SqliteDocumentPersistence(object):
                                                    parent_node.get_parent().uuid if parent_node.get_parent() else None,
                                                    next(key for key, value in self.node_types.items() if
                                                         value == parent_node.get_node_type()),
-                                                   parent_node.index, parent_node.index]).fetchall()
+                                                   parent_node.index, f"{parent_node.index}".zfill(6)]).fetchall()
                 except StopIteration:
                     return []
             else:
@@ -123,11 +123,11 @@ class SqliteDocumentPersistence(object):
                                 parent_node(id, pid, nt, idx, path) AS (
                                     VALUES (?,?,?,?,?)
                                     UNION ALL
-                                    SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path + "|" + cns.idx as path
+                                    SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path || substr('000000' || cns.idx, -6, 6) 
                                     FROM cn cns, parent_node
                                     WHERE parent_node.id = cns.pid  
                                 )
-                                SELECT id, pid, nt, idx, idx from parent_node where nt=? order by path
+                                SELECT id, pid, nt, idx, path from parent_node where nt=? order by path
                                 """
 
                 try:
@@ -137,7 +137,7 @@ class SqliteDocumentPersistence(object):
                                                    next(key for key, value in self.node_types.items() if
                                                         value == parent_node.get_node_type()),
                                                    parent_node.index,
-                                                   parent_node.index,
+                                                   f"{parent_node.index}".zfill(6),
                                                    next(key for key, value in self.node_types.items() if
                                                         value == node_type)]).fetchall()
                 except StopIteration:
