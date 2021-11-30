@@ -623,7 +623,8 @@ class ContentNode(object):
         children = nodes_to_adopt.copy()
         for existing_child in self.get_children():
             if existing_child not in children:
-                self.add_child(existing_child, child_idx_base)
+                existing_child.index = child_idx_base
+                self.document.get_persistence().update_node(existing_child)
             else:
                 existing_child.index = children.index(existing_child)
                 existing_child._parent_uuid = self.uuid
