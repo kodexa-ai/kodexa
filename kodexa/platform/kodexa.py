@@ -1308,7 +1308,7 @@ class EventHelper:
 
     def log(self, message: str):
         requests.post(
-            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/log",
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/logs",
             json=[
                 {'entry': message}
             ],
