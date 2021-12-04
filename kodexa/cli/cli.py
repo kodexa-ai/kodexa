@@ -82,10 +82,12 @@ def cli(info: Info, verbose: int):
 @click.option('--path', default=os.getcwd(), help='Path to folder containing kodexa.yml')
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--org', help='The slug for the organization to deploy to', required=True)
+@click.option('--slug', help='The slug to deploy the model to', required=False)
+@click.option('--version', help='The version to deploy the model to', required=False)
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @cli.command()
 @pass_info
-def push_model(_: Info, path: str, url: str, org: str, token: str):
+def push_model(_: Info, path: str, url: str, org: str, token: str, slug: str, version: str):
     """Deploy extension pack to a Kodexa platform instance
     """
 
@@ -99,8 +101,8 @@ def push_model(_: Info, path: str, url: str, org: str, token: str):
         import yaml
         model_meta = yaml.safe_load(model_meta_file)
 
-    slug = model_meta["slug"]
-    version = model_meta["version"]
+    slug = slug if slug else model_meta["slug"]
+    version = version if version else model_meta["version"]
     model_meta["type"] = "model"
 
     from kodexa import RemoteModelStore
