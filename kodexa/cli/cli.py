@@ -6,6 +6,7 @@ This is the Kodexa CLI, it can be used to allow you to work with an instance of 
 
 It supports interacting with the API, listing and viewing components.  Note it can also be used to login and logout
 """
+import click
 import glob
 import json
 import logging
@@ -13,13 +14,11 @@ import os
 import os.path
 import sys
 import tarfile
+import yaml
 from getpass import getpass
 from pathlib import Path
-from typing import Optional
-
-import click
-import yaml
 from rich import print
+from typing import Optional
 
 from kodexa.cli.documentation import generate_site
 from kodexa.model.model import ModelContentMetadata
@@ -105,12 +104,16 @@ def push_model(_: Info, path: str, url: str, org: str, token: str, slug: str, ve
     version = version if version else model_meta["version"]
     model_meta["type"] = "model"
 
+    model_meta["version"] = version
+    model_meta["slug"] = slug
+
     from kodexa import RemoteModelStore
     ref = f"{org}/{slug}:{version}"
     print("Pushing model to ", ref)
     model_meta['ref'] = ref
     remote_model_store = RemoteModelStore.parse_obj(model_meta)
-    KodexaPlatform.deploy(ref, remote_model_store, force_replace=True)
+    KodexaPlatform.deploy(ref, remote_model_store, name=model_meta['name'], description=model_meta['description'],
+                          force_replace=True)
 
     print("Deleting existing contents")
     for path in remote_model_store.list_contents():
@@ -153,6 +156,7 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 
     print("Deployed extension pack :tada:")
 
+
 @cli.command()
 @click.argument('object_type', required=True)
 @click.argument('ref', required=False)
@@ -188,6 +192,7 @@ def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, 
     print("Applying object")
     KodexaPlatform.apply(object_type, ref, obj)
     print("Applied object :tada:")
+
 
 @cli.command()
 @click.argument('object_type', required=True)
