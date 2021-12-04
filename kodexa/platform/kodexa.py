@@ -159,6 +159,15 @@ DEFAULT_COLUMNS = {
         'endDate',
         'status'
     ],
+    'stores': [
+        'orgSlug',
+        'slug',
+        'version',
+        'name',
+        'description',
+        'storeType',
+        'storePurpose'
+    ],
     'default': [
         'orgSlug',
         'slug',
