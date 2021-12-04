@@ -36,11 +36,11 @@ setup(name='kodexa',
           'rich',
           'appdirs',
           'jsonpickle',
-          'antlr4-python3-runtime',
           'datamodel-code-generator',
           'better-exceptions',
           'boto3',
-          'awslambdaric'
+          'awslambdaric',
+          'bbox'
       ],
       entry_points="""
         [console_scripts]

@@ -28,3 +28,4 @@ datamodel-code-generator
 better-exceptions
 boto3
 awslambdaric
+bbox
