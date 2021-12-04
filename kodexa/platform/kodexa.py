@@ -597,11 +597,12 @@ class KodexaPlatform:
         return metadata_object
 
     @staticmethod
-    def list_objects(organization_slug, object_type):
+    def list_objects(organization_slug, object_type, query="*"):
 
         url = f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}" if organization_slug else f"{KodexaPlatform.get_url()}/api/{object_type}"
 
         list_response = requests.get(url,
+                                     params={"query": query},
                                      headers={"x-access-token": KodexaPlatform.get_access_token(),
                                               "content-type": "application/json"})
         if list_response.status_code == 200:
@@ -737,7 +738,7 @@ class KodexaPlatform:
                 return obj_json
 
     @classmethod
-    def get(cls, object_type, ref, path=None, format=None):
+    def get(cls, object_type, ref, path=None, format=None, query="*"):
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
@@ -767,7 +768,7 @@ class KodexaPlatform:
                     pprint(obj)
 
             else:
-                objects = KodexaPlatform.list_objects(ref, object_type)
+                objects = KodexaPlatform.list_objects(ref, object_type, query)
                 cols = DEFAULT_COLUMNS['default']
 
                 if object_type in DEFAULT_COLUMNS:

@@ -193,16 +193,17 @@ def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, 
 @click.argument('ref', required=False)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@click.option('--query', default="*", help='Limit the results using a query')
 @click.option('--path', default=None, help='JQ path to content you want')
 @click.option('--format', default=None, help='The format to output (json, yaml)')
 @pass_info
-def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, path: str = None, format=None):
+def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, format=None):
     """
     List the instance of the object type
     """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref, path, format)
+    KodexaPlatform.get(object_type, ref, path, format, query)
 
 
 @cli.command()
