@@ -157,7 +157,9 @@ DEFAULT_COLUMNS = {
         'id',
         'startDate',
         'endDate',
-        'status'
+        'status',
+        'assistant',
+        'documentFamily'
     ],
     'stores': [
         'orgSlug',
