@@ -107,6 +107,7 @@ def push_model(_: Info, path: str, url: str, org: str, token: str, slug: str, ve
 
     from kodexa import RemoteModelStore
     ref = f"{org}/{slug}:{version}"
+    print("Pushing model to ", ref)
     model_meta['ref'] = ref
     remote_model_store = RemoteModelStore.parse_obj(model_meta)
     KodexaPlatform.deploy(ref, remote_model_store, force_replace=True)
