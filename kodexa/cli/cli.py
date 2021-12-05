@@ -6,7 +6,6 @@ This is the Kodexa CLI, it can be used to allow you to work with an instance of 
 
 It supports interacting with the API, listing and viewing components.  Note it can also be used to login and logout
 """
-import click
 import glob
 import json
 import logging
@@ -14,11 +13,13 @@ import os
 import os.path
 import sys
 import tarfile
-import yaml
 from getpass import getpass
 from pathlib import Path
-from rich import print
 from typing import Optional
+
+import click
+import yaml
+from rich import print
 
 from kodexa.cli.documentation import generate_site
 from kodexa.model.model import ModelContentMetadata
@@ -195,6 +196,19 @@ def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, 
 
 
 @cli.command()
+@click.argument('execution_id', required=True)
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@pass_info
+def logs(_: Info, execution_id: str, url: str, token: str):
+    """Get logs for an execution
+    """
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+    KodexaPlatform.logs(execution_id)
+
+
+@cli.command()
 @click.argument('object_type', required=True)
 @click.argument('ref', required=False)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
@@ -202,14 +216,18 @@ def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, 
 @click.option('--query', default="*", help='Limit the results using a query')
 @click.option('--path', default=None, help='JQ path to content you want')
 @click.option('--format', default=None, help='The format to output (json, yaml)')
+@click.option('--page', default=1, help='Page number')
+@click.option('--pageSize', default=10, help='Page size')
+@click.option('--sort', default=None, help='Sort by (ie. startDate:desc)')
 @pass_info
-def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, format=None):
+def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, format=None,
+        page: int = 1, pagesize: int = 10, sort: str = None):
     """
     List the instance of the object type
     """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref, path, format, query)
+    KodexaPlatform.get(object_type, ref, path, format, query, page, pagesize, sort)
 
 
 @cli.command()
@@ -220,11 +238,12 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
 @click.option('--download/--no-download', default=False, help='Download the KDDB for the lastest in the family')
 @click.option('--page', default=1, help='Page number')
 @click.option('--pageSize', default=10, help='Page size')
+@click.option('--sort', default=None, help='Sort by ie. name:asc')
 @pass_info
-def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, page: int, pagesize: int):
+def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, page: int, pagesize: int, sort: None):
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.query(ref, query, download, page, pagesize)
+    KodexaPlatform.query(ref, query, download, page, pagesize, sort)
 
 
 @cli.command()

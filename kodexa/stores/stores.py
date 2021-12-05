@@ -268,12 +268,15 @@ class RemoteDocumentStore(DocumentStore):
     def register_listener(self, listener):
         pass
 
-    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
+    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> List[DocumentFamily]:
         params = {
             'page': page,
             'pageSize': page_size,
             'query': query
         }
+        if sort is not None:
+            params.sort = sort
+
         from kodexa import KodexaPlatform
         get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/families",
                                                        params=params)

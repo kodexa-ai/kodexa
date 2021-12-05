@@ -158,8 +158,8 @@ DEFAULT_COLUMNS = {
         'startDate',
         'endDate',
         'status',
-        'assistant',
-        'documentFamily'
+        'assistant.name',
+        'documentFamily.path'
     ],
     'stores': [
         'orgSlug',
@@ -608,12 +608,19 @@ class KodexaPlatform:
         return metadata_object
 
     @staticmethod
-    def list_objects(organization_slug, object_type, query="*"):
+    def list_objects(organization_slug, object_type, query="*", page=1, pagesize=10, sort=None):
 
         url = f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}" if organization_slug else f"{KodexaPlatform.get_url()}/api/{object_type}"
 
+        params = {"query": query,
+                  "page": page,
+                  "pageSize": pagesize}
+
+        if sort is not None:
+            params["sort"] = sort
+
         list_response = requests.get(url,
-                                     params={"query": query},
+                                     params=params,
                                      headers={"x-access-token": KodexaPlatform.get_access_token(),
                                               "content-type": "application/json"})
         if list_response.status_code == 200:
@@ -736,8 +743,8 @@ class KodexaPlatform:
                                                  "content-type": "application/json"})
         else:
             obj_response = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref.split('/')[0]}",
-                                        headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                                 "content-type": "application/json"})
+                                         headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                                  "content-type": "application/json"})
         if obj_response.status_code != 200:
             logger.warning(obj_response.text)
             raise Exception(f"Unable to {'update' if existing is not None else 'create'} object {ref}")
@@ -749,7 +756,8 @@ class KodexaPlatform:
                 return obj_json
 
     @classmethod
-    def get(cls, object_type, ref, path=None, format=None, query="*"):
+    def get(cls, object_type, ref, path=None, format=None, query="*", page: int = 1, pagesize: int = 10,
+            sort: str = None):
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
@@ -779,7 +787,7 @@ class KodexaPlatform:
                     pprint(obj)
 
             else:
-                objects = KodexaPlatform.list_objects(ref, object_type, query)
+                objects = KodexaPlatform.list_objects(ref, object_type, query, page, pagesize, sort)
                 cols = DEFAULT_COLUMNS['default']
 
                 if object_type in DEFAULT_COLUMNS:
@@ -795,10 +803,17 @@ class KodexaPlatform:
                     row = []
 
                     for col in cols:
-                        row.append(object_dict[col] if col in object_dict else '')
+                        from simpleeval import simple_eval
+                        from simpleeval import AttributeDoesNotExist
+                        try:
+                            row.append(simple_eval('object.' + col, names={'object': object_dict}))
+                        except AttributeDoesNotExist:
+                            row.append("")
                     table.add_row(*row)
 
                 print(table)
+
+                print(f"\n{objects['totalElements']} {object_type_metadata['plural']} found, page {objects['number']+1} of {objects['totalPages']}")
         except:
             print(f"\n:exclamation: Failed to get {object_type_metadata['name']} [{sys.exc_info()[0]}]")
             print("\n".join(
@@ -866,13 +881,13 @@ class KodexaPlatform:
         return os.getenv('KODEXA_TMP', tempfile.gettempdir())
 
     @classmethod
-    def query(cls, ref, query, download=False, page=1, page_size=10):
+    def query(cls, ref, query, download=False, page=1, page_size=10, sort=None):
 
         store = KodexaPlatform.get_object_instance(ref, 'store')
 
         if isinstance(store, RemoteDocumentStore):
             if download:
-                families = store.query_families(query, page=page, page_size=page_size)
+                families = store.query_families(query, page=page, page_size=page_size, sort=sort)
                 for family in families:
                     print(f"Downloading {family.path}")
                     import os
@@ -899,6 +914,20 @@ class KodexaPlatform:
                     table.add_row(*row)
 
                 print(table)
+
+    @classmethod
+    def logs(cls, execution_id):
+        r = requests.get(f"{KodexaPlatform.get_url()}/api/executions/{execution_id}/logs",
+                         headers={"x-access-token": KodexaPlatform.get_access_token(),
+                                  "content-type": "application/json"})
+        if r.status_code == 401:
+            raise Exception("Your access token was not authorized")
+        elif r.status_code == 200:
+            for entry in r.json()['content']:
+                print(entry['entry'], end='')
+        else:
+            logger.warning(r.text)
+            raise Exception("Unable to reindex check your reference and platform settings")
 
 
 class RemoteSession:
