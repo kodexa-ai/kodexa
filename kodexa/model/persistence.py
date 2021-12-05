@@ -572,10 +572,10 @@ class PersistenceManager(object):
         all_features = []
         node_id_with_features = []
 
-        logger.info("Merging cache to persistance")
+        logger.debug("Merging cache to persistence")
         dirty_nodes = self.node_cache.get_dirty_objs()
 
-        logger.info(f"Identified {len(dirty_nodes)} nodes to update")
+        logger.debug(f"Identified {len(dirty_nodes)} nodes to update")
 
         next_feature_id = self._underlying_persistence.get_max_feature_id()
         for node in dirty_nodes:
@@ -603,16 +603,16 @@ class PersistenceManager(object):
 
                 self.node_cache.undirty(node)
 
-        logger.info(f"Writing {len(all_node_ids)} nodes")
+        logger.debug(f"Writing {len(all_node_ids)} nodes")
         self._underlying_persistence.cursor.executemany("DELETE FROM cn where id=?", all_node_ids)
         self._underlying_persistence.cursor.executemany("DELETE FROM ft where cn_id=?", node_id_with_features)
         self._underlying_persistence.cursor.executemany("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", all_nodes)
         self._underlying_persistence.cursor.executemany("DELETE FROM cnp where cn_id=?", all_node_ids)
-        logger.info(f"Writing {len(all_content_parts)} content parts")
+        logger.debug(f"Writing {len(all_content_parts)} content parts")
 
         self._underlying_persistence.cursor.executemany(CONTENT_NODE_PART_INSERT, all_content_parts)
 
-        logger.info(f"Writing {len(all_features)} features")
+        logger.debug(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
 
     def get_content_nodes(self, node_type, parent_node, include_children):
