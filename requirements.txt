@@ -18,6 +18,7 @@ jinja2
 flake8
 rich
 appdirs
+simpleeval
 jq
 jsonpickle
 pdoc3
