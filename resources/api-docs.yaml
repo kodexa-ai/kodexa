@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 4.1.262
+  version: 4.1.276
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.com
@@ -9438,6 +9438,10 @@ components:
     Option:
       type: object
       properties:
+        groupOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Option'
         tabId:
           type: string
         name:
@@ -9679,6 +9683,7 @@ components:
           - CONTENT
           - CLASSIFICATION
           - PROCESSING
+          - MODEL
         taxons:
           type: array
           description: The hierarchical structure of taxon's in this taxonomy
@@ -9741,6 +9746,9 @@ components:
           enum:
           - SUGGESTION
           - SOURCE
+        priority:
+          type: integer
+          format: int32
       description: A list of relationships to other taxons and the purpose of the
         relationship
     SavedFilter:
@@ -9979,6 +9987,13 @@ components:
           type: string
           description: "If the taxon is based on expression, this is the expression\
             \ based on the available objects"
+        nullable:
+          type: boolean
+          description: Determine if the value of the taxon can be null (unknown)
+        nullValue:
+          type: string
+          description: Allows the setting of a value to replace null if the taxon
+            is nullable
         description:
           type: string
           description: The description of the taxon
@@ -10071,6 +10086,7 @@ components:
             - CONTENT
             - CLASSIFICATION
             - PROCESSING
+            - MODEL
           enabled:
             type: boolean
             description: Is the taxonomy enabled (effects display in the UI)
@@ -10583,6 +10599,10 @@ components:
         label:
           type: string
           writeOnly: true
+        numberOfNotes:
+          type: integer
+          description: The number of notes associated with this attribute
+          format: int64
     DataLineage:
       type: object
       properties:
@@ -11711,24 +11731,24 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
     Sort:
       type: object
       properties:
         empty:
           type: boolean
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
     PageTeam:
       type: object

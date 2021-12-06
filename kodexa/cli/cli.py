@@ -113,6 +113,7 @@ def push_model(_: Info, path: str, url: str, org: str, token: str, slug: str, ve
     print("Pushing model to ", ref)
     model_meta['ref'] = ref
     remote_model_store = RemoteModelStore.parse_obj(model_meta)
+
     KodexaPlatform.deploy(ref, remote_model_store, name=model_meta['name'], description=model_meta['description'],
                           force_replace=True)
 
@@ -127,8 +128,8 @@ def push_model(_: Info, path: str, url: str, org: str, token: str, slug: str, ve
                 with open(path_hit, 'rb') as path_content:
                     remote_model_store.put(path_hit, path_content, replace=True)
 
-    remote_model_store.set_content_metadata(ModelContentMetadata.parse_obj(model_meta['metadata']))
-
+    model_metadata = ModelContentMetadata.parse_obj(model_meta['metadata'])
+    remote_model_store.set_content_metadata(model_metadata)
     print("Pushed model :tada:")
 
 
