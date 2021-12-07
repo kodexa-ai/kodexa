@@ -417,13 +417,6 @@ class PipelineStep:
         else:
             return document
 
-    def end_processing(self, context):
-        try:
-            self.step.end_processing(context)
-        except:
-            pass
-
-
 class LabelStep(object):
     """A simple step for handling the labelling for a document"""
 
@@ -708,11 +701,6 @@ class Pipeline:
 
             else:
                 logger.warning("A step did not return a document?")
-
-        logger.info(f"Completing pipeline {self.name}")
-
-        for step in self.steps:
-            step.end_processing(self.context)
 
         logger.info(f"Completed pipeline {self.name}")
 
