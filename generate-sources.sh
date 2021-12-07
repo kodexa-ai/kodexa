@@ -13,7 +13,16 @@ cp kodexa/model/objects_new.py kodexa/model/objects.py
 # Handle default: Optional[Dict[str, Any]] = None - this is really an ANY
 python -c "import sys;lines=sys.stdin.read();print(lines.replace('default: Optional[Dict[str, Any]] = None','default: Optional[Any] = None'))" < kodexa/model/objects.py > kodexa/model/objects_new.py
 
+cp kodexa/model/objects_new.py kodexa/model/objects.py
 
+# Handle default: Optional[Dict[str, Any]] = None - this is really an ANY
+python -c "import sys;lines=sys.stdin.read();print(lines.replace('runtime_inference_parameters: Optional[Dict[str, Dict[str, Any]]] = Field(','runtime_inference_parameters: Optional[Dict[str, Any]] = Field('))" < kodexa/model/objects.py > kodexa/model/objects_new.py
+
+
+cp kodexa/model/objects_new.py kodexa/model/objects.py
+
+# Handle default: Optional[Dict[str, Any]] = None - this is really an ANY
+python -c "import sys;lines=sys.stdin.read();print(lines.replace('runtime_training_parameters: Optional[Dict[str, Dict[str, Any]]] = Field(','runtime_training_parameters: Optional[Dict[str, Any]] = Field('))" < kodexa/model/objects.py > kodexa/model/objects_new.py
 
 cp kodexa/model/objects_new.py kodexa/model/objects.py
 rm kodexa/model/objects_new.py
