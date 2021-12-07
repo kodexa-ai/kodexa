@@ -443,7 +443,13 @@ class KodexaPlatform:
                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
                                          "content-type": "application/json"})
 
-        return object_class(**response.json())
+        if response.status_code == 200:
+            return object_class(**response.json())
+        elif response.status_code == 404:
+            return None
+        else:
+            raise Exception(
+                f"Unable to create {object_type_metadata['plural']} with ref {ref} [{response.status_code} {response.text}]")
 
     @staticmethod
     def get_object_instance(ref: str, object_type):
@@ -813,7 +819,8 @@ class KodexaPlatform:
 
                 print(table)
 
-                print(f"\n{objects['totalElements']} {object_type_metadata['plural']} found, page {objects['number']+1} of {objects['totalPages']}")
+                print(
+                    f"\n{objects['totalElements']} {object_type_metadata['plural']} found, page {objects['number'] + 1} of {objects['totalPages']}")
         except:
             print(f"\n:exclamation: Failed to get {object_type_metadata['name']} [{sys.exc_info()[0]}]")
             print("\n".join(
