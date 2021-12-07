@@ -11,7 +11,6 @@ import requests
 
 from kodexa.model import ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, ModelStore, Store
 from kodexa.model.model import ModelContentMetadata
-from kodexa.stores.local import LocalModelStore, TableDataStore
 
 logger = logging.getLogger('kodexa.stores')
 
@@ -23,13 +22,15 @@ class RemoteDataStore(Store):
         """ """
         return self.ref
 
-    def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
+    def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
+                            include_id: bool = False):
         """
 
         Args:
           path (str): The path to the data object
           query (str): A query to limit the results (Defaults to *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+          include_id (Optional[bool]): Include the data object ID as a column (defaults to False)
         Returns:
 
         """
@@ -45,6 +46,9 @@ class RemoteDataStore(Store):
 
         for data_object in data_objects:
             if len(table_result['columns']) == 0:
+                if include_id:
+                    table_result['column_headers'].append('Data Object ID')
+                    table_result['columns'].append('data_object_id')
                 for taxon in data_object['taxon']['children']:
                     if not taxon['group']:
                         table_result['column_headers'].append(taxon['label'])
@@ -53,6 +57,9 @@ class RemoteDataStore(Store):
             new_row = []
             for column in table_result['columns']:
                 column_value = None
+                if include_id:
+                    if column == 'data_object_id':
+                        column_value = data_object['id']
                 for attribute in data_object['attributes']:
                     if attribute['tag'] == column:
                         column_value = attribute['stringValue']
@@ -61,6 +68,37 @@ class RemoteDataStore(Store):
             table_result['rows'].append(new_row)
 
         return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
+
+    def update_data_object_attribute(self, data_object, attribute):
+        """
+
+        Args:
+          data_object (DataObject): The data object to update
+          attribute (Attribute): The attribute to update
+
+        Returns:
+
+        """
+        from kodexa import KodexaPlatform
+
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects/{data_object.id}/attributes/{attribute.id}"
+        logger.info(f"Downloading a specific data object from {url}")
+
+        data_object_response = requests.put(
+            url,
+            data=attribute.json(by_alias=True),
+            headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
+
+        if data_object_response.status_code == 200:
+            from kodexa.model.objects import DataObject
+            return DataObject(**data_object_response.json())
+        else:
+            logger.warning(
+                "Unable to update data attribute status [" + data_object_response.text + "], response " + str(
+                    data_object_response.status_code))
+            raise Exception(
+                "Unable to update data attribute status [" + data_object_response.text + "], response " + str(
+                    data_object_response.status_code))
 
     def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
@@ -86,6 +124,28 @@ class RemoteDataStore(Store):
             rows = rows + row_response['content']
 
         return rows
+
+    def get_data_object(self, data_object_id: str):
+        from kodexa import KodexaPlatform
+
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects/{data_object_id}"
+        logger.info(f"Downloading a specific data object from {url}")
+
+        data_object_response = requests.get(
+            url,
+            headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
+
+        print(data_object_response)
+        if data_object_response.status_code == 200:
+            from kodexa.model.objects import DataObject
+            return DataObject(**data_object_response.json())
+        else:
+            logger.warning(
+                "Unable to get data object from remote store [" + data_object_response.text + "], response " + str(
+                    data_object_response.status_code))
+            raise Exception(
+                "Unable to get data object from remote store  [" + data_object_response.text + "], response " + str(
+                    data_object_response.status_code))
 
     def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
                                       document_family: Optional[DocumentFamily] = None):
@@ -147,8 +207,10 @@ class RemoteDataStore(Store):
         if doc.status_code == 200:
             return
         else:
-            logger.warning("Unable to post data objects to remote store [" + doc.text + "], response " + str(doc.status_code))
-            raise Exception("Unable to post data objects to remote store [" + doc.text + "], response " + str(doc.status_code))
+            logger.warning(
+                "Unable to post data objects to remote store [" + doc.text + "], response " + str(doc.status_code))
+            raise Exception(
+                "Unable to post data objects to remote store [" + doc.text + "], response " + str(doc.status_code))
 
     def add(self, row):
         from kodexa import KodexaPlatform
@@ -214,6 +276,27 @@ class RemoteDocumentStore(DocumentStore):
                 return DocumentFamily.parse_obj(document_family_response.json())
             else:
                 msg = "Get document family failed [" + document_family_response.text + "], response " + str(
+                    document_family_response.status_code)
+                logger.warning(msg)
+                raise Exception(msg)
+        except JSONDecodeError:
+            logger.warning(
+                "Unable to decode the JSON response")
+            raise
+
+    def update_document_family_status(self, document_family, status):
+        from kodexa import KodexaPlatform
+        try:
+            logger.info(f"Updating the status of {document_family.id}")
+            document_family_response = requests.put(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/status",
+                headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"},
+                data=status.json(by_alias=True))
+
+            if document_family_response.status_code == 200:
+                return DocumentFamily(**document_family_response.json())
+            else:
+                msg = "Document family update failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
                 logger.warning(msg)
                 raise Exception(msg)

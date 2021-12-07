@@ -150,6 +150,7 @@ DEFAULT_COLUMNS = {
     ],
     'projects': [
         'id',
+        'organization.name',
         'name',
         'description',
     ],
@@ -437,7 +438,6 @@ class KodexaPlatform:
     def __build_object(ref, object_type_metadata, object_class):
         from kodexa import KodexaPlatform
         url = f"{KodexaPlatform.get_url()}/api/{object_type_metadata['plural']}/{ref.replace(':', '/')}"
-
         import requests
         response = requests.get(url,
                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
@@ -633,7 +633,7 @@ class KodexaPlatform:
             return list_response.json()
         else:
             logger.warning(list_response.text)
-            raise Exception("Unable to list objects")
+            raise Exception("Unable to list objects ["+list_response.text+"]")
 
     @staticmethod
     def undeploy(object_type: str, ref: str):
