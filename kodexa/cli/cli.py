@@ -273,6 +273,9 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
 @click.option('--sort', default=None, help='Sort by ie. name:asc')
 @pass_info
 def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, page: int, pagesize: int, sort: None):
+    """
+    Query the documents in a given document store
+    """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.query(ref, query, download, page, pagesize, sort)
@@ -324,6 +327,9 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
+    """
+    Reindex the given resource (based on ref)
+    """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.reindex(object_type, ref)
@@ -333,6 +339,9 @@ def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
 @pass_info
 @click.option('--python/--no-python', default=False, help='Print out the header for a Python file')
 def platform(_: Info, python: bool):
+    """
+    Get the details for the Kodexa instance we are logged into
+    """
     platform_url = KodexaPlatform.get_url()
 
     if platform_url is not None:
@@ -357,6 +366,9 @@ def platform(_: Info, python: bool):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def delete(_: Info, object_type: str, ref: str, url: str, token: str):
+    """
+    Delete the given resource (based on ref)
+    """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.delete(object_type, ref)
@@ -419,6 +431,9 @@ def document(_: Info, path: str):
 @click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
 def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
+    """
+    Package an extension pack based on the kodexa.yml file
+    """
     metadata_obj = ExtensionHelper.load_metadata(path)
     print("Preparing to pack")
     try:
