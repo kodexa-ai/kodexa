@@ -160,6 +160,24 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 
 
 @cli.command()
+@click.argument('ref', required=True)
+@click.argument('path', required=True)
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@pass_info
+def upload(_: Info, ref: str, path: str, token: str, url: str):
+    """Upload the contents of a file or directory to a Kodexa platform instance
+    """
+
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+
+    print(f"Uploading {path}")
+    KodexaPlatform.upload_file(ref, path)
+    print("Upload complete :tada:")
+
+
+@cli.command()
 @click.argument('object_type', required=True)
 @click.argument('ref', required=False)
 @click.option('--file', help='The path to the file containing the object to apply')

@@ -153,6 +153,7 @@ DEFAULT_COLUMNS = {
         'organization.name',
         'name',
         'description',
+        'assistants'
     ],
     'executions': [
         'id',
@@ -633,7 +634,7 @@ class KodexaPlatform:
             return list_response.json()
         else:
             logger.warning(list_response.text)
-            raise Exception("Unable to list objects ["+list_response.text+"]")
+            raise Exception("Unable to list objects [" + list_response.text + "]")
 
     @staticmethod
     def undeploy(object_type: str, ref: str):
@@ -935,6 +936,16 @@ class KodexaPlatform:
         else:
             logger.warning(r.text)
             raise Exception("Unable to reindex check your reference and platform settings")
+
+    @classmethod
+    def upload_file(cls, ref, path):
+        store = KodexaPlatform.get_object_instance(ref, 'store')
+
+        if isinstance(store, RemoteDocumentStore):
+            with open(path, 'rb') as content:
+                store.put_native(path, content)
+        else:
+            raise Exception("Reference must be a document store")
 
 
 class RemoteSession:
