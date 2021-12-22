@@ -684,7 +684,15 @@ class KodexaPlatform:
                 return None
             if 'type' in object_type_metadata:
                 return object_type_metadata['type'].parse_obj(obj_json)
+            if object_type == 'stores':
+                if obj_json['storeType'] == 'TABLE':
+                    return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDataStore)
+                if obj_json['storeType'] == 'DOCUMENT':
+                    return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDocumentStore)
+                if obj_json['storeType'] == 'MODEL':
+                    return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteModelStore)
             else:
+                print("errr")
                 return obj_json
 
     @classmethod
@@ -811,6 +819,7 @@ class KodexaPlatform:
                         return self.represent_scalar('tag:yaml.org,2002:null', '')
 
                     yaml.add_representer(type(None), represent_none)
+
                     print(yaml.dump(obj.dict(by_alias=True)))
                 elif format == 'json':
                     print(obj.json(by_alias=True, indent=4))
