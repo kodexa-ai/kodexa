@@ -158,6 +158,19 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 
     print("Deployed extension pack :tada:")
 
+@cli.command()
+@click.argument('id', required=True)
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@pass_info
+def project(_: Info, id: str, token: str, url: str):
+    """Get all the details for a specific project
+    """
+
+    KodexaPlatform.set_url(url)
+    KodexaPlatform.set_access_token(token)
+
+    KodexaPlatform.get_project(id)
 
 @cli.command()
 @click.argument('ref', required=True)
