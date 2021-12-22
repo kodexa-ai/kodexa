@@ -155,6 +155,13 @@ DEFAULT_COLUMNS = {
         'description',
         'assistants'
     ],
+    'assistants': [
+        'id',
+        'name',
+        'description',
+        'active',
+        'schedules.nextEvent'
+    ],
     'executions': [
         'id',
         'startDate',
@@ -710,6 +717,17 @@ class KodexaPlatform:
             print(f"Check your URL and password [{obj_response.status_code}]")
 
     @classmethod
+    def get_project_resource(cls, id, resource_name, resource_type):
+        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects/{id}/{resource_name}",
+                                    headers={"content-type": "application/json",
+                                             "x-access-token": KodexaPlatform.get_access_token()})
+
+        if obj_response.status_code == 200:
+            cls.__print_table(obj_response.json(), resource_type, False, False)
+        else:
+            print(f"Check your URL and password [{obj_response.status_code}]")
+
+    @classmethod
     def projects(cls):
         obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects",
                                     headers={"content-type": "application/json",
@@ -746,10 +764,12 @@ class KodexaPlatform:
         if existing is not None:
 
             obj_response = requests.put(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
+                                        json=obj,
                                         headers={"x-access-token": KodexaPlatform.get_access_token(),
                                                  "content-type": "application/json"})
         else:
             obj_response = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref.split('/')[0]}",
+                                         json=obj,
                                          headers={"x-access-token": KodexaPlatform.get_access_token(),
                                                   "content-type": "application/json"})
         if obj_response.status_code != 200:
@@ -795,33 +815,7 @@ class KodexaPlatform:
 
             else:
                 objects = KodexaPlatform.list_objects(ref, object_type, query, page, pagesize, sort)
-                cols = DEFAULT_COLUMNS['default']
-
-                if object_type in DEFAULT_COLUMNS:
-                    cols = DEFAULT_COLUMNS[object_type]
-
-                print("\n")
-                from rich.table import Table
-
-                table = Table(title=f"Listing {object_type_metadata['plural']}")
-                for col in cols:
-                    table.add_column(col)
-                for object_dict in objects['content']:
-                    row = []
-
-                    for col in cols:
-                        from simpleeval import simple_eval
-                        from simpleeval import AttributeDoesNotExist
-                        try:
-                            row.append(simple_eval('object.' + col, names={'object': object_dict}))
-                        except AttributeDoesNotExist:
-                            row.append("")
-                    table.add_row(*row)
-
-                print(table)
-
-                print(
-                    f"\n{objects['totalElements']} {object_type_metadata['plural']} found, page {objects['number'] + 1} of {objects['totalPages']}")
+                cls.__print_table(objects, object_type)
         except:
             print(f"\n:exclamation: Failed to get {object_type_metadata['name']} [{sys.exc_info()[0]}]")
             print("\n".join(
@@ -946,6 +940,59 @@ class KodexaPlatform:
                 store.put_native(path, content)
         else:
             raise Exception("Reference must be a document store")
+
+    @classmethod
+    def get_project(cls, id):
+        project_instance = cls.get_object_instance(id, 'project')
+        print(f"Name: [bold]{project_instance.name}[/bold]")
+        print(f"Description: [bold]{project_instance.description}[/bold]\n")
+
+        print("[bold]Document Stores[/bold]")
+        cls.get_project_resource(id, 'documentStores', 'stores')
+        print("[bold]Data Stores[/bold]")
+        cls.get_project_resource(id, 'dataStores', 'stores')
+        print("[bold]Content Taxonomies[/bold]")
+        cls.get_project_resource(id, 'contentTaxonomies', 'taxonomies')
+        print("[bold]Assistants[/bold]")
+        cls.get_project_resource(id, 'assistants', 'assistants')
+
+    @classmethod
+    def __print_table(cls, objects, object_type, title=True, show_count=True):
+        cols = DEFAULT_COLUMNS['default']
+
+        object_type, object_type_metadata = resolve_object_type(object_type)
+
+        if object_type in DEFAULT_COLUMNS:
+            cols = DEFAULT_COLUMNS[object_type]
+
+        from rich.table import Table
+
+        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
+        for col in cols:
+            table.add_column(col)
+
+        if 'content' in objects:
+            hits = objects['content']
+        else:
+            hits = objects
+
+        for object_dict in hits:
+            row = []
+
+            for col in cols:
+                from simpleeval import simple_eval
+                from simpleeval import AttributeDoesNotExist
+                try:
+                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
+                except AttributeDoesNotExist:
+                    row.append("")
+            table.add_row(*row)
+
+        print(table)
+
+        if 'content' in objects and show_count:
+            print(
+                f"\n{objects['totalElements']} {object_type_metadata['plural']} found, page {objects['number'] + 1} of {objects['totalPages']}")
 
 
 class RemoteSession:
