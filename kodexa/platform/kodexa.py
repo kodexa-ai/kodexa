@@ -23,7 +23,7 @@ import yaml
 from addict import Dict
 from appdirs import AppDirs
 from requests import Response
-from rich import print
+from rich import print, get_console
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
@@ -140,9 +140,7 @@ class PipelineMetadataBuilder:
 
 DEFAULT_COLUMNS = {
     'extensionPacks': [
-        'orgSlug',
-        'slug',
-        'version',
+        'ref',
         'name',
         'description',
         'type',
@@ -171,18 +169,14 @@ DEFAULT_COLUMNS = {
         'documentFamily.path'
     ],
     'stores': [
-        'orgSlug',
-        'slug',
-        'version',
+        'ref',
         'name',
         'description',
         'storeType',
         'storePurpose'
     ],
     'default': [
-        'orgSlug',
-        'slug',
-        'version',
+        'ref',
         'name',
         'description',
         'type'
@@ -239,7 +233,8 @@ OBJECT_TYPES = {
         "name": "execution",
         "plural": "executions",
         "type": Execution,
-        "global": True
+        "global": True,
+        "sort": "startDate:desc"
     }
 }
 
@@ -685,6 +680,8 @@ class KodexaPlatform:
             raise Exception(f"Unable to get object {ref}")
         else:
             obj_json = obj_response.json()
+            if obj_json is None:
+                return None
             if 'type' in object_type_metadata:
                 return object_type_metadata['type'].parse_obj(obj_json)
             else:
@@ -788,6 +785,9 @@ class KodexaPlatform:
 
         object_type, object_type_metadata = resolve_object_type(object_type)
 
+        if sort is None and 'sort' in object_type_metadata:
+            sort = object_type_metadata['sort']
+
         if 'global' not in object_type_metadata and not ref:
             print(":fire: You must provide a ref for this type of resource")
             return
@@ -797,6 +797,10 @@ class KodexaPlatform:
             # If ref is just the org then we will list them
             if ref and ('/' in ref or 'global' in object_type_metadata):
                 obj = KodexaPlatform.get_object(ref, object_type)
+
+                if obj is None:
+                    print(f":fire: Unable to find {object_type_metadata['name']} {ref}")
+                    return
 
                 if path is not None:
                     import jq
@@ -920,13 +924,14 @@ class KodexaPlatform:
     @classmethod
     def logs(cls, execution_id):
         r = requests.get(f"{KodexaPlatform.get_url()}/api/executions/{execution_id}/logs",
+                         params={"page": 1, "pageSize": 10000, "sort": "logDate:asc"},
                          headers={"x-access-token": KodexaPlatform.get_access_token(),
                                   "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
         elif r.status_code == 200:
             for entry in r.json()['content']:
-                print(entry['entry'], end='')
+                get_console().print(entry['entry'], end='', markup=False)
         else:
             logger.warning(r.text)
             raise Exception("Unable to reindex check your reference and platform settings")
@@ -993,6 +998,23 @@ class KodexaPlatform:
         if 'content' in objects and show_count:
             print(
                 f"\n{objects['totalElements']} {object_type_metadata['plural']} found, page {objects['number'] + 1} of {objects['totalPages']}")
+
+    @classmethod
+    def send_event(cls, project_id, assistant_id, obj):
+        r = requests.post(f"{KodexaPlatform.get_url()}/api/projects/{project_id}/assistants/{assistant_id}/events",
+                          data={
+                              'eventType': obj['eventType'],
+                              'options': json.dumps(obj['options'])
+                          },
+                          headers={"x-access-token": KodexaPlatform.get_access_token()})
+        if r.status_code == 401:
+            raise Exception("Your access token was not authorized")
+        if r.status_code == 200:
+            print(f"Starting an execution with id {r.json()['id']}")
+            return r.json()
+        else:
+            print(r.text)
+            raise Exception("Unable to send event")
 
 
 class RemoteSession:

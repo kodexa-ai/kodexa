@@ -279,6 +279,45 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, p
 
 
 @cli.command()
+@click.argument('project_id', required=True)
+@click.argument('assistant_id', required=True)
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@click.option('--file', help='The path to the file containing the event to send')
+@click.option('--format', default=None, help='The format to use if from stdin (json, yaml)')
+@pass_info
+def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str, format: str, token: str):
+    """Send an event to an assistant
+    """
+
+    KodexaPlatform.set_access_token(token)
+    KodexaPlatform.set_url(url)
+
+    obj = None
+    if file is None:
+        print("Reading from stdin")
+        if format == 'yaml':
+            obj = yaml.parse(sys.stdin.read())
+        elif format == 'json':
+            obj = json.loads(sys.stdin.read())
+        else:
+            raise Exception("You must provide a format if using stdin")
+    else:
+        print("Reading event from file", file)
+        with open(file, 'r') as f:
+            if file.lower().endswith('.json'):
+                obj = json.load(f)
+            elif file.lower().endswith('.yaml'):
+                obj = yaml.full_load(f)
+            else:
+                raise Exception("Unsupported file type")
+
+    print("Sending event")
+    KodexaPlatform.send_event(project_id, assistant_id, obj)
+    print("Event sent :tada:")
+
+
+@cli.command()
 @click.argument('object_type', required=True)
 @click.argument('ref', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
