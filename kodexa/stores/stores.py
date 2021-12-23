@@ -31,20 +31,52 @@ class RemoteTableDataStore(RemoteStore):
         """ """
         return self.ref
 
-    def get_data_objects_df(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
+    def get_data_objects_df(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
+                            include_id=False):
         """
 
         Args:
           parent (str): The parent taxon (/ is root)
           query (str): A query to limit the results (Defaults to *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+          include_id (bool): Include the id in the data object
         Returns:
 
         """
         import pandas as pd
 
-        table_result = self.get_data_objects(parent, query, document_family)
-        return pd.DataFrame(table_result['rows'], columns=table_result['columns'])
+        data_objects = self.get_data_objects(parent, query, document_family)
+
+        table_result = {
+            'rows': [],
+            'columns': [],
+            'column_headers': []
+        }
+
+        for data_object in data_objects:
+            if len(table_result['columns']) == 0:
+                if include_id:
+                    table_result['column_headers'].append('Data Object ID')
+                    table_result['columns'].append('data_object_id')
+                for taxon in data_object['taxon']['children']:
+                    if not taxon['group']:
+                        table_result['column_headers'].append(taxon['label'])
+                        table_result['columns'].append(taxon['name'])
+
+            new_row = []
+            for column in table_result['columns']:
+                column_value = None
+                if include_id:
+                    if column == 'data_object_id':
+                        column_value = data_object['id']
+                for attribute in data_object['attributes']:
+                    if attribute['tag'] == column:
+                        column_value = attribute['stringValue']
+                new_row.append(column_value)
+
+            table_result['rows'].append(new_row)
+
+        return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
 
     def get_data_objects(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
