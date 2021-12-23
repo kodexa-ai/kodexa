@@ -31,7 +31,7 @@ class RemoteTableDataStore(RemoteStore):
         """ """
         return self.ref
 
-    def get_parent_df(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
+    def get_data_objects_df(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
 
         Args:
@@ -43,10 +43,10 @@ class RemoteTableDataStore(RemoteStore):
         """
         import pandas as pd
 
-        table_result = self.get_parent(parent, query, document_family)
+        table_result = self.get_data_objects(parent, query, document_family)
         return pd.DataFrame(table_result['rows'], columns=table_result['columns'])
 
-    def get_parent(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
+    def get_data_objects(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
 
         Args:
