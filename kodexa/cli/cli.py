@@ -207,7 +207,7 @@ def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, 
     if file is None:
         print("Reading from stdin")
         if format == 'yaml':
-            obj = yaml.parse(sys.stdin.read())
+            obj = yaml.safe_load(sys.stdin.read())
         elif format == 'json':
             obj = json.loads(sys.stdin.read())
         else:
@@ -218,7 +218,7 @@ def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, 
             if file.lower().endswith('.json'):
                 obj = json.load(f)
             elif file.lower().endswith('.yaml'):
-                obj = yaml.parse(f)
+                obj = yaml.safe_load(f)
             else:
                 raise Exception("Unsupported file type")
 
