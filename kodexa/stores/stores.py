@@ -110,7 +110,7 @@ class RemoteTableDataStore(RemoteStore):
         """
         from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         logger.debug(f"Downloading a specific table from {url}")
 
         # We need to go through and pull all the pages
@@ -144,7 +144,7 @@ class RemoteTableDataStore(RemoteStore):
         """
         from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         logger.debug(f"Uploading rows to store {url}")
 
         doc = requests.post(
@@ -168,8 +168,8 @@ class RemoteTableDataStore(RemoteStore):
         """
         from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/rows"
-        logger.debug(f"Uploading rows to store {url}")
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects"
+        logger.debug(f"Uploading data objects to store {url}")
 
         row_dict = {}
         for idx, row_value in enumerate(row):
