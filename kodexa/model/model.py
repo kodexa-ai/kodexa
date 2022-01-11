@@ -2549,12 +2549,13 @@ class DocumentFamily:
                 document_family.classes.append(ContentClassification.from_dict(co_class))
 
         if 'labels' in family_dict:
-            document_family.labels = family_dict['labels']
+            document_family.labels = family_dict['labels'] if family_dict['labels'] is not None else []
+            document_family.labels = [label['label'] for label in document_family.labels]
         else:
             document_family.labels = []
 
         if 'mixins' in family_dict:
-            document_family.mixins = family_dict['mixins']
+            document_family.mixins = family_dict['mixins'] if family_dict['mixins'] is not None else []
         else:
             document_family.mixins = []
 
