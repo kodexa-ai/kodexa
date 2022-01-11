@@ -23,5 +23,4 @@ jsonpickle
 pdoc3
 python_dateutil >= 2.5.3
 urllib3 >= 1.25.3
-antlr4-python3-runtime
-kodexa-api~=4.0.0
+better_exceptions

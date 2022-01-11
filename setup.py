@@ -36,7 +36,8 @@ setup(name='kodexa',
           'jinja2',
           'rich',
           'appdirs',
-          'jsonpickle'
+          'jsonpickle',
+          'better_exceptions'
       ],
       entry_points="""
         [console_scripts]
