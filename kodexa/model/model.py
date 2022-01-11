@@ -2550,7 +2550,11 @@ class DocumentFamily:
 
         if 'labels' in family_dict:
             document_family.labels = family_dict['labels'] if family_dict['labels'] is not None else []
+
+            if document_family.labels is None and len(document_family.content_objects) > 0:
+                document_family.labels = document_family.content_objects[-1].labels
             document_family.labels = [label['label'] for label in document_family.labels]
+
         else:
             document_family.labels = []
 
