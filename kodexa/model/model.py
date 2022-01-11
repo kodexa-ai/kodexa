@@ -2544,6 +2544,11 @@ class DocumentFamily:
         document_family.id = family_dict['id']
         document_family.content_objects = []
 
+        for co_dict in family_dict['contentObjects']:
+            document_family.content_objects.append(ContentObject.from_dict(co_dict))
+        for transition_dict in family_dict['transitions']:
+            document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
+
         if 'classes' in family_dict:
             for co_class in family_dict['classes']:
                 document_family.classes.append(ContentClassification.from_dict(co_class))
@@ -2563,10 +2568,6 @@ class DocumentFamily:
         else:
             document_family.mixins = []
 
-        for co_dict in family_dict['contentObjects']:
-            document_family.content_objects.append(ContentObject.from_dict(co_dict))
-        for transition_dict in family_dict['transitions']:
-            document_family.transitions.append(DocumentTransition.from_dict(transition_dict))
         return document_family
 
     def to_dict(self) -> dict:
