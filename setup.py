@@ -37,7 +37,8 @@ setup(name='kodexa',
           'rich',
           'appdirs',
           'jsonpickle',
-          'better_exceptions'
+          'better_exceptions',
+          'tblib'
       ],
       entry_points="""
         [console_scripts]

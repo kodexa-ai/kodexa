@@ -23,4 +23,5 @@ jsonpickle
 pdoc3
 python_dateutil >= 2.5.3
 urllib3 >= 1.25.3
-better_exceptions
+better_exceptions == 0.3.3
+tblib == 1.7.0
