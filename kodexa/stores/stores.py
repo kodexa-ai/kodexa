@@ -91,7 +91,7 @@ class RemoteTableDataStore(RemoteStore):
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family)
+        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family, query=query)
 
         # lets work out the last page
         rows = rows + row_response['content']
