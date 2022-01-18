@@ -31,12 +31,26 @@ class RemoteTableDataStore(RemoteStore):
         """ """
         return self.ref
 
-    def get_data_objects_df(self, parent: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
+    def delete_contents(self):
+        """Delete the contents of the store"""
+        from kodexa import KodexaPlatform
+        import requests
+        resp = requests.delete(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/dataObjects",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return resp.content
+        else:
+            msg = f"Unable to delete families {resp.text}, status : {resp.status_code}"
+            raise Exception(msg)
+
+    def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
                             include_id=False):
         """
 
         Args:
-          parent (str): The parent taxon (/ is root)
+          path (str): The path (empty is root)
           query (str): A query to limit the results (Defaults to *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
           include_id (bool): Include the id in the data object
@@ -45,7 +59,7 @@ class RemoteTableDataStore(RemoteStore):
         """
         import pandas as pd
 
-        data_objects = self.get_data_objects(parent, query, document_family)
+        data_objects = self.get_data_objects(path, query, document_family)
 
         table_result = {
             'rows': [],
@@ -163,12 +177,11 @@ class RemoteTableDataStore(RemoteStore):
             raise Exception("Unable to get table from remote store  [" + rows_response.text + "], response " + str(
                 rows_response.status_code))
 
-
-    def add_rows(self, rows):
+    def add_data_objects(self, data_objects):
         """
 
         Args:
-          rows: A list of rows that you want to post
+          data_objects: A list of data objects that you want to create
 
         Returns:
 
@@ -180,7 +193,7 @@ class RemoteTableDataStore(RemoteStore):
 
         doc = requests.post(
             url,
-            json=rows,
+            json=data_objects,
             headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
         if doc.status_code == 200:
             return
@@ -188,11 +201,11 @@ class RemoteTableDataStore(RemoteStore):
             logger.warning("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
             raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
 
-    def add(self, row):
+    def add(self, data_object):
         """
 
         Args:
-          row:
+          data_object:
 
         Returns:
 
@@ -203,7 +216,7 @@ class RemoteTableDataStore(RemoteStore):
         logger.debug(f"Uploading data objects to store {url}")
 
         row_dict = {}
-        for idx, row_value in enumerate(row):
+        for idx, row_value in enumerate(data_object):
             if len(self.columns) == 0 or len(self.columns) <= idx:
                 row_dict[f'col{idx}'] = row_value
             else:
@@ -289,6 +302,20 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             self.store_purpose = 'OPERATIONAL'
 
         super().__init__(self.store_type, self.store_purpose)
+
+    def delete_contents(self):
+        """Delete the contents of the store"""
+        from kodexa import KodexaPlatform
+        import requests
+        resp = requests.delete(
+            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/documentFamilies",
+            headers={"x-access-token": KodexaPlatform.get_access_token()})
+
+        if resp.status_code == 200:
+            return resp.content
+        else:
+            msg = f"Unable to delete families {resp.text}, status : {resp.status_code}"
+            raise Exception(msg)
 
     def get_name(self):
         """The name of the connector
