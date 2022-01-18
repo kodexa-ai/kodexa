@@ -216,7 +216,7 @@ class RemoteDataStore(Store):
         from kodexa import KodexaPlatform
 
         url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects"
-        logger.debug(f"Uploading rows to store {url}")
+        logger.debug(f"Uploading data objects to store {url}")
 
         row_dict = {}
         for idx, row_value in enumerate(row):

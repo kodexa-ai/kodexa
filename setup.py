@@ -19,14 +19,15 @@ setup(name='kodexa',
       long_description=long_description,
       long_description_content_type="text/markdown",
       url='https://www.github.com/kodexa-ai/kodexa',
-      packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.pipeline',
+      packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.pipeline', 'kodexa.taxonomy',
                 'kodexa.stores', 'kodexa.model', 'kodexa.steps', 'kodexa.selectors',
-                'kodexa.assistant', 'kodexa.platform', 'kodexa.testing', 'kodexa.cli',
+                'kodexa.assistant', 'kodexa.cloud', 'kodexa.testing', 'kodexa.cli',
                 'kodexa.cli.templates'],
       install_requires=[
           'addict~=2.2.1',
           'requests',
           'msgpack~=1.0.0',
+          'kodexa-api~=4.0.0',
           'urllib3',
           'pyyaml',
           'ply',
@@ -34,7 +35,6 @@ setup(name='kodexa',
           'deepdiff',
           'jinja2',
           'rich',
-          'simpleeval',
           'appdirs',
           'jsonpickle',
           'datamodel-code-generator',
@@ -42,6 +42,9 @@ setup(name='kodexa',
           'boto3',
           'awslambdaric',
           'bbox'
+          'jsonpickle',
+          'better_exceptions',
+          'tblib'
       ],
       entry_points="""
         [console_scripts]
@@ -52,7 +55,7 @@ setup(name='kodexa',
           #   3 - Alpha
           #   4 - Beta
           #   5 - Production/Stable
-          'Development Status :: 4 - Beta',
+          'Development Status :: 5 - Production/Stable',
 
           # Indicate who your project is intended for.
           'Intended Audience :: Developers',

@@ -24,7 +24,6 @@ jsonpickle
 pdoc3
 python_dateutil >= 2.5.3
 urllib3 >= 1.25.3
-antlr4-python3-runtime
 datamodel-code-generator
 better-exceptions
 boto3
