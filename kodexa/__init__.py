@@ -12,7 +12,7 @@ from .model import ContentEvent, ContentFeature, ContentNode, Document, Document
     DocumentStore, DocumentTransition, SourceMetadata, TransitionType
 from .model.objects import Taxonomy
 from .pipeline import Pipeline, PipelineContext, PipelineStatistics
-from .platform import KodexaPlatform, RemoteAction, RemotePipeline, RemoteSession
+from .platform import KodexaPlatform, RemoteAction, RemotePipeline, RemoteSession, KodexaClient
 from .steps import NodeTagCopy, NodeTagger, RollupTransformer, TagsToKeyValuePairExtractor, TextParser, \
     KodexaProcessingException
 from .stores import LocalDocumentStore, LocalModelStore, RemoteDocumentStore, \

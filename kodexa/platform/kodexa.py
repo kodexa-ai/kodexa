@@ -281,6 +281,7 @@ class KodexaClient:
     def __init__(self, url=None, access_token=None):
         self.url = url
         self.access_token = access_token
+        self.organizations = O
 
     def get(self, api_path: str, params: Optional[dict] = None) -> Optional[Response]:
         if params is None:
