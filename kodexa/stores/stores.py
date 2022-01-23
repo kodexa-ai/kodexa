@@ -357,6 +357,7 @@ class RemoteDocumentStore(DocumentStore):
             'pageSize': page_size,
             'query': query
         }
+
         if sort is not None:
             params.sort = sort
 

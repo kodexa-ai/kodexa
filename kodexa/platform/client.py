@@ -40,6 +40,13 @@ class ComponentEndpoint:
     def get_page_class(self) -> Type[BaseModel]:
         pass
 
+    def find_by_slug(self, slug) -> Optional[Type[BaseModel]]:
+        component_page = self.list(query=f"slug:'{slug}'")
+        if component_page.empty:
+            return None
+        else:
+            return component_page.content[0]
+
     def list(self, query="*", page=1, pagesize=10, sort=None):
         url = f"{self.client.url}/api/{self.get_type()}/{self.organization.organization_slug}"
 
@@ -72,9 +79,17 @@ class OrganizationsEndpoint:
 
     def create(self, organization: Organization) -> Organization:
         url = f"{self.client.url}/api/organizations"
-        create_response = self.client.post(url, json=organization.dict())
+        create_response = self.client.post(url, body=organization.dict())
+        return Organization.parse_obj(**create_response.json())
 
-    def list(self, query="*", page=1, pagesize=10, sort=None):
+    def find_by_slug(self, slug) -> Optional[Organization]:
+        organizations = self.list(query=f"slug:'{slug}'")
+        if organizations.empty:
+            return None
+        else:
+            return organizations.content[0]
+
+    def list(self, query="*", page=1, pagesize=10, sort=None) -> PageOrganization:
         url = f"{self.client.url}/api/organizations"
 
         params = {"query": query,
@@ -87,7 +102,7 @@ class OrganizationsEndpoint:
         list_response = self.client.get(url, params=params)
         return PageOrganization.parse_obj(list_response.json())
 
-    def get(self, organization_id):
+    def get(self, organization_id) -> Organization:
         url = f"{self.client.url}/api/organizations/{organization_id}"
         get_response = self.client.get(url)
         return Organization.parse_obj(**get_response.json())
