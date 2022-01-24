@@ -1,16 +1,16 @@
 openapi: 3.0.1
 info:
   title: Kodexa
-  description: Rethink how you work with documents
+  description: Pragmatic AI for Documents
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 4.1.276
+  version: 4.1.394
 externalDocs:
   description: Kodexa Developer Portal
-  url: https://developer.kodexa.com
+  url: https://developer.kodexa.ai
 servers:
-- url: https://qa1.kodexa.ai
+- url: https://dev3.kodexa.com
   description: Generated server url
 tags:
 - name: Teams
@@ -861,7 +861,7 @@ paths:
       - Stores
       description: Get the document family for a path in the specific version of the
         store
-      operationId: getContentByVersion
+      operationId: bdataObjectseFsByVersion
       parameters:
       - name: orgSlug
         in: path
@@ -1107,6 +1107,11 @@ paths:
       - name: version
         in: path
         required: true
+        schema:
+          type: string
+      - name: mappings
+        in: query
+        required: false
         schema:
           type: string
       requestBody:
@@ -1845,7 +1850,7 @@ paths:
       - Stores
       description: Get the document family for a path in the current version of the
         store
-      operationId: getContent
+      operationId: bdataObjectseFs
       parameters:
       - name: orgSlug
         in: path
@@ -5198,37 +5203,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Store'
-  /api/stores/{orgSlug}/{slug}/{version}/train:
-    post:
-      tags:
-      - Stores
-      description: Train this model
-      operationId: trainModelByVersion
-      parameters:
-      - name: orgSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ModelTrainRequest'
-        required: true
-      responses:
-        "200":
-          description: OK
   /api/stores/{orgSlug}/{slug}/{version}/families/{id}/searchContents:
     get:
       tags:
@@ -5379,7 +5353,7 @@ paths:
     get:
       tags:
       - Stores
-      description: Get the paginated dataObjects from the current version of the store
+      description: Get the paginated dataObjects from a specific version of the store
       operationId: getDataObjectsWithVersion
       parameters:
       - name: orgSlug
@@ -5397,17 +5371,26 @@ paths:
         required: true
         schema:
           type: string
-      - name: queryContext
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/QueryContext'
       - name: path
         in: query
         required: false
         schema:
           type: string
-          default: ""
+      - name: queryContext
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/QueryContext'
+      - name: documentFamilyId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: storeRef
+        in: query
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: OK
@@ -5688,32 +5671,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ContentObject'
-  /api/stores/{orgSlug}/{slug}/train:
-    post:
-      tags:
-      - Stores
-      description: Train this Model
-      operationId: trainModel
-      parameters:
-      - name: orgSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ModelTrainRequest'
-        required: true
-      responses:
-        "200":
-          description: OK
   /api/stores/{orgSlug}/{slug}/dataObjects:
     get:
       tags:
@@ -5731,17 +5688,26 @@ paths:
         required: true
         schema:
           type: string
-      - name: queryContext
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/QueryContext'
       - name: path
         in: query
         required: false
         schema:
           type: string
-          default: ""
+      - name: queryContext
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/QueryContext'
+      - name: documentFamilyId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: storeRef
+        in: query
+        required: false
+        schema:
+          type: string
       responses:
         "200":
           description: OK
@@ -7584,6 +7550,46 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DataObject'
+  /api/stores/{orgSlug}/{slug}/{version}/families/{id}/auditEvents:
+    get:
+      tags:
+      - Stores
+      description: Get audit events for the specific document family in the current
+        version of the store
+      operationId: getAuditEventsForFamilyWithVersion
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: queryContext
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/QueryContext'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageAuditEvent'
   /api/stores/{orgSlug}/{slug}/{version}/families/{documentFamilyId}/preview/{page}:
     get:
       tags:
@@ -7774,17 +7780,16 @@ paths:
         required: true
         schema:
           type: string
-      - name: queryContext
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/QueryContext'
       - name: path
         in: query
         required: false
         schema:
           type: string
-          default: ""
+      - name: queryContext
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/QueryContext'
       responses:
         "200":
           description: OK
@@ -7792,12 +7797,12 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PageDataObject'
-  /api/stores/{orgSlug}/{slug}/{version}/dataObjects/{parentId}/attributes/{attributeId}/auditEvents:
+  /api/stores/{orgSlug}/{slug}/{version}/dataObjects/{dataObjectId}/auditEvents:
     get:
       tags:
       - Stores
-      description: Delete a specific attribute in a data object
-      operationId: getAuditEventsForDataObjectAttribute
+      description: Get the audit events for a specific data object
+      operationId: getAuditEventsForDataObject
       parameters:
       - name: orgSlug
         in: path
@@ -7814,14 +7819,14 @@ paths:
         required: true
         schema:
           type: string
-      - name: parentId
+      - name: dataObjectId
         in: path
         required: true
         schema:
           type: string
-      - name: attributeId
-        in: path
-        required: true
+      - name: tag
+        in: query
+        required: false
         schema:
           type: string
       - name: queryContext
@@ -7936,6 +7941,41 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PlatformEvent'
+  /api/stores/{orgSlug}/{slug}/families/{id}/auditEvents:
+    get:
+      tags:
+      - Stores
+      description: Get audit events for specific document family in the current version
+        of the store
+      operationId: getAuditEventsForFamily
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: queryContext
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/QueryContext'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageAuditEvent'
   /api/stores/{orgSlug}/{slug}/families/{documentFamilyId}/preview/{page}:
     get:
       tags:
@@ -8076,17 +8116,16 @@ paths:
         required: true
         schema:
           type: string
-      - name: queryContext
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/QueryContext'
       - name: path
         in: query
         required: false
         schema:
           type: string
-          default: ""
+      - name: queryContext
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/QueryContext'
       responses:
         "200":
           description: OK
@@ -9315,6 +9354,10 @@ components:
             description: The options for this model instance
             items:
               $ref: '#/components/schemas/Option'
+          vueTemplate:
+            type: string
+            description: The Vue template to render for the configuration of this
+              model
           runtimeTrainingParameters:
             type: object
             additionalProperties:
@@ -9457,6 +9500,8 @@ components:
         type:
           type: string
         listType:
+          type: string
+        featureFlag:
           type: string
         default:
           type: object
@@ -10059,6 +10104,12 @@ components:
         path:
           type: string
           description: The path to the node
+        usePostExpression:
+          type: boolean
+          description: Use a post extraction expression
+        postExpression:
+          type: string
+          description: An expression that is applied post extraction of the data
       description: A taxon is an individual label within a taxonomy
     Taxonomy:
       required:
@@ -10383,6 +10434,10 @@ components:
         updatedOn:
           type: string
           format: date-time
+        unknownFields:
+          type: object
+          additionalProperties:
+            type: string
         transitionType:
           type: string
           description: The type of transition
@@ -10518,7 +10573,6 @@ components:
       description: A list of messages relating to the validity
     DataAttribute:
       required:
-      - dataType
       - tag
       - validationState
       type: object
@@ -10538,22 +10592,6 @@ components:
           type: string
         truncated:
           type: boolean
-        dataType:
-          type: string
-          enum:
-          - STRING
-          - DATE
-          - DATE_TIME
-          - NUMBER
-          - DECIMAL
-          - FLOAT
-          - BOOLEAN
-          - CURRENCY
-          - URL
-          - EMAIL_ADDRESS
-          - PHONE_NUMBER
-          - POSTAL_CODE
-          - SELECTION
         tag:
           type: string
         tagUuid:
@@ -10575,9 +10613,6 @@ components:
           type: string
         attributeStatus:
           $ref: '#/components/schemas/AttributeStatus'
-        confidence:
-          type: number
-          format: float
         validationState:
           type: string
           description: The current validation state
@@ -10590,6 +10625,9 @@ components:
           description: A list of messages relating to the validity
           items:
             $ref: '#/components/schemas/CellValidationMessage'
+        confidence:
+          type: number
+          format: float
         dataFeatures:
           type: object
           additionalProperties:
@@ -10651,9 +10689,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DataAttribute'
-        confidence:
-          type: number
-          format: float
         parentId:
           type: string
         storeRef:
@@ -11066,6 +11101,10 @@ components:
           type: string
         description:
           type: string
+        showTasks:
+          type: boolean
+        showThumbnails:
+          type: boolean
         projectTemplate:
           $ref: '#/components/schemas/ProjectTemplateMetadata'
         labels:
@@ -11231,6 +11270,8 @@ components:
           type: boolean
         extensionPackBridge:
           type: string
+        fallbackFeatureFlags:
+          type: string
     UserActivation:
       type: object
       properties:
@@ -11266,22 +11307,6 @@ components:
           type: string
         organization:
           $ref: '#/components/schemas/Organization'
-    ModelTrainRequest:
-      required:
-      - options
-      - trainingStore
-      type: object
-      properties:
-        options:
-          type: object
-          additionalProperties:
-            type: object
-        trainingStore:
-          $ref: '#/components/schemas/Store'
-        subscriptions:
-          type: array
-          items:
-            $ref: '#/components/schemas/EventSubscription'
     SearchContent:
       type: object
       properties:
@@ -11667,8 +11692,15 @@ components:
         ua:
           type: string
           description: Google UA
-        dsn:
-          type: string
+        extensionPacks:
+          type: array
+          description: Installed extension packs
+          items:
+            type: object
+            additionalProperties:
+              type: object
+              description: Installed extension packs
+            description: Installed extension packs
       description: "Provides details on the version, build and environment that is\
         \ currently running"
     QueryContext:
@@ -11731,24 +11763,24 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
     Sort:
       type: object
       properties:
         empty:
           type: boolean
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
     PageTeam:
       type: object
@@ -11969,38 +12001,6 @@ components:
           type: boolean
         empty:
           type: boolean
-    PageNote:
-      type: object
-      properties:
-        totalPages:
-          type: integer
-          format: int32
-        totalElements:
-          type: integer
-          format: int64
-        size:
-          type: integer
-          format: int32
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/Note'
-        number:
-          type: integer
-          format: int32
-        sort:
-          $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
-        pageable:
-          $ref: '#/components/schemas/Pageable'
-        first:
-          type: boolean
-        last:
-          type: boolean
-        empty:
-          type: boolean
     AuditEvent:
       type: object
       properties:
@@ -12017,11 +12017,66 @@ components:
           format: date-time
         platformUser:
           $ref: '#/components/schemas/User'
+        documentFamily:
+          $ref: '#/components/schemas/DocumentFamily'
+        dataObject:
+          $ref: '#/components/schemas/DataObject'
         dataAttribute:
           $ref: '#/components/schemas/DataAttribute'
-        message:
+        tag:
           type: string
+        eventType:
+          type: string
+          enum:
+          - CREATED
+          - DELETED
+          - UPDATED
+        oldValue:
+          $ref: '#/components/schemas/DataAttributeValues'
+        newValue:
+          $ref: '#/components/schemas/DataAttributeValues'
       description: An audit event captures a data to a data structure or document
+    DataAttributeValues:
+      required:
+      - tag
+      - validationState
+      type: object
+      properties:
+        value:
+          type: string
+        truncated:
+          type: boolean
+        tag:
+          type: string
+        tagUuid:
+          type: string
+        dateValue:
+          type: string
+          format: date-time
+        floatValue:
+          type: number
+          format: float
+        decimalValue:
+          type: number
+        numberValue:
+          type: integer
+          format: int32
+        booleanValue:
+          type: boolean
+        stringValue:
+          type: string
+        attributeStatus:
+          $ref: '#/components/schemas/AttributeStatus'
+        confidence:
+          type: number
+          format: float
+        validationState:
+          type: string
+          description: The current validation state
+          enum:
+          - VALID
+          - INVALID
+          - WARNING
     PageAuditEvent:
       type: object
       properties:
@@ -12038,6 +12093,38 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AuditEvent'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/Sort'
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+    PageNote:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Note'
         number:
           type: integer
           format: int32
