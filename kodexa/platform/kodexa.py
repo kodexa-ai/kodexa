@@ -14,7 +14,6 @@ import sys
 import time
 from json import JSONDecodeError
 from pprint import pprint
-from typing import Optional
 
 import better_exceptions
 import jsonpickle
@@ -22,7 +21,6 @@ import requests
 import yaml
 from addict import Dict
 from appdirs import AppDirs
-from requests import Response
 from rich import print, get_console
 
 from kodexa.connectors import get_source
@@ -271,39 +269,6 @@ def resolve_object_type(obj_type):
         sys.exit(1)
 
 
-class KodexaClient:
-    """
-    A helper client that makes it a bit easier to work with the API on the platform
-
-    We wanted to use the OpenAPI V3 generator but it isn't yet able to cope with the structure
-    """
-
-    def __init__(self, url=None, access_token=None):
-        self.url = url
-        self.access_token = access_token
-
-    def get(self, api_path: str, params: Optional[dict] = None) -> Optional[Response]:
-        if params is None:
-            params = {}
-
-        url = f"{self.url}/{api_path}"
-        logger.info(f"Accessing {url}")
-
-        get_response = requests.get(
-            url,
-            params=params,
-            headers={"x-access-token": self.access_token})
-
-        if get_response.status_code == 200:
-            return get_response
-        elif get_response.status_code == 404:
-            return None
-        else:
-            msg = "Get failed [" + get_response.text + "], response " + str(get_response.status_code)
-            logger.warning(msg)
-            raise Exception(msg)
-
-
 class KodexaPlatform:
     """
     The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
@@ -315,10 +280,6 @@ class KodexaPlatform:
     * Environment variables (KODEXA_ACCESS_TOKEN and KODEXA_URL)
 
     """
-
-    @staticmethod
-    def get_client() -> KodexaClient:
-        return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
     def get_access_token() -> str:
