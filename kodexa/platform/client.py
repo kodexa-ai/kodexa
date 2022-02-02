@@ -8,15 +8,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import json
 import logging
 from typing import Type, Optional
 
 import requests
+from pydantic import BaseModel
+
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview
-from pydantic import BaseModel
 
 logger = logging.getLogger('kodexa.platform')
 
@@ -78,12 +79,12 @@ class OrganizationsEndpoint:
 
     def create(self, organization: Organization) -> Organization:
         url = f"{self.client.url}/api/organizations"
-        create_response = self.client.post(url, body=organization.dict())
+        create_response = self.client.post(url, body=json.loads(organization.json()))
         return Organization.parse_obj(create_response.json())
 
     def find_by_slug(self, slug) -> Optional[Organization]:
         organizations = self.list(query=f"slug:'{slug}'")
-        if organizations.empty:
+        if organizations.number_of_elements == 0:
             return None
         else:
             return organizations.content[0]
@@ -135,6 +136,21 @@ class ProjectsEndpoint:
         get_response = self.client.get(url)
         return Project.parse_obj(**get_response.json())
 
+    def create(self, project: Project, template_ref: str = None) -> Project:
+        url = f"{self.client.url}/api/projects"
+
+        if template_ref is not None:
+            params = {"templateRef": template_ref}
+        else:
+            params = None
+
+        create_response = self.client.post(url, body=json.loads(project.json()), params=params)
+        return Project.parse_obj(create_response.json())
+
+    def delete(self, id: str) -> None:
+        url = f"{self.client.url}/api/projects/{id}"
+        self.client.delete(url)
+
 
 class StoresEndpoint(ComponentEndpoint):
     def get_type(self) -> str:
@@ -181,6 +197,7 @@ def process_response(response) -> requests.Response:
 class KodexaClient:
 
     def __init__(self, url=None, access_token=None):
+        from kodexa import KodexaPlatform
         self.url = url if url is not None else KodexaPlatform.get_url()
         self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
         self.organizations = OrganizationsEndpoint(self)
@@ -194,9 +211,10 @@ class KodexaClient:
                                                              "content-type": "application/json"})
         return process_response(response)
 
-    def post(self, url, data=None, body=None, files=None) -> requests.Response:
-        response = requests.post(url, json=body, data=data, files=files, headers={"x-access-token": self.access_token,
-                                                                                  "content-type": "application/json"})
+    def post(self, url, data=None, body=None, files=None, params=None) -> requests.Response:
+        response = requests.post(url, json=body, data=data, files=files, params=params,
+                                 headers={"x-access-token": self.access_token,
+                                          "content-type": "application/json"})
         return process_response(response)
 
     def put(self, url, body=None) -> requests.Response:
