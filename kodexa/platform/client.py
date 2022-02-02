@@ -13,11 +13,10 @@ import logging
 from typing import Type, Optional
 
 import requests
-from pydantic import BaseModel
-
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview
+from pydantic import BaseModel
 
 logger = logging.getLogger('kodexa.platform')
 
@@ -80,7 +79,7 @@ class OrganizationsEndpoint:
     def create(self, organization: Organization) -> Organization:
         url = f"{self.client.url}/api/organizations"
         create_response = self.client.post(url, body=organization.dict())
-        return Organization.parse_obj(**create_response.json())
+        return Organization.parse_obj(create_response.json())
 
     def find_by_slug(self, slug) -> Optional[Organization]:
         organizations = self.list(query=f"slug:'{slug}'")
@@ -88,6 +87,10 @@ class OrganizationsEndpoint:
             return None
         else:
             return organizations.content[0]
+
+    def delete(self, id: str) -> None:
+        url = f"{self.client.url}/api/organizations/{id}"
+        self.client.delete(url)
 
     def list(self, query="*", page=1, pagesize=10, sort=None) -> PageOrganization:
         url = f"{self.client.url}/api/organizations"
@@ -171,15 +174,15 @@ def process_response(response) -> requests.Response:
     if response.status_code == 500:
         raise Exception("Internal server error")
     if response.status_code == 400:
-        raise Exception("Bad request")
+        raise Exception("Bad request " + response.text)
     return response
 
 
 class KodexaClient:
 
-    def __init__(self, url, access_token):
-        self.url = url
-        self.access_token = access_token
+    def __init__(self, url=None, access_token=None):
+        self.url = url if url is not None else KodexaPlatform.get_url()
+        self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
 
@@ -192,13 +195,13 @@ class KodexaClient:
         return process_response(response)
 
     def post(self, url, data=None, body=None, files=None) -> requests.Response:
-        response = requests.get(url, body, data=data, files=files, headers={"x-access-token": self.access_token,
-                                                                            "content-type": "application/json"})
+        response = requests.post(url, json=body, data=data, files=files, headers={"x-access-token": self.access_token,
+                                                                                  "content-type": "application/json"})
         return process_response(response)
 
     def put(self, url, body=None) -> requests.Response:
-        response = requests.put(url, body, headers={"x-access-token": self.access_token,
-                                                    "content-type": "application/json"})
+        response = requests.put(url, json=body, headers={"x-access-token": self.access_token,
+                                                         "content-type": "application/json"})
         return process_response(response)
 
     def delete(self, url, params=None) -> requests.Response:
