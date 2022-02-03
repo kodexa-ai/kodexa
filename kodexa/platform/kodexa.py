@@ -1394,7 +1394,7 @@ class EventHelper:
 
     def log(self, message: str):
         requests.post(
-            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/logs",
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/logs",
             json=[
                 {'entry': message}
             ],
@@ -1402,14 +1402,14 @@ class EventHelper:
 
     def get_content_object(self, content_object_id: str):
         logger.info(
-            f"Getting content object {content_object_id} in event {self.event.id} in execution {self.event.execution_id}")
+            f"Getting content object {content_object_id} in event {self.event.id} in execution {self.event.execution.id}")
 
         co_response = requests.get(
-            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/objects/{content_object_id}",
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/objects/{content_object_id}",
             headers={'x-access-token': KodexaPlatform.get_access_token()}, timeout=300)
         if co_response.status_code != 200:
             logger.error(f"Response {co_response.status_code} {co_response.text}")
-            raise Exception(f"Unable to find content object {content_object_id} in execution {self.event.execution_id}")
+            raise Exception(f"Unable to find content object {content_object_id} in execution {self.event.execution.id}")
         return io.BytesIO(co_response.content)
 
     def put_content_object(self, content_object: ContentObject, content) -> ContentObject:
@@ -1421,7 +1421,7 @@ class EventHelper:
         }
         logger.info("Posting back content object to execution object")
         co_response = requests.post(
-            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution_id}/objects",
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/objects",
             data=data,
             headers={'x-access-token': KodexaPlatform.get_access_token()},
             files=files, timeout=300)
@@ -1437,7 +1437,7 @@ class EventHelper:
 
     def build_pipeline_context(self) -> PipelineContext:
         context = PipelineContext(context={}, content_provider=self,
-                                  store_provider=self, execution_id=self.event.execution_id)
+                                  store_provider=self, execution_id=self.event.execution.id)
 
         if self.event.store_ref and self.event.document_family_id:
             logger.info("We have storeRef and document family")
