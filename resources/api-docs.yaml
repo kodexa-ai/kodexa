@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 0.0.0-models-workflow.58
+  version: 0.0.0-models-workflow.60
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -9817,7 +9817,6 @@ components:
           description: The version of the schema
           format: int32
         orgSlug:
-          pattern: "^[a-zA-Z0-9\\-_]{0,255}$"
           type: string
           description: The slug of the organization that owns this metadata object
         slug:
@@ -10606,13 +10605,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
+        label:
+          type: string
+          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
-        label:
-          type: string
-          writeOnly: true
     DataLineage:
       type: object
       properties:
@@ -11067,9 +11066,6 @@ components:
         endDate:
           type: string
           format: date-time
-        executionId:
-          type: string
-          deprecated: true
     ExecutionStep:
       type: object
       properties:
