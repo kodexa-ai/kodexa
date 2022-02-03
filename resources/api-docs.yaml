@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 4.1.394
+  version: 0.0.0-models-workflow.58
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -63,6 +63,9 @@ tags:
   description: Provides ability to work with access tokens
 - name: Credentials
   description: Provides ability to capture and store types of credential
+- name: Execution Scheduler
+  description: Provides endpoints for picking up and executing scheduled execution
+    events
 paths:
   /api/users/{id}:
     get:
@@ -2621,6 +2624,48 @@ paths:
           description: You are not authorized to view the resource
         "200":
           description: Successfully deleted the resource
+  /api/projects/{id}/workflow:
+    get:
+      tags:
+      - Projects
+      description: Get the workflow definition for this project
+      operationId: getWorkflowDefinition
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/WorkflowDefinition'
+    put:
+      tags:
+      - Projects
+      description: Update workflow definition for this project
+      operationId: getWorkflowDefinition
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: workflowDefinition
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/WorkflowDefinition'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/WorkflowDefinition'
   /api/projects/{id}/resources:
     put:
       tags:
@@ -3888,35 +3933,6 @@ paths:
       - Extension Packs
       description: "Repack (re-download, build and deploy) the given extension pack"
       operationId: repack
-      parameters:
-      - name: organizationSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ExtensionPack'
-  /api/extensionPacks/{organizationSlug}/{slug}/{version}/_purgeQueue:
-    put:
-      tags:
-      - Extension Packs
-      description: Purge the work queue for this extension pack
-      operationId: purgeQueue
       parameters:
       - name: organizationSlug
         in: path
@@ -6835,14 +6851,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ExtensionPack'
-  /api/events/_reindex:
-    post:
-      tags:
-      - Platform Events
-      operationId: reindexPlatformEvent
-      responses:
-        "200":
-          description: OK
   /api/dashboards/{organizationSlug}:
     get:
       tags:
@@ -7382,6 +7390,42 @@ paths:
                 additionalProperties:
                   type: integer
                   format: int64
+  /api/stores/{orgSlug}/{slug}/{version}/families/{id}/export:
+    get:
+      tags:
+      - Stores
+      description: "Reprocess content in the store, allow you to provide a list of\
+        \ the family ID's"
+      operationId: exportDocumentFamily
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
   /api/stores/{orgSlug}/{slug}/{version}/families/{id}/executions:
     get:
       tags:
@@ -8239,6 +8283,24 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Execution'
+  /api/scheduler:
+    get:
+      tags:
+      - Execution Scheduler
+      operationId: nextEvent
+      parameters:
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExecutionEvent'
   /api/projects/{id}/modelStores:
     get:
       tags:
@@ -8396,64 +8458,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PageExecution'
-  /api/extensionPacks/{organizationSlug}/{slug}/{version}/_status:
-    get:
-      tags:
-      - Extension Packs
-      description: Get the deployment status for the extension pack
-      operationId: getDeploymentStatus
-      parameters:
-      - name: organizationSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/DeploymentStatus'
-  /api/extensionPacks/{organizationSlug}/{slug}/{version}/_queueDetail:
-    get:
-      tags:
-      - Extension Packs
-      description: Get the details of the work queue for this extension pack
-      operationId: getQueueDetails
-      parameters:
-      - name: organizationSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/QueueDetail'
   /api/executions:
     get:
       tags:
@@ -8564,30 +8568,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PagePlatformEvent'
-  /api/events/{organizationSlug}/{id}:
-    get:
-      tags:
-      - Platform Events
-      description: Get event with specified ID in organization
-      operationId: getEvent
-      parameters:
-      - name: organizationSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/PlatformEvent'
   /api/availableExtensionPacks:
     get:
       tags:
@@ -9115,21 +9095,13 @@ components:
           $ref: '#/components/schemas/ContainerResources'
         memoryAssigned:
           type: string
-        containerName:
+        schedulerToken:
           type: string
         serviceName:
           type: string
+        containerName:
+          type: string
         functionArn:
-          type: string
-        subscriptionArn:
-          type: string
-        sentryDsn:
-          type: string
-        queueUrl:
-          type: string
-        queueArn:
-          type: string
-        eventSourceMappingUuid:
           type: string
         environment:
           type: object
@@ -9825,8 +9797,8 @@ components:
       properties:
         label:
           type: string
-        value:
-          type: object
+        id:
+          type: string
         description:
           type: string
       description: "If data type is SELECTION, this is the list of available options"
@@ -10634,13 +10606,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
-        label:
-          type: string
-          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
+        label:
+          type: string
+          writeOnly: true
     DataLineage:
       type: object
       properties:
@@ -10783,6 +10755,95 @@ components:
             $ref: '#/components/schemas/ValidationError'
         definition:
           $ref: '#/components/schemas/AssistantDefinition'
+    AssistantEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseEvent'
+      - type: object
+        properties:
+          type:
+            type: string
+          contentObject:
+            $ref: '#/components/schemas/ContentObject'
+          options:
+            type: object
+            additionalProperties:
+              type: object
+          eventType:
+            type: string
+          assistant:
+            $ref: '#/components/schemas/Assistant'
+    AssistantExecution:
+      type: object
+      properties:
+        assistantId:
+          type: string
+        assistantName:
+          type: string
+        ref:
+          type: string
+        options:
+          type: object
+          additionalProperties:
+            type: object
+        optionTypes:
+          type: object
+          additionalProperties:
+            type: string
+        status:
+          type: string
+          enum:
+          - PENDING
+          - RUNNING
+          - SUCCEEDED
+          - FAILED
+          - REQUESTED
+          - SKIPPED
+          - CANCELLING
+          - CANCELLED
+        exceptionDetails:
+          $ref: '#/components/schemas/ExceptionDetails'
+        event:
+          oneOf:
+          - $ref: '#/components/schemas/AssistantEvent'
+          - $ref: '#/components/schemas/ContentEvent'
+          - $ref: '#/components/schemas/ModelTrainEvent'
+          - $ref: '#/components/schemas/ScheduledEvent'
+        response:
+          $ref: '#/components/schemas/AssistantExecutionResponse'
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        processingTime:
+          type: integer
+          format: int64
+    AssistantExecutionResponse:
+      type: object
+      properties:
+        text:
+          type: string
+        pipelines:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistantResponsePipeline'
+    AssistantResponsePipeline:
+      type: object
+      properties:
+        description:
+          type: string
+        pipeline:
+          $ref: '#/components/schemas/Pipeline'
+        writeBackToStore:
+          type: boolean
+        dataSourceRef:
+          type: string
+        taxonomyRefs:
+          type: array
+          items:
+            type: string
     AssistantSchedule:
       type: object
       properties:
@@ -10798,6 +10859,41 @@ components:
           format: date-time
         id:
           type: string
+    BaseEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of the event
+      discriminator:
+        propertyName: type
+        mapping:
+          assistant: '#/components/schemas/AssistantEvent'
+          content: '#/components/schemas/ContentEvent'
+          scheduled: '#/components/schemas/ScheduledEvent'
+          modelTrain: '#/components/schemas/ModelTrainEvent'
+      oneOf:
+      - $ref: '#/components/schemas/ContentEvent'
+      - $ref: '#/components/schemas/ScheduledEvent'
+      - $ref: '#/components/schemas/AssistantEvent'
+      - $ref: '#/components/schemas/ModelTrainEvent'
+    ContentEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseEvent'
+      - type: object
+        properties:
+          type:
+            type: string
+          contentObject:
+            $ref: '#/components/schemas/ContentObject'
+          documentFamily:
+            $ref: '#/components/schemas/DocumentFamily'
+          objectEventType:
+            type: string
+            enum:
+            - NEW_OBJECT
+            - DERIVED_OBJECT
     Execution:
       type: object
       properties:
@@ -10822,6 +10918,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ExecutionTarget'
+        events:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionEvent'
         session:
           $ref: '#/components/schemas/Session'
         startDate:
@@ -10878,6 +10979,97 @@ components:
             $ref: '#/components/schemas/SessionStore'
         documentFamily:
           $ref: '#/components/schemas/DocumentFamily'
+    ExecutionEvent:
+      required:
+      - sessionId
+      - token
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the object
+        uuid:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        updatedOn:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum:
+          - START_EXECUTION
+          - STEP_UPDATE
+          - ASSISTANT_EVENT
+          - ASSISTANT_RESPONSE
+          - MODEL_TRAIN
+          - MODEL_TRAIN_UPDATE
+        status:
+          type: string
+          enum:
+          - PENDING
+          - RUNNING
+          - SUCCEEDED
+          - FAILED
+          - REQUESTED
+          - SKIPPED
+          - CANCELLING
+          - CANCELLED
+        execution:
+          $ref: '#/components/schemas/Execution'
+        storeRef:
+          type: string
+        documentFamilyId:
+          type: string
+        sessionId:
+          type: string
+        token:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionStep'
+        assistant:
+          $ref: '#/components/schemas/AssistantExecution'
+        modelTrain:
+          $ref: '#/components/schemas/ModelTrainExecution'
+        source:
+          type: object
+          additionalProperties:
+            type: object
+        payload:
+          type: object
+          additionalProperties:
+            type: object
+        contentObjects:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentObject'
+        inputId:
+          type: string
+        target:
+          type: string
+        assignedWorker:
+          type: string
+        platformUrl:
+          type: string
+        sessionCallBackUrl:
+          type: string
+        created:
+          type: string
+          format: date-time
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        executionId:
+          type: string
+          deprecated: true
     ExecutionStep:
       type: object
       properties:
@@ -10976,6 +11168,40 @@ components:
           type: array
           items:
             type: string
+    ModelTrainEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseEvent'
+      - type: object
+        properties:
+          type:
+            type: string
+          modelStoreRef:
+            type: string
+          options:
+            type: object
+            additionalProperties:
+              type: object
+          trainingStoreRef:
+            type: string
+          subscriptions:
+            type: array
+            items:
+              $ref: '#/components/schemas/EventSubscription'
+    ScheduledEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseEvent'
+      - type: object
+        properties:
+          type:
+            type: string
+          lastEvent:
+            type: string
+            format: date-time
+          nextEvent:
+            type: string
+            format: date-time
     Session:
       required:
       - state
@@ -11002,6 +11228,11 @@ components:
         lastAccessed:
           type: string
           format: date-time
+        executions:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Execution'
     SessionStore:
       type: object
       properties:
@@ -11023,8 +11254,6 @@ components:
           additionalProperties:
             type: object
     Workflow:
-      required:
-      - name
       type: object
       properties:
         id:
@@ -11038,16 +11267,17 @@ components:
         updatedOn:
           type: string
           format: date-time
-        name:
-          type: string
-        description:
-          type: string
         active:
           type: boolean
         definition:
           $ref: '#/components/schemas/WorkflowDefinition'
     WorkflowDefinition:
       type: object
+      properties:
+        description:
+          type: string
+        definitionXml:
+          type: string
     Role:
       required:
       - name
@@ -11107,6 +11337,8 @@ components:
           type: boolean
         projectTemplate:
           $ref: '#/components/schemas/ProjectTemplateMetadata'
+        workflow:
+          $ref: '#/components/schemas/Workflow'
         labels:
           uniqueItems: true
           type: array
@@ -11213,8 +11445,6 @@ components:
         memoryAssigned:
           type: string
         cpu:
-          type: string
-        sentryDsn:
           type: string
         podMatchLabels:
           type: array
@@ -11366,246 +11596,6 @@ components:
           description: End position
           format: int32
       description: Entities identified in search content
-    AssistantEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          contentObject:
-            $ref: '#/components/schemas/ContentObject'
-          options:
-            type: object
-            additionalProperties:
-              type: object
-          eventType:
-            type: string
-          assistant:
-            $ref: '#/components/schemas/Assistant'
-    AssistantExecution:
-      type: object
-      properties:
-        assistantId:
-          type: string
-        assistantName:
-          type: string
-        ref:
-          type: string
-        deploymentType:
-          type: string
-          enum:
-          - KUBERNETES
-          - AWS_LAMBDA
-          - AZURE_CLOUD_FUNCTION
-          - NONE
-        serviceName:
-          type: string
-        containerName:
-          type: string
-        options:
-          type: object
-          additionalProperties:
-            type: object
-        optionTypes:
-          type: object
-          additionalProperties:
-            type: string
-        status:
-          type: string
-          enum:
-          - PENDING
-          - RUNNING
-          - SUCCEEDED
-          - FAILED
-          - REQUESTED
-          - SKIPPED
-          - CANCELLING
-          - CANCELLED
-        exceptionDetails:
-          $ref: '#/components/schemas/ExceptionDetails'
-        event:
-          oneOf:
-          - $ref: '#/components/schemas/AssistantEvent'
-          - $ref: '#/components/schemas/ContentEvent'
-          - $ref: '#/components/schemas/ModelTrainEvent'
-          - $ref: '#/components/schemas/ScheduledEvent'
-        response:
-          $ref: '#/components/schemas/AssistantExecutionResponse'
-        startDate:
-          type: string
-          format: date-time
-        endDate:
-          type: string
-          format: date-time
-        processingTime:
-          type: integer
-          format: int64
-    AssistantExecutionResponse:
-      type: object
-      properties:
-        text:
-          type: string
-        pipelines:
-          type: array
-          items:
-            $ref: '#/components/schemas/AssistantResponsePipeline'
-    AssistantResponsePipeline:
-      type: object
-      properties:
-        description:
-          type: string
-        pipeline:
-          $ref: '#/components/schemas/Pipeline'
-        writeBackToStore:
-          type: boolean
-        dataSourceRef:
-          type: string
-        taxonomyRefs:
-          type: array
-          items:
-            type: string
-    BaseEvent:
-      type: object
-      properties:
-        type:
-          type: string
-          description: The type of the event
-      discriminator:
-        propertyName: type
-        mapping:
-          assistant: '#/components/schemas/AssistantEvent'
-          content: '#/components/schemas/ContentEvent'
-          scheduled: '#/components/schemas/ScheduledEvent'
-          modelTrain: '#/components/schemas/ModelTrainEvent'
-      oneOf:
-      - $ref: '#/components/schemas/ContentEvent'
-      - $ref: '#/components/schemas/ScheduledEvent'
-      - $ref: '#/components/schemas/AssistantEvent'
-      - $ref: '#/components/schemas/ModelTrainEvent'
-    ContentEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          contentObject:
-            $ref: '#/components/schemas/ContentObject'
-          documentFamily:
-            $ref: '#/components/schemas/DocumentFamily'
-          objectEventType:
-            type: string
-            enum:
-            - NEW_OBJECT
-            - DERIVED_OBJECT
-    ExecutionEvent:
-      required:
-      - sessionId
-      - token
-      - type
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the object
-        uuid:
-          type: string
-        createdOn:
-          type: string
-          format: date-time
-        updatedOn:
-          type: string
-          format: date-time
-        type:
-          type: string
-          enum:
-          - START_EXECUTION
-          - STEP_UPDATE
-          - ASSISTANT_EVENT
-          - ASSISTANT_RESPONSE
-          - MODEL_TRAIN
-          - MODEL_TRAIN_UPDATE
-        executionId:
-          type: string
-        storeRef:
-          type: string
-        documentFamilyId:
-          type: string
-        sessionId:
-          type: string
-        token:
-          type: string
-        steps:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionStep'
-        assistant:
-          $ref: '#/components/schemas/AssistantExecution'
-        modelTrain:
-          $ref: '#/components/schemas/ModelTrainExecution'
-        source:
-          type: object
-          additionalProperties:
-            type: object
-        payload:
-          type: object
-          additionalProperties:
-            type: object
-        contentObjects:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ContentObject'
-        inputId:
-          type: string
-        target:
-          type: string
-        assignedWorker:
-          type: string
-        platformUrl:
-          type: string
-        sessionCallBackUrl:
-          type: string
-        created:
-          type: string
-          format: date-time
-    ModelTrainEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          modelStoreRef:
-            type: string
-          options:
-            type: object
-            additionalProperties:
-              type: object
-          trainingStoreRef:
-            type: string
-          subscriptions:
-            type: array
-            items:
-              $ref: '#/components/schemas/EventSubscription'
-    ScheduledEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          lastEvent:
-            type: string
-            format: date-time
-          nextEvent:
-            type: string
-            format: date-time
     ExecutionLogEntry:
       type: object
       properties:
@@ -12493,17 +12483,6 @@ components:
           type: boolean
         empty:
           type: boolean
-    DeploymentStatus:
-      type: object
-    QueueDetail:
-      type: object
-      properties:
-        messageCount:
-          type: integer
-          format: int64
-        inflight:
-          type: integer
-          format: int64
     PageExecutionLogEntry:
       type: object
       properties:
