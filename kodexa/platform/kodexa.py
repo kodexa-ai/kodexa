@@ -1450,7 +1450,7 @@ class EventHelper:
         return context
 
     def get_input_document(self, context):
-        for content_object in self.event.content_objects:
+        for content_object in self.event.execution.content_objects:
 
             if content_object.id == self.event.input_id:
                 input_document_bytes = self.get_content_object(self.event.input_id)
