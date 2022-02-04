@@ -1,7 +1,7 @@
 #antlr4 -o /kodexa/selectors/impl -package kodexa.selectors.impl -listener -visitor -Dlanguage=Python3 -lib resources resources/selector.g4
 
 datamodel-codegen --input resources/api-docs.yaml --output kodexa/model/objects.py --snake-case --base-class kodexa.model.base.KodexaBaseModel
-python -c "import sys;lines=sys.stdin.read();print(lines.replace('options: Optional[Dict[str, Dict[str, Any]]] = None','options: Optional[Dict[str, Any]] = None'))" < kodexa/model/objects.py > kodexa/model/objects_new.py
+python -c "import sys;lines=sys.stdin.read();print(lines.replace('Optional[Dict[str, Dict[str, Any]]]','Optional[Dict[str, Any]]'))" < kodexa/model/objects.py > kodexa/model/objects_new.py
 
 cp kodexa/model/objects_new.py kodexa/model/objects.py
 
@@ -12,17 +12,6 @@ cp kodexa/model/objects_new.py kodexa/model/objects.py
 
 # Handle default: Optional[Dict[str, Any]] = None - this is really an ANY
 python -c "import sys;lines=sys.stdin.read();print(lines.replace('default: Optional[Dict[str, Any]] = None','default: Optional[Any] = None'))" < kodexa/model/objects.py > kodexa/model/objects_new.py
-
-cp kodexa/model/objects_new.py kodexa/model/objects.py
-
-# Handle default: Optional[Dict[str, Any]] = None - this is really an ANY
-python -c "import sys;lines=sys.stdin.read();print(lines.replace('runtime_inference_parameters: Optional[Dict[str, Dict[str, Any]]] = Field(','runtime_inference_parameters: Optional[Dict[str, Any]] = Field('))" < kodexa/model/objects.py > kodexa/model/objects_new.py
-
-
-cp kodexa/model/objects_new.py kodexa/model/objects.py
-
-# Handle default: Optional[Dict[str, Any]] = None - this is really an ANY
-python -c "import sys;lines=sys.stdin.read();print(lines.replace('runtime_training_parameters: Optional[Dict[str, Dict[str, Any]]] = Field(','runtime_training_parameters: Optional[Dict[str, Any]] = Field('))" < kodexa/model/objects.py > kodexa/model/objects_new.py
 
 cp kodexa/model/objects_new.py kodexa/model/objects.py
 rm kodexa/model/objects_new.py
