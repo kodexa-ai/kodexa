@@ -207,21 +207,27 @@ class KodexaClient:
         return PlatformOverview.parse_obj(self.get(f"{self.base_url}/api").json())
 
     def get(self, url, params=None) -> requests.Response:
-        response = requests.get(self.base_url + url, params=params, headers={"x-access-token": self.access_token,
-                                                                        "content-type": "application/json"})
+        response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
+                                                                             "content-type": "application/json"})
         return process_response(response)
 
     def post(self, url, data=None, body=None, files=None, params=None) -> requests.Response:
-        response = requests.post(self.base_url + url, json=body, data=data, files=files, params=params,
+        response = requests.post(self.get_url(url), json=body, data=data, files=files, params=params,
                                  headers={"x-access-token": self.access_token,
                                           "content-type": "application/json"})
         return process_response(response)
 
     def put(self, url, body=None) -> requests.Response:
-        response = requests.put(self.base_url + url, json=body, headers={"x-access-token": self.access_token,
-                                                                    "content-type": "application/json"})
+        response = requests.put(self.get_url(url), json=body, headers={"x-access-token": self.access_token,
+                                                                         "content-type": "application/json"})
         return process_response(response)
 
     def delete(self, url, params=None) -> requests.Response:
-        response = requests.delete(self.base_url + url, params=params, headers={"x-access-token": self.access_token})
+        response = requests.delete(self.get_url(url), params=params, headers={"x-access-token": self.access_token})
         return process_response(response)
+
+    def get_url(self, url):
+        if url.startswith("/"):
+            return self.base_url + url
+        else:
+            return self.base_url + "/" + url
