@@ -48,7 +48,7 @@ class ComponentEndpoint:
             return component_page.content[0]
 
     def list(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"{self.client.url}/api/{self.get_type()}/{self.organization.organization_slug}"
+        url = f"/api/{self.get_type()}/{self.organization.organization_slug}"
 
         params = {"query": query,
                   "page": page,
@@ -61,7 +61,7 @@ class ComponentEndpoint:
         return self.get_page_class().parse_obj(**list_response.json())
 
     def get(self, slug, version=None):
-        url = f"{self.client.url}/api/{self.get_type()}/{self.organization.organization_slug}/{slug}"
+        url = f"/api/{self.get_type()}/{self.organization.organization_slug}/{slug}"
         if version is not None:
             url += f"/{version}"
 
@@ -78,7 +78,7 @@ class OrganizationsEndpoint:
         self.client: "KodexaClient" = client
 
     def create(self, organization: Organization) -> Organization:
-        url = f"{self.client.url}/api/organizations"
+        url = f"/api/organizations"
         create_response = self.client.post(url, body=json.loads(organization.json()))
         return Organization.parse_obj(create_response.json())
 
@@ -90,11 +90,11 @@ class OrganizationsEndpoint:
             return organizations.content[0]
 
     def delete(self, id: str) -> None:
-        url = f"{self.client.url}/api/organizations/{id}"
+        url = f"/api/organizations/{id}"
         self.client.delete(url)
 
     def list(self, query="*", page=1, pagesize=10, sort=None) -> PageOrganization:
-        url = f"{self.client.url}/api/organizations"
+        url = f"/api/organizations"
 
         params = {"query": query,
                   "page": page,
@@ -107,7 +107,7 @@ class OrganizationsEndpoint:
         return PageOrganization.parse_obj(list_response.json())
 
     def get(self, organization_id) -> Organization:
-        url = f"{self.client.url}/api/organizations/{organization_id}"
+        url = f"/api/organizations/{organization_id}"
         get_response = self.client.get(url)
         return Organization.parse_obj(**get_response.json())
 
@@ -119,7 +119,7 @@ class ProjectsEndpoint:
         self.organization: Optional["KodexaOrganization"] = organization
 
     def list(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"{self.client.url}/api/projects"
+        url = f"/api/projects"
 
         params = {"query": query,
                   "page": page,
@@ -132,12 +132,12 @@ class ProjectsEndpoint:
         return PageProject.parse_obj(**list_response.json())
 
     def get(self, project_id: str) -> Project:
-        url = f"{self.client.url}/api/projects/{project_id}"
+        url = f"/api/projects/{project_id}"
         get_response = self.client.get(url)
         return Project.parse_obj(**get_response.json())
 
     def create(self, project: Project, template_ref: str = None) -> Project:
-        url = f"{self.client.url}/api/projects"
+        url = f"/api/projects"
 
         if template_ref is not None:
             params = {"templateRef": template_ref}
@@ -148,7 +148,7 @@ class ProjectsEndpoint:
         return Project.parse_obj(create_response.json())
 
     def delete(self, id: str) -> None:
-        url = f"{self.client.url}/api/projects/{id}"
+        url = f"/api/projects/{id}"
         self.client.delete(url)
 
 
@@ -198,30 +198,30 @@ class KodexaClient:
 
     def __init__(self, url=None, access_token=None):
         from kodexa import KodexaPlatform
-        self.url = url if url is not None else KodexaPlatform.get_url()
+        self.base_url = url if url is not None else KodexaPlatform.get_url()
         self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
 
     def get_platform(self):
-        return PlatformOverview.parse_obj(self.get(f"{self.url}/api").json())
+        return PlatformOverview.parse_obj(self.get(f"{self.base_url}/api").json())
 
     def get(self, url, params=None) -> requests.Response:
-        response = requests.get(url, params=params, headers={"x-access-token": self.access_token,
-                                                             "content-type": "application/json"})
+        response = requests.get(self.base_url + url, params=params, headers={"x-access-token": self.access_token,
+                                                                        "content-type": "application/json"})
         return process_response(response)
 
     def post(self, url, data=None, body=None, files=None, params=None) -> requests.Response:
-        response = requests.post(url, json=body, data=data, files=files, params=params,
+        response = requests.post(self.base_url + url, json=body, data=data, files=files, params=params,
                                  headers={"x-access-token": self.access_token,
                                           "content-type": "application/json"})
         return process_response(response)
 
     def put(self, url, body=None) -> requests.Response:
-        response = requests.put(url, json=body, headers={"x-access-token": self.access_token,
-                                                         "content-type": "application/json"})
+        response = requests.put(self.base_url + url, json=body, headers={"x-access-token": self.access_token,
+                                                                    "content-type": "application/json"})
         return process_response(response)
 
     def delete(self, url, params=None) -> requests.Response:
-        response = requests.delete(url, params=params, headers={"x-access-token": self.access_token})
+        response = requests.delete(self.base_url + url, params=params, headers={"x-access-token": self.access_token})
         return process_response(response)

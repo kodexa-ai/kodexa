@@ -2098,7 +2098,7 @@ class Document(object):
             headers = {}
         url_document = Document()
         url_document.metadata.connector = 'url'
-        url_document.metadata.connector_options.url = url
+        url_document.metadata.connector_options.base_url = url
         url_document.metadata.connector_options.headers = headers
         url_document.source.connector = 'url'
         url_document.source.original_filename = url
