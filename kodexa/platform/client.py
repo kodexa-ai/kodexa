@@ -208,7 +208,7 @@ class KodexaClient:
 
     def get(self, url, params=None) -> requests.Response:
         response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
-                                                                             "content-type": "application/json"})
+                                                                           "content-type": "application/json"})
         return process_response(response)
 
     def post(self, url, data=None, body=None, files=None, params=None) -> requests.Response:
@@ -219,7 +219,7 @@ class KodexaClient:
 
     def put(self, url, body=None) -> requests.Response:
         response = requests.put(self.get_url(url), json=body, headers={"x-access-token": self.access_token,
-                                                                         "content-type": "application/json"})
+                                                                       "content-type": "application/json"})
         return process_response(response)
 
     def delete(self, url, params=None) -> requests.Response:
