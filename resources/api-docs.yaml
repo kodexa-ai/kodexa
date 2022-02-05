@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 0.0.0-models-workflow.66
+  version: 0.0.0-models-workflow.73
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -10603,13 +10603,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
+        label:
+          type: string
+          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
-        label:
-          type: string
-          writeOnly: true
     DataLineage:
       type: object
       properties:
@@ -10752,95 +10752,6 @@ components:
             $ref: '#/components/schemas/ValidationError'
         definition:
           $ref: '#/components/schemas/AssistantDefinition'
-    AssistantEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          contentObject:
-            $ref: '#/components/schemas/ContentObject'
-          options:
-            type: object
-            additionalProperties:
-              type: object
-          eventType:
-            type: string
-          assistant:
-            $ref: '#/components/schemas/Assistant'
-    AssistantExecution:
-      type: object
-      properties:
-        assistantId:
-          type: string
-        assistantName:
-          type: string
-        ref:
-          type: string
-        options:
-          type: object
-          additionalProperties:
-            type: object
-        optionTypes:
-          type: object
-          additionalProperties:
-            type: string
-        status:
-          type: string
-          enum:
-          - PENDING
-          - RUNNING
-          - SUCCEEDED
-          - FAILED
-          - REQUESTED
-          - SKIPPED
-          - CANCELLING
-          - CANCELLED
-        exceptionDetails:
-          $ref: '#/components/schemas/ExceptionDetails'
-        event:
-          oneOf:
-          - $ref: '#/components/schemas/AssistantEvent'
-          - $ref: '#/components/schemas/ContentEvent'
-          - $ref: '#/components/schemas/ModelTrainEvent'
-          - $ref: '#/components/schemas/ScheduledEvent'
-        response:
-          $ref: '#/components/schemas/AssistantExecutionResponse'
-        startDate:
-          type: string
-          format: date-time
-        endDate:
-          type: string
-          format: date-time
-        processingTime:
-          type: integer
-          format: int64
-    AssistantExecutionResponse:
-      type: object
-      properties:
-        text:
-          type: string
-        pipelines:
-          type: array
-          items:
-            $ref: '#/components/schemas/AssistantResponsePipeline'
-    AssistantResponsePipeline:
-      type: object
-      properties:
-        description:
-          type: string
-        pipeline:
-          $ref: '#/components/schemas/Pipeline'
-        writeBackToStore:
-          type: boolean
-        dataSourceRef:
-          type: string
-        taxonomyRefs:
-          type: array
-          items:
-            type: string
     AssistantSchedule:
       type: object
       properties:
@@ -10856,41 +10767,6 @@ components:
           format: date-time
         id:
           type: string
-    BaseEvent:
-      type: object
-      properties:
-        type:
-          type: string
-          description: The type of the event
-      discriminator:
-        propertyName: type
-        mapping:
-          assistant: '#/components/schemas/AssistantEvent'
-          content: '#/components/schemas/ContentEvent'
-          scheduled: '#/components/schemas/ScheduledEvent'
-          modelTrain: '#/components/schemas/ModelTrainEvent'
-      oneOf:
-      - $ref: '#/components/schemas/ContentEvent'
-      - $ref: '#/components/schemas/ScheduledEvent'
-      - $ref: '#/components/schemas/AssistantEvent'
-      - $ref: '#/components/schemas/ModelTrainEvent'
-    ContentEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          contentObject:
-            $ref: '#/components/schemas/ContentObject'
-          documentFamily:
-            $ref: '#/components/schemas/DocumentFamily'
-          objectEventType:
-            type: string
-            enum:
-            - NEW_OBJECT
-            - DERIVED_OBJECT
     Execution:
       type: object
       properties:
@@ -10915,11 +10791,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ExecutionTarget'
-        events:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionEvent'
         session:
           $ref: '#/components/schemas/Session'
         startDate:
@@ -10981,87 +10852,6 @@ components:
             $ref: '#/components/schemas/SessionStore'
         documentFamily:
           $ref: '#/components/schemas/DocumentFamily'
-    ExecutionEvent:
-      required:
-      - sessionId
-      - token
-      - type
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the object
-        uuid:
-          type: string
-        createdOn:
-          type: string
-          format: date-time
-        updatedOn:
-          type: string
-          format: date-time
-        type:
-          type: string
-          enum:
-          - START_EXECUTION
-          - STEP_UPDATE
-          - ASSISTANT_EVENT
-          - ASSISTANT_RESPONSE
-          - MODEL_TRAIN
-          - MODEL_TRAIN_UPDATE
-        status:
-          type: string
-          enum:
-          - PENDING
-          - RUNNING
-          - SUCCEEDED
-          - FAILED
-          - REQUESTED
-          - SKIPPED
-          - CANCELLING
-          - CANCELLED
-        execution:
-          $ref: '#/components/schemas/Execution'
-        storeRef:
-          type: string
-        documentFamilyId:
-          type: string
-        sessionId:
-          type: string
-        token:
-          type: string
-        steps:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionStep'
-        assistant:
-          $ref: '#/components/schemas/AssistantExecution'
-        modelTrain:
-          $ref: '#/components/schemas/ModelTrainExecution'
-        source:
-          type: object
-          additionalProperties:
-            type: object
-        payload:
-          type: object
-          additionalProperties:
-            type: object
-        inputId:
-          type: string
-        extensionPack:
-          $ref: '#/components/schemas/ExtensionPackMetadata'
-        platformUrl:
-          type: string
-        sessionCallBackUrl:
-          type: string
-        created:
-          type: string
-          format: date-time
-        startDate:
-          type: string
-          format: date-time
-        endDate:
-          type: string
-          format: date-time
     ExecutionStep:
       type: object
       properties:
@@ -11151,76 +10941,6 @@ components:
           type: array
           items:
             type: string
-    ExtensionPackMetadata:
-      required:
-      - slug
-      type: object
-      properties:
-        id:
-          type: string
-        version:
-          type: string
-        uuid:
-          type: string
-        createdOn:
-          type: string
-          format: date-time
-        updatedOn:
-          type: string
-          format: date-time
-        createdBy:
-          type: string
-        updatedBy:
-          type: string
-        organization:
-          $ref: '#/components/schemas/Organization'
-        slug:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ExtensionPack'
-        executionEvents:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionEvent'
-        extensionPackRef:
-          type: string
-        ref:
-          type: string
-    ModelTrainEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          modelStoreRef:
-            type: string
-          options:
-            type: object
-            additionalProperties:
-              type: object
-          trainingStoreRef:
-            type: string
-          subscriptions:
-            type: array
-            items:
-              $ref: '#/components/schemas/EventSubscription'
-    ScheduledEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          lastEvent:
-            type: string
-            format: date-time
-          nextEvent:
-            type: string
-            format: date-time
     Session:
       required:
       - state
@@ -11615,6 +11335,281 @@ components:
           description: End position
           format: int32
       description: Entities identified in search content
+    AssistantEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseEvent'
+      - type: object
+        properties:
+          type:
+            type: string
+          contentObject:
+            $ref: '#/components/schemas/ContentObject'
+          options:
+            type: object
+            additionalProperties:
+              type: object
+          eventType:
+            type: string
+          assistant:
+            $ref: '#/components/schemas/Assistant'
+    AssistantExecution:
+      type: object
+      properties:
+        assistantId:
+          type: string
+        assistantName:
+          type: string
+        ref:
+          type: string
+        options:
+          type: object
+          additionalProperties:
+            type: object
+        optionTypes:
+          type: object
+          additionalProperties:
+            type: string
+        status:
+          type: string
+          enum:
+          - PENDING
+          - RUNNING
+          - SUCCEEDED
+          - FAILED
+          - REQUESTED
+          - SKIPPED
+          - CANCELLING
+          - CANCELLED
+        exceptionDetails:
+          $ref: '#/components/schemas/ExceptionDetails'
+        event:
+          oneOf:
+          - $ref: '#/components/schemas/AssistantEvent'
+          - $ref: '#/components/schemas/ContentEvent'
+          - $ref: '#/components/schemas/ModelTrainEvent'
+          - $ref: '#/components/schemas/ScheduledEvent'
+        response:
+          $ref: '#/components/schemas/AssistantExecutionResponse'
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        processingTime:
+          type: integer
+          format: int64
+    AssistantExecutionResponse:
+      type: object
+      properties:
+        text:
+          type: string
+        pipelines:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssistantResponsePipeline'
+    AssistantResponsePipeline:
+      type: object
+      properties:
+        description:
+          type: string
+        pipeline:
+          $ref: '#/components/schemas/Pipeline'
+        writeBackToStore:
+          type: boolean
+        dataSourceRef:
+          type: string
+        taxonomyRefs:
+          type: array
+          items:
+            type: string
+    BaseEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of the event
+      discriminator:
+        propertyName: type
+        mapping:
+          assistant: '#/components/schemas/AssistantEvent'
+          content: '#/components/schemas/ContentEvent'
+          scheduled: '#/components/schemas/ScheduledEvent'
+          modelTrain: '#/components/schemas/ModelTrainEvent'
+      oneOf:
+      - $ref: '#/components/schemas/ContentEvent'
+      - $ref: '#/components/schemas/ScheduledEvent'
+      - $ref: '#/components/schemas/AssistantEvent'
+      - $ref: '#/components/schemas/ModelTrainEvent'
+    ContentEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseEvent'
+      - type: object
+        properties:
+          type:
+            type: string
+          contentObject:
+            $ref: '#/components/schemas/ContentObject'
+          documentFamily:
+            $ref: '#/components/schemas/DocumentFamily'
+          objectEventType:
+            type: string
+            enum:
+            - NEW_OBJECT
+            - DERIVED_OBJECT
+    ExecutionEvent:
+      required:
+      - sessionId
+      - token
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the object
+        uuid:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        updatedOn:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum:
+          - START_EXECUTION
+          - STEP_UPDATE
+          - ASSISTANT_EVENT
+          - ASSISTANT_RESPONSE
+          - MODEL_TRAIN
+          - MODEL_TRAIN_UPDATE
+        status:
+          type: string
+          enum:
+          - PENDING
+          - RUNNING
+          - SUCCEEDED
+          - FAILED
+          - REQUESTED
+          - SKIPPED
+          - CANCELLING
+          - CANCELLED
+        execution:
+          $ref: '#/components/schemas/Execution'
+        storeRef:
+          type: string
+        documentFamilyId:
+          type: string
+        sessionId:
+          type: string
+        token:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionStep'
+        assistant:
+          $ref: '#/components/schemas/AssistantExecution'
+        modelTrain:
+          $ref: '#/components/schemas/ModelTrainExecution'
+        source:
+          type: object
+          additionalProperties:
+            type: object
+        payload:
+          type: object
+          additionalProperties:
+            type: object
+        inputId:
+          type: string
+        extensionPack:
+          $ref: '#/components/schemas/ExtensionPackMetadata'
+        platformUrl:
+          type: string
+        sessionCallBackUrl:
+          type: string
+        created:
+          type: string
+          format: date-time
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+    ExtensionPackMetadata:
+      required:
+      - slug
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: string
+        uuid:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        updatedOn:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+        organization:
+          $ref: '#/components/schemas/Organization'
+        slug:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ExtensionPack'
+        executionEvents:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionEvent'
+        extensionPackRef:
+          type: string
+        ref:
+          type: string
+    ModelTrainEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseEvent'
+      - type: object
+        properties:
+          type:
+            type: string
+          modelStoreRef:
+            type: string
+          options:
+            type: object
+            additionalProperties:
+              type: object
+          trainingStoreRef:
+            type: string
+          subscriptions:
+            type: array
+            items:
+              $ref: '#/components/schemas/EventSubscription'
+    ScheduledEvent:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseEvent'
+      - type: object
+        properties:
+          type:
+            type: string
+          lastEvent:
+            type: string
+            format: date-time
+          nextEvent:
+            type: string
+            format: date-time
     ExecutionLogEntry:
       type: object
       properties:
@@ -11735,12 +11730,12 @@ components:
     PageUser:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11772,34 +11767,34 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
     Sort:
       type: object
       properties:
         empty:
           type: boolean
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
     PageTeam:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11826,12 +11821,12 @@ components:
     PageTaxonomy:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11858,12 +11853,12 @@ components:
     PageStore:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11890,12 +11885,12 @@ components:
     PageDocumentFamily:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11922,12 +11917,12 @@ components:
     PageExecution:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11981,12 +11976,12 @@ components:
     PageDataObject:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12089,12 +12084,12 @@ components:
     PageAuditEvent:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12121,12 +12116,12 @@ components:
     PageNote:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12153,12 +12148,12 @@ components:
     PageSession:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12185,12 +12180,12 @@ components:
     PageRole:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12217,12 +12212,12 @@ components:
     PageProject:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12249,12 +12244,12 @@ components:
     PageAssistant:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12281,12 +12276,12 @@ components:
     PageProjectTemplate:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12313,12 +12308,12 @@ components:
     PagePipeline:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12345,12 +12340,12 @@ components:
     PageOrganization:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12377,12 +12372,12 @@ components:
     PageModelRuntime:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12409,12 +12404,12 @@ components:
     PageMembership:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12441,12 +12436,12 @@ components:
     PageLabel:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12473,12 +12468,12 @@ components:
     PageExtensionPack:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12505,12 +12500,12 @@ components:
     PageExecutionLogEntry:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12537,12 +12532,12 @@ components:
     PagePlatformEvent:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12569,12 +12564,12 @@ components:
     PageDashboard:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12601,12 +12596,12 @@ components:
     PageCredential:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12633,12 +12628,12 @@ components:
     PageAssistantDefinition:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12665,12 +12660,12 @@ components:
     PageAction:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12704,12 +12699,12 @@ components:
     PageAccessToken:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
