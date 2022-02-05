@@ -23,7 +23,6 @@ from addict import Dict
 from appdirs import AppDirs
 from rich import print, get_console
 
-from kodexa import KodexaClient
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
@@ -283,7 +282,8 @@ class KodexaPlatform:
     """
 
     @staticmethod
-    def get_client() -> KodexaClient:
+    def get_client():
+        from kodexa import KodexaClient
         return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
