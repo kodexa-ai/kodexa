@@ -44,7 +44,9 @@ setup(name='kodexa',
           'bbox',
           'jsonpickle',
           'better_exceptions',
-          'tblib'
+          'tblib',
+          'pyfunctional',
+          'bbox'
       ],
       entry_points="""
         [console_scripts]

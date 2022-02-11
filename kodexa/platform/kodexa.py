@@ -719,13 +719,17 @@ class KodexaPlatform:
             print(f"Check your URL and password [{obj_response.status_code}]")
 
     @classmethod
-    def apply(cls, object_type, ref, obj):
-        object_type, object_type_metadata = resolve_object_type(object_type)
-        if ref and not ('/' in ref or 'global' in object_type_metadata):
-            raise Exception(f"Unable to apply {object_type_metadata['name']} since {ref} is not complete")
+    def apply(cls, obj, org_slug=None):
 
-        url_ref = ref.replace(':', '/')
-        existing = KodexaPlatform.get_object(ref, object_type)
+        object_type, object_type_metadata = resolve_object_type(obj['type'])
+
+        if 'global' not in object_type_metadata and not org_slug:
+            print(":fire: You must provide an organization slug for this type of resource")
+            return
+
+        url_ref = f"{org_slug}/{obj['type']}/{obj['slug']}" if 'global' not in object_type_metadata else f"{object_type}/{obj['id']}"
+
+        existing = KodexaPlatform.get_object(url_ref, object_type)
         if existing is not None:
 
             obj_response = requests.put(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
@@ -739,7 +743,7 @@ class KodexaPlatform:
                                                   "content-type": "application/json"})
         if obj_response.status_code != 200:
             logger.warning(obj_response.text)
-            raise Exception(f"Unable to {'update' if existing is not None else 'create'} object {ref}")
+            raise Exception(f"Unable to {'update' if existing is not None else 'create'} object {url_ref}")
         else:
             obj_json = obj_response.json()
             if 'type' in object_type_metadata:
