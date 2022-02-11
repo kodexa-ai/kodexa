@@ -727,7 +727,7 @@ class KodexaPlatform:
             print(":fire: You must provide an organization slug for this type of resource")
             return
 
-        url_ref = f"{org_slug}/{obj['type']}/{obj['slug']}" if 'global' not in object_type_metadata else f"{object_type}/{obj['id']}"
+        url_ref = f"{org_slug}/{obj['slug']}" if 'global' not in object_type_metadata else f"{object_type}/{obj['id']}"
 
         existing = KodexaPlatform.get_object(url_ref, object_type)
         if existing is not None:

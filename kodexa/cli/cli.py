@@ -193,12 +193,12 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 
 
 @cli.command()
-@click.argument('org_slug', required=False)
+@click.option('--org', help='The slug for the organization to deploy to', required=False)
 @click.option('--file', help='The path to the file containing the object to apply')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def apply(_: Info, org_slug: Optional[str], file: str, token: str, format=None):
+def apply(_: Info, org: Optional[str], file: str, token: str, format=None):
     """Apply an object to a Kodexa platform instance from a file
     """
 
@@ -207,7 +207,7 @@ def apply(_: Info, org_slug: Optional[str], file: str, token: str, format=None):
     obj = None
     if file is None:
         print("Reading from stdin")
-        if format == 'yaml':
+        if format == 'yaml' or format == 'yml':
             obj = yaml.safe_load(sys.stdin.read())
         elif format == 'json':
             obj = json.loads(sys.stdin.read())
@@ -218,7 +218,7 @@ def apply(_: Info, org_slug: Optional[str], file: str, token: str, format=None):
         with open(file, 'r') as f:
             if file.lower().endswith('.json'):
                 obj = json.load(f)
-            elif file.lower().endswith('.yaml'):
+            elif file.lower().endswith('.yaml') or file.lower().endswith('.yml'):
                 obj = yaml.safe_load(f)
             else:
                 raise Exception("Unsupported file type")
@@ -227,10 +227,10 @@ def apply(_: Info, org_slug: Optional[str], file: str, token: str, format=None):
         print(f"Found {len(obj)} components")
         for o in obj:
             print("Applying component")
-            KodexaPlatform.apply_object(o, org_slug)
+            KodexaPlatform.apply(o, org)
     else:
         print("Applying component")
-        KodexaPlatform.apply(obj, org_slug)
+        KodexaPlatform.apply(obj, org)
     print("Applied component :tada:")
 
 
