@@ -158,6 +158,7 @@ def deploy(_: Info, path: str, url: str, org: str, token: str):
 
     print("Deployed extension pack :tada:")
 
+
 @cli.command()
 @click.argument('id', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
@@ -171,6 +172,7 @@ def project(_: Info, id: str, token: str, url: str):
     KodexaPlatform.set_access_token(token)
 
     KodexaPlatform.get_project(id)
+
 
 @cli.command()
 @click.argument('ref', required=True)
@@ -191,14 +193,13 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 
 
 @cli.command()
-@click.argument('object_type', required=True)
-@click.argument('ref', required=False)
+@click.argument('org_slug', required=False)
 @click.option('--file', help='The path to the file containing the object to apply')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, format=None):
-    """Apply an object to a Kodexa platform instance
+def apply(_: Info, org_slug: Optional[str], file: str, token: str, format=None):
+    """Apply an object to a Kodexa platform instance from a file
     """
 
     KodexaPlatform.set_access_token(token)
@@ -222,9 +223,15 @@ def apply(_: Info, object_type: str, ref: Optional[str], file: str, token: str, 
             else:
                 raise Exception("Unsupported file type")
 
-    print("Applying object")
-    KodexaPlatform.apply(object_type, ref, obj)
-    print("Applied object :tada:")
+    if isinstance(obj, list):
+        print(f"Found {len(obj)} components")
+        for o in obj:
+            print("Applying component")
+            KodexaPlatform.apply_object(o, org_slug)
+    else:
+        print("Applying component")
+        KodexaPlatform.apply(obj, org_slug)
+    print("Applied component :tada:")
 
 
 @cli.command()

@@ -10,7 +10,7 @@
 #  limitations under the License.
 import json
 import logging
-from typing import Type, Optional
+from typing import Type, Optional, List
 
 import requests
 from pydantic import BaseModel
@@ -77,6 +77,10 @@ class OrganizationsEndpoint:
     def __init__(self, client: "KodexaClient"):
         self.client: "KodexaClient" = client
 
+    def reindex(self):
+        url = f'/api/organizations/_reindex'
+        self.client.post(url)
+
     def create(self, organization: Organization) -> Organization:
         url = f"/api/organizations"
         create_response = self.client.post(url, body=json.loads(organization.json()))
@@ -112,11 +116,31 @@ class OrganizationsEndpoint:
         return Organization.parse_obj(**get_response.json())
 
 
+class ProjectEndpoint(Project):
+    client: Optional["KodexaClient"] = None
+
+    def set_client(self, client):
+        self.client = client
+
+    def stores(self) -> List[Store]:
+        pass
+
+    def taxonomies(self) -> List[Store]:
+        pass
+
+    def models(self) -> List[Store]:
+        pass
+
+
 class ProjectsEndpoint:
 
     def __init__(self, client: "KodexaClient", organization: "KodexaOrganization" = None):
         self.client: "KodexaClient" = client
         self.organization: Optional["KodexaOrganization"] = organization
+
+    def reindex(self):
+        url = f'/api/projects/_reindex'
+        self.client.post(url)
 
     def list(self, query="*", page=1, pagesize=10, sort=None):
         url = f"/api/projects"
@@ -134,7 +158,7 @@ class ProjectsEndpoint:
     def get(self, project_id: str) -> Project:
         url = f"/api/projects/{project_id}"
         get_response = self.client.get(url)
-        return Project.parse_obj(**get_response.json())
+        return ProjectEndpoint.parse_obj(**get_response.json())
 
     def create(self, project: Project, template_ref: str = None) -> Project:
         url = f"/api/projects"
@@ -145,7 +169,7 @@ class ProjectsEndpoint:
             params = None
 
         create_response = self.client.post(url, body=json.loads(project.json()), params=params)
-        return Project.parse_obj(create_response.json())
+        return ProjectEndpoint.parse_obj(create_response.json())
 
     def delete(self, id: str) -> None:
         url = f"/api/projects/{id}"
