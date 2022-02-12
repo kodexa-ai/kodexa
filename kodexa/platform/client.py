@@ -22,9 +22,16 @@ from pydantic import BaseModel
 
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
-    PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata
+    PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
+    AssistantDefinition, Action, ModelRuntime, Credential, Execution
 
 logger = logging.getLogger()
+
+
+#
+# Declare all the endpoints that we will have
+#
+# These wrap the objects from the model and provide a simple interface to the platform that is easier to use
 
 
 class ComponentEndpoint:
@@ -135,12 +142,49 @@ class ClientEndpoint(BaseModel):
         return json.loads(self.json(exclude={'client'}, by_alias=True))
 
 
+class PageEndpoint(ClientEndpoint):
+
+    def to_df(self):
+        import pandas as pd
+        df = pd.DataFrame(seq(self.content).map(lambda x: x.dict()).to_list())
+        df.drop('client', 1)
+        return df
+
+    def set_client(self, client):
+        ClientEndpoint.set_client(self, client)
+        return self.to_endpoints()
+
+    def to_endpoints(self):
+        self.content = seq(self.content).map(lambda x: self.client.deserialize(x.dict(by_alias=True))).to_list()
+        return self
+
+
+class PageTaxonomyEndpoint(PageTaxonomy, PageEndpoint):
+    pass
+
+
+class PageStoreEndpoint(PageStore, PageEndpoint):
+    pass
+
+
 class OrganizationEndpoint(Organization, ClientEndpoint):
 
     def apply(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
         response = self.client.post(url, body=self.to_dict())
         return self.client.deserialize(response.json())
+
+    def stores(self, query="*", page=1, pagesize=10, sort=None):
+        url = f"/api/stores/{self.slug}"
+        stores_response = self.client.get(url,
+                                          params={"query": query, "page": page, "pageSize": pagesize, "sort": sort})
+        return PageStoreEndpoint.parse_obj(stores_response.json()).set_client(self.client)
+
+    def taxonomies(self, query="*", page=1, pagesize=10, sort=None):
+        url = f"/api/taxonomies/{self.slug}"
+        stores_response = self.client.get(url,
+                                          params={"query": query, "page": page, "pageSize": pagesize, "sort": sort})
+        return PageTaxonomyEndpoint.parse_obj(stores_response.json()).set_client(self.client)
 
 
 class ComponentInstanceEndpoint(ClientEndpoint):
@@ -609,6 +653,97 @@ def process_response(response) -> requests.Response:
     return response
 
 
+#
+#  The Kodexa Client is the way that brings everything together
+#
+#
+
+OBJECT_TYPES = {
+    "extensionPacks": {
+        "name": "extension pack",
+        "plural": "extension packs",
+        "type": ExtensionPack
+    },
+    "pipelines": {
+        "name": "pipeline",
+        "plural": "pipelines",
+        "type": Pipeline
+    },
+    "assistants": {
+        "name": "assistant",
+        "plural": "assistants",
+        "type": AssistantDefinition
+    },
+    "actions": {
+        "name": "action",
+        "plural": "actions",
+        "type": Action
+    },
+    "modelRuntimes": {
+        "name": "modelRuntime",
+        "plural": "modelRuntimes",
+        "type": ModelRuntime
+    },
+    "credentials": {
+        "name": "credential",
+        "plural": "credentials",
+        "type": Credential
+    },
+    "taxonomies": {
+        "name": "taxonomy",
+        "plural": "taxonomies",
+        "type": TaxonomyEndpoint
+    },
+    "stores": {
+        "name": "store",
+        "plural": "stores"
+    },
+    "projects": {
+        "name": "project",
+        "plural": "projects",
+        "type": ProjectEndpoint,
+        "global": True
+    },
+    "executions": {
+        "name": "execution",
+        "plural": "executions",
+        "type": Execution,
+        "global": True,
+        "sort": "startDate:desc"
+    }
+}
+
+
+def resolve_object_type(obj_type):
+    """Takes part of an object type (ie. pipeline) and then resolves the object type (pipelines)
+
+    Args:
+      obj_type: part of the object type
+
+    Returns:
+      The object type dict (if found)
+
+    """
+    hits = []
+    keys = []
+
+    if not isinstance(obj_type, str):
+        obj_type = str(obj_type).lower()
+
+    for target_type in OBJECT_TYPES.keys():
+        if obj_type in target_type:
+            hits.append(OBJECT_TYPES[target_type])
+            keys.append(target_type)
+
+    if len(hits) == 1:
+        return keys[0], hits[0]
+
+    if len(hits) == 0:
+        raise Exception(f"Unable to find object type {obj_type}")
+    else:
+        raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
+
+
 class KodexaClient:
 
     def __init__(self, url=None, access_token=None):
@@ -621,8 +756,24 @@ class KodexaClient:
     def reindex(self):
         self.post("/api/indices/_reindex")
 
-    def get_by_ref(self, ref: str) -> BaseModel:
-        raise NotImplementedError()
+    def __build_object(self, ref, object_type_metadata):
+        url = f"/api/{object_type_metadata['plural']}/{ref.replace(':', '/')}"
+        response = self.get(url)
+
+        # We need to merge the use of the object type metadata
+        # and the deserialize method better
+
+        if 'type' not in object_type_metadata:
+            return self.deserialize(response.json())
+        else:
+            instance = object_type_metadata['type'](**response.json())
+            if isinstance(instance, ClientEndpoint):
+                instance.set_client(self)
+
+            return instance
+
+    def get_object_by_ref(self, object_type: str, ref: str) -> BaseModel:
+        return self.__build_object(ref, resolve_object_type(object_type))
 
     def get_platform(self):
         return PlatformOverview.parse_obj(self.get(f"{self.base_url}/api").json())
@@ -672,7 +823,7 @@ class KodexaClient:
                         document_store.set_client(self)
 
                         # We need special handling of the metadata
-                        if "metadata" in component_dict:
+                        if "metadata" in component_dict and component_dict["metadata"] is not None:
                             document_store.metadata = DocumentContentMetadata.parse_obj(
                                 component_dict["metadata"])
 
@@ -682,7 +833,7 @@ class KodexaClient:
                         model_store.set_client(self)
 
                         # We need special handling of the metadata
-                        if "metadata" in component_dict:
+                        if "metadata" in component_dict and component_dict["metadata"] is not None:
                             model_store.metadata = ModelContentMetadata.parse_obj(
                                 component_dict["metadata"])
 
