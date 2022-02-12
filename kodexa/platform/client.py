@@ -247,14 +247,14 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
 class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
-    def wait_for(self, mixin_name: Optional[str], label: Optional[str], timeout: int = 60) -> "DocumentFamilyEndpoint":
-        logger.info("Waiting for mixin %s to be available on document family %s", mixin_name, self.id)
+    def wait_for(self, mixin: Optional[str], label: Optional[str], timeout: int = 60) -> "DocumentFamilyEndpoint":
+        logger.info("Waiting for mixin and/or label to be available on document family %s", self.id)
         start = time.time()
         while time.time() - start < timeout:
             url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
             updated_document_family = DocumentFamilyEndpoint.parse_obj(self.client.get(url).json()).set_client(
                 self.client)
-            if mixin_name and mixin_name in updated_document_family.mixins:
+            if mixin and mixin in updated_document_family.mixins:
                 return updated_document_family
             if label and label in updated_document_family.labels:
                 return updated_document_family
