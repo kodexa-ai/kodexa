@@ -13,11 +13,10 @@ import logging
 from typing import Type, Optional, List
 
 import requests
-from pydantic import BaseModel
-
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview
+from pydantic import BaseModel
 
 logger = logging.getLogger('kodexa.platform')
 
@@ -27,9 +26,9 @@ class ComponentEndpoint:
     Represents a re-usable endpoint for a component (stores, taxonomies etc)
     """
 
-    def __init__(self, client: "KodexaClient", organization: "KodexaOrganization"):
+    def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint"):
         self.client: "KodexaClient" = client
-        self.organization: "KodexaOrganization" = organization
+        self.organization: "OrganizationEndpoint" = organization
 
     def get_type(self) -> str:
         pass
@@ -41,14 +40,14 @@ class ComponentEndpoint:
         pass
 
     def find_by_slug(self, slug) -> Optional[Type[BaseModel]]:
-        component_page = self.list(query=f"slug:'{slug}'")
+        component_page = self.list(filters=["slug=" + slug])
         if component_page.empty:
             return None
         else:
             return component_page.content[0]
 
     def list(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/{self.get_type()}/{self.organization.organization_slug}"
+        url = f"/api/{self.get_type()}/{self.organization.slug}"
 
         params = {"query": query,
                   "page": page,
@@ -61,7 +60,7 @@ class ComponentEndpoint:
         return self.get_page_class().parse_obj(**list_response.json())
 
     def get(self, slug, version=None):
-        url = f"/api/{self.get_type()}/{self.organization.organization_slug}/{slug}"
+        url = f"/api/{self.get_type()}/{self.organization.slug}/{slug}"
         if version is not None:
             url += f"/{version}"
 
@@ -86,18 +85,19 @@ class OrganizationsEndpoint:
         create_response = self.client.post(url, body=json.loads(organization.json()))
         return Organization.parse_obj(create_response.json())
 
-    def find_by_slug(self, slug) -> Optional[Organization]:
-        organizations = self.list(query=f"slug:'{slug}'")
+    def find_by_slug(self, slug) -> Optional["OrganizationEndpoint"]:
+        organizations = self.list(filters=["slug=" + slug])
         if organizations.number_of_elements == 0:
             return None
         else:
-            return organizations.content[0]
+            return OrganizationEndpoint.parse_obj(organizations.content[0].dict()).set_client(self.client)
 
     def delete(self, id: str) -> None:
         url = f"/api/organizations/{id}"
         self.client.delete(url)
 
-    def list(self, query="*", page=1, pagesize=10, sort=None) -> PageOrganization:
+    def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
+             filters: Optional[List[str]] = None) -> PageOrganization:
         url = f"/api/organizations"
 
         params = {"query": query,
@@ -106,6 +106,8 @@ class OrganizationsEndpoint:
 
         if sort is not None:
             params["sort"] = sort
+        if filters is not None:
+            params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
         return PageOrganization.parse_obj(list_response.json())
@@ -113,14 +115,33 @@ class OrganizationsEndpoint:
     def get(self, organization_id) -> Organization:
         url = f"/api/organizations/{organization_id}"
         get_response = self.client.get(url)
-        return Organization.parse_obj(**get_response.json())
+        return OrganizationEndpoint.parse_obj(**get_response.json()).set_client(self.client)
 
 
-class ProjectEndpoint(Project):
-    client: Optional["KodexaClient"] = None
+class ClientEndpoint(BaseModel):
+
+    client:Optional["KodexaClient"] = None
 
     def set_client(self, client):
         self.client = client
+        return self
+
+
+class OrganizationEndpoint(Organization, ClientEndpoint):
+
+    def apply(self, component: ComponentEndpoint) -> ComponentEndpoint:
+        url = f"/api/{component.get_type()}/{self.slug}"
+        response = self.client.post(url, body=json.loads(component.json()))
+        return self.client.deserialize(response.json())
+
+
+class ComponentInstanceEndpoint(ClientEndpoint):
+
+    def get_type(self) -> str:
+        raise NotImplementedError()
+
+
+class ProjectEndpoint(ClientEndpoint, Project):
 
     def stores(self) -> List[Store]:
         pass
@@ -158,7 +179,7 @@ class ProjectsEndpoint:
     def get(self, project_id: str) -> Project:
         url = f"/api/projects/{project_id}"
         get_response = self.client.get(url)
-        return ProjectEndpoint.parse_obj(**get_response.json())
+        return ProjectEndpoint.parse_obj(**get_response.json()).set_client(self.client)
 
     def create(self, project: Project, template_ref: str = None) -> Project:
         url = f"/api/projects"
@@ -169,7 +190,7 @@ class ProjectsEndpoint:
             params = None
 
         create_response = self.client.post(url, body=json.loads(project.json()), params=params)
-        return ProjectEndpoint.parse_obj(create_response.json())
+        return ProjectEndpoint.parse_obj(create_response.json()).set_client(self.client)
 
     def delete(self, id: str) -> None:
         url = f"/api/projects/{id}"
@@ -183,8 +204,23 @@ class StoresEndpoint(ComponentEndpoint):
     def get_page_class(self) -> Type[BaseModel]:
         return PageStore
 
-    def get_instance_class(self) -> Type[BaseModel]:
-        return Store
+
+class StoreEndpoint(ComponentInstanceEndpoint, Store):
+
+    def get_type(self) -> str:
+        return "stores"
+
+
+class DataStoreEndpoint(StoreEndpoint):
+    pass
+
+
+class ModelStoreEndpoint(StoreEndpoint):
+    pass
+
+
+class DocumentStoreEndpoint(StoreEndpoint):
+    pass
 
 
 class TaxonomiesEndpoint(ComponentEndpoint):
@@ -198,14 +234,6 @@ class TaxonomiesEndpoint(ComponentEndpoint):
         return Taxonomy
 
 
-class KodexaOrganization:
-    def __init__(self, client, organization_slug):
-        self.client = client
-        self.organization_slug = organization_slug
-        self.stores = StoresEndpoint(client, self)
-        self.taxonomies = TaxonomiesEndpoint(client, self)
-
-
 def process_response(response) -> requests.Response:
     if response.status_code == 401:
         raise Exception("Unauthorized")
@@ -214,7 +242,10 @@ def process_response(response) -> requests.Response:
     if response.status_code == 500:
         raise Exception("Internal server error")
     if response.status_code == 400:
-        raise Exception("Bad request " + response.text)
+        if response.json() and response.json().get("errors"):
+            raise Exception(', '.join(response.json()["errors"].values()))
+        else:
+            raise Exception("Bad request " + response.text)
     return response
 
 
@@ -255,3 +286,30 @@ class KodexaClient:
             return self.base_url + url
         else:
             return self.base_url + "/" + url
+
+    def deserialize(self, component_dict: dict) -> ComponentInstanceEndpoint:
+        if "type" in component_dict:
+            component_type = component_dict["type"]
+            if component_type == 'store':
+                if "storeType" in component_dict:
+                    store_type = component_dict["storeType"]
+                    if store_type.lower() == "document":
+                        document_store = DocumentStoreEndpoint.parse_obj(**component_dict)
+                        document_store.set_client(self)
+                        return document_store
+                    elif store_type.lower() == "model":
+                        model_store = ModelStoreEndpoint.parse_obj(**component_dict)
+                        model_store.set_client(self)
+                        return model_store
+                    elif store_type.lower() == "data":
+                        data_store = DataStoreEndpoint.parse_obj(**component_dict)
+                        data_store.set_client(self)
+                        return data_store
+                    else:
+                        raise Exception("Unknown store type: " + store_type)
+                else:
+                    raise Exception("A store must have a storeType")
+            if component_type == 'taxonomy':
+                return Taxonomy.parse_obj(**component_dict)
+        else:
+            raise Exception("Type not found in the dictionary, unable to deserialize")
