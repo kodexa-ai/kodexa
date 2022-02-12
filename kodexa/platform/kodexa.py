@@ -32,7 +32,7 @@ from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
 
-logger = logging.getLogger('kodexa.platform')
+logger = logging.getLogger()
 
 dirs = AppDirs("Kodexa", "Kodexa")
 

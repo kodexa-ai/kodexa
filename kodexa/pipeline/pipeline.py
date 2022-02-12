@@ -19,7 +19,7 @@ from kodexa.connectors.connectors import get_caller_dir, DocumentStoreConnector
 from kodexa.model import Document, Store, ContentObject
 from kodexa.stores.stores import DocumentStore
 
-logger = logging.getLogger('kodexa.pipeline')
+logger = logging.getLogger()
 
 
 def new_id():

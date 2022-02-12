@@ -21,6 +21,8 @@ import click
 import yaml
 from rich import print
 
+logging.root.addHandler(logging.StreamHandler(sys.stdout))
+
 from kodexa import KodexaClient
 from kodexa.cli.documentation import generate_site
 from kodexa.model.model import ModelContentMetadata
@@ -54,26 +56,19 @@ pass_info = click.make_pass_decorator(Info, ensure=True)
 @click.option("--verbose", "-v", count=True, help="Enable verbose output.")
 @pass_info
 def cli(info: Info, verbose: int):
-    """Run Kodexa.
 
-    Args:
-      info: Info: 
-      verbose: int: 
-
-    Returns:
-
-    """
     # Use the verbosity count to determine the logging level...
     if verbose > 0:
-        logging.basicConfig(
-            level=LOGGING_LEVELS[verbose]
+
+        logging.root.setLevel(
+            LOGGING_LEVELS[verbose]
             if verbose in LOGGING_LEVELS
             else logging.DEBUG
         )
         click.echo(
             click.style(
                 f"Verbose logging is enabled. "
-                f"(LEVEL={logging.getLogger().getEffectiveLevel()})",
+                f"(LEVEL={logging.root.getEffectiveLevel()})",
                 fg="yellow",
             )
         )

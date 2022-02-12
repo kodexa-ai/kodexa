@@ -22,7 +22,7 @@ from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata
 
-logger = logging.getLogger('kodexa.platform')
+logger = logging.getLogger()
 
 
 class ComponentEndpoint:
@@ -376,7 +376,9 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             for content_path in metadata.contents:
                 final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
                 for path_hit in glob.glob(final_wildcard):
+                    path_hit = path_hit.replace(metadata.base_dir, '') if metadata.base_dir else path_hit
                     if Path(path_hit).is_file():
+                        logger.info(f"Uploading {path_hit}")
                         with open(path_hit, 'rb') as path_content:
                             self.upload_bytes(path_hit, path_content, replace=True)
 

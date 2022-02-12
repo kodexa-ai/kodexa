@@ -12,7 +12,7 @@ from kodexa.assistant.assistant import AssistantMetadata
 from kodexa.model import AssistantEvent, ContentObjectReference, DocumentStore, ActorType
 from kodexa.model.objects import ScheduledEvent, ExceptionDetails
 
-logger = logging.getLogger('kodexa.testing')
+logger = logging.getLogger()
 
 
 def print_data_table(context: PipelineContext, store_name: str):

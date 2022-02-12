@@ -12,7 +12,7 @@ import requests
 from kodexa.model import ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, ModelStore, Store
 from kodexa.model.model import ModelContentMetadata
 
-logger = logging.getLogger('kodexa.stores')
+logger = logging.getLogger()
 
 
 class RemoteDataStore(Store):
