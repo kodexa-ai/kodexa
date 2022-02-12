@@ -17,10 +17,12 @@ jobs:
         with:
           python-version: 3.8
       - name: Increment version
-        uses: remorses/bump-version@js
+        id: version
+        uses: pdodds/Bump-N-Tag-Version@master
         with:
-          version_file: ./VERSION
-          prerelease_tag: beta
+          file_name: './VERSION'
+          tag_version: "true"
+          postfix: 'beta'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install dependencies
@@ -38,17 +40,17 @@ jobs:
       - name: Package
         run: |
           python setup.py bdist_wheel sdist
-      - name: Publish a Python distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
-      - name: Build Python Documentation
-        run: |
-          pdoc --html kodexa
-      - name: Deploy GitHub Page
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./html/kodexa
-          keep_files: true
+#      - name: Publish a Python distribution to PyPI
+#        uses: pypa/gh-action-pypi-publish@master
+#        with:
+#          user: __token__
+#          password: ${{ secrets.PYPI_TOKEN }}
+#      - name: Build Python Documentation
+#        run: |
+#          pdoc --html kodexa
+#      - name: Deploy GitHub Page
+#        uses: peaceiris/actions-gh-pages@v3
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          publish_dir: ./html/kodexa
+#          keep_files: true
