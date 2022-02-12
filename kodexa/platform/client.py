@@ -183,9 +183,9 @@ class ProjectEndpoint(ClientEndpoint, Project):
 
 class ProjectsEndpoint:
 
-    def __init__(self, client: "KodexaClient", organization: "KodexaOrganization" = None):
+    def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint" = None):
         self.client: "KodexaClient" = client
-        self.organization: Optional["KodexaOrganization"] = organization
+        self.organization: Optional["OrganizationEndpoint"] = organization
 
     def reindex(self):
         url = f'/api/projects/_reindex'
