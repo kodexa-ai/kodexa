@@ -20,7 +20,7 @@ from kodexa.model import ContentEvent, ContentObject, Document, DocumentFamily, 
     ModelStore, Store
 from kodexa.model.objects import ObjectEventType
 
-logger = logging.getLogger('kodexa.stores')
+logger = logging.getLogger()
 
 
 class LocalDocumentStore(DocumentStore):

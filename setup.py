@@ -57,7 +57,7 @@ setup(name='kodexa',
           #   3 - Alpha
           #   4 - Beta
           #   5 - Production/Stable
-          'Development Status :: 5 - Production/Stable',
+          'Development Status :: 4 - Beta',
 
           # Indicate who your project is intended for.
           'Intended Audience :: Developers',
@@ -69,7 +69,7 @@ setup(name='kodexa',
           # noqa
           # Specify the Python versions you support here. In particular, ensure
           # that you indicate whether you support Python 2, Python 3 or both.
-          'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
       ],
       package_data={
           # If any package contains *.j2

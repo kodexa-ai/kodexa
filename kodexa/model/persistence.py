@@ -9,7 +9,7 @@ import msgpack
 from kodexa.model import Document, ContentNode, SourceMetadata
 from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
-logger = logging.getLogger('kodexa.model.persistence')
+logger = logging.getLogger()
 
 # Heavily used SQL
 

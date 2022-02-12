@@ -18,7 +18,7 @@ import requests
 
 from kodexa.model import ContentObject, Document, DocumentMetadata, DocumentStore, SourceMetadata
 
-logger = logging.getLogger('kodexa.connectors')
+logger = logging.getLogger()
 
 
 def get_caller_dir():
