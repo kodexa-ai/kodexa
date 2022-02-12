@@ -268,7 +268,160 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
 
 
 class DataStoreEndpoint(StoreEndpoint):
-    pass
+
+    def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
+                            include_id: bool = False):
+        """
+        Args:
+          path (str): The path to the data object
+          query (str): A query to limit the results (Defaults to *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+          include_id (Optional[bool]): Include the data object ID as a column (defaults to False)
+        Returns:
+
+        """
+        import pandas as pd
+
+        data_objects = self.get_data_objects(path, query, document_family)
+
+        table_result = {
+            'rows': [],
+            'columns': [],
+            'column_headers': []
+        }
+
+        for data_object in data_objects:
+            if len(table_result['columns']) == 0:
+                if include_id:
+                    table_result['column_headers'].append('Data Object ID')
+                    table_result['columns'].append('data_object_id')
+                for taxon in data_object['taxon']['children']:
+                    if not taxon['group']:
+                        table_result['column_headers'].append(taxon['label'])
+                        table_result['columns'].append(taxon['name'])
+
+            new_row = []
+            for column in table_result['columns']:
+                column_value = None
+                if include_id:
+                    if column == 'data_object_id':
+                        column_value = data_object['id']
+                for attribute in data_object['attributes']:
+                    if attribute['tag'] == column:
+                        column_value = attribute['stringValue']
+                new_row.append(column_value)
+
+            table_result['rows'].append(new_row)
+
+        return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
+
+    def update_data_object_attribute(self, data_object, attribute):
+        """
+
+        Args:
+          data_object (DataObject): The data object to update
+          attribute (Attribute): The attribute to update
+
+        Returns:
+
+        """
+        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects/{data_object.id}/attributes/{attribute.id}"
+        logger.info(f"Downloading a specific data object from {url}")
+
+        data_object_response = self.client.put(
+            url, body=attribute.json(by_alias=True))
+        from kodexa.model.objects import DataObject
+        return DataObject(**data_object_response.json())
+
+    def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
+        """
+
+        Args:
+          path (str): The path to the data object
+          query (str): A query to limit the results (Default *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+        Returns:
+
+        """
+
+        # We need to get the first set of rows,
+        rows: List = []
+        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family)
+
+        # lets work out the last page
+        rows = rows + row_response['content']
+        total_pages = row_response['totalPages']
+
+        for page in range(2, total_pages):
+            row_response = self.get_data_objects_page_request(path, page, query=query, document_family=document_family)
+            rows = rows + row_response['content']
+
+        return rows
+
+    def get_data_object(self, data_object_id: str):
+
+        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects/{data_object_id}"
+        logger.info(f"Downloading a specific data object from {url}")
+
+        data_object_response = self.client.get(url)
+        from kodexa.model.objects import DataObject
+        return DataObject(**data_object_response.json())
+
+    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
+                                      document_family: Optional[DocumentFamily] = None):
+        """
+
+        Args:
+          path (str): The parent taxon (/ is root)
+          page_number (int):  (Default value = 1)
+          page_size (int):  (Default value = 5000)
+          query (str): The query to limit results (Default *)
+          document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+
+        Returns:
+
+        """
+        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
+        logger.debug(f"Downloading a specific table from {url}")
+
+        # We need to go through and pull all the pages
+        params = {"path": path, "page": page_number, "pageSize": page_size, "query": query}
+
+        if document_family:
+            params['documentFamilyId'] = document_family.id
+            params['storeRef'] = document_family.store_ref
+
+        rows_response = self.client.get(url, params=params)
+
+        # TODO this needs to return real objects
+        return rows_response.json()
+
+    def add_data_objects(self, rows):
+        """
+
+        Args:
+          rows: A list of rows that you want to post
+
+        Returns:
+
+        """
+        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
+        logger.debug(f"Uploading data objects to store {url}")
+
+        doc = requests.post(url, json=rows)
+
+    def add(self, row):
+        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
+        logger.debug(f"Uploading data objects to store {url}")
+
+        row_dict = {}
+        for idx, row_value in enumerate(row):
+            if len(self.columns) == 0 or len(self.columns) <= idx:
+                row_dict[f'col{idx}'] = row_value
+            else:
+                row_dict[self.columns[idx]] = row_value
+
+        doc = requests.post(url, json=[{'data': row_dict}])
 
 
 class DocumentStoreEndpoint(StoreEndpoint):
