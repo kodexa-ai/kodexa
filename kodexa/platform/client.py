@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Type, Optional, List
 
 import requests
+from functional import seq
 from pydantic import BaseModel
 
 from kodexa.model import Store, Taxonomy
@@ -171,14 +172,18 @@ class ComponentInstanceEndpoint(ClientEndpoint):
 
 class ProjectEndpoint(ClientEndpoint, Project):
 
-    def stores(self) -> List[Store]:
-        pass
+    def _get_resource(self, resource_type: str) -> List[ComponentInstanceEndpoint]:
+        url = f"/api/projects/{self.id}/{resource_type}"
+        response = self.client.get(url)
+        return [self.client.deserialize(store) for store in response.json()]
 
-    def taxonomies(self) -> List[Store]:
-        pass
+    def stores(self, store_type=None, store_purpose=None) -> List[ComponentInstanceEndpoint]:
+        return (seq(self._get_resource("stores"))
+                .filter(lambda store: store_type is None or store.store_type == store_type)
+                .filter(lambda store: store_type is None or store.store_purpose == store_purpose))
 
-    def models(self) -> List[Store]:
-        pass
+    def taxonomies(self) -> List[ComponentInstanceEndpoint]:
+        return self._get_resource("taxonomies")
 
 
 class ProjectsEndpoint:
@@ -558,6 +563,8 @@ def process_response(response) -> requests.Response:
         raise Exception("Unauthorized")
     if response.status_code == 404:
         raise Exception("Not found")
+    if response.status_code == 405:
+        raise Exception("Method not allowed")
     if response.status_code == 500:
         raise Exception("Internal server error")
     if response.status_code == 400:
@@ -649,4 +656,4 @@ class KodexaClient:
             if component_type == 'taxonomy':
                 return TaxonomyEndpoint.parse_obj(component_dict).set_client(self)
         else:
-            raise Exception("Type not found in the dictionary, unable to deserialize")
+            raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
