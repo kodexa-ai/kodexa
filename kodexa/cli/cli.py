@@ -21,6 +21,7 @@ import click
 import yaml
 from rich import print
 
+from kodexa import KodexaClient
 from kodexa.cli.documentation import generate_site
 from kodexa.model.model import ModelContentMetadata
 from kodexa.platform.kodexa import ExtensionHelper, KodexaPlatform
@@ -202,7 +203,7 @@ def apply(_: Info, org: Optional[str], file: str, token: str, format=None):
     """Apply an object to a Kodexa platform instance from a file
     """
 
-    KodexaPlatform.set_access_token(token)
+    client = KodexaClient(access_token=token)
 
     obj = None
     if file is None:
@@ -226,11 +227,14 @@ def apply(_: Info, org: Optional[str], file: str, token: str, format=None):
     if isinstance(obj, list):
         print(f"Found {len(obj)} components")
         for o in obj:
-            print("Applying component")
-            KodexaPlatform.apply(o, org)
+            component = client.deserialize(o)
+            print(f"Applying component {component.ref}")
+            client.apply(component)
+
     else:
-        print("Applying component")
-        KodexaPlatform.apply(obj, org)
+        component = client.deserialize(obj)
+        print(f"Applying component {component.ref}")
+        client.apply(component)
     print("Applied component :tada:")
 
 
