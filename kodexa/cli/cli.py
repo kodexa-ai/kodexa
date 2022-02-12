@@ -134,32 +134,6 @@ def push_model(_: Info, path: str, url: str, org: str, token: str, slug: str, ve
     print("Pushed model :tada:")
 
 
-@click.option('--path', default=os.getcwd(), help='Path to folder containing kodexa.yml')
-@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
-@click.option('--org', help='The slug for the organization to deploy to', required=True)
-@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
-@cli.command()
-@pass_info
-def deploy(_: Info, path: str, url: str, org: str, token: str):
-    """Deploy extension pack to a Kodexa platform instance
-    """
-
-    print("Starting deployment from path", path)
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-
-    if '://' in path:
-        print("Deploying from URI", path)
-        KodexaPlatform.deploy_extension_from_uri(path, org)
-    else:
-        print("Deploying local metadata from", path)
-        metadata = ExtensionHelper.load_metadata(path)
-        metadata['orgSlug'] = org;
-        KodexaPlatform.deploy_extension(metadata)
-
-    print("Deployed extension pack :tada:")
-
-
 @cli.command()
 @click.argument('id', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
@@ -196,11 +170,13 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 @cli.command()
 @click.option('--org', help='The slug for the organization to deploy to', required=False)
 @click.option('--file', help='The path to the file containing the object to apply')
+@click.option('--update/--no-update', help='The path to the file containing the object to apply',
+              default=False)
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def apply(_: Info, org: Optional[str], file: str, token: str, format=None):
-    """Apply an object to a Kodexa platform instance from a file
+def deploy(_: Info, org: Optional[str], file: str, token: str, format=None, update: bool = False):
+    """Deploy an object to a Kodexa platform instance from a file
     """
 
     client = KodexaClient(access_token=token)
@@ -228,14 +204,18 @@ def apply(_: Info, org: Optional[str], file: str, token: str, format=None):
         print(f"Found {len(obj)} components")
         for o in obj:
             component = client.deserialize(o)
-            print(f"Applying component {component.ref}")
-            client.apply(component)
+            if org is not None:
+                component.org_slug = org
+            print(f"Deploying component {component.slug}:{component.version}")
+            component.deploy(update=update)
 
     else:
         component = client.deserialize(obj)
-        print(f"Applying component {component.ref}")
-        client.apply(component)
-    print("Applied component :tada:")
+        if org is not None:
+            component.org_slug = org
+        print(f"Deploying component {component.slug}:{component.version}")
+        component.deploy(update=update)
+    print("Deployed :tada:")
 
 
 @cli.command()
