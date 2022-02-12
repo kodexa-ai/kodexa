@@ -8,8 +8,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import glob
 import json
 import logging
+import os
+from pathlib import Path
 from typing import Type, Optional, List
 
 import requests
@@ -17,7 +20,7 @@ from pydantic import BaseModel
 
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
-    PlatformOverview
+    PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata
 
 logger = logging.getLogger('kodexa.platform')
 
@@ -143,6 +146,9 @@ class ComponentInstanceEndpoint(ClientEndpoint):
     def get_type(self) -> str:
         raise NotImplementedError()
 
+    def post_deploy(self):
+        pass
+
     def deploy(self, update=False):
         if self.org_slug is None:
             raise Exception("We can not deploy this component since it does not have an organization")
@@ -157,8 +163,10 @@ class ComponentInstanceEndpoint(ClientEndpoint):
             raise Exception("Component already exists")
         if exists:
             self.client.put(url, self.to_dict())
+            self.post_deploy()
         else:
             self.client.post(url, self.to_dict())
+            self.post_deploy()
 
 
 class ProjectEndpoint(ClientEndpoint, Project):
@@ -230,17 +238,147 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
     def get_type(self) -> str:
         return "stores"
 
+    def get_metadata_class(self) -> Optional[Type[BaseModel]]:
+        return None
+
+    def set_metadata(self, metadata):
+        pass
+
+    def upload_contents(self, metadata):
+        pass
+
+    def update_metadata(self):
+        self.client.put(f"/api/stores/{self.ref.replace(':', '/')}/metadata", body=json.loads(self.metadata.json()))
+
+    def get_metadata(self):
+        metadata_response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/metadata")
+        return self.get_metadata_class().parse_obj(**metadata_response.json()) if self.get_metadata_class() else None
+
+    def post_deploy(self):
+        if self.metadata:
+            # We need to determine in the subclass if we wil be uploading the
+            # contents
+            self.upload_contents(self.metadata)
+
 
 class DataStoreEndpoint(StoreEndpoint):
     pass
 
 
-class ModelStoreEndpoint(StoreEndpoint):
-    pass
-
-
 class DocumentStoreEndpoint(StoreEndpoint):
-    pass
+
+    def delete_by_path(self, object_path: str):
+        """
+        Delete the content stored in the store at the given path
+
+        Args:
+          object_path: the path to the content (ie. mymodel.dat)
+          object_path: str:
+        """
+        self.client.delete(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs",
+            params={"path": object_path})
+
+    def upload_bytes(self, path: str, content, replace=False) -> DocumentFamily:
+        """
+        Put the content into the store at the given path
+
+        Args:
+          path: The path you wish to put the content at
+          content: The content for that object
+          replace: Replace the content if it exists
+
+        Returns:
+          the document family that was created
+        """
+        files = {"file": content}
+
+        if replace:
+            delete_response = requests.delete(
+                f"/api/stores/{self.ref.replace(':', '/')}/fs",
+                params={"path": path})
+            logger.info(f"Deleting {path}")
+
+        content_object_response = self.client.post(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs",
+            params={"path": path},
+            files=files)
+        logger.info(f"Uploaded {path} ({content_object_response.status_code})")
+        return DocumentFamily.parse_obj(content_object_response.json())
+
+    def get_bytes(self, object_path: str):
+        """Get the bytes for the object at the given path, will return None if there is no object there
+
+        Args:
+          object_path: the object path
+          object_path: str:
+
+        Returns:
+          the bytes or None is nothing is at the path
+
+        """
+        return self.client.get(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs",
+            params={"path": object_path}).content
+
+    def list_contents(self) -> List[str]:
+
+        # TODO this needs to be cleaned up a bit
+        params = {
+            'page': 1,
+            'pageSize': 1000,
+            'query': '*'
+        }
+        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
+                                       params=params)
+        paths = []
+        for fam_dict in get_response.json()['content']:
+            paths.append(fam_dict['path'])
+        return paths
+
+    def get_metadata_class(self) -> Type[BaseModel]:
+        return DocumentContentMetadata
+
+    def put(self, path: str, content, replace=False) -> DocumentFamily:
+        """Put the content into the store at the given path
+
+        Args:
+          path: The path you wish to put the content at
+          content: The content for that object
+          replace: Replace the content if it exists
+
+        Returns:
+          the document family that was created
+        """
+        files = {"file": content}
+
+        if replace:
+            self.client.delete(
+                f"/api/stores/{self.ref.replace(':', '/')}/fs",
+                params={"path": path})
+            logger.info(f"Deleted {path}")
+
+        content_object_response = self.client.post(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs",
+            params={"path": path},
+            files=files)
+        logger.info(f"Uploaded {path}")
+        return DocumentFamily.parse_obj(**content_object_response.json())
+
+
+class ModelStoreEndpoint(DocumentStoreEndpoint):
+
+    def get_metadata_class(self) -> Type[BaseModel]:
+        return ModelContentMetadata
+
+    def upload_contents(self, metadata):
+        if metadata.contents:
+            for content_path in metadata.contents:
+                final_wildcard = os.path.join(metadata.baseDir, content_path) if metadata.baseDir else content_path
+                for path_hit in glob.glob(final_wildcard):
+                    if Path(path_hit).is_file():
+                        with open(path_hit, 'rb') as path_content:
+                            self.upload_file(path_hit, path_content, replace=True)
 
 
 class TaxonomiesEndpoint(ComponentEndpoint):
