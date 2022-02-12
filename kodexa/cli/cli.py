@@ -75,60 +75,6 @@ def cli(info: Info, verbose: int):
     info.verbose = verbose
 
 
-@click.option('--path', default=os.getcwd(), help='Path to folder containing kodexa.yml')
-@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
-@click.option('--org', help='The slug for the organization to deploy to', required=True)
-@click.option('--slug', help='The slug to deploy the model to', required=False)
-@click.option('--version', help='The version to deploy the model to', required=False)
-@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
-@cli.command()
-@pass_info
-def push_model(_: Info, path: str, url: str, org: str, token: str, slug: str, version: str):
-    """Deploy extension pack to a Kodexa platform instance
-    """
-
-    print("Pushing model from path", path)
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-
-    # We need to open the model.yml - upload the contents
-    # and then update the metadata
-    with open(path + "/model.yml", "r") as model_meta_file:
-        import yaml
-        model_meta = yaml.safe_load(model_meta_file)
-
-    slug = slug if slug else model_meta["slug"]
-    version = version if version else model_meta["version"]
-    model_meta["type"] = "model"
-
-    model_meta["version"] = version
-    model_meta["slug"] = slug
-
-    from kodexa import RemoteModelStore
-    ref = f"{org}/{slug}:{version}"
-    print("Pushing model to ", ref)
-    model_meta['ref'] = ref
-    remote_model_store = RemoteModelStore.parse_obj(model_meta)
-
-    KodexaPlatform.deploy(ref, remote_model_store, name=model_meta['name'], description=model_meta['description'],
-                          force_replace=True)
-
-    print("Deleting existing contents")
-    for path in remote_model_store.list_contents():
-        remote_model_store.delete(path)
-
-    for path in model_meta["contents"]:
-        for path_hit in glob.glob(path):
-            print(f"Uploading {path_hit}")
-            if Path(path_hit).is_file():
-                with open(path_hit, 'rb') as path_content:
-                    remote_model_store.put(path_hit, path_content, replace=True)
-
-    model_metadata = ModelContentMetadata.parse_obj(model_meta['metadata'])
-    remote_model_store.set_content_metadata(model_metadata)
-    print("Pushed model :tada:")
-
-
 @cli.command()
 @click.argument('id', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
