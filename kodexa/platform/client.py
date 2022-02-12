@@ -13,10 +13,11 @@ import logging
 from typing import Type, Optional, List
 
 import requests
+from pydantic import BaseModel
+
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview
-from pydantic import BaseModel
 
 logger = logging.getLogger('kodexa.platform')
 
@@ -119,17 +120,19 @@ class OrganizationsEndpoint:
 
 
 class ClientEndpoint(BaseModel):
-
-    client:Optional["KodexaClient"] = None
+    client: Optional["KodexaClient"] = None
 
     def set_client(self, client):
         self.client = client
         return self
 
+    def to_dict(self):
+        return json.loads(self.json(exclude={'client'}))
+
 
 class OrganizationEndpoint(Organization, ClientEndpoint):
 
-    def apply(self, component: ComponentEndpoint) -> ComponentEndpoint:
+    def apply(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
         response = self.client.post(url, body=json.loads(component.json()))
         return self.client.deserialize(response.json())
@@ -139,6 +142,23 @@ class ComponentInstanceEndpoint(ClientEndpoint):
 
     def get_type(self) -> str:
         raise NotImplementedError()
+
+    def deploy(self, update=False):
+        if self.org_slug is None:
+            raise Exception("We can not deploy this component since it does not have an organization")
+        if self.slug is None:
+            raise Exception("We can not deploy this component since it does not have a slug")
+
+        self.ref = f"{self.org_slug}/{self.slug}{f':{self.version}' if self.version is not None else ''}"
+
+        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
+        exists = self.client.exists(url)
+        if not update and exists:
+            raise Exception("Component already exists")
+        if exists:
+            self.client.put(url, self.to_dict())
+        else:
+            self.client.post(url, self.to_dict())
 
 
 class ProjectEndpoint(ClientEndpoint, Project):
@@ -261,6 +281,14 @@ class KodexaClient:
     def get_platform(self):
         return PlatformOverview.parse_obj(self.get(f"{self.base_url}/api").json())
 
+    def exists(self, url) -> bool:
+        response = requests.get(self.get_url(url), headers={"x-access-token": self.access_token,
+                                                            "content-type": "application/json"})
+        if response.status_code == 200 or response.status_code == 404:
+            return response.status_code == 200
+        else:
+            process_response(response)
+
     def get(self, url, params=None) -> requests.Response:
         response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
                                                                            "content-type": "application/json"})
@@ -294,15 +322,15 @@ class KodexaClient:
                 if "storeType" in component_dict:
                     store_type = component_dict["storeType"]
                     if store_type.lower() == "document":
-                        document_store = DocumentStoreEndpoint.parse_obj(**component_dict)
+                        document_store = DocumentStoreEndpoint.parse_obj(component_dict)
                         document_store.set_client(self)
                         return document_store
                     elif store_type.lower() == "model":
-                        model_store = ModelStoreEndpoint.parse_obj(**component_dict)
+                        model_store = ModelStoreEndpoint.parse_obj(component_dict)
                         model_store.set_client(self)
                         return model_store
                     elif store_type.lower() == "data":
-                        data_store = DataStoreEndpoint.parse_obj(**component_dict)
+                        data_store = DataStoreEndpoint.parse_obj(component_dict)
                         data_store.set_client(self)
                         return data_store
                     else:
@@ -310,6 +338,6 @@ class KodexaClient:
                 else:
                     raise Exception("A store must have a storeType")
             if component_type == 'taxonomy':
-                return Taxonomy.parse_obj(**component_dict)
+                return Taxonomy.parse_obj(component_dict)
         else:
             raise Exception("Type not found in the dictionary, unable to deserialize")
