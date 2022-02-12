@@ -130,14 +130,14 @@ class ClientEndpoint(BaseModel):
         return self
 
     def to_dict(self):
-        return json.loads(self.json(exclude={'client'}))
+        return json.loads(self.json(exclude={'client'}, by_alias=True))
 
 
 class OrganizationEndpoint(Organization, ClientEndpoint):
 
     def apply(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
-        response = self.client.post(url, body=json.loads(component.json()))
+        response = self.client.post(url, body=self.to_dict())
         return self.client.deserialize(response.json())
 
 
@@ -231,6 +231,12 @@ class StoresEndpoint(ComponentEndpoint):
 
     def get_page_class(self) -> Type[BaseModel]:
         return PageStore
+
+
+class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
+
+    def get_type(self) -> str:
+        return "taxonomies"
 
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):
@@ -482,14 +488,12 @@ class KodexaClient:
 
                         return model_store
                     elif store_type.lower() == "data":
-                        data_store = DataStoreEndpoint.parse_obj(component_dict)
-                        data_store.set_client(self)
-                        return data_store
+                        return DataStoreEndpoint.parse_obj(component_dict).set_client(self)
                     else:
                         raise Exception("Unknown store type: " + store_type)
                 else:
                     raise Exception("A store must have a storeType")
             if component_type == 'taxonomy':
-                return Taxonomy.parse_obj(component_dict)
+                return TaxonomyEndpoint.parse_obj(component_dict).set_client(self)
         else:
             raise Exception("Type not found in the dictionary, unable to deserialize")
