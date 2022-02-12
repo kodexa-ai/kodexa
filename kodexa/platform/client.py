@@ -12,6 +12,7 @@ import glob
 import json
 import logging
 import os
+import time
 from pathlib import Path
 from typing import Type, Optional, List
 
@@ -180,7 +181,7 @@ class ProjectEndpoint(ClientEndpoint, Project):
     def stores(self, store_type=None, store_purpose=None) -> List[ComponentInstanceEndpoint]:
         return (seq(self._get_resource("stores"))
                 .filter(lambda store: store_type is None or store.store_type == store_type)
-                .filter(lambda store: store_type is None or store.store_purpose == store_purpose))
+                .filter(lambda store: store_type is None or store.store_purpose == store_purpose).to_list())
 
     def taxonomies(self) -> List[ComponentInstanceEndpoint]:
         return self._get_resource("taxonomies")
@@ -242,6 +243,30 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
     def get_type(self) -> str:
         return "taxonomies"
+
+
+class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
+
+    def wait_for(self, mixin_name: Optional[str], label: Optional[str], timeout: int = 60) -> "DocumentFamilyEndpoint":
+        logger.info("Waiting for mixin %s to be available on document family %s", mixin_name, self.id)
+        start = time.time()
+        while time.time() - start < timeout:
+            url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
+            updated_document_family = DocumentFamilyEndpoint.parse_obj(self.client.get(url).json()).set_client(
+                self.client)
+            if mixin_name and mixin_name in updated_document_family.mixins:
+                return updated_document_family
+            if label and label in updated_document_family.labels:
+                return updated_document_family
+        raise Exception(f"Not available on document family {self.id}")
+
+    def delete(self):
+        logger.info("Deleting document family %s", self.id)
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
+        if self.client.exists(url):
+            self.client.delete(url)
+        else:
+            raise Exception(f"Document family {self.id} does not exist")
 
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):
@@ -443,6 +468,15 @@ class DocumentStoreEndpoint(StoreEndpoint):
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": object_path})
 
+    def upload_file(self, file_path: str, object_path: Optional[str] = None, replace=False):
+        if Path(file_path).is_file():
+            logger.info(f"Uploading {file_path}")
+            with open(file_path, 'rb') as path_content:
+                return self.upload_bytes(file_path, object_path if object_path is not None else file_path,
+                                         replace=replace)
+        else:
+            raise Exception(f"{file_path} is not a file")
+
     def upload_bytes(self, path: str, content, replace=False) -> DocumentFamily:
         """
         Put the content into the store at the given path
@@ -468,7 +502,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             params={"path": path},
             files=files)
         logger.info(f"Uploaded {path} ({content_object_response.status_code})")
-        return DocumentFamily.parse_obj(content_object_response.json())
+        return DocumentFamilyEndpoint.parse_obj(content_object_response.json()).set_client(self.client)
 
     def get_bytes(self, object_path: str):
         """Get the bytes for the object at the given path, will return None if there is no object there
@@ -527,7 +561,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             params={"path": path},
             files=files)
         logger.info(f"Uploaded {path}")
-        return DocumentFamily.parse_obj(**content_object_response.json())
+        return DocumentFamilyEndpoint.parse_obj(**content_object_response.json()).set_client(self.client)
 
 
 class ModelStoreEndpoint(DocumentStoreEndpoint):
@@ -583,6 +617,12 @@ class KodexaClient:
         self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
+
+    def reindex(self):
+        self.post("/api/indices/_reindex")
+
+    def get_by_ref(self, ref: str) -> BaseModel:
+        raise NotImplementedError()
 
     def get_platform(self):
         return PlatformOverview.parse_obj(self.get(f"{self.base_url}/api").json())
@@ -647,7 +687,7 @@ class KodexaClient:
                                 component_dict["metadata"])
 
                         return model_store
-                    elif store_type.lower() == "data":
+                    elif store_type.lower() == "data" or store_type.lower() == "table":
                         return DataStoreEndpoint.parse_obj(component_dict).set_client(self)
                     else:
                         raise Exception("Unknown store type: " + store_type)
