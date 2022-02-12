@@ -147,8 +147,13 @@ class PageEndpoint(ClientEndpoint):
     def to_df(self):
         import pandas as pd
         df = pd.DataFrame(seq(self.content).map(lambda x: x.dict()).to_list())
-        df.drop('client', 1)
+        df.drop(columns='client', axis=1)
         return df
+
+    def get(self, index: int) -> "ComponentInstanceEndpoint":
+        if index < 0 or index >= len(self.content):
+            raise IndexError(f"Index {index} out of range")
+        return self.content[index]
 
     def set_client(self, client):
         ClientEndpoint.set_client(self, client)
@@ -194,6 +199,31 @@ class ComponentInstanceEndpoint(ClientEndpoint):
 
     def post_deploy(self):
         pass
+
+    def create(self):
+        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
+        exists = self.client.exists(url)
+        if exists:
+            raise Exception("Can't create as it already exists")
+        else:
+            url = f"/api/{self.get_type()}"
+            self.client.post(url, self.to_dict())
+
+    def update(self):
+        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
+        exists = self.client.exists(url)
+        if not exists:
+            raise Exception("Can't update as it doesn't exist?")
+        else:
+            self.client.put(url, self.to_dict())
+
+    def delete(self):
+        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
+        exists = self.client.exists(url)
+        if not exists:
+            raise Exception("Component doesn't exist")
+        else:
+            self.client.delete(url)
 
     def deploy(self, update=False):
         if self.org_slug is None:
