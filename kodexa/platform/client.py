@@ -293,8 +293,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
         files = {"file": content}
 
-        if replace:
-            delete_response = requests.delete(
+        if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}):
+            delete_response = self.client.delete(
                 f"/api/stores/{self.ref.replace(':', '/')}/fs",
                 params={"path": path})
             logger.info(f"Deleting {path}")
@@ -374,11 +374,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
     def upload_contents(self, metadata):
         if metadata.contents:
             for content_path in metadata.contents:
-                final_wildcard = os.path.join(metadata.baseDir, content_path) if metadata.baseDir else content_path
+                final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
                 for path_hit in glob.glob(final_wildcard):
                     if Path(path_hit).is_file():
                         with open(path_hit, 'rb') as path_content:
-                            self.upload_file(path_hit, path_content, replace=True)
+                            self.upload_bytes(path_hit, path_content, replace=True)
 
 
 class TaxonomiesEndpoint(ComponentEndpoint):
@@ -419,9 +419,9 @@ class KodexaClient:
     def get_platform(self):
         return PlatformOverview.parse_obj(self.get(f"{self.base_url}/api").json())
 
-    def exists(self, url) -> bool:
-        response = requests.get(self.get_url(url), headers={"x-access-token": self.access_token,
-                                                            "content-type": "application/json"})
+    def exists(self, url, params=None) -> bool:
+        response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
+                                                                           "content-type": "application/json"})
         if response.status_code == 200 or response.status_code == 404:
             return response.status_code == 200
         else:
@@ -462,10 +462,22 @@ class KodexaClient:
                     if store_type.lower() == "document":
                         document_store = DocumentStoreEndpoint.parse_obj(component_dict)
                         document_store.set_client(self)
+
+                        # We need special handling of the metadata
+                        if "metadata" in component_dict:
+                            document_store.metadata = DocumentContentMetadata.parse_obj(
+                                component_dict["metadata"])
+
                         return document_store
                     elif store_type.lower() == "model":
                         model_store = ModelStoreEndpoint.parse_obj(component_dict)
                         model_store.set_client(self)
+
+                        # We need special handling of the metadata
+                        if "metadata" in component_dict:
+                            model_store.metadata = ModelContentMetadata.parse_obj(
+                                component_dict["metadata"])
+
                         return model_store
                     elif store_type.lower() == "data":
                         data_store = DataStoreEndpoint.parse_obj(component_dict)
