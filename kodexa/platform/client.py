@@ -18,11 +18,12 @@ from typing import Type, Optional, List
 
 import requests
 from functional import seq
+from pydantic import BaseModel
+
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution
-from pydantic import BaseModel
 
 logger = logging.getLogger()
 
@@ -171,7 +172,41 @@ class PageStoreEndpoint(PageStore, PageEndpoint):
     pass
 
 
-class OrganizationEndpoint(Organization, ClientEndpoint):
+class EntityEndpoint(ClientEndpoint):
+
+    def get_type(self) -> str:
+        raise NotImplementedError()
+
+    def create(self):
+        url = f"/api/{self.get_type()}"
+        exists = self.client.exists(url)
+        if exists:
+            raise Exception("Can't create as it already exists")
+        else:
+            url = f"/api/{self.get_type()}"
+            self.client.post(url, self.to_dict())
+
+    def update(self):
+        url = f"/api/{self.get_type()}/{self.id}"
+        exists = self.client.exists(url)
+        if not exists:
+            raise Exception("Can't update as it doesn't exist?")
+        else:
+            self.client.put(url, self.to_dict())
+
+    def delete(self):
+        url = f"/api/{self.get_type()}/{self.id}"
+        exists = self.client.exists(url)
+        if not exists:
+            raise Exception("Component doesn't exist")
+        else:
+            self.client.delete(url)
+
+
+class OrganizationEndpoint(Organization, EntityEndpoint):
+
+    def get_type(self) -> str:
+        return "organizations"
 
     def apply(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
@@ -244,7 +279,10 @@ class ComponentInstanceEndpoint(ClientEndpoint):
             self.post_deploy()
 
 
-class ProjectEndpoint(ClientEndpoint, Project):
+class ProjectEndpoint(EntityEndpoint, Project):
+
+    def get_type(self) -> str:
+        return "projects"
 
     def _get_resource(self, resource_type: str) -> List[ComponentInstanceEndpoint]:
         url = f"/api/projects/{self.id}/{resource_type}"
@@ -546,7 +584,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
             with open(file_path, 'rb') as path_content:
-                return self.upload_bytes(path=object_path if object_path is not None else file_path, content=path_content,
+                return self.upload_bytes(path=object_path if object_path is not None else file_path,
+                                         content=path_content,
                                          replace=replace)
         else:
             raise Exception(f"{file_path} is not a file")
