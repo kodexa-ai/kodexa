@@ -18,12 +18,11 @@ from typing import Type, Optional, List
 
 import requests
 from functional import seq
-from pydantic import BaseModel
-
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution
+from pydantic import BaseModel
 
 logger = logging.getLogger()
 
@@ -321,7 +320,8 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
 class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
-    def wait_for(self, mixin: Optional[str], label: Optional[str], timeout: int = 60) -> "DocumentFamilyEndpoint":
+    def wait_for(self, mixin: Optional[str] = None, label: Optional[str] = None,
+                 timeout: int = 60) -> "DocumentFamilyEndpoint":
         logger.info("Waiting for mixin and/or label to be available on document family %s", self.id)
         start = time.time()
         while time.time() - start < timeout:
@@ -546,7 +546,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
             with open(file_path, 'rb') as path_content:
-                return self.upload_bytes(file_path, object_path if object_path is not None else file_path,
+                return self.upload_bytes(path=object_path if object_path is not None else file_path, content=path_content,
                                          replace=replace)
         else:
             raise Exception(f"{file_path} is not a file")
@@ -823,8 +823,7 @@ class KodexaClient:
 
     def post(self, url, data=None, body=None, files=None, params=None) -> requests.Response:
         response = requests.post(self.get_url(url), json=body, data=data, files=files, params=params,
-                                 headers={"x-access-token": self.access_token,
-                                          "content-type": "application/json"})
+                                 headers={"x-access-token": self.access_token})
         return process_response(response)
 
     def put(self, url, body=None) -> requests.Response:
