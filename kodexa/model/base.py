@@ -9,6 +9,7 @@ def to_camel(string: str) -> str:
 
 class KodexaBaseModel(BaseModel):
     class Config:
+        allow_population_by_field_name = True
         use_enum_values = True
         json_encoders = {
             # custom output conversion for datetime (yyyy-MM-dd'T'HH:mm:ss.SSS'Z')

@@ -23,7 +23,8 @@ from pydantic import BaseModel
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
-    AssistantDefinition, Action, ModelRuntime, Credential, Execution
+    AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
+    PageProjectTemplate, PageUser, User
 
 logger = logging.getLogger()
 
@@ -95,7 +96,7 @@ class OrganizationsEndpoint:
 
     def create(self, organization: Organization) -> Organization:
         url = f"/api/organizations"
-        create_response = self.client.post(url, body=json.loads(organization.json()))
+        create_response = self.client.post(url, body=json.loads(organization.json(by_alias=True)))
         return Organization.parse_obj(create_response.json())
 
     def find_by_slug(self, slug) -> Optional["OrganizationEndpoint"]:
@@ -172,6 +173,26 @@ class PageStoreEndpoint(PageStore, PageEndpoint):
     pass
 
 
+class PageModelRuntimeEndpoint(PageStore, PageEndpoint):
+    pass
+
+
+class PageAssistantDefinitionEndpoint(PageAssistantDefinition, PageEndpoint):
+    pass
+
+
+class PageCredentialEndpoint(PageCredential, PageEndpoint):
+    pass
+
+
+class PageUserEndpoint(PageUser, PageEndpoint):
+    pass
+
+
+class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
+    pass
+
+
 class EntityEndpoint(ClientEndpoint):
 
     def get_type(self) -> str:
@@ -212,6 +233,27 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         url = f"/api/{component.get_type()}/{self.slug}"
         response = self.client.post(url, body=self.to_dict())
         return self.client.deserialize(response.json())
+
+    def model_runtimes(self, query="*", page=1, pagesize=10, sort=None):
+        url = f"/api/modelRuntimes/{self.slug}"
+        model_runtimes_response = self.client.get(url,
+                                                  params={"query": query, "page": page, "pageSize": pagesize,
+                                                          "sort": sort})
+        return PageModelRuntimeEndpoint.parse_obj(model_runtimes_response.json()).set_client(self.client)
+
+    def project_templates(self, query="*", page=1, pagesize=10, sort=None):
+        url = f"/api/projectTemplates/{self.slug}"
+        response = self.client.get(url,
+                                   params={"query": query, "page": page, "pageSize": pagesize,
+                                           "sort": sort})
+        return PageProjectTemplateEndpoint.parse_obj(response.json()).set_client(self.client)
+
+    def credentials(self, query="*", page=1, pagesize=10, sort=None):
+        url = f"/api/projectTemplates/{self.slug}"
+        response = self.client.get(url,
+                                   params={"query": query, "page": page, "pageSize": pagesize,
+                                           "sort": sort})
+        return PageCredentialEndpoint.parse_obj(response.json()).set_client(self.client)
 
     def stores(self, query="*", page=1, pagesize=10, sort=None):
         url = f"/api/stores/{self.slug}"
@@ -334,7 +376,7 @@ class ProjectsEndpoint:
         else:
             params = None
 
-        create_response = self.client.post(url, body=json.loads(project.json()), params=params)
+        create_response = self.client.post(url, body=json.loads(project.json(by_alias=True)), params=params)
         return ProjectEndpoint.parse_obj(create_response.json()).set_client(self.client)
 
     def delete(self, id: str) -> None:
@@ -354,6 +396,56 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
     def get_type(self) -> str:
         return "taxonomies"
+
+
+class UserEndpoint(User, EntityEndpoint):
+    def get_type(self) -> str:
+        return "users"
+
+    def delete(self):
+        raise Exception("You can not delete a user")
+
+class UsersEndpoint:
+    """
+    Represents the organization endpoint
+    """
+
+    def __init__(self, client: "KodexaClient"):
+        self.client: "KodexaClient" = client
+
+    def reindex(self):
+        url = f'/api/users/_reindex'
+        self.client.post(url)
+
+    def create(self, user: User) -> UserEndpoint:
+        url = f"/api/users"
+        create_response = self.client.post(url, body=json.loads(user.json(by_alias=True)))
+        return UserEndpoint.parse_obj(create_response.json()).set_client(self.client)
+
+    def delete(self, id: str) -> None:
+        url = f"/api/users/{id}"
+        self.client.delete(url)
+
+    def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
+             filters: Optional[List[str]] = None) -> PageUser:
+        url = f"/api/organizations"
+
+        params = {"query": query,
+                  "page": page,
+                  "pageSize": pagesize}
+
+        if sort is not None:
+            params["sort"] = sort
+        if filters is not None:
+            params["filter"] = filters
+
+        list_response = self.client.get(url, params=params)
+        return PageUser.parse_obj(list_response.json())
+
+    def get(self, user_id) -> UserEndpoint:
+        url = f"/api/users/{user_id}"
+        get_response = self.client.get(url)
+        return UserEndpoint.parse_obj(**get_response.json()).set_client(self.client)
 
 
 class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
@@ -716,7 +808,10 @@ def process_response(response) -> requests.Response:
         raise Exception("Internal server error")
     if response.status_code == 400:
         if response.json() and response.json().get("errors"):
-            raise Exception(', '.join(response.json()["errors"].values()))
+            messages = []
+            for key,value in response.json()["errors"].items():
+                messages.append(f"{key}: {value}")
+            raise Exception(', '.join(messages))
         else:
             raise Exception("Bad request " + response.text)
     return response
@@ -821,6 +916,10 @@ class KodexaClient:
         self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
+        self.users = UsersEndpoint(self)
+
+    def platform(self) -> PlatformOverview:
+        return PlatformOverview.parse_obj(self.get('/api').json())
 
     def reindex(self):
         self.post("/api/indices/_reindex")
