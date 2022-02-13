@@ -18,13 +18,12 @@ from typing import Type, Optional, List
 
 import requests
 from functional import seq
-from pydantic import BaseModel
-
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User
+from pydantic import BaseModel
 
 logger = logging.getLogger()
 
@@ -317,7 +316,7 @@ class ComponentInstanceEndpoint(ClientEndpoint):
             self.client.put(url, self.to_dict())
             self.post_deploy()
         else:
-            self.client.post(url, self.to_dict())
+            self.client.post(f"/api/{self.get_type()}/{self.org_slug}", self.to_dict())
             self.post_deploy()
 
 
@@ -405,6 +404,7 @@ class UserEndpoint(User, EntityEndpoint):
     def delete(self):
         raise Exception("You can not delete a user")
 
+
 class UsersEndpoint:
     """
     Represents the organization endpoint
@@ -486,6 +486,9 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
 
     def upload_contents(self, metadata):
         pass
+
+    def reindex(self):
+        self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/_reindex")
 
     def update_metadata(self):
         self.client.put(f"/api/stores/{self.ref.replace(':', '/')}/metadata", body=json.loads(self.metadata.json()))
@@ -697,7 +700,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         files = {"file": content}
 
         if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}):
-            delete_response = self.client.delete(
+            self.client.delete(
                 f"/api/stores/{self.ref.replace(':', '/')}/fs",
                 params={"path": path})
             logger.info(f"Deleting {path}")
@@ -779,11 +782,25 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             for content_path in metadata.contents:
                 final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
                 for path_hit in glob.glob(final_wildcard):
-                    path_hit = path_hit.replace(metadata.base_dir, '') if metadata.base_dir else path_hit
+                    relative_path = path_hit.replace(metadata.base_dir, '') if metadata.base_dir else path_hit
                     if Path(path_hit).is_file():
                         logger.info(f"Uploading {path_hit}")
                         with open(path_hit, 'rb') as path_content:
-                            self.upload_bytes(path_hit, path_content, replace=True)
+                            self.upload_bytes(relative_path, path_content, replace=True)
+
+    def list_contents(self) -> List[str]:
+        # TODO this needs to be cleaned up a bit
+        params = {
+            'page': 1,
+            'pageSize': 1000,
+            'query': '*'
+        }
+        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
+                                       params=params)
+        paths = []
+        for fam_dict in get_response.json()['content']:
+            paths.append(fam_dict['path'])
+        return paths
 
 
 class TaxonomiesEndpoint(ComponentEndpoint):
@@ -809,7 +826,7 @@ def process_response(response) -> requests.Response:
     if response.status_code == 400:
         if response.json() and response.json().get("errors"):
             messages = []
-            for key,value in response.json()["errors"].items():
+            for key, value in response.json()["errors"].items():
                 messages.append(f"{key}: {value}")
             raise Exception(', '.join(messages))
         else:
@@ -941,7 +958,7 @@ class KodexaClient:
             return instance
 
     def get_object_by_ref(self, object_type: str, ref: str) -> BaseModel:
-        return self.__build_object(ref, resolve_object_type(object_type))
+        return self.__build_object(ref, resolve_object_type(object_type)[1])
 
     def get_platform(self):
         return PlatformOverview.parse_obj(self.get(f"{self.base_url}/api").json())
@@ -959,9 +976,12 @@ class KodexaClient:
                                                                            "content-type": "application/json"})
         return process_response(response)
 
-    def post(self, url, data=None, body=None, files=None, params=None) -> requests.Response:
+    def post(self, url, body=None, data=None, files=None, params=None) -> requests.Response:
+        headers = {"x-access-token": self.access_token}
+        if files is None:
+            headers["content-type"] = "application/json"
         response = requests.post(self.get_url(url), json=body, data=data, files=files, params=params,
-                                 headers={"x-access-token": self.access_token})
+                                 headers=headers)
         return process_response(response)
 
     def put(self, url, body=None) -> requests.Response:
