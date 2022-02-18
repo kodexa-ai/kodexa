@@ -784,9 +784,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
         return DocumentFamilyEndpoint.parse_obj(**document_family_response.json()).set_client(self.client)
 
     def get_by_path(self, path: str) -> Optional[DocumentFamily]:
-        from kodexa import KodexaPlatform
-        get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/fs",
-                                                       params={"path": path, "meta": True})
+        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/fs",
+                                       params={"path": path, "meta": True})
         return DocumentFamily.parse_obj(get_response.json()) if get_response is not None else None
 
 
