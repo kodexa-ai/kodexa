@@ -20,6 +20,7 @@ import requests
 from functional import seq
 from pydantic import BaseModel
 
+from kodexa import Document
 from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
@@ -273,8 +274,8 @@ class ComponentInstanceEndpoint(ClientEndpoint):
     def get_type(self) -> str:
         raise NotImplementedError()
 
-    def post_deploy(self):
-        pass
+    def post_deploy(self) -> List[str]:
+        return []
 
     def create(self):
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
@@ -315,10 +316,10 @@ class ComponentInstanceEndpoint(ClientEndpoint):
             raise Exception("Component already exists")
         if exists:
             self.client.put(url, self.to_dict())
-            self.post_deploy()
+            return self.post_deploy()
         else:
             self.client.post(f"/api/{self.get_type()}/{self.org_slug}", self.to_dict())
-            self.post_deploy()
+            return self.post_deploy()
 
 
 class ProjectEndpoint(EntityEndpoint, Project):
@@ -485,8 +486,8 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
     def set_metadata(self, metadata):
         pass
 
-    def upload_contents(self, metadata):
-        pass
+    def upload_contents(self, metadata) -> List[str]:
+        return []
 
     def reindex(self):
         self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/_reindex")
@@ -498,11 +499,12 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
         metadata_response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/metadata")
         return self.get_metadata_class().parse_obj(**metadata_response.json()) if self.get_metadata_class() else None
 
-    def post_deploy(self):
+    def post_deploy(self) -> List[str]:
         if self.metadata:
             # We need to determine in the subclass if we wil be uploading the
             # contents
-            self.upload_contents(self.metadata)
+            return self.upload_contents(self.metadata)
+        return []
 
 
 class DataStoreEndpoint(StoreEndpoint):
@@ -746,31 +748,46 @@ class DocumentStoreEndpoint(StoreEndpoint):
     def get_metadata_class(self) -> Type[BaseModel]:
         return DocumentContentMetadata
 
-    def put(self, path: str, content, replace=False) -> DocumentFamily:
-        """Put the content into the store at the given path
+    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
+        logger.info(f"Getting document family id {document_family_id}")
+        document_family_response = self.client.get(
+            f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}")
+        return DocumentFamilyEndpoint.parse_obj(**document_family_response.json()).set_client(self.client)
 
-        Args:
-          path: The path you wish to put the content at
-          content: The content for that object
-          replace: Replace the content if it exists
+    def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> List[DocumentFamilyEndpoint]:
+        params = {
+            'page': page,
+            'pageSize': page_size,
+            'query': query
+        }
 
-        Returns:
-          the document family that was created
-        """
-        files = {"file": content}
+        if sort is not None:
+            params.sort = sort
 
-        if replace:
-            self.client.delete(
-                f"/api/stores/{self.ref.replace(':', '/')}/fs",
-                params={"path": path})
-            logger.info(f"Deleted {path}")
+        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
+                                       params=params)
+        families = []
+        for fam_dict in get_response.json()['content']:
+            families.append(DocumentFamilyEndpoint.parse_obj(**fam_dict).set_client(self.client))
+        return families
 
-        content_object_response = self.client.post(
+    def upload_document(self, path: str, document: "Document") -> DocumentFamilyEndpoint:
+        logger.info(f"Putting document to path {path}")
+
+        files = {"file": document.to_kddb()}
+        data = {"path": path, "documentVersion": document.version, "document": True}
+        document_family_response = self.client.post(
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": path},
-            files=files)
-        logger.info(f"Uploaded {path}")
-        return DocumentFamilyEndpoint.parse_obj(**content_object_response.json()).set_client(self.client)
+            files=files, data=data)
+
+        return DocumentFamilyEndpoint.parse_obj(**document_family_response.json()).set_client(self.client)
+
+    def get_by_path(self, path: str) -> Optional[DocumentFamily]:
+        from kodexa import KodexaPlatform
+        get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/fs",
+                                                       params={"path": path, "meta": True})
+        return DocumentFamily.parse_obj(get_response.json()) if get_response is not None else None
 
 
 class ModelStoreEndpoint(DocumentStoreEndpoint):
@@ -779,15 +796,21 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         return ModelContentMetadata
 
     def upload_contents(self, metadata):
+        results = []
         if metadata.contents:
             for content_path in metadata.contents:
                 final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
+                num_hits = 0
                 for path_hit in glob.glob(final_wildcard):
                     relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
                     if Path(path_hit).is_file():
                         logger.info(f"Uploading {path_hit}")
                         with open(path_hit, 'rb') as path_content:
                             self.upload_bytes(relative_path, path_content, replace=True)
+                            num_hits += 1
+                if num_hits > 0:
+                    results.append(f"{num_hits} files uploaded for {final_wildcard}")
+        return results
 
     def list_contents(self) -> List[str]:
         # TODO this needs to be cleaned up a bit

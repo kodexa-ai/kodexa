@@ -6,7 +6,6 @@ This is the Kodexa CLI, it can be used to allow you to work with an instance of 
 
 It supports interacting with the API, listing and viewing components.  Note it can also be used to login and logout
 """
-import glob
 import json
 import logging
 import os
@@ -14,7 +13,6 @@ import os.path
 import sys
 import tarfile
 from getpass import getpass
-from pathlib import Path
 from typing import Optional
 
 import click
@@ -25,7 +23,6 @@ logging.root.addHandler(logging.StreamHandler(sys.stdout))
 
 from kodexa import KodexaClient
 from kodexa.cli.documentation import generate_site
-from kodexa.model.model import ModelContentMetadata
 from kodexa.platform.kodexa import ExtensionHelper, KodexaPlatform
 
 LOGGING_LEVELS = {
@@ -56,10 +53,8 @@ pass_info = click.make_pass_decorator(Info, ensure=True)
 @click.option("--verbose", "-v", count=True, help="Enable verbose output.")
 @pass_info
 def cli(info: Info, verbose: int):
-
     # Use the verbosity count to determine the logging level...
     if verbose > 0:
-
         logging.root.setLevel(
             LOGGING_LEVELS[verbose]
             if verbose in LOGGING_LEVELS
@@ -110,13 +105,17 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 
 @cli.command()
 @click.option('--org', help='The slug for the organization to deploy to', required=False)
+@click.option('--slug', help='Override the slug for component (only works for a single component)', required=False)
+@click.option('--version', help='Override the version for component (only works for a single component)',
+              required=False)
 @click.option('--file', help='The path to the file containing the object to apply')
 @click.option('--update/--no-update', help='The path to the file containing the object to apply',
               default=False)
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def deploy(_: Info, org: Optional[str], file: str, token: str, format=None, update: bool = False):
+def deploy(_: Info, org: Optional[str], file: str, token: str, format=None, update: bool = False, version=None,
+           slug=None):
     """Deploy an object to a Kodexa platform instance from a file
     """
 
@@ -152,10 +151,17 @@ def deploy(_: Info, org: Optional[str], file: str, token: str, format=None, upda
 
     else:
         component = client.deserialize(obj)
+
+        if version is not None:
+            component.version = version
+        if slug is not None:
+            component.slug = slug
         if org is not None:
             component.org_slug = org
         print(f"Deploying component {component.slug}:{component.version}")
-        component.deploy(update=update)
+        log_details = component.deploy(update=update)
+        for log_detail in log_details:
+            print(log_detail)
     print("Deployed :tada:")
 
 
