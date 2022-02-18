@@ -1,7 +1,5 @@
 import os
 
-import pytest
-
 from kodexa import Document, Pipeline, NodeTagger
 from kodexa.model import ContentObject
 
@@ -133,6 +131,15 @@ def test_tagged_content():
     assert len(node_match2) == 0
 
 
+def test_uuid_select():
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    node_uuid = document.select_first('//p').uuid
+    print(document.select_first('//p').uuid)
+    print(document.select_first('//p').content)
+
+    assert document.select_first(f'//p[uuid({node_uuid})]').content == document.select_first('//p').content
+
+
 def test_parent_axis():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
     first_paragraph = document.select('(//p)[0]')
@@ -189,4 +196,3 @@ def test_content_node_equality():
     c2 = ContentObject(**{'uuid': '123', 'contentType': 'DOCUMENT'})
 
     assert c1 == c2
-
