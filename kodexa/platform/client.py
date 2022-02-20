@@ -230,7 +230,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
     def get_type(self) -> str:
         return "organizations"
 
-    def apply(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
+    def deploy(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
         response = self.client.post(url, body=self.to_dict())
         return self.client.deserialize(response.json())
