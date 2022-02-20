@@ -360,6 +360,13 @@ def document(_: Info, path: str):
 
 
 @cli.command()
+@pass_info
+def version(_: Info):
+    import pkg_resources
+    print("Kodexa Version:", pkg_resources.get_distribution("kodexa").version)
+
+
+@cli.command()
 @click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml (defaults to current)')
 @click.option('--output', default=os.getcwd() + "/dist",
               help='Path to the output folder (defaults to dist under current)')
