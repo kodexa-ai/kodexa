@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 4.1.453
+  version: 0.0.0-model-spike.108
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -1055,6 +1055,12 @@ paths:
         schema:
           type: string
           default: '*'
+      - name: projectId
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
       responses:
         "200":
           description: OK
@@ -2022,6 +2028,12 @@ paths:
         schema:
           type: string
           default: '*'
+      - name: projectId
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
       responses:
         "200":
           description: OK
@@ -7526,7 +7538,8 @@ paths:
     get:
       tags:
       - Stores
-      description: Get a specific document family in a version of the store
+      description: Get data objects for a specific document family in a version of
+        the store
       operationId: getFamilyExtractedDataWithVersion
       parameters:
       - name: orgSlug
@@ -9313,6 +9326,12 @@ components:
           modelRuntimeRef:
             type: string
             description: The reference to the model runtime to use
+          modelRuntimeParameters:
+            type: object
+            additionalProperties:
+              type: object
+              description: The parameters passed to the model runtime for base configuration
+            description: The parameters passed to the model runtime for base configuration
           state:
             type: string
             description: The state of the model in this store
@@ -9414,9 +9433,9 @@ components:
           inferenceAction:
             type: string
             description: The reference to the action that will be used for inference
-          trainingEntrypoint:
+          trainingAction:
             type: string
-            description: A reference to the entry point for training
+            description: A reference to the action that will be used for training
           deploymentType:
             type: string
             description: "The deployment to use, local means that the model runtime\
@@ -10632,13 +10651,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
+        label:
+          type: string
+          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
-        label:
-          type: string
-          writeOnly: true
     DataLineage:
       type: object
       properties:
@@ -11728,24 +11747,24 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
     Sort:
       type: object
       properties:
         empty:
           type: boolean
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
     PageTeam:
       type: object

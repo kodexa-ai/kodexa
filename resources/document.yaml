@@ -1,0 +1,36 @@
+#
+# Document Metadata
+#
+# This represents the meta structure of the Kodexa Document and is used to allow us to generate
+# document clients in different languages.
+#
+
+changelog:
+  - description: "Initial version"
+    date: "2020-01-01"
+  - description:
+    sql: CREATE TABLE ft(
+      id           integer primary key,
+      cn_id        integer,
+      f_type       INTEGER,
+      binary_value blob,
+      single       integer,
+      tag_uuid     text
+      )
+
+domain:
+  - type: Document
+    attributes:
+      - name: contentNode
+        type: ContentNode
+  - type: ContentNode
+    query:
+      - name: contentNode
+        sql: ContentNode
+    attributes:
+      - name: features
+        type: list
+        listType: ContentFeature
+      - name: children
+        type: list
+        listType: ContentNode
