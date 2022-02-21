@@ -28,7 +28,7 @@ class AssistantPipeline:
 
     def __init__(self, pipeline, description=None, write_back_to_store: bool = False,
                  data_store: Optional[Store] = None,
-                 taxonomies: Optional[List[Taxonomy]] = None):
+                 taxonomies: Optional[List[Taxonomy]] = None, labels_to_apply: Optional[List[str]] = None):
         self.pipeline = pipeline
         """The pipeline to execute"""
         self.description = description
@@ -39,6 +39,8 @@ class AssistantPipeline:
         """Optionally the datastore that we want to extract the labelled content to"""
         self.taxonomies = taxonomies
         """Optionally a list of the taxonomies to use when extracting the labels"""
+        self.labels_to_apply = labels_to_apply
+        """Optionally a list of the labels to apply to the document when complete"""
 
 
 class AssistantIntent:
