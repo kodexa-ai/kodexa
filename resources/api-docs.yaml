@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 0.0.0-model-spike.108
+  version: 0.0.0-model-spike.116
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -9019,6 +9019,14 @@ components:
             type: string
             description: The reference to the extension pack (if the metadata object
               was created by an extension pack)
+          credentialType:
+            type: string
+          properties:
+            type: object
+            additionalProperties:
+              type: object
+              description: A map of key/value pairs that define the credential
+            description: A map of key/value pairs that define the credential
     CustomEvent:
       type: object
       properties:
@@ -10473,9 +10481,9 @@ components:
           type: string
           description: A label for the transition (this can be used later if we want
             to prune based on a label)
-        sourceContentObjectId:
-          type: string
         destinationContentObjectId:
+          type: string
+        sourceContentObjectId:
           type: string
       description: "Provides the definition of a transition for a document, where\
         \ a change was applied by an assistant, user or external process"
@@ -11436,6 +11444,10 @@ components:
         dataSourceRef:
           type: string
         taxonomyRefs:
+          type: array
+          items:
+            type: string
+        labelsToApply:
           type: array
           items:
             type: string
