@@ -479,7 +479,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{self.content_objects[-1].id}/content")
         return Document.from_kddb(get_response.content)
 
-    def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None) -> Document:
+    def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
         feature_set = FeatureSet()
         if content_object is None:
             content_object = self.content_objects[-1]
@@ -489,12 +489,15 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                 'nodeUuid': tagged_node.uuid,
                 'features': []
             }
+
+            feature_set.node_features.append(node_feature)
+
             for feature in tagged_node.get_features():
                 node_feature['features'].append(feature.to_dict())
 
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
-        put_response = self.client.put(url, body=feature_set.json(by_alias=True))
-        return Document.from_kddb(put_response.content)
+        print(feature_set.json(by_alias=True))
+        self.client.put(url, body=feature_set.dict(by_alias=True))
 
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):
