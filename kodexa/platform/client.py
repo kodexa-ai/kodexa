@@ -496,7 +496,6 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                 node_feature['features'].append(feature.to_dict())
 
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
-        print(feature_set.json(by_alias=True))
         self.client.put(url, body=feature_set.dict(by_alias=True))
 
 
