@@ -25,7 +25,7 @@ from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
-    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject
+    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon
 
 logger = logging.getLogger()
 
@@ -397,6 +397,19 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
     def get_type(self) -> str:
         return "taxonomies"
+
+    def find_taxon_by_label_path(self, label_path: str) -> Taxon:
+        label_path_parts = label_path.split("/")
+
+        def find_taxon(taxons, parts):
+            for taxon in taxons:
+                if taxon.label == parts[0]:
+                    if len(parts) == 1:
+                        return taxon
+                    else:
+                        return find_taxon(taxon.children, parts[1:])
+
+        return find_taxon(self.taxons, label_path_parts)
 
 
 class UserEndpoint(User, EntityEndpoint):
