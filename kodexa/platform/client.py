@@ -474,9 +474,11 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         else:
             raise Exception(f"Document family {self.id} does not exist")
 
-    def get_latest_document(self) -> Document:
+    def get_document(self, content_object: Optional[ContentObject] = None) -> Document:
+        if content_object is None:
+            content_object = self.content_objects[-1]
         get_response = self.client.get(
-            f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{self.content_objects[-1].id}/content")
+            f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content")
         return Document.from_kddb(get_response.content)
 
     def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
