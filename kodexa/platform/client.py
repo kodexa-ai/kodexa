@@ -488,16 +488,22 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         feature_set.node_features = []
         for tagged_node in document.select('//*[hasTag()]'):
             node_feature = {
-                'nodeUuid': tagged_node.uuid,
+                'nodeUuid': str(tagged_node.uuid),
                 'features': []
             }
 
             feature_set.node_features.append(node_feature)
 
+            # TODO this needs to be cleaned up
             for feature in tagged_node.get_features():
-                node_feature['features'].append(feature.to_dict())
+                if feature.feature_type == 'tag':
+                    feature_dict = feature.to_dict()
+                    feature_dict['featureType'] = feature.feature_type
+                    feature_dict['name'] = feature.name
+                    node_feature['features'].append(feature_dict)
 
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
+        print(feature_set.json())
         self.client.put(url, body=feature_set.dict(by_alias=True))
 
 
