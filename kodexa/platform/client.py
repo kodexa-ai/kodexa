@@ -489,7 +489,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                 feature_set.node_features.append(feature.to_dict())
 
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
-        put_response = self.client.put(url, body=feature_set.json())
+        put_response = self.client.put(url, body=feature_set.json(by_alias=True))
         return Document.from_kddb(put_response.content)
 
 
