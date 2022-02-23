@@ -84,22 +84,6 @@ def test_class_step_step_with_context():
     assert new_document_store.get_latest_document("test.doc").metadata.cheese == pipeline.context.execution_id
 
 
-def test_enabled_steps():
-    class MyProcessingStep:
-
-        def get_name(self):
-            return "test-step"
-
-        def process(self, doc):
-            doc.metadata.cheese = 'burger'
-            return doc
-
-    assert Pipeline.from_text('Hello World').add_step(MyProcessingStep(), enabled=True).run().output_document.metadata[
-               'cheese'] == 'burger'
-    assert 'cheese' not in Pipeline.from_text('Hello World').add_step(MyProcessingStep(),
-                                                                      enabled=False).run().output_document.metadata
-
-
 def test_function_step_with_context():
     document_store = LocalDocumentStore()
     document_store.put("test.doc", create_document())
