@@ -72,7 +72,7 @@ class ComponentEndpoint:
             params["sort"] = sort
 
         list_response = self.client.get(url, params=params)
-        return self.get_page_class().parse_obj(**list_response.json())
+        return self.get_page_class().parse_obj(list_response.json())
 
     def get(self, slug, version=None):
         url = f"/api/{self.get_type()}/{self.organization.slug}/{slug}"
@@ -80,7 +80,7 @@ class ComponentEndpoint:
             url += f"/{version}"
 
         get_response = self.client.get(url)
-        return self.get_instance_class().parse_obj(**get_response.json())
+        return self.get_instance_class().parse_obj(get_response.json())
 
 
 class OrganizationsEndpoint:
@@ -362,12 +362,12 @@ class ProjectsEndpoint:
             params["sort"] = sort
 
         list_response = self.client.get(url, params=params)
-        return PageProject.parse_obj(**list_response.json())
+        return PageProject.parse_obj(list_response.json())
 
     def get(self, project_id: str) -> Project:
         url = f"/api/projects/{project_id}"
         get_response = self.client.get(url)
-        return ProjectEndpoint.parse_obj(**get_response.json()).set_client(self.client)
+        return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
     def create(self, project: Project, template_ref: str = None) -> Project:
         url = f"/api/projects"
@@ -447,10 +447,20 @@ class UsersEndpoint:
     def get(self, user_id) -> UserEndpoint:
         url = f"/api/users/{user_id}"
         get_response = self.client.get(url)
-        return UserEndpoint.parse_obj(**get_response.json()).set_client(self.client)
+        return UserEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
 
 class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
+
+    def update(self):
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
+        self.client.put(url, body=self.to_dict())
+
+    def update_document(self, document: Document, content_object: Optional[ContentObject] = None):
+        if content_object is None:
+            content_object = self.content_objects[-1]
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content"
+        self.client.post(url, files={'document': document.to_kddb()})
 
     def wait_for(self, mixin: Optional[str] = None, label: Optional[str] = None,
                  timeout: int = 60) -> "DocumentFamilyEndpoint":
@@ -529,7 +539,7 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
 
     def get_metadata(self):
         metadata_response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/metadata")
-        return self.get_metadata_class().parse_obj(**metadata_response.json()) if self.get_metadata_class() else None
+        return self.get_metadata_class().parse_obj(metadata_response.json()) if self.get_metadata_class() else None
 
     def post_deploy(self) -> List[str]:
         if self.metadata:
@@ -784,7 +794,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         logger.info(f"Getting document family id {document_family_id}")
         document_family_response = self.client.get(
             f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}")
-        return DocumentFamilyEndpoint.parse_obj(**document_family_response.json()).set_client(self.client)
+        return DocumentFamilyEndpoint.parse_obj(document_family_response.json()).set_client(self.client)
 
     def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> List[DocumentFamilyEndpoint]:
         params = {
@@ -800,7 +810,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
                                        params=params)
         families = []
         for fam_dict in get_response.json()['content']:
-            families.append(DocumentFamilyEndpoint.parse_obj(**fam_dict).set_client(self.client))
+            families.append(DocumentFamilyEndpoint.parse_obj(fam_dict).set_client(self.client))
         return families
 
     def upload_document(self, path: str, document: "Document") -> DocumentFamilyEndpoint:
@@ -813,7 +823,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             params={"path": path},
             files=files, data=data)
 
-        return DocumentFamilyEndpoint.parse_obj(**document_family_response.json()).set_client(self.client)
+        return DocumentFamilyEndpoint.parse_obj(document_family_response.json()).set_client(self.client)
 
     def get_by_path(self, path: str) -> DocumentFamilyEndpoint:
         get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/fs",
@@ -877,6 +887,7 @@ def process_response(response) -> requests.Response:
     if response.status_code == 405:
         raise Exception("Method not allowed")
     if response.status_code == 500:
+        print(response.text)
         raise Exception("Internal server error")
     if response.status_code == 400:
         if response.json() and response.json().get("errors"):
@@ -1039,9 +1050,14 @@ class KodexaClient:
                                  headers=headers)
         return process_response(response)
 
-    def put(self, url, body=None) -> requests.Response:
-        response = requests.put(self.get_url(url), json=body, headers={"x-access-token": self.access_token,
-                                                                       "content-type": "application/json"})
+    def put(self, url, body=None, data=None, files=None) -> requests.Response:
+        headers = {"x-access-token": self.access_token}
+        if files is None:
+            headers["content-type"] = "application/json"
+        else:
+            headers["content-type"] = "multipart/form-data"
+        response = requests.put(self.get_url(url), json=body, data=data, files=files,
+                                headers=headers)
         return process_response(response)
 
     def delete(self, url, params=None) -> requests.Response:
