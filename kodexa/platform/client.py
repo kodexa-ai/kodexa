@@ -25,7 +25,7 @@ from kodexa.model import Store, Taxonomy
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
-    PageProjectTemplate, PageUser, User
+    PageProjectTemplate, PageUser, User, FeatureSet
 
 logger = logging.getLogger()
 
@@ -478,6 +478,17 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         get_response = self.client.get(
             f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{self.content_objects[-1].id}/content")
         return Document.from_kddb(get_response.content)
+
+    def replace_tags_on_latest(self, document: Document) -> Document:
+        feature_set = FeatureSet()
+        feature_set.node_features = []
+        for tagged_node in document.select('//*[hasTag()]'):
+            for feature in tagged_node.get_features():
+                feature_set.node_features.append(feature)
+
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{self.content_objects[-1].id}/_replaceTags"
+        put_response = self.client.put(url, body=feature_set.json())
+        return Document.from_kddb(put_response.content)
 
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):
