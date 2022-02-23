@@ -486,7 +486,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         feature_set.node_features = []
         for tagged_node in document.select('//*[hasTag()]'):
             for feature in tagged_node.get_features():
-                feature_set.node_features.append(feature)
+                feature_set.node_features.append(feature.to_dict())
 
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
         put_response = self.client.put(url, body=feature_set.json())
