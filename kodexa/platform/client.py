@@ -474,6 +474,11 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         else:
             raise Exception(f"Document family {self.id} does not exist")
 
+    def get_latest_document(self) -> Document:
+        get_response = self.client.get(
+            f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{self.content_objects[-1].id}/content")
+        return Document.from_kddb(get_response.content)
+
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):
 
@@ -783,10 +788,10 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         return DocumentFamilyEndpoint.parse_obj(**document_family_response.json()).set_client(self.client)
 
-    def get_by_path(self, path: str) -> Optional[DocumentFamily]:
+    def get_by_path(self, path: str) -> DocumentFamilyEndpoint:
         get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/fs",
                                        params={"path": path, "meta": True})
-        return DocumentFamily.parse_obj(get_response.json()) if get_response is not None else None
+        return DocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
 
 class ModelStoreEndpoint(DocumentStoreEndpoint):
