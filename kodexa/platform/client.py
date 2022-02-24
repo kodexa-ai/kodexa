@@ -26,7 +26,7 @@ from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
-    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject
+    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, PageDataObject
 
 logger = logging.getLogger()
 
@@ -231,6 +231,9 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
     def get_type(self) -> str:
         return "organizations"
 
+    def projects(self) -> PageProject:
+        return ProjectsEndpoint(self.client, self).find_by_organization(self)
+
     def deploy(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
         response = self.client.post(url, body=self.to_dict())
@@ -364,6 +367,21 @@ class ProjectsEndpoint:
 
         list_response = self.client.get(url, params=params)
         return PageProject.parse_obj(list_response.json())
+
+    def find_by_name(self, project_name: str) -> Project:
+        url = f"/api/projects/"
+        get_response = self.client.get(url, params={'filter': f'name={project_name}'})
+        if len(get_response.json()['content']) > 0:
+            return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
+        else:
+            raise Exception("Project not found")
+
+    def find_by_organization(self, organization: Organization) -> PageProject:
+        url = f"/api/projects/"
+        get_response = self.client.get(url, params={'filter': f'organization.id={organization.id}'})
+        projects_page = PageProject.parse_obj(get_response.json())
+        projects_page.content = [ProjectEndpoint.parse_obj(project) for project in projects_page.content]
+        return projects_page
 
     def get(self, project_id: str) -> Project:
         url = f"/api/projects/{project_id}"
@@ -620,27 +638,28 @@ class DataStoreEndpoint(StoreEndpoint):
                 if include_id:
                     table_result['column_headers'].append('Data Object ID')
                     table_result['columns'].append('data_object_id')
-                for taxon in data_object['taxon']['children']:
-                    if not taxon['group']:
-                        table_result['column_headers'].append(taxon['label'])
-                        table_result['columns'].append(taxon['name'])
+                for taxon in data_object.taxon.children:
+                    if not taxon.group:
+                        table_result['column_headers'].append(taxon.label)
+                        table_result['columns'].append(taxon.name)
 
             new_row = []
             for column in table_result['columns']:
                 column_value = None
                 if include_id:
                     if column == 'data_object_id':
-                        column_value = data_object['id']
-                for attribute in data_object['attributes']:
-                    if attribute['tag'] == column:
-                        column_value = attribute['stringValue']
+                        column_value = data_object.id
+                for attribute in data_object.attributes:
+                    if attribute.tag == column:
+                        column_value = attribute.string_value
                 new_row.append(column_value)
 
             table_result['rows'].append(new_row)
 
         return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
 
-    def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
+    def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None) -> List[
+        DataObjectEndpoint]:
         """
 
         Args:
@@ -656,12 +675,12 @@ class DataStoreEndpoint(StoreEndpoint):
         row_response = self.get_data_objects_page_request(path, 1, document_family=document_family)
 
         # lets work out the last page
-        rows = rows + row_response['content']
-        total_pages = row_response['totalPages']
+        rows = rows + row_response.content
+        total_pages = row_response.total_pages
 
         for page in range(2, total_pages):
             row_response = self.get_data_objects_page_request(path, page, query=query, document_family=document_family)
-            rows = rows + row_response['content']
+            rows = rows + row_response.content
 
         return rows
 
@@ -671,11 +690,10 @@ class DataStoreEndpoint(StoreEndpoint):
         logger.info(f"Downloading a specific data object from {url}")
 
         data_object_response = self.client.get(url)
-        from kodexa.model.objects import DataObject
-        return DataObject(**data_object_response.json())
+        return DataObjectEndpoint.parse_obj(data_object_response.json())
 
     def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
-                                      document_family: Optional[DocumentFamily] = None):
+                                      document_family: Optional[DocumentFamily] = None) -> PageDataObject:
         """
 
         Args:
@@ -699,7 +717,9 @@ class DataStoreEndpoint(StoreEndpoint):
             params['storeRef'] = document_family.store_ref
 
         data_objects_response = self.client.get(url, params=params)
-        return [DataObjectEndpoint.parse_obj(data_object) for data_object in data_objects_response.json()['content']]
+        data_object_page = PageDataObject.parse_obj(data_objects_response.json())
+        data_object_page.content = [DataObjectEndpoint.parse_obj(data_object) for data_object in data_object_page]
+        return data_object_page
 
     def create_data_objects(self, data_objects: List[DataObject]) -> List[DataObjectEndpoint]:
         """
