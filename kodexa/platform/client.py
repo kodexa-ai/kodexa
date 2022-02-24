@@ -398,6 +398,19 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
     def get_type(self) -> str:
         return "taxonomies"
 
+    def get_group_taxons(self) -> List[Taxon]:
+
+        def find_groups(taxons) -> List[Taxon]:
+            group_taxons = []
+            for taxon in taxons:
+                if taxon.is_group:
+                    group_taxons.append(taxon)
+                if taxon.children:
+                    group_taxons.extend(find_groups(taxon.children))
+            return group_taxons
+
+        return find_groups(self.taxons)
+
     def find_taxon_by_label_path(self, label_path: str) -> Taxon:
         label_path_parts = label_path.split("/")
 
@@ -563,6 +576,11 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
 
 
 class DataStoreEndpoint(StoreEndpoint):
+
+    def get_taxonomies(self) -> List[Taxonomy]:
+        url = f"/api/stores/{self.ref.replace(':', '/')}/taxonomies"
+        taxonomy_response = self.client.get(url)
+        return [Taxonomy.parse_obj(taxonomy_response) for taxonomy_response in taxonomy_response.json()]
 
     def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
                             include_id: bool = False):
