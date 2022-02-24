@@ -22,10 +22,11 @@ from pydantic import BaseModel
 
 from kodexa import Document
 from kodexa.model import Store, Taxonomy
+from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
-    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon
+    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject
 
 logger = logging.getLogger()
 
@@ -194,7 +195,7 @@ class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
     pass
 
 
-class EntityEndpoint(ClientEndpoint):
+class EntityEndpoint(BaseEntity, ClientEndpoint):
 
     def get_type(self) -> str:
         raise NotImplementedError()
@@ -269,7 +270,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         return PageTaxonomyEndpoint.parse_obj(stores_response.json()).set_client(self.client)
 
 
-class ComponentInstanceEndpoint(ClientEndpoint):
+class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
 
     def get_type(self) -> str:
         raise NotImplementedError()
@@ -476,6 +477,17 @@ class UsersEndpoint:
         return UserEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
 
+class DataObjectEndpoint(DataObject, ClientEndpoint):
+
+    def update(self):
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/dataObjects/{self.id}"
+        self.client.put(url, body=self.to_dict())
+
+    def delete(self):
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/dataObjects/{self.id}"
+        self.client.delete(url)
+
+
 class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     def update(self):
@@ -580,7 +592,7 @@ class DataStoreEndpoint(StoreEndpoint):
     def get_taxonomies(self) -> List[Taxonomy]:
         url = f"/api/stores/{self.ref.replace(':', '/')}/taxonomies"
         taxonomy_response = self.client.get(url)
-        return [Taxonomy.parse_obj(taxonomy_response) for taxonomy_response in taxonomy_response.json()]
+        return [TaxonomyEndpoint.parse_obj(taxonomy_response) for taxonomy_response in taxonomy_response.json()]
 
     def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
                             include_id: bool = False):
@@ -627,24 +639,6 @@ class DataStoreEndpoint(StoreEndpoint):
             table_result['rows'].append(new_row)
 
         return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
-
-    def update_data_object_attribute(self, data_object, attribute):
-        """
-
-        Args:
-          data_object (DataObject): The data object to update
-          attribute (Attribute): The attribute to update
-
-        Returns:
-
-        """
-        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects/{data_object.id}/attributes/{attribute.id}"
-        logger.info(f"Downloading a specific data object from {url}")
-
-        data_object_response = self.client.put(
-            url, body=attribute.json(by_alias=True))
-        from kodexa.model.objects import DataObject
-        return DataObject(**data_object_response.json())
 
     def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
@@ -704,37 +698,23 @@ class DataStoreEndpoint(StoreEndpoint):
             params['documentFamilyId'] = document_family.id
             params['storeRef'] = document_family.store_ref
 
-        rows_response = self.client.get(url, params=params)
+        data_objects_response = self.client.get(url, params=params)
+        return [DataObjectEndpoint.parse_obj(data_object) for data_object in data_objects_response.json()['content']]
 
-        # TODO this needs to return real objects
-        return rows_response.json()
-
-    def add_data_objects(self, rows):
+    def create_data_objects(self, data_objects: List[DataObject]) -> List[DataObjectEndpoint]:
         """
 
         Args:
-          rows: A list of rows that you want to post
+          data_objects: A list of data objects that you want to create
 
         Returns:
 
         """
         url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
-        logger.debug(f"Uploading data objects to store {url}")
+        logger.debug(f"Creating data objects in store {url}")
 
-        doc = requests.post(url, json=rows)
-
-    def add(self, row):
-        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
-        logger.debug(f"Uploading data objects to store {url}")
-
-        row_dict = {}
-        for idx, row_value in enumerate(row):
-            if len(self.columns) == 0 or len(self.columns) <= idx:
-                row_dict[f'col{idx}'] = row_value
-            else:
-                row_dict[self.columns[idx]] = row_value
-
-        doc = requests.post(url, json=[{'data': row_dict}])
+        create_response = requests.post(url, json=[data_object.dict(by_alias=True) for data_object in data_objects])
+        return [DataObjectEndpoint.parse_obj(data_object) for data_object in create_response.json()]
 
 
 class DocumentStoreEndpoint(StoreEndpoint):
