@@ -26,7 +26,8 @@ from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
-    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, PageDataObject
+    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
+    PageDataObject, Assistant
 
 logger = logging.getLogger()
 
@@ -326,6 +327,30 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             return self.post_deploy()
 
 
+class AssistantEndpoint(Assistant, ClientEndpoint):
+
+    def update(self) -> "AssistantEndpoint":
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}"
+        response = self.client.put(url, body=self.to_dict())
+        return AssistantEndpoint.parse_obj(response.json()).set_client(self.client)
+
+    def delete(self):
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}"
+        self.client.delete(url)
+
+    def activate(self):
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/activate"
+        self.client.put(url)
+
+    def deactivate(self):
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/deactivate"
+        self.client.put(url)
+
+    def schedule(self):
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/schedule"
+        self.client.put(url)
+
+
 class ProjectEndpoint(EntityEndpoint, Project):
 
     def get_type(self) -> str:
@@ -341,8 +366,16 @@ class ProjectEndpoint(EntityEndpoint, Project):
                 .filter(lambda store: store_type is None or store.store_type == store_type)
                 .filter(lambda store: store_type is None or store.store_purpose == store_purpose).to_list())
 
-    def taxonomies(self) -> List[ComponentInstanceEndpoint]:
+    def taxonomies(self) -> List["TaxonomyEndpoint"]:
         return self._get_resource("taxonomies")
+
+    def dashboards(self) -> List["Dashboard"]:
+        return self._get_resource("dashboards")
+
+    def assistants(self):
+        url = f"/api/projects/{self.id}/assistants"
+        response = self.client.get(url)
+        return [AssistantEndpoint.parse_obj(assistant).set_client(self.client) for assistant in response.json()]
 
 
 class ProjectsEndpoint:
