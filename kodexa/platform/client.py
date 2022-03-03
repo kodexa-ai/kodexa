@@ -267,11 +267,22 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
                                           params={"query": query, "page": page, "pageSize": pagesize, "sort": sort})
         return PageStoreEndpoint.parse_obj(stores_response.json()).set_client(self.client)
 
+    def get_store(self, slug, version=None):
+        url = f"/api/stores/{self.slug}/{slug}{'/' + version if version else ''}"
+        stores_response = self.client.get(url)
+        return PageStoreEndpoint.parse_obj(stores_response.json()).set_client(self.client)
+
     def taxonomies(self, query="*", page=1, pagesize=10, sort=None):
         url = f"/api/taxonomies/{self.slug}"
         stores_response = self.client.get(url,
                                           params={"query": query, "page": page, "pageSize": pagesize, "sort": sort})
         return PageTaxonomyEndpoint.parse_obj(stores_response.json()).set_client(self.client)
+
+
+class ComponentsEndpoint(ClientEndpoint):
+
+    def __init__(self, organization: OrganizationEndpoint):
+        self.organization = organization
 
 
 class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
@@ -794,7 +805,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         else:
             raise Exception(f"{file_path} is not a file")
 
-    def upload_bytes(self, path: str, content, replace=False) -> DocumentFamily:
+    def upload_bytes(self, path: str, content, replace=False) -> DocumentFamilyEndpoint:
         """
         Put the content into the store at the given path
 
@@ -854,7 +865,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
     def get_metadata_class(self) -> Type[BaseModel]:
         return DocumentContentMetadata
 
-    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
+    def get_family(self, document_family_id: str) -> DocumentFamilyEndpoint:
         logger.info(f"Getting document family id {document_family_id}")
         document_family_response = self.client.get(
             f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}")
