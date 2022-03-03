@@ -8,29 +8,38 @@
 changelog:
   - description: "Initial version"
     date: "2020-01-01"
-  - description:
-    sql: CREATE TABLE ft(
-      id           integer primary key,
-      cn_id        integer,
-      f_type       INTEGER,
-      binary_value blob,
-      single       integer,
-      tag_uuid     text
-      )
+    sql:
+       - CREATE TABLE metadata (id integer primary key, metadata text)
+       - CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, idx INTEGER)
+       - CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)
+       - CREATE TABLE n_type (id integer primary key, name text)
+       - CREATE TABLE f_type (id integer primary key, name text)
+       - CREATE TABLE ft
+         (
+           id           integer primary key,
+           cn_id        integer,
+           f_type       INTEGER,
+           binary_value blob,
+           single       integer,
+           tag_uuid     text
+         )
+       - CREATE UNIQUE INDEX n_type_uk ON n_type(name)
+       - CREATE UNIQUE INDEX f_type_uk ON f_type(name)
+       - CREATE INDEX cn_perf ON cn(nt)
+       - CREATE INDEX cn_perf2 ON cn(pid)
+       - CREATE INDEX cnp_perf ON cnp(cn_id, pos)
+       - CREATE INDEX f_perf ON ft(cn_id)
+       - CREATE INDEX f_perf2 ON ft(tag_uuid)
 
-domain:
-  - type: Document
-    attributes:
-      - name: contentNode
-        type: ContentNode
-  - type: ContentNode
-    query:
-      - name: contentNode
-        sql: ContentNode
-    attributes:
-      - name: features
-        type: list
-        listType: ContentFeature
-      - name: children
-        type: list
-        listType: ContentNode
+queries:
+  - name: bob
+    sql:
+
+featureTypes:
+  - featureType: spatial
+    name: bbox
+    sql:
+      create:
+      read:
+      update:
+      delete:

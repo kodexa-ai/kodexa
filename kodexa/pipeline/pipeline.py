@@ -328,8 +328,6 @@ class PipelineStep:
                 metadata = self.step.to_dict()
 
             metadata['name'] = self.name
-            metadata['parameterized'] = self.parameterized
-            metadata['enabled'] = self.enabled
             metadata['stepType'] = self.step_type
             return metadata
         except AttributeError as e:
