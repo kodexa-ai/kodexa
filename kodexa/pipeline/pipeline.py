@@ -522,8 +522,8 @@ class Pipeline:
                          attach_source=attach_source))
         return self
 
-    def add_step(self, step, name=None, enabled=True, options=None, attach_source=False,
-                 parameterized=False, step_type='ACTION'):
+    def add_step(self, step, name=None, options=None, attach_source=False,
+                 step_type='ACTION'):
         """Add the given step to the current pipeline
 
 
@@ -536,10 +536,8 @@ class Pipeline:
         Args:
           step: the step to add
           name: the name to use to describe the step (default None)
-          enabled: is the step enabled (default True)
           options: options to be passed to the step if it is a simplified remote action (Default value = None)
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
-          parameterized: apply the pipeline's parameters to the options (Default value = False)
           step_type: the type of step to add, can either be an ACTION or MODEL
         Returns:
           the instance of the pipeline
