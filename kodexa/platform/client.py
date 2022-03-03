@@ -27,7 +27,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant
+    PageDataObject, Assistant, Dashboard
 
 logger = logging.getLogger()
 
@@ -380,7 +380,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
     def taxonomies(self) -> List["TaxonomyEndpoint"]:
         return self._get_resource("taxonomies")
 
-    def dashboards(self) -> List["Dashboard"]:
+    def dashboards(self) -> List[Dashboard]:
         return self._get_resource("dashboards")
 
     def assistants(self):

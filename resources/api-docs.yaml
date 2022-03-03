@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 0.0.0-model-spike.116
+  version: 0.0.0-model-spike.186
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -964,6 +964,13 @@ paths:
         required: false
         schema:
           type: string
+      - name: metadata
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: object
       - name: documentVersion
         in: query
         required: false
@@ -1354,55 +1361,6 @@ paths:
       responses:
         "200":
           description: OK
-  /api/stores/{orgSlug}/{slug}/{version}/families/{id}/objects/{objectId}/content:
-    put:
-      tags:
-      - Stores
-      description: Update the contents of an object in a family (note that this will
-        overwrite any content and not store a transition)
-      operationId: updateContentObjectInFamily
-      parameters:
-      - name: orgSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: objectId
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                document:
-                  type: string
-                  format: binary
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/DocumentFamily'
   /api/stores/{orgSlug}/{slug}/{version}/families/{id}/objects/{objectId}/_replaceTags:
     put:
       tags:
@@ -1948,6 +1906,13 @@ paths:
         required: false
         schema:
           type: string
+      - name: metadata
+        in: query
+        required: true
+        schema:
+          type: object
+          additionalProperties:
+            type: object
       - name: documentVersion
         in: query
         required: false
@@ -5155,11 +5120,17 @@ paths:
     post:
       tags:
       - Taxonomies
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createTaxonomy
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -5210,11 +5181,17 @@ paths:
     post:
       tags:
       - Stores
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createStore
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -5314,6 +5291,55 @@ paths:
       responses:
         "200":
           description: OK
+  /api/stores/{orgSlug}/{slug}/{version}/families/{id}/objects/{objectId}/content:
+    post:
+      tags:
+      - Stores
+      description: Update the contents of an object in a family (note that this will
+        overwrite any content and not store a transition)
+      operationId: updateContentObjectInFamily
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: objectId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                document:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/DocumentFamily'
   /api/stores/{orgSlug}/{slug}/{version}/families/{documentFamilyId}/objects:
     post:
       tags:
@@ -5815,79 +5841,6 @@ paths:
       responses:
         "200":
           description: OK
-  /api/sessions/{sessionId}/executions/{executionId}/stores/{storeId}:
-    get:
-      tags:
-      - Sessions
-      description: Get the data and structure of a session store
-      operationId: getExecutionStore
-      parameters:
-      - name: x-access-token
-        in: header
-        required: false
-        schema:
-          type: string
-      - name: sessionId
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: storeId
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: executionId
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SessionStore'
-    post:
-      tags:
-      - Sessions
-      description: Update a execution-based store content
-      operationId: updateExecutionStore
-      parameters:
-      - name: x-access-token
-        in: header
-        required: false
-        schema:
-          type: string
-      - name: sessionId
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: storeId
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: executionId
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SessionStore'
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SessionStore'
   /api/sessions/{sessionId}/executions/{executionId}/objects:
     post:
       tags:
@@ -6386,11 +6339,17 @@ paths:
     post:
       tags:
       - Project Templates
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createProjectTemplate
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -6441,11 +6400,17 @@ paths:
     post:
       tags:
       - Pipelines
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createPipeline
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -6598,11 +6563,17 @@ paths:
     post:
       tags:
       - ModelRuntimes
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createModelRuntime
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -6857,7 +6828,8 @@ paths:
     post:
       tags:
       - Extension Packs
-      description: "Create, buid and deploy extension pack from specific URI"
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createExtensionPack
       parameters:
       - name: organizationSlug
@@ -6870,11 +6842,16 @@ paths:
         required: true
         schema:
           type: string
+      - name: templateRef
+        in: query
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeploymentOptions'
+              $ref: '#/components/schemas/ExtensionPack'
         required: true
       responses:
         "200":
@@ -6917,11 +6894,17 @@ paths:
     post:
       tags:
       - Dashboards
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createDashboard
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -6972,11 +6955,17 @@ paths:
     post:
       tags:
       - Credentials
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createCredential
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -7027,11 +7016,17 @@ paths:
     post:
       tags:
       - Assistants
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createAssistantDefinition
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -7082,11 +7077,17 @@ paths:
     post:
       tags:
       - Actions
-      description: Create a new instance of the object in the organization
+      description: Create a new instance of the object in the organization using the
+        template with given ref
       operationId: createAction
       parameters:
       - name: organizationSlug
         in: path
+        required: true
+        schema:
+          type: string
+      - name: templateRef
+        in: query
         required: true
         schema:
           type: string
@@ -8491,6 +8492,31 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PageExecution'
+  /api/marketplace:
+    get:
+      tags:
+      - Platform Overview
+      description: List available resources from the marketplace
+      operationId: getMarketPlace
+      parameters:
+      - name: selectionType
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ""
+      - name: queryContext
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/QueryContext'
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageSlugBasedMetadata'
   /api/executions:
     get:
       tags:
@@ -8854,6 +8880,8 @@ components:
       - $ref: '#/components/schemas/SlugBasedMetadata'
       - type: object
         properties:
+          template:
+            type: boolean
           extensionPackRef:
             type: string
             description: The reference to the extension pack (if the metadata object
@@ -9632,12 +9660,6 @@ components:
         ref:
           type: string
           description: The reference to the action
-        enabled:
-          type: boolean
-          description: The reference to the action
-        parameterized:
-          type: boolean
-          description: Is the step parameterized
         options:
           type: object
           additionalProperties:
@@ -9871,6 +9893,10 @@ components:
           type: integer
           description: The version of the schema
           format: int32
+        template:
+          type: boolean
+          description: Is this taxonomy a template that can be used to create new
+            taxonomies
         orgSlug:
           type: string
           description: The slug of the organization that owns this metadata object
@@ -9899,7 +9925,10 @@ components:
           description: Is the metadata object publicly accessible by other organizations
         imageUrl:
           type: string
-          description: URL of image for assistant
+          description: URL of image when presenting this object in a UI
+        overviewMarkdown:
+          type: string
+          description: Markdown that is used to present the overview of the object
         metadataTag:
           type: array
           description: A list of associated tags
@@ -10481,9 +10510,9 @@ components:
           type: string
           description: A label for the transition (this can be used later if we want
             to prune based on a label)
-        destinationContentObjectId:
-          type: string
         sourceContentObjectId:
+          type: string
+        destinationContentObjectId:
           type: string
       description: "Provides the definition of a transition for a document, where\
         \ a change was applied by an assistant, user or external process"
@@ -10659,13 +10688,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
-        label:
-          type: string
-          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
+        label:
+          type: string
+          writeOnly: true
     DataLineage:
       type: object
       properties:
@@ -10786,6 +10815,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ExecutionTarget'
+        session:
+          $ref: '#/components/schemas/Session'
         startDate:
           type: string
           format: date-time
@@ -10838,11 +10869,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContentObject'
-        stores:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/SessionStore'
         documentFamily:
           $ref: '#/components/schemas/DocumentFamily'
     ExecutionStep:
@@ -10874,10 +10900,6 @@ components:
         processingTime:
           type: integer
           format: int64
-        parameterized:
-          type: boolean
-        enabled:
-          type: boolean
         options:
           type: object
           additionalProperties:
@@ -10895,11 +10917,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContentObject'
-        stores:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/SessionStore'
         inputId:
           type: string
         outputId:
@@ -10934,26 +10951,36 @@ components:
           type: array
           items:
             type: string
-    SessionStore:
+        labelsToApply:
+          type: array
+          items:
+            type: string
+    Session:
+      required:
+      - state
       type: object
       properties:
         id:
           type: string
-        name:
+          description: The ID of the object
+        uuid:
           type: string
-        storeType:
+        createdOn:
+          type: string
+          format: date-time
+        updatedOn:
+          type: string
+          format: date-time
+        state:
           type: string
           enum:
-          - DOCUMENT
-          - TABLE
-          - DICTIONARY
-          - MODEL
-        ref:
+          - OPEN
+          - CLOSED
+        token:
           type: string
-        data:
-          type: object
-          additionalProperties:
-            type: object
+        lastAccessed:
+          type: string
+          format: date-time
     Role:
       required:
       - name
@@ -11008,6 +11035,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AssistantSchedule'
+        project:
+          $ref: '#/components/schemas/Project'
         name:
           type: string
         description:
@@ -11759,24 +11788,24 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
     Sort:
       type: object
       properties:
         empty:
           type: boolean
-        unsorted:
-          type: boolean
         sorted:
+          type: boolean
+        unsorted:
           type: boolean
     PageTeam:
       type: object
@@ -12169,32 +12198,6 @@ components:
           type: boolean
         empty:
           type: boolean
-    Session:
-      required:
-      - state
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the object
-        uuid:
-          type: string
-        createdOn:
-          type: string
-          format: date-time
-        updatedOn:
-          type: string
-          format: date-time
-        state:
-          type: string
-          enum:
-          - OPEN
-          - CLOSED
-        token:
-          type: string
-        lastAccessed:
-          type: string
-          format: date-time
     PageRole:
       type: object
       properties:
@@ -12435,6 +12438,48 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Membership'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        numberOfElements:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+    PageSlugBasedMetadata:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/Action'
+            - $ref: '#/components/schemas/AssistantDefinition'
+            - $ref: '#/components/schemas/Credential'
+            - $ref: '#/components/schemas/Dashboard'
+            - $ref: '#/components/schemas/ExtensionPack'
+            - $ref: '#/components/schemas/ModelRuntime'
+            - $ref: '#/components/schemas/Pipeline'
+            - $ref: '#/components/schemas/ProjectTemplate'
+            - $ref: '#/components/schemas/Store'
+            - $ref: '#/components/schemas/Taxonomy'
         number:
           type: integer
           format: int32
