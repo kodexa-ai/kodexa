@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 0.0.0-model-spike.186
+  version: 0.0.0-model-spike.200
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -2624,7 +2624,7 @@ paths:
       tags:
       - Projects
       description: Update workflow definition for this project
-      operationId: getWorkflowDefinition
+      operationId: updateWorkflowDefinition
       parameters:
       - name: id
         in: path
@@ -9362,12 +9362,6 @@ components:
           modelRuntimeRef:
             type: string
             description: The reference to the model runtime to use
-          modelRuntimeParameters:
-            type: object
-            additionalProperties:
-              type: object
-              description: The parameters passed to the model runtime for base configuration
-            description: The parameters passed to the model runtime for base configuration
           state:
             type: string
             description: The state of the model in this store
@@ -9395,27 +9389,28 @@ components:
           trainable:
             type: boolean
             description: Can this model be trained
-          options:
-            type: array
-            description: The options for this model instance
-            items:
-              $ref: '#/components/schemas/Option'
           vueTemplate:
             type: string
             description: The Vue template to render for the configuration of this
               model
-          runtimeTrainingParameters:
+          trainingOptions:
             type: object
             additionalProperties:
               type: object
-              description: The parameters passed to the model runtime for training
-            description: The parameters passed to the model runtime for training
-          runtimeInferenceParameters:
+              description: The training options for this model
+            description: The training options for this model
+          trainingParameters:
             type: object
             additionalProperties:
               type: object
-              description: The parameters passed to the model runtime for inference
-            description: The parameters passed to the model runtime for inference
+              description: The values for the training options
+            description: The values for the training options
+          inferenceOptions:
+            type: object
+            additionalProperties:
+              type: object
+              description: The inference options for this model
+            description: The inference options for this model
           buildStatistics:
             type: object
             additionalProperties:
@@ -9615,19 +9610,6 @@ components:
               was created by an extension pack)
           metadata:
             $ref: '#/components/schemas/PipelineImplementationMetadata'
-    PipelineExample:
-      type: object
-      properties:
-        title:
-          type: string
-          description: Title of the example
-        description:
-          type: string
-          description: Description of the example
-        url:
-          type: string
-          description: URL to the example input
-      description: Metadata linking to an example input for this pipeline
     PipelineImplementationMetadata:
       type: object
       properties:
@@ -9636,20 +9618,6 @@ components:
           description: The metadata for the steps in this pipeline
           items:
             $ref: '#/components/schemas/PipelineStepMetadata'
-        stores:
-          type: array
-          description: The metadata for the stores in this pipeline
-          items:
-            $ref: '#/components/schemas/PipelineStore'
-        moreInfoUrl:
-          type: string
-          description: A URL for more information for this pipeline
-        exampleUrls:
-          type: array
-          description: "A list of the examples of this pipeline, the examples are\
-            \ example inputs for the pipeline"
-          items:
-            $ref: '#/components/schemas/PipelineExample'
       description: Metadata captured when publishing a pipeline definition
     PipelineStepMetadata:
       type: object
@@ -9673,21 +9641,6 @@ components:
           - ACTION
           - MODEL
       description: The metadata for the steps in this pipeline
-    PipelineStore:
-      type: object
-      properties:
-        name:
-          type: string
-        ref:
-          type: string
-        storeType:
-          type: string
-          enum:
-          - DOCUMENT
-          - TABLE
-          - DICTIONARY
-          - MODEL
-      description: The metadata for the stores in this pipeline
     PossibleValue:
       type: object
       properties:
@@ -10688,13 +10641,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
+        label:
+          type: string
+          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
-        label:
-          type: string
-          writeOnly: true
     DataLineage:
       type: object
       properties:
@@ -11439,7 +11392,6 @@ components:
           oneOf:
           - $ref: '#/components/schemas/AssistantEvent'
           - $ref: '#/components/schemas/ContentEvent'
-          - $ref: '#/components/schemas/ModelTrainEvent'
           - $ref: '#/components/schemas/ScheduledEvent'
         response:
           $ref: '#/components/schemas/AssistantExecutionResponse'
@@ -11492,12 +11444,10 @@ components:
           assistant: '#/components/schemas/AssistantEvent'
           content: '#/components/schemas/ContentEvent'
           scheduled: '#/components/schemas/ScheduledEvent'
-          modelTrain: '#/components/schemas/ModelTrainEvent'
       oneOf:
       - $ref: '#/components/schemas/ContentEvent'
       - $ref: '#/components/schemas/ScheduledEvent'
       - $ref: '#/components/schemas/AssistantEvent'
-      - $ref: '#/components/schemas/ModelTrainEvent'
     ContentEvent:
       type: object
       allOf:
@@ -11594,29 +11544,6 @@ components:
         endDate:
           type: string
           format: date-time
-    ModelTrainEvent:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/BaseEvent'
-      - type: object
-        properties:
-          type:
-            type: string
-          modelStoreRef:
-            type: string
-          options:
-            type: object
-            additionalProperties:
-              type: object
-          trainingStoreRef:
-            type: string
-          subscriptions:
-            type: array
-            items:
-              oneOf:
-              - $ref: '#/components/schemas/LabelSubscription'
-              - $ref: '#/components/schemas/MixinSubscription'
-              - $ref: '#/components/schemas/PathSubscription'
     ScheduledEvent:
       type: object
       allOf:
@@ -11788,24 +11715,24 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
     Sort:
       type: object
       properties:
         empty:
           type: boolean
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
     PageTeam:
       type: object
@@ -11990,7 +11917,6 @@ components:
           oneOf:
           - $ref: '#/components/schemas/AssistantEvent'
           - $ref: '#/components/schemas/ContentEvent'
-          - $ref: '#/components/schemas/ModelTrainEvent'
           - $ref: '#/components/schemas/ScheduledEvent'
         documentFamily:
           $ref: '#/components/schemas/DocumentFamily'

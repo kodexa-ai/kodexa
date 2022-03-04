@@ -27,7 +27,7 @@ from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
 from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, ExecutionEvent, \
-    ContentObject, ModelTrainEvent, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution
+    ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
@@ -1390,8 +1390,6 @@ class EventHelper:
 
     @staticmethod
     def get_base_event(event_dict: Dict):
-        if event_dict['type'] == 'modelTrain':
-            return ModelTrainEvent(**event_dict)
         if event_dict['type'] == 'assistant':
             return AssistantEvent(**event_dict)
         if event_dict['type'] == 'content':
