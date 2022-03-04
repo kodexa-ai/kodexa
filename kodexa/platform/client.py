@@ -477,7 +477,7 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
     def find_taxon(self, taxons, parts, use_label=False):
         for taxon in taxons:
             match_value = taxon.label if use_label else taxon.name
-            if taxon.label == match_value:
+            if parts[0] == match_value:
                 if len(parts) == 1:
                     return taxon
                 else:
@@ -488,9 +488,9 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
         return self.find_taxon(self.taxons, label_path_parts, use_label=True)
 
-    def find_taxon_by_path(self, label_path: str) -> Taxon:
-        label_path_parts = label_path.split("/")
-        return self.find_taxon(self.taxons, label_path_parts)
+    def find_taxon_by_path(self, path: str) -> Taxon:
+        path_parts = path.split("/")
+        return self.find_taxon(self.taxons, path_parts)
 
 
 class UserEndpoint(User, EntityEndpoint):

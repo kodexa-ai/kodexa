@@ -1,5 +1,6 @@
 {
   "taxonomyType": "CONTENT",
+  "type": "taxonomy",
   "enabled": true,
   "slug": "demo",
   "name": "demo",
