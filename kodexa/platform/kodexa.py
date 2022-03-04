@@ -1408,8 +1408,7 @@ class EventHelper:
                 {'entry': message}
             ],
             headers={'x-access-token': KodexaPlatform.get_access_token()}, timeout=300)
-        if response.status_code != 200:
-            logger.error(f"Failed to log message {response.status_code}")
+        print(response.status_code, flush=True)
 
     def get_content_object(self, content_object_id: str):
         logger.info(
