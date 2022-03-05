@@ -304,8 +304,8 @@ class PipelineStep:
             self.name = step.__name__
         elif isinstance(self.step, str):
             logger.info(f"Adding new remote step {step} to pipeline")
-            from kodexa import RemoteAction
-            self.step = RemoteAction(step, options=options, attach_source=attach_source)
+            from kodexa import RemoteStep
+            self.step = RemoteStep(step, step_type=step_type, options=options, attach_source=attach_source)
         else:
             logger.info(f"Adding new step {type(step)} to pipeline")
 

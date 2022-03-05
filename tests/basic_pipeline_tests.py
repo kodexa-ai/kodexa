@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from kodexa import RemoteAction
+from kodexa import RemoteStep
 from kodexa.model import DocumentMetadata, Document, ContentObject, ContentType
 from kodexa.pipeline import Pipeline
 from kodexa.steps.common import TextParser, DocumentStoreWriter
@@ -27,7 +27,7 @@ def test_simplified_remote_action_reference():
     pipeline.add_step('kodexa/ner-tagger', options={"option": "test"})
 
     assert len(pipeline.steps) == 1
-    assert isinstance(pipeline.steps[0].step, RemoteAction)
+    assert isinstance(pipeline.steps[0].step, RemoteStep)
     assert "option" in pipeline.steps[0].step.options
 
 

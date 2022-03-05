@@ -1293,30 +1293,28 @@ class RemotePipeline:
                                                     unpack=unpack))
 
 
-class RemoteAction:
-    """Allows you to interact with an action that has been deployed in the Kodexa platform"""
+class RemoteStep:
+    """Allows you to interact with a step that has been deployed in the Kodexa platform"""
 
-    def __init__(self, slug, version=None, attach_source=False, options=None, auth=None):
-        if auth is None:
-            auth = []
+    def __init__(self, ref, step_type='ACTION', attach_source=False, options=None):
         if options is None:
             options = {}
-        self.slug = slug
-        self.version = version
+        self.ref = ref
+        self.step_type = step_type
         self.attach_source = attach_source
         self.options = options
-        self.auth = auth
 
     def to_dict(self):
         """ """
         return {
-            'ref': self.slug,
+            'ref': self.ref,
+            'step_type': self.step_type,
             'options': self.options
         }
 
     def get_name(self):
         """ """
-        return f"Remote Action ({self.slug})"
+        return f"Remote Action ({self.ref})"
 
     def process(self, document, context):
         cloud_session = RemoteSession("service", self.slug)
