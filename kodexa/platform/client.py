@@ -972,7 +972,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
                     # We will put the implementation in one place
 
-                    relative_path = self.IMPLEMENTATION_PREFIX + '/' + relative_path
+                    relative_path = self.IMPLEMENTATION_PREFIX + relative_path
                     if Path(path_hit).is_file():
                         logger.info(f"Uploading {path_hit}")
                         with open(path_hit, 'rb') as path_content:
