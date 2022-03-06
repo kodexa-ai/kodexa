@@ -940,7 +940,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
     def download_trained_model(self, training_run_id: str, download_path: Optional[str] = ""):
         for path in self.list_contents():
             if path.startswith(self.TRAINED_MODELS_PREFIX + training_run_id):
-                file_path = os.path.join(download_path, path.removeprefix(self.IMPLEMENTATION_PREFIX))
+                file_path = os.path.join(download_path, path.replace(self.TRAINED_MODELS_PREFIX, ''))
                 logger.info(f"Downloading trained model file {file_path}")
                 Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
 
@@ -950,7 +950,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
     def download_implementation(self, download_path: Optional[str] = ""):
         for path in self.list_contents():
             if path.startswith(self.IMPLEMENTATION_PREFIX):
-                file_path = os.path.join(download_path, path.removeprefix(self.IMPLEMENTATION_PREFIX))
+                file_path = os.path.join(download_path, path.replace(self.IMPLEMENTATION_PREFIX, ''))
                 logger.info(f"Downloading model file {file_path}")
                 Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
 
