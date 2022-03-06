@@ -922,12 +922,12 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         results = []
         final_wildcard = "**/*" if base_path is None else f"{base_path}/**/*"
         num_hits = 0
-        for path_hit in glob.glob(final_wildcard):
+        for path_hit in glob.glob(final_wildcard, recursive=True):
             relative_path = path_hit.replace(base_path + '/', '') if base_path else path_hit
 
             # We will put the implementation in one place
 
-            relative_path = self.TRAINED_MODELS_PREFIX + '/' + training_run_id + '/' + relative_path
+            relative_path = self.TRAINED_MODELS_PREFIX + training_run_id + '/' + relative_path
             if Path(path_hit).is_file():
                 logger.info(f"Uploading model file {path_hit}")
                 with open(path_hit, 'rb') as path_content:
@@ -967,7 +967,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             for content_path in metadata.contents:
                 final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
                 num_hits = 0
-                for path_hit in glob.glob(final_wildcard):
+                for path_hit in glob.glob(final_wildcard, recursive=True):
                     relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
 
                     # We will put the implementation in one place
