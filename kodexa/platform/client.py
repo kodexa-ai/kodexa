@@ -950,6 +950,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
     def download_implementation(self, download_path: Optional[str] = ""):
         for path in self.list_contents():
             if path.startswith(self.IMPLEMENTATION_PREFIX):
+                logger.info(f"Downloading implementation file {path}")
                 file_path = os.path.join(download_path, path.replace(self.IMPLEMENTATION_PREFIX, ''))
                 logger.info(f"Downloading model file {file_path}")
                 Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
