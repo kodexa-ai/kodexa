@@ -912,9 +912,53 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
 
 class ModelStoreEndpoint(DocumentStoreEndpoint):
+    IMPLEMENTATION_PREFIX = "model_implementation/"
+    TRAINED_MODELS_PREFIX = "trained_models/"
 
     def get_metadata_class(self) -> Type[BaseModel]:
         return ModelContentMetadata
+
+    def upload_trained_model(self, training_run_id: str, base_path: Optional[str] = None):
+        results = []
+        final_wildcard = "**/*" if base_path is None else f"{base_path}/**/*"
+        num_hits = 0
+        for path_hit in glob.glob(final_wildcard):
+            relative_path = path_hit.replace(base_path + '/', '') if base_path else path_hit
+
+            # We will put the implementation in one place
+
+            relative_path = self.TRAINED_MODELS_PREFIX + '/' + training_run_id + '/' + relative_path
+            if Path(path_hit).is_file():
+                logger.info(f"Uploading model file {path_hit}")
+                with open(path_hit, 'rb') as path_content:
+                    self.upload_bytes(relative_path, path_content, replace=True)
+                    num_hits += 1
+        if num_hits > 0:
+            results.append(f"{num_hits} files uploaded for {final_wildcard}")
+        return results
+
+    def download_trained_model(self, training_run_id: str, download_path: Optional[str] = ""):
+        for path in self.list_contents():
+            if path.startswith(self.TRAINED_MODELS_PREFIX + training_run_id):
+                file_path = os.path.join(download_path, path.removeprefix(self.IMPLEMENTATION_PREFIX))
+                logger.info(f"Downloading trained model file {file_path}")
+                Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
+
+                with open(file_path, 'wb') as output_file:
+                    output_file.write(self.get_bytes(path))
+
+    def download_implementation(self, download_path: Optional[str] = ""):
+        for path in self.list_contents():
+            if path.startswith(self.IMPLEMENTATION_PREFIX):
+                file_path = os.path.join(download_path, path.removeprefix(self.IMPLEMENTATION_PREFIX))
+                logger.info(f"Downloading model file {file_path}")
+                Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
+
+                with open(file_path, 'wb') as output_file:
+                    output_file.write(self.get_bytes(path))
+
+    def upload_implementation(self, metadata):
+        return self.upload_contents(metadata)
 
     def upload_contents(self, metadata):
         results = []
@@ -924,6 +968,10 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                 num_hits = 0
                 for path_hit in glob.glob(final_wildcard):
                     relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
+
+                    # We will put the implementation in one place
+
+                    relative_path = self.IMPLEMENTATION_PREFIX + '/' + relative_path
                     if Path(path_hit).is_file():
                         logger.info(f"Uploading {path_hit}")
                         with open(path_hit, 'rb') as path_content:
