@@ -111,15 +111,16 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 @click.option('--file', help='The path to the file containing the object to apply')
 @click.option('--update/--no-update', help='The path to the file containing the object to apply',
               default=False)
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def deploy(_: Info, org: Optional[str], file: str, token: str, format=None, update: bool = False, version=None,
+def deploy(_: Info, org: Optional[str], file: str, url:str, token: str, format=None, update: bool = False, version=None,
            slug=None):
     """Deploy an object to a Kodexa platform instance from a file
     """
 
-    client = KodexaClient(access_token=token)
+    client = KodexaClient(access_token=token, url=url)
 
     obj = None
     if file is None:
