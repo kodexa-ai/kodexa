@@ -767,7 +767,8 @@ class DataStoreEndpoint(StoreEndpoint):
 
         data_objects_response = self.client.get(url, params=params)
         data_object_page = PageDataObject.parse_obj(data_objects_response.json())
-        data_object_page.content = [DataObjectEndpoint.parse_obj(data_object) for data_object in data_object_page]
+        data_object_page.content = [DataObjectEndpoint.parse_obj(data_object) for data_object in
+                                    data_object_page.content]
         return data_object_page
 
     def create_data_objects(self, data_objects: List[DataObject]) -> List[DataObjectEndpoint]:
