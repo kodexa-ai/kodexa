@@ -1005,6 +1005,12 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         return self.upload_contents(metadata)
 
     def upload_contents(self, metadata):
+
+        # First we are going to delete anything we have in the implementation
+        for imp_file in self.list_contents():
+            if imp_file.startswith(self.IMPLEMENTATION_PREFIX):
+                self.delete_by_path(imp_file)
+
         results = []
         if metadata.contents:
             for content_path in metadata.contents:
