@@ -27,7 +27,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, Dashboard
+    PageDataObject, Assistant, Dashboard, ProjectTemplate
 
 logger = logging.getLogger()
 
@@ -454,6 +454,48 @@ class StoresEndpoint(ComponentEndpoint):
 
     def get_page_class(self) -> Type[BaseModel]:
         return PageStore
+
+
+class ProjectTemplateEndpoint(ComponentInstanceEndpoint, ProjectTemplate):
+
+    def get_type(self) -> str:
+        return "projectTemplates"
+
+
+class CredentialEndpoint(ComponentInstanceEndpoint, Credential):
+
+    def get_type(self) -> str:
+        return "credentials"
+
+
+class AssistantDefinitionEndpoint(ComponentInstanceEndpoint, AssistantDefinition):
+
+    def get_type(self) -> str:
+        return "assistants"
+
+
+class PipelineEndpoint(ComponentInstanceEndpoint, Pipeline):
+
+    def get_type(self) -> str:
+        return "pipelines"
+
+
+class ModelRuntimeEndpoint(ComponentInstanceEndpoint, ModelRuntime):
+
+    def get_type(self) -> str:
+        return "modelRuntimes"
+
+
+class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
+
+    def get_type(self) -> str:
+        return "extensionPacks"
+
+
+class ActionEndpoint(ComponentInstanceEndpoint, Action):
+
+    def get_type(self) -> str:
+        return "actions"
 
 
 class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
@@ -1232,7 +1274,18 @@ class KodexaClient:
                         raise Exception("Unknown store type: " + store_type)
                 else:
                     raise Exception("A store must have a storeType")
-            if component_type == 'taxonomy':
-                return TaxonomyEndpoint.parse_obj(component_dict).set_client(self)
+            known_components = {
+                "taxonomy": TaxonomyEndpoint,
+                "pipeline": PipelineEndpoint,
+                "action": ActionEndpoint,
+                "credential": CredentialEndpoint,
+                "projectTemplate": ProjectTemplateEndpoint,
+                "modelRuntime": ModelRuntimeEndpoint
+            }
+
+            if component_type in known_components:
+                return known_components[component_type].parse_obj(component_dict).set_client(self)
+            else:
+                raise Exception("Unknown component type: " + component_type)
         else:
             raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
