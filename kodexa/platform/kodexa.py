@@ -27,7 +27,7 @@ from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
 from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, ExecutionEvent, \
-    ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution
+    ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
@@ -171,13 +171,15 @@ DEFAULT_COLUMNS = {
         'name',
         'description',
         'storeType',
-        'storePurpose'
+        'storePurpose',
+        'template'
     ],
     'default': [
         'ref',
         'name',
         'description',
-        'type'
+        'type',
+        'template'
     ]
 }
 
@@ -226,6 +228,11 @@ OBJECT_TYPES = {
         "plural": "projects",
         "type": Project,
         "global": True
+    },
+    "projectTemplates": {
+        "name": "projectTemplate",
+        "plural": "projectTemplates",
+        "type": ProjectTemplate
     },
     "executions": {
         "name": "execution",
