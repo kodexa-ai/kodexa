@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 0.0.0-model-spike.201
+  version: 5.0.24
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -5134,6 +5134,11 @@ paths:
         required: true
         schema:
           type: string
+      - name: projectId
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -5193,6 +5198,11 @@ paths:
       - name: templateRef
         in: query
         required: true
+        schema:
+          type: string
+      - name: projectId
+        in: query
+        required: false
         schema:
           type: string
       requestBody:
@@ -6353,6 +6363,11 @@ paths:
         required: true
         schema:
           type: string
+      - name: projectId
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -6412,6 +6427,11 @@ paths:
       - name: templateRef
         in: query
         required: true
+        schema:
+          type: string
+      - name: projectId
+        in: query
+        required: false
         schema:
           type: string
       requestBody:
@@ -6575,6 +6595,11 @@ paths:
       - name: templateRef
         in: query
         required: true
+        schema:
+          type: string
+      - name: projectId
+        in: query
+        required: false
         schema:
           type: string
       requestBody:
@@ -6847,6 +6872,11 @@ paths:
         required: true
         schema:
           type: string
+      - name: projectId
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -6906,6 +6936,11 @@ paths:
       - name: templateRef
         in: query
         required: true
+        schema:
+          type: string
+      - name: projectId
+        in: query
+        required: false
         schema:
           type: string
       requestBody:
@@ -6969,6 +7004,11 @@ paths:
         required: true
         schema:
           type: string
+      - name: projectId
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -7030,6 +7070,11 @@ paths:
         required: true
         schema:
           type: string
+      - name: projectId
+        in: query
+        required: false
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -7089,6 +7134,11 @@ paths:
       - name: templateRef
         in: query
         required: true
+        schema:
+          type: string
+      - name: projectId
+        in: query
+        required: false
         schema:
           type: string
       requestBody:
@@ -8868,8 +8918,6 @@ components:
             $ref: '#/components/schemas/StepImplementation'
           metadata:
             $ref: '#/components/schemas/ObjectMetadata'
-          readme:
-            type: string
     AssistantDefinition:
       required:
       - name
@@ -9380,18 +9428,6 @@ components:
             - DEPLOYED
             - UNDEPLOYED
             - FAILED
-          provider:
-            type: string
-            description: The details of the provider of this model
-          providerUrl:
-            type: string
-            description: The link to the model provider details
-          tags:
-            type: array
-            description: A list of tags that relate to this model
-            items:
-              type: string
-              description: A list of tags that relate to this model
           trainable:
             type: boolean
             description: Can this model be trained
@@ -9450,6 +9486,14 @@ components:
               type: string
               description: A list of the paths (with wildcards) that hold the content
                 of this model
+          ignoredContents:
+            type: array
+            description: A list of the paths (with wildcards) that are ignored when
+              picking up the content of this model
+            items:
+              type: string
+              description: A list of the paths (with wildcards) that are ignored when
+                picking up the content of this model
           baseDir:
             type: string
             description: A base directory that was used for uploading of the model
@@ -9526,10 +9570,6 @@ components:
     ObjectMetadata:
       type: object
       properties:
-        tags:
-          type: array
-          items:
-            type: string
         options:
           type: array
           items:
@@ -9697,6 +9737,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DashboardRow'
+        templateRef:
+          type: string
       description: The dashboards that will be created with the project template
     ProjectStore:
       type: object
@@ -9719,6 +9761,8 @@ components:
           enum:
           - OPERATIONAL
           - TRAINING
+        templateRef:
+          type: string
       description: The stores that will be created with the project template
     ProjectTaxonomy:
       type: object
@@ -9742,6 +9786,8 @@ components:
           description: The hierarchical structure of taxon's in this taxonomy
           items:
             $ref: '#/components/schemas/Taxon'
+        templateRef:
+          type: string
       description: The taxonomies that will be created with the project template
     ProjectTemplate:
       required:
@@ -9893,6 +9939,15 @@ components:
           description: A list of associated tags
           items:
             $ref: '#/components/schemas/MetadataTag'
+        provider:
+          type: string
+          description: The details of the of provider
+        providerUrl:
+          type: string
+          description: The link to the provider website
+        providerImageUrl:
+          type: string
+          description: The link to the model image
       discriminator:
         propertyName: type
         mapping:
@@ -10800,10 +10855,8 @@ components:
           $ref: '#/components/schemas/ExceptionDetails'
         statusDetails:
           $ref: '#/components/schemas/StatusDetails'
-        steps:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionStep'
+        pipeline:
+          $ref: '#/components/schemas/ExecutionPipeline'
         parameters:
           type: object
           additionalProperties:
@@ -10830,6 +10883,23 @@ components:
             $ref: '#/components/schemas/ContentObject'
         documentFamily:
           $ref: '#/components/schemas/DocumentFamily'
+    ExecutionPipeline:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        ref:
+          type: string
+        id:
+          type: string
+        exceptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExceptionDetails'
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionStep'
     ExecutionStep:
       type: object
       properties:
@@ -11496,8 +11566,6 @@ components:
           - STEP_UPDATE
           - ASSISTANT_EVENT
           - ASSISTANT_RESPONSE
-          - MODEL_TRAIN
-          - MODEL_TRAIN_UPDATE
         status:
           type: string
           enum:
@@ -11703,7 +11771,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -11713,7 +11781,7 @@ components:
           type: boolean
         empty:
           type: boolean
-    Pageable:
+    PageableObject:
       type: object
       properties:
         offset:
@@ -11721,16 +11789,16 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
     Sort:
       type: object
       properties:
@@ -11762,7 +11830,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -11794,7 +11862,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -11826,7 +11894,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -11858,7 +11926,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -11890,7 +11958,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -11948,7 +12016,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12056,7 +12124,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12088,7 +12156,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12120,7 +12188,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12152,7 +12220,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12184,7 +12252,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12216,7 +12284,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12248,7 +12316,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12280,7 +12348,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12312,7 +12380,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12344,7 +12412,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12376,7 +12444,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12418,7 +12486,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12450,7 +12518,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12482,7 +12550,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12514,7 +12582,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12546,7 +12614,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12578,7 +12646,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12610,7 +12678,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12642,7 +12710,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12674,7 +12742,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
@@ -12713,7 +12781,7 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         pageable:
-          $ref: '#/components/schemas/Pageable'
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
