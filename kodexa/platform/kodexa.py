@@ -23,12 +23,14 @@ from addict import Dict
 from appdirs import AppDirs
 from rich import print, get_console
 
+from kodexa import KodexaClient
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
 from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, ExecutionEvent, \
     ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
+from kodexa.platform.client import DocumentStoreEndpoint
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
 from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
 
@@ -1455,7 +1457,8 @@ class EventHelper:
 
         if self.event.store_ref and self.event.document_family_id:
             logger.info("We have storeRef and document family")
-            rds: RemoteDocumentStore = KodexaPlatform.get_object_instance(self.event.store_ref, 'store')
+            client = KodexaClient()
+            rds: DocumentStoreEndpoint = client.get_object_by_ref('store', self.event.store_ref)
             document_family = rds.get_family(self.event.document_family_id)
 
             context.document_family = document_family
