@@ -2,11 +2,11 @@
 Provides the high-level classes and definition for an Assistant that can be implemented in Kodexa and run on an
 instance of the Kodexa platform
 """
-import uuid
 from typing import List, Optional
 
-from kodexa.model import ContentObject, DocumentStore, Document
+from kodexa.model import ContentObject, Document
 from kodexa.model.objects import BaseEvent, Store, Taxonomy
+from kodexa.platform.client import DocumentStoreEndpoint
 
 
 class AssistantMetadata:
@@ -96,7 +96,7 @@ class AssistantContext:
     while processing an event
     """
 
-    from kodexa.model import ContentEvent, DocumentStore
+    from kodexa.model import ContentEvent
 
     def __init__(self, metadata: AssistantMetadata, path_to_kodexa_metadata: str = 'kodexa.yml',
                  stores=None, content_provider=None, extension_pack_util=None):
@@ -158,7 +158,7 @@ class AssistantContext:
             options = {}
         return self.extension_pack_util.get_step(step, options)
 
-    def get_store(self, event: ContentEvent) -> DocumentStore:
+    def get_store(self, event: ContentEvent) -> DocumentStoreEndpoint:
         """
         Get a document store for the event (based on the document family ID)
 
@@ -173,8 +173,8 @@ class AssistantContext:
                 return store
 
         if event.document_family.store_ref is not None:
-            from kodexa import KodexaPlatform
-            return KodexaPlatform.get_object_instance(event.document_family.store_ref, 'store')
+            from kodexa import KodexaClient
+            return KodexaClient().get_object_by_ref('store', event.document_family.store_ref)
 
         raise Exception(f"Unable to get store ref {event.document_family.store_ref}")
 
