@@ -948,6 +948,9 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         return DocumentFamilyEndpoint.parse_obj(document_family_response.json()).set_client(self.client)
 
+    def exists_by_path(self, path: str) -> bool:
+        return self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path})
+
     def get_by_path(self, path: str) -> DocumentFamilyEndpoint:
         get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/fs",
                                        params={"path": path, "meta": True})
