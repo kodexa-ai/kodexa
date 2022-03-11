@@ -20,8 +20,7 @@ import requests
 from functional import seq
 from pydantic import BaseModel
 
-from kodexa import Document
-from kodexa.model import Store, Taxonomy
+from kodexa.model import Store, Taxonomy, Document
 from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
