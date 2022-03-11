@@ -1023,8 +1023,8 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
                     relative_path = self.IMPLEMENTATION_PREFIX + relative_path
                     if Path(path_hit).is_file():
-                        logger.info(f"Uploading {path_hit}")
                         with open(path_hit, 'rb') as path_content:
+                            results.append(f"Uploading model file {path_hit}")
                             self.upload_bytes(relative_path, path_content, replace=True)
                             num_hits += 1
                 if num_hits > 0:
