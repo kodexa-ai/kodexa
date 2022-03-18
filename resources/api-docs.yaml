@@ -5,12 +5,12 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 5.0.24
+  version: 5.0.90
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
 servers:
-- url: https://dev3.kodexa.com
+- url: https://qa1.kodexa.com
   description: Generated server url
 tags:
 - name: Teams
@@ -3968,6 +3968,25 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ExtensionPack'
+  /api/executions/{executionId}/cancel:
+    put:
+      tags:
+      - Executions
+      description: Cancel the specific execution
+      operationId: cancelExecution
+      parameters:
+      - name: executionId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Execution'
   /api/dashboards/{organizationSlug}/{slug}:
     get:
       tags:
@@ -8628,25 +8647,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PageExecutionLogEntry'
-  /api/executions/{executionId}/cancel:
-    get:
-      tags:
-      - Executions
-      description: Get the specific session
-      operationId: cancelExecution
-      parameters:
-      - name: executionId
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Execution'
   /api/events/{organizationSlug}:
     get:
       tags:
@@ -8832,6 +8832,8 @@ components:
           format: date-time
         userStorage:
           $ref: '#/components/schemas/UserStorage'
+        hasImage:
+          type: boolean
       description: A user within the Kodexa platform
     UserStorage:
       type: object
@@ -8880,6 +8882,8 @@ components:
           type: boolean
         description:
           type: string
+        hasImage:
+          type: boolean
     Team:
       type: object
       properties:
@@ -9581,7 +9585,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Option'
-        tabId:
+        tabName:
           type: string
         name:
           type: string
@@ -9596,6 +9600,10 @@ components:
         type:
           type: string
         listType:
+          type: string
+        listLabel:
+          type: string
+        listDescription:
           type: string
         featureFlag:
           type: string
@@ -9931,6 +9939,9 @@ components:
         imageUrl:
           type: string
           description: URL of image when presenting this object in a UI
+        icon:
+          type: string
+          description: Material Icon name to use in the UI
         overviewMarkdown:
           type: string
           description: Markdown that is used to present the overview of the object
@@ -10826,9 +10837,7 @@ components:
         description:
           type: string
         targets:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionTarget'
+          $ref: '#/components/schemas/ExecutionTargets'
         session:
           $ref: '#/components/schemas/Session'
         startDate:
@@ -10984,6 +10993,13 @@ components:
           type: array
           items:
             type: string
+    ExecutionTargets:
+      type: object
+      properties:
+        instances:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionTarget'
     Session:
       required:
       - state
@@ -11081,9 +11097,7 @@ components:
           additionalProperties:
             type: object
         validationErrors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ValidationError'
+          $ref: '#/components/schemas/ValidationResults'
         definition:
           $ref: '#/components/schemas/AssistantDefinition'
     AssistantSchedule:
@@ -11124,6 +11138,8 @@ components:
         showTasks:
           type: boolean
         showThumbnails:
+          type: boolean
+        hasImage:
           type: boolean
         projectTemplate:
           $ref: '#/components/schemas/ProjectTemplateMetadata'
@@ -11175,6 +11191,13 @@ components:
             $ref: '#/components/schemas/Project'
         ref:
           type: string
+    ValidationResults:
+      type: object
+      properties:
+        instances:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
     Workflow:
       type: object
       properties:
@@ -11587,10 +11610,8 @@ components:
           type: string
         token:
           type: string
-        steps:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExecutionStep'
+        pipeline:
+          $ref: '#/components/schemas/ExecutionPipeline'
         assistant:
           $ref: '#/components/schemas/AssistantExecution'
         modelTrain:
@@ -11789,9 +11810,9 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
-        paged:
-          type: boolean
         unpaged:
+          type: boolean
+        paged:
           type: boolean
         pageNumber:
           type: integer
@@ -11804,9 +11825,9 @@ components:
       properties:
         empty:
           type: boolean
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
     PageTeam:
       type: object
