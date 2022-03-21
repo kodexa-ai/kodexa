@@ -18,15 +18,14 @@ from typing import Type, Optional, List
 
 import requests
 from functional import seq
-from pydantic import BaseModel
-
 from kodexa.model import Store, Taxonomy, Document
 from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, Dashboard, ProjectTemplate
+    PageDataObject, Assistant, Dashboard, ProjectTemplate, PageModelRuntime
+from pydantic import BaseModel
 
 logger = logging.getLogger()
 
@@ -36,15 +35,30 @@ logger = logging.getLogger()
 #
 # These wrap the objects from the model and provide a simple interface to the platform that is easier to use
 
+class OrganizationOwned(BaseModel):
+    
+    organization: Optional["OrganizationEndpoint"] = None
 
-class ComponentEndpoint:
-    """
-    Represents a re-usable endpoint for a component (stores, taxonomies etc)
-    """
+    def set_organization(self, organization):
+        self.organization = organization
+        return self
 
-    def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint"):
-        self.client: "KodexaClient" = client
-        self.organization: "OrganizationEndpoint" = organization
+
+class ClientEndpoint(BaseModel):
+    client: Optional["KodexaClient"] = None
+
+    def set_client(self, client):
+        self.client = client
+        return self
+
+    def to_dict(self):
+        return json.loads(self.json(exclude={'client'}, by_alias=True))
+
+    def detach(self):
+        return self.copy(exclude={'client'})
+
+
+class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
 
     def get_type(self) -> str:
         pass
@@ -55,6 +69,10 @@ class ComponentEndpoint:
     def get_page_class(self) -> Type[BaseModel]:
         pass
 
+    def reindex(self):
+        url = f"/api/{self.get_type()}/_reindex"
+        self.client.post(url)
+
     def find_by_slug(self, slug) -> Optional[Type[BaseModel]]:
         component_page = self.list(filters=["slug=" + slug])
         if component_page.empty:
@@ -62,7 +80,7 @@ class ComponentEndpoint:
         else:
             return component_page.content[0]
 
-    def list(self, query="*", page=1, pagesize=10, sort=None):
+    def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}/{self.organization.slug}"
 
         params = {"query": query,
@@ -72,10 +90,18 @@ class ComponentEndpoint:
         if sort is not None:
             params["sort"] = sort
 
+        if filters is not None:
+            params["filters"] = filters
+
         list_response = self.client.get(url, params=params)
         return self.get_page_class().parse_obj(list_response.json())
 
-    def get(self, slug, version=None):
+    def create(self, component):
+        url = f"/api/{self.get_type()}/{self.organization.slug}/"
+        get_response = self.client.post(url, component.to_dict())
+        return self.get_instance_class().parse_obj(get_response.json())
+
+    def get_by_slug(self, slug, version=None):
         url = f"/api/{self.get_type()}/{self.organization.slug}/{slug}"
         if version is not None:
             url += f"/{version}"
@@ -96,10 +122,10 @@ class OrganizationsEndpoint:
         url = f'/api/organizations/_reindex'
         self.client.post(url)
 
-    def create(self, organization: Organization) -> Organization:
+    def create(self, organization: Organization) -> "OrganizationEndpoint":
         url = f"/api/organizations"
         create_response = self.client.post(url, body=json.loads(organization.json(by_alias=True)))
-        return Organization.parse_obj(create_response.json())
+        return OrganizationEndpoint.parse_obj(create_response.json()).set_client(self.client)
 
     def find_by_slug(self, slug) -> Optional["OrganizationEndpoint"]:
         organizations = self.list(filters=["slug=" + slug])
@@ -132,17 +158,6 @@ class OrganizationsEndpoint:
         url = f"/api/organizations/{organization_id}"
         get_response = self.client.get(url)
         return OrganizationEndpoint.parse_obj(**get_response.json()).set_client(self.client)
-
-
-class ClientEndpoint(BaseModel):
-    client: Optional["KodexaClient"] = None
-
-    def set_client(self, client):
-        self.client = client
-        return self
-
-    def to_dict(self):
-        return json.loads(self.json(exclude={'client'}, by_alias=True))
 
 
 class PageEndpoint(ClientEndpoint):
@@ -236,7 +251,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
 
     def deploy(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
-        response = self.client.post(url, body=self.to_dict())
+        response = self.client.post(url, body=component.to_dict())
         return self.client.deserialize(response.json())
 
     def model_runtimes(self, query="*", page=1, pagesize=10, sort=None):
@@ -260,22 +275,18 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
                                            "sort": sort})
         return PageCredentialEndpoint.parse_obj(response.json()).set_client(self.client)
 
-    def stores(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/stores/{self.slug}"
-        stores_response = self.client.get(url,
-                                          params={"query": query, "page": page, "pageSize": pagesize, "sort": sort})
-        return PageStoreEndpoint.parse_obj(stores_response.json()).set_client(self.client)
+    @property
+    def stores(self):
+        return StoresEndpoint().set_client(self.client).set_organization(self)
 
     def get_store(self, slug, version=None):
         url = f"/api/stores/{self.slug}/{slug}{'/' + version if version else ''}"
         stores_response = self.client.get(url)
         return PageStoreEndpoint.parse_obj(stores_response.json()).set_client(self.client)
 
-    def taxonomies(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/taxonomies/{self.slug}"
-        stores_response = self.client.get(url,
-                                          params={"query": query, "page": page, "pageSize": pagesize, "sort": sort})
-        return PageTaxonomyEndpoint.parse_obj(stores_response.json()).set_client(self.client)
+    @property
+    def taxonomies(self):
+        return TaxonomiesEndpoint().set_client(self.client).set_organization(self)
 
 
 class ComponentsEndpoint(ClientEndpoint):
@@ -298,7 +309,7 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
         if exists:
             raise Exception("Can't create as it already exists")
         else:
-            url = f"/api/{self.get_type()}"
+            url = f"/api/{self.get_type()}/{self.org_slug}"
             self.client.post(url, self.to_dict())
 
     def update(self):
@@ -439,7 +450,8 @@ class ProjectsEndpoint:
         else:
             params = None
 
-        create_response = self.client.post(url, body=json.loads(project.json(by_alias=True)), params=params)
+        create_response = self.client.post(url, body=json.loads(project.json(exclude={'client'}, by_alias=True)),
+                                           params=params)
         return ProjectEndpoint.parse_obj(create_response.json()).set_client(self.client)
 
     def delete(self, id: str) -> None:
@@ -447,12 +459,26 @@ class ProjectsEndpoint:
         self.client.delete(url)
 
 
-class StoresEndpoint(ComponentEndpoint):
+class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "stores"
 
     def get_page_class(self) -> Type[BaseModel]:
         return PageStore
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return Store
+
+
+class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    def get_type(self) -> str:
+        return "modelRuntimes"
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageModelRuntime
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return ModelRuntime
 
 
 class ProjectTemplateEndpoint(ComponentInstanceEndpoint, ProjectTemplate):
@@ -842,6 +868,20 @@ class DocumentStoreEndpoint(StoreEndpoint):
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": object_path})
 
+    def import_family(self, file_path: str):
+        if Path(file_path).is_file():
+            logger.info(f"Uploading {file_path}")
+            with open(file_path, 'rb') as dfm_content:
+                files = {"familyZip": dfm_content}
+                content_object_response = self.client.post(
+                    f"/api/stores/{self.ref.replace(':', '/')}/families",
+                    params={'import': 'true'},
+                    files=files)
+                logger.info(f"Uploaded ({content_object_response.status_code})")
+                return DocumentFamilyEndpoint.parse_obj(content_object_response.json()).set_client(self.client)
+        else:
+            raise Exception(f"{file_path} is not a file")
+
     def upload_file(self, file_path: str, object_path: Optional[str] = None, replace=False):
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
@@ -1048,7 +1088,8 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         return paths
 
 
-class TaxonomiesEndpoint(ComponentEndpoint):
+class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+
     def get_type(self) -> str:
         return "taxonomies"
 
