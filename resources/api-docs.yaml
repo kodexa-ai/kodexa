@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 5.0.98
+  version: 5.0.132
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
@@ -6213,6 +6213,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/Project'
   /api/projects/{id}/taxonomies:
+    get:
+      tags:
+      - Projects
+      description: Get a list of the taxonomies (type classification) associated with
+        this project
+      operationId: getTaxonomies
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Taxonomy'
     post:
       tags:
       - Projects
@@ -10690,13 +10711,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
-        label:
-          type: string
-          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
+        label:
+          type: string
+          writeOnly: true
     DataLineage:
       type: object
       properties:
@@ -10867,8 +10888,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContentObject'
-        documentFamily:
-          $ref: '#/components/schemas/DocumentFamily'
     ExecutionPipeline:
       type: object
       properties:
