@@ -24,7 +24,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, Dashboard, ProjectTemplate, PageModelRuntime
+    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime
 from pydantic import BaseModel
 
 logger = logging.getLogger()
@@ -36,7 +36,6 @@ logger = logging.getLogger()
 # These wrap the objects from the model and provide a simple interface to the platform that is easier to use
 
 class OrganizationOwned(BaseModel):
-    
     organization: Optional["OrganizationEndpoint"] = None
 
     def set_organization(self, organization):
@@ -372,28 +371,114 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         self.client.put(url)
 
 
+class ProjectAssistantsEndpoint(ComponentEndpoint):
+    project: ProjectEndpoint
+
+    def set_project(self, project: ProjectEndpoint):
+        self.project = project
+        return self
+
+    def get_type(self) -> str:
+        return f"projects/{projectId}/assistants"
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return AssistantEndpoint
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageAssistant
+
+
+class ProjectDocumentStoresEndpoint(ComponentEndpoint):
+    project: ProjectEndpoint
+
+    def set_project(self, project: ProjectEndpoint):
+        self.project = project
+        return self
+
+    def get_type(self) -> str:
+        return f"projects/{self.project.id}/documentStores"
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return DocumentStoreEndpoint
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageDocumentStore
+
+
+class ProjectTaxonomiesEndpoint(ComponentEndpoint):
+    project: ProjectEndpoint
+
+    def set_project(self, project: ProjectEndpoint):
+        self.project = project
+        return self
+
+    def get_type(self) -> str:
+        return f"projects/{self.project.id}/taxonomies"
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return TaxonomyEndpoint
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageTaxonomy
+
+
+class ProjectDataStoresEndpoint(ComponentEndpoint):
+    project: ProjectEndpoint
+
+    def set_project(self, project: ProjectEndpoint):
+        self.project = project
+        return self
+
+    def get_type(self) -> str:
+        return f"projects/{self.project.id}/dataStores"
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return DataStoreEndpoint
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageDataStore
+
+
+class ProjectModelStoresEndpoint(ComponentEndpoint):
+    project: ProjectEndpoint
+
+    def set_project(self, project: ProjectEndpoint):
+        self.project = project
+        return self
+
+    def get_type(self) -> str:
+        return f"projects/{self.project.id}/modelStores"
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return DataStoreEndpoint
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageDataStore
+
+
 class ProjectEndpoint(EntityEndpoint, Project):
 
     def get_type(self) -> str:
         return "projects"
 
-    def _get_resource(self, resource_type: str) -> List[ComponentInstanceEndpoint]:
-        url = f"/api/projects/{self.id}/{resource_type}"
-        response = self.client.get(url)
-        return [self.client.deserialize(store) for store in response.json()]
+    @property
+    def document_stores(self) -> ProjectDocumentStoresEndpoint:
+        return ProjectDocumentStoresEndpoint().set_client(self.client).set_project(self)
 
-    def stores(self, store_type=None, store_purpose=None) -> List[ComponentInstanceEndpoint]:
-        return (seq(self._get_resource("stores"))
-                .filter(lambda store: store_type is None or store.store_type == store_type)
-                .filter(lambda store: store_type is None or store.store_purpose == store_purpose).to_list())
+    @property
+    def data_stores(self) -> ProjectDataStoresEndpoint:
+        return ProjectDataStoresEndpoint().set_client(self.client).set_project(self)
 
-    def taxonomies(self) -> List["TaxonomyEndpoint"]:
-        return self._get_resource("taxonomies")
+    @property
+    def model_stores(self) -> ProjectModelStoresEndpoint:
+        return ProjectModelStoresEndpoint().set_client(self.client).set_project(self)
 
-    def dashboards(self) -> List[Dashboard]:
-        return self._get_resource("dashboards")
+    @property
+    def taxonomies(self) -> ProjectTaxonomiesEndpoint:
+        return ProjectTaxonomiesEndpoint().set_client(self.client).set_project(self)
 
-    def assistants(self):
+    @property
+    def assistants(self) -> ProjectAssistantsEndpoint:
         url = f"/api/projects/{self.id}/assistants"
         response = self.client.get(url)
         return [AssistantEndpoint.parse_obj(assistant).set_client(self.client) for assistant in response.json()]
