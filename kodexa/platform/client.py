@@ -57,6 +57,41 @@ class ClientEndpoint(BaseModel):
         return self.copy(exclude={'client'})
 
 
+class ProjectResourceEndpoint(ClientEndpoint):
+    project: Optional["ProjectEndpoint"]
+
+    def set_project(self, project: "ProjectEndpoint"):
+        self.project = project
+        return self
+
+    def get_type(self) -> str:
+        pass
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        pass
+
+    def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
+        url = f"/api/projects/{self.project.id}/{self.get_type()}"
+
+        params = {"query": query,
+                  "page": page,
+                  "pageSize": pagesize}
+
+        if sort is not None:
+            params["sort"] = sort
+
+        if filters is not None:
+            params["filters"] = filters
+
+        list_response = self.client.get(url, params=params)
+        return [self.get_instance_class().parse_obj(item).set_client(self.client) for item in list_response.json()]
+
+    def create(self, component):
+        url = f"/api/projects/{self.project.id}/{self.get_type()}"
+        get_response = self.client.post(url, component.to_dict())
+        return self.get_instance_class().parse_obj(get_response.json())
+
+
 class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
 
     def get_type(self) -> str:
@@ -371,89 +406,49 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         self.client.put(url)
 
 
-class ProjectAssistantsEndpoint(ComponentEndpoint):
-    project: ProjectEndpoint
-
-    def set_project(self, project: ProjectEndpoint):
-        self.project = project
-        return self
+class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
 
     def get_type(self) -> str:
-        return f"projects/{projectId}/assistants"
+        return f"assistants"
 
     def get_instance_class(self) -> Type[BaseModel]:
         return AssistantEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
-        return PageAssistant
 
-
-class ProjectDocumentStoresEndpoint(ComponentEndpoint):
-    project: ProjectEndpoint
-
-    def set_project(self, project: ProjectEndpoint):
-        self.project = project
-        return self
+class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
 
     def get_type(self) -> str:
-        return f"projects/{self.project.id}/documentStores"
+        return f"documentStores"
 
     def get_instance_class(self) -> Type[BaseModel]:
         return DocumentStoreEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
-        return PageDocumentStore
 
-
-class ProjectTaxonomiesEndpoint(ComponentEndpoint):
-    project: ProjectEndpoint
-
-    def set_project(self, project: ProjectEndpoint):
-        self.project = project
-        return self
+class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
 
     def get_type(self) -> str:
-        return f"projects/{self.project.id}/taxonomies"
+        return f"taxonomies"
 
     def get_instance_class(self) -> Type[BaseModel]:
         return TaxonomyEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
-        return PageTaxonomy
 
-
-class ProjectDataStoresEndpoint(ComponentEndpoint):
-    project: ProjectEndpoint
-
-    def set_project(self, project: ProjectEndpoint):
-        self.project = project
-        return self
+class ProjectDataStoresEndpoint(ProjectResourceEndpoint):
 
     def get_type(self) -> str:
-        return f"projects/{self.project.id}/dataStores"
+        return f"dataStores"
 
     def get_instance_class(self) -> Type[BaseModel]:
         return DataStoreEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
-        return PageDataStore
 
-
-class ProjectModelStoresEndpoint(ComponentEndpoint):
-    project: ProjectEndpoint
-
-    def set_project(self, project: ProjectEndpoint):
-        self.project = project
-        return self
+class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
 
     def get_type(self) -> str:
-        return f"projects/{self.project.id}/modelStores"
+        return f"modelStores"
 
     def get_instance_class(self) -> Type[BaseModel]:
         return DataStoreEndpoint
-
-    def get_page_class(self) -> Type[BaseModel]:
-        return PageDataStore
 
 
 class ProjectEndpoint(EntityEndpoint, Project):
