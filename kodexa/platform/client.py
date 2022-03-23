@@ -797,6 +797,7 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
         if self.metadata:
             # We need to determine in the subclass if we wil be uploading the
             # contents
+            self.update_metadata()
             return self.upload_contents(self.metadata)
         return []
 
