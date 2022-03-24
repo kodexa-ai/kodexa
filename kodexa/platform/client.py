@@ -18,6 +18,8 @@ from typing import Type, Optional, List
 
 import requests
 from functional import seq
+from pydantic import BaseModel
+
 from kodexa.model import Store, Taxonomy, Document
 from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
@@ -25,7 +27,6 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageModelRuntime
-from pydantic import BaseModel
 
 logger = logging.getLogger()
 
@@ -787,7 +788,8 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
         self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/_reindex")
 
     def update_metadata(self):
-        self.client.put(f"/api/stores/{self.ref.replace(':', '/')}/metadata", body=json.loads(self.metadata.json()))
+        self.client.put(f"/api/stores/{self.ref.replace(':', '/')}/metadata",
+                        body=json.loads(self.metadata.json(by_alias=True)))
 
     def get_metadata(self):
         metadata_response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/metadata")
