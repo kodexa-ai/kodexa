@@ -15,3 +15,4 @@ default.profraw
 
 kodexa.egg-info/
 .openapigenerator
+/kodexa.iml

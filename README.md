@@ -3,7 +3,7 @@
 ![Build](https://github.com/kodexa-ai/kodexa/workflows/Python%20Package%20Using%20Anaconda/badge.svg)
 
 
-The Kodexa Content Framework framework is designed to allow you to work with a wide range of unstructured and semi-structured content and enables you to work with the Kodexa Platform (https://platform.kodexa.com).
+Kodexa is designed to allow you to work with a wide range of unstructured and semi-structured content and enables you to work with the Kodexa Platform (https://platform.kodexa.com).
 
 ## Documentation & Examples
 
@@ -13,9 +13,7 @@ For more information on how to use Kodexa see https://developer.kodexa.com/
 
 ## Current Development
 
-The current stable version of Kodexa is available in the release-3.3 branch.
-
-The main branch is 4.0.0 which is under development and considered an beta version.
+The current stable version of Kodexa is available in the releases/4.0 branch.
 
 ## Set-up
 
@@ -27,14 +25,6 @@ Activate the conda environment with the command:
 
     conda activate kodexa
     pip install -r requirements.txt
-
-## Building Client and Selector ANTLR
-
-Currently, the build of the OpenAPI client and ANTLR grammar require the tools to be installed on your
-path.
-
-    $ brew install openapi-generator
-    $ brew install antlr
 
 ## License
 
