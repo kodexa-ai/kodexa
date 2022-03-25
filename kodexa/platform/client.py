@@ -738,7 +738,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             raise Exception(f"Document family {self.id} does not exist")
 
     def get_native(self) -> Document:
-        hits = list(filter(lambda content_object: content_object.content_type == ContentType.native, self.content_objects))
+        hits = list(filter(lambda content_object: content_object.content_type == 'NATIVE', self.content_objects))
         if len(hits) == 0:
             raise Exception(f"No native content object found on document family {self.id}")
 
