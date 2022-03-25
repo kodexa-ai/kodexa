@@ -1214,7 +1214,8 @@ class ContentNode(object):
 
         value_strings = []
         for k in value_groups.keys():
-            value_strings.append(value_separator.join(value_groups[k]))
+            if value_groups[k] and len(value_groups[k]) > 0 and value_groups[k][0] is not None:
+                value_strings.append(value_separator.join(value_groups[k]))
 
         return value_strings
 
@@ -1227,7 +1228,7 @@ class ContentNode(object):
           tag_uuid (optional(str)): if set we will only get nodes related to this tag UUID
 
         Returns:
-          a list of the tag content nodes
+          a dictionary that groups nodes by tag UUID
 
         """
         if include_children:
