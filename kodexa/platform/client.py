@@ -26,7 +26,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime
+    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime, ContentType
 
 logger = logging.getLogger()
 
@@ -736,6 +736,15 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             self.client.delete(url)
         else:
             raise Exception(f"Document family {self.id} does not exist")
+
+    def get_native(self) -> Document:
+        hits = filter(lambda content_object: content_object.content_type == ContentType.native, self.content_objects)
+        if len(hits) == 0:
+            raise Exception(f"No native content object found on document family {self.id}")
+
+        get_response = self.client.get(
+            f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{hits[0].id}/content")
+        return get_response.content
 
     def get_document(self, content_object: Optional[ContentObject] = None) -> Document:
         if content_object is None:
