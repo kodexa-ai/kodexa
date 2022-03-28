@@ -28,3 +28,4 @@ better-exceptions
 boto3==1.21.8
 awslambdaric
 pyfunctional
+pydantic_yaml

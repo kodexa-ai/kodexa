@@ -1,0 +1,30 @@
+version: 5
+changes:
+  - name: Baseline
+    id: baseline
+    sql:
+      - CREATE TABLE `kdxa_document` (
+        `metadata` text NOT NULL
+        )
+      - CREATE TABLE `kdxa_content_nodes` (
+        `id` integer primary key,
+        `parent_id` int(11) DEFAULT NULL,
+        `node_type` varchar(255)
+        )
+      - CREATE TABLE `kdxa_content_parts` (
+        `id` integer primary key,
+        `content_node_id` int(11),
+        `string_value` text DEFAULT NULL,
+        `int_value` int(11) DEFAULT NULL
+        )
+      - CREATE TABLE `kdxa_content_node_feature` (
+        `id` integer primary key,
+        `content_node_id` int(11),
+        `feature_id` int(11)
+        )
+      - CREATE TABLE `kdxa_content_feature` (
+        `id` integer primary key,
+        `feature_type` varchar(255),
+        `feature_name` varchar(255),
+        `feature_class` varchar(255)
+        )
