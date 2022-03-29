@@ -1184,18 +1184,22 @@ class ContentNode(object):
 
         """
 
-        def group_tag_values(group_dict, feature_val, tag_uuid):
+        def group_tag_values(group_dict, feature_val, tag_uuid, tag_node):
             # we know the names of all these tags are the same, but we want to group them if they share the same uuid
 
             if feature_val['uuid'] != tag_uuid:
                 return
 
+            final_value = feature_val['value']
+            if final_value is None:
+                final_value = tag_node.content
+
             if feature_val['uuid'] in value_groups.keys():
                 # we've seen this UUID - add it's value to the group
-                group_dict[feature_val['uuid']].append(feature_val['value'])
+                group_dict[feature_val['uuid']].append(final_value)
             else:
                 # first occurrence
-                group_dict[feature_val['uuid']] = [feature_val['value']]
+                group_dict[feature_val['uuid']] = [final_value]
 
         if include_children:
             tagged_nodes = self.select('//*[hasTag("' + tag_name + '")]')
@@ -1210,7 +1214,7 @@ class ContentNode(object):
                     tag_feature_vals = [tag_feature_vals]
 
                 for v in tag_feature_vals:
-                    group_tag_values(value_groups, v, tag_uuid)
+                    group_tag_values(value_groups, v, tag_uuid, tag_node)
 
         value_strings = []
         for k in value_groups.keys():
