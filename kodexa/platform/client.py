@@ -475,10 +475,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
 
     @property
     def assistants(self) -> ProjectAssistantsEndpoint:
-        url = f"/api/projects/{self.id}/assistants"
-        response = self.client.get(url)
-        return [AssistantEndpoint.parse_obj(assistant).set_client(self.client) for assistant in response.json()]
-
+        return ProjectAssistantsEndpoint().set_client(self.client).set_project(self)
 
 class ProjectsEndpoint:
 
