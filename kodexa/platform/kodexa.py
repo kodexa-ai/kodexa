@@ -153,11 +153,10 @@ DEFAULT_COLUMNS = {
         'assistants'
     ],
     'assistants': [
-        'id',
+        'ref',
         'name',
         'description',
-        'active',
-        'schedules.nextEvent'
+        'template'
     ],
     'executions': [
         'id',
