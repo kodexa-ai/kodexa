@@ -68,7 +68,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def get_type(self) -> str:
         pass
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self) -> Type[ClientEndpoint]:
         pass
 
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
@@ -90,7 +90,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def create(self, component):
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
         get_response = self.client.post(url, component.to_dict())
-        return self.get_instance_class().parse_obj(get_response.json())
+        return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
 
 
 class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
