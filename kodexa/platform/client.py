@@ -26,7 +26,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime, ContentType
+    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime
 
 logger = logging.getLogger()
 
@@ -406,6 +406,21 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/schedule"
         self.client.put(url)
 
+    def set_stores(self, stores: List["DocumentStoreEndpoint"]):
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/stores"
+        self.client.put(url, body=[store.to_dict() for store in stores])
+        return self
+
+    def get_stores(self) -> List["DocumentStoreEndpoint"]:
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/stores"
+        response = self.client.get(url)
+        return [DocumentStoreEndpoint.parse_obj(store).set_client(self.client) for store in response.json()]
+
+    def executions(self) -> List["Execution"]:
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/executions"
+        response = self.client.get(url)
+        return [Execution.parse_obj(execution) for execution in response.json()]
+
 
 class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
 
@@ -476,6 +491,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
     @property
     def assistants(self) -> ProjectAssistantsEndpoint:
         return ProjectAssistantsEndpoint().set_client(self.client).set_project(self)
+
 
 class ProjectsEndpoint:
 
