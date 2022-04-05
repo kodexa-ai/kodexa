@@ -26,7 +26,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime, ContentType
+    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime, DeploymentOptions
 
 logger = logging.getLogger()
 
@@ -597,6 +597,14 @@ class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
     def get_type(self) -> str:
         return "extensionPacks"
 
+    def deploy_pack(self, deployment_options: DeploymentOptions) -> None:
+        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}/_deploy"
+        self.client.put(url, body=json.loads(deployment_options.json(by_alias=True)))
+
+    def undeploy_pack(self) -> None:
+        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}/_undeploy"
+        self.client.put(url)
+
 
 class ActionEndpoint(ComponentInstanceEndpoint, Action):
 
@@ -737,7 +745,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         else:
             raise Exception(f"Document family {self.id} does not exist")
 
-    def get_native(self) -> Document:
+    def get_native(self):
         hits = list(filter(lambda content_object: content_object.content_type == 'NATIVE', self.content_objects))
         if len(hits) == 0:
             raise Exception(f"No native content object found on document family {self.id}")
