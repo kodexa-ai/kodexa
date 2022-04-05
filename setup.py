@@ -45,7 +45,8 @@ setup(name='kodexa',
           'tblib',
           'simpleeval',
           'pyfunctional',
-          'bbox'
+          'bbox',
+          'pydantic_yaml'
       ],
       entry_points="""
         [console_scripts]

@@ -68,7 +68,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def get_type(self) -> str:
         pass
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self) -> Type[ClientEndpoint]:
         pass
 
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
@@ -90,7 +90,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def create(self, component):
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
         get_response = self.client.post(url, component.to_dict())
-        return self.get_instance_class().parse_obj(get_response.json())
+        return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
 
 
 class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
@@ -406,6 +406,21 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/schedule"
         self.client.put(url)
 
+    def set_stores(self, stores: List["DocumentStoreEndpoint"]):
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/stores"
+        self.client.put(url, body=[store.to_dict() for store in stores])
+        return self
+
+    def get_stores(self) -> List["DocumentStoreEndpoint"]:
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/stores"
+        response = self.client.get(url)
+        return [DocumentStoreEndpoint.parse_obj(store).set_client(self.client) for store in response.json()]
+
+    def executions(self) -> List["Execution"]:
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/executions"
+        response = self.client.get(url)
+        return [Execution.parse_obj(execution) for execution in response.json()]
+
 
 class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
 
@@ -475,9 +490,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
 
     @property
     def assistants(self) -> ProjectAssistantsEndpoint:
-        url = f"/api/projects/{self.id}/assistants"
-        response = self.client.get(url)
-        return [AssistantEndpoint.parse_obj(assistant).set_client(self.client) for assistant in response.json()]
+        return ProjectAssistantsEndpoint().set_client(self.client).set_project(self)
 
 
 class ProjectsEndpoint:
@@ -596,14 +609,6 @@ class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
 
     def get_type(self) -> str:
         return "extensionPacks"
-
-    def deploy_pack(self, deployment_options: DeploymentOptions) -> None:
-        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}/_deploy"
-        self.client.put(url, body=json.loads(deployment_options.json(by_alias=True)))
-
-    def undeploy_pack(self) -> None:
-        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}/_undeploy"
-        self.client.put(url)
 
 
 class ActionEndpoint(ComponentInstanceEndpoint, Action):
@@ -745,7 +750,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         else:
             raise Exception(f"Document family {self.id} does not exist")
 
-    def get_native(self):
+    def get_native(self) -> Document:
         hits = list(filter(lambda content_object: content_object.content_type == 'NATIVE', self.content_objects))
         if len(hits) == 0:
             raise Exception(f"No native content object found on document family {self.id}")
