@@ -1190,7 +1190,7 @@ class ContentNode(object):
             if feature_val['uuid'] != tag_uuid:
                 return
 
-            final_value = feature_val['value']
+            final_value = feature_val['value'] if 'value' in feature_val else None
             if final_value is None:
                 final_value = tag_node.content
 
