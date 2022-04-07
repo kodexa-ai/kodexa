@@ -58,7 +58,7 @@ class LocalDocumentStore(DocumentStore):
             kwargs['name'] = 'Local Document Store'
         if 'store_ref' not in kwargs:
             kwargs['store_ref'] = 'local/local'
-        super().__init__()
+        super().__init__(**kwargs)
 
         if self.store_path is None:
             from kodexa import KodexaPlatform
