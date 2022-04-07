@@ -26,7 +26,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime, DeploymentOptions
+    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime, PageExtensionPack
 
 logger = logging.getLogger()
 
@@ -229,6 +229,10 @@ class PageModelRuntimeEndpoint(PageStore, PageEndpoint):
     pass
 
 
+class PageExtensionPackEndpoint(PageExtensionPack, PageEndpoint):
+    pass
+
+
 class PageAssistantDefinitionEndpoint(PageAssistantDefinition, PageEndpoint):
     pass
 
@@ -281,6 +285,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
     def get_type(self) -> str:
         return "organizations"
 
+    @property
     def projects(self) -> PageProject:
         return ProjectsEndpoint(self.client, self).find_by_organization(self)
 
@@ -289,6 +294,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         response = self.client.post(url, body=component.to_dict())
         return self.client.deserialize(response.json())
 
+    @property
     def model_runtimes(self, query="*", page=1, pagesize=10, sort=None):
         url = f"/api/modelRuntimes/{self.slug}"
         model_runtimes_response = self.client.get(url,
@@ -296,6 +302,15 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
                                                           "sort": sort})
         return PageModelRuntimeEndpoint.parse_obj(model_runtimes_response.json()).set_client(self.client)
 
+    @property
+    def extension_packs(self, query="*", page=1, pagesize=10, sort=None):
+        url = f"/api/extensionPacks/{self.slug}"
+        extension_packs_response = self.client.get(url,
+                                                   params={"query": query, "page": page, "pageSize": pagesize,
+                                                           "sort": sort})
+        return PageExtensionPackEndpoint.parse_obj(extension_packs_response.json()).set_client(self.client)
+
+    @property
     def project_templates(self, query="*", page=1, pagesize=10, sort=None):
         url = f"/api/projectTemplates/{self.slug}"
         response = self.client.get(url,
@@ -303,6 +318,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
                                            "sort": sort})
         return PageProjectTemplateEndpoint.parse_obj(response.json()).set_client(self.client)
 
+    @property
     def credentials(self, query="*", page=1, pagesize=10, sort=None):
         url = f"/api/projectTemplates/{self.slug}"
         response = self.client.get(url,
