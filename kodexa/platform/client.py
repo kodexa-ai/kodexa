@@ -1451,7 +1451,8 @@ class KodexaClient:
                 "action": ActionEndpoint,
                 "credential": CredentialEndpoint,
                 "projectTemplate": ProjectTemplateEndpoint,
-                "modelRuntime": ModelRuntimeEndpoint
+                "modelRuntime": ModelRuntimeEndpoint,
+                "extensionPack": ExtensionPackEndpoint
             }
 
             if component_type in known_components:
