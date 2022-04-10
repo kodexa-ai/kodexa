@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import inspect
 import logging
-import os
 import sys
 import time
 import traceback
@@ -20,7 +19,7 @@ from kodexa.connectors.connectors import get_caller_dir, DocumentStoreConnector
 from kodexa.model import Document, Store, ContentObject
 from kodexa.stores.stores import DocumentStore
 
-logger = logging.getLogger('kodexa.pipeline')
+logger = logging.getLogger()
 
 
 def new_id():
@@ -113,7 +112,8 @@ class PipelineContext:
 
     def __init__(self, content_provider=None, store_provider=None,
                  existing_content_objects=None,
-                 context=None, execution_id=None):
+                 context=None, execution_id=None,
+                 status_handler=None, cancellation_handler=None):
         if content_provider is None:
             content_provider = InMemoryContentProvider()
         if store_provider is None:
@@ -135,6 +135,18 @@ class PipelineContext:
         self.document_family = None
         self.content_object = None
         self.document_store = None
+        self.status_handler = status_handler
+        self.cancellation_handler = cancellation_handler
+
+    def update_status(self, status_message: str, status_full_message: Optional[str] = None):
+        if self.status_handler is not None:
+            self.status_handler(status_message, status_full_message)
+
+    def is_cancelled(self) -> bool:
+        if self.cancellation_handler is not None:
+            return self.cancellation_handler()
+        else:
+            return False
 
     def get_context(self) -> Dict:
         """ """
@@ -275,15 +287,13 @@ class PipelineStep:
     It is internally used by the Pipeline and is not a public API
     """
 
-    def __init__(self, step, enabled=False, name=None, options=None, attach_source=False,
-                 parameterized=False, step_type='ACTION'):
+    def __init__(self, step, name=None, options=None, attach_source=False,
+                 step_type='ACTION'):
         if options is None:
             options = {}
         self.step = step
         self.name = name
-        self.enabled = enabled
         self.options = options
-        self.parameterized = parameterized
         self.step_type = step_type
 
         if str(type(self.step)) == "<class 'type'>":
@@ -294,8 +304,8 @@ class PipelineStep:
             self.name = step.__name__
         elif isinstance(self.step, str):
             logger.info(f"Adding new remote step {step} to pipeline")
-            from kodexa import RemoteAction
-            self.step = RemoteAction(step, options=options, attach_source=attach_source)
+            from kodexa import RemoteStep
+            self.step = RemoteStep(step, step_type=step_type, options=options, attach_source=attach_source)
         else:
             logger.info(f"Adding new step {type(step)} to pipeline")
 
@@ -318,8 +328,6 @@ class PipelineStep:
                 metadata = self.step.to_dict()
 
             metadata['name'] = self.name
-            metadata['parameterized'] = self.parameterized
-            metadata['enabled'] = self.enabled
             metadata['stepType'] = self.step_type
             return metadata
         except AttributeError as e:
@@ -328,88 +336,54 @@ class PipelineStep:
     def execute(self, context, document):
 
         start = time.perf_counter()
-        if self.enabled:
-            try:
-
-                context.set_current_document(document)
-                logger.info(f"Starting step")
-                if str(type(self.step)) == "<class 'type'>":
-
-                    logger.info(f"Starting step based on class {self.step}")
-
-                    # We need to handle the parameterization
-                    import copy
-
-                    option_copy = copy.deepcopy(self.options)
-                    if self.parameterized:
-                        import collections
-
-                        def replace_params(opts, params):
-
-                            if isinstance(opts, dict):
-                                for key, val in opts.items():
-                                    opts[key] = replace_params(val, params)
-                            elif isinstance(opts, list):
-                                new_list = []
-                                for list_val in opts:
-                                    new_list.append(replace_params(list_val, params))
-                                return new_list
-                            elif isinstance(opts, str):
-                                if opts.startswith('${') and opts.endswith('}'):
-                                    param_name = opts[2:-1]
-                                    if param_name in params:
-                                        return params[param_name]
-                                    else:
-                                        raise Exception("Unable to find parameter name " + param_name)
-
-                            return opts
-
-                        replace_params(option_copy, context.parameters)
-
-                    step_instance = self.step(**option_copy)
-                    if len(signature(step_instance.process).parameters) == 1:
-                        result_document = step_instance.process(document)
-                    else:
-                        result_document = step_instance.process(document, context)
-
-                elif not callable(self.step):
-                    logger.info(f"Starting step {type(self.step)}")
-
-                    if len(signature(self.step.process).parameters) == 1:
-                        result_document = self.step.process(document)
-                    else:
-                        result_document = self.step.process(document, context)
-                else:
-                    logger.info(f"Starting step function {self.step.__name__}")
-
-                    if len(signature(self.step).parameters) == 1:
-                        result_document = self.step(document)
-                    else:
-                        result_document = self.step(document, context)
-
-                end = time.perf_counter()
-                logger.info(f"Step completed (f{end - start:0.4f}s)")
-
-                return result_document
-            except:
-                logger.warning("Step failed")
-                tt, value, tb = sys.exc_info()
-                document.exceptions.append({
-                    "step": self.step.__name__ if callable(self.step) else type(self.step),
-                    "traceback": traceback.format_exception(tt, value, tb)
-                })
-                if context.stop_on_exception:
-                    raise
-                else:
-                    return document
-        else:
-            return document
-
-    def end_processing(self, context):
         try:
-            self.step.end_processing(context)
+
+            context.set_current_document(document)
+            logger.info(f"Starting step")
+            if str(type(self.step)) == "<class 'type'>":
+
+                logger.info(f"Starting step based on class {self.step}")
+
+                # We need to handle the parameterization
+                import copy
+
+                option_copy = copy.deepcopy(self.options)
+                step_instance = self.step(**option_copy)
+                if len(signature(step_instance.process).parameters) == 1:
+                    result_document = step_instance.process(document)
+                else:
+                    result_document = step_instance.process(document, context)
+
+            elif not callable(self.step):
+                logger.info(f"Starting step {type(self.step)}")
+
+                if len(signature(self.step.process).parameters) == 1:
+                    result_document = self.step.process(document)
+                else:
+                    result_document = self.step.process(document, context)
+            else:
+                logger.info(f"Starting step function {self.step.__name__}")
+
+                if len(signature(self.step).parameters) == 1:
+                    result_document = self.step(document)
+                else:
+                    result_document = self.step(document, context)
+
+            end = time.perf_counter()
+            logger.info(f"Step completed (f{end - start:0.4f}s)")
+
+            return result_document
         except:
-            pass
+            logger.warning("Step failed")
+            tt, value, tb = sys.exc_info()
+            document.exceptions.append({
+                "step": self.step.__name__ if callable(self.step) else type(self.step),
+                "traceback": traceback.format_exception(tt, value, tb)
+            })
+            if context.stop_on_exception:
+                raise
+            else:
+                return document
 
 
 class LabelStep(object):
@@ -418,10 +392,6 @@ class LabelStep(object):
     def __init__(self, label: str, remove=False):
         self.label = label
         self.remove = remove
-
-    def get_name(self):
-        """ """
-        return f"Remove label {self.label}" if self.remove else f"Add label {self.label}"
 
     def process(self, document: Document):
         """
@@ -512,16 +482,13 @@ class Pipeline:
         self.stores.append(PipelineStore(name, store, extracted_labelled))
         return self
 
-    def add_label(self, label: str, enabled=True, condition=None, options=None, attach_source=False,
-                  parameterized=False, cache_path=None):
+    def add_label(self, label: str, options=None, attach_source=False):
         """Adds a label to the document
 
         Args:
           label: label to add
-          enabled: is the step enabled (default True)
           options: options to be passed to the step if it is a simplified remote action (Default value = None)
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
-          parameterized: apply the pipeline's parameters to the options (Default value = False)
           label: str:
 
         Returns:
@@ -529,21 +496,18 @@ class Pipeline:
 
         """
         self.steps.append(
-            PipelineStep(step=LabelStep(label), name=f"Add label {label}", enabled=enabled,
+            PipelineStep(step=LabelStep(label), name=f"Add label {label}",
                          options=options,
-                         attach_source=attach_source, parameterized=parameterized))
+                         attach_source=attach_source))
         return self
 
-    def remove_label(self, label: str, enabled=True, options=None, attach_source=False,
-                     parameterized=False):
+    def remove_label(self, label: str, options=None, attach_source=False):
         """Adds a label to the document
 
         Args:
           label: label to remove
-          enabled: is the step enabled (default True)
           options: options to be passed to the step if it is a simplified remote action (Default value = None)
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
-          parameterized: apply the pipeline's parameters to the options (Default value = False)
           label: str: the label to add
 
         Returns:
@@ -551,13 +515,13 @@ class Pipeline:
 
         """
         self.steps.append(
-            PipelineStep(step=LabelStep(label, remove=True), name=f"Remove label {label}", enabled=enabled,
+            PipelineStep(step=LabelStep(label, remove=True), name=f"Remove label {label}",
                          options=options,
-                         attach_source=attach_source, parameterized=parameterized))
+                         attach_source=attach_source))
         return self
 
-    def add_step(self, step, name=None, enabled=True, options=None, attach_source=False,
-                 parameterized=False, step_type='ACTION'):
+    def add_step(self, step, name=None, options=None, attach_source=False,
+                 step_type='ACTION'):
         """Add the given step to the current pipeline
 
 
@@ -570,10 +534,8 @@ class Pipeline:
         Args:
           step: the step to add
           name: the name to use to describe the step (default None)
-          enabled: is the step enabled (default True)
           options: options to be passed to the step if it is a simplified remote action (Default value = None)
           attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
-          parameterized: apply the pipeline's parameters to the options (Default value = False)
           step_type: the type of step to add, can either be an ACTION or MODEL
         Returns:
           the instance of the pipeline
@@ -590,8 +552,8 @@ class Pipeline:
         """
         if options is None:
             options = {}
-        self.steps.append(PipelineStep(step=step, name=name, enabled=enabled, options=options,
-                                       attach_source=attach_source, parameterized=parameterized,
+        self.steps.append(PipelineStep(step=step, name=name, options=options,
+                                       attach_source=attach_source,
                                        step_type=step_type))
 
         return self
@@ -700,11 +662,6 @@ class Pipeline:
 
             else:
                 logger.warning("A step did not return a document?")
-
-        logger.info(f"Completing pipeline {self.name}")
-
-        for step in self.steps:
-            step.end_processing(self.context)
 
         logger.info(f"Completed pipeline {self.name}")
 

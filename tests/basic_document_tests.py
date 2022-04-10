@@ -40,6 +40,13 @@ def test_get_nodes_between():
     assert len(nodes) == 2
 
 
+def test_persistance_cache():
+    document = Document.from_text('The sun is very bright today.')
+    document.to_kddb()
+    document.get_root().tag('cheese')
+    assert document.from_kddb(document.to_kddb()).get_root().has_tags() is True
+
+
 def test_tag_nodes_between():
     document = get_test_document_with_three_children()
     document.content_node.get_children()[0].tag_nodes_to(document.content_node.get_children()[2], 'test-tag',

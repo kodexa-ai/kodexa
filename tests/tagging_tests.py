@@ -15,6 +15,17 @@ def test_fixed_tagging():
     assert doc.content_node.get_tag_values('name')[0] == 'Philip'
 
 
+def test_fixed_tagging_remove():
+    doc = Document.from_text("Hello Philip")
+    doc.content_node.tag('name', fixed_position=[6, 12])
+
+    assert doc.content_node.get_tag_values('name')[0] == 'Philip'
+
+    doc.content_node.remove_tag('name')
+
+    assert len(doc.content_node.get_tag_values('name')) == 0
+
+
 def test_fixed_tagging_with_child():
     doc = Document.from_text("Hello")
     doc.content_node.add_child_content("text", "Philip")
@@ -180,7 +191,8 @@ def test_tagging_issue_with_html():
     node = kdxa_doc.select('//*[hasTag("test_tag")]')[0]
     feature = node.get_feature_value("tag", "test_tag")
     assert feature['value'] == 'IIJ'
-    assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content(strip=False)[feature['start']:feature['end']]
+    assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content(strip=False)[
+                    feature['start']:feature['end']]
 
 
 def test_fax2tagging():

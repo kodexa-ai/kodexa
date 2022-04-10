@@ -9,9 +9,10 @@ from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, PipelineContext, \
     TableDataStore, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
-from kodexa.model.model import AssistantEvent, ContentObjectReference, DocumentStore
+from kodexa.model import AssistantEvent, ContentObjectReference, DocumentStore, ActorType
+from kodexa.model.objects import ScheduledEvent, ExceptionDetails
 
-logger = logging.getLogger('kodexa.testing')
+logger = logging.getLogger()
 
 
 def print_data_table(context: PipelineContext, store_name: str):
@@ -233,7 +234,8 @@ class AssistantTestHarness:
             content_provider: optional provider for content
         """
         self.assistant = assistant
-        self.stores = stores
+        from kodexa.model import Store
+        self.stores: List[Store] = stores
         self.kodexa_metadata_path = kodexa_metadata_path
         self.metadata = metadata
         self.content_provider = content_provider
@@ -254,7 +256,7 @@ class AssistantTestHarness:
 
         return self.assistant.process_event(assistant_event, assistant_context)
 
-    def test_scheduled_event(self, scheduled_event: AssistantEvent) -> AssistantResponse:
+    def test_scheduled_event(self, scheduled_event: ScheduledEvent) -> AssistantResponse:
         """
         Pass a scheduled event into the assistant
 
@@ -299,8 +301,10 @@ class AssistantTestHarness:
 
                 if pipeline_context.output_document is not None and assistant_pipeline.write_back_to_store:
                     # We need to build the transition between the old and the new
-                    document_relationship = DocumentTransition(TransitionType.DERIVED, event.content_object.id, None,
-                                                               DocumentActor("testing", "assistant"))
+                    document_relationship = DocumentTransition()
+                    document_relationship.transition_type = TransitionType.derived
+                    document_relationship.source_content_object_id = event.content_object.id
+                    document_relationship.actor = DocumentActor(actorId="testing", actorType=ActorType.assistant)
 
                     store.add_related_document_to_family(event.document_family.id, document_relationship,
                                                          pipeline_context.output_document)
@@ -328,7 +332,7 @@ class AssistantTestHarness:
           The instance of the document store
         """
         for store in self.stores:
-            if event.document_family.store_ref == store.get_ref():
+            if event.document_family.store_ref == store.ref:
                 return store
 
         raise Exception(f"Unable to get store ref {event.document_family.store_ref}")
@@ -339,6 +343,22 @@ class OptionException(Exception):
     An exception that is raised when there is a problem with a requests option
     """
     pass
+
+
+class ExceptionBuilder:
+    """
+    A helper to build an exception details from the last exception
+    """
+
+    @staticmethod
+    def build_exception_details():
+        import sys
+        import better_exceptions
+        et, ev, tb = sys.exc_info()
+        return ExceptionDetails(**{'errorType': et.__name__, 'errorMessage': str(ev),
+                                                'message': "An unexpected exception has occurred",
+                                                'help': "\n".join(
+                                                    better_exceptions.format_exception(*sys.exc_info()))})
 
 
 class ExtensionPackUtil:
@@ -451,7 +471,7 @@ class ExtensionPackUtil:
         return AssistantTestHarness(assistant, stores, self.file_path, assistant_metadata)
 
     def get_assistant(self, assistant_slug, options=None):
-        """Create an instance of an assistant from the kodexa metadata
+        """Create an instance of an assistant from the Kodexa metadata
 
         Args:
           assistant_slug: param options:

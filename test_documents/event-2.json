@@ -1,0 +1,167 @@
+{
+  "id": "99d74b1a2b354cd09212ce4eed48230e",
+  "type": "ASSISTANT_EVENT",
+  "executionId": "8a8a82bd7cb6994f017cb6ba801105af",
+  "sessionId": "8a8a82bd7cb6994f017cb6ba7fdf05ae",
+  "token": "82796bb599e1429abd54111e0aaf5b9e",
+  "steps": [],
+  "assistant": {
+    "assistantId": "8a8a82137cb30893017cb31cd5410022",
+    "assistantName": "PDF Assistant",
+    "ref": "kodexa/pdf-parsing-assistant:4.1.6",
+    "deploymentType": "KUBERNETES",
+    "serviceName": "elnido-kodexa-spatial-4-1-6",
+    "containerName": "045323014350.dkr.ecr.us-east-1.amazonaws.com/kodexa-extensions/extension-spatial:4.1.6",
+    "options": {
+      "taxonomy": "philip-world/8a8a82137cb30893017cb31cd222001d-content:1.0.0",
+      "data_store": "philip-world/8a8a82137cb30893017cb31cd222001d-extracted-data:1.0.0",
+      "ocr_engine": "tesseract",
+      "form_analysis": true,
+      "complete_label": "data-labelled",
+      "table_analysis": true,
+      "perform_indexing": false,
+      "space_multiplier": 1.0,
+      "ignore_empty_rows": false,
+      "template_document": "philip-world/8a8a82137cb30893017cb31cd222001d-training:1.0.0/undefined",
+      "find_multiple_text_columns": false
+    },
+    "optionTypes": {
+      "ignore_empty_rows": "boolean",
+      "find_multiple_text_columns": "boolean",
+      "complete_label": "string",
+      "data_store": "tableStore",
+      "perform_indexing": "boolean",
+      "form_analysis": "boolean",
+      "taxonomy": "taxonomy",
+      "space_multiplier": "number",
+      "template_document": "document",
+      "table_analysis": "boolean",
+      "ocr": "boolean",
+      "ocr_engine": "string"
+    },
+    "status": "PENDING",
+    "event": {
+      "type": "content",
+      "contentObject": {
+        "id": "8a8a82137cb30893017cb31d01830026",
+        "uuid": "a316fe1f0a5e44699a8478ce49128ad2",
+        "createdOn": "2021-10-24T16:23:15.183Z",
+        "updatedOn": "2021-10-24T16:23:16.768Z",
+        "contentType": "DOCUMENT",
+        "documentVersion": "",
+        "index": 0,
+        "labels": [],
+        "metadata": {},
+        "source": {
+          "connector": "document-store",
+          "headers": {
+            "id": "8a8a82137cb30893017cb31cfd940025",
+            "ref": "philip-world/8a8a82137cb30893017cb31cd222001d-processing:1.0.0",
+            "family": "8a8a82137cb30893017cb31cfd8d0024"
+          },
+          "original_filename": "DistRpt19-A_20190815.pdf",
+          "original_path": "DistRpt19-A_20190815.pdf"
+        },
+        "mixins": [],
+        "contentMetadata": {},
+        "created": "2021-10-24T16:23:14.893Z",
+        "modified": "2021-10-24T16:23:14.893Z",
+        "size": 61440,
+        "storeRef": "philip-world/8a8a82137cb30893017cb31cd222001d-processing:1.0.0",
+        "documentFamilyId": "8a8a82137cb30893017cb31cfd8d0024"
+      },
+      "documentFamily": {
+        "id": "8a8a82137cb30893017cb31cfd8d0024",
+        "uuid": "16be496cf90c4fe9b6e0d0bcd24ce078",
+        "createdOn": "2021-10-24T16:23:15.176Z",
+        "updatedOn": "2021-10-25T09:14:08.145Z",
+        "assignments": [],
+        "storeRef": "philip-world/8a8a82137cb30893017cb31cd222001d-processing:1.0.0",
+        "path": "DistRpt19-A_20190815.pdf",
+        "locked": false,
+        "created": "2021-10-24T16:23:14.050Z",
+        "modified": "2021-10-25T09:14:08.142Z",
+        "size": 129795,
+        "indexed": false,
+        "contentObjects": [
+          {
+            "id": "8a8a82137cb30893017cb31cfd940025",
+            "uuid": "eba9cc356831404691ba02f597f4dddf",
+            "createdOn": "2021-10-24T16:23:15.180Z",
+            "updatedOn": "2021-10-24T16:23:15.180Z",
+            "contentType": "NATIVE",
+            "index": 0,
+            "labels": [],
+            "metadata": {},
+            "source": {},
+            "mixins": [],
+            "contentMetadata": {},
+            "created": "2021-10-24T16:23:14.063Z",
+            "modified": "2021-10-24T16:23:14.063Z",
+            "size": 129795,
+            "storeRef": "philip-world/8a8a82137cb30893017cb31cd222001d-processing:1.0.0",
+            "documentFamilyId": "8a8a82137cb30893017cb31cfd8d0024"
+          },
+          {
+            "id": "8a8a82137cb30893017cb31d01830026",
+            "uuid": "a316fe1f0a5e44699a8478ce49128ad2",
+            "createdOn": "2021-10-24T16:23:15.183Z",
+            "updatedOn": "2021-10-24T16:23:16.768Z",
+            "contentType": "DOCUMENT",
+            "documentVersion": "",
+            "index": 0,
+            "labels": [],
+            "metadata": {},
+            "source": {
+              "connector": "document-store",
+              "headers": {
+                "id": "8a8a82137cb30893017cb31cfd940025",
+                "ref": "philip-world/8a8a82137cb30893017cb31cd222001d-processing:1.0.0",
+                "family": "8a8a82137cb30893017cb31cfd8d0024"
+              },
+              "original_filename": "DistRpt19-A_20190815.pdf",
+              "original_path": "DistRpt19-A_20190815.pdf"
+            },
+            "mixins": [],
+            "contentMetadata": {},
+            "created": "2021-10-24T16:23:14.893Z",
+            "modified": "2021-10-24T16:23:14.893Z",
+            "size": 61440,
+            "storeRef": "philip-world/8a8a82137cb30893017cb31cd222001d-processing:1.0.0",
+            "documentFamilyId": "8a8a82137cb30893017cb31cfd8d0024"
+          }
+        ],
+        "transitions": [
+          {
+            "id": "8a8a82137cb30893017cb31d01e30027",
+            "uuid": "dc50553803634405885d750f5d11d3fc",
+            "createdOn": "2021-10-24T16:23:15.184Z",
+            "updatedOn": "2021-10-24T16:23:15.184Z",
+            "transitionType": "DERIVED",
+            "index": 0,
+            "dateTime": "2021-10-24T16:23:14.896Z",
+            "actor": {
+              "actorId": "8a8a828d7c135c30017c135c55a50000",
+              "actorType": "USER"
+            },
+            "sourceContentObjectId": "8a8a82137cb30893017cb31cfd940025",
+            "destinationContentObjectId": "8a8a82137cb30893017cb31d01830026"
+          }
+        ],
+        "labels": [],
+        "mixins": [],
+        "classes": []
+      },
+      "objectEventType": "NEW_OBJECT"
+    }
+  },
+  "source": {},
+  "payload": {},
+  "contentObjects": [],
+  "targetDeploymentType": "KUBERNETES",
+  "target": "elnido-kodexa-spatial-4-1-6",
+  "platformUrl": "https://elnido.kodexa.ai/api/sessions/8a8a82bd7cb6994f017cb6ba7fdf05ae/events",
+  "log": [],
+  "debug": false,
+  "created": "2021-10-25T09:14:08.27433267"
+}
