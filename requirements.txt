@@ -1,4 +1,4 @@
-setuptools==61.2.0
+setuptools==62.0.0
 twine==3.8.0
 texttable
 addict==2.4.0
@@ -9,14 +9,14 @@ wheel==0.37.1
 ply
 pytest==7.1.1
 pytest-runner==6.0.0
-pandas==1.4.1
+pandas==1.4.2
 pyyaml
 mypy
 deepdiff==5.7.0
-click==8.1.0
+click==8.1.2
 jinja2
 flake8
-rich==12.0.1
+rich==12.2.0
 appdirs
 simpleeval==0.9.12
 jq==1.2.2
@@ -25,7 +25,8 @@ pdoc3
 python_dateutil >= 2.5.3
 datamodel-code-generator==0.11.20
 better-exceptions
-boto3==1.21.27
+boto3==1.21.37
 awslambdaric
 pyfunctional
 pydantic_yaml
+sphinx
