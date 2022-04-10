@@ -26,7 +26,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageModelRuntime, PageExtensionPack
+    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack
 
 logger = logging.getLogger()
 
@@ -295,28 +295,16 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         return self.client.deserialize(response.json())
 
     @property
-    def model_runtimes(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/modelRuntimes/{self.slug}"
-        model_runtimes_response = self.client.get(url,
-                                                  params={"query": query, "page": page, "pageSize": pagesize,
-                                                          "sort": sort})
-        return PageModelRuntimeEndpoint.parse_obj(model_runtimes_response.json()).set_client(self.client)
+    def model_runtimes(self) -> "ModelRuntimesEndpoint":
+        return ModelRuntimesEndpoint().set_organization(self).set_client(self.client)
 
     @property
-    def extension_packs(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/extensionPacks/{self.slug}"
-        extension_packs_response = self.client.get(url,
-                                                   params={"query": query, "page": page, "pageSize": pagesize,
-                                                           "sort": sort})
-        return PageExtensionPackEndpoint.parse_obj(extension_packs_response.json()).set_client(self.client)
+    def extension_packs(self) -> "ExtensionPacksEndpoint":
+        return ExtensionPacksEndpoint().set_organization(self).set_client(self.client)
 
     @property
-    def project_templates(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/projectTemplates/{self.slug}"
-        response = self.client.get(url,
-                                   params={"query": query, "page": page, "pageSize": pagesize,
-                                           "sort": sort})
-        return PageProjectTemplateEndpoint.parse_obj(response.json()).set_client(self.client)
+    def project_templates(self) -> "ProjectTemplatesEndpoint":
+        return ProjectTemplatesEndpoint().set_organization(self).set_client(self.client)
 
     @property
     def credentials(self, query="*", page=1, pagesize=10, sort=None):
@@ -329,11 +317,6 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
     @property
     def stores(self):
         return StoresEndpoint().set_client(self.client).set_organization(self)
-
-    def get_store(self, slug, version=None):
-        url = f"/api/stores/{self.slug}/{slug}{'/' + version if version else ''}"
-        stores_response = self.client.get(url)
-        return PageStoreEndpoint.parse_obj(stores_response.json()).set_client(self.client)
 
     @property
     def taxonomies(self):
@@ -580,15 +563,37 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         return Store
 
 
+class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    def get_type(self) -> str:
+        return "extensionPacks"
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageExtensionPackEndpoint
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return ExtensionPackEndpoint
+
+
+class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    def get_type(self) -> str:
+        return "projectTemplates"
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageProjectTemplateEndpoint
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return ProjectTemplateEndpoint
+
+
 class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "modelRuntimes"
 
     def get_page_class(self) -> Type[BaseModel]:
-        return PageModelRuntime
+        return PageModelRuntimeEndpoint
 
     def get_instance_class(self) -> Type[BaseModel]:
-        return ModelRuntime
+        return ModelRuntimeEndpoint
 
 
 class ProjectTemplateEndpoint(ComponentInstanceEndpoint, ProjectTemplate):
