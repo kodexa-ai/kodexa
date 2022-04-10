@@ -30,3 +30,4 @@ awslambdaric
 pyfunctional
 pydantic_yaml
 sphinx
+sphinx_rtd_theme
