@@ -25,8 +25,6 @@ pdoc3
 python_dateutil >= 2.5.3
 datamodel-code-generator==0.11.20
 better-exceptions
-boto3==1.21.37
-awslambdaric
 pyfunctional
 pydantic_yaml
 sphinx
