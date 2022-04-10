@@ -8,52 +8,29 @@ from json import JSONDecodeError
 from typing import Any, List, Optional
 
 import requests
-from requests import Response
 
-from kodexa.model import ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, ModelStore, \
-    RemoteStore
+from kodexa.model import ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, ModelStore, Store
 from kodexa.model.model import ModelContentMetadata
-from kodexa.stores.local import LocalModelStore, TableDataStore
 
-logger = logging.getLogger('kodexa.stores')
+logger = logging.getLogger()
 
 
-class RemoteTableDataStore(RemoteStore):
+class RemoteDataStore(Store):
     """ """
-
-    def __init__(self, ref: str, columns=None):
-        if columns is None:
-            columns = []
-        self.ref = ref
-        self.columns = columns
 
     def get_ref(self):
         """ """
         return self.ref
 
-    def delete_contents(self):
-        """Delete the contents of the store"""
-        from kodexa import KodexaPlatform
-        import requests
-        resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/dataObjects",
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
-
-        if resp.status_code == 200:
-            return resp.content
-        else:
-            msg = f"Unable to delete families {resp.text}, status : {resp.status_code}"
-            raise Exception(msg)
-
     def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
-                            include_id=False):
+                            include_id: bool = False):
         """
 
         Args:
-          path (str): The path (empty is root)
+          path (str): The path to the data object
           query (str): A query to limit the results (Defaults to *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
-          include_id (bool): Include the id in the data object
+          include_id (Optional[bool]): Include the data object ID as a column (defaults to False)
         Returns:
 
         """
@@ -92,6 +69,37 @@ class RemoteTableDataStore(RemoteStore):
 
         return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
 
+    def update_data_object_attribute(self, data_object, attribute):
+        """
+
+        Args:
+          data_object (DataObject): The data object to update
+          attribute (Attribute): The attribute to update
+
+        Returns:
+
+        """
+        from kodexa import KodexaPlatform
+
+        url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects/{data_object.id}/attributes/{attribute.id}"
+        logger.info(f"Downloading a specific data object from {url}")
+
+        data_object_response = requests.put(
+            url,
+            data=attribute.json(by_alias=True),
+            headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
+
+        if data_object_response.status_code == 200:
+            from kodexa.model.objects import DataObject
+            return DataObject(**data_object_response.json())
+        else:
+            logger.warning(
+                "Unable to update data attribute status [" + data_object_response.text + "], response " + str(
+                    data_object_response.status_code))
+            raise Exception(
+                "Unable to update data attribute status [" + data_object_response.text + "], response " + str(
+                    data_object_response.status_code))
+
     def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None):
         """
 
@@ -105,7 +113,7 @@ class RemoteTableDataStore(RemoteStore):
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family, query=query)
+        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family)
 
         # lets work out the last page
         rows = rows + row_response['content']
@@ -129,7 +137,8 @@ class RemoteTableDataStore(RemoteStore):
 
         print(data_object_response)
         if data_object_response.status_code == 200:
-            return data_object_response.json()
+            from kodexa.model.objects import DataObject
+            return DataObject(**data_object_response.json())
         else:
             logger.warning(
                 "Unable to get data object from remote store [" + data_object_response.text + "], response " + str(
@@ -177,11 +186,11 @@ class RemoteTableDataStore(RemoteStore):
             raise Exception("Unable to get table from remote store  [" + rows_response.text + "], response " + str(
                 rows_response.status_code))
 
-    def add_data_objects(self, data_objects):
+    def add_data_objects(self, rows):
         """
 
         Args:
-          data_objects: A list of data objects that you want to create
+          rows: A list of rows that you want to post
 
         Returns:
 
@@ -193,30 +202,24 @@ class RemoteTableDataStore(RemoteStore):
 
         doc = requests.post(
             url,
-            json=data_objects,
+            json=rows,
             headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
         if doc.status_code == 200:
             return
         else:
-            logger.warning("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
-            raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+            logger.warning(
+                "Unable to post data objects to remote store [" + doc.text + "], response " + str(doc.status_code))
+            raise Exception(
+                "Unable to post data objects to remote store [" + doc.text + "], response " + str(doc.status_code))
 
-    def add(self, data_object):
-        """
-
-        Args:
-          data_object:
-
-        Returns:
-
-        """
+    def add(self, row):
         from kodexa import KodexaPlatform
 
         url = f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         logger.debug(f"Uploading data objects to store {url}")
 
         row_dict = {}
-        for idx, row_value in enumerate(data_object):
+        for idx, row_value in enumerate(row):
             if len(self.columns) == 0 or len(self.columns) <= idx:
                 row_dict[f'col{idx}'] = row_value
             else:
@@ -233,124 +236,14 @@ class RemoteTableDataStore(RemoteStore):
             raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
 
 
-class DataStoreHelper:
-    """A small helper that can convert a dictionary back into a store
-    type
-
-    Args:
-
-    Returns:
-
-    """
-
-    @staticmethod
-    def from_dict(dict):
-        """Build a new TableDataStore or DictDataStore from a dictionary.
-
-        Args:
-          dict: doc_dict: A dictionary representation of a Kodexa Document.
-
-        Returns:
-          TableDataStore, DictDataStore, or None: A TableDataStore or DictDataStore - driven from 'type' in doc_dict.
-          If 'type' is not present or does not align with one of these two types, None is returend.
-
-        >>> Document.from_dict(doc_dict)
-        """
-
-        if 'type' in dict:
-            if 'TABLE' == dict['type']:
-                columns = dict['data']['columns'] if 'columns' in dict['data'] else None
-                rows = dict['data']['rows'] if 'rows' in dict['data'] else None
-                return TableDataStore(columns=columns, rows=rows)
-            elif 'DOCUMENT' == dict['type']:
-                if 'ref' in dict:
-                    return RemoteDocumentStore(dict['ref'])
-                else:
-                    from kodexa import LocalDocumentStore
-                    return LocalDocumentStore(dict['data']['path'])
-            elif 'MODEL' == dict['type']:
-                if 'ref' in dict:
-                    return RemoteModelStore(dict['ref'])
-                else:
-                    return LocalModelStore(dict['data']['path'])
-            else:
-                return None
-        else:
-            logger.info("Unknown store")
-            return None
-
-
-class RemoteDocumentStore(DocumentStore, RemoteStore):
+class RemoteDocumentStore(DocumentStore):
     """
     Remote Document Stores provide you with all the capabilities of Document storage and relationships
     in an instance of the Kodexa platform
     """
 
-    def __init__(self, ref: str):
-
-        self.ref: str = ref
-
-        get_response = self._base_get(
-            f"api/stores/{self.ref.replace(':', '/')}")
-
-        if get_response is not None:
-            self.store_type = get_response.json()['storeType']
-            self.store_purpose = get_response.json()['storePurpose']
-        else:
-            # we couldn't find metadata for this store, so we're setting default values
-            self.store_type = 'DOCUMENT'
-            self.store_purpose = 'OPERATIONAL'
-
-        super().__init__(self.store_type, self.store_purpose)
-
-    def delete_contents(self):
-        """Delete the contents of the store"""
-        from kodexa import KodexaPlatform
-        import requests
-        resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/documentFamilies",
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
-
-        if resp.status_code == 200:
-            return resp.content
-        else:
-            msg = f"Unable to delete families {resp.text}, status : {resp.status_code}"
-            raise Exception(msg)
-
-    def get_name(self):
-        """The name of the connector
-
-        Returns:
-            The name of the document store
-
-        """
-        return self.get_ref()
-
     def get_ref(self) -> str:
-        """Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
-        :return: The reference
-
-        Args:
-
-        Returns:
-
-        """
         return self.ref
-
-    def to_dict(self):
-        """
-        Convert the document store to its metadata dictionary
-
-        Returns:
-            A dictionary representing the metadata for the store
-        """
-        return {
-            "type": "DOCUMENT",
-            "ref": self.ref,
-            "storeType": self.store_type,
-            "storePurpose": self.store_purpose
-        }
 
     def delete(self, path: str):
         from kodexa import KodexaPlatform
@@ -380,9 +273,30 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 headers={"x-access-token": KodexaPlatform.get_access_token()})
 
             if document_family_response.status_code == 200:
-                return DocumentFamily.from_dict(document_family_response.json())
+                return DocumentFamily.parse_obj(document_family_response.json())
             else:
                 msg = "Get document family failed [" + document_family_response.text + "], response " + str(
+                    document_family_response.status_code)
+                logger.warning(msg)
+                raise Exception(msg)
+        except JSONDecodeError:
+            logger.warning(
+                "Unable to decode the JSON response")
+            raise
+
+    def update_document_family_status(self, document_family, status):
+        from kodexa import KodexaPlatform
+        try:
+            logger.info(f"Updating the status of {document_family.id}")
+            document_family_response = requests.put(
+                f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/status",
+                headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"},
+                data=status.json(by_alias=True))
+
+            if document_family_response.status_code == 200:
+                return DocumentFamily(**document_family_response.json())
+            else:
+                msg = "Document family update failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
                 logger.warning(msg)
                 raise Exception(msg)
@@ -409,7 +323,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 files=files)
 
             if document_family_response.status_code == 200:
-                return ContentObject.from_dict(document_family_response.json())
+                return ContentObject.parse_obj(document_family_response.json())
             else:
                 msg = "Document family create failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
@@ -422,30 +336,38 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
 
     def get_document_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
             Optional[Document]:
-        get_response = self._base_get(
+        from kodexa import KodexaPlatform
+        get_response = KodexaPlatform.get_client().get(
             f"api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object.id}/content")
         return Document.from_kddb(get_response.content) if get_response is not None else None
 
     def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
             Any:
-        get_response = self._base_get(
+        from kodexa import KodexaPlatform
+        get_response = KodexaPlatform.get_client().get(
             f"api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object.id}/content")
         return get_response.content if get_response is not None else None
 
     def register_listener(self, listener):
         pass
 
-    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
+    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> List[DocumentFamily]:
         params = {
             'page': page,
             'pageSize': page_size,
             'query': query
         }
-        get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/families", params=params)
+
+        if sort is not None:
+            params.sort = sort
+
+        from kodexa import KodexaPlatform
+        get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/families",
+                                                       params=params)
         if get_response is not None:
             families = []
             for fam_dict in get_response.json()['content']:
-                families.append(DocumentFamily.from_dict(fam_dict))
+                families.append(DocumentFamily.parse_obj(fam_dict))
             return families
         else:
             return []
@@ -464,7 +386,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 files=files)
 
             if content_object_replace.status_code == 200:
-                return DocumentFamily.from_dict(content_object_replace.json())
+                return DocumentFamily.parse_obj(content_object_replace.json())
             else:
                 msg = "Document replace failed [" + content_object_replace.text + "], response " + str(
                     content_object_replace.status_code)
@@ -489,7 +411,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 files=files, data=data)
 
             if document_family_response.status_code == 200:
-                return DocumentFamily.from_dict(document_family_response.json())
+                return DocumentFamily.parse_obj(document_family_response.json())
             else:
                 msg = "Document family create failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
@@ -513,7 +435,7 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
                 files=files)
 
             if document_family_response.status_code == 200:
-                return DocumentFamily.from_dict(document_family_response.json())
+                return DocumentFamily.parse_obj(document_family_response.json())
             else:
                 msg = "Document family create failed [" + document_family_response.text + "], response " + str(
                     document_family_response.status_code)
@@ -525,71 +447,33 @@ class RemoteDocumentStore(DocumentStore, RemoteStore):
             raise
 
     def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
-        get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/fs",
-                                      params={"path": path, "meta": True})
-        return DocumentFamily.from_dict(get_response.json()) if get_response is not None else None
+        from kodexa import KodexaPlatform
+        get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/fs",
+                                                       params={"path": path, "meta": True})
+        return DocumentFamily.parse_obj(get_response.json()) if get_response is not None else None
 
     def count(self) -> int:
-        get_response = self._base_get(f"api/stores/{self.ref.replace(':', '/')}/families")
+        from kodexa import KodexaPlatform
+        get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/families")
         if get_response is not None:
             return get_response.json()['totalElements']
         else:
             return 0
 
     def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
-        get_response = self._base_get(
+        from kodexa import KodexaPlatform
+        get_response = KodexaPlatform.get_client().get(
             f"api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content")
         if get_response is not None:
             return Document.from_kddb(get_response.content)
         else:
             return None
 
-    def _base_get(self, api_path: str, params: Optional[dict] = None) -> Optional[Response]:
-        if params is None:
-            params = {}
-        from kodexa import KodexaPlatform
 
-        url = f"{KodexaPlatform.get_url()}/{api_path}"
-        logger.info(f"Accessing {url}")
-
-        get_response = requests.get(
-            url,
-            params=params,
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
-
-        if get_response.status_code == 200:
-            return get_response
-        elif get_response.status_code == 404:
-            return None
-        else:
-            msg = "Get failed [" + get_response.text + "], response " + str(get_response.status_code)
-            logger.warning(msg)
-            raise Exception(msg)
-
-
-class RemoteModelStore(ModelStore, RemoteStore):
+class RemoteModelStore(ModelStore):
     """
     A remote model store allows you to store artifacts from your model
     """
-
-    def to_dict(self):
-        """ """
-        return {
-            "type": "MODEL",
-            "ref": self.ref
-        }
-
-    def __init__(self, ref: str):
-        self.ref = ref
-
-    def get_ref(self) -> str:
-        """
-        Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
-        Returns:
-            The reference to the store
-        """
-        return self.ref
 
     def delete(self, object_path: str):
         """
@@ -644,12 +528,13 @@ class RemoteModelStore(ModelStore, RemoteStore):
             logger.warning(msg)
             raise Exception(msg)
 
-    def put(self, path: str, content) -> DocumentFamily:
+    def put(self, path: str, content, replace=False) -> DocumentFamily:
         """Put the content into the model store at the given path
 
         Args:
           path: The path you wish to put the content at
           content: The content for that object
+          replace: Replace the content if it exists
 
         Returns:
           the document family that was created
@@ -658,14 +543,22 @@ class RemoteModelStore(ModelStore, RemoteStore):
         import requests
         try:
             files = {"file": content}
+
+            if replace:
+                delete_response = requests.delete(
+                    f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
+                    params={"path": path},
+                    headers={"x-access-token": KodexaPlatform.get_access_token()})
+                logger.info(f"Deleting {path} ({delete_response.status_code})")
+
             content_object_response = requests.post(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/fs",
                 params={"path": path},
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
                 files=files)
-
+            logger.info(f"Uploaded {path} ({content_object_response.status_code})")
             if content_object_response.status_code == 200:
-                return DocumentFamily.from_dict(content_object_response.json())
+                return DocumentFamily.parse_obj(content_object_response.json())
             elif content_object_response.status_code == 400:
                 from addict import Dict
                 bad_request = Dict(json.loads(content_object_response.text))
@@ -691,10 +584,11 @@ class RemoteModelStore(ModelStore, RemoteStore):
         from kodexa import KodexaPlatform
         import requests
         try:
+            model_content_metadata.type = "model"
             content_object_response = requests.put(
                 f"{KodexaPlatform.get_url()}/api/stores/{self.ref.replace(':', '/')}/metadata",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
-                json=model_content_metadata.to_dict())
+                json=model_content_metadata.dict(by_alias=True))
 
             if content_object_response.status_code == 200:
                 return model_content_metadata
@@ -727,8 +621,27 @@ class RemoteModelStore(ModelStore, RemoteStore):
             headers={"x-access-token": KodexaPlatform.get_access_token()})
 
         if resp.status_code == 200:
-            return ModelContentMetadata.from_dict(resp.json())
+            return ModelContentMetadata.parse_obj(resp.json())
         else:
             msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
             logger.warning(msg)
             raise Exception(msg)
+
+    def list_contents(self) -> List[str]:
+
+        # TODO this needs to be cleaned up a bit
+        params = {
+            'page': 1,
+            'pageSize': 1000,
+            'query': '*'
+        }
+        from kodexa import KodexaPlatform
+        get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/families",
+                                                       params=params)
+        if get_response is not None:
+            paths = []
+            for fam_dict in get_response.json()['content']:
+                paths.append(fam_dict['path'])
+            return paths
+        else:
+            return []

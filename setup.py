@@ -19,9 +19,9 @@ setup(name='kodexa',
       long_description=long_description,
       long_description_content_type="text/markdown",
       url='https://www.github.com/kodexa-ai/kodexa',
-      packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.pipeline', 'kodexa.taxonomy',
+      packages=['kodexa', 'kodexa.connectors', 'kodexa.mixins', 'kodexa.pipeline',
                 'kodexa.stores', 'kodexa.model', 'kodexa.steps', 'kodexa.selectors',
-                'kodexa.assistant', 'kodexa.cloud', 'kodexa.testing', 'kodexa.cli',
+                'kodexa.assistant', 'kodexa.platform', 'kodexa.testing', 'kodexa.cli',
                 'kodexa.cli.templates'],
       install_requires=[
           'addict~=2.2.1',
@@ -31,13 +31,22 @@ setup(name='kodexa',
           'pyyaml',
           'ply',
           'click',
-          'deepdiff',
           'jinja2',
           'rich',
           'appdirs',
           'jsonpickle',
+          'datamodel-code-generator',
+          'better-exceptions',
+          'boto3',
+          'awslambdaric',
+          'bbox',
+          'jsonpickle',
           'better_exceptions',
-          'tblib'
+          'tblib',
+          'simpleeval',
+          'pyfunctional',
+          'bbox',
+          'pydantic_yaml'
       ],
       entry_points="""
         [console_scripts]
@@ -48,7 +57,7 @@ setup(name='kodexa',
           #   3 - Alpha
           #   4 - Beta
           #   5 - Production/Stable
-          'Development Status :: 5 - Production/Stable',
+          'Development Status :: 4 - Beta',
 
           # Indicate who your project is intended for.
           'Intended Audience :: Developers',
@@ -60,7 +69,7 @@ setup(name='kodexa',
           # noqa
           # Specify the Python versions you support here. In particular, ensure
           # that you indicate whether you support Python 2, Python 3 or both.
-          'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
       ],
       package_data={
           # If any package contains *.j2

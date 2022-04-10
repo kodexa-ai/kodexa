@@ -12,13 +12,13 @@ import os
 import tempfile
 import urllib
 from os.path import join
-from typing import Dict, List, Type
+from typing import Dict, Type
 
 import requests
 
 from kodexa.model import ContentObject, Document, DocumentMetadata, DocumentStore, SourceMetadata
 
-logger = logging.getLogger('kodexa.connectors')
+logger = logging.getLogger()
 
 
 def get_caller_dir():
@@ -191,7 +191,8 @@ class UrlConnector:
                 for header in document.source.headers:
                     opener.addheaders = [(header, document.source.headers[header])]
                 urllib.request.install_opener(opener)
-            with tempfile.NamedTemporaryFile(delete=True) as tmp_file:
+            from kodexa import KodexaPlatform
+            with tempfile.NamedTemporaryFile(delete=True, dir=KodexaPlatform.get_tempdir()) as tmp_file:
                 urllib.request.urlretrieve(document.source.original_path, tmp_file.name)
 
                 return open(tmp_file.name, 'rb')
@@ -217,44 +218,6 @@ class UrlConnector:
 registered_connectors: Dict[str, Type] = {}
 
 
-class CacheConnector:
-    """A Cache Connector can be used to inject caching of content
-    in front of a connector, you must extend this type to implement
-    a cache
-
-    Args:
-
-    Returns:
-
-    """
-
-    def is_cached(self, source: SourceMetadata):
-        """
-
-        Args:
-          source: SourceMetadata:
-
-        Returns:
-
-        """
-        return False
-
-    def get_source(self, document: Document):
-        """
-
-        Args:
-          document: Document:
-
-        Returns:
-
-        """
-        pass
-
-
-# The registered caches
-registered_caches: List[CacheConnector] = []
-
-
 def get_connectors():
     """
 
@@ -267,35 +230,7 @@ def get_connectors():
     return registered_connectors.keys()
 
 
-def add_cache(cache_connector: CacheConnector):
-    """Register a cache connector, this can intercept a source request and
-    determine if there is already an object in a cache that holds it
-
-    Args:
-      cache_connector: return:
-      cache_connector: CacheConnector:
-
-    Returns:
-
-    """
-    registered_caches.append(cache_connector)
-
-
 def get_connector(connector: str, source: SourceMetadata):
-    """
-
-    Args:
-      connector: str:
-      source: SourceMetadata:
-
-    Returns:
-
-    """
-    # Adding support for cache connectors
-    for cache_connector in registered_caches:
-        if cache_connector.is_cached(source):
-            return cache_connector
-
     if connector in registered_connectors:
         logger.info(f"Getting registered connector {connector}")
         return registered_connectors[connector]
@@ -305,26 +240,10 @@ def get_connector(connector: str, source: SourceMetadata):
 
 
 def add_connector(connector):
-    """
-
-    Args:
-      connector:
-
-    Returns:
-
-    """
     registered_connectors[connector.get_name()] = connector
 
 
 def get_source(document):
-    """
-
-    Args:
-      document:
-
-    Returns:
-
-    """
     connector = get_connector(document.source.connector,
                               document.source)
     return connector.get_source(document)
@@ -356,23 +275,20 @@ class DocumentStoreConnector(object):
 
     @staticmethod
     def get_source(document):
-        """
 
-        Args:
-          document:
-
-        Returns:
-
-        """
         from kodexa import RemoteDocumentStore
-        remote_document_store = RemoteDocumentStore(document.source.headers['ref'])
+        from kodexa import KodexaPlatform
+        remote_document_store: RemoteDocumentStore = KodexaPlatform.get_object_instance(document.source.headers['ref'],
+                                                                                        'store')
         family = remote_document_store.get_family(document.source.headers['family'])
-        bytes = remote_document_store.get_source_by_content_object(family,
-                                                                   ContentObject(id=document.source.headers['id']))
-        if bytes is None:
+        document_bytes = remote_document_store.get_source_by_content_object(family,
+                                                                            ContentObject(
+                                                                                **{'contentType': 'NATIVE', 'id':
+                                                                                    document.source.headers['id']}))
+        if document_bytes is None:
             raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
         else:
-            return io.BytesIO(bytes)
+            return io.BytesIO(document_bytes)
 
 
 add_connector(FolderConnector)

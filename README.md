@@ -2,8 +2,7 @@
 
 ![Build](https://github.com/kodexa-ai/kodexa/workflows/Python%20Package%20Using%20Anaconda/badge.svg)
 
-
-Kodexa is designed to allow you to work with a wide range of unstructured and semi-structured content and enables you to work with the Kodexa Platform (https://platform.kodexa.com).
+The Kodexa Content Framework framework is designed to allow you to work with a wide range of unstructured and semi-structured content and enables you to work with the Kodexa Platform (https://platform.kodexa.com).
 
 ## Documentation & Examples
 
@@ -13,7 +12,7 @@ For more information on how to use Kodexa see https://developer.kodexa.com/
 
 ## Current Development
 
-The current stable version of Kodexa is available in the releases/4.0 branch.
+The main branch is 5.0 which is under development and considered a beta version.
 
 ## Set-up
 

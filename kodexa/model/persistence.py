@@ -9,7 +9,7 @@ import msgpack
 from kodexa.model import Document, ContentNode, SourceMetadata
 from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
-logger = logging.getLogger('kodexa.model.persistence')
+logger = logging.getLogger()
 
 # Heavily used SQL
 
@@ -52,7 +52,8 @@ class SqliteDocumentPersistence(object):
                 # At this point we need to load the db
                 self.is_new = False
         else:
-            new_file, filename = tempfile.mkstemp(suffix='.kddb')
+            from kodexa import KodexaPlatform
+            new_file, filename = tempfile.mkstemp(suffix='.kddb', dir=KodexaPlatform.get_tempdir())
             self.is_tmp = True
 
         self.current_filename = filename
@@ -62,6 +63,98 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("PRAGMA journal_mode=OFF")
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
+
+    def update_features(self,node):
+
+        next_feature_id = self.get_max_feature_id()
+        all_features = []
+        for feature in node.get_features():
+            binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
+
+            tag_uuid = None
+            if feature.feature_type == 'tag' and 'uuid' in feature.value[0]:
+                tag_uuid = feature.value[0]['uuid']
+
+            all_features.append(
+                [next_feature_id, node.uuid, self.get_feature_type_id(feature),
+                 binary_value, feature.single, tag_uuid])
+
+            next_feature_id = next_feature_id + 1
+
+        self.cursor.execute("DELETE FROM ft where cn_id=?", [node.uuid])
+        self.cursor.executemany(FEATURE_INSERT, all_features)
+
+    def update_node(self, node):
+        self.cursor.execute('update cn set idx=?, pid=? where id=?',
+                            [node.index, node._parent_uuid,
+                             node.uuid])
+
+    def get_content_nodes(self, node_type, parent_node: ContentNode, include_children):
+        nodes = []
+
+        results = []
+        if include_children:
+
+            if node_type == "*":
+                query = """
+                            with recursive
+                            parent_node(id, pid, nt, idx, path) AS (
+                                VALUES (?,?,?,?,?)
+                                UNION ALL
+                                SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path || substr('0000000' || cns.idx, -6, 6) 
+                                FROM cn cns, parent_node
+                                WHERE parent_node.id = cns.pid  
+                            )
+                            SELECT id, pid, nt, idx, path from parent_node order by path
+                            """
+
+                try:
+                    results = self.cursor.execute(query,
+                                                  [parent_node.uuid,
+                                                   parent_node.get_parent().uuid if parent_node.get_parent() else None,
+                                                   next(key for key, value in self.node_types.items() if
+                                                        value == parent_node.get_node_type()),
+                                                   parent_node.index, f"{parent_node.index}".zfill(6)]).fetchall()
+                except StopIteration:
+                    return []
+            else:
+                query = """
+                                with recursive
+                                parent_node(id, pid, nt, idx, path) AS (
+                                    VALUES (?,?,?,?,?)
+                                    UNION ALL
+                                    SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path || substr('000000' || cns.idx, -6, 6) 
+                                    FROM cn cns, parent_node
+                                    WHERE parent_node.id = cns.pid  
+                                )
+                                SELECT id, pid, nt, idx, path from parent_node where nt=? order by path
+                                """
+
+                try:
+                    results = self.cursor.execute(query,
+                                                  [parent_node.uuid,
+                                                   parent_node.get_parent().uuid if parent_node.get_parent() else None,
+                                                   next(key for key, value in self.node_types.items() if
+                                                        value == parent_node.get_node_type()),
+                                                   parent_node.index,
+                                                   f"{parent_node.index}".zfill(6),
+                                                   next(key for key, value in self.node_types.items() if
+                                                        value == node_type)]).fetchall()
+                except StopIteration:
+                    return []
+        else:
+            query = "select id, pid, nt, idx from cn where pid=? and nt=? order by idx"
+            try:
+                results = self.cursor.execute(query,
+                                              [parent_node.uuid, next(key for key, value in self.node_types.items() if
+                                                                      value == node_type)]).fetchall()
+            except StopIteration:
+                return []
+
+        for raw_node in list(results):
+            nodes.append(self.__build_node(raw_node))
+
+        return nodes
 
     def initialize(self):
         if self.is_new:
@@ -242,7 +335,8 @@ class SqliteDocumentPersistence(object):
                                         single       integer,
                                         tag_uuid     text
                                     )""")
-            self.cursor.execute("insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.fvalue_id")
+            self.cursor.execute(
+                "insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.fvalue_id")
             # we will create a new feature table
             self.cursor.execute("drop table f")
             self.cursor.execute("drop table f_value")
@@ -308,7 +402,7 @@ class SqliteDocumentPersistence(object):
 
         parent = self.cursor.execute("select pid from cn where id = ?", [content_node.uuid]).fetchone()
         if parent:
-            return self.__get_node(parent[0])
+            return self.get_node(parent[0])
         else:
             return None
 
@@ -324,8 +418,7 @@ class SqliteDocumentPersistence(object):
         if self.document.content_node:
             self.__insert_node(self.document.content_node, None)
 
-    def get_bytes(self):
-
+    def sync(self):
         self.__update_metadata()
         self.cursor.execute("pragma optimize")
         self.connection.commit()
@@ -338,6 +431,8 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
+    def get_bytes(self):
+        self.sync()
         with open(self.current_filename, 'rb') as f:
             return f.read()
 
@@ -422,7 +517,8 @@ class SimpleObjectCache(object):
     def remove_obj(self, obj):
         if obj.uuid in self.objs:
             self.objs.pop(obj.uuid)
-            self.dirty_objs.remove(obj.uuid)
+            if obj.uuid in self.dirty_objs:
+                self.dirty_objs.remove(obj.uuid)
 
     def get_dirty_objs(self):
         results = []
@@ -460,21 +556,26 @@ class PersistenceManager(object):
 
         self.node_cache.next_id = self._underlying_persistence.get_next_node_id()
 
+    def get_parent(self, node):
+        if node.uuid in self.node_parent_cache:
+            return self.node_cache.get_obj(self.node_parent_cache[node.uuid])
+        else:
+            return self._underlying_persistence.get_parent(node)
+
     def close(self):
         self._underlying_persistence.close()
 
-    def get_bytes(self):
-
+    def flush_cache(self):
         all_node_ids = []
         all_nodes = []
         all_content_parts = []
         all_features = []
         node_id_with_features = []
 
-        logger.info("Merging cache to persistance")
+        logger.debug("Merging cache to persistence")
         dirty_nodes = self.node_cache.get_dirty_objs()
 
-        logger.info(f"Identified {len(dirty_nodes)} nodes to update")
+        logger.debug(f"Identified {len(dirty_nodes)} nodes to update")
 
         next_feature_id = self._underlying_persistence.get_max_feature_id()
         for node in dirty_nodes:
@@ -502,17 +603,24 @@ class PersistenceManager(object):
 
                 self.node_cache.undirty(node)
 
-        logger.info(f"Writing {len(all_node_ids)} nodes")
+        logger.debug(f"Writing {len(all_node_ids)} nodes")
         self._underlying_persistence.cursor.executemany("DELETE FROM cn where id=?", all_node_ids)
         self._underlying_persistence.cursor.executemany("DELETE FROM ft where cn_id=?", node_id_with_features)
         self._underlying_persistence.cursor.executemany("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", all_nodes)
         self._underlying_persistence.cursor.executemany("DELETE FROM cnp where cn_id=?", all_node_ids)
-        logger.info(f"Writing {len(all_content_parts)} content parts")
+        logger.debug(f"Writing {len(all_content_parts)} content parts")
 
         self._underlying_persistence.cursor.executemany(CONTENT_NODE_PART_INSERT, all_content_parts)
 
-        logger.info(f"Writing {len(all_features)} features")
+        logger.debug(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
+
+    def get_content_nodes(self, node_type, parent_node, include_children):
+        return self._underlying_persistence.get_content_nodes(node_type, parent_node, include_children)
+
+    def get_bytes(self):
+        self.flush_cache()
+        self._underlying_persistence.sync()
         return self._underlying_persistence.get_bytes()
 
     def update_metadata(self):
@@ -580,6 +688,7 @@ class PersistenceManager(object):
         if node.uuid in self.node_parent_cache:
             self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
             self.child_id_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
+            del self.node_parent_cache[node.uuid]
 
         self.content_parts_cache.pop(node.uuid, None)
         self.feature_cache.pop(node.uuid, None)
@@ -605,6 +714,12 @@ class PersistenceManager(object):
 
         return self.child_cache[node.uuid]
 
+    def update_node(self, node):
+        # We need to also update the parent
+        self.node_parent_cache[node.uuid] = node._parent_uuid
+
+        self._underlying_persistence.update_node(node)
+
     def update_content_parts(self, node, content_parts):
         self.content_parts_cache[node.uuid] = content_parts
 
@@ -623,8 +738,10 @@ class PersistenceManager(object):
     def remove_feature(self, node, feature_type, name):
 
         features = self.get_features(node)
+        self._underlying_persistence.remove_feature(node, feature_type, name)
         new_features = [i for i in features if not (i.feature_type == feature_type and i.name == name)]
         self.feature_cache[node.uuid] = new_features
+        self.node_cache.add_obj(node)
 
     def get_features(self, node):
 
@@ -640,4 +757,5 @@ class PersistenceManager(object):
             features = self._underlying_persistence.get_features(node)
             self.feature_cache[node.uuid] = features
 
+        self.node_cache.add_obj(node)
         self.feature_cache[node.uuid].append(feature)

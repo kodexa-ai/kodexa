@@ -9,7 +9,7 @@ def test_basic_assistant():
     # see the processing
 
     extension_pack_util = ExtensionPackUtil("tests/kodexa-assistant.yml")
-    lds = LocalDocumentStore('/tmp/assistant-lds', force_initialize=True)
+    lds = LocalDocumentStore()
     assistant_harness = extension_pack_util.get_assistant_test_harness("my-assistant", stores=[lds],
                                                                        assistant_metadata=AssistantMetadata(
                                                                            'test-assistant-1', 'My Test Assistant'))
@@ -25,4 +25,4 @@ def test_basic_assistant():
 
     assert lds.get_family_by_path('missing') is None
     document_family = lds.get_family_by_path('cheesy-puff.txt')
-    assert document_family.get_document_count() == 2
+    assert len(document_family.content_objects) == 2

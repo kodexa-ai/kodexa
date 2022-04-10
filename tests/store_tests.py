@@ -4,7 +4,7 @@ from kodexa import *
 
 
 def test_basic_local_document_store():
-    lds = LocalDocumentStore('/tmp/lds-test', force_initialize=True)
+    lds = LocalDocumentStore()
 
     d1 = Document.from_text("Hello World")
 
@@ -18,10 +18,11 @@ def test_basic_local_document_store():
     assert family is not None
 
     lds.add_related_document_to_family(family.id,
-                                       DocumentTransition(TransitionType.DERIVED, family.get_latest_content().id),
+                                       DocumentTransition(transitionType=TransitionType.derived,
+                                                          sourceContentObjectId=family.content_objects[-1].id),
                                        Document.from_text('Hello again world'))
 
-    assert lds.get_family_by_path("my_document.txt").get_document_count() == 2
+    assert len(lds.get_family_by_path("my_document.txt").content_objects) == 2
 
 
 @pytest.mark.skip

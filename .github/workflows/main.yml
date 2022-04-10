@@ -22,6 +22,7 @@ jobs:
         with:
           file_name: './VERSION'
           tag_version: "true"
+          postfix: 'beta'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install dependencies
