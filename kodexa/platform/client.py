@@ -26,7 +26,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack
+    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions
 
 logger = logging.getLogger()
 
@@ -108,8 +108,11 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         url = f"/api/{self.get_type()}/_reindex"
         self.client.post(url)
 
-    def find_by_slug(self, slug) -> Optional[Type[BaseModel]]:
-        component_page = self.list(filters=["slug=" + slug])
+    def find_by_slug(self, slug, version=None) -> Optional[Type[BaseModel]]:
+        filters = ["slug=" + slug]
+        if version is not None:
+            filters.append("version=" + version)
+        component_page = self.list(filters)
         if component_page.empty:
             return None
         else:
@@ -572,6 +575,12 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
 
     def get_instance_class(self) -> Type[BaseModel]:
         return ExtensionPackEndpoint
+
+    def deploy_from_url(self, extension_pack_url: str,
+                        deployment_options: DeploymentOptions) -> "ExtensionPackEndpoint":
+        url = f"/api/{self.organization.slug}/extensionPacks"
+        create_response = self.client.post(url, body=deployment_options, params={"url": extension_pack_url})
+        return ExtensionPackEndpoint.parse_obj(create_response.json()).set_client(self.client)
 
 
 class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
