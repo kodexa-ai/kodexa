@@ -36,50 +36,7 @@ class Ref:
 
         (self.org_slug, self.slug) = first_part.split("/")
 
-    def get_name(self):
-        pass
-
-    def merge(self, other_store):
-        pass
-
-    def to_dict(self):
-        pass
-
-    def set_pipeline_context(self, pipeline_context):
-        pass
-
-    def count(self):
-        pass
-
-
-class RemoteStore:
-    """A remote store is one that refers to a Kodexa platform  instance"""
-
-    def get_ref(self) -> str:
-        """Get the reference to the store on the platform (i.e. kodexa/my-store:1.1.0)
-
-        :return: The reference
-
-        Args:
-
-        Returns:
-
-        """
-        pass
-
-    def delete_contents(self):
-        """Delete the contents of the store"""
-        from kodexa import KodexaPlatform
-        import requests
-        resp = requests.delete(
-            f"{KodexaPlatform.get_url()}/api/stores/{self.get_ref().replace(':', '/')}/fs",
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
-
-        if resp.status_code == 200:
-            return resp.content
-        else:
-            msg = f"Unable to delete families {resp.text}, status : {resp.status_code}"
-            raise Exception(msg)
+        self.object_ref = f"{self.org_slug}/{self.slug}:{self.version}" if self.version else f"{self.org_slug}/{self.slug}"
 
 
 class DocumentMetadata(Dict):
