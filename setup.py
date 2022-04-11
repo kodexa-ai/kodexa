@@ -35,12 +35,10 @@ setup(name='kodexa',
           'rich',
           'appdirs',
           'jsonpickle',
-          'jsonpickle',
           'better_exceptions',
           'tblib',
           'simpleeval',
           'pyfunctional',
-          'bbox',
           'pydantic_yaml'
       ],
       entry_points="""
