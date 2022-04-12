@@ -24,7 +24,7 @@ setup(name='kodexa',
                 'kodexa.assistant', 'kodexa.cloud', 'kodexa.testing', 'kodexa.cli',
                 'kodexa.cli.templates'],
       install_requires=[
-          'addict~=2.2.1',
+          'addict',
           'requests',
           'msgpack~=1.0.0',
           'urllib3',

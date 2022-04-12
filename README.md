@@ -13,9 +13,8 @@ For more information on how to use Kodexa see https://developer.kodexa.com/
 
 ## Current Development
 
-The current stable version of Kodexa is available in the release-3.3 branch.
+The current stable version of Kodexa is available in the release-4.0 branch.
 
-The main branch is 4.0.0 which is under development and considered an beta version.
 
 ## Set-up
 
@@ -27,14 +26,6 @@ Activate the conda environment with the command:
 
     conda activate kodexa
     pip install -r requirements.txt
-
-## Building Client and Selector ANTLR
-
-Currently, the build of the OpenAPI client and ANTLR grammar require the tools to be installed on your
-path.
-
-    $ brew install openapi-generator
-    $ brew install antlr
 
 ## License
 
