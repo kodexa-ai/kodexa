@@ -18,14 +18,15 @@ from typing import Type, Optional, List
 
 import requests
 from functional import seq
+from pydantic import BaseModel
+
 from kodexa.model import Store, Taxonomy, Document
 from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions
-from pydantic import BaseModel
+    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership
 
 logger = logging.getLogger()
 
@@ -253,6 +254,12 @@ class PageUserEndpoint(PageUser, PageEndpoint):
         return "user"
 
 
+class PageMembershipEndpoint(PageMembership, PageEndpoint):
+
+    def get_type(self) -> Optional[str]:
+        return "membership"
+
+
 class PageProjectEndpoint(PageProject, PageEndpoint):
 
     def get_type(self) -> Optional[str]:
@@ -306,7 +313,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
 
     @property
     def projects(self) -> 'ProjectsEndpoint':
-        return ProjectsEndpoint(self.client, self).find_by_organization(self)
+        return ProjectsEndpoint(self.client, self)
 
     def deploy(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
@@ -729,19 +736,46 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
         return self.find_taxon(self.taxons, path_parts)
 
 
+class MembershipEndpoint(Membership, EntityEndpoint):
+    def get_type(self) -> str:
+        return "memberships"
+
+
 class UserEndpoint(User, EntityEndpoint):
     def get_type(self) -> str:
         return "users"
 
     def activate(self) -> "UserEndpoint":
-        url = f"/api/{self.id}/activate"
+        url = f"/api/users/{self.id}/activate"
         response = self.client.put(url)
         return UserEndpoint.parse_obj(response.json()).set_client(self.client)
 
     def deactivate(self) -> "UserEndpoint":
-        url = f"/api/{self.id}/activate"
+        url = f"/api/users/{self.id}/activate"
         response = self.client.put(url)
         return UserEndpoint.parse_obj(response.json()).set_client(self.client)
+
+    def set_password(self, password: str, reset_token) -> "UserEndpoint":
+        url = f"/api/users/{self.id}/password"
+        response = self.client.put(url, body={"password": password, "resetToken": reset_token})
+        return UserEndpoint.parse_obj(response.json()).set_client(self.client)
+
+    def get_memberships(self) -> List[MembershipEndpoint]:
+        url = f"/api/users/{self.id}/memberships"
+        response = self.client.get(url)
+        return [MembershipEndpoint.parse_obj(membership) for membership in response.json()]
+
+
+class MembershipsEndpoint(EntitiesEndpoint):
+
+    def get_type(self) -> str:
+        return f"memberships"
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return MembershipEndpoint
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageMembershipEndpoint
 
 
 class UsersEndpoint(EntitiesEndpoint):
@@ -1378,7 +1412,24 @@ class KodexaClient:
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
         self.users = UsersEndpoint(self)
+        self.memberships = MembershipsEndpoint(self)
 
+    @staticmethod
+    def login(url, email, password):
+        from requests.auth import HTTPBasicAuth
+        obj_response = requests.get(f"{url}/api/account/me/token",
+                                    auth=HTTPBasicAuth(email, password),
+                                    headers={"content-type": "application/json"})
+        if obj_response.status_code == 200:
+            return KodexaClient(url, obj_response.text)
+        else:
+            raise Exception(f"Check your URL and password [{obj_response.status_code}]")
+
+    @property
+    def me(self):
+        return UserEndpoint.parse_obj(self.get("/api/account/me").json()).set_client(self)
+
+    @property
     def platform(self) -> PlatformOverview:
         return PlatformOverview.parse_obj(self.get('/api').json())
 
@@ -1489,7 +1540,8 @@ class KodexaClient:
                 "modelRuntime": ModelRuntimeEndpoint,
                 "extensionPack": ExtensionPackEndpoint,
                 "user": UserEndpoint,
-                "project": ProjectEndpoint
+                "project": ProjectEndpoint,
+                "membership": MembershipEndpoint
             }
 
             if component_type in known_components:
