@@ -254,6 +254,11 @@ class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
 
 class EntityEndpoint(BaseEntity, ClientEndpoint):
 
+    def reload(self):
+        url = f"/api/{self.get_type()}/{self.id}"
+        response = self.client.get(url)
+        return self.parse_obj(response.json()).set_client(self.client)
+
     def get_type(self) -> str:
         raise NotImplementedError()
 
@@ -688,8 +693,15 @@ class UserEndpoint(User, EntityEndpoint):
     def get_type(self) -> str:
         return "users"
 
-    def delete(self):
-        raise Exception("You can not delete a user")
+    def activate(self) -> "UserEndpoint":
+        url = f"/api/{self.id}/activate"
+        response = self.client.put(url)
+        return UserEndpoint.parse_obj(response.json()).set_client(self.client)
+
+    def deactivate(self) -> "UserEndpoint":
+        url = f"/api/{self.id}/activate"
+        response = self.client.put(url)
+        return UserEndpoint.parse_obj(response.json()).set_client(self.client)
 
 
 class UsersEndpoint:
@@ -715,7 +727,7 @@ class UsersEndpoint:
 
     def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
              filters: Optional[List[str]] = None) -> PageUser:
-        url = f"/api/organizations"
+        url = f"/api/users"
 
         params = {"query": query,
                   "page": page,
