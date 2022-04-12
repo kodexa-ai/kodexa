@@ -18,8 +18,6 @@ from typing import Type, Optional, List
 
 import requests
 from functional import seq
-from pydantic import BaseModel
-
 from kodexa.model import Store, Taxonomy, Document
 from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
@@ -27,6 +25,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions
+from pydantic import BaseModel
 
 logger = logging.getLogger()
 
@@ -82,7 +81,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
             params["sort"] = sort
 
         if filters is not None:
-            params["filters"] = filters
+            params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
         return [self.get_instance_class().parse_obj(item).set_client(self.client) for item in list_response.json()]
@@ -200,6 +199,9 @@ class OrganizationsEndpoint:
 
 class PageEndpoint(ClientEndpoint):
 
+    def get_type(self) -> Optional[str]:
+        return None
+
     def to_df(self):
         import pandas as pd
         df = pd.DataFrame(seq(self.content).map(lambda x: x.dict()).to_list())
@@ -216,7 +218,8 @@ class PageEndpoint(ClientEndpoint):
         return self.to_endpoints()
 
     def to_endpoints(self):
-        self.content = seq(self.content).map(lambda x: self.client.deserialize(x.dict(by_alias=True))).to_list()
+        self.content = seq(self.content).map(
+            lambda x: self.client.deserialize(x.dict(by_alias=True), type=self.get_type())).to_list()
         return self
 
 
@@ -245,7 +248,15 @@ class PageCredentialEndpoint(PageCredential, PageEndpoint):
 
 
 class PageUserEndpoint(PageUser, PageEndpoint):
-    pass
+
+    def get_type(self) -> Optional[str]:
+        return "user"
+
+
+class PageProjectEndpoint(PageProject, PageEndpoint):
+
+    def get_type(self) -> Optional[str]:
+        return "project"
 
 
 class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
@@ -294,7 +305,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         return "organizations"
 
     @property
-    def projects(self) -> PageProject:
+    def projects(self) -> 'ProjectsEndpoint':
         return ProjectsEndpoint(self.client, self).find_by_organization(self)
 
     def deploy(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
@@ -500,18 +511,28 @@ class ProjectEndpoint(EntityEndpoint, Project):
         return ProjectAssistantsEndpoint().set_client(self.client).set_project(self)
 
 
-class ProjectsEndpoint:
+class EntitiesEndpoint:
+
+    def get_type(self) -> str:
+        raise NotImplementedError()
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        raise NotImplementedError()
+
+    def get_page_class(self) -> Type[BaseModel]:
+        raise NotImplementedError()
 
     def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint" = None):
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
 
     def reindex(self):
-        url = f'/api/projects/_reindex'
+        url = f'/api/{self.get_type()}/_reindex'
+
         self.client.post(url)
 
-    def list(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/projects"
+    def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
+        url = f"/api/{self.get_type()}"
 
         params = {"query": query,
                   "page": page,
@@ -520,31 +541,54 @@ class ProjectsEndpoint:
         if sort is not None:
             params["sort"] = sort
 
-        list_response = self.client.get(url, params=params)
-        return PageProject.parse_obj(list_response.json())
+        if filters is not None:
+            params["filter"] = filters
 
-    def find_by_name(self, project_name: str) -> Project:
-        url = f"/api/projects/"
+        list_response = self.client.get(url, params=params)
+        return self.get_page_class().parse_obj(list_response.json()).set_client(self.client)
+
+    def find_by_organization(self, organization: Organization) -> PageProject:
+        url = f"/api/{self.get_type()}/"
+        get_response = self.client.get(url, params={'filter': f'organization.id={organization.id}'})
+        return self.get_page_class().parse_obj(get_response.json()).set_client(self.client)
+
+    def get(self, entity_id: str) -> "EntityEndpoint":
+        url = f"/api/{self.get_type()}/{entity_id}"
+        get_response = self.client.get(url)
+        return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
+
+    def create(self, new_entity: EntityEndpoint) -> EntityEndpoint:
+        url = f"/api/{self.get_type()}"
+
+        create_response = self.client.post(url, body=json.loads(new_entity.json(exclude={'client'}, by_alias=True)))
+        return self.get_instance_class().parse_obj(create_response.json()).set_client(self.client)
+
+    def delete(self, id: str) -> None:
+        url = f"/api/{self.get_type()}/{id}"
+        self.client.delete(url)
+
+
+class ProjectsEndpoint(EntitiesEndpoint):
+
+    def get_type(self) -> str:
+        return f"projects"
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return ProjectEndpoint
+
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageProjectEndpoint
+
+    def find_by_name(self, project_name: str) -> ProjectEndpoint:
+        url = f"/api/{self.get_type()}/"
         get_response = self.client.get(url, params={'filter': f'name={project_name}'})
         if len(get_response.json()['content']) > 0:
             return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
         else:
             raise Exception("Project not found")
 
-    def find_by_organization(self, organization: Organization) -> PageProject:
-        url = f"/api/projects/"
-        get_response = self.client.get(url, params={'filter': f'organization.id={organization.id}'})
-        projects_page = PageProject.parse_obj(get_response.json())
-        projects_page.content = [ProjectEndpoint.parse_obj(project) for project in projects_page.content]
-        return projects_page
-
-    def get(self, project_id: str) -> Project:
-        url = f"/api/projects/{project_id}"
-        get_response = self.client.get(url)
-        return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
-
     def create(self, project: Project, template_ref: str = None) -> Project:
-        url = f"/api/projects"
+        url = f"/api/{self.get_type()}"
 
         if template_ref is not None:
             params = {"templateRef": template_ref}
@@ -554,10 +598,6 @@ class ProjectsEndpoint:
         create_response = self.client.post(url, body=json.loads(project.json(exclude={'client'}, by_alias=True)),
                                            params=params)
         return ProjectEndpoint.parse_obj(create_response.json()).set_client(self.client)
-
-    def delete(self, id: str) -> None:
-        url = f"/api/projects/{id}"
-        self.client.delete(url)
 
 
 class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -704,47 +744,16 @@ class UserEndpoint(User, EntityEndpoint):
         return UserEndpoint.parse_obj(response.json()).set_client(self.client)
 
 
-class UsersEndpoint:
-    """
-    Represents the organization endpoint
-    """
+class UsersEndpoint(EntitiesEndpoint):
 
-    def __init__(self, client: "KodexaClient"):
-        self.client: "KodexaClient" = client
+    def get_type(self) -> str:
+        return f"users"
 
-    def reindex(self):
-        url = f'/api/users/_reindex'
-        self.client.post(url)
+    def get_instance_class(self) -> Type[BaseModel]:
+        return UserEndpoint
 
-    def create(self, user: User) -> UserEndpoint:
-        url = f"/api/users"
-        create_response = self.client.post(url, body=json.loads(user.json(by_alias=True)))
-        return UserEndpoint.parse_obj(create_response.json()).set_client(self.client)
-
-    def delete(self, id: str) -> None:
-        url = f"/api/users/{id}"
-        self.client.delete(url)
-
-    def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
-             filters: Optional[List[str]] = None) -> PageUser:
-        url = f"/api/users"
-
-        params = {"query": query,
-                  "page": page,
-                  "pageSize": pagesize}
-
-        if sort is not None:
-            params["sort"] = sort
-        if filters is not None:
-            params["filter"] = filters
-
-        list_response = self.client.get(url, params=params)
-        return PageUser.parse_obj(list_response.json())
-
-    def get(self, user_id) -> UserEndpoint:
-        url = f"/api/users/{user_id}"
-        get_response = self.client.get(url)
-        return UserEndpoint.parse_obj(get_response.json()).set_client(self.client)
+    def get_page_class(self) -> Type[BaseModel]:
+        return PageUserEndpoint
 
 
 class DataObjectEndpoint(DataObject, ClientEndpoint):
@@ -1439,9 +1448,9 @@ class KodexaClient:
         else:
             return self.base_url + "/" + url
 
-    def deserialize(self, component_dict: dict) -> ComponentInstanceEndpoint:
-        if "type" in component_dict:
-            component_type = component_dict["type"]
+    def deserialize(self, component_dict: dict, type: Optional[str]) -> ComponentInstanceEndpoint:
+        if "type" in component_dict or type is not None:
+            component_type = type if type is not None else component_dict["type"]
             if component_type == 'store':
                 if "storeType" in component_dict:
                     store_type = component_dict["storeType"]
@@ -1478,7 +1487,9 @@ class KodexaClient:
                 "credential": CredentialEndpoint,
                 "projectTemplate": ProjectTemplateEndpoint,
                 "modelRuntime": ModelRuntimeEndpoint,
-                "extensionPack": ExtensionPackEndpoint
+                "extensionPack": ExtensionPackEndpoint,
+                "user": UserEndpoint,
+                "project": ProjectEndpoint
             }
 
             if component_type in known_components:
