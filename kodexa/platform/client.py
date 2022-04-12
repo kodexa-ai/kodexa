@@ -825,6 +825,9 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                 return updated_document_family
             if label and label in updated_document_family.labels:
                 return updated_document_family
+
+            time.sleep(5)
+
         raise Exception(f"Not available on document family {self.id}")
 
     def delete(self):

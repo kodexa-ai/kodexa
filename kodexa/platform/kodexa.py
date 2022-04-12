@@ -1083,7 +1083,7 @@ class RemoteSession:
                 logger.info(f"Status changed from {status} -> {execution.status}")
                 status = execution.status
 
-            time.sleep(1)
+            time.sleep(5)
 
         if status == "FAILED":
             logger.warning("Execution has failed")
