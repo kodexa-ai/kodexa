@@ -1502,7 +1502,7 @@ class KodexaClient:
         else:
             return self.base_url + "/" + url
 
-    def deserialize(self, component_dict: dict, type: Optional[str]) -> ComponentInstanceEndpoint:
+    def deserialize(self, component_dict: dict, type: Optional[str] = None) -> ComponentInstanceEndpoint:
         if "type" in component_dict or type is not None:
             component_type = type if type is not None else component_dict["type"]
             if component_type == 'store':
