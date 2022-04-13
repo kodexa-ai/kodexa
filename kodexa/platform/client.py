@@ -132,7 +132,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["filters"] = filters
 
         list_response = self.client.get(url, params=params)
-        return self.get_page_class().parse_obj(list_response.json())
+        return self.get_page_class().parse_obj(list_response.json()).to_endpoints(self.client)
 
     def create(self, component):
         url = f"/api/{self.get_type()}/{self.organization.slug}/"
