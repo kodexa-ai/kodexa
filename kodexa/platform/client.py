@@ -630,7 +630,7 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
 
     def deploy_from_url(self, extension_pack_url: str,
                         deployment_options: DeploymentOptions) -> "ExtensionPackEndpoint":
-        url = f"/api/{self.organization.slug}/extensionPacks"
+        url = f"/api/extensionPacks/{self.organization.slug}"
         create_response = self.client.post(url, body=json.loads(deployment_options.json(by_alias=True)), params={"uri": extension_pack_url})
         return ExtensionPackEndpoint.parse_obj(create_response.json()).set_client(self.client)
 
