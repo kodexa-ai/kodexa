@@ -112,7 +112,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         filters = ["slug=" + slug]
         if version is not None:
             filters.append("version=" + version)
-        component_page = self.list(filters)
+        component_page = self.list(filters=filters)
         if component_page.empty:
             return None
         else:
@@ -132,7 +132,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["filters"] = filters
 
         list_response = self.client.get(url, params=params)
-        return self.get_page_class().parse_obj(list_response.json()).to_endpoints(self.client)
+        return self.get_page_class().parse_obj(list_response.json()).set_client(self.client).to_endpoints()
 
     def create(self, component):
         url = f"/api/{self.get_type()}/{self.organization.slug}/"
@@ -631,7 +631,8 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
     def deploy_from_url(self, extension_pack_url: str,
                         deployment_options: DeploymentOptions) -> "ExtensionPackEndpoint":
         url = f"/api/extensionPacks/{self.organization.slug}"
-        create_response = self.client.post(url, body=json.loads(deployment_options.json(by_alias=True)), params={"uri": extension_pack_url})
+        create_response = self.client.post(url, body=json.loads(deployment_options.json(by_alias=True)),
+                                           params={"uri": extension_pack_url})
         return ExtensionPackEndpoint.parse_obj(create_response.json()).set_client(self.client)
 
 
