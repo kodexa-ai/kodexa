@@ -220,7 +220,7 @@ class PageEndpoint(ClientEndpoint):
 
     def to_endpoints(self):
         self.content = seq(self.content).map(
-            lambda x: self.client.deserialize(x.dict(by_alias=True), type=self.get_type())).to_list()
+            lambda x: self.client.deserialize(x.dict(exclude={'client'}, by_alias=True), type=self.get_type())).to_list()
         return self
 
 
