@@ -1110,10 +1110,10 @@ class DocumentStoreEndpoint(StoreEndpoint):
         else:
             additional_metadata = {'path': path}
 
-        if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params=additional_metadata):
+        if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}):
             self.client.delete(
                 f"/api/stores/{self.ref.replace(':', '/')}/fs",
-                params={"path": path})
+                params=additional_metadata)
             logger.info(f"Deleting {path}")
 
         content_object_response = self.client.post(
