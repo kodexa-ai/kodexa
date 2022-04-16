@@ -5,12 +5,12 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: "${git.build.version}"
+  version: 5.0.306
 externalDocs:
   description: Kodexa Developer Portal
   url: https://developer.kodexa.ai
 servers:
-- url: http://localhost:8080
+- url: https://cass.kodexa.com
   description: Generated server url
 tags:
 - name: Teams
@@ -10577,9 +10577,9 @@ components:
           type: string
           description: A label for the transition (this can be used later if we want
             to prune based on a label)
-        destinationContentObjectId:
-          type: string
         sourceContentObjectId:
+          type: string
+        destinationContentObjectId:
           type: string
       description: "Provides the definition of a transition for a document, where\
         \ a change was applied by an assistant, user or external process"
@@ -10755,13 +10755,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
-        label:
-          type: string
-          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
+        label:
+          type: string
+          writeOnly: true
     DataLineage:
       type: object
       properties:
@@ -11826,16 +11826,12 @@ components:
     PageUser:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11848,11 +11844,15 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     PageableObject:
@@ -11878,23 +11878,19 @@ components:
       properties:
         empty:
           type: boolean
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
     PageTeam:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11907,26 +11903,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageTaxonomy:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageTaxonomy:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11939,26 +11935,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageStore:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageStore:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -11971,26 +11967,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageDocumentFamily:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageDocumentFamily:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12003,26 +11999,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageExecution:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageExecution:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12035,11 +12031,15 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     PlatformEvent:
@@ -12071,16 +12071,12 @@ components:
     PageDataObject:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12093,11 +12089,15 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     AuditEvent:
@@ -12179,16 +12179,12 @@ components:
     PageAuditEvent:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12201,26 +12197,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageNote:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageNote:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12233,26 +12229,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageSession:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageSession:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12265,26 +12261,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageRole:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageRole:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12297,26 +12293,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageProject:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageProject:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12329,26 +12325,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageProjectTemplate:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageProjectTemplate:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12361,26 +12357,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PagePipeline:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PagePipeline:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12393,26 +12389,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageOrganization:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageOrganization:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12425,26 +12421,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageModelRuntime:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageModelRuntime:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12457,26 +12453,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageMembership:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageMembership:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12489,26 +12485,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageSlugBasedMetadata:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageSlugBasedMetadata:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12531,26 +12527,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageLabel:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageLabel:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12563,26 +12559,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageExtensionPack:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageExtensionPack:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12595,26 +12591,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageExecutionLogEntry:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageExecutionLogEntry:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12627,26 +12623,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PagePlatformEvent:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PagePlatformEvent:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12659,26 +12655,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageDashboard:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageDashboard:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12691,26 +12687,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageCredential:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageCredential:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12723,26 +12719,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageAssistantDefinition:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageAssistantDefinition:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12755,26 +12751,26 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
-        numberOfElements:
-          type: integer
-          format: int32
         pageable:
           $ref: '#/components/schemas/PageableObject'
-        empty:
-          type: boolean
-    PageAction:
-      type: object
-      properties:
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
+        numberOfElements:
           type: integer
           format: int32
         first:
           type: boolean
         last:
           type: boolean
+        empty:
+          type: boolean
+    PageAction:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12787,11 +12783,15 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     AccessTokenDetails:
@@ -12804,16 +12804,12 @@ components:
     PageAccessToken:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
-        first:
-          type: boolean
-        last:
-          type: boolean
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -12826,11 +12822,15 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/Sort'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
+        first:
+          type: boolean
+        last:
+          type: boolean
         empty:
           type: boolean
     BulkDelete:
