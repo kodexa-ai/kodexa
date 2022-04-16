@@ -19,6 +19,7 @@ from typing import Type, Optional, List
 import requests
 from functional import seq
 from pydantic import BaseModel
+from pydantic_yaml import YamlModel
 
 from kodexa.model import Store, Taxonomy, Document
 from kodexa.model.base import BaseEntity
@@ -44,7 +45,7 @@ class OrganizationOwned(BaseModel):
         return self
 
 
-class ClientEndpoint(BaseModel):
+class ClientEndpoint(YamlModel):
     client: Optional["KodexaClient"] = None
 
     def set_client(self, client):
@@ -55,6 +56,13 @@ class ClientEndpoint(BaseModel):
 
     def to_dict(self):
         return json.loads(self.json(exclude={'client'}, by_alias=True))
+
+    def yaml(self, **kwargs):
+        if 'exclude' in kwargs:
+            kwargs['exclude']['client']
+        else:
+            kwargs['exclude'] = {'client'}
+        return YamlModel.yaml(self, **kwargs)
 
     def detach(self):
         return self.copy(exclude={'client'})
