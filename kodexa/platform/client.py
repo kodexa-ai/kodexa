@@ -220,7 +220,8 @@ class PageEndpoint(ClientEndpoint):
 
     def to_endpoints(self):
         self.content = seq(self.content).map(
-            lambda x: self.client.deserialize(x.dict(exclude={'client'}, by_alias=True), type=self.get_type())).to_list()
+            lambda x: self.client.deserialize(x.dict(exclude={'client'}, by_alias=True),
+                                              type=self.get_type())).to_list()
         return self
 
 
@@ -1077,17 +1078,19 @@ class DocumentStoreEndpoint(StoreEndpoint):
         else:
             raise Exception(f"{file_path} is not a file")
 
-    def upload_file(self, file_path: str, object_path: Optional[str] = None, replace=False):
+    def upload_file(self, file_path: str, object_path: Optional[str] = None, replace=False,
+                    additional_metadata: Optional[dict] = None):
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
             with open(file_path, 'rb') as path_content:
                 return self.upload_bytes(path=object_path if object_path is not None else file_path,
                                          content=path_content,
-                                         replace=replace)
+                                         replace=replace, additional_metadata=additional_metadata)
         else:
             raise Exception(f"{file_path} is not a file")
 
-    def upload_bytes(self, path: str, content, replace=False) -> DocumentFamilyEndpoint:
+    def upload_bytes(self, path: str, content, replace=False,
+                     additional_metadata: Optional[dict] = None) -> DocumentFamilyEndpoint:
         """
         Put the content into the store at the given path
 
@@ -1095,13 +1098,19 @@ class DocumentStoreEndpoint(StoreEndpoint):
           path: The path you wish to put the content at
           content: The content for that object
           replace: Replace the content if it exists
+          additional_metadata: Additional metadata to store with the document (not it can't include 'path')
 
         Returns:
           the document family that was created
         """
         files = {"file": content}
 
-        if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}):
+        if additional_metadata is not None:
+            additional_metadata['path'] = path
+        else:
+            additional_metadata = {'path': path}
+
+        if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params=additional_metadata):
             self.client.delete(
                 f"/api/stores/{self.ref.replace(':', '/')}/fs",
                 params={"path": path})
