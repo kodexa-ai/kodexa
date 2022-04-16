@@ -1113,12 +1113,13 @@ class DocumentStoreEndpoint(StoreEndpoint):
         if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}):
             self.client.delete(
                 f"/api/stores/{self.ref.replace(':', '/')}/fs",
-                params=additional_metadata)
+                params={"path": path})
             logger.info(f"Deleting {path}")
 
         content_object_response = self.client.post(
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": path},
+            data=additional_metadata,
             files=files)
         logger.info(f"Uploaded {path} ({content_object_response.status_code})")
         return DocumentFamilyEndpoint.parse_obj(content_object_response.json()).set_client(self.client)
