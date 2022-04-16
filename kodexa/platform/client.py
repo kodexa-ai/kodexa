@@ -49,6 +49,8 @@ class ClientEndpoint(BaseModel):
 
     def set_client(self, client):
         self.client = client
+        if isinstance(self, ComponentInstanceEndpoint):
+            self.ref = f"{self.org_slug}/{self.slug}:{self.version}"
         return self
 
     def to_dict(self):
@@ -1105,10 +1107,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
         files = {"file": content}
 
-        if additional_metadata is not None:
-            additional_metadata['path'] = path
-        else:
-            additional_metadata = {'path': path}
+        if additional_metadata is None:
+            additional_metadata = {}
 
         if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}):
             self.client.delete(
@@ -1260,14 +1260,24 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
         results = []
         if metadata.contents:
+
+            ignore_files = []
+            if metadata.ignored_contents:
+                for ignore_path in metadata.ignored_contents:
+                    final_wildcard = os.path.join(metadata.base_dir, ignore_path) if metadata.base_dir else ignore_path
+                    for path_hit in glob.glob(final_wildcard, recursive=True):
+                        ignore_files.append(path_hit)
+
             for content_path in metadata.contents:
                 final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
                 num_hits = 0
+
                 for path_hit in glob.glob(final_wildcard, recursive=True):
+                    if path_hit in ignore_files:
+                        continue
                     relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
 
                     # We will put the implementation in one place
-
                     relative_path = self.IMPLEMENTATION_PREFIX + relative_path
                     if Path(path_hit).is_file():
                         with open(path_hit, 'rb') as path_content:
