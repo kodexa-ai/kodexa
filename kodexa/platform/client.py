@@ -27,7 +27,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership
+    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, Label
 
 logger = logging.getLogger()
 
@@ -62,6 +62,10 @@ class ClientEndpoint(YamlModel):
             kwargs['exclude']['client']
         else:
             kwargs['exclude'] = {'client'}
+
+        kwargs['exclude_unset'] = True
+        kwargs['exclude_none'] = True
+
         return YamlModel.yaml(self, **kwargs)
 
     def detach(self):
@@ -850,7 +854,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         else:
             raise Exception(f"Document family {self.id} does not exist")
 
-    def get_native(self) -> Document:
+    def get_native(self) -> bytes:
         hits = list(filter(lambda content_object: content_object.content_type == 'NATIVE', self.content_objects))
         if len(hits) == 0:
             raise Exception(f"No native content object found on document family {self.id}")
@@ -859,6 +863,10 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{hits[0].id}/content")
 
         return get_response.content
+
+    def update_labels(self, labels: List[Label]) -> List[Label]:
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/labels"
+        return self.client.put(url, body=labels)
 
     def get_document(self, content_object: Optional[ContentObject] = None) -> Document:
         if content_object is None:
