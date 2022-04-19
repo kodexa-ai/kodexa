@@ -1519,13 +1519,13 @@ class KodexaClient:
                                  headers=headers)
         return process_response(response)
 
-    def put(self, url, body=None, data=None, files=None) -> requests.Response:
+    def put(self, url, body=None, data=None, files=None, params=None) -> requests.Response:
         headers = {"x-access-token": self.access_token}
         if files is None:
             headers["content-type"] = "application/json"
         else:
             headers["content-type"] = "multipart/form-data"
-        response = requests.put(self.get_url(url), json=body, data=data, files=files,
+        response = requests.put(self.get_url(url), json=body, data=data, files=files, params=params,
                                 headers=headers)
         return process_response(response)
 
