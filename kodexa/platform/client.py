@@ -882,6 +882,10 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content")
         return Document.from_kddb(get_response.content)
 
+    def reprocess(self, assistant: Assistant):
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/reprocess"
+        self.client.put(url, params={'assistantId': assistant.id})
+
     def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
         feature_set = FeatureSet()
         if content_object is None:
