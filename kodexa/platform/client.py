@@ -27,7 +27,8 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, Label
+    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, Label, \
+    PageDocumentFamily
 
 logger = logging.getLogger()
 
@@ -283,6 +284,12 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
 
 class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
     pass
+
+
+class PageDocumentFamilyEndpoint(PageDocumentFamily, PageEndpoint):
+
+    def get_type(self) -> Optional[str]:
+        return "documentFamily"
 
 
 class EntityEndpoint(BaseEntity, ClientEndpoint):
@@ -1179,7 +1186,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}")
         return DocumentFamilyEndpoint.parse_obj(document_family_response.json()).set_client(self.client)
 
-    def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> List[DocumentFamilyEndpoint]:
+    def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> PageDocumentFamilyEndpoint:
         params = {
             'page': page,
             'pageSize': page_size,
@@ -1191,10 +1198,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
                                        params=params)
-        families = []
-        for fam_dict in get_response.json()['content']:
-            families.append(DocumentFamilyEndpoint.parse_obj(fam_dict).set_client(self.client))
-        return families
+
+        return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
     def upload_document(self, path: str, document: "Document") -> DocumentFamilyEndpoint:
         logger.info(f"Putting document to path {path}")
@@ -1581,7 +1586,8 @@ class KodexaClient:
                 "extensionPack": ExtensionPackEndpoint,
                 "user": UserEndpoint,
                 "project": ProjectEndpoint,
-                "membership": MembershipEndpoint
+                "membership": MembershipEndpoint,
+                "documentFamily": DocumentFamilyEndpoint
             }
 
             if component_type in known_components:

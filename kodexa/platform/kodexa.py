@@ -21,13 +21,14 @@ import requests
 import yaml
 from addict import Dict
 from appdirs import AppDirs
+from functional import seq
 from rich import print, get_console
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
 from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, ExecutionEvent, \
-    ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate
+    ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate, Membership
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
 from kodexa.stores import RemoteDocumentStore, RemoteDataStore
@@ -166,6 +167,11 @@ DEFAULT_COLUMNS = {
         'assistant.name',
         'documentFamily.path'
     ],
+    'memberships': [
+        'organization.slug',
+        'organization.name'
+    ],
+
     'stores': [
         'ref',
         'name',
@@ -240,6 +246,12 @@ OBJECT_TYPES = {
         "type": Execution,
         "global": True,
         "sort": "startDate:desc"
+    },
+    "memberships": {
+        "name": "membership",
+        "plural": "memberships",
+        "type": Membership,
+        "global": True
     }
 }
 
@@ -869,37 +881,46 @@ class KodexaPlatform:
     @classmethod
     def query(cls, ref, query, download=False, page=1, page_size=10, sort=None):
 
-        store = KodexaPlatform.get_object_instance(ref, 'store')
+        client = KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
+        store = client.get_object_by_ref('store', ref)
 
-        if isinstance(store, RemoteDocumentStore):
+        if isinstance(store, DocumentStoreEndpoint):
             if download:
-                families = store.query_families(query, page=page, page_size=page_size, sort=sort)
-                for family in families:
-                    print(f"Downloading {family.path}")
+                page_document_families = store.query(query, page=page, page_size=page_size, sort=sort)
+                for family_endpoint in page_document_families.content:
+                    print(f"Downloading {family_endpoint.path}")
                     import os
-                    file_path = os.path.splitext(family.path)[0] + '.kddb'
+                    file_path = os.path.splitext(family_endpoint.path)[0] + '.kddb'
                     directory = os.path.dirname(file_path)
                     if not os.path.exists(directory):
                         os.makedirs(directory)
-                    store.get_latest_document_in_family(family).to_kddb(file_path)
+                    family_endpoint.get_document().to_kddb(file_path)
             else:
                 print("\n")
                 from rich.table import Table
 
                 table = Table(title=f"Listing Documents")
 
-                cols = ['id', 'path', 'labels', 'document_status', 'assignments', 'mixins', 'locked']
+                cols = ['id', 'path', 'labels', 'document_status', 'assignments', 'mixins', 'locked', 'created']
                 for col in cols:
                     table.add_column(col)
 
-                families = store.query_families(query)
-                for family in families:
+                def format_col(col, value):
+                    if col == 'labels':
+                        return ", ".join(seq(value).map(lambda x: x.label).to_list())
+                    else:
+                        return str(value)
+
+                page_document_families = store.query(query, page=page, page_size=page_size, sort=sort)
+                for family_endpoint in page_document_families.content:
                     row = []
                     for col in cols:
-                        row.append(str(getattr(family, col)))
+                        row.append(format_col(col, getattr(family_endpoint, col)))
                     table.add_row(*row)
 
                 print(table)
+
+                print(f"Total Matching Documents: {page_document_families.total_elements}")
 
     @classmethod
     def logs(cls, execution_id):
