@@ -612,7 +612,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
         url = f"/api/{self.get_type()}/"
         get_response = self.client.get(url, params={'filter': f'name={project_name}'})
         if len(get_response.json()['content']) > 0:
-            return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
+            return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
         else:
             raise Exception("Project not found")
 
