@@ -634,7 +634,7 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         return "stores"
 
     def get_page_class(self) -> Type[BaseModel]:
-        return PageStore
+        return PageStoreEndpoint
 
     def get_instance_class(self) -> Type[BaseModel]:
         return Store
