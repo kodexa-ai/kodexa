@@ -206,18 +206,19 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
 @click.argument('query', default="*")
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
-@click.option('--download/--no-download', default=False, help='Download the KDDB for the lastest in the family')
+@click.option('--download/--no-download', default=False, help='Download the KDDB for the latest in the family')
+@click.option('--download-native/--no-download-native', default=False, help='Download the native file for the family')
 @click.option('--page', default=1, help='Page number')
 @click.option('--pageSize', default=10, help='Page size')
 @click.option('--sort', default=None, help='Sort by ie. name:asc')
 @pass_info
-def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, page: int, pagesize: int, sort: None):
+def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, download_native: bool, page: int, pagesize: int, sort: None):
     """
     Query the documents in a given document store
     """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.query(ref, query, download, page, pagesize, sort)
+    KodexaPlatform.query(ref, query, download, page, pagesize, sort, download_native)
 
 
 @cli.command()

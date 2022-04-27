@@ -879,7 +879,7 @@ class KodexaPlatform:
         return os.getenv('KODEXA_TMP', tempfile.gettempdir())
 
     @classmethod
-    def query(cls, ref, query, download=False, page=1, page_size=10, sort=None):
+    def query(cls, ref, query, download=False, page=1, page_size=10, sort=None, download_native=False):
 
         client = KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
         store = client.get_object_by_ref('store', ref)
@@ -895,6 +895,17 @@ class KodexaPlatform:
                     if not os.path.exists(directory):
                         os.makedirs(directory)
                     family_endpoint.get_document().to_kddb(file_path)
+            if download_native:
+                page_document_families = store.query(query, page=page, page_size=page_size, sort=sort)
+                for family_endpoint in page_document_families.content:
+                    print(f"Downloading {family_endpoint.path}")
+                    import os
+                    file_path = family_endpoint.path
+                    directory = os.path.dirname(file_path)
+                    if not os.path.exists(directory):
+                        os.makedirs(directory)
+                    with open(file_path, 'wb') as f:
+                        f.write(family_endpoint.get_native())
             else:
                 print("\n")
                 from rich.table import Table
