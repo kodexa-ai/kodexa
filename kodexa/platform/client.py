@@ -205,7 +205,7 @@ class OrganizationsEndpoint:
             params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
-        return PageOrganizationEndpoint.parse_obj(list_response.json())
+        return PageOrganizationEndpoint.parse_obj(list_response.json()).set_client(self.client)
 
     def get(self, organization_id) -> "OrganizationEndpoint":
         url = f"/api/organizations/{organization_id}"
