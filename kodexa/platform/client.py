@@ -192,7 +192,7 @@ class OrganizationsEndpoint:
         self.client.delete(url)
 
     def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
-             filters: Optional[List[str]] = None) -> PageOrganization:
+             filters: Optional[List[str]] = None) -> PageOrganizationEndpoint:
         url = f"/api/organizations"
 
         params = {"query": query,
@@ -205,9 +205,9 @@ class OrganizationsEndpoint:
             params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
-        return PageOrganization.parse_obj(list_response.json())
+        return PageOrganizationEndpoint.parse_obj(list_response.json())
 
-    def get(self, organization_id) -> Organization:
+    def get(self, organization_id) -> "OrganizationEndpoint":
         url = f"/api/organizations/{organization_id}"
         get_response = self.client.get(url)
         return OrganizationEndpoint.parse_obj(**get_response.json()).set_client(self.client)
@@ -284,6 +284,12 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
 
 class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
     pass
+
+
+class PageOrganizationEndpoint(PageOrganization, PageEndpoint):
+
+    def get_type(self) -> Optional[str]:
+        return "organization"
 
 
 class PageDocumentFamilyEndpoint(PageDocumentFamily, PageEndpoint):
@@ -1591,7 +1597,8 @@ class KodexaClient:
                 "user": UserEndpoint,
                 "project": ProjectEndpoint,
                 "membership": MembershipEndpoint,
-                "documentFamily": DocumentFamilyEndpoint
+                "documentFamily": DocumentFamilyEndpoint,
+                "organization": OrganizationEndpoint
             }
 
             if component_type in known_components:
