@@ -185,7 +185,7 @@ class OrganizationsEndpoint:
         if organizations.number_of_elements == 0:
             return None
         else:
-            return OrganizationEndpoint.parse_obj(organizations.content[0].dict()).set_client(self.client)
+            return organizations.content[0]
 
     def delete(self, id: str) -> None:
         url = f"/api/organizations/{id}"
