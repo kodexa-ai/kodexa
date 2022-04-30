@@ -192,7 +192,7 @@ class OrganizationsEndpoint:
         self.client.delete(url)
 
     def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
-             filters: Optional[List[str]] = None) -> PageOrganizationEndpoint:
+             filters: Optional[List[str]] = None) -> "PageOrganizationEndpoint":
         url = f"/api/organizations"
 
         params = {"query": query,
