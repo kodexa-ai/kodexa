@@ -130,8 +130,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         component_page = self.list(filters=filters)
         if component_page.empty:
             return None
-        else:
-            return component_page.content[0]
+        return component_page.content[0]
 
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}/{self.organization.slug}"
