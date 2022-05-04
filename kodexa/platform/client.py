@@ -312,9 +312,8 @@ class EntityEndpoint(BaseEntity, ClientEndpoint):
         exists = self.client.exists(url)
         if exists:
             raise Exception("Can't create as it already exists")
-        else:
-            url = f"/api/{self.get_type()}"
-            self.client.post(url, self.to_dict())
+        url = f"/api/{self.get_type()}"
+        self.client.post(url, self.to_dict())
 
     def update(self):
         url = f"/api/{self.get_type()}/{self.id}"
