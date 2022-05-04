@@ -421,12 +421,13 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
         exists = self.client.exists(url)
         if not update and exists:
             raise Exception("Component already exists")
+
         if exists:
             self.client.put(url, self.to_dict())
             return self.post_deploy()
-        else:
-            self.client.post(f"/api/{self.get_type()}/{self.org_slug}", self.to_dict())
-            return self.post_deploy()
+
+        self.client.post(f"/api/{self.get_type()}/{self.org_slug}", self.to_dict())
+        return self.post_deploy()
 
 
 class AssistantEndpoint(Assistant, ClientEndpoint):
