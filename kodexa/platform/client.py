@@ -186,8 +186,8 @@ class OrganizationsEndpoint:
             return None
         return organizations.content[0]
 
-    def delete(self, id: str) -> None:
-        url = f"/api/organizations/{id}"
+    def delete(self, organization_id: str) -> None:
+        url = f"/api/organizations/{organization_id}"
         self.client.delete(url)
 
     def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
