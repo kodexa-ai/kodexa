@@ -327,8 +327,7 @@ class EntityEndpoint(BaseEntity, ClientEndpoint):
         exists = self.client.exists(url)
         if not exists:
             raise Exception("Component doesn't exist")
-        else:
-            self.client.delete(url)
+        self.client.delete(url)
 
 
 class OrganizationEndpoint(Organization, EntityEndpoint):
