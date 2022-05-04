@@ -392,9 +392,8 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
         exists = self.client.exists(url)
         if exists:
             raise Exception("Can't create as it already exists")
-        else:
-            url = f"/api/{self.get_type()}/{self.org_slug}"
-            self.client.post(url, self.to_dict())
+        url = f"/api/{self.get_type()}/{self.org_slug}"
+        self.client.post(url, self.to_dict())
 
     def update(self):
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
