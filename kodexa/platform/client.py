@@ -184,8 +184,7 @@ class OrganizationsEndpoint:
         organizations = self.list(filters=["slug=" + slug])
         if organizations.number_of_elements == 0:
             return None
-        else:
-            return organizations.content[0]
+        return organizations.content[0]
 
     def delete(self, id: str) -> None:
         url = f"/api/organizations/{id}"
