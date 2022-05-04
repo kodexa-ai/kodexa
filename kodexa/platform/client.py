@@ -400,16 +400,14 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
         exists = self.client.exists(url)
         if not exists:
             raise Exception("Can't update as it doesn't exist?")
-        else:
-            self.client.put(url, self.to_dict())
+        self.client.put(url, self.to_dict())
 
     def delete(self):
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
         exists = self.client.exists(url)
         if not exists:
             raise Exception("Component doesn't exist")
-        else:
-            self.client.delete(url)
+        self.client.delete(url)
 
     def deploy(self, update=False):
         if self.org_slug is None:
