@@ -746,8 +746,7 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
             if parts[0] == match_value:
                 if len(parts) == 1:
                     return taxon
-                else:
-                    return self.find_taxon(taxon.children, parts[1:], use_label)
+                return self.find_taxon(taxon.children, parts[1:], use_label)
 
     def find_taxon_by_label_path(self, label_path: str) -> Taxon:
         label_path_parts = label_path.split("/")
