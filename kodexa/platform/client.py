@@ -1491,12 +1491,11 @@ class KodexaClient:
 
         if 'type' not in object_type_metadata:
             return self.deserialize(response.json())
-        else:
-            instance = object_type_metadata['type'](**response.json())
-            if isinstance(instance, ClientEndpoint):
-                instance.set_client(self)
+        instance = object_type_metadata['type'](**response.json())
+        if isinstance(instance, ClientEndpoint):
+            instance.set_client(self)
 
-            return instance
+        return instance
 
     def get_object_by_ref(self, object_type: str, ref: str) -> BaseModel:
         return self.__build_object(ref, resolve_object_type(object_type)[1])
@@ -1509,8 +1508,7 @@ class KodexaClient:
                                                                            "content-type": "application/json"})
         if response.status_code == 200 or response.status_code == 404:
             return response.status_code == 200
-        else:
-            process_response(response)
+        process_response(response)
 
     def get(self, url, params=None) -> requests.Response:
         response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
