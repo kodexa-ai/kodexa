@@ -2455,7 +2455,6 @@ class ModelStore(Store):
           Bytes or None is there is nothing at the path
 
         """
-        pass
 
     def put(self, path: str, content: Any, replace=False) -> DocumentFamily:
         """
@@ -2468,7 +2467,6 @@ class ModelStore(Store):
           The document family that was created
 
         """
-        pass
 
     def set_content_metadata(self, model_content_metadata: ModelContentMetadata):
         """
