@@ -1836,9 +1836,9 @@ class Document(object):
 
         if path is None:
             return self.get_persistence().get_bytes()
-        else:
-            with open(path, 'wb') as output_file:
-                output_file.write(self.get_persistence().get_bytes())
+
+        with open(path, 'wb') as output_file:
+            output_file.write(self.get_persistence().get_bytes())
 
     @staticmethod
     def from_kdxa(file_path):
