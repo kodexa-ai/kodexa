@@ -1445,8 +1445,8 @@ def resolve_object_type(obj_type):
 
     if len(hits) == 0:
         raise Exception(f"Unable to find object type {obj_type}")
-    else:
-        raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
+
+    raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
 
 
 class KodexaClient:
