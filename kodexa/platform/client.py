@@ -591,8 +591,8 @@ class EntitiesEndpoint:
         create_response = self.client.post(url, body=json.loads(new_entity.json(exclude={'client'}, by_alias=True)))
         return self.get_instance_class().parse_obj(create_response.json()).set_client(self.client)
 
-    def delete(self, id: str) -> None:
-        url = f"/api/{self.get_type()}/{id}"
+    def delete(self, self_id: str) -> None:
+        url = f"/api/{self.get_type()}/{self_id}"
         self.client.delete(url)
 
 
