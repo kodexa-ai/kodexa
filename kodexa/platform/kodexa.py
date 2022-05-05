@@ -436,9 +436,9 @@ class KodexaPlatform:
             return object_class(**response.json())
         if response.status_code == 404:
             return None
-        else:
-            raise Exception(
-                f"Unable to create {object_type_metadata['plural']} with ref {ref} [{response.status_code} {response.text}]")
+
+        raise Exception(
+            f"Unable to create {object_type_metadata['plural']} with ref {ref} [{response.status_code} {response.text}]")
 
     @staticmethod
     def get_object_instance(ref: str, object_type):
