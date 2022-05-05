@@ -1052,7 +1052,7 @@ class RemoteSession:
                          headers={"x-access-token": KodexaPlatform.get_access_token()})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
-        elif r.status_code == 200:
+        if r.status_code == 200:
             return r.json()
         else:
             logger.warning(r.text)
