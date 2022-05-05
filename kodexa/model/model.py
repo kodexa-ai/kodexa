@@ -2476,7 +2476,6 @@ class ModelStore(Store):
 
         :param model_content_metadata: The metadata object
         """
-        pass
 
     def get_content_metadata(self) -> ModelContentMetadata:
         """
