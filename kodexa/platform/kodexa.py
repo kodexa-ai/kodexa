@@ -959,19 +959,19 @@ class KodexaPlatform:
             raise Exception("Reference must be a document store")
 
     @classmethod
-    def get_project(cls, id):
-        project_instance = cls.get_object_instance(id, 'project')
+    def get_project(cls, project_id):
+        project_instance = cls.get_object_instance(project_id, 'project')
         print(f"Name: [bold]{project_instance.name}[/bold]")
         print(f"Description: [bold]{project_instance.description}[/bold]\n")
 
         print("[bold]Document Stores[/bold]")
-        cls.get_project_resource(id, 'documentStores', 'stores')
+        cls.get_project_resource(project_id, 'documentStores', 'stores')
         print("[bold]Data Stores[/bold]")
-        cls.get_project_resource(id, 'dataStores', 'stores')
+        cls.get_project_resource(project_id, 'dataStores', 'stores')
         print("[bold]Content Taxonomies[/bold]")
-        cls.get_project_resource(id, 'contentTaxonomies', 'taxonomies')
+        cls.get_project_resource(project_id, 'contentTaxonomies', 'taxonomies')
         print("[bold]Assistants[/bold]")
-        cls.get_project_resource(id, 'assistants', 'assistants')
+        cls.get_project_resource(project_id, 'assistants', 'assistants')
 
     @classmethod
     def __print_table(cls, objects, object_type, title=True, show_count=True):
