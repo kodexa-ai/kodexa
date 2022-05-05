@@ -1563,8 +1563,8 @@ class ContentFeature(object):
         """
         if self.single:
             return self.value[0]
-        else:
-            return self.value
+
+        return self.value
 
 
 @dataclasses.dataclass()
