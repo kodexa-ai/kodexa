@@ -980,8 +980,8 @@ class ContentNode(object):
         def get_tag_uuid(tag_uuid):
             if tag_uuid:
                 return tag_uuid
-            else:
-                return str(uuid.uuid4())
+
+            return str(uuid.uuid4())
 
         def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
             content_length = 0
@@ -1005,7 +1005,7 @@ class ContentNode(object):
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index))
                             return -1
-                        elif start < part_length <= end:
+                        if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start,
                                                           content_length + part_length,
@@ -1032,13 +1032,12 @@ class ContentNode(object):
 
                     if result < 0 or (end - result) <= 0:
                         return -1
-                    else:
 
-                        offset = offset + result
-                        end = end - result
-                        start = 0 if start - result < 0 else start - result
+                    offset = offset + result
+                    end = end - result
+                    start = 0 if start - result < 0 else start - result
 
-                        content_length = content_length + result
+                    content_length = content_length + result
                 else:
                     raise Exception("Invalid part?")
 
