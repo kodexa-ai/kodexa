@@ -1573,8 +1573,8 @@ class KodexaClient:
                         return DataStoreEndpoint.parse_obj(component_dict).set_client(self)
 
                     raise Exception("Unknown store type: " + store_type)
-                else:
-                    raise Exception("A store must have a storeType")
+
+                raise Exception("A store must have a storeType")
             known_components = {
                 "taxonomy": TaxonomyEndpoint,
                 "pipeline": PipelineEndpoint,
