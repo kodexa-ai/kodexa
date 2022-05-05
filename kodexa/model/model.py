@@ -798,8 +798,8 @@ class ContentNode(object):
         self_bbox = self.get_bbox()
         if self_bbox:
             return self_bbox[1]
-        else:
-            return None
+
+        return None
 
     def get_width(self):
         """Get the width of the node
@@ -817,8 +817,8 @@ class ContentNode(object):
         self_bbox = self.get_bbox()
         if self_bbox:
             return self_bbox[2] - self_bbox[0]
-        else:
-            return None
+
+        return None
 
     def get_height(self):
         """Get the height of the node
@@ -836,8 +836,8 @@ class ContentNode(object):
         self_bbox = self.get_bbox()
         if self_bbox:
             return self_bbox[3] - self_bbox[1]
-        else:
-            return None
+
+        return None
 
     def copy_tag(self, selector=".", existing_tag_name=None, new_tag_name=None):
         """Creates a new tag of 'new_tag_name' on the selected content node(s) with the same information as the tag with 'existing_tag_name'.
