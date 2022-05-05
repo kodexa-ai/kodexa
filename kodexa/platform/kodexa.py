@@ -24,9 +24,10 @@ from appdirs import AppDirs
 from functional import seq
 from rich import print, get_console
 
+from kodexa import DocumentStore
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
-from kodexa.model import Document, ExtensionPack
+from kodexa.model import Document, ExtensionPack, ModelStore
 from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, ExecutionEvent, \
     ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate, Membership
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
@@ -503,13 +504,13 @@ class KodexaPlatform:
 
             builder.build_steps(metadata_object)
 
-        elif isinstance(kodexa_object, LocalDocumentStore) or isinstance(kodexa_object, RemoteDocumentStore):
+        elif isinstance(kodexa_object, DocumentStore):
             object_url = 'stores'
             metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
             metadata_object.description = 'A document store' if kodexa_object.description is None else kodexa_object.description
             metadata_object.type = 'store'
             metadata_object.storeType = 'DOCUMENT'
-        elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
+        elif isinstance(kodexa_object, ModelStore):
             object_url = 'stores'
             metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
             metadata_object.description = 'A model store' if kodexa_object.description is None else kodexa_object.description
