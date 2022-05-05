@@ -1511,8 +1511,8 @@ class ContentNode(object):
             if traverse == traverse.ALL or traverse == traverse.PARENT and self.get_parent():
                 # Lets look for a previous node on the parent
                 return self.get_parent().previous_node(node_type_re, skip_virtual, has_no_content, traverse)
-            else:
-                return None
+
+            return None
 
         search_index = self.index - 1
         compiled_node_type_re = re.compile(node_type_re)
