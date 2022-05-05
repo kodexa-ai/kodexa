@@ -2484,7 +2484,6 @@ class ModelStore(Store):
 
         :return: the model content metadata
         """
-        pass
 
     def list_contents(self) -> List[str]:
         """
