@@ -613,9 +613,9 @@ class KodexaPlatform:
                                               "content-type": "application/json"})
         if list_response.status_code == 200:
             return list_response.json()
-        else:
-            logger.warning(list_response.text)
-            raise Exception("Unable to list objects [" + list_response.text + "]")
+
+        logger.warning(list_response.text)
+        raise Exception("Unable to list objects [" + list_response.text + "]")
 
     @staticmethod
     def undeploy(object_type: str, ref: str):
