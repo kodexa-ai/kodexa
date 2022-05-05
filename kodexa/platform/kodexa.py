@@ -1132,11 +1132,9 @@ class RemoteSession:
                     if step.exceptionDetails.help:
                         logger.warning(f"Additional help is available:\n\n{step.exceptionDetails.help}")
 
-            logger.debug(execution)
-        if step:
-            raise Exception(f"Processing has failed\nDetails: {step.exceptionDetails.help}")
-        else:
-            raise Exception("Processing has failed, no steps.")
+                    raise Exception(f"Processing has failed on step {step.name}")
+
+            raise Exception("Processing has failed, no steps seem to have failed")
 
         return execution
 
