@@ -1561,7 +1561,7 @@ class KodexaClient:
                                 component_dict["metadata"])
 
                         return document_store
-                    elif store_type.lower() == "model":
+                    if store_type.lower() == "model":
                         model_store = ModelStoreEndpoint.parse_obj(component_dict)
                         model_store.set_client(self)
 
@@ -1571,7 +1571,7 @@ class KodexaClient:
                                 component_dict["metadata"])
 
                         return model_store
-                    elif store_type.lower() == "data" or store_type.lower() == "table":
+                    if store_type.lower() == "data" or store_type.lower() == "table":
                         return DataStoreEndpoint.parse_obj(component_dict).set_client(self)
                     else:
                         raise Exception("Unknown store type: " + store_type)
