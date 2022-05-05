@@ -407,8 +407,8 @@ class ContentNode(object):
         hits = [i for i in self.get_features() if i.feature_type == feature_type and i.name == name]
         if len(hits) > 0:
             return hits[0]
-        else:
-            return None
+
+        return None
 
     def get_features_of_type(self, feature_type):
         """Get all features of a specific type.
