@@ -1593,5 +1593,5 @@ class KodexaClient:
             if component_type in known_components:
                 return known_components[component_type].parse_obj(component_dict).set_client(self)
             raise Exception("Unknown component type: " + component_type)
-        else:
-            raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
+
+        raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
