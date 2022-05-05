@@ -2148,8 +2148,8 @@ class Document(object):
             result = self.content_node.select(selector, variables)
             if isinstance(result, list):
                 return result
-            else:
-                return [self.content_node] if bool(result) else []
+
+            return [self.content_node] if bool(result) else []
         return []
 
     def get_labels(self) -> List[str]:
