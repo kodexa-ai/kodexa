@@ -654,7 +654,7 @@ class KodexaPlatform:
         if obj_response.status_code == 404:
             logger.info(f"Object {ref} not found")
             return None
-        elif obj_response.status_code != 200:
+        if obj_response.status_code != 200:
             logger.warning(obj_response.text)
             raise Exception(f"Unable to get object {ref}")
         else:
