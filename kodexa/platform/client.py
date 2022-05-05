@@ -1353,8 +1353,8 @@ def process_response(response) -> requests.Response:
             for key, value in response.json()["errors"].items():
                 messages.append(f"{key}: {value}")
             raise Exception(', '.join(messages))
-        else:
-            raise Exception("Bad request " + response.text)
+
+        raise Exception("Bad request " + response.text)
     return response
 
 
