@@ -1368,8 +1368,8 @@ class ContentNode(object):
 
         if not self.get_parent():
             return True
-        else:
-            return self.index == self.get_parent().get_last_child_index()
+
+        return self.index == self.get_parent().get_last_child_index()
 
     def get_last_child_index(self):
         """Returns the max index value for the children of this node. If the node has no children, returns None.
