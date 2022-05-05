@@ -2034,7 +2034,7 @@ class Document(object):
         return content_node
 
     @classmethod
-    def from_kddb(cls, input, detached: bool = False):
+    def from_kddb(cls, source, detached: bool = False):
         """
         Loads a document from a Kodexa Document Database (KDDB) file
 
@@ -2046,9 +2046,9 @@ class Document(object):
 
         :return: the document
         """
-        if isinstance(input, str):
-            if isinstance(input, str):
-                document = Document(kddb_path=input)
+        if isinstance(source, str):
+            if isinstance(source, str):
+                document = Document(kddb_path=source)
             if detached:
                 return Document.from_kddb(document.to_kddb())
             else:
@@ -2058,7 +2058,7 @@ class Document(object):
             import tempfile
             from kodexa import KodexaPlatform
             fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False, dir=KodexaPlatform.get_tempdir())
-            fp.write(input)
+            fp.write(source)
             fp.close()
             return Document(kddb_path=fp.name, delete_on_close=True)
 
