@@ -779,8 +779,8 @@ class ContentNode(object):
         self_bbox = self.get_bbox()
         if self_bbox:
             return self_bbox[0]
-        else:
-            return None
+
+        return None
 
     def get_y(self):
         """Get the Y position of the node
