@@ -1057,12 +1057,12 @@ class ContentNode(object):
 
                     if result < 0 or (end - result) <= 0:
                         return -1
-                    else:
-                        offset = offset + result
-                        end = end - result
-                        start = 0 if start - result < 0 else start - result
 
-                        content_length = content_length + result
+                    offset = offset + result
+                    end = end - result
+                    start = 0 if start - result < 0 else start - result
+
+                    content_length = content_length + result
 
             if len(node_to_check.get_all_content(strip=False)) != content_length:
                 raise Exception(
