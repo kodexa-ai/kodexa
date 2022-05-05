@@ -1571,8 +1571,8 @@ class KodexaClient:
                         return model_store
                     if store_type.lower() == "data" or store_type.lower() == "table":
                         return DataStoreEndpoint.parse_obj(component_dict).set_client(self)
-                    else:
-                        raise Exception("Unknown store type: " + store_type)
+
+                    raise Exception("Unknown store type: " + store_type)
                 else:
                     raise Exception("A store must have a storeType")
             known_components = {
