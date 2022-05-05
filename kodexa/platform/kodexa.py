@@ -868,7 +868,7 @@ class KodexaPlatform:
                                    "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
-        elif r.status_code == 200:
+        if r.status_code == 200:
             return r.text
         else:
             logger.warning(r.text)
