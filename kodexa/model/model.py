@@ -2052,14 +2052,14 @@ class Document(object):
                 return Document.from_kddb(document.to_kddb())
 
             return document
-        else:
-            # We will assume the input is of byte type
-            import tempfile
-            from kodexa import KodexaPlatform
-            fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False, dir=KodexaPlatform.get_tempdir())
-            fp.write(source)
-            fp.close()
-            return Document(kddb_path=fp.name, delete_on_close=True)
+
+        # We will assume the input is of byte type
+        import tempfile
+        from kodexa import KodexaPlatform
+        fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False, dir=KodexaPlatform.get_tempdir())
+        fp.write(source)
+        fp.close()
+        return Document(kddb_path=fp.name, delete_on_close=True)
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
