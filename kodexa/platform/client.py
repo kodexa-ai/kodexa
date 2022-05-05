@@ -1540,8 +1540,8 @@ class KodexaClient:
     def get_url(self, url):
         if url.startswith("/"):
             return self.base_url + url
-        else:
-            return self.base_url + "/" + url
+
+        return self.base_url + "/" + url
 
     def deserialize(self, component_dict: dict, component_type: Optional[str] = None) -> ComponentInstanceEndpoint:
         if "type" in component_dict or component_type is not None:
