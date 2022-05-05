@@ -348,12 +348,12 @@ class ContentNode(object):
             self.document.get_persistence().remove_feature(self, feature_type, name)
             self.document.get_persistence().add_feature(self, feature)
             return feature
-        else:
-            # Make sure that we treat the value as list all the time
-            new_feature = ContentFeature(feature_type, name,
+
+        # Make sure that we treat the value as list all the time
+        new_feature = ContentFeature(feature_type, name,
                                          [value] if single and not serialized else value, single=single)
-            self.document.get_persistence().add_feature(self, new_feature)
-            return new_feature
+        self.document.get_persistence().add_feature(self, new_feature)
+        return new_feature
 
     def delete_children(self, nodes: Optional[List] = None,
                         exclude_nodes: Optional[List] = None):
