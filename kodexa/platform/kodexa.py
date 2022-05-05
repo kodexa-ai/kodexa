@@ -767,8 +767,8 @@ class KodexaPlatform:
             obj_json = obj_response.json()
             if 'type' in object_type_metadata:
                 return object_type_metadata['type'].parse_obj(obj_json)
-            else:
-                return obj_json
+
+            return obj_json
 
     @classmethod
     def get(cls, object_type, ref, path=None, output_format=None, query="*", page: int = 1, pagesize: int = 10,
