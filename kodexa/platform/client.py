@@ -1468,6 +1468,7 @@ class KodexaClient:
                                     headers={"content-type": "application/json"})
         if obj_response.status_code == 200:
             return KodexaClient(url, obj_response.text)
+
         raise Exception(f"Check your URL and password [{obj_response.status_code}]")
 
     @property
