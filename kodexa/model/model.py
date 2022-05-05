@@ -1968,18 +1968,18 @@ class Document(object):
         return Document.from_dict(json.loads(json_string))
 
     @staticmethod
-    def from_msgpack(bytes):
+    def from_msgpack(msgpack_bytes):
         """Create an instance of a Document from a message pack byte array.
 
         Args:
-          bytes: bytes: A message pack byte array.
+          msgpack_bytes: bytes: A message pack byte array.
 
         Returns:
           Document: A complete Kodexa Document
 
         >>> Document.from_msgpack(open(os.path.join('news-doc.kdxa'), 'rb').read())
         """
-        return Document.from_dict(msgpack.unpackb(bytes, raw=False))
+        return Document.from_dict(msgpack.unpackb(msgpack_bytes, raw=False))
 
     def get_mixins(self):
         """Get the list of mixins that have been enabled on this document."""
