@@ -701,8 +701,8 @@ class KodexaPlatform:
             print(f"Check your URL and password [{obj_response.status_code}]")
 
     @classmethod
-    def get_project_resource(cls, id, resource_name, resource_type):
-        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects/{id}/{resource_name}",
+    def get_project_resource(cls, resource_id, resource_name, resource_type):
+        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects/{resource_id}/{resource_name}",
                                     headers={"content-type": "application/json",
                                              "x-access-token": KodexaPlatform.get_access_token()})
 
