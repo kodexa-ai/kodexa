@@ -433,7 +433,7 @@ class KodexaPlatform:
 
         if response.status_code == 200:
             return object_class(**response.json())
-        elif response.status_code == 404:
+        if response.status_code == 404:
             return None
         else:
             raise Exception(
