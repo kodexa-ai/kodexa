@@ -1054,9 +1054,9 @@ class RemoteSession:
             raise Exception("Your access token was not authorized")
         if r.status_code == 200:
             return r.json()
-        else:
-            logger.warning(r.text)
-            raise Exception("Unable to get action metadata, check your reference and platform settings")
+
+        logger.warning(r.text)
+        raise Exception("Unable to get action metadata, check your reference and platform settings")
 
     def start(self):
         """ """
