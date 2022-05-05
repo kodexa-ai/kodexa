@@ -771,7 +771,7 @@ class KodexaPlatform:
                 return obj_json
 
     @classmethod
-    def get(cls, object_type, ref, path=None, format=None, query="*", page: int = 1, pagesize: int = 10,
+    def get(cls, object_type, ref, path=None, output_format=None, query="*", page: int = 1, pagesize: int = 10,
             sort: str = None):
 
         object_type, object_type_metadata = resolve_object_type(object_type)
@@ -797,14 +797,14 @@ class KodexaPlatform:
                     import jq
                     obj = jq.compile(path).input(obj).all()
                 import yaml
-                if format == 'yaml':
+                if output_format == 'yaml':
                     def represent_none(self, _):
                         return self.represent_scalar('tag:yaml.org,2002:null', '')
 
                     yaml.add_representer(type(None), represent_none)
 
                     print(yaml.dump(obj.dict(by_alias=True)))
-                elif format == 'json':
+                elif output_format == 'json':
                     print(obj.json(by_alias=True, indent=4))
                 else:
                     pprint(obj)
