@@ -2492,7 +2492,6 @@ class ModelStore(Store):
 
         :return: a list of the object names
         """
-        pass
 
 
 class ContentObjectReference:
