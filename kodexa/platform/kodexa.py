@@ -942,7 +942,7 @@ class KodexaPlatform:
                                   "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
-        elif r.status_code == 200:
+        if r.status_code == 200:
             for entry in r.json()['content']:
                 get_console().print(entry['entry'], end='', markup=False)
         else:
