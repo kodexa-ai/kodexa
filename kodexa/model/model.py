@@ -1355,8 +1355,8 @@ class ContentNode(object):
         """
         if not self.parent:
             return True
-        else:
-            return self.index == 0
+
+        return self.index == 0
 
     def is_last_child(self):
         """Determines if this node is the last child of its parent or has no parent.
