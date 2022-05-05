@@ -1025,9 +1025,9 @@ class KodexaPlatform:
         if r.status_code == 200:
             print(f"Starting an execution with id {r.json()['id']}")
             return r.json()
-        else:
-            print(r.text)
-            raise Exception("Unable to send event")
+
+        print(r.text)
+        raise Exception("Unable to send event")
 
 
 class RemoteSession:
