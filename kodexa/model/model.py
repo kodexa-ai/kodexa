@@ -2051,8 +2051,8 @@ class Document(object):
                 document = Document(kddb_path=source)
             if detached:
                 return Document.from_kddb(document.to_kddb())
-            else:
-                return document
+
+            return document
         else:
             # We will assume the input is of byte type
             import tempfile
@@ -2151,8 +2151,7 @@ class Document(object):
                 return result
             else:
                 return [self.content_node] if bool(result) else []
-        else:
-            return []
+        return []
 
     def get_labels(self) -> List[str]:
         """
