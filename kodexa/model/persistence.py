@@ -69,12 +69,8 @@ class SqliteDocumentPersistence(object):
         "select * from cn where id in (select cn_id from ft where f_type in (select id from f_type where name like 'tag:%'))"
         features = []
         for feature in self.cursor.execute(
-                "select id, cn_id, f_type, binary_value, single from ft where f_type in (select id from f_type where name like 'tag:%')").fetchall():
-            feature_type_name = self.feature_type_names[feature[2]]
-            single = feature[4] == 1
-            value = msgpack.unpackb(feature[3])
-            features.append(ContentFeature(feature_type_name.split(':')[0], feature_type_name.split(':')[1],
-                                           value, single=single))
+                "select name from f_type where name like 'tag:%'").fetchall():
+            features.append(feature[0].split(':')[1])
 
         return features
 
