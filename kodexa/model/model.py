@@ -1699,6 +1699,9 @@ class Document(object):
     def get_persistence(self):
         return self._persistence_layer
 
+    def get_all_tags(self):
+        return self._persistence_layer.get_all_tags()
+
     @property
     def content_node(self):
         """The root content Node"""
