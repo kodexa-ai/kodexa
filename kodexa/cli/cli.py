@@ -220,6 +220,14 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.query(ref, query, download, page, pagesize, sort, download_native)
 
+@cli.command()
+@click.argument('project_id', required=True)
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@click.option('--output', help='The path to export to')
+@pass_info
+def export_project(_: Info, project_id: str, url: str, output: str):
+    pass
 
 @cli.command()
 @click.argument('project_id', required=True)
