@@ -27,8 +27,8 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, Label, \
-    PageDocumentFamily
+    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
+    PageDocumentFamily, ProjectResourcesUpdate
 
 logger = logging.getLogger()
 
@@ -502,6 +502,15 @@ class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
         return TaxonomyEndpoint
 
 
+class ProjectStoresEndpoint(ProjectResourceEndpoint):
+
+    def get_type(self) -> str:
+        return f"stores"
+
+    def get_instance_class(self) -> Type[BaseModel]:
+        return StoreEndpoint
+
+
 class ProjectDataStoresEndpoint(ProjectResourceEndpoint):
 
     def get_type(self) -> str:
@@ -524,6 +533,20 @@ class ProjectEndpoint(EntityEndpoint, Project):
 
     def get_type(self) -> str:
         return "projects"
+
+    def update_resources(self, stores: List["StoreEndpoint"] = None, taxonomies: List["TaxonomyEndpoint"] = None) -> "ProjectEndpoint":
+        project_resources_update = ProjectResourcesUpdate()
+        project_resources_update.store_refs = []
+        project_resources_update.taxonomy_refs = []
+        project_resources_update.dashboard_refs = []
+
+        if stores:
+            project_resources_update.store_refs = [store.ref for store in stores]
+
+        if taxonomies:
+            project_resources_update.taxonomy_refs = [taxonomy.ref for taxonomy in taxonomies]
+
+        self.client.put(f"/api/projects/{self.id}/resources", body=json.loads(project_resources_update.json(by_alias=True)))
 
     @property
     def document_stores(self) -> ProjectDocumentStoresEndpoint:
@@ -835,6 +858,11 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
     def update(self):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
         self.client.put(url, body=self.to_dict())
+
+    def export(self) -> bytes:
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
+        get_response = self.client.get(url)
+        return get_response.content
 
     def update_document(self, document: Document, content_object: Optional[ContentObject] = None):
         if content_object is None:
@@ -1186,6 +1214,14 @@ class DocumentStoreEndpoint(StoreEndpoint):
         for fam_dict in get_response.json()['content']:
             paths.append(fam_dict['path'])
         return paths
+
+    def download_document_families(self, output_dir: str):
+        """Download all the document families in the store to the given directory"""
+
+        for document_family in self.query(page_size=9999).content:
+            export_bytes = document_family.export()
+            with open(os.path.join(output_dir, document_family.id + ".dfm"), 'wb') as f:
+                f.write(export_bytes)
 
     def get_metadata_class(self) -> Type[BaseModel]:
         return DocumentContentMetadata
@@ -1554,6 +1590,108 @@ class KodexaClient:
         else:
             return self.base_url + "/" + url
 
+    def export_project(self, project: ProjectEndpoint, export_path: str):
+
+        # We will create a directory for the project in the export path and then export the project
+        # components and metadata to that directory
+
+        # First export the project metadata
+
+        project_export_dir = os.path.join(export_path, project.name)
+        Path(project_export_dir).mkdir(parents=True, exist_ok=False)
+
+        project_metadata_file = os.path.join(project_export_dir, "project_metadata.json")
+        with open(project_metadata_file, "w") as f:
+            f.write(json.dumps(project.to_dict(), indent=4))
+
+        for assistant in project.assistants.list():
+            assistant_file = os.path.join(project_export_dir, f"assistant-{assistant.id}.json")
+            with open(assistant_file, "w") as f:
+                f.write(json.dumps(assistant.to_dict(), indent=4))
+
+        for data_store in project.data_stores.list():
+            data_store_file = os.path.join(project_export_dir,
+                                           f"data-store-{data_store.slug}-{data_store.version}.json")
+            with open(data_store_file, "w") as f:
+                f.write(json.dumps(data_store.to_dict(), indent=4))
+
+        for document_store in project.document_stores.list():
+            document_store_file = os.path.join(project_export_dir,
+                                               f"document-store-{document_store.slug}-{document_store.version}.json")
+            with open(document_store_file, "w") as f:
+                f.write(json.dumps(document_store.to_dict(), indent=4))
+
+            store_folder = os.path.join(project_export_dir,
+                                        f"document-store-{document_store.slug}-{document_store.version}")
+            Path(store_folder).mkdir(parents=True, exist_ok=False)
+            document_store.download_document_families(store_folder)
+
+        for model_store in project.model_stores.list():
+            model_store_file = os.path.join(project_export_dir,
+                                            f"model-store-{model_store.slug}-{model_store.version}.json")
+            with open(model_store_file, "w") as f:
+                f.write(json.dumps(model_store.to_dict(), indent=4))
+
+            store_folder = os.path.join(project_export_dir,
+                                        f"document-store-{model_store.slug}-{model_store.version}")
+            Path(store_folder).mkdir(parents=True, exist_ok=False)
+            model_store.download_document_families(store_folder)
+
+        for taxonomy in project.taxonomies.list():
+            taxonomy_file = os.path.join(project_export_dir,
+                                         f"taxonomy-{taxonomy.slug}-{taxonomy.version}.json")
+            with open(taxonomy_file, "w") as f:
+                f.write(json.dumps(taxonomy.to_dict(), indent=4))
+
+    def import_project(self, organization: OrganizationEndpoint, import_path: str):
+        # The import path is the directory containing the export (or a zip file containing the export)
+
+        project_metadata_file = os.path.join(import_path, "project_metadata.json")
+        with open(project_metadata_file, "r") as f:
+            project = Project.parse_obj(json.load(f))
+            project.id = None
+            project.uuid = None
+            project.workflow = None
+            project.organization = organization.detach()
+            new_project = organization.projects.create(project, None)
+
+        stores = []
+        taxonomies = []
+
+        import glob
+        for document_store_file in glob.glob(os.path.join(import_path, "document-store-*.json")):
+            with open(document_store_file, "r") as f:
+                document_store = DocumentStoreEndpoint.parse_obj(json.load(f))
+                document_store.org_slug = None
+                document_store.ref = None
+                stores.append(organization.stores.create(document_store))
+
+        for data_store_file in glob.glob(os.path.join(import_path, "data-store-*.json")):
+            with open(data_store_file, "r") as f:
+                data_store = DataStoreEndpoint.parse_obj(json.load(f))
+                data_store.org_slug = None
+                data_store.ref = None
+                stores.append(organization.stores.create(data_store))
+
+        for model_store_file in glob.glob(os.path.join(import_path, "model-store-*.json")):
+            with open(model_store_file, "r") as f:
+                model_store = ModelStoreEndpoint.parse_obj(json.load(f))
+                model_store.org_slug = None
+                model_store.ref = None
+                stores.append(organization.stores.create(model_store))
+
+        # for taxonomy_file in glob.glob(os.path.join(import_path, "taxonomy-*.json")):
+        #     with open(taxonomy_file, "r") as f:
+        #         taxonomy = TaxonomyEndpoint.parse_obj(json.load(f))
+        #         taxonomy.org_slug = None
+        #         taxonomy.ref = None
+        #         taxonomies.append(organization.taxonomies.create(taxonomy))
+
+        import time
+        time.sleep(4)
+
+        new_project.update_resources(stores=stores, taxonomies=taxonomies)
+
     def deserialize(self, component_dict: dict, type: Optional[str] = None) -> ComponentInstanceEndpoint:
         if "type" in component_dict or type is not None:
             component_type = type if type is not None else component_dict["type"]
@@ -1607,3 +1745,7 @@ class KodexaClient:
                 raise Exception("Unknown component type: " + component_type)
         else:
             raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
+
+    def get_project(self, project_id) -> ProjectEndpoint:
+        project = self.get(f"/api/projects/{project_id}")
+        return ProjectEndpoint.parse_obj(project.json()).set_client(self)
