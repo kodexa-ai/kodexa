@@ -350,8 +350,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         return self.client.deserialize(response.json())
 
     def suspend(self):
-        url = f"/api/organizations/{self.slug}/suspend"
-        self.client.put(url)
+        self.client.put(f"/api/organizations/{self.id}/suspend")
 
     @property
     def model_runtimes(self) -> "ModelRuntimesEndpoint":
@@ -367,11 +366,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
 
     @property
     def credentials(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/projectTemplates/{self.slug}"
-        response = self.client.get(url,
-                                   params={"query": query, "page": page, "pageSize": pagesize,
-                                           "sort": sort})
-        return PageCredentialEndpoint.parse_obj(response.json()).set_client(self.client)
+        return CredentialsEndpoint().set_organization(self).set_client(self.client)
 
     @property
     def stores(self):
@@ -591,7 +586,7 @@ class EntitiesEndpoint:
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         raise NotImplementedError()
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         raise NotImplementedError()
 
     def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint" = None):
@@ -648,7 +643,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return ProjectEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageProjectEndpoint
 
     def find_by_name(self, project_name: str) -> ProjectEndpoint:
@@ -712,18 +707,29 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
     def get_type(self) -> str:
         return "projectTemplates"
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageProjectTemplateEndpoint
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return ProjectTemplateEndpoint
 
 
+class CredentialsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    def get_type(self) -> str:
+        return "credentials"
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        return PageCredentialEndpoint
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        return CredentialEndpoint
+
+
 class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "modelRuntimes"
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageModelRuntimeEndpoint
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
@@ -847,7 +853,7 @@ class MembershipsEndpoint(EntitiesEndpoint):
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return MembershipEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageMembershipEndpoint
 
 
@@ -859,7 +865,7 @@ class UsersEndpoint(EntitiesEndpoint):
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return UserEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageUserEndpoint
 
 
@@ -1396,7 +1402,7 @@ class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "taxonomies"
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageTaxonomy
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
