@@ -349,6 +349,10 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         response = self.client.post(url, body=component.to_dict())
         return self.client.deserialize(response.json())
 
+    def suspend(self):
+        url = f"/api/organizations/{self.slug}/suspend"
+        self.client.put(url)
+
     @property
     def model_runtimes(self) -> "ModelRuntimesEndpoint":
         return ModelRuntimesEndpoint().set_organization(self).set_client(self.client)
