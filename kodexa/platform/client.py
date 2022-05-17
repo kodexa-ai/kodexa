@@ -947,6 +947,14 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/reprocess"
         self.client.put(url, params={'assistantId': assistant.id})
 
+    def add_document(self, document: Document, content_object: Optional[ContentObject] = None):
+        url = f'/api/stores/{self.store_ref.replace(":", "/")}/families/{self.id}/objects'
+        if content_object is None:
+            content_object = self.content_objects[-1]
+        self.client.post(url, params={'sourceContentObjectId': content_object.id, 'transitionType': 'DERIVED',
+                                      'documentVersion': document.version},
+                         files={'file': document.to_kddb()})
+
     def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
         feature_set = FeatureSet()
         if content_object is None:
