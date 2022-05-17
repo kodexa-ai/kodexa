@@ -1403,22 +1403,21 @@ class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         return "taxonomies"
 
     def get_page_class(self, object_dict=None) -> Type[BaseModel]:
-        return PageTaxonomy
+        return PageTaxonomyEndpoint
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
-        return Taxonomy
+        return TaxonomyEndpoint
 
 
 def process_response(response) -> requests.Response:
     if response.status_code == 401:
-        raise Exception("Unauthorized")
+        raise Exception(f"Unauthorized ({response.text})")
     if response.status_code == 404:
-        raise Exception("Not found")
+        raise Exception(f"Not found ({response.text})")
     if response.status_code == 405:
         raise Exception("Method not allowed")
     if response.status_code == 500:
-        print(response.text)
-        raise Exception("Internal server error")
+        raise Exception("Internal server error: \n" + response.text)
     if response.status_code == 400:
         if response.json() and response.json().get("errors"):
             messages = []
@@ -1680,12 +1679,21 @@ class KodexaClient:
             project.uuid = None
             project.workflow = None
             project.organization = organization.detach()
+            project.project_template_ref = None
             new_project = organization.projects.create(project, None)
 
         stores = []
         taxonomies = []
 
         import glob
+
+        for assistant_file in glob.glob(os.path.join(import_path, "assistant-*.json")):
+            with open(assistant_file, "r") as f:
+                assistant: AssistantEndpoint = AssistantEndpoint.parse_obj(json.load(f))
+
+                assistant.assistant_definition_ref = assistant.definition.ref.split(':')[0]
+                new_project.assistants.create(assistant)
+
         for document_store_file in glob.glob(os.path.join(import_path, "document-store-*.json")):
             with open(document_store_file, "r") as f:
                 document_store = DocumentStoreEndpoint.parse_obj(json.load(f)).set_client(self)
@@ -1716,12 +1724,12 @@ class KodexaClient:
                 for doc_fam in glob.glob(os.path.join(import_path, model_store_file.replace('.json', '/*.dfm'))):
                     model_store.import_family(doc_fam)
 
-        # for taxonomy_file in glob.glob(os.path.join(import_path, "taxonomy-*.json")):
-        #     with open(taxonomy_file, "r") as f:
-        #         taxonomy = TaxonomyEndpoint.parse_obj(json.load(f))
-        #         taxonomy.org_slug = None
-        #         taxonomy.ref = None
-        #         taxonomies.append(organization.taxonomies.create(taxonomy))
+        for taxonomy_file in glob.glob(os.path.join(import_path, "taxonomy-*.json")):
+            with open(taxonomy_file, "r") as f:
+                taxonomy = TaxonomyEndpoint.parse_obj(json.load(f))
+                taxonomy.org_slug = None
+                taxonomy.ref = None
+                taxonomies.append(organization.taxonomies.create(taxonomy))
 
         import time
         time.sleep(4)

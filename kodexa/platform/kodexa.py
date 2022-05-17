@@ -150,8 +150,7 @@ DEFAULT_COLUMNS = {
         'id',
         'organization.name',
         'name',
-        'description',
-        'assistants'
+        'description'
     ],
     'assistants': [
         'ref',
@@ -858,11 +857,10 @@ class KodexaPlatform:
             raise Exception("Unable to get server information, check your platform settings")
 
     @classmethod
-    def reindex(cls, object_type, ref):
+    def reindex(cls, object_type):
         object_type, object_type_metadata = resolve_object_type(object_type)
-        print(f"Reindexing {object_type_metadata['name']} [bold]{ref}[/bold]")
-        url_ref = ref.replace(':', '/')
-        r = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}/_reindex",
+        print(f"Reindexing {object_type_metadata['name']}")
+        r = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/_reindex",
                           headers={"x-access-token": KodexaPlatform.get_access_token(),
                                    "content-type": "application/json"})
         if r.status_code == 401:
