@@ -115,7 +115,8 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def deploy(_: Info, org: Optional[str], file: str, url:str, token: str, format=None, update: bool = False, version=None,
+def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, format=None, update: bool = False,
+           version=None,
            slug=None):
     """Deploy an object to a Kodexa platform instance from a file
     """
@@ -212,7 +213,8 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
 @click.option('--pageSize', default=10, help='Page size')
 @click.option('--sort', default=None, help='Sort by ie. name:asc')
 @pass_info
-def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, download_native: bool, page: int, pagesize: int, sort: None):
+def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, download_native: bool, page: int,
+          pagesize: int, sort: None):
     """
     Query the documents in a given document store
     """
@@ -220,14 +222,37 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.query(ref, query, download, page, pagesize, sort, download_native)
 
+
 @cli.command()
 @click.argument('project_id', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--output', help='The path to export to')
 @pass_info
-def export_project(_: Info, project_id: str, url: str, output: str):
-    pass
+def export_project(_: Info, project_id: str, url: str, token: str, output: str):
+    client = KodexaClient(url, token)
+    project_endpoint = client.projects.get(project_id)
+    client.export_project(project_endpoint, output)
+
+
+@cli.command()
+@click.argument('org_slug', required=True)
+@click.argument('path', required=True)
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@pass_info
+def import_project(_: Info, org_slug: str, url: str, token: str, path: str):
+
+    print("Importing project from {}".format(path))
+
+    client = KodexaClient(url, token)
+    organization = client.organizations.find_by_slug(org_slug)
+
+    print("Organization: {}".format(organization.name))
+    client.import_project(organization, path)
+
+    print("Project imported")
+
 
 @cli.command()
 @click.argument('project_id', required=True)
@@ -270,17 +295,18 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
 
 @cli.command()
 @click.argument('object_type', required=True)
-@click.argument('ref', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
-def reindex(_: Info, object_type: str, ref: str, url: str, token: str):
+def reindex(_: Info, object_type: str, url: str, token: str):
     """
     Reindex the given resource (based on ref)
     """
+    print("Starting global reindexing")
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.reindex(object_type, ref)
+    KodexaPlatform.reindex(object_type)
+    print(":tada: Global reindexing complete")
 
 
 @cli.command()
