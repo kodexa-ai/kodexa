@@ -203,15 +203,15 @@ class UrlConnector:
     def __next__(self):
         if self.completed:
             raise StopIteration
-        else:
-            self.completed = True
-            document = Document(DocumentMetadata(
-                {"connector": self.get_name(),
-                 "connector_options": {"url": self.url, "headers": self.headers}}))
-            document.source.connector = self.get_name()
-            document.source.original_path = self.url
-            document.source.headers = self.headers
-            return document
+
+        self.completed = True
+        document = Document(DocumentMetadata(
+            {"connector": self.get_name(),
+                "connector_options": {"url": self.url, "headers": self.headers}}))
+        document.source.connector = self.get_name()
+        document.source.original_path = self.url
+        document.source.headers = self.headers
+        return document
 
 
 # The registered connectors
