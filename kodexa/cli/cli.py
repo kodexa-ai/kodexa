@@ -75,14 +75,14 @@ def cli(info: Info, verbose: int):
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
-def project(_: Info, id: str, token: str, url: str):
+def project(_: Info, project_id: str, token: str, url: str):
     """Get all the details for a specific project
     """
 
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
 
-    KodexaPlatform.get_project(id)
+    KodexaPlatform.get_project(project_id)
 
 
 @cli.command()
