@@ -565,11 +565,11 @@ class RemoteModelStore(ModelStore):
                 for error_key in bad_request.errors.keys():
                     print(bad_request.errors[error_key] + " (" + error_key + ")")
                 raise Exception("Invalid request")
-            else:
-                msg = "Execution creation failed [" + content_object_response.text + "], response " + str(
-                    content_object_response.status_code)
-                logger.warning(msg)
-                raise Exception(msg)
+
+            msg = "Execution creation failed [" + content_object_response.text + "], response " + str(
+                content_object_response.status_code)
+            logger.warning(msg)
+            raise Exception(msg)
         except JSONDecodeError:
             logger.warning(
                 "Unable to JSON decode the response?")
@@ -598,11 +598,11 @@ class RemoteModelStore(ModelStore):
                 for error_key in bad_request.errors.keys():
                     print(bad_request.errors[error_key] + " (" + error_key + ")")
                 raise Exception("Invalid request")
-            else:
-                msg = "Execution creation failed [" + content_object_response.text + "], response " + str(
-                    content_object_response.status_code)
-                logger.warning(msg)
-                raise Exception(msg)
+
+            msg = "Execution creation failed [" + content_object_response.text + "], response " + str(
+                content_object_response.status_code)
+            logger.warning(msg)
+            raise Exception(msg)
         except JSONDecodeError:
             logger.warning(
                 "Unable to JSON decode the response?")
