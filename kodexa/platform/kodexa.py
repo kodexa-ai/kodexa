@@ -764,12 +764,12 @@ class KodexaPlatform:
         if obj_response.status_code != 200:
             logger.warning(obj_response.text)
             raise Exception(f"Unable to {'update' if existing is not None else 'create'} object {url_ref}")
-        else:
-            obj_json = obj_response.json()
-            if 'type' in object_type_metadata:
-                return object_type_metadata['type'].parse_obj(obj_json)
 
-            return obj_json
+        obj_json = obj_response.json()
+        if 'type' in object_type_metadata:
+            return object_type_metadata['type'].parse_obj(obj_json)
+
+        return obj_json
 
     @classmethod
     def get(cls, object_type, ref, path=None, output_format=None, query="*", page: int = 1, pagesize: int = 10,
@@ -852,7 +852,7 @@ class KodexaPlatform:
                                   "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
-        elif r.status_code == 200:
+        if r.status_code == 200:
             return r.json()
         else:
             logger.warning(r.text)
