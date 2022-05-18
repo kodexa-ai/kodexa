@@ -343,8 +343,8 @@ class FunctionCall(object):
             compiled_pattern = context.cache_pattern(args[0])
             if content_node.node_type is not None and compiled_pattern.match(content_node.node_type):
                 return content_node.node_type
-            else:
-                return None
+
+            return None
 
         if self.name == 'tagRegex':
             compiled_pattern = context.cache_pattern(args[0])
