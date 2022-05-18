@@ -412,11 +412,11 @@ class RemoteDocumentStore(DocumentStore):
 
             if document_family_response.status_code == 200:
                 return DocumentFamily.parse_obj(document_family_response.json())
-            else:
-                msg = "Document family create failed [" + document_family_response.text + "], response " + str(
-                    document_family_response.status_code)
-                logger.warning(msg)
-                raise Exception(msg)
+
+            msg = "Document family create failed [" + document_family_response.text + "], response " + str(
+                document_family_response.status_code)
+            logger.warning(msg)
+            raise Exception(msg)
         except JSONDecodeError:
             logger.warning(
                 "Unable to decode the JSON response")
