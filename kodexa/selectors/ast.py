@@ -357,14 +357,14 @@ class FunctionCall(object):
         if self.name == 'hasTag':
             if len(self.args) == 0:
                 return len(content_node.get_tags()) > 0
-            else:
-                return content_node.has_feature('tag', args[0])
+
+            return content_node.has_feature('tag', args[0])
 
         if self.name == 'hasFeature':
             if len(args) == 0:
                 return len(content_node.get_features()) > 0
-            else:
-                return content_node.has_feature(args[0], args[1])
+
+            return content_node.has_feature(args[0], args[1])
 
         if self.name == 'hasFeatureValue':
             values = content_node.get_feature_values(args[0], args[1])
