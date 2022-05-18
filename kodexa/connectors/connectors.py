@@ -268,10 +268,10 @@ class DocumentStoreConnector(object):
     def __next__(self):
         if self.index >= self.store.count():
             raise StopIteration
-        else:
-            document_family = self.store.query_families()[self.index]
-            self.index += 1
-            return self.store.get_latest_document_in_family(document_family)
+
+        document_family = self.store.query_families()[self.index]
+        self.index += 1
+        return self.store.get_latest_document_in_family(document_family)
 
     @staticmethod
     def get_source(document):
