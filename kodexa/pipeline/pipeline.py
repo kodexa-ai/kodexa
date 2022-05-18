@@ -427,7 +427,6 @@ class PipelineStore:
 
         """
         # TODO implement
-        pass
 
 
 class Pipeline:
