@@ -257,8 +257,8 @@ class RemoteDocumentStore(DocumentStore):
 
             if document_family_response.status_code == 200:
                 return True
-            else:
-                return False
+
+            return False
         except JSONDecodeError:
             logger.warning(
                 "Unable to decode the JSON response")
