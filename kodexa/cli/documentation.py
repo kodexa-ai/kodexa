@@ -37,7 +37,7 @@ def get_template_env():
     cli_path = os.path.dirname(get_path())
     package_location = os.path.join(cli_path, "templates")
     template_loader = jinja2.FileSystemLoader(searchpath=package_location)
-    return jinja2.Environment(loader=template_loader)
+    return jinja2.Environment(loader=template_loader, autoescape=False)
 
 
 def generate_documentation(metadata):
