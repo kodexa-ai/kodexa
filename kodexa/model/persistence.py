@@ -172,8 +172,8 @@ class SqliteDocumentPersistence(object):
         max_id = self.cursor.execute("select max(id) from ft").fetchone()
         if max_id[0] is None:
             return 1
-        else:
-            return max_id[0] + 1
+
+        return max_id[0] + 1
 
     def __build_db(self):
         self.cursor.execute("CREATE TABLE metadata (id integer primary key, metadata text)")
