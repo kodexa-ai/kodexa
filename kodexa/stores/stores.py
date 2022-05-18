@@ -231,9 +231,9 @@ class RemoteDataStore(Store):
             headers={"x-access-token": KodexaPlatform.get_access_token(), "content-type": "application/json"})
         if doc.status_code == 200:
             return
-        else:
-            logger.warning("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
-            raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+
+        logger.warning("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
+        raise Exception("Unable to post rows to remote store [" + doc.text + "], response " + str(doc.status_code))
 
 
 class RemoteDocumentStore(DocumentStore):
