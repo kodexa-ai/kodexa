@@ -202,4 +202,3 @@ class Assistant:
           AssistantResponse: the response to the event
 
         """
-
