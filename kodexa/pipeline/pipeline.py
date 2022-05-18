@@ -314,7 +314,7 @@ class PipelineStep:
         try:
             if str(type(self.step)) == "<class 'type'>":
                 raise Exception("You can not yet deploy a pipeline with a class instance style step")
-            elif isinstance(self.step, str):
+            if isinstance(self.step, str):
                 return {
                     'ref': self.step,
                     'options': self.options
