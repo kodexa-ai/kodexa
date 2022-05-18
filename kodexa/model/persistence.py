@@ -403,8 +403,8 @@ class SqliteDocumentPersistence(object):
         parent = self.cursor.execute("select pid from cn where id = ?", [content_node.uuid]).fetchone()
         if parent:
             return self.get_node(parent[0])
-        else:
-            return None
+
+        return None
 
     def update_metadata(self):
         self.__update_metadata()
