@@ -870,9 +870,9 @@ class KodexaPlatform:
             raise Exception("Your access token was not authorized")
         if r.status_code == 200:
             return r.text
-        else:
-            logger.warning(r.text)
-            raise Exception("Unable to reindex check your reference and platform settings")
+
+        logger.warning(r.text)
+        raise Exception("Unable to reindex check your reference and platform settings")
 
     @classmethod
     def get_tempdir(cls):
