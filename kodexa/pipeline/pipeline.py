@@ -382,8 +382,8 @@ class PipelineStep:
             })
             if context.stop_on_exception:
                 raise
-            else:
-                return document
+
+            return document
 
 
 class LabelStep(object):
