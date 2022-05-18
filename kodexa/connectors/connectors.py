@@ -234,9 +234,9 @@ def get_connector(connector: str, source: SourceMetadata):
     if connector in registered_connectors:
         logger.info(f"Getting registered connector {connector}")
         return registered_connectors[connector]
-    else:
-        logging.error(f"Unable to find connector {connector}")
-        raise Exception(f"Unable to find connector {connector}")
+
+    logging.error(f"Unable to find connector {connector}")
+    raise Exception(f"Unable to find connector {connector}")
 
 
 def add_connector(connector):
