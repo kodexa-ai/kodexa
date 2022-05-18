@@ -80,7 +80,7 @@ class LocalDocumentStore(DocumentStore):
 
         if path.is_file():
             raise Exception("Unable to load store, since it is pointing to a file?")
-        elif not path.exists():
+        if not path.exists():
             logger.info(f"Creating new local document store in {self.store_path}")
             path.mkdir(parents=True)
 
