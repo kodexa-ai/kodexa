@@ -920,8 +920,8 @@ class KodexaPlatform:
                 def format_col(col, value):
                     if col == 'labels':
                         return ", ".join(seq(value).map(lambda x: x.label).to_list())
-                    else:
-                        return str(value)
+
+                    return str(value)
 
                 page_document_families = store.query(query, page=page, page_size=page_size, sort=sort)
                 for family_endpoint in page_document_families.content:
