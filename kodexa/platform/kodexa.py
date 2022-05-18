@@ -382,8 +382,8 @@ class KodexaPlatform:
 
         if response.status_code == 404:
             raise Exception("Unable to find access token")
-        else:
-            raise Exception("An error occurred connecting to the Kodexa platform")
+
+        raise Exception("An error occurred connecting to the Kodexa platform")
 
     @classmethod
     def deploy_extension(cls, metadata):
