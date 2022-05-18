@@ -369,8 +369,8 @@ class RemoteDocumentStore(DocumentStore):
             for fam_dict in get_response.json()['content']:
                 families.append(DocumentFamily.parse_obj(fam_dict))
             return families
-        else:
-            return []
+
+        return []
 
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
                                document: Document) -> DocumentFamily:
