@@ -295,8 +295,8 @@ class VariableReference(object):
     def resolve(self, variables, context: SelectorContext):
         if self.name[1] in variables:
             return variables[self.name[1]]
-        else:
-            return None
+
+        return None
 
 
 class FunctionCall(object):
