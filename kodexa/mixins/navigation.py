@@ -33,4 +33,3 @@ class NavigationMixin:
         Returns:
 
         """
-        pass
