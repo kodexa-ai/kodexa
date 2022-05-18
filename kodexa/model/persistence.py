@@ -559,8 +559,8 @@ class PersistenceManager(object):
     def get_parent(self, node):
         if node.uuid in self.node_parent_cache:
             return self.node_cache.get_obj(self.node_parent_cache[node.uuid])
-        else:
-            return self._underlying_persistence.get_parent(node)
+
+        return self._underlying_persistence.get_parent(node)
 
     def close(self):
         self._underlying_persistence.close()
