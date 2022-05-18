@@ -229,7 +229,7 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
 @click.option('--file', help='The path to the file containing the event to send')
 @click.option('--format', default=None, help='The format to use if from stdin (json, yaml)')
 @pass_info
-def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str, format: str, token: str):
+def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str, event_format: str, token: str):
     """Send an event to an assistant
     """
 
@@ -239,9 +239,9 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
     obj = None
     if file is None:
         print("Reading from stdin")
-        if format == 'yaml':
+        if event_format == 'yaml':
             obj = yaml.parse(sys.stdin.read())
-        elif format == 'json':
+        elif event_format == 'json':
             obj = json.loads(sys.stdin.read())
         else:
             raise Exception("You must provide a format if using stdin")
