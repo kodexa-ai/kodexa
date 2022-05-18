@@ -145,8 +145,8 @@ class PipelineContext:
     def is_cancelled(self) -> bool:
         if self.cancellation_handler is not None:
             return self.cancellation_handler()
-        else:
-            return False
+
+        return False
 
     def get_context(self) -> Dict:
         """ """
