@@ -214,8 +214,8 @@ class RollupTransformer:
 
         if node.get_parent():
             return self.is_node_in_list(node.get_parent(), node_ids)
-        else:
-            return False
+
+        return False
 
 
 class TagsToKeyValuePairExtractor:
