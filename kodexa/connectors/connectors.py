@@ -287,8 +287,8 @@ class DocumentStoreConnector(object):
                                                                                     document.source.headers['id']}))
         if document_bytes is None:
             raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
-        else:
-            return io.BytesIO(document_bytes)
+
+        return io.BytesIO(document_bytes)
 
 
 add_connector(FolderConnector)
