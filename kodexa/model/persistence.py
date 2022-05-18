@@ -485,8 +485,8 @@ class SqliteDocumentPersistence(object):
         next_id = self.cursor.execute("select max(id) from cn").fetchone()
         if next_id[0] is None:
             return 1
-        else:
-            return next_id[0] + 1
+
+        return next_id[0] + 1
 
 
 class SimpleObjectCache(object):
