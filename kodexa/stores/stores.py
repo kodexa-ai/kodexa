@@ -387,11 +387,11 @@ class RemoteDocumentStore(DocumentStore):
 
             if content_object_replace.status_code == 200:
                 return DocumentFamily.parse_obj(content_object_replace.json())
-            else:
-                msg = "Document replace failed [" + content_object_replace.text + "], response " + str(
-                    content_object_replace.status_code)
-                logger.warning(msg)
-                raise Exception(msg)
+
+            msg = "Document replace failed [" + content_object_replace.text + "], response " + str(
+                content_object_replace.status_code)
+            logger.warning(msg)
+            raise Exception(msg)
         except JSONDecodeError:
             logger.warning(
                 "Unable to decode the JSON response")
