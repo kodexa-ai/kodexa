@@ -351,8 +351,8 @@ class FunctionCall(object):
             for feature in content_node.get_features_of_type('tag'):
                 if feature.name is not None and compiled_pattern.match(feature.name):
                     return True
-            else:
-                return False
+
+            return False
 
         if self.name == 'hasTag':
             if len(self.args) == 0:
