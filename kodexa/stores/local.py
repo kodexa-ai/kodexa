@@ -510,8 +510,8 @@ class LocalModelStore(ModelStore):
         """
         if Path(os.path.join(self.store_path, path)).is_file():
             return open(os.path.join(self.store_path, path), 'rb')
-        else:
-            return None
+
+        return None
 
     def put_native(self, path: str, content: Any, force_replace=False):
         """
