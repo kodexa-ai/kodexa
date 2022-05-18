@@ -854,9 +854,9 @@ class KodexaPlatform:
             raise Exception("Your access token was not authorized")
         if r.status_code == 200:
             return r.json()
-        else:
-            logger.warning(r.text)
-            raise Exception("Unable to get server information, check your platform settings")
+
+        logger.warning(r.text)
+        raise Exception("Unable to get server information, check your platform settings")
 
     @classmethod
     def reindex(cls, object_type, ref):
