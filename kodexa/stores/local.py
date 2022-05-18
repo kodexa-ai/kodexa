@@ -487,7 +487,7 @@ class LocalModelStore(ModelStore):
             shutil.rmtree(self.store_path)
         if path.is_file():
             raise Exception("Unable to load store, since it is pointing to a file?")
-        elif not path.exists():
+        if not path.exists():
             path.mkdir(parents=True)
 
     def to_dict(self):
