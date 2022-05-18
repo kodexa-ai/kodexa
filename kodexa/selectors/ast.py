@@ -231,11 +231,11 @@ class Step(object):
 
         if match:
             return [axis_node]
-        else:
-            if self.axis is not None:
-                return self.resolve(axis_node, variables, context)
-            else:
-                return []
+
+        if self.axis is not None:
+            return self.resolve(axis_node, variables, context)
+
+        return []
 
 
 class NameTest(object):
