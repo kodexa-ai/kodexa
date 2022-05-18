@@ -74,21 +74,21 @@ class FolderConnector:
     def __next__(self):
         if self.index > len(self.files) - 1:
             raise StopIteration
-        else:
-            self.index += 1
-            if self.unpack:
-                return Document.from_kdxa(self.files[self.index - 1])
 
-            document = Document(DocumentMetadata(
-                {"source_path": self.files[self.index - 1], "connector": self.get_name(),
-                    "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
-                    "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
-            document.source.original_filename = os.path.basename(self.files[self.index - 1])
-            document.source.original_path = self.path
-            document.source.connector = self.get_name()
+        self.index += 1
+        if self.unpack:
+            return Document.from_kdxa(self.files[self.index - 1])
 
-            # TODO we need to get the checksum and last_updated and created times
-            return document
+        document = Document(DocumentMetadata(
+            {"source_path": self.files[self.index - 1], "connector": self.get_name(),
+                "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
+                "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
+        document.source.original_filename = os.path.basename(self.files[self.index - 1])
+        document.source.original_path = self.path
+        document.source.connector = self.get_name()
+
+        # TODO we need to get the checksum and last_updated and created times
+        return document
 
     def __get_files__(self):
         all_files = []
