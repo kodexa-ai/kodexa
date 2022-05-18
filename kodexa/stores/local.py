@@ -599,8 +599,8 @@ class TableDataStore(Store):
 
         if not self.columns:
             return pd.DataFrame(self.rows)
-        else:
-            return pd.DataFrame(self.rows, columns=self.columns)
+
+        return pd.DataFrame(self.rows, columns=self.columns)
 
     def set_pipeline_context(self, pipeline_context):
         """
