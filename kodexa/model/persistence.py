@@ -501,9 +501,9 @@ class SimpleObjectCache(object):
         self.next_id = 1
         self.dirty_objs = set()
 
-    def get_obj(self, id):
-        if id in self.objs:
-            return self.objs[id]
+    def get_obj(self, obj_id):
+        if obj_id in self.objs:
+            return self.objs[obj_id]
 
         return None
 
