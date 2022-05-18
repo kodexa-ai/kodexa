@@ -149,9 +149,9 @@ class PredicatedExpression(object):
                 if isinstance(predicate, int) and predicate == idx:
                     results.append(node)
                     return results
-                else:
-                    if not isinstance(predicate, int) and predicate.resolve(node):
-                        results.append(node)
+
+                if not isinstance(predicate, int) and predicate.resolve(node):
+                    results.append(node)
 
         return results
 
