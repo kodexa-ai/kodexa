@@ -267,7 +267,7 @@ class SqliteDocumentPersistence(object):
 
             return ([cn_values], cn_parts_values)
 
-        raise "Node must have a UUID?"
+        raise Exception("Node must have a UUID?")
 
     def __clean_none_values(self, d):
         clean = {}
