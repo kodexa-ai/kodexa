@@ -180,11 +180,11 @@ class RemoteDataStore(Store):
 
         if rows_response.status_code == 200:
             return rows_response.json()
-        else:
-            logger.warning("Unable to get table from remote store [" + rows_response.text + "], response " + str(
-                rows_response.status_code))
-            raise Exception("Unable to get table from remote store  [" + rows_response.text + "], response " + str(
-                rows_response.status_code))
+
+        logger.warning("Unable to get table from remote store [" + rows_response.text + "], response " + str(
+            rows_response.status_code))
+        raise Exception("Unable to get table from remote store  [" + rows_response.text + "], response " + str(
+            rows_response.status_code))
 
     def add_data_objects(self, rows):
         """
