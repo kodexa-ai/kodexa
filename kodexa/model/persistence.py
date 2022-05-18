@@ -266,8 +266,8 @@ class SqliteDocumentPersistence(object):
                 self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
             return ([cn_values], cn_parts_values)
-        else:
-            raise "Node must have a UUID?"
+
+        raise "Node must have a UUID?"
 
     def __clean_none_values(self, d):
         clean = {}
