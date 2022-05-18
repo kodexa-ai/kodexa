@@ -22,4 +22,3 @@ class SpatialMixin:
         Returns:
 
         """
-        pass
