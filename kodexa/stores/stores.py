@@ -457,8 +457,8 @@ class RemoteDocumentStore(DocumentStore):
         get_response = KodexaPlatform.get_client().get(f"api/stores/{self.ref.replace(':', '/')}/families")
         if get_response is not None:
             return get_response.json()['totalElements']
-        else:
-            return 0
+
+        return 0
 
     def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
         from kodexa import KodexaPlatform
