@@ -33,4 +33,3 @@ class CoreMixin:
 
         """
         # all functions have been moved to ContentNode
-        pass
