@@ -395,8 +395,8 @@ class SqliteDocumentPersistence(object):
         node_row = self.cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
         if node_row:
             return self.__build_node(node_row)
-        else:
-            return None
+
+        return None
 
     def get_parent(self, content_node):
 
