@@ -125,8 +125,8 @@ class BinaryExpression(object):
             return side.resolve(content_node, variables, context)
         if isinstance(side, AbsolutePath):
             return side.resolve(content_node, variables, context)
-        else:
-            return side
+
+        return side
 
 
 class PredicatedExpression(object):
