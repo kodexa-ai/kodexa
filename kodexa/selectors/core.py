@@ -39,15 +39,15 @@ class LexerWrapper(lex.Lexer):
                     if operator is not None:
                         tok.type = operator
                 else:
-                    next = self.peek()
-                    if next is not None:
-                        if next.type == 'OPEN_PAREN':
+                    self_next = self.peek()
+                    if self_next is not None:
+                        if self_next.type == 'OPEN_PAREN':
                             # point 2
                             if tok.value in NODE_TYPES:
                                 tok.type = 'NODETYPE'
                             else:
                                 tok.type = 'FUNCNAME'
-                        elif next.type == 'AXIS_SEP':
+                        elif self_next.type == 'AXIS_SEP':
                             # point 3
                             tok.type = 'AXISNAME'
 
