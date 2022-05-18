@@ -319,7 +319,6 @@ class AssistantTestHarness:
         Returns:
 
         """
-        pass
 
     def get_store(self, event: ContentEvent) -> DocumentStore:
         """
