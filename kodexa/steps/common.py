@@ -231,8 +231,8 @@ class TagsToKeyValuePairExtractor:
         """ """
         if self.include_node_content:
             return TableDataStore(columns=['tag', 'tagged_content', 'node_content'])
-        else:
-            return TableDataStore(columns=['tag', 'tagged_content'])
+
+        return TableDataStore(columns=['tag', 'tagged_content'])
 
     def process(self, document, context):
         """
