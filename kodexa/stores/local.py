@@ -428,8 +428,8 @@ class LocalDocumentStore(DocumentStore):
         document_family = self.get_family_by_path(path)
         if document_family is not None:
             return document_family
-        else:
-            raise Exception("Unable to get document family?")
+
+        raise Exception("Unable to get document family?")
 
     def exists(self, document):
         """Look to see if we have document with the same original path and original filename
