@@ -706,8 +706,11 @@ class PersistenceManager(object):
 
             for child_id in child_ids:
                 child_node = self.node_cache.get_obj(child_id)
-                new_children.append(child_node) if child_node is not None else new_children.append(
-                    self.get_node(child_id))
+
+                if child_node is not None:
+                    new_children.append(child_node)
+                else:
+                    new_children.append(self.get_node(child_id))
 
             self.child_cache[node.uuid] = sorted(new_children, key=lambda x: x.index)
             self.child_id_cache[node.uuid] = set(child_ids)
