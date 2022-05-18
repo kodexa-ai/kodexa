@@ -522,8 +522,8 @@ class SimpleObjectCache(object):
 
     def get_dirty_objs(self):
         results = []
-        for id in set(self.dirty_objs):
-            node = self.get_obj(id)
+        for set_id in set(self.dirty_objs):
+            node = self.get_obj(set_id)
             if node is not None:
                 results.append(node)
         return results
