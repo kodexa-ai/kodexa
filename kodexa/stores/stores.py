@@ -466,8 +466,8 @@ class RemoteDocumentStore(DocumentStore):
             f"api/stores/{self.ref.replace(':', '/')}/families/{document_family.id}/objects/{content_object_id}/content")
         if get_response is not None:
             return Document.from_kddb(get_response.content)
-        else:
-            return None
+
+        return None
 
 
 class RemoteModelStore(ModelStore):
