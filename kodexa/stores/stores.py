@@ -523,10 +523,10 @@ class RemoteModelStore(ModelStore):
 
         if resp.status_code == 200:
             return resp.content
-        else:
-            msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
-            logger.warning(msg)
-            raise Exception(msg)
+
+        msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
+        logger.warning(msg)
+        raise Exception(msg)
 
     def put(self, path: str, content, replace=False) -> DocumentFamily:
         """Put the content into the model store at the given path
