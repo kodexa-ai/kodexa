@@ -115,7 +115,7 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def deploy(_: Info, org: Optional[str], file: str, url:str, token: str, format=None, update: bool = False, version=None,
+def deploy(_: Info, org: Optional[str], file: str, url:str, token: str, file_format=None, update: bool = False, version=None,
            slug=None):
     """Deploy an object to a Kodexa platform instance from a file
     """
@@ -125,9 +125,9 @@ def deploy(_: Info, org: Optional[str], file: str, url:str, token: str, format=N
     obj = None
     if file is None:
         print("Reading from stdin")
-        if format == 'yaml' or format == 'yml':
+        if file_format == 'yaml' or file_format == 'yml':
             obj = yaml.safe_load(sys.stdin.read())
-        elif format == 'json':
+        elif file_format == 'json':
             obj = json.loads(sys.stdin.read())
         else:
             raise Exception("You must provide a format if using stdin")
