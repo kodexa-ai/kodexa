@@ -336,8 +336,8 @@ class FunctionCall(object):
 
             if content_to_test is not None and compiled_pattern.match(content_to_test):
                 return content_to_test
-            else:
-                return None
+
+            return None
 
         if self.name == 'typeRegex':
             compiled_pattern = context.cache_pattern(args[0])
