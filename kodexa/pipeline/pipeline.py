@@ -319,7 +319,7 @@ class PipelineStep:
                     'ref': self.step,
                     'options': self.options
                 }
-            elif callable(self.step):
+            if callable(self.step):
                 metadata = {
                     'function': self.step.__name__,
                     'script': dedent(inspect.getsource(self.step))
