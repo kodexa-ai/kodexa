@@ -622,10 +622,10 @@ class RemoteModelStore(ModelStore):
 
         if resp.status_code == 200:
             return ModelContentMetadata.parse_obj(resp.json())
-        else:
-            msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
-            logger.warning(msg)
-            raise Exception(msg)
+
+        msg = f"Unable to get model object {resp.text}, status : {resp.status_code}"
+        logger.warning(msg)
+        raise Exception(msg)
 
     def list_contents(self) -> List[str]:
 
