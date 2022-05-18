@@ -498,10 +498,10 @@ class RemoteModelStore(ModelStore):
             return True
         if resp.status_code == 404:
             return False
-        else:
-            msg = f"Unable to delete model object {resp.text}, status : {resp.status_code}"
-            logger.warning(msg)
-            raise Exception(msg)
+
+        msg = f"Unable to delete model object {resp.text}, status : {resp.status_code}"
+        logger.warning(msg)
+        raise Exception(msg)
 
     def get(self, object_path: str):
         """Get the bytes for the object at the given path, will return None if there is no object there
