@@ -643,5 +643,5 @@ class RemoteModelStore(ModelStore):
             for fam_dict in get_response.json()['content']:
                 paths.append(fam_dict['path'])
             return paths
-        else:
-            return []
+
+        return []
