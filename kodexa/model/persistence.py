@@ -504,8 +504,8 @@ class SimpleObjectCache(object):
     def get_obj(self, id):
         if id in self.objs:
             return self.objs[id]
-        else:
-            return None
+
+        return None
 
     def add_obj(self, obj):
         if obj.uuid is None:
