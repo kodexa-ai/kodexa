@@ -191,14 +191,14 @@ def logs(_: Info, execution_id: str, url: str, token: str):
 @click.option('--pageSize', default=10, help='Page size')
 @click.option('--sort', default=None, help='Sort by (ie. startDate:desc)')
 @pass_info
-def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, format=None,
+def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, obj_format=None,
         page: int = 1, pagesize: int = 10, sort: str = None):
     """
     List the instance of the object type
     """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref, path, format, query, page, pagesize, sort)
+    KodexaPlatform.get(object_type, ref, path, obj_format, query, page, pagesize, sort)
 
 
 @cli.command()
