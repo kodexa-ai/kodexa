@@ -139,17 +139,17 @@ class FileHandleConnector:
     def __next__(self):
         if self.completed:
             raise StopIteration
-        else:
-            document = Document(DocumentMetadata(
-                {"source_path": self.file, "connector": self.get_name(),
-                 "mime_type": mimetypes.guess_type(self.file),
-                 "connector_options": {"file": self.file}}))
-            document.source.original_filename = self.file
-            document.source.original_path = os.path.basename(self.file)
-            document.source.connector = self.get_name()
 
-            # TODO we need to get the checksum and last_updated and created times
-            return document
+        document = Document(DocumentMetadata(
+            {"source_path": self.file, "connector": self.get_name(),
+                "mime_type": mimetypes.guess_type(self.file),
+                "connector_options": {"file": self.file}}))
+        document.source.original_filename = self.file
+        document.source.original_path = os.path.basename(self.file)
+        document.source.connector = self.get_name()
+
+        # TODO we need to get the checksum and last_updated and created times
+        return document
 
 
 class UrlConnector:
