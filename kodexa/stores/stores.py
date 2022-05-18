@@ -559,7 +559,7 @@ class RemoteModelStore(ModelStore):
             logger.info(f"Uploaded {path} ({content_object_response.status_code})")
             if content_object_response.status_code == 200:
                 return DocumentFamily.parse_obj(content_object_response.json())
-            elif content_object_response.status_code == 400:
+            if content_object_response.status_code == 400:
                 from addict import Dict
                 bad_request = Dict(json.loads(content_object_response.text))
                 for error_key in bad_request.errors.keys():
@@ -592,7 +592,7 @@ class RemoteModelStore(ModelStore):
 
             if content_object_response.status_code == 200:
                 return model_content_metadata
-            elif content_object_response.status_code == 400:
+            if content_object_response.status_code == 400:
                 from addict import Dict
                 bad_request = Dict(json.loads(content_object_response.text))
                 for error_key in bad_request.errors.keys():
