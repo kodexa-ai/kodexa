@@ -111,8 +111,8 @@ class BinaryExpression(object):
             if isinstance(left_value, list) and isinstance(right_value, list):
                 intersection_list = [value for value in left_value if value in right_value]
                 return intersection_list
-            else:
-                return []
+
+            return []
         if self.op == 'and':
             return bool(self.get_value(self.left, content_node, variables, context)) and bool(
                 self.get_value(self.right, content_node, variables, context))
