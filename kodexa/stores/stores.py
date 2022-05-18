@@ -139,13 +139,13 @@ class RemoteDataStore(Store):
         if data_object_response.status_code == 200:
             from kodexa.model.objects import DataObject
             return DataObject(**data_object_response.json())
-        else:
-            logger.warning(
-                "Unable to get data object from remote store [" + data_object_response.text + "], response " + str(
-                    data_object_response.status_code))
-            raise Exception(
-                "Unable to get data object from remote store  [" + data_object_response.text + "], response " + str(
-                    data_object_response.status_code))
+
+        logger.warning(
+            "Unable to get data object from remote store [" + data_object_response.text + "], response " + str(
+                data_object_response.status_code))
+        raise Exception(
+            "Unable to get data object from remote store  [" + data_object_response.text + "], response " + str(
+                data_object_response.status_code))
 
     def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
                                       document_family: Optional[DocumentFamily] = None):
