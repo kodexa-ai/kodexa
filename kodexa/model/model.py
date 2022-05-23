@@ -46,6 +46,17 @@ class DocumentMetadata(Dict):
         super().__init__(*args, **kwargs)
 
 
+class ContentException(Dict):
+    """A content exception represents an issue identified during labeling or validation at the document level"""
+
+    def __init__(self, tag: str, message: str, group_uuid: Optional[str], tag_uuid: Optional[str], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tag = tag
+        self.message = message
+        self.group_uuid = group_uuid
+        self.tag_uuid = tag_uuid
+
+
 class Tag(Dict):
     """A tag represents the metadata for a label that is applies as a feature on a content node"""
 
@@ -1721,6 +1732,12 @@ class Document(object):
 
     def get_all_tags(self):
         return self._persistence_layer.get_all_tags()
+
+    # def get_content_exceptions(self) -> List[ContentException]:
+    #     return self._persistence_layer.get_content_exceptions()
+    # 
+    # def add_content_exception(self, content_exception: ContentException):
+    #     self._persistence_layer.add_content_exception(content_exception)
 
     @property
     def content_node(self):
