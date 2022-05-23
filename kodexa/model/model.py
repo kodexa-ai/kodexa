@@ -1254,20 +1254,20 @@ class ContentNode(object):
 
         return value_strings
 
-    def get_related_tag_nodes(self, tag_name: str, include_children: bool = False, tag_uuid=None):
+    def get_related_tag_nodes(self, tag_name: str, everywhere: bool = False, tag_uuid=None):
         """Get the nodes for a specific tag name, grouped by uuid
 
         Args:
           tag_name (str): tag name
-          include_children (bool): include the children of this node
+          everywhere (bool): include the children of this node
           tag_uuid (optional(str)): if set we will only get nodes related to this tag UUID
 
         Returns:
           a dictionary that groups nodes by tag UUID
 
         """
-        if include_children:
-            tagged_nodes = self.select(f'//*[hasTag("{tag_name}")]')
+        if everywhere:
+            tagged_nodes = self.document.get_tagged_nodes(tag_name, tag_uuid)
         else:
             tagged_nodes = [self]
 
@@ -1279,9 +1279,6 @@ class ContentNode(object):
             tag_instances = tagged_node.get_tag(tag_name)
 
             for tag_instance in tag_instances:
-                if tag_uuid and tag_instance['uuid'] != tag_uuid:
-                    continue
-
                 if tag_instance['uuid'] not in node_groups:
                     node_groups[tag_instance['uuid']] = [tagged_node]
                 else:
@@ -1732,6 +1729,9 @@ class Document(object):
 
     def get_all_tags(self):
         return self._persistence_layer.get_all_tags()
+
+    def get_tagged_nodes(self, tag_name, tag_uuid=None):
+        return self._persistence_layer.get_tagged_nodes(tag_name, tag_uuid)
 
     # def get_content_exceptions(self) -> List[ContentException]:
     #     return self._persistence_layer.get_content_exceptions()

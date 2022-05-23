@@ -498,6 +498,18 @@ class SqliteDocumentPersistence(object):
         else:
             return next_id[0] + 1
 
+    def get_tagged_nodes(self, tag, tag_uuid=None):
+        content_nodes = []
+        if tag_uuid is None:
+            query = f"select cn_id from ft where f_type in (select id from f_type where name like 'tag:{tag}')"
+        else:
+            query = f"select cn_id from ft where f_type in (select id from f_type where name like 'tag:{tag}') and tag_uuid = {tag_uuid}"
+        for content_node_ids in self.cursor.execute(
+                query).fetchall():
+            content_nodes.append(self.get_node(content_node_ids[0]))
+
+        return content_nodes
+
 
 class SimpleObjectCache(object):
     """
@@ -563,6 +575,9 @@ class PersistenceManager(object):
 
     def get_all_tags(self):
         return self._underlying_persistence.get_all_tags()
+
+    def get_tagged_nodes(self, tag, tag_uuid=None):
+        return self._underlying_persistence.get_tagged_nodes(tag, tag_uuid)
 
     def initialize(self):
         self._underlying_persistence.initialize()
