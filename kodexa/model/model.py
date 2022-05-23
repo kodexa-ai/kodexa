@@ -1233,7 +1233,7 @@ class ContentNode(object):
                 group_dict[feature_val['uuid']] = [final_value]
 
         if include_children:
-            tagged_nodes = self.select('//*[hasTag("' + tag_name + '")]')
+            tagged_nodes = self.document.get_tagged_nodes(tag_name, tag_uuid=tag_uuid)
         else:
             tagged_nodes = self.select('.')
 
