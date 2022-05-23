@@ -46,12 +46,25 @@ class DocumentMetadata(Dict):
         super().__init__(*args, **kwargs)
 
 
+class ContentException(Dict):
+    """A content exception represents an issue identified during labeling or validation at the document level"""
+
+    def __init__(self, tag: str, message: str, group_uuid: Optional[str], tag_uuid: Optional[str], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tag = tag
+        self.message = message
+        self.group_uuid = group_uuid
+        self.tag_uuid = tag_uuid
+
+
 class Tag(Dict):
     """A tag represents the metadata for a label that is applies as a feature on a content node"""
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
                  uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
-                 index: Optional[int] = None, bbox: Optional[List[int]] = None, **kwargs):
+                 group_uuid: Optional[str] = None, parent_group_uuid: Optional[str] = None,
+                 cell_index: Optional[int] = None, index: Optional[int] = None, bbox: Optional[List[int]] = None,
+                 **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
         """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
@@ -69,6 +82,17 @@ class Tag(Dict):
         """The tag index, this is used to allow us to order tags, and understand the ordering of parent child tag relationships"""
         self.bbox: Optional[List[int]] = bbox
         """The optional bounding box that can be used if the label is spatial (based on the node as the container)"""
+        self.group_uuid: Optional[str] = group_uuid
+        """The UUID of the group that this tag belongs to, this is used to allow us to group tags together"""
+        self.parent_group_uuid: Optional[str] = parent_group_uuid
+        """The UUID of the parent group that this tag belongs to, this is used to allow us to group tags together"""
+        self.cell_index: Optional[int] = cell_index
+        """The cell index of the cell that this tag belongs to, this is used to allow us to group tags together"""
+
+        # Pull the cell index from the data to the tag if we have it in the data
+        if self.cell_index is None:
+            if data and 'cell_index' in data:
+                self.cell_index = data['cell_index']
 
 
 class FindDirection(Enum):
@@ -939,7 +963,7 @@ class ContentNode(object):
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
-            use_match=True, index=None):
+            use_match=True, index=None, cell_index=None, group_uuid=None, parent_group_uuid=None):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
@@ -968,6 +992,9 @@ class ContentNode(object):
           value: The value you wish to store with the tag, this allows you to provide text that isn't part of the content but represents the data you wish tagged
           use_match: If True (default) we will use match for regex matching, if False we will use search
           index: The index for the tag
+          cell_index: The cell index for the tag
+          group_uuid: The group uuid for the tag
+          parent_group_uuid: The parent group uuid for the tag
 
         >>> document.content_node.tag('is_cheese')
         """
@@ -1003,7 +1030,8 @@ class ContentNode(object):
                                                       Tag(original_start, original_end,
                                                           part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
-                                                          index=index))
+                                                          index=index, parent_group_uuid=parent_group_uuid,
+                                                          group_uuid=group_uuid, cell_index=cell_index))
                             return -1
                         if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1011,7 +1039,8 @@ class ContentNode(object):
                                                           content_length + part_length,
                                                           value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
-                                                          index=index))
+                                                          index=index, parent_group_uuid=parent_group_uuid,
+                                                          group_uuid=group_uuid, cell_index=cell_index))
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1081,7 +1110,8 @@ class ContentNode(object):
                 if not content_re:
                     node.add_feature('tag', tag_to_apply,
                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value,
-                                         index=index))
+                                         index=index, parent_group_uuid=parent_group_uuid, group_uuid=group_uuid,
+                                         cell_index=cell_index))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1101,7 +1131,8 @@ class ContentNode(object):
                                 if any(True for _ in matches):
                                     node.add_feature('tag', tag_to_apply,
                                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
-                                                         value=value, index=index))
+                                                         value=value, index=index, parent_group_uuid=parent_group_uuid,
+                                                         group_uuid=group_uuid, cell_index=cell_index))
                             else:
                                 if matches:
                                     for match in matches:
@@ -1697,6 +1728,15 @@ class Document(object):
 
     def get_persistence(self):
         return self._persistence_layer
+
+    def get_all_tags(self):
+        return self._persistence_layer.get_all_tags()
+
+    # def get_content_exceptions(self) -> List[ContentException]:
+    #     return self._persistence_layer.get_content_exceptions()
+    # 
+    # def add_content_exception(self, content_exception: ContentException):
+    #     self._persistence_layer.add_content_exception(content_exception)
 
     @property
     def content_node(self):
