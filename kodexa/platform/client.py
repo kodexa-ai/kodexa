@@ -1017,6 +1017,19 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
 
 class DataStoreEndpoint(StoreEndpoint):
 
+    def get_data_objects_export(self, document_family: Optional[DocumentFamily] = None,
+                                output_format: str = "json", path:Optional[str] = None) -> str:
+        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
+        params = {"format": output_format}
+        if document_family:
+            params["documentFamilyId"] = document_family.id
+
+        if output_format == 'csv' and not path:
+            raise ValueError("CSV output requires a path")
+
+        response = self.client.get(url, params=params)
+        return response.text
+
     def get_taxonomies(self) -> List[Taxonomy]:
         url = f"/api/stores/{self.ref.replace(':', '/')}/taxonomies"
         taxonomy_response = self.client.get(url)
