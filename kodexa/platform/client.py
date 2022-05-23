@@ -83,7 +83,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def get_type(self) -> str:
         pass
 
-    def get_instance_class(self) -> Type[ClientEndpoint]:
+    def get_instance_class(self, object_dict=None) -> Type[ClientEndpoint]:
         pass
 
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
@@ -113,10 +113,10 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         pass
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, obj_dict=None) -> Type[BaseModel]:
         pass
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, obj_dict=None) -> Type[BaseModel]:
         pass
 
     def reindex(self):
@@ -146,12 +146,13 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["filters"] = filters
 
         list_response = self.client.get(url, params=params)
-        return self.get_page_class().parse_obj(list_response.json()).set_client(self.client).to_endpoints()
+        return self.get_page_class(list_response.json()).parse_obj(list_response.json()).set_client(
+            self.client).to_endpoints()
 
     def create(self, component):
         url = f"/api/{self.get_type()}/{self.organization.slug}/"
         get_response = self.client.post(url, component.to_dict())
-        return self.get_instance_class().parse_obj(get_response.json())
+        return self.get_instance_class(get_response.json()).parse_obj(get_response.json()).set_client(self.client)
 
     def get_by_slug(self, slug, version=None):
         url = f"/api/{self.get_type()}/{self.organization.slug}/{slug}"
@@ -159,7 +160,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             url += f"/{version}"
 
         get_response = self.client.get(url)
-        return self.get_instance_class().parse_obj(get_response.json())
+        return self.get_instance_class(get_response.json()).parse_obj(get_response.json())
 
 
 class OrganizationsEndpoint:
@@ -357,11 +358,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
 
     @property
     def credentials(self, query="*", page=1, pagesize=10, sort=None):
-        url = f"/api/projectTemplates/{self.slug}"
-        response = self.client.get(url,
-                                   params={"query": query, "page": page, "pageSize": pagesize,
-                                           "sort": sort})
-        return PageCredentialEndpoint.parse_obj(response.json()).set_client(self.client)
+        return CredentialsEndpoint().set_organization(self).set_client(self.client)
 
     @property
     def stores(self):
@@ -473,7 +470,7 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
     def get_type(self) -> str:
         return f"assistants"
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return AssistantEndpoint
 
 
@@ -482,7 +479,7 @@ class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
     def get_type(self) -> str:
         return f"documentStores"
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return DocumentStoreEndpoint
 
 
@@ -491,8 +488,24 @@ class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
     def get_type(self) -> str:
         return f"taxonomies"
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return TaxonomyEndpoint
+
+
+class ProjectStoresEndpoint(ProjectResourceEndpoint):
+
+    def get_type(self) -> str:
+        return f"stores"
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        if object_dict['storeType'] == "DOCUMENT":
+            return DocumentStoreEndpoint
+        elif object_dict['storeType'] == "MODEL":
+            return ModelStoreEndpoint
+        elif object_dict['storeType'] == "TABLE":
+            return DataStoreEndpoint
+        else:
+            raise ValueError(f"Unknown store type {object_dict['storeType']}")
 
 
 class ProjectDataStoresEndpoint(ProjectResourceEndpoint):
@@ -500,7 +513,7 @@ class ProjectDataStoresEndpoint(ProjectResourceEndpoint):
     def get_type(self) -> str:
         return f"dataStores"
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return DataStoreEndpoint
 
 
@@ -509,7 +522,7 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
     def get_type(self) -> str:
         return f"modelStores"
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return DataStoreEndpoint
 
 
@@ -517,6 +530,22 @@ class ProjectEndpoint(EntityEndpoint, Project):
 
     def get_type(self) -> str:
         return "projects"
+
+    def update_resources(self, stores: List["StoreEndpoint"] = None,
+                         taxonomies: List["TaxonomyEndpoint"] = None) -> "ProjectEndpoint":
+        project_resources_update = ProjectResourcesUpdate()
+        project_resources_update.store_refs = []
+        project_resources_update.taxonomy_refs = []
+        project_resources_update.dashboard_refs = []
+
+        if stores:
+            project_resources_update.store_refs = [store.ref for store in stores]
+
+        if taxonomies:
+            project_resources_update.taxonomy_refs = [taxonomy.ref for taxonomy in taxonomies]
+
+        self.client.put(f"/api/projects/{self.id}/resources",
+                        body=json.loads(project_resources_update.json(by_alias=True)))
 
     @property
     def document_stores(self) -> ProjectDocumentStoresEndpoint:
@@ -544,10 +573,10 @@ class EntitiesEndpoint:
     def get_type(self) -> str:
         raise NotImplementedError()
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         raise NotImplementedError()
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         raise NotImplementedError()
 
     def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint" = None):
@@ -601,10 +630,10 @@ class ProjectsEndpoint(EntitiesEndpoint):
     def get_type(self) -> str:
         return f"projects"
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return ProjectEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageProjectEndpoint
 
     def find_by_name(self, project_name: str) -> ProjectEndpoint:
@@ -631,21 +660,28 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "stores"
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageStoreEndpoint
 
-    def get_instance_class(self) -> Type[BaseModel]:
-        return Store
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        if object_dict['storeType'] == "DOCUMENT":
+            return DocumentStoreEndpoint
+        elif object_dict['storeType'] == "MODEL":
+            return ModelStoreEndpoint
+        elif object_dict['storeType'] == "TABLE":
+            return DataStoreEndpoint
+        else:
+            raise ValueError(f"Unknown store type {object_dict['storeType']}")
 
 
 class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "extensionPacks"
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageExtensionPackEndpoint
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return ExtensionPackEndpoint
 
     def deploy_from_url(self, extension_pack_url: str,
@@ -660,21 +696,32 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
     def get_type(self) -> str:
         return "projectTemplates"
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageProjectTemplateEndpoint
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return ProjectTemplateEndpoint
+
+
+class CredentialsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    def get_type(self) -> str:
+        return "credentials"
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        return PageCredentialEndpoint
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        return CredentialEndpoint
 
 
 class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "modelRuntimes"
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageModelRuntimeEndpoint
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return ModelRuntimeEndpoint
 
 
@@ -791,10 +838,10 @@ class MembershipsEndpoint(EntitiesEndpoint):
     def get_type(self) -> str:
         return f"memberships"
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return MembershipEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageMembershipEndpoint
 
 
@@ -803,10 +850,10 @@ class UsersEndpoint(EntitiesEndpoint):
     def get_type(self) -> str:
         return f"users"
 
-    def get_instance_class(self) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return UserEndpoint
 
-    def get_page_class(self) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         return PageUserEndpoint
 
 
@@ -826,6 +873,11 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
     def update(self):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
         self.client.put(url, body=self.to_dict())
+
+    def export(self) -> bytes:
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
+        get_response = self.client.get(url)
+        return get_response.content
 
     def update_document(self, document: Document, content_object: Optional[ContentObject] = None):
         if content_object is None:
@@ -882,6 +934,14 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
     def reprocess(self, assistant: Assistant):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/reprocess"
         self.client.put(url, params={'assistantId': assistant.id})
+
+    def add_document(self, document: Document, content_object: Optional[ContentObject] = None):
+        url = f'/api/stores/{self.store_ref.replace(":", "/")}/families/{self.id}/objects'
+        if content_object is None:
+            content_object = self.content_objects[-1]
+        self.client.post(url, params={'sourceContentObjectId': content_object.id, 'transitionType': 'DERIVED',
+                                      'documentVersion': document.version},
+                         files={'file': document.to_kddb()})
 
     def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
         feature_set = FeatureSet()
@@ -944,6 +1004,19 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
 
 
 class DataStoreEndpoint(StoreEndpoint):
+
+    def get_data_objects_export(self, document_family: Optional[DocumentFamily] = None,
+                                output_format: str = "json", path:Optional[str] = None) -> str:
+        url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
+        params = {"format": output_format}
+        if document_family:
+            params["documentFamilyId"] = document_family.id
+
+        if output_format == 'csv' and not path:
+            raise ValueError("CSV output requires a path")
+
+        response = self.client.get(url, params=params)
+        return response.text
 
     def get_taxonomies(self) -> List[Taxonomy]:
         url = f"/api/stores/{self.ref.replace(':', '/')}/taxonomies"
@@ -1178,6 +1251,14 @@ class DocumentStoreEndpoint(StoreEndpoint):
             paths.append(fam_dict['path'])
         return paths
 
+    def download_document_families(self, output_dir: str):
+        """Download all the document families in the store to the given directory"""
+
+        for document_family in self.query(page_size=9999).content:
+            export_bytes = document_family.export()
+            with open(os.path.join(output_dir, document_family.id + ".dfm"), 'wb') as f:
+                f.write(export_bytes)
+
     def get_metadata_class(self) -> Type[BaseModel]:
         return DocumentContentMetadata
 
@@ -1330,23 +1411,22 @@ class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "taxonomies"
 
-    def get_page_class(self) -> Type[BaseModel]:
-        return PageTaxonomy
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        return PageTaxonomyEndpoint
 
-    def get_instance_class(self) -> Type[BaseModel]:
-        return Taxonomy
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        return TaxonomyEndpoint
 
 
 def process_response(response) -> requests.Response:
     if response.status_code == 401:
-        raise Exception("Unauthorized")
+        raise Exception(f"Unauthorized ({response.text})")
     if response.status_code == 404:
-        raise Exception("Not found")
+        raise Exception(f"Not found ({response.text})")
     if response.status_code == 405:
         raise Exception("Method not allowed")
     if response.status_code == 500:
-        print(response.text)
-        raise Exception("Internal server error")
+        raise Exception("Internal server error: \n" + response.text)
     if response.status_code == 400:
         if response.json() and response.json().get("errors"):
             messages = []
@@ -1540,12 +1620,132 @@ class KodexaClient:
     def get_url(self, url):
         if url.startswith("/"):
             return self.base_url + url
+        else:
+            return self.base_url + "/" + url
 
-        return self.base_url + "/" + url
+    def export_project(self, project: ProjectEndpoint, export_path: str):
 
-    def deserialize(self, component_dict: dict, component_type: Optional[str] = None) -> ComponentInstanceEndpoint:
-        if "type" in component_dict or component_type is not None:
-            component_type = component_type if component_type is not None else component_dict["type"]
+        # We will create a directory for the project in the export path and then export the project
+        # components and metadata to that directory
+
+        # First export the project metadata
+
+        project_export_dir = os.path.join(export_path, project.name)
+        Path(project_export_dir).mkdir(parents=True, exist_ok=False)
+
+        project_metadata_file = os.path.join(project_export_dir, "project_metadata.json")
+        with open(project_metadata_file, "w") as f:
+            f.write(json.dumps(project.to_dict(), indent=4))
+
+        for assistant in project.assistants.list():
+            assistant_file = os.path.join(project_export_dir, f"assistant-{assistant.id}.json")
+            with open(assistant_file, "w") as f:
+                f.write(json.dumps(assistant.to_dict(), indent=4))
+
+        for data_store in project.data_stores.list():
+            data_store_file = os.path.join(project_export_dir,
+                                           f"data-store-{data_store.slug}-{data_store.version}.json")
+            with open(data_store_file, "w") as f:
+                f.write(json.dumps(data_store.to_dict(), indent=4))
+
+        for document_store in project.document_stores.list():
+            document_store_file = os.path.join(project_export_dir,
+                                               f"document-store-{document_store.slug}-{document_store.version}.json")
+            with open(document_store_file, "w") as f:
+                f.write(json.dumps(document_store.to_dict(), indent=4))
+
+            store_folder = os.path.join(project_export_dir,
+                                        f"document-store-{document_store.slug}-{document_store.version}")
+            Path(store_folder).mkdir(parents=True, exist_ok=False)
+            document_store.download_document_families(store_folder)
+
+        for model_store in project.model_stores.list():
+            model_store_file = os.path.join(project_export_dir,
+                                            f"model-store-{model_store.slug}-{model_store.version}.json")
+            with open(model_store_file, "w") as f:
+                f.write(json.dumps(model_store.to_dict(), indent=4))
+
+            store_folder = os.path.join(project_export_dir,
+                                        f"document-store-{model_store.slug}-{model_store.version}")
+            Path(store_folder).mkdir(parents=True, exist_ok=False)
+            model_store.download_document_families(store_folder)
+
+        for taxonomy in project.taxonomies.list():
+            taxonomy_file = os.path.join(project_export_dir,
+                                         f"taxonomy-{taxonomy.slug}-{taxonomy.version}.json")
+            with open(taxonomy_file, "w") as f:
+                f.write(json.dumps(taxonomy.to_dict(), indent=4))
+
+    def import_project(self, organization: OrganizationEndpoint, import_path: str):
+        # The import path is the directory containing the export (or a zip file containing the export)
+
+        project_metadata_file = os.path.join(import_path, "project_metadata.json")
+        with open(project_metadata_file, "r") as f:
+            project = Project.parse_obj(json.load(f))
+            project.id = None
+            project.uuid = None
+            project.workflow = None
+            project.organization = organization.detach()
+            project.project_template_ref = None
+            new_project = organization.projects.create(project, None)
+
+        stores = []
+        taxonomies = []
+
+        import glob
+
+        for assistant_file in glob.glob(os.path.join(import_path, "assistant-*.json")):
+            with open(assistant_file, "r") as f:
+                assistant: AssistantEndpoint = AssistantEndpoint.parse_obj(json.load(f))
+
+                assistant.assistant_definition_ref = assistant.definition.ref.split(':')[0]
+                new_project.assistants.create(assistant)
+
+        for document_store_file in glob.glob(os.path.join(import_path, "document-store-*.json")):
+            with open(document_store_file, "r") as f:
+                document_store = DocumentStoreEndpoint.parse_obj(json.load(f)).set_client(self)
+                document_store.org_slug = None
+                document_store.ref = None
+                document_store = organization.stores.create(document_store)
+                stores.append(document_store)
+
+                for doc_fam in glob.glob(os.path.join(import_path, document_store_file.replace('.json', '/*.dfm'))):
+                    document_store.import_family(doc_fam)
+
+        for data_store_file in glob.glob(os.path.join(import_path, "data-store-*.json")):
+            with open(data_store_file, "r") as f:
+                data_store = DataStoreEndpoint.parse_obj(json.load(f)).set_client(self)
+                data_store.org_slug = None
+                data_store.ref = None
+                data_store = organization.stores.create(data_store)
+                stores.append(data_store)
+
+        for model_store_file in glob.glob(os.path.join(import_path, "model-store-*.json")):
+            with open(model_store_file, "r") as f:
+                model_store = ModelStoreEndpoint.parse_obj(json.load(f)).set_client(self)
+                model_store.org_slug = None
+                model_store.ref = None
+                model_store = organization.stores.create(model_store)
+                stores.append(model_store)
+
+                for doc_fam in glob.glob(os.path.join(import_path, model_store_file.replace('.json', '/*.dfm'))):
+                    model_store.import_family(doc_fam)
+
+        for taxonomy_file in glob.glob(os.path.join(import_path, "taxonomy-*.json")):
+            with open(taxonomy_file, "r") as f:
+                taxonomy = TaxonomyEndpoint.parse_obj(json.load(f))
+                taxonomy.org_slug = None
+                taxonomy.ref = None
+                taxonomies.append(organization.taxonomies.create(taxonomy))
+
+        import time
+        time.sleep(4)
+
+        new_project.update_resources(stores=stores, taxonomies=taxonomies)
+
+    def deserialize(self, component_dict: dict, type: Optional[str] = None) -> ComponentInstanceEndpoint:
+        if "type" in component_dict or type is not None:
+            component_type = type if type is not None else component_dict["type"]
             if component_type == 'store':
                 if "storeType" in component_dict:
                     store_type = component_dict["storeType"]
@@ -1559,7 +1759,7 @@ class KodexaClient:
                                 component_dict["metadata"])
 
                         return document_store
-                    if store_type.lower() == "model":
+                    elif store_type.lower() == "model":
                         model_store = ModelStoreEndpoint.parse_obj(component_dict)
                         model_store.set_client(self)
 
@@ -1595,3 +1795,7 @@ class KodexaClient:
             raise Exception("Unknown component type: " + component_type)
 
         raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
+
+    def get_project(self, project_id) -> ProjectEndpoint:
+        project = self.get(f"/api/projects/{project_id}")
+        return ProjectEndpoint.parse_obj(project.json()).set_client(self)

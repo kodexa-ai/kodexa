@@ -6,6 +6,7 @@ import tempfile
 import uuid
 
 import msgpack
+
 from kodexa.model import Document, ContentNode, SourceMetadata
 from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
 
@@ -64,7 +65,16 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
-    def update_features(self,node):
+    def get_all_tags(self):
+        "select * from cn where id in (select cn_id from ft where f_type in (select id from f_type where name like 'tag:%'))"
+        features = []
+        for feature in self.cursor.execute(
+                "select name from f_type where name like 'tag:%'").fetchall():
+            features.append(feature[0].split(':')[1])
+
+        return features
+
+    def update_features(self, node):
 
         next_feature_id = self.get_max_feature_id()
         all_features = []
@@ -550,6 +560,9 @@ class PersistenceManager(object):
         self.node_parent_cache = {}
 
         self._underlying_persistence = SqliteDocumentPersistence(document, filename, delete_on_close)
+
+    def get_all_tags(self):
+        return self._underlying_persistence.get_all_tags()
 
     def initialize(self):
         self._underlying_persistence.initialize()

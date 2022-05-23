@@ -39,7 +39,7 @@ def test_table_data_store():
 
 
 def test_basic_local_document_store():
-    lds = LocalDocumentStore(store_path='/tmp/s1')
+    lds = LocalDocumentStore(store_path='/tmp/s1', force_initialize=True)
     lds.put('my-doc', Document.from_text('hello!'))
 
     assert len(lds.list_objects()) == 1
