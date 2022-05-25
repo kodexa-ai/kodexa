@@ -49,10 +49,11 @@ class DocumentMetadata(Dict):
 class ContentException(Dict):
     """A content exception represents an issue identified during labeling or validation at the document level"""
 
-    def __init__(self, tag: str, message: str, group_uuid: Optional[str], tag_uuid: Optional[str], *args, **kwargs):
+    def __init__(self, tag: str, message: str, group_uuid: Optional[str], tag_uuid: Optional[str], exception_details: Optional[str], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tag = tag
         self.message = message
+        self.exception_details = exception_details
         self.group_uuid = group_uuid
         self.tag_uuid = tag_uuid
 
