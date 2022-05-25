@@ -373,12 +373,12 @@ class ContentNode(object):
             self.document.get_persistence().remove_feature(self, feature_type, name)
             self.document.get_persistence().add_feature(self, feature)
             return feature
-        else:
-            # Make sure that we treat the value as list all the time
-            new_feature = ContentFeature(feature_type, name,
+
+        # Make sure that we treat the value as list all the time
+        new_feature = ContentFeature(feature_type, name,
                                          [value] if single and not serialized else value, single=single)
-            self.document.get_persistence().add_feature(self, new_feature)
-            return new_feature
+        self.document.get_persistence().add_feature(self, new_feature)
+        return new_feature
 
     def delete_children(self, nodes: Optional[List] = None,
                         exclude_nodes: Optional[List] = None):
@@ -432,8 +432,8 @@ class ContentNode(object):
         hits = [i for i in self.get_features() if i.feature_type == feature_type and i.name == name]
         if len(hits) > 0:
             return hits[0]
-        else:
-            return None
+
+        return None
 
     def get_features_of_type(self, feature_type):
         """Get all features of a specific type.
@@ -804,8 +804,8 @@ class ContentNode(object):
         self_bbox = self.get_bbox()
         if self_bbox:
             return self_bbox[0]
-        else:
-            return None
+
+        return None
 
     def get_y(self):
         """Get the Y position of the node
@@ -823,8 +823,8 @@ class ContentNode(object):
         self_bbox = self.get_bbox()
         if self_bbox:
             return self_bbox[1]
-        else:
-            return None
+
+        return None
 
     def get_width(self):
         """Get the width of the node
@@ -842,8 +842,8 @@ class ContentNode(object):
         self_bbox = self.get_bbox()
         if self_bbox:
             return self_bbox[2] - self_bbox[0]
-        else:
-            return None
+
+        return None
 
     def get_height(self):
         """Get the height of the node
@@ -861,8 +861,8 @@ class ContentNode(object):
         self_bbox = self.get_bbox()
         if self_bbox:
             return self_bbox[3] - self_bbox[1]
-        else:
-            return None
+
+        return None
 
     def copy_tag(self, selector=".", existing_tag_name=None, new_tag_name=None):
         """Creates a new tag of 'new_tag_name' on the selected content node(s) with the same information as the tag with 'existing_tag_name'.
@@ -1008,8 +1008,8 @@ class ContentNode(object):
         def get_tag_uuid(tag_uuid):
             if tag_uuid:
                 return tag_uuid
-            else:
-                return str(uuid.uuid4())
+
+            return str(uuid.uuid4())
 
         def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
             content_length = 0
@@ -1034,7 +1034,7 @@ class ContentNode(object):
                                                           index=index, parent_group_uuid=parent_group_uuid,
                                                           group_uuid=group_uuid, cell_index=cell_index))
                             return -1
-                        elif start < part_length <= end:
+                        if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
                                                       Tag(original_start,
                                                           content_length + part_length,
@@ -1062,13 +1062,12 @@ class ContentNode(object):
 
                     if result < 0 or (end - result) <= 0:
                         return -1
-                    else:
 
-                        offset = offset + result
-                        end = end - result
-                        start = 0 if start - result < 0 else start - result
+                    offset = offset + result
+                    end = end - result
+                    start = 0 if start - result < 0 else start - result
 
-                        content_length = content_length + result
+                    content_length = content_length + result
                 else:
                     raise Exception("Invalid part?")
 
@@ -1087,12 +1086,12 @@ class ContentNode(object):
 
                     if result < 0 or (end - result) <= 0:
                         return -1
-                    else:
-                        offset = offset + result
-                        end = end - result
-                        start = 0 if start - result < 0 else start - result
 
-                        content_length = content_length + result
+                    offset = offset + result
+                    end = end - result
+                    start = 0 if start - result < 0 else start - result
+
+                    content_length = content_length + result
 
             if len(node_to_check.get_all_content(strip=False)) != content_length:
                 raise Exception(
@@ -1384,8 +1383,8 @@ class ContentNode(object):
         """
         if not self.parent:
             return True
-        else:
-            return self.index == 0
+
+        return self.index == 0
 
     def is_last_child(self):
         """Determines if this node is the last child of its parent or has no parent.
@@ -1397,8 +1396,8 @@ class ContentNode(object):
 
         if not self.get_parent():
             return True
-        else:
-            return self.index == self.get_parent().get_last_child_index()
+
+        return self.index == self.get_parent().get_last_child_index()
 
     def get_last_child_index(self):
         """Returns the max index value for the children of this node. If the node has no children, returns None.
@@ -1540,8 +1539,8 @@ class ContentNode(object):
             if traverse == traverse.ALL or traverse == traverse.PARENT and self.get_parent():
                 # Lets look for a previous node on the parent
                 return self.get_parent().previous_node(node_type_re, skip_virtual, has_no_content, traverse)
-            else:
-                return None
+
+            return None
 
         search_index = self.index - 1
         compiled_node_type_re = re.compile(node_type_re)
@@ -1592,8 +1591,8 @@ class ContentFeature(object):
         """
         if self.single:
             return self.value[0]
-        else:
-            return self.value
+
+        return self.value
 
 
 @dataclasses.dataclass()
@@ -1877,9 +1876,9 @@ class Document(object):
 
         if path is None:
             return self.get_persistence().get_bytes()
-        else:
-            with open(path, 'wb') as output_file:
-                output_file.write(self.get_persistence().get_bytes())
+
+        with open(path, 'wb') as output_file:
+            output_file.write(self.get_persistence().get_bytes())
 
     @staticmethod
     def from_kdxa(file_path):
@@ -2009,18 +2008,18 @@ class Document(object):
         return Document.from_dict(json.loads(json_string))
 
     @staticmethod
-    def from_msgpack(bytes):
+    def from_msgpack(msgpack_bytes):
         """Create an instance of a Document from a message pack byte array.
 
         Args:
-          bytes: bytes: A message pack byte array.
+          msgpack_bytes: bytes: A message pack byte array.
 
         Returns:
           Document: A complete Kodexa Document
 
         >>> Document.from_msgpack(open(os.path.join('news-doc.kdxa'), 'rb').read())
         """
-        return Document.from_dict(msgpack.unpackb(bytes, raw=False))
+        return Document.from_dict(msgpack.unpackb(msgpack_bytes, raw=False))
 
     def get_mixins(self):
         """Get the list of mixins that have been enabled on this document."""
@@ -2075,7 +2074,7 @@ class Document(object):
         return content_node
 
     @classmethod
-    def from_kddb(cls, input, detached: bool = False):
+    def from_kddb(cls, source, detached: bool = False):
         """
         Loads a document from a Kodexa Document Database (KDDB) file
 
@@ -2087,21 +2086,21 @@ class Document(object):
 
         :return: the document
         """
-        if isinstance(input, str):
-            if isinstance(input, str):
-                document = Document(kddb_path=input)
+        if isinstance(source, str):
+            if isinstance(source, str):
+                document = Document(kddb_path=source)
             if detached:
                 return Document.from_kddb(document.to_kddb())
-            else:
-                return document
-        else:
-            # We will assume the input is of byte type
-            import tempfile
-            from kodexa import KodexaPlatform
-            fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False, dir=KodexaPlatform.get_tempdir())
-            fp.write(input)
-            fp.close()
-            return Document(kddb_path=fp.name, delete_on_close=True)
+
+            return document
+
+        # We will assume the input is of byte type
+        import tempfile
+        from kodexa import KodexaPlatform
+        fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False, dir=KodexaPlatform.get_tempdir())
+        fp.write(source)
+        fp.close()
+        return Document(kddb_path=fp.name, delete_on_close=True)
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
@@ -2190,10 +2189,9 @@ class Document(object):
             result = self.content_node.select(selector, variables)
             if isinstance(result, list):
                 return result
-            else:
-                return [self.content_node] if bool(result) else []
-        else:
-            return []
+
+            return [self.content_node] if bool(result) else []
+        return []
 
     def get_labels(self) -> List[str]:
         """
@@ -2496,7 +2494,6 @@ class ModelStore(Store):
           Bytes or None is there is nothing at the path
 
         """
-        pass
 
     def put(self, path: str, content: Any, replace=False) -> DocumentFamily:
         """
@@ -2509,7 +2506,6 @@ class ModelStore(Store):
           The document family that was created
 
         """
-        pass
 
     def set_content_metadata(self, model_content_metadata: ModelContentMetadata):
         """
@@ -2517,7 +2513,6 @@ class ModelStore(Store):
 
         :param model_content_metadata: The metadata object
         """
-        pass
 
     def get_content_metadata(self) -> ModelContentMetadata:
         """
@@ -2525,7 +2520,6 @@ class ModelStore(Store):
 
         :return: the model content metadata
         """
-        pass
 
     def list_contents(self) -> List[str]:
         """
@@ -2533,7 +2527,6 @@ class ModelStore(Store):
 
         :return: a list of the object names
         """
-        pass
 
 
 class ContentObjectReference:

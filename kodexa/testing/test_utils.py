@@ -319,7 +319,6 @@ class AssistantTestHarness:
         Returns:
 
         """
-        pass
 
     def get_store(self, event: ContentEvent) -> DocumentStore:
         """
@@ -342,7 +341,6 @@ class OptionException(Exception):
     """
     An exception that is raised when there is a problem with a requests option
     """
-    pass
 
 
 class ExceptionBuilder:

@@ -75,14 +75,14 @@ def cli(info: Info, verbose: int):
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
-def project(_: Info, id: str, token: str, url: str):
+def project(_: Info, project_id: str, token: str, url: str):
     """Get all the details for a specific project
     """
 
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
 
-    KodexaPlatform.get_project(id)
+    KodexaPlatform.get_project(project_id)
 
 
 @cli.command()
@@ -115,8 +115,7 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, format=None, update: bool = False,
-           version=None,
+def deploy(_: Info, org: Optional[str], file: str, url:str, token: str, file_format=None, update: bool = False, version=None,
            slug=None):
     """Deploy an object to a Kodexa platform instance from a file
     """
@@ -126,9 +125,9 @@ def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, format=
     obj = None
     if file is None:
         print("Reading from stdin")
-        if format == 'yaml' or format == 'yml':
+        if file_format == 'yaml' or file_format == 'yml':
             obj = yaml.safe_load(sys.stdin.read())
-        elif format == 'json':
+        elif file_format == 'json':
             obj = json.loads(sys.stdin.read())
         else:
             raise Exception("You must provide a format if using stdin")
@@ -192,14 +191,14 @@ def logs(_: Info, execution_id: str, url: str, token: str):
 @click.option('--pageSize', default=10, help='Page size')
 @click.option('--sort', default=None, help='Sort by (ie. startDate:desc)')
 @pass_info
-def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, format=None,
+def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, obj_format=None,
         page: int = 1, pagesize: int = 10, sort: str = None):
     """
     List the instance of the object type
     """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref, path, format, query, page, pagesize, sort)
+    KodexaPlatform.get(object_type, ref, path, obj_format, query, page, pagesize, sort)
 
 
 @cli.command()
@@ -262,7 +261,7 @@ def import_project(_: Info, org_slug: str, url: str, token: str, path: str):
 @click.option('--file', help='The path to the file containing the event to send')
 @click.option('--format', default=None, help='The format to use if from stdin (json, yaml)')
 @pass_info
-def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str, format: str, token: str):
+def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str, event_format: str, token: str):
     """Send an event to an assistant
     """
 
@@ -272,9 +271,9 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
     obj = None
     if file is None:
         print("Reading from stdin")
-        if format == 'yaml':
+        if event_format == 'yaml':
             obj = yaml.parse(sys.stdin.read())
-        elif format == 'json':
+        elif event_format == 'json':
             obj = json.loads(sys.stdin.read())
         else:
             raise Exception("You must provide a format if using stdin")

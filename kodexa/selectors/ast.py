@@ -111,8 +111,8 @@ class BinaryExpression(object):
             if isinstance(left_value, list) and isinstance(right_value, list):
                 intersection_list = [value for value in left_value if value in right_value]
                 return intersection_list
-            else:
-                return []
+
+            return []
         if self.op == 'and':
             return bool(self.get_value(self.left, content_node, variables, context)) and bool(
                 self.get_value(self.right, content_node, variables, context))
@@ -125,8 +125,8 @@ class BinaryExpression(object):
             return side.resolve(content_node, variables, context)
         if isinstance(side, AbsolutePath):
             return side.resolve(content_node, variables, context)
-        else:
-            return side
+
+        return side
 
 
 class PredicatedExpression(object):
@@ -149,9 +149,9 @@ class PredicatedExpression(object):
                 if isinstance(predicate, int) and predicate == idx:
                     results.append(node)
                     return results
-                else:
-                    if not isinstance(predicate, int) and predicate.resolve(node):
-                        results.append(node)
+
+                if not isinstance(predicate, int) and predicate.resolve(node):
+                    results.append(node)
 
         return results
 
@@ -231,11 +231,11 @@ class Step(object):
 
         if match:
             return [axis_node]
-        else:
-            if self.axis is not None:
-                return self.resolve(axis_node, variables, context)
-            else:
-                return []
+
+        if self.axis is not None:
+            return self.resolve(axis_node, variables, context)
+
+        return []
 
 
 class NameTest(object):
@@ -295,8 +295,8 @@ class VariableReference(object):
     def resolve(self, variables, context: SelectorContext):
         if self.name[1] in variables:
             return variables[self.name[1]]
-        else:
-            return None
+
+        return None
 
 
 class FunctionCall(object):
@@ -336,35 +336,35 @@ class FunctionCall(object):
 
             if content_to_test is not None and compiled_pattern.match(content_to_test):
                 return content_to_test
-            else:
-                return None
+
+            return None
 
         if self.name == 'typeRegex':
             compiled_pattern = context.cache_pattern(args[0])
             if content_node.node_type is not None and compiled_pattern.match(content_node.node_type):
                 return content_node.node_type
-            else:
-                return None
+
+            return None
 
         if self.name == 'tagRegex':
             compiled_pattern = context.cache_pattern(args[0])
             for feature in content_node.get_features_of_type('tag'):
                 if feature.name is not None and compiled_pattern.match(feature.name):
                     return True
-            else:
-                return False
+
+            return False
 
         if self.name == 'hasTag':
             if len(self.args) == 0:
                 return len(content_node.get_tags()) > 0
-            else:
-                return content_node.has_feature('tag', args[0])
+
+            return content_node.has_feature('tag', args[0])
 
         if self.name == 'hasFeature':
             if len(args) == 0:
                 return len(content_node.get_features()) > 0
-            else:
-                return content_node.has_feature(args[0], args[1])
+
+            return content_node.has_feature(args[0], args[1])
 
         if self.name == 'hasFeatureValue':
             values = content_node.get_feature_values(args[0], args[1])

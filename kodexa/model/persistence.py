@@ -182,8 +182,8 @@ class SqliteDocumentPersistence(object):
         max_id = self.cursor.execute("select max(id) from ft").fetchone()
         if max_id[0] is None:
             return 1
-        else:
-            return max_id[0] + 1
+
+        return max_id[0] + 1
 
     def __build_db(self):
         self.cursor.execute("CREATE TABLE metadata (id integer primary key, metadata text)")
@@ -276,8 +276,8 @@ class SqliteDocumentPersistence(object):
                 self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
 
             return ([cn_values], cn_parts_values)
-        else:
-            raise "Node must have a UUID?"
+
+        raise Exception("Node must have a UUID?")
 
     def __clean_none_values(self, d):
         clean = {}
@@ -405,16 +405,16 @@ class SqliteDocumentPersistence(object):
         node_row = self.cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
         if node_row:
             return self.__build_node(node_row)
-        else:
-            return None
+
+        return None
 
     def get_parent(self, content_node):
 
         parent = self.cursor.execute("select pid from cn where id = ?", [content_node.uuid]).fetchone()
         if parent:
             return self.get_node(parent[0])
-        else:
-            return None
+
+        return None
 
     def update_metadata(self):
         self.__update_metadata()
@@ -495,8 +495,8 @@ class SqliteDocumentPersistence(object):
         next_id = self.cursor.execute("select max(id) from cn").fetchone()
         if next_id[0] is None:
             return 1
-        else:
-            return next_id[0] + 1
+
+        return next_id[0] + 1
 
     def get_tagged_nodes(self, tag, tag_uuid=None):
         content_nodes = []
@@ -523,11 +523,11 @@ class SimpleObjectCache(object):
         self.next_id = 1
         self.dirty_objs = set()
 
-    def get_obj(self, id):
-        if id in self.objs:
-            return self.objs[id]
-        else:
-            return None
+    def get_obj(self, obj_id):
+        if obj_id in self.objs:
+            return self.objs[obj_id]
+
+        return None
 
     def add_obj(self, obj):
         if obj.uuid is None:
@@ -544,8 +544,8 @@ class SimpleObjectCache(object):
 
     def get_dirty_objs(self):
         results = []
-        for id in set(self.dirty_objs):
-            node = self.get_obj(id)
+        for set_id in set(self.dirty_objs):
+            node = self.get_obj(set_id)
             if node is not None:
                 results.append(node)
         return results
@@ -588,8 +588,8 @@ class PersistenceManager(object):
     def get_parent(self, node):
         if node.uuid in self.node_parent_cache:
             return self.node_cache.get_obj(self.node_parent_cache[node.uuid])
-        else:
-            return self._underlying_persistence.get_parent(node)
+
+        return self._underlying_persistence.get_parent(node)
 
     def close(self):
         self._underlying_persistence.close()
@@ -735,8 +735,11 @@ class PersistenceManager(object):
 
             for child_id in child_ids:
                 child_node = self.node_cache.get_obj(child_id)
-                new_children.append(child_node) if child_node is not None else new_children.append(
-                    self.get_node(child_id))
+
+                if child_node is not None:
+                    new_children.append(child_node)
+                else:
+                    new_children.append(self.get_node(child_id))
 
             self.child_cache[node.uuid] = sorted(new_children, key=lambda x: x.index)
             self.child_id_cache[node.uuid] = set(child_ids)

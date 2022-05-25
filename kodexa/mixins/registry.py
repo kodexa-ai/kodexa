@@ -18,8 +18,8 @@ def get_mixin(mixin):
     """
     if mixin in registered_mixins:
         return registered_mixins[mixin]
-    else:
-        return None
+
+    return None
 
 
 def add_mixin(mixin):

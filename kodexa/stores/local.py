@@ -80,7 +80,7 @@ class LocalDocumentStore(DocumentStore):
 
         if path.is_file():
             raise Exception("Unable to load store, since it is pointing to a file?")
-        elif not path.exists():
+        if not path.exists():
             logger.info(f"Creating new local document store in {self.store_path}")
             path.mkdir(parents=True)
 
@@ -428,8 +428,8 @@ class LocalDocumentStore(DocumentStore):
         document_family = self.get_family_by_path(path)
         if document_family is not None:
             return document_family
-        else:
-            raise Exception("Unable to get document family?")
+
+        raise Exception("Unable to get document family?")
 
     def exists(self, document):
         """Look to see if we have document with the same original path and original filename
@@ -487,7 +487,7 @@ class LocalModelStore(ModelStore):
             shutil.rmtree(self.store_path)
         if path.is_file():
             raise Exception("Unable to load store, since it is pointing to a file?")
-        elif not path.exists():
+        if not path.exists():
             path.mkdir(parents=True)
 
     def to_dict(self):
@@ -510,8 +510,8 @@ class LocalModelStore(ModelStore):
         """
         if Path(os.path.join(self.store_path, path)).is_file():
             return open(os.path.join(self.store_path, path), 'rb')
-        else:
-            return None
+
+        return None
 
     def put_native(self, path: str, content: Any, force_replace=False):
         """
@@ -599,8 +599,8 @@ class TableDataStore(Store):
 
         if not self.columns:
             return pd.DataFrame(self.rows)
-        else:
-            return pd.DataFrame(self.rows, columns=self.columns)
+
+        return pd.DataFrame(self.rows, columns=self.columns)
 
     def set_pipeline_context(self, pipeline_context):
         """
