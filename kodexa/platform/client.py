@@ -1024,6 +1024,9 @@ class DataStoreEndpoint(StoreEndpoint):
         if document_family:
             params["documentFamilyId"] = document_family.id
 
+        if path:
+            params["path"] = path
+
         if output_format == 'csv' and not path:
             raise ValueError("CSV output requires a path")
 
