@@ -24,9 +24,10 @@ from appdirs import AppDirs
 from functional import seq
 from rich import print, get_console
 
+from kodexa import DocumentStore
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
-from kodexa.model import Document, ExtensionPack
+from kodexa.model import Document, ExtensionPack, ModelStore
 from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, Credential, ExecutionEvent, \
     ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate, Membership
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
@@ -377,11 +378,11 @@ class KodexaPlatform:
             headers={"x-access-token": KodexaPlatform.get_access_token()})
         if response.status_code == 200:
             return Dict(response.json())
-        else:
-            if response.status_code == 404:
-                raise Exception("Unable to find access token")
-            else:
-                raise Exception("An error occurred connecting to the Kodexa platform")
+
+        if response.status_code == 404:
+            raise Exception("Unable to find access token")
+
+        raise Exception("An error occurred connecting to the Kodexa platform")
 
     @classmethod
     def deploy_extension(cls, metadata):
@@ -432,11 +433,11 @@ class KodexaPlatform:
 
         if response.status_code == 200:
             return object_class(**response.json())
-        elif response.status_code == 404:
+        if response.status_code == 404:
             return None
-        else:
-            raise Exception(
-                f"Unable to create {object_type_metadata['plural']} with ref {ref} [{response.status_code} {response.text}]")
+
+        raise Exception(
+            f"Unable to create {object_type_metadata['plural']} with ref {ref} [{response.status_code} {response.text}]")
 
     @staticmethod
     def get_object_instance(ref: str, object_type):
@@ -502,13 +503,13 @@ class KodexaPlatform:
 
             builder.build_steps(metadata_object)
 
-        elif isinstance(kodexa_object, LocalDocumentStore) or isinstance(kodexa_object, RemoteDocumentStore):
+        elif isinstance(kodexa_object, DocumentStore):
             object_url = 'stores'
             metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
             metadata_object.description = 'A document store' if kodexa_object.description is None else kodexa_object.description
             metadata_object.type = 'store'
             metadata_object.storeType = 'DOCUMENT'
-        elif isinstance(kodexa_object, LocalModelStore) or isinstance(kodexa_object, RemoteModelStore):
+        elif isinstance(kodexa_object, ModelStore):
             object_url = 'stores'
             metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
             metadata_object.description = 'A model store' if kodexa_object.description is None else kodexa_object.description
@@ -612,9 +613,9 @@ class KodexaPlatform:
                                               "content-type": "application/json"})
         if list_response.status_code == 200:
             return list_response.json()
-        else:
-            logger.warning(list_response.text)
-            raise Exception("Unable to list objects [" + list_response.text + "]")
+
+        logger.warning(list_response.text)
+        raise Exception("Unable to list objects [" + list_response.text + "]")
 
     @staticmethod
     def undeploy(object_type: str, ref: str):
@@ -653,25 +654,25 @@ class KodexaPlatform:
         if obj_response.status_code == 404:
             logger.info(f"Object {ref} not found")
             return None
-        elif obj_response.status_code != 200:
+        if obj_response.status_code != 200:
             logger.warning(obj_response.text)
             raise Exception(f"Unable to get object {ref}")
+
+        obj_json = obj_response.json()
+        if obj_json is None:
+            return None
+        if 'type' in object_type_metadata:
+            return object_type_metadata['type'].parse_obj(obj_json)
+        if object_type == 'stores':
+            if obj_json['storeType'] == 'TABLE':
+                return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDataStore)
+            if obj_json['storeType'] == 'DOCUMENT':
+                return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDocumentStore)
+            if obj_json['storeType'] == 'MODEL':
+                return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteModelStore)
         else:
-            obj_json = obj_response.json()
-            if obj_json is None:
-                return None
-            if 'type' in object_type_metadata:
-                return object_type_metadata['type'].parse_obj(obj_json)
-            if object_type == 'stores':
-                if obj_json['storeType'] == 'TABLE':
-                    return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDataStore)
-                if obj_json['storeType'] == 'DOCUMENT':
-                    return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDocumentStore)
-                if obj_json['storeType'] == 'MODEL':
-                    return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteModelStore)
-            else:
-                print("errr")
-                return obj_json
+            print("errr")
+            return obj_json
 
     @classmethod
     def executions(cls):
@@ -700,8 +701,8 @@ class KodexaPlatform:
             print(f"Check your URL and password [{obj_response.status_code}]")
 
     @classmethod
-    def get_project_resource(cls, id, resource_name, resource_type):
-        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects/{id}/{resource_name}",
+    def get_project_resource(cls, resource_id, resource_name, resource_type):
+        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects/{resource_id}/{resource_name}",
                                     headers={"content-type": "application/json",
                                              "x-access-token": KodexaPlatform.get_access_token()})
 
@@ -762,15 +763,15 @@ class KodexaPlatform:
         if obj_response.status_code != 200:
             logger.warning(obj_response.text)
             raise Exception(f"Unable to {'update' if existing is not None else 'create'} object {url_ref}")
-        else:
-            obj_json = obj_response.json()
-            if 'type' in object_type_metadata:
-                return object_type_metadata['type'].parse_obj(obj_json)
-            else:
-                return obj_json
+
+        obj_json = obj_response.json()
+        if 'type' in object_type_metadata:
+            return object_type_metadata['type'].parse_obj(obj_json)
+
+        return obj_json
 
     @classmethod
-    def get(cls, object_type, ref, path=None, format=None, query="*", page: int = 1, pagesize: int = 10,
+    def get(cls, object_type, ref, path=None, output_format=None, query="*", page: int = 1, pagesize: int = 10,
             sort: str = None):
 
         object_type, object_type_metadata = resolve_object_type(object_type)
@@ -796,14 +797,14 @@ class KodexaPlatform:
                     import jq
                     obj = jq.compile(path).input(obj).all()
                 import yaml
-                if format == 'yaml':
+                if output_format == 'yaml':
                     def represent_none(self, _):
                         return self.represent_scalar('tag:yaml.org,2002:null', '')
 
                     yaml.add_representer(type(None), represent_none)
 
                     print(yaml.dump(obj.dict(by_alias=True)))
-                elif format == 'json':
+                elif output_format == 'json':
                     print(obj.json(by_alias=True, indent=4))
                 else:
                     pprint(obj)
@@ -850,11 +851,11 @@ class KodexaPlatform:
                                   "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
-        elif r.status_code == 200:
+        if r.status_code == 200:
             return r.json()
-        else:
-            logger.warning(r.text)
-            raise Exception("Unable to get server information, check your platform settings")
+
+        logger.warning(r.text)
+        raise Exception("Unable to get server information, check your platform settings")
 
     @classmethod
     def reindex(cls, object_type):
@@ -865,11 +866,11 @@ class KodexaPlatform:
                                    "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
-        elif r.status_code == 200:
+        if r.status_code == 200:
             return r.text
-        else:
-            logger.warning(r.text)
-            raise Exception("Unable to reindex check your reference and platform settings")
+
+        logger.warning(r.text)
+        raise Exception("Unable to reindex check your reference and platform settings")
 
     @classmethod
     def get_tempdir(cls):
@@ -917,8 +918,8 @@ class KodexaPlatform:
                 def format_col(col, value):
                     if col == 'labels':
                         return ", ".join(seq(value).map(lambda x: x.label).to_list())
-                    else:
-                        return str(value)
+
+                    return str(value)
 
                 page_document_families = store.query(query, page=page, page_size=page_size, sort=sort)
                 for family_endpoint in page_document_families.content:
@@ -939,7 +940,7 @@ class KodexaPlatform:
                                   "content-type": "application/json"})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
-        elif r.status_code == 200:
+        if r.status_code == 200:
             for entry in r.json()['content']:
                 get_console().print(entry['entry'], end='', markup=False)
         else:
@@ -957,19 +958,19 @@ class KodexaPlatform:
             raise Exception("Reference must be a document store")
 
     @classmethod
-    def get_project(cls, id):
-        project_instance = cls.get_object_instance(id, 'project')
+    def get_project(cls, project_id):
+        project_instance = cls.get_object_instance(project_id, 'project')
         print(f"Name: [bold]{project_instance.name}[/bold]")
         print(f"Description: [bold]{project_instance.description}[/bold]\n")
 
         print("[bold]Document Stores[/bold]")
-        cls.get_project_resource(id, 'documentStores', 'stores')
+        cls.get_project_resource(project_id, 'documentStores', 'stores')
         print("[bold]Data Stores[/bold]")
-        cls.get_project_resource(id, 'dataStores', 'stores')
+        cls.get_project_resource(project_id, 'dataStores', 'stores')
         print("[bold]Content Taxonomies[/bold]")
-        cls.get_project_resource(id, 'contentTaxonomies', 'taxonomies')
+        cls.get_project_resource(project_id, 'contentTaxonomies', 'taxonomies')
         print("[bold]Assistants[/bold]")
-        cls.get_project_resource(id, 'assistants', 'assistants')
+        cls.get_project_resource(project_id, 'assistants', 'assistants')
 
     @classmethod
     def __print_table(cls, objects, object_type, title=True, show_count=True):
@@ -1022,9 +1023,9 @@ class KodexaPlatform:
         if r.status_code == 200:
             print(f"Starting an execution with id {r.json()['id']}")
             return r.json()
-        else:
-            print(r.text)
-            raise Exception("Unable to send event")
+
+        print(r.text)
+        raise Exception("Unable to send event")
 
 
 class RemoteSession:
@@ -1049,11 +1050,11 @@ class RemoteSession:
                          headers={"x-access-token": KodexaPlatform.get_access_token()})
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
-        elif r.status_code == 200:
+        if r.status_code == 200:
             return r.json()
-        else:
-            logger.warning(r.text)
-            raise Exception("Unable to get action metadata, check your reference and platform settings")
+
+        logger.warning(r.text)
+        raise Exception("Unable to get action metadata, check your reference and platform settings")
 
     def start(self):
         """ """
@@ -1129,9 +1130,9 @@ class RemoteSession:
                     if step.exceptionDetails.help:
                         logger.warning(f"Additional help is available:\n\n{step.exceptionDetails.help}")
 
-            logger.debug(execution)
+                    raise Exception(f"Processing has failed on step {step.name}")
 
-            raise Exception(f"Processing has failed\nDetails: {step.exceptionDetails.help}")
+            raise Exception("Processing has failed, no steps seem to have failed")
 
         return execution
 
@@ -1152,9 +1153,9 @@ class RemoteSession:
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()})
             return Document.from_kddb(doc.content)
-        else:
-            logger.info("No output document")
-            return None
+
+        logger.info("No output document")
+        return None
 
     def get_store(self, execution, store):
         """

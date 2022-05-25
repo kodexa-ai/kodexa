@@ -214,8 +214,8 @@ class RollupTransformer:
 
         if node.get_parent():
             return self.is_node_in_list(node.get_parent(), node_ids)
-        else:
-            return False
+
+        return False
 
 
 class TagsToKeyValuePairExtractor:
@@ -231,8 +231,8 @@ class TagsToKeyValuePairExtractor:
         """ """
         if self.include_node_content:
             return TableDataStore(columns=['tag', 'tagged_content', 'node_content'])
-        else:
-            return TableDataStore(columns=['tag', 'tagged_content'])
+
+        return TableDataStore(columns=['tag', 'tagged_content'])
 
     def process(self, document, context):
         """

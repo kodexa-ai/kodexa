@@ -74,21 +74,21 @@ class FolderConnector:
     def __next__(self):
         if self.index > len(self.files) - 1:
             raise StopIteration
-        else:
-            self.index += 1
-            if self.unpack:
-                return Document.from_kdxa(self.files[self.index - 1])
-            else:
-                document = Document(DocumentMetadata(
-                    {"source_path": self.files[self.index - 1], "connector": self.get_name(),
-                     "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
-                     "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
-                document.source.original_filename = os.path.basename(self.files[self.index - 1])
-                document.source.original_path = self.path
-                document.source.connector = self.get_name()
 
-                # TODO we need to get the checksum and last_updated and created times
-                return document
+        self.index += 1
+        if self.unpack:
+            return Document.from_kdxa(self.files[self.index - 1])
+
+        document = Document(DocumentMetadata(
+            {"source_path": self.files[self.index - 1], "connector": self.get_name(),
+                "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
+                "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
+        document.source.original_filename = os.path.basename(self.files[self.index - 1])
+        document.source.original_path = self.path
+        document.source.connector = self.get_name()
+
+        # TODO we need to get the checksum and last_updated and created times
+        return document
 
     def __get_files__(self):
         all_files = []
@@ -139,17 +139,17 @@ class FileHandleConnector:
     def __next__(self):
         if self.completed:
             raise StopIteration
-        else:
-            document = Document(DocumentMetadata(
-                {"source_path": self.file, "connector": self.get_name(),
-                 "mime_type": mimetypes.guess_type(self.file),
-                 "connector_options": {"file": self.file}}))
-            document.source.original_filename = self.file
-            document.source.original_path = os.path.basename(self.file)
-            document.source.connector = self.get_name()
 
-            # TODO we need to get the checksum and last_updated and created times
-            return document
+        document = Document(DocumentMetadata(
+            {"source_path": self.file, "connector": self.get_name(),
+                "mime_type": mimetypes.guess_type(self.file),
+                "connector_options": {"file": self.file}}))
+        document.source.original_filename = self.file
+        document.source.original_path = os.path.basename(self.file)
+        document.source.connector = self.get_name()
+
+        # TODO we need to get the checksum and last_updated and created times
+        return document
 
 
 class UrlConnector:
@@ -185,17 +185,17 @@ class UrlConnector:
             response = requests.get(document.source.original_path,
                                     headers=document.source.headers)
             return io.BytesIO(response.content)
-        else:
-            if document.source.headers:
-                opener = urllib.request.build_opener()
-                for header in document.source.headers:
-                    opener.addheaders = [(header, document.source.headers[header])]
-                urllib.request.install_opener(opener)
-            from kodexa import KodexaPlatform
-            with tempfile.NamedTemporaryFile(delete=True, dir=KodexaPlatform.get_tempdir()) as tmp_file:
-                urllib.request.urlretrieve(document.source.original_path, tmp_file.name)
 
-                return open(tmp_file.name, 'rb')
+        if document.source.headers:
+            opener = urllib.request.build_opener()
+            for header in document.source.headers:
+                opener.addheaders = [(header, document.source.headers[header])]
+            urllib.request.install_opener(opener)
+        from kodexa import KodexaPlatform
+        with tempfile.NamedTemporaryFile(delete=True, dir=KodexaPlatform.get_tempdir()) as tmp_file:
+            urllib.request.urlretrieve(document.source.original_path, tmp_file.name)
+
+            return open(tmp_file.name, 'rb')
 
     def __iter__(self):
         return self
@@ -203,15 +203,15 @@ class UrlConnector:
     def __next__(self):
         if self.completed:
             raise StopIteration
-        else:
-            self.completed = True
-            document = Document(DocumentMetadata(
-                {"connector": self.get_name(),
-                 "connector_options": {"url": self.url, "headers": self.headers}}))
-            document.source.connector = self.get_name()
-            document.source.original_path = self.url
-            document.source.headers = self.headers
-            return document
+
+        self.completed = True
+        document = Document(DocumentMetadata(
+            {"connector": self.get_name(),
+                "connector_options": {"url": self.url, "headers": self.headers}}))
+        document.source.connector = self.get_name()
+        document.source.original_path = self.url
+        document.source.headers = self.headers
+        return document
 
 
 # The registered connectors
@@ -234,9 +234,9 @@ def get_connector(connector: str, source: SourceMetadata):
     if connector in registered_connectors:
         logger.info(f"Getting registered connector {connector}")
         return registered_connectors[connector]
-    else:
-        logging.error(f"Unable to find connector {connector}")
-        raise Exception(f"Unable to find connector {connector}")
+
+    logging.error(f"Unable to find connector {connector}")
+    raise Exception(f"Unable to find connector {connector}")
 
 
 def add_connector(connector):
@@ -268,10 +268,10 @@ class DocumentStoreConnector(object):
     def __next__(self):
         if self.index >= self.store.count():
             raise StopIteration
-        else:
-            document_family = self.store.query_families()[self.index]
-            self.index += 1
-            return self.store.get_latest_document_in_family(document_family)
+
+        document_family = self.store.query_families()[self.index]
+        self.index += 1
+        return self.store.get_latest_document_in_family(document_family)
 
     @staticmethod
     def get_source(document):
@@ -287,8 +287,8 @@ class DocumentStoreConnector(object):
                                                                                     document.source.headers['id']}))
         if document_bytes is None:
             raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
-        else:
-            return io.BytesIO(document_bytes)
+
+        return io.BytesIO(document_bytes)
 
 
 add_connector(FolderConnector)

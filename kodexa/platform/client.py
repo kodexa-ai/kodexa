@@ -27,8 +27,8 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
-    PageDocumentFamily, ProjectResourcesUpdate
+    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, Label, \
+    PageDocumentFamily
 
 logger = logging.getLogger()
 
@@ -130,8 +130,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         component_page = self.list(filters=filters)
         if component_page.empty:
             return None
-        else:
-            return component_page.content[0]
+        return component_page.content[0]
 
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}/{self.organization.slug}"
@@ -185,11 +184,10 @@ class OrganizationsEndpoint:
         organizations = self.list(filters=["slug=" + slug])
         if organizations.number_of_elements == 0:
             return None
-        else:
-            return organizations.content[0]
+        return organizations.content[0]
 
-    def delete(self, id: str) -> None:
-        url = f"/api/organizations/{id}"
+    def delete(self, organization_id: str) -> None:
+        url = f"/api/organizations/{organization_id}"
         self.client.delete(url)
 
     def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
@@ -237,7 +235,7 @@ class PageEndpoint(ClientEndpoint):
     def to_endpoints(self):
         self.content = seq(self.content).map(
             lambda x: self.client.deserialize(x.dict(exclude={'client'}, by_alias=True),
-                                              type=self.get_type())).to_list()
+                                              component_type=self.get_type())).to_list()
         return self
 
 
@@ -314,25 +312,22 @@ class EntityEndpoint(BaseEntity, ClientEndpoint):
         exists = self.client.exists(url)
         if exists:
             raise Exception("Can't create as it already exists")
-        else:
-            url = f"/api/{self.get_type()}"
-            self.client.post(url, self.to_dict())
+        url = f"/api/{self.get_type()}"
+        self.client.post(url, self.to_dict())
 
     def update(self):
         url = f"/api/{self.get_type()}/{self.id}"
         exists = self.client.exists(url)
         if not exists:
             raise Exception("Can't update as it doesn't exist?")
-        else:
-            self.client.put(url, self.to_dict())
+        self.client.put(url, self.to_dict())
 
     def delete(self):
         url = f"/api/{self.get_type()}/{self.id}"
         exists = self.client.exists(url)
         if not exists:
             raise Exception("Component doesn't exist")
-        else:
-            self.client.delete(url)
+        self.client.delete(url)
 
 
 class OrganizationEndpoint(Organization, EntityEndpoint):
@@ -348,9 +343,6 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         url = f"/api/{component.get_type()}/{self.slug}"
         response = self.client.post(url, body=component.to_dict())
         return self.client.deserialize(response.json())
-
-    def suspend(self):
-        self.client.put(f"/api/organizations/{self.id}/suspend")
 
     @property
     def model_runtimes(self) -> "ModelRuntimesEndpoint":
@@ -396,25 +388,22 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
         exists = self.client.exists(url)
         if exists:
             raise Exception("Can't create as it already exists")
-        else:
-            url = f"/api/{self.get_type()}/{self.org_slug}"
-            self.client.post(url, self.to_dict())
+        url = f"/api/{self.get_type()}/{self.org_slug}"
+        self.client.post(url, self.to_dict())
 
     def update(self):
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
         exists = self.client.exists(url)
         if not exists:
             raise Exception("Can't update as it doesn't exist?")
-        else:
-            self.client.put(url, self.to_dict())
+        self.client.put(url, self.to_dict())
 
     def delete(self):
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
         exists = self.client.exists(url)
         if not exists:
             raise Exception("Component doesn't exist")
-        else:
-            self.client.delete(url)
+        self.client.delete(url)
 
     def deploy(self, update=False):
         if self.org_slug is None:
@@ -428,12 +417,13 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
         exists = self.client.exists(url)
         if not update and exists:
             raise Exception("Component already exists")
+
         if exists:
             self.client.put(url, self.to_dict())
             return self.post_deploy()
-        else:
-            self.client.post(f"/api/{self.get_type()}/{self.org_slug}", self.to_dict())
-            return self.post_deploy()
+
+        self.client.post(f"/api/{self.get_type()}/{self.org_slug}", self.to_dict())
+        return self.post_deploy()
 
 
 class AssistantEndpoint(Assistant, ClientEndpoint):
@@ -630,8 +620,8 @@ class EntitiesEndpoint:
         create_response = self.client.post(url, body=json.loads(new_entity.json(exclude={'client'}, by_alias=True)))
         return self.get_instance_class().parse_obj(create_response.json()).set_client(self.client)
 
-    def delete(self, id: str) -> None:
-        url = f"/api/{self.get_type()}/{id}"
+    def delete(self, self_id: str) -> None:
+        url = f"/api/{self.get_type()}/{self_id}"
         self.client.delete(url)
 
 
@@ -651,8 +641,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
         get_response = self.client.get(url, params={'filter': f'name={project_name}'})
         if len(get_response.json()['content']) > 0:
             return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
-        else:
-            raise Exception("Project not found")
+        raise Exception("Project not found")
 
     def create(self, project: Project, template_ref: str = None) -> Project:
         url = f"/api/{self.get_type()}"
@@ -802,8 +791,7 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
             if parts[0] == match_value:
                 if len(parts) == 1:
                     return taxon
-                else:
-                    return self.find_taxon(taxon.children, parts[1:], use_label)
+                return self.find_taxon(taxon.children, parts[1:], use_label)
 
     def find_taxon_by_label_path(self, label_path: str) -> Taxon:
         label_path_parts = label_path.split("/")
@@ -1448,8 +1436,8 @@ def process_response(response) -> requests.Response:
             for key, value in response.json()["errors"].items():
                 messages.append(f"{key}: {value}")
             raise Exception(', '.join(messages))
-        else:
-            raise Exception("Bad request " + response.text)
+
+        raise Exception("Bad request " + response.text)
     return response
 
 
@@ -1540,8 +1528,8 @@ def resolve_object_type(obj_type):
 
     if len(hits) == 0:
         raise Exception(f"Unable to find object type {obj_type}")
-    else:
-        raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
+
+    raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
 
 
 class KodexaClient:
@@ -1563,8 +1551,8 @@ class KodexaClient:
                                     headers={"content-type": "application/json"})
         if obj_response.status_code == 200:
             return KodexaClient(url, obj_response.text)
-        else:
-            raise Exception(f"Check your URL and password [{obj_response.status_code}]")
+
+        raise Exception(f"Check your URL and password [{obj_response.status_code}]")
 
     @property
     def me(self):
@@ -1586,12 +1574,11 @@ class KodexaClient:
 
         if 'type' not in object_type_metadata:
             return self.deserialize(response.json())
-        else:
-            instance = object_type_metadata['type'](**response.json())
-            if isinstance(instance, ClientEndpoint):
-                instance.set_client(self)
+        instance = object_type_metadata['type'](**response.json())
+        if isinstance(instance, ClientEndpoint):
+            instance.set_client(self)
 
-            return instance
+        return instance
 
     def get_object_by_ref(self, object_type: str, ref: str) -> BaseModel:
         return self.__build_object(ref, resolve_object_type(object_type)[1])
@@ -1604,8 +1591,7 @@ class KodexaClient:
                                                                            "content-type": "application/json"})
         if response.status_code == 200 or response.status_code == 404:
             return response.status_code == 200
-        else:
-            process_response(response)
+        process_response(response)
 
     def get(self, url, params=None) -> requests.Response:
         response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
@@ -1786,12 +1772,12 @@ class KodexaClient:
                                 component_dict["metadata"])
 
                         return model_store
-                    elif store_type.lower() == "data" or store_type.lower() == "table":
+                    if store_type.lower() == "data" or store_type.lower() == "table":
                         return DataStoreEndpoint.parse_obj(component_dict).set_client(self)
-                    else:
-                        raise Exception("Unknown store type: " + store_type)
-                else:
-                    raise Exception("A store must have a storeType")
+
+                    raise Exception("Unknown store type: " + store_type)
+
+                raise Exception("A store must have a storeType")
             known_components = {
                 "taxonomy": TaxonomyEndpoint,
                 "pipeline": PipelineEndpoint,
@@ -1809,10 +1795,9 @@ class KodexaClient:
 
             if component_type in known_components:
                 return known_components[component_type].parse_obj(component_dict).set_client(self)
-            else:
-                raise Exception("Unknown component type: " + component_type)
-        else:
-            raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
+            raise Exception("Unknown component type: " + component_type)
+
+        raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
 
     def get_project(self, project_id) -> ProjectEndpoint:
         project = self.get(f"/api/projects/{project_id}")

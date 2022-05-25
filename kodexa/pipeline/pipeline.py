@@ -145,8 +145,8 @@ class PipelineContext:
     def is_cancelled(self) -> bool:
         if self.cancellation_handler is not None:
             return self.cancellation_handler()
-        else:
-            return False
+
+        return False
 
     def get_context(self) -> Dict:
         """ """
@@ -314,12 +314,12 @@ class PipelineStep:
         try:
             if str(type(self.step)) == "<class 'type'>":
                 raise Exception("You can not yet deploy a pipeline with a class instance style step")
-            elif isinstance(self.step, str):
+            if isinstance(self.step, str):
                 return {
                     'ref': self.step,
                     'options': self.options
                 }
-            elif callable(self.step):
+            if callable(self.step):
                 metadata = {
                     'function': self.step.__name__,
                     'script': dedent(inspect.getsource(self.step))
@@ -382,8 +382,8 @@ class PipelineStep:
             })
             if context.stop_on_exception:
                 raise
-            else:
-                return document
+
+            return document
 
 
 class LabelStep(object):
@@ -427,7 +427,6 @@ class PipelineStore:
 
         """
         # TODO implement
-        pass
 
 
 class Pipeline:
