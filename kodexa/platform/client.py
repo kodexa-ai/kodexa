@@ -28,7 +28,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, Label, \
-    PageDocumentFamily
+    PageDocumentFamily, ProjectResourcesUpdate
 
 logger = logging.getLogger()
 
