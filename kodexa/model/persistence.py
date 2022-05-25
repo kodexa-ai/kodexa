@@ -577,6 +577,7 @@ class PersistenceManager(object):
         return self._underlying_persistence.get_all_tags()
 
     def get_tagged_nodes(self, tag, tag_uuid=None):
+        self.flush_cache()
         return self._underlying_persistence.get_tagged_nodes(tag, tag_uuid)
 
     def initialize(self):
