@@ -1746,9 +1746,9 @@ class KodexaClient:
 
         new_project.update_resources(stores=stores, taxonomies=taxonomies)
 
-    def deserialize(self, component_dict: dict, type: Optional[str] = None) -> ComponentInstanceEndpoint:
-        if "type" in component_dict or type is not None:
-            component_type = type if type is not None else component_dict["type"]
+    def deserialize(self, component_dict: dict, component_type: Optional[str] = None) -> ComponentInstanceEndpoint:
+        if "type" in component_dict or component_type is not None:
+            component_type = component_type if component_type is not None else component_dict["type"]
             if component_type == 'store':
                 if "storeType" in component_dict:
                     store_type = component_dict["storeType"]
