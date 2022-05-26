@@ -339,6 +339,9 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
     def projects(self) -> 'ProjectsEndpoint':
         return ProjectsEndpoint(self.client, self)
 
+    def suspend(self):
+        self.client.put(f"/api/organizations/{self.id}/suspend")
+
     def deploy(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
         url = f"/api/{component.get_type()}/{self.slug}"
         response = self.client.post(url, body=component.to_dict())
@@ -357,7 +360,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         return ProjectTemplatesEndpoint().set_organization(self).set_client(self.client)
 
     @property
-    def credentials(self, query="*", page=1, pagesize=10, sort=None):
+    def credentials(self):
         return CredentialsEndpoint().set_organization(self).set_client(self.client)
 
     @property
