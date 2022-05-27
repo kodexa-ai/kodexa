@@ -115,7 +115,8 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
 @pass_info
-def deploy(_: Info, org: Optional[str], file: str, url:str, token: str, file_format=None, update: bool = False, version=None,
+def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, file_format=None, update: bool = False,
+           version=None,
            slug=None):
     """Deploy an object to a Kodexa platform instance from a file
     """
@@ -191,14 +192,14 @@ def logs(_: Info, execution_id: str, url: str, token: str):
 @click.option('--pageSize', default=10, help='Page size')
 @click.option('--sort', default=None, help='Sort by (ie. startDate:desc)')
 @pass_info
-def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, obj_format=None,
+def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, format=None,
         page: int = 1, pagesize: int = 10, sort: str = None):
     """
     List the instance of the object type
     """
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref, path, obj_format, query, page, pagesize, sort)
+    KodexaPlatform.get(object_type, ref, path, format, query, page, pagesize, sort)
 
 
 @cli.command()
@@ -241,7 +242,6 @@ def export_project(_: Info, project_id: str, url: str, token: str, output: str):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def import_project(_: Info, org_slug: str, url: str, token: str, path: str):
-
     print("Importing project from {}".format(path))
 
     client = KodexaClient(url, token)
