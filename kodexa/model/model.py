@@ -49,7 +49,8 @@ class DocumentMetadata(Dict):
 class ContentException(Dict):
     """A content exception represents an issue identified during labeling or validation at the document level"""
 
-    def __init__(self, tag: str, message: str, group_uuid: Optional[str], tag_uuid: Optional[str], exception_details: Optional[str], *args, **kwargs):
+    def __init__(self, message: str, tag: Optional[str] = None, group_uuid: Optional[str] = None, tag_uuid: Optional[str] = None,
+                 exception_details: Optional[str] = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tag = tag
         self.message = message
@@ -376,7 +377,7 @@ class ContentNode(object):
 
         # Make sure that we treat the value as list all the time
         new_feature = ContentFeature(feature_type, name,
-                                         [value] if single and not serialized else value, single=single)
+                                     [value] if single and not serialized else value, single=single)
         self.document.get_persistence().add_feature(self, new_feature)
         return new_feature
 
@@ -964,7 +965,7 @@ class ContentNode(object):
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
-            use_match=True, index=None, cell_index=None, group_uuid=None, parent_group_uuid=None):
+            use_match=True, index=None, cell_index=None, group_uuid=None, parent_group_uuid=None, note=None):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
@@ -996,6 +997,7 @@ class ContentNode(object):
           cell_index: The cell index for the tag
           group_uuid: The group uuid for the tag
           parent_group_uuid: The parent group uuid for the tag
+          note: a text note for the tag
 
         >>> document.content_node.tag('is_cheese')
         """
@@ -1032,7 +1034,7 @@ class ContentNode(object):
                                                           part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note))
                             return -1
                         if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1041,7 +1043,7 @@ class ContentNode(object):
                                                           value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note))
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1112,7 +1114,7 @@ class ContentNode(object):
                     node.add_feature('tag', tag_to_apply,
                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value,
                                          index=index, parent_group_uuid=parent_group_uuid, group_uuid=group_uuid,
-                                         cell_index=cell_index))
+                                         cell_index=cell_index, note=note))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1133,7 +1135,7 @@ class ContentNode(object):
                                     node.add_feature('tag', tag_to_apply,
                                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
                                                          value=value, index=index, parent_group_uuid=parent_group_uuid,
-                                                         group_uuid=group_uuid, cell_index=cell_index))
+                                                         group_uuid=group_uuid, cell_index=cell_index, note=note))
                             else:
                                 if matches:
                                     for match in matches:
@@ -1667,10 +1669,13 @@ class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
 
     PREVIOUS_VERSION: str = "1.0.0"
-    CURRENT_VERSION: str = "4.0.1"
+    CURRENT_VERSION: str = "4.0.2"
 
     def __str__(self):
         return f"kodexa://{self.uuid}"
+
+    def add_exception(self, exception: ContentException):
+        self._persistence_layer.add_exception(exception)
 
     def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
                  kddb_path: str = None, delete_on_close=False):

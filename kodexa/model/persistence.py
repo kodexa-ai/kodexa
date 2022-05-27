@@ -8,12 +8,12 @@ import uuid
 import msgpack
 
 from kodexa.model import Document, ContentNode, SourceMetadata
-from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature
+from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature, ContentException
 
 logger = logging.getLogger()
 
 # Heavily used SQL
-
+EXCEPTION_INSERT = "INSERT INTO excpts (tag, message, exception_details, group_uuid, tag_uuid) VALUES (?, ?, ?, ?, ?)"
 FEATURE_INSERT = "INSERT INTO ft (id, cn_id, f_type, binary_value, single, tag_uuid) VALUES (?,?,?,?,?,?)"
 FEATURE_DELETE = "DELETE FROM ft where cn_id=? and f_type=?"
 
@@ -210,6 +210,16 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("CREATE INDEX cnp_perf ON cnp(cn_id, pos);")
         self.cursor.execute("CREATE INDEX f_perf ON ft(cn_id);")
         self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
+        self.cursor.execute("""CREATE TABLE excpts
+                                    (
+                                        id           integer primary key,
+                                        tag          text,
+                                        message      text,
+                                        exception_details text,
+                                        group_uuid   text,
+                                        tag_uuid     text
+                                    )""")
+        self.document.version = "4.0.2"
 
         self.__update_metadata()
 
@@ -334,7 +344,7 @@ class SqliteDocumentPersistence(object):
             self.document.content_node = self.__build_node(
                 root_node)
 
-        if self.document.version != '4.0.1':
+        if self.document.version != '4.0.1' and self.document.version != '4.0.2':
             # We need to migrate this to a 4.0.1 document
             self.cursor.execute("""CREATE TABLE ft
                                     (
@@ -353,6 +363,19 @@ class SqliteDocumentPersistence(object):
             self.cursor.execute("CREATE INDEX f_perf ON ft(cn_id);")
             self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
             self.document.version = "4.0.1"
+            self.update_metadata()
+
+        if self.document.version == '4.0.1':
+            self.cursor.execute("""CREATE TABLE excpts
+                                    (
+                                        id           integer primary key,
+                                        tag          text,
+                                        message      text,
+                                        exception_details text,
+                                        group_uuid   text,
+                                        tag_uuid     text
+                                    )""")
+            self.document.version = "4.0.2"
             self.update_metadata()
 
     def get_content_parts(self, new_node):
@@ -510,6 +533,12 @@ class SqliteDocumentPersistence(object):
 
         return content_nodes
 
+    def add_exception(self, exception: ContentException):
+        # Add an exception to the exception table
+        self.cursor.execute(EXCEPTION_INSERT,
+                            [exception.tag, exception.message, exception.exception_details, exception.group_uuid,
+                             exception.tag_uuid])
+
 
 class SimpleObjectCache(object):
     """
@@ -572,6 +601,9 @@ class PersistenceManager(object):
         self.node_parent_cache = {}
 
         self._underlying_persistence = SqliteDocumentPersistence(document, filename, delete_on_close)
+
+    def add_exception(self, exception: ContentException):
+        self._underlying_persistence.add_exception(exception)
 
     def get_all_tags(self):
         return self._underlying_persistence.get_all_tags()
