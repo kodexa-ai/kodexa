@@ -366,7 +366,7 @@ class SqliteDocumentPersistence(object):
             self.update_metadata()
 
         if self.document.version == '4.0.1':
-            self.cursor.execute("""CREATE TABLE excpts
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS excpts 
                                     (
                                         id           integer primary key,
                                         tag          text,
