@@ -927,6 +927,10 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/addLabel"
         return self.client.put(url, params={'label': label})
 
+    def remove_label(self, label: str):
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/removeLabel"
+        return self.client.put(url, params={'label': label})
+
     def get_document(self, content_object: Optional[ContentObject] = None) -> Document:
         if content_object is None:
             content_object = self.content_objects[-1]
