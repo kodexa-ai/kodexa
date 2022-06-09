@@ -13,7 +13,7 @@ from kodexa.model.model import ContentClassification, DocumentMetadata, ContentF
 logger = logging.getLogger()
 
 # Heavily used SQL
-EXCEPTION_INSERT = "INSERT INTO excpts (tag, message, exception_details, group_uuid, tag_uuid) VALUES (?, ?, ?, ?, ?)"
+EXCEPTION_INSERT = "INSERT INTO content_exceptions (tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 FEATURE_INSERT = "INSERT INTO ft (id, cn_id, f_type, binary_value, single, tag_uuid) VALUES (?,?,?,?,?,?)"
 FEATURE_DELETE = "DELETE FROM ft where cn_id=? and f_type=?"
 
@@ -210,14 +210,17 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("CREATE INDEX cnp_perf ON cnp(cn_id, pos);")
         self.cursor.execute("CREATE INDEX f_perf ON ft(cn_id);")
         self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
-        self.cursor.execute("""CREATE TABLE excpts
+        self.cursor.execute("""CREATE TABLE content_exceptions
                                     (
                                         id           integer primary key,
                                         tag          text,
                                         message      text,
                                         exception_details text,
                                         group_uuid   text,
-                                        tag_uuid     text
+                                        tag_uuid     text,
+                                        exception_type text,
+                                        severity     text,
+                                        node_uuid    text
                                     )""")
         self.document.version = "4.0.2"
 
@@ -366,14 +369,17 @@ class SqliteDocumentPersistence(object):
             self.update_metadata()
 
         if self.document.version == '4.0.1':
-            self.cursor.execute("""CREATE TABLE IF NOT EXISTS excpts 
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
                                     (
                                         id           integer primary key,
                                         tag          text,
                                         message      text,
                                         exception_details text,
                                         group_uuid   text,
-                                        tag_uuid     text
+                                        tag_uuid     text,
+                                        exception_type text,
+                                        severity     text,
+                                        node_uuid    text
                                     )""")
             self.document.version = "4.0.2"
             self.update_metadata()
@@ -537,7 +543,7 @@ class SqliteDocumentPersistence(object):
         # Add an exception to the exception table
         self.cursor.execute(EXCEPTION_INSERT,
                             [exception.tag, exception.message, exception.exception_details, exception.group_uuid,
-                             exception.tag_uuid])
+                             exception.tag_uuid, exception.exception_type, exception.severity, exception.node_uuid])
 
 
 class SimpleObjectCache(object):
