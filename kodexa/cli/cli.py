@@ -47,6 +47,22 @@ class Info(object):
 pass_info = click.make_pass_decorator(Info, ensure=True)
 
 
+def merge(a, b, path=None):
+    "merges dictionary b into dictionary a"
+    if path is None: path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                merge(a[key], b[key], path + [str(key)])
+            elif a[key] == b[key]:
+                pass  # same leaf value
+            else:
+                raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+        else:
+            a[key] = b[key]
+    return a
+
+
 # Change the options to below to suit the actual options for your task (or
 # tasks).
 @click.group()
@@ -114,11 +130,12 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @click.option('--format', default=None, help='The format to input if from stdin (json, yaml)')
+@click.option('--overlay', default=None, help='A JSON or YAML file that will overlay the metadata')
 @pass_info
-def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, file_format=None, update: bool = False,
-           version=None,
-           slug=None):
-    """Deploy an object to a Kodexa platform instance from a file
+def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, format=None, update: bool = False,
+           version=None, overlay: Optional[str] = None, slug=None):
+    """
+    Deploy a component to a Kodexa platform instance from a file or stdin
     """
 
     client = KodexaClient(access_token=token, url=url)
@@ -126,9 +143,9 @@ def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, file_fo
     obj = None
     if file is None:
         print("Reading from stdin")
-        if file_format == 'yaml' or file_format == 'yml':
+        if format == 'yaml' or format == 'yml':
             obj = yaml.safe_load(sys.stdin.read())
-        elif file_format == 'json':
+        elif format == 'json':
             obj = json.loads(sys.stdin.read())
         else:
             raise Exception("You must provide a format if using stdin")
@@ -142,9 +159,24 @@ def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, file_fo
             else:
                 raise Exception("Unsupported file type")
 
+    overlay_obj = None
+
+    if overlay is not None:
+        print("Reading overlay")
+        if overlay.endswith('yaml') or overlay.endswith('yml'):
+            overlay_obj = yaml.safe_load(sys.stdin.read())
+        elif overlay.endswith('json'):
+            overlay_obj = json.loads(sys.stdin.read())
+        else:
+            raise Exception("Unable to determine the format of the overlay file, must be .json or .yml/.yaml")
+
     if isinstance(obj, list):
         print(f"Found {len(obj)} components")
         for o in obj:
+
+            if overlay_obj:
+                o = merge(o, overlay_obj)
+
             component = client.deserialize(o)
             if org is not None:
                 component.org_slug = org
@@ -152,6 +184,10 @@ def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, file_fo
             component.deploy(update=update)
 
     else:
+
+        if overlay_obj:
+            obj = merge(obj, overlay_obj)
+
         component = client.deserialize(obj)
 
         if version is not None:
