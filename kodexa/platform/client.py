@@ -860,6 +860,19 @@ class UsersEndpoint(EntitiesEndpoint):
         return PageUserEndpoint
 
 
+class DataAttributeEndpoint(DataAttribute, ClientEndpoint):
+
+    data_object: DataObject = None
+
+    def set_data_object(self, data_object:DataObject):
+        self.data_object = data_object
+
+    def notes(self) -> PageNote:
+        # https://demo.kodexa.com/api/stores/{orgSlug}/{slug}/{version}/dataObjects/{parentId}/attributes/{attributeId}/notes
+        url = f"/api/stores/{self.data_object.store_ref.replace(':', '/')}/dataObjects/{self.data_object.id}/attributes/{self.id}/notes"
+        return self.client.get(url)
+
+
 class DataObjectEndpoint(DataObject, ClientEndpoint):
 
     def update(self):
