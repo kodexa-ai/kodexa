@@ -861,14 +861,13 @@ class UsersEndpoint(EntitiesEndpoint):
 
 
 class DataAttributeEndpoint(DataAttribute, ClientEndpoint):
-
     data_object: DataObject = None
 
     def set_data_object(self, data_object: DataObject):
         self.data_object = data_object
 
+    @property
     def notes(self) -> PageNote:
-        # https://demo.kodexa.com/api/stores/{orgSlug}/{slug}/{version}/dataObjects/{parentId}/attributes/{attributeId}/notes
         url = f"/api/stores/{self.data_object.store_ref.replace(':', '/')}/dataObjects/{self.data_object.id}/attributes/{self.id}/notes"
         response = self.client.get(url)
         return PageNote.parse_obj(response.json())
@@ -1033,7 +1032,8 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
 class DataStoreEndpoint(StoreEndpoint):
 
     def get_data_objects_export(self, document_family: Optional[DocumentFamily] = None,
-                                output_format: str = "json", path:Optional[str] = None, root_name:str="", friendly_names=True) -> str:
+                                output_format: str = "json", path: Optional[str] = None, root_name: str = "",
+                                friendly_names=True) -> str:
         url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         params = {"format": output_format, "friendlyNames": friendly_names, "rootName": root_name}
         if document_family:
