@@ -28,7 +28,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, Label, \
-    PageDocumentFamily, ProjectResourcesUpdate
+    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote
 
 logger = logging.getLogger()
 
@@ -864,13 +864,14 @@ class DataAttributeEndpoint(DataAttribute, ClientEndpoint):
 
     data_object: DataObject = None
 
-    def set_data_object(self, data_object:DataObject):
+    def set_data_object(self, data_object: DataObject):
         self.data_object = data_object
 
     def notes(self) -> PageNote:
         # https://demo.kodexa.com/api/stores/{orgSlug}/{slug}/{version}/dataObjects/{parentId}/attributes/{attributeId}/notes
         url = f"/api/stores/{self.data_object.store_ref.replace(':', '/')}/dataObjects/{self.data_object.id}/attributes/{self.id}/notes"
-        return self.client.get(url)
+        response = self.client.get(url)
+        return PageNote.parse_obj(response.json())
 
 
 class DataObjectEndpoint(DataObject, ClientEndpoint):
@@ -882,6 +883,12 @@ class DataObjectEndpoint(DataObject, ClientEndpoint):
     def delete(self):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/dataObjects/{self.id}"
         self.client.delete(url)
+
+    @property
+    def attributes(self) -> List[DataAttributeEndpoint]:
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/dataObjects/{self.id}/attributes"
+        response = self.client.get(url)
+        return [DataAttributeEndpoint.parse_obj(attribute) for attribute in response.json()]
 
 
 class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
