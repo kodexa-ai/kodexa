@@ -3,8 +3,7 @@ name: Python Package Using Anaconda
 on:
   push:
     branches:
-      - 'main'
-      - 'releases/*'
+      - 'develop'
 
 jobs:
   build-linux:
@@ -22,6 +21,7 @@ jobs:
         with:
           file_name: './VERSION'
           tag_version: "true"
+          postfix: 'beta'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install dependencies
