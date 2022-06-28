@@ -1519,12 +1519,23 @@ OBJECT_TYPES = {
         "type": ProjectEndpoint,
         "global": True
     },
+    "projectTemplates": {
+        "name": "projectTemplate",
+        "plural": "projectTemplates",
+        "type": ProjectTemplate
+    },
     "executions": {
         "name": "execution",
         "plural": "executions",
         "type": Execution,
         "global": True,
         "sort": "startDate:desc"
+    },
+    "memberships": {
+        "name": "membership",
+        "plural": "memberships",
+        "type": Membership,
+        "global": True
     }
 }
 
