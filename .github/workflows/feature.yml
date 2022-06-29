@@ -5,6 +5,7 @@ on:
     branches-ignore:
       - main
       - 'releases/*'
+      - develop
 
 jobs:
   build-linux:
