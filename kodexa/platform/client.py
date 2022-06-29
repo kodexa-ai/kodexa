@@ -27,7 +27,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, Label, \
+    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote
 
 logger = logging.getLogger()
@@ -1599,6 +1599,9 @@ class KodexaClient:
     @property
     def platform(self) -> PlatformOverview:
         return PlatformOverview.parse_obj(self.get('/api').json())
+
+    def change_password(self, old_password: str, new_password: str):
+        return self.post("/api/account/passwordChange", body={"oldPassword": old_password, "newPassword": new_password})
 
     def reindex(self):
         self.post("/api/indices/_reindex")
