@@ -5,7 +5,7 @@ instance of the Kodexa platform
 from typing import List, Optional
 
 from kodexa.model import ContentObject, Document
-from kodexa.model.objects import BaseEvent, Store, Taxonomy
+from kodexa.model.objects import Store, Taxonomy, BaseEvent
 from kodexa.platform.client import DocumentStoreEndpoint
 
 
