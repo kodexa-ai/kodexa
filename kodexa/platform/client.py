@@ -28,7 +28,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
-    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote
+    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm
 
 logger = logging.getLogger()
 
@@ -361,6 +361,10 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
 
     @property
     def credentials(self):
+        return CredentialsEndpoint().set_organization(self).set_client(self.client)
+
+    @property
+    def dataForms(self):
         return CredentialsEndpoint().set_organization(self).set_client(self.client)
 
     @property
@@ -717,6 +721,17 @@ class CredentialsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         return CredentialEndpoint
 
 
+class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    def get_type(self) -> str:
+        return "dataForms"
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        return PageDataForm
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        return DataFormEndpoint
+
+
 class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "modelRuntimes"
@@ -738,6 +753,12 @@ class CredentialEndpoint(ComponentInstanceEndpoint, Credential):
 
     def get_type(self) -> str:
         return "credentials"
+
+
+class DataFormEndpoint(ComponentInstanceEndpoint, Credential):
+
+    def get_type(self) -> str:
+        return "dataForms"
 
 
 class AssistantDefinitionEndpoint(ComponentInstanceEndpoint, AssistantDefinition):
