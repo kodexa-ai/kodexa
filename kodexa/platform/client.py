@@ -1852,7 +1852,8 @@ class KodexaClient:
                 "project": ProjectEndpoint,
                 "membership": MembershipEndpoint,
                 "documentFamily": DocumentFamilyEndpoint,
-                "organization": OrganizationEndpoint
+                "organization": OrganizationEndpoint,
+                "dataForm": DataFormEndpoint
             }
 
             if component_type in known_components:
