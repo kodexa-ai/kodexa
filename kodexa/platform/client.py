@@ -28,7 +28,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
-    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm
+    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm
 
 logger = logging.getLogger()
 
@@ -755,7 +755,7 @@ class CredentialEndpoint(ComponentInstanceEndpoint, Credential):
         return "credentials"
 
 
-class DataFormEndpoint(ComponentInstanceEndpoint, DataForm):
+class DataFormEndpoint(ComponentInstanceEndpoint, Credential):
 
     def get_type(self) -> str:
         return "dataForms"
@@ -1054,9 +1054,9 @@ class DataStoreEndpoint(StoreEndpoint):
 
     def get_data_objects_export(self, document_family: Optional[DocumentFamily] = None,
                                 output_format: str = "json", path: Optional[str] = None, root_name: str = "",
-                                name_format='API_SAFE_LABEL') -> str:
+                                friendly_names=True) -> str:
         url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
-        params = {"format": output_format, "nameFormat": name_format, "rootName": root_name}
+        params = {"format": output_format, "friendlyNames": friendly_names, "rootName": root_name}
         if document_family:
             params["documentFamilyId"] = document_family.id
 
