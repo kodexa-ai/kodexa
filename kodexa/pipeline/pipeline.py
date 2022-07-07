@@ -6,7 +6,6 @@ import sys
 import time
 import traceback
 import uuid
-from collections import KeysView
 from inspect import signature
 from textwrap import dedent
 from typing import List, Optional, Dict
@@ -93,7 +92,7 @@ class InMemoryStoreProvider:
         """
         return self.stores[name] if name in self.stores else None
 
-    def get_store_names(self) -> KeysView:
+    def get_store_names(self):
         """ """
         return self.stores.keys()
 
@@ -192,7 +191,7 @@ class PipelineContext:
         """
         self.store_provider.put_store(name, store)
 
-    def get_store_names(self) -> KeysView:
+    def get_store_names(self):
         """
 
         Args:
