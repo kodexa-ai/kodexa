@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 0.0.169-develop
+  version: 0.0.218-develop
 externalDocs:
   description: Kodexa Support Portal
   url: https://support.kodexa.com
@@ -1277,6 +1277,176 @@ paths:
             schema:
               $ref: '#/components/schemas/ReprocessRequest'
         required: true
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "200":
+          description: OK
+  /api/stores/{orgSlug}/{slug}/{version}/presets/{id}:
+    get:
+      tags:
+      - Stores
+      description: Get a saved view preset by id
+      operationId: getStoreViewPreset
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ViewPreset'
+    put:
+      tags:
+      - Stores
+      description: Get the saved view presets
+      operationId: updateStoreViewPreset
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewPreset'
+        required: true
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "200":
+          description: OK
+    delete:
+      tags:
+      - Stores
+      description: Delete a saved view preset by id
+      operationId: deleteStoreViewPreset
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         "401":
           description: Unauthorized
@@ -9773,6 +9943,119 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ModelTraining'
+  /api/stores/{orgSlug}/{slug}/{version}/presets:
+    get:
+      tags:
+      - Stores
+      description: Get the saved view presets
+      operationId: getStoreViewPresets
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ViewPreset'
+    post:
+      tags:
+      - Stores
+      description: Get the saved view presets
+      operationId: createStoreViewPreset
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewPreset'
+        required: true
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ViewPreset'
   /api/stores/{orgSlug}/{slug}/{version}/families/{id}/searchContents:
     get:
       tags:
@@ -10392,7 +10675,7 @@ paths:
     get:
       tags:
       - Stores
-      description: Delete a specific attribute in a data object
+      description: Get the notes for a specific attribute
       operationId: getNotesForDataObjectAttribute
       parameters:
       - name: orgSlug
@@ -14294,6 +14577,12 @@ paths:
           type: integer
           format: int32
           default: 200
+      - name: force
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
       responses:
         "401":
           description: Unauthorized
@@ -14324,7 +14613,10 @@ paths:
           content:
             '*/*':
               schema:
-                type: string
+                type: array
+                items:
+                  type: string
+                  format: byte
   /api/stores/{orgSlug}/{slug}/{version}/families/{documentFamilyId}/objects/{id}/content:
     get:
       tags:
@@ -14640,6 +14932,72 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PageDataObject'
+  /api/stores/{orgSlug}/{slug}/{version}/dataObjects/{parentId}/attributes/{attributeId}/preview:
+    get:
+      tags:
+      - Stores
+      description: Get a Preview Image for the attribute if is from a spatial document
+      operationId: getPreviewForAttributeTagMetadata
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: parentId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: attributeId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: byte
   /api/stores/{orgSlug}/{slug}/{version}/dataObjects/{dataObjectId}/auditEvents:
     get:
       tags:
@@ -14975,6 +15333,12 @@ paths:
           type: integer
           format: int32
           default: 200
+      - name: force
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
       responses:
         "401":
           description: Unauthorized
@@ -15005,7 +15369,10 @@ paths:
           content:
             '*/*':
               schema:
-                type: string
+                type: array
+                items:
+                  type: string
+                  format: byte
   /api/stores/{orgSlug}/{slug}/families/{documentFamilyId}/objects/{id}/content:
     get:
       tags:
@@ -16338,11 +16705,11 @@ components:
     StatusType:
       type: object
       properties:
+        reasonPhrase:
+          type: string
         statusCode:
           type: integer
           format: int32
-        reasonPhrase:
-          type: string
     ThrowableProblem:
       type: object
       properties:
@@ -16748,6 +17115,10 @@ components:
           description: The type of the card
         path:
           type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
         taxonPath:
           type: string
         dataType:
@@ -17510,16 +17881,6 @@ components:
           format: int32
       description: A list of relationships to other taxons and the purpose of the
         relationship
-    SavedFilter:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        filter:
-          $ref: '#/components/schemas/StoreFilter'
-      description: Filters that have been saved for this store
     ScheduleDefinition:
       type: object
       properties:
@@ -17668,13 +18029,11 @@ components:
             - TRAINING
           viewOptions:
             $ref: '#/components/schemas/StoreViewOptions'
-          savedFilters:
+          viewPresets:
             type: array
-            description: Filters that have been saved for this store
+            description: View presets that have been saved for this store
             items:
-              $ref: '#/components/schemas/SavedFilter'
-    StoreFilter:
-      type: object
+              $ref: '#/components/schemas/ViewPreset'
     StoreViewOptions:
       type: object
       properties:
@@ -17908,6 +18267,20 @@ components:
             type: string
           body:
             type: string
+    ViewPreset:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        filterString:
+          type: string
+        enabledTaxons:
+          type: object
+          additionalProperties:
+            type: boolean
+      description: View presets that have been saved for this store
     ReprocessRequest:
       type: object
       properties:
@@ -18786,11 +19159,11 @@ components:
     ExtractedTagMetadata:
       type: object
       properties:
-        boundingBox:
+        scaledBoundingBox:
           type: array
           items:
             type: number
-            format: float
+            format: double
         parentSelector:
           type: string
         parentIndex:
@@ -19640,12 +20013,12 @@ components:
     PageUser:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -19677,16 +20050,16 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
     Sort:
       type: object
       properties:
@@ -19699,12 +20072,12 @@ components:
     PageTeam:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -19731,12 +20104,12 @@ components:
     PageTaxonomy:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -19763,12 +20136,12 @@ components:
     PageStore:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -19795,12 +20168,12 @@ components:
     PageModelTraining:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -19827,12 +20200,12 @@ components:
     PageDocumentFamily:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -19859,12 +20232,12 @@ components:
     PageExecution:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -19917,12 +20290,12 @@ components:
     PageDataObject:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20025,12 +20398,12 @@ components:
     PageAuditEvent:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20057,12 +20430,12 @@ components:
     PageNote:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20089,12 +20462,12 @@ components:
     PageSession:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20121,12 +20494,12 @@ components:
     PageRole:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20153,12 +20526,12 @@ components:
     PageProject:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20185,12 +20558,12 @@ components:
     PageProjectTemplate:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20217,12 +20590,12 @@ components:
     PagePipeline:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20249,12 +20622,12 @@ components:
     PageOrganization:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20281,12 +20654,12 @@ components:
     PageModelRuntime:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20313,12 +20686,12 @@ components:
     PageMembership:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20345,12 +20718,12 @@ components:
     PageSlugBasedMetadata:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20388,12 +20761,12 @@ components:
     PageExtensionPack:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20420,12 +20793,12 @@ components:
     PageExecutionLogEntry:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20452,12 +20825,12 @@ components:
     PagePlatformEvent:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20484,12 +20857,12 @@ components:
     PageDataForm:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20516,12 +20889,12 @@ components:
     PageDashboard:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20548,12 +20921,12 @@ components:
     PageCredential:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20580,12 +20953,12 @@ components:
     PageAssistantDefinition:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20612,12 +20985,12 @@ components:
     PageAction:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
@@ -20651,12 +21024,12 @@ components:
     PageAccessToken:
       type: object
       properties:
-        totalElements:
-          type: integer
-          format: int64
         totalPages:
           type: integer
           format: int32
+        totalElements:
+          type: integer
+          format: int64
         size:
           type: integer
           format: int32
