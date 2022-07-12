@@ -2464,8 +2464,7 @@ class AssistantExecution(KodexaBaseModel):
 
 
 class BaseEvent(KodexaBaseModel):
-    __root__: Union[BaseEvent1, ContentEvent, ScheduledEvent, AssistantEvent]
-
+    pass
 
 class ExecutionEvent(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
