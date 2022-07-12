@@ -28,7 +28,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
-    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm
+    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm
 
 logger = logging.getLogger()
 
@@ -755,7 +755,7 @@ class CredentialEndpoint(ComponentInstanceEndpoint, Credential):
         return "credentials"
 
 
-class DataFormEndpoint(ComponentInstanceEndpoint, Credential):
+class DataFormEndpoint(ComponentInstanceEndpoint, DataForm):
 
     def get_type(self) -> str:
         return "dataForms"
