@@ -70,7 +70,7 @@ class Tag(Dict):
                  uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
                  group_uuid: Optional[str] = None, parent_group_uuid: Optional[str] = None,
                  cell_index: Optional[int] = None, index: Optional[int] = None, bbox: Optional[List[int]] = None,
-                 note: Optional[str] = None, **kwargs):
+                 note: Optional[str] = None, status:Optional[str] = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
         """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
@@ -96,6 +96,9 @@ class Tag(Dict):
         """The cell index of the cell that this tag belongs to, this is used to allow us to group tags together"""
         self.note: Optional[str] = note
         """A note that can be associated with the tag"""
+        self.status: Optional[str] = status
+        """The status of the tag, this can be passed to an attribute status during extraction"""
+
         # Pull the cell index from the data to the tag if we have it in the data
         if self.cell_index is None:
             if data and 'cell_index' in data:
@@ -970,7 +973,8 @@ class ContentNode(object):
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
-            use_match=True, index=None, cell_index=None, group_uuid=None, parent_group_uuid=None, note=None):
+            use_match=True, index=None, cell_index=None, group_uuid=None, parent_group_uuid=None, note=None,
+            status=None):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
@@ -1003,6 +1007,7 @@ class ContentNode(object):
           group_uuid: The group uuid for the tag
           parent_group_uuid: The parent group uuid for the tag
           note: a text note for the tag
+          status: a status for the tag, this can be transistioned to an attribute status during extraction
 
         >>> document.content_node.tag('is_cheese')
         """
