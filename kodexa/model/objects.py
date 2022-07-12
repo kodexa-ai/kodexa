@@ -8,11 +8,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-import BaseEvent
-import ContentMetadata
-import DashboardWidget
-import ExtensionPackSource
-import SlugBasedMetadata
 from kodexa.model.base import KodexaBaseModel
 from pydantic import AnyUrl, Field, constr
 
