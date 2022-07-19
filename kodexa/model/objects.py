@@ -1301,6 +1301,11 @@ class Taxon(KodexaBaseModel):
         None,
         description='The name to be used, note based on the hierarchy the actual label in the document will have the parent name too',
     )
+    external_name: Optional[constr(regex=r'^[a-z0-9\_]$')] = Field(
+        None,
+        alias='externalName',
+        description='The name to be used when we are publishing this taxon to external systems',
+    )
     value_path: Optional[ValuePath] = Field(
         None,
         alias='valuePath',
