@@ -1291,10 +1291,11 @@ class ContentNode(object):
             tag_instances = tagged_node.get_tag(tag_name)
 
             for tag_instance in tag_instances:
-                if tag_instance['uuid'] not in node_groups:
-                    node_groups[tag_instance['uuid']] = [tagged_node]
-                else:
-                    node_groups[tag_instance['uuid']].append(tagged_node)
+                if 'uuid' in tag_instance:
+                    if tag_instance['uuid'] not in node_groups:
+                        node_groups[tag_instance['uuid']] = [tagged_node]
+                    else:
+                        node_groups[tag_instance['uuid']].append(tagged_node)
 
         return node_groups
 
