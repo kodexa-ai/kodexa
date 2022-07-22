@@ -919,7 +919,6 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                 return updated_document_family
             if label and label in seq(updated_document_family.labels).filter(lambda l: l.name == label).count() > 0:
                 return updated_document_family
-
             time.sleep(5)
 
         raise Exception(f"Not available on document family {self.id}")
