@@ -917,7 +917,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                 self.client)
             if mixin and mixin in updated_document_family.mixins:
                 return updated_document_family
-            if label and label in updated_document_family.labels:
+            if label and label in seq(updated_document_family.labels).filter(lambda l: l.name == label).count() > 0:
                 return updated_document_family
 
             time.sleep(5)
