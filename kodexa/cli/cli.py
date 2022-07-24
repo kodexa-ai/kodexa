@@ -22,7 +22,6 @@ from rich import print
 logging.root.addHandler(logging.StreamHandler(sys.stdout))
 
 from kodexa import KodexaClient
-from kodexa.cli.documentation import generate_site
 from kodexa.platform.kodexa import ExtensionHelper, KodexaPlatform
 
 LOGGING_LEVELS = {
@@ -414,20 +413,6 @@ def login(_: Info):
         print('ERROR', error)
     else:
         KodexaPlatform.login(kodexa_url, username, password)
-
-
-@cli.command()
-@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
-@pass_info
-def document(_: Info, path: str):
-    """
-    Build markdown documentation for this extension
-    """
-    metadata = ExtensionHelper.load_metadata(path)
-    print("Metadata loaded")
-    from kodexa.cli.documentation import generate_documentation
-    generate_documentation(metadata)
-    print("Extension documentation has been successfully built :tada:")
 
 
 @cli.command()

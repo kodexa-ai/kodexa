@@ -14,9 +14,8 @@ from uuid import uuid4
 import yaml
 
 from kodexa.connectors import FolderConnector
-from kodexa.connectors.connectors import get_caller_dir, DocumentStoreConnector
+from kodexa.connectors.connectors import get_caller_dir
 from kodexa.model import Document, Store, ContentObject
-from kodexa.stores.stores import DocumentStore
 
 logger = logging.getLogger()
 
@@ -664,23 +663,6 @@ class Pipeline:
         logger.info(f"Completed pipeline {self.name}")
 
         return self.context
-
-    @staticmethod
-    def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
-        """Build a new pipeline with the input documents from a document store
-
-        Args:
-          store: DocumentStore The URL ie. https://www.google.com
-          subscription: str The subscription query to use (Default value = None)
-          store: DocumentStore:
-          *args:
-          **kwargs:
-
-        Returns:
-          A new instance of a pipeline
-
-        """
-        return Pipeline(DocumentStoreConnector(store, subscription), *args, **kwargs)
 
     @staticmethod
     def from_url(url, headers=None, *args, **kwargs):

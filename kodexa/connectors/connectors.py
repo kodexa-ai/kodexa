@@ -16,7 +16,7 @@ from typing import Dict, Type
 
 import requests
 
-from kodexa.model import ContentObject, Document, DocumentMetadata, DocumentStore, SourceMetadata
+from kodexa.model import Document, DocumentMetadata, SourceMetadata
 
 logger = logging.getLogger()
 
@@ -249,49 +249,6 @@ def get_source(document):
     return connector.get_source(document)
 
 
-class DocumentStoreConnector(object):
-    """ """
-
-    def __init__(self, store: DocumentStore, subscription: str):
-        self.store = store
-        self.subscription = subscription
-        self.index = 0
-
-    @staticmethod
-    def get_name():
-        """ """
-        return "document-store"
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self.index >= self.store.count():
-            raise StopIteration
-
-        document_family = self.store.query_families()[self.index]
-        self.index += 1
-        return self.store.get_latest_document_in_family(document_family)
-
-    @staticmethod
-    def get_source(document):
-
-        from kodexa import RemoteDocumentStore
-        from kodexa import KodexaPlatform
-        remote_document_store: RemoteDocumentStore = KodexaPlatform.get_object_instance(document.source.headers['ref'],
-                                                                                        'store')
-        family = remote_document_store.get_family(document.source.headers['family'])
-        document_bytes = remote_document_store.get_source_by_content_object(family,
-                                                                            ContentObject(
-                                                                                **{'contentType': 'NATIVE', 'id':
-                                                                                    document.source.headers['id']}))
-        if document_bytes is None:
-            raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
-
-        return io.BytesIO(document_bytes)
-
-
 add_connector(FolderConnector)
 add_connector(FileHandleConnector)
 add_connector(UrlConnector)
-add_connector(DocumentStoreConnector)

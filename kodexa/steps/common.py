@@ -1,5 +1,4 @@
 from kodexa import get_source, DocumentStore, Document
-from kodexa.stores import TableDataStore
 
 
 class KodexaProcessingException(Exception):
@@ -216,53 +215,6 @@ class RollupTransformer:
             return self.is_node_in_list(node.get_parent(), node_ids)
 
         return False
-
-
-class TagsToKeyValuePairExtractor:
-    """Extract all the tags from a document into a key/value pair table store"""
-
-    def __init__(self, store_name, include=[], exclude=[], include_node_content=True):
-        self.store_name = store_name
-        self.include = include
-        self.exclude = exclude
-        self.include_node_content = include_node_content
-
-    def get_default_store(self):
-        """ """
-        if self.include_node_content:
-            return TableDataStore(columns=['tag', 'tagged_content', 'node_content'])
-
-        return TableDataStore(columns=['tag', 'tagged_content'])
-
-    def process(self, document, context):
-        """
-        """
-
-        table_store = context.get_store(self.store_name, self.get_default_store())
-
-        if document.content_node:
-            self.process_node(table_store, document.content_node)
-
-        return document
-
-    def process_node(self, table_store, node):
-        """
-        """
-        for feature in node.get_features():
-            if feature.feature_type == 'tag' \
-                    and (feature.name in self.include or len(self.include) == 0) \
-                    and (feature.name not in self.exclude or len(self.exclude) == 0):
-                tagged_text = node.content
-                if 'start' in feature.value[0]:
-                    tagged_text = node.content[feature.value[0]['start']:feature.value[0]['end']]
-
-                if self.include_node_content:
-                    table_store.add([feature.name, tagged_text, node.content])
-                else:
-                    table_store.add([feature.name, tagged_text])
-
-        for child in node.get_children():
-            self.process_node(table_store, child)
 
 
 class DocumentStoreWriter:
