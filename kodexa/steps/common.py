@@ -1,5 +1,4 @@
-from kodexa import get_source, Document
-from kodexa.platform.client import DocumentStoreEndpoint
+from kodexa import get_source
 
 
 class KodexaProcessingException(Exception):
@@ -216,14 +215,3 @@ class RollupTransformer:
             return self.is_node_in_list(node.get_parent(), node_ids)
 
         return False
-
-
-class DocumentStoreWriter:
-    """Writes the document to the provided document store"""
-
-    def __init__(self, document_store: DocumentStoreEndpoint):
-        self.document_store = document_store
-
-    def process(self, document: Document):
-        self.document_store.upload_document(document.source.original_filename, document)
-        return document

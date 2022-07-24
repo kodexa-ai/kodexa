@@ -5,8 +5,8 @@ import pytest
 from kodexa import RemoteStep
 from kodexa.model import DocumentMetadata, Document, ContentObject, ContentType
 from kodexa.pipeline import Pipeline
-from kodexa.steps.common import TextParser, DocumentStoreWriter
-from kodexa.stores import LocalDocumentStore
+from kodexa.steps.common import TextParser
+from kodexa.testing import DocumentTestCaptureStep
 
 
 def create_document():
@@ -30,17 +30,6 @@ def test_simplified_remote_action_reference():
     assert isinstance(pipeline.steps[0].step, RemoteStep)
     assert "option" in pipeline.steps[0].step.options
 
-
-def test_basic_local_document_store():
-    JSON_STORE = "/tmp/test-json-store.jsonkey"
-    document_store = LocalDocumentStore(store_path=JSON_STORE, force_initialize=True)
-    document_store.put("test.doc", create_document())
-
-    new_document_store = LocalDocumentStore(store_path=JSON_STORE)
-
-    assert (new_document_store.count() == 1)
-
-
 def test_co():
     # Just confirm the Pydantic Constructor
     new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})
@@ -49,21 +38,13 @@ def test_co():
 
 
 def test_pipeline_example():
-    document_store = LocalDocumentStore()
-    document_store.put("test.doc", create_document())
-
-    pipeline = Pipeline(document_store)
+    pipeline = Pipeline([create_document()])
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
 
 
 def test_class_step_step_with_context():
-    document_store = LocalDocumentStore()
-    document_store.put('test.doc', create_document())
-
-    new_document_store = LocalDocumentStore()
-
     class MyProcessingStep:
 
         def get_name(self):
@@ -74,58 +55,54 @@ def test_class_step_step_with_context():
             logging.error("Hello")
             return doc
 
-    pipeline = Pipeline(document_store)
+    document_captures = DocumentTestCaptureStep()
+
+    pipeline = Pipeline([create_document()])
     pipeline.add_step(MyProcessingStep())
-    pipeline.add_step(DocumentStoreWriter(new_document_store))
+    pipeline.add_step(document_captures)
     ctxt = pipeline.run()
 
     assert ctxt.statistics.documents_processed == 1
     assert ctxt.statistics.document_exceptions == 0
-    assert new_document_store.get_latest_document("test.doc").metadata.cheese == pipeline.context.execution_id
+    assert document_captures.documents[0].metadata.cheese == pipeline.context.execution_id
 
 
 def test_function_step_with_context():
-    document_store = LocalDocumentStore()
-    document_store.put("test.doc", create_document())
-    new_document_store = LocalDocumentStore()
-
     def my_function(doc, context):
         doc.metadata.cheese = context.execution_id
         logging.error("Hello")
         return doc
 
-    assert new_document_store.count() == 0
-    pipeline = Pipeline(document_store)
+    document_captures = DocumentTestCaptureStep()
+
+    pipeline = Pipeline([create_document()])
     pipeline.add_step(my_function)
-    pipeline.add_step(DocumentStoreWriter(new_document_store))
+    pipeline.add_step(document_captures)
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
-    assert new_document_store.count() == 1
-    assert new_document_store.get_latest_document("test.doc").metadata.cheese == pipeline.context.execution_id
+    assert len(document_captures.documents) == 1
+    assert document_captures.documents[0].metadata.cheese == pipeline.context.execution_id
 
 
 def test_function_step():
-    document_store = LocalDocumentStore()
-    document_store.put("test.doc", create_document())
-    new_document_store = LocalDocumentStore()
+    test_capture = DocumentTestCaptureStep()
 
     def my_function(doc):
         doc.metadata.cheese = "fishstick"
         logging.error("Hello")
         return doc
 
-    assert new_document_store.count() == 0
-    pipeline = Pipeline(document_store)
+    pipeline = Pipeline([create_document()])
     pipeline.add_step(my_function)
-    pipeline.add_step(DocumentStoreWriter(new_document_store))
+    pipeline.add_step(test_capture)
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
-    assert new_document_store.count() == 1
-    assert new_document_store.get_latest_document("test.doc").metadata.cheese == 'fishstick'
+    assert len(test_capture.documents) == 1
+    assert test_capture[0].metadata.cheese == 'fishstick'
 
 
 def test_fluent_pipeline():
@@ -135,52 +112,48 @@ def test_fluent_pipeline():
         return doc
 
     document = create_document()
-    new_document_store = LocalDocumentStore()
+    test_capture = DocumentTestCaptureStep()
 
     stats = Pipeline(document).add_step(my_function).add_step(my_function).add_step(
-        DocumentStoreWriter(new_document_store)).run().statistics
+        test_capture).run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
-    assert new_document_store.count() == 1
-    assert new_document_store.get_latest_document("test.doc").metadata.cheese == 'fishstick'
+    assert len(test_capture.documents) == 1
+    assert test_capture.documents[0].metadata.cheese == 'fishstick'
 
 
 def test_url_pipeline():
     document = Document.from_url("http://www.google.com")
-    new_document_store = LocalDocumentStore()
+    test_capture = DocumentTestCaptureStep()
 
     stats = Pipeline(document).add_step(TextParser(encoding='ISO-8859-1')).add_step(
-        DocumentStoreWriter(new_document_store)).run().statistics
+        test_capture).run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
-    assert new_document_store.count() == 1
+    assert len(test_capture.documents) == 1
 
-    new_doc = new_document_store.get_latest_document("http://www.google.com")
-    print(new_doc.content_node.get_all_content())
+    print(test_capture.documents[0].content_node.get_all_content())
 
 
 def test_function_step_with_exception():
-    document_store = LocalDocumentStore()
-    document_store.put("test.doc", create_document())
-    new_document_store = LocalDocumentStore()
+    test_capture = DocumentTestCaptureStep()
 
     def my_function(doc):
         doc.metadata.cheese = "fishstick"
         raise Exception("hello world")
 
-    assert new_document_store.count() == 0
-    pipeline = Pipeline(document_store, stop_on_exception=False)
+    pipeline = Pipeline([create_document()], stop_on_exception=False)
     pipeline.add_step(my_function)
-    pipeline.add_step(DocumentStoreWriter(new_document_store))
+    pipeline.add_step(test_capture)
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 1
-    assert new_document_store.count() == 1
+    assert len(test_capture.documents) == 1
 
-    assert len(new_document_store.get_latest_document("test.doc").exceptions) == 1
+    assert len(test_capture.documents[0].exceptions) == 1
 
 
 def test_basic_url_pipeline():

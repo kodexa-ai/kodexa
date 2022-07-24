@@ -1,5 +1,5 @@
 """
-Common and reusable steps
+Some example steps that can be used locally
 """
 from .common import NodeTagger, NodeTagCopy, TextParser, RollupTransformer, \
-    KodexaProcessingException, DocumentStoreWriter
+    KodexaProcessingException

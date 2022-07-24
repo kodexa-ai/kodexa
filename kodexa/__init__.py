@@ -12,4 +12,3 @@ from .pipeline import Pipeline, PipelineContext, PipelineStatistics
 from .platform import KodexaPlatform, RemoteStep, RemotePipeline, RemoteSession, KodexaClient
 from .steps import NodeTagCopy, NodeTagger, RollupTransformer, TextParser, \
     KodexaProcessingException
-from .stores import LocalDocumentStore

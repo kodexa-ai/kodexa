@@ -323,9 +323,6 @@ class SqliteDocumentPersistence(object):
 
         metadata = msgpack.unpackb(self.cursor.execute("select * from metadata").fetchone()[1])
         self.document.metadata = DocumentMetadata(metadata['metadata'])
-        for mixin in metadata['mixins']:
-            from kodexa.mixins import registry
-            registry.add_mixin_to_document(mixin, self.document)
         self.document.version = metadata['version'] if 'version' in metadata and metadata[
             'version'] else Document.PREVIOUS_VERSION  # some older docs don't have a version or it's None
 

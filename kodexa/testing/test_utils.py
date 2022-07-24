@@ -5,7 +5,7 @@ from typing import List
 
 from addict import addict
 
-from kodexa import Assistant, AssistantResponse, LocalDocumentStore
+from kodexa import Assistant, AssistantResponse
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
 from kodexa.model import AssistantEvent, ActorType
@@ -13,6 +13,16 @@ from kodexa.model.objects import ScheduledEvent, ExceptionDetails
 from kodexa.platform.client import DocumentStoreEndpoint
 
 logger = logging.getLogger()
+
+
+class DocumentTestCaptureStep:
+
+    def __init__(self):
+        self.documents = []
+
+    def process(self, document):
+        self.documents.append(document)
+        return document
 
 
 def simplify_node(node: ContentNode):
@@ -36,11 +46,14 @@ def simplify_node(node: ContentNode):
 
 def simplify_document(document: Document) -> dict:
     """
+    This method can be used to simplify the structure when we want to capture it for
+    comparison in testing
 
     Args:
-      document: Document:
+      document: Document: the document to simplify
 
     Returns:
+        A dictionary based simplified representation
 
     """
     return {
@@ -151,7 +164,8 @@ class AssistantTestHarness:
         return self.assistant.process_event(scheduled_event, assistant_context)
 
     def process_event(self, event: ContentEvent):
-        """The harness will take the content event and
+        """
+        The harness will take the content event and
         will pass it to the assistant - then we will
         take each of the pipelines and run the document
         through them in turn (note in the platform this might be in parallel)
@@ -190,17 +204,6 @@ class AssistantTestHarness:
 
                     store.add_related_document_to_family(event.document_family.id, document_relationship,
                                                          pipeline_context.output_document)
-
-    def register_local_document_store(self, store: LocalDocumentStore):
-        """
-        Register a local document store with this harness
-
-        Args:
-          store: LocalDocumentStore:
-
-        Returns:
-
-        """
 
     def get_store(self, event: ContentEvent) -> DocumentStoreEndpoint:
         """
@@ -247,6 +250,7 @@ class ExtensionPackUtil:
 
     This allows you to use the kodexa.yml in unit tests to ensure it matches your current action code
 
+    >>> from kodexa import *
     >>> util = ExtensionPackUtil("../kodexa.yml")
     >>> pipeline = Pipeline()
     >>> pipeline.add_step(util.get_step("my-action",{"my-option": "cheese"}))

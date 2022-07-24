@@ -32,7 +32,6 @@ from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRun
     DataForm
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
-from kodexa.stores import LocalDocumentStore
 
 logger = logging.getLogger()
 
@@ -78,7 +77,8 @@ def save_config(config_obj):
 
 
 class PipelineMetadataBuilder:
-    """Build a metadata representation of the pipeline for passing to an instance of the
+    """
+    Build a metadata representation of the pipeline for passing to an instance of the
     Kodexa platform
     """
 
@@ -106,14 +106,6 @@ class PipelineMetadataBuilder:
         """
         pipeline_metadata.metadata.steps = []
         pipeline_metadata.metadata.stores = []
-
-        for pipeline_store in self.pipeline.stores:
-
-            if isinstance(pipeline_store.store, RemoteDocumentStore):
-                pipeline_metadata.metadata.stores.append(
-                    {"name": pipeline_store.name, "ref": pipeline_store.store.ref, "storeType": "DOCUMENT"})
-            else:
-                raise Exception("Pipeline refers to a non-remote store, deployment of local stores is not supported")
 
         for idx, step in enumerate(self.pipeline.steps):
 
