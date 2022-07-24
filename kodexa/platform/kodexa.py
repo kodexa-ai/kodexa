@@ -32,8 +32,7 @@ from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRun
     DataForm
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
-from kodexa.stores import RemoteDocumentStore, RemoteDataStore
-from kodexa.stores import TableDataStore, RemoteModelStore, LocalDocumentStore, LocalModelStore
+from kodexa.stores import LocalDocumentStore
 
 logger = logging.getLogger()
 

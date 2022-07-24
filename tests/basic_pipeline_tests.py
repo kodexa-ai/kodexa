@@ -6,7 +6,7 @@ from kodexa import RemoteStep
 from kodexa.model import DocumentMetadata, Document, ContentObject, ContentType
 from kodexa.pipeline import Pipeline
 from kodexa.steps.common import TextParser, DocumentStoreWriter
-from kodexa.stores import LocalDocumentStore, TableDataStore
+from kodexa.stores import LocalDocumentStore
 
 
 def create_document():
@@ -181,27 +181,6 @@ def test_function_step_with_exception():
     assert new_document_store.count() == 1
 
     assert len(new_document_store.get_latest_document("test.doc").exceptions) == 1
-
-
-def test_table_stores_with_extractor():
-    document_store = LocalDocumentStore()
-    document_store.put("test.doc", create_document())
-    pipeline = Pipeline(document_store, stop_on_exception=False)
-    pipeline.add_store('output', TableDataStore(columns=['cheese']))
-
-    def extractor(document, context):
-        # An example of how we might
-        # extract into a dict
-        #
-        context.get_store('output').add(['test'])
-
-        return document
-
-    pipeline.add_step(extractor)
-
-    context = pipeline.run()
-
-    assert context.get_store('output').count() == 1
 
 
 def test_basic_url_pipeline():
