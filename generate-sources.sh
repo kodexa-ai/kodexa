@@ -1,6 +1,6 @@
 #antlr4 -o /kodexa/selectors/impl -package kodexa.selectors.impl -listener -visitor -Dlanguage=Python3 -lib resources resources/selector.g4
 
-datamodel-codegen --input resources/api-docs.yaml --output kodexa/model/objects.py --snake-case --base-class kodexa.model.base.KodexaBaseModel
+datamodel-codegen --input resources/api-docs.yaml --output kodexa/model/objects.py --use-schema-description --snake-case --base-class kodexa.model.base.KodexaBaseModel
 python -c "import sys;lines=sys.stdin.read();print(lines.replace('Optional[Dict[str, Dict[str, Any]]]','Optional[Dict[str, Any]]'))" < kodexa/model/objects.py > kodexa/model/objects_new.py
 
 cp kodexa/model/objects_new.py kodexa/model/objects.py

@@ -22,6 +22,8 @@ project = 'Kodexa'
 copyright = '2022, Kodexa Inc'
 author = 'Kodexa Inc'
 
+master_doc = "index"
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -30,10 +32,11 @@ author = 'Kodexa Inc'
 # ones.
 extensions = [
     'sphinx.ext.napoleon',
+    'sphinx.ext.intersphinx'
 ]
 
-napoleon_google_docstring = False
-napoleon_use_param = False
+napoleon_google_docstring = True
+napoleon_use_param = True
 napoleon_use_ivar = True
 
 # Add any paths that contain templates here, relative to this directory.
@@ -44,13 +47,20 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
+#html_logo = "_static/logo-wide.svg"
+html_title = "Kodexa"
+html_copy_source = True
+html_sourcelink_suffix = ""
+html_last_updated_fmt = ""
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -21,14 +21,14 @@ from functional import seq
 from pydantic import BaseModel
 from pydantic_yaml import YamlModel
 
-from kodexa.model import Store, Taxonomy, Document
+from kodexa.model import Taxonomy, Document
 from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
-    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm
+    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store
 
 logger = logging.getLogger()
 
@@ -1483,15 +1483,14 @@ class DataStoreEndpoint(StoreEndpoint):
 
 
 class DocumentStoreEndpoint(StoreEndpoint):
-    """Represents a document store"""
+    """Represents a document store that can be used to store files and then their related document representations"""
 
     def delete_by_path(self, object_path: str):
         """
         Delete the content stored in the store at the given path
 
         Args:
-          object_path: the path to the content (ie. mymodel.dat)
-          object_path: str:
+          object_path:str the path to the document family (ie. Invoice.pdf)
         """
         self.client.delete(
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
@@ -1500,6 +1499,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
     def import_family(self, file_path: str):
         """
         Import a document family from a file
+
         Args:
             file_path (str): The path to the file
         """
@@ -1522,7 +1522,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         Upload a file to the store
         Args:
             file_path (str): The path to the file
-            object_path (Optional[str]): The path to the object (Default None)
+            object_path (Optional[str]): The path to the object (Default is the same the file path)
             replace (bool): Replace the file if it already exists (Default False)
             additional_metadata (Optional[dict]): Additional metadata to add to the file (Default None)
         """
