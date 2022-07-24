@@ -16,14 +16,14 @@ from typing import Any, Dict, List, Optional
 import jsonpickle
 from pydantic import Field
 
-from kodexa.model import ContentEvent, ContentObject, Document, DocumentFamily, DocumentStore, DocumentTransition, \
-    ModelStore, Store
-from kodexa.model.objects import ObjectEventType
+from kodexa.model import ContentEvent, ContentObject, Document, DocumentTransition
+from kodexa.model.objects import ObjectEventType, DocumentFamily, Store
+from kodexa.platform.client import DocumentStoreEndpoint
 
 logger = logging.getLogger()
 
 
-class LocalDocumentStore(DocumentStore):
+class LocalDocumentStore(DocumentStoreEndpoint):
     """A Local implementation of a DocumentStore that can be useful for notebooks and development
        but is not for Production use"""
 
@@ -48,6 +48,21 @@ class LocalDocumentStore(DocumentStore):
 
     def delete(self, path: str):
         pass
+
+        def __iter__(self):
+            self.index = 0
+        return self
+
+    def __next__(self):
+        if self.index >= len(self.metastore):
+            raise StopIteration
+        content_object = self.metastore[self.index].content_objects[-1]
+        document = self.get_document_by_content_object(self.metastore[self.index], content_object)
+
+        from kodexa.model.model import ContentObjectReference
+        content_object_reference = ContentObjectReference(content_object, self, document, self.metastore[self.index])
+        self.index = self.index + 1
+        return content_object_reference
 
     def __init__(self, *args, **kwargs):
         if 'slug' not in kwargs:
@@ -185,21 +200,6 @@ class LocalDocumentStore(DocumentStore):
 
         return open(os.path.join(self.store_path, content_object.id), 'rb')
 
-    def __iter__(self):
-        self.index = 0
-        return self
-
-    def __next__(self):
-        if self.index >= len(self.metastore):
-            raise StopIteration
-        content_object = self.metastore[self.index].content_objects[-1]
-        document = self.get_document_by_content_object(self.metastore[self.index], content_object)
-
-        from kodexa.model.model import ContentObjectReference
-        content_object_reference = ContentObjectReference(content_object, self, document, self.metastore[self.index])
-        self.index = self.index + 1
-        return content_object_reference
-
     def get_ref(self) -> str:
         """ """
         return self.store_path
@@ -280,7 +280,7 @@ class LocalDocumentStore(DocumentStore):
             for content_object in family.content_objects:
 
                 if content_object.id == uuid:
-                    return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
+                    return Document.from_kddb(os.path.join(self.store_path, content_object.id) + ".kddb")
         return None
 
     def get_by_path(self, path: str) -> Optional[Document]:
@@ -295,7 +295,7 @@ class LocalDocumentStore(DocumentStore):
         """
         for family in self.metastore:
             if family.path == path:
-                return Document.from_kdxa(os.path.join(self.store_path, family.get_latest_content().id) + ".kdxa")
+                return Document.from_kddb(os.path.join(self.store_path, family.get_latest_content().id) + ".kddb")
         return None
 
     def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
@@ -371,7 +371,7 @@ class LocalDocumentStore(DocumentStore):
         for family in self.metastore:
             if family.id == document_family_id:
                 new_event = self.add_document(family, document, transition)
-                document.to_kdxa(os.path.join(self.store_path, new_event.content_object.id) + ".kdxa")
+                document.to_kddb(os.path.join(self.store_path, new_event.content_object.id) + ".kddb")
                 self.write_metastore()
 
     def get_document_by_content_object(self, document_family: DocumentFamily,
@@ -386,14 +386,14 @@ class LocalDocumentStore(DocumentStore):
           The Kodexa document related to the content family
 
         """
-        return Document.from_kdxa(os.path.join(self.store_path, content_object.id) + ".kdxa")
+        return Document.from_kddb(os.path.join(self.store_path, content_object.id) + ".kddb")
 
     def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
                                document: Document) -> Optional[DocumentFamily]:
 
         for co in document_family.content_objects:
             if co.id == content_object_id:
-                document.to_kdxa(os.path.join(self.store_path, content_object_id) + ".kdxa")
+                document.to_kddb(os.path.join(self.store_path, content_object_id) + ".kddb")
                 co.labels = document.labels
                 co.classes = document.classes
                 self.write_metastore()
@@ -417,7 +417,7 @@ class LocalDocumentStore(DocumentStore):
         if self.get_family_by_path(path) is None:
             new_document_family = DocumentFamily(path=path)
             new_event = self.add_document(new_document_family, document)
-            document.to_kdxa(os.path.join(self.store_path, new_event.content_object.id) + ".kdxa")
+            document.to_kddb(os.path.join(self.store_path, new_event.content_object.id) + ".kddb")
 
             self.metastore.append(new_document_family)
             self.write_metastore()

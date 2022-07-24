@@ -8,8 +8,9 @@ from addict import addict
 from kodexa import Assistant, AssistantResponse, LocalDocumentStore
 from kodexa import ContentEvent, ContentNode, Document, DocumentActor, DocumentTransition, TransitionType
 from kodexa.assistant.assistant import AssistantMetadata
-from kodexa.model import AssistantEvent, ContentObjectReference, DocumentStore, ActorType
+from kodexa.model import AssistantEvent, ActorType
 from kodexa.model.objects import ScheduledEvent, ExceptionDetails
+from kodexa.platform.client import DocumentStoreEndpoint
 
 logger = logging.getLogger()
 
@@ -102,7 +103,7 @@ class AssistantTestHarness:
 
     """
 
-    def __init__(self, assistant: Assistant, stores: List[DocumentStore], kodexa_metadata_path: str,
+    def __init__(self, assistant: Assistant, stores: List[DocumentStoreEndpoint], kodexa_metadata_path: str,
                  metadata: AssistantMetadata, content_provider=None):
         """
         Initialize the test harness
@@ -115,8 +116,7 @@ class AssistantTestHarness:
             content_provider: optional provider for content
         """
         self.assistant = assistant
-        from kodexa.model import Store
-        self.stores: List[Store] = stores
+        self.stores: List[DocumentStoreEndpoint] = stores
         self.kodexa_metadata_path = kodexa_metadata_path
         self.metadata = metadata
         self.content_provider = content_provider
@@ -175,6 +175,7 @@ class AssistantTestHarness:
             document = store.get_document_by_content_object(event.document_family, event.content_object)
             if document is not None:
                 pipeline = assistant_pipeline.pipeline
+                from kodexa.model.model import ContentObjectReference
                 pipeline.connector = [
                     ContentObjectReference(content_object=event.content_object, document=document, store=store,
                                            document_family=event.document_family)]
@@ -201,7 +202,7 @@ class AssistantTestHarness:
 
         """
 
-    def get_store(self, event: ContentEvent) -> DocumentStore:
+    def get_store(self, event: ContentEvent) -> DocumentStoreEndpoint:
         """
         Get a document store for the event (based on the document family ID)
 
