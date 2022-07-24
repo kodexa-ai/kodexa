@@ -1,4 +1,3 @@
-from kodexa import LocalDocumentStore
 from kodexa.assistant.assistant import AssistantMetadata
 from kodexa.testing import Document, ExtensionPackUtil
 
@@ -9,7 +8,6 @@ def test_basic_assistant():
     # see the processing
 
     extension_pack_util = ExtensionPackUtil("tests/kodexa-assistant.yml")
-    lds = LocalDocumentStore()
     assistant_harness = extension_pack_util.get_assistant_test_harness("my-assistant", stores=[lds],
                                                                        assistant_metadata=AssistantMetadata(
                                                                            'test-assistant-1', 'My Test Assistant'))

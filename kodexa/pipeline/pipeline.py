@@ -524,10 +524,6 @@ class Pipeline:
         self.context = PipelineContext()
         self.context.stop_on_exception = self.stop_on_exception
 
-        for pipeline_store in self.stores:
-            logger.info(f"Adding store {pipeline_store.name}")
-            self.context.add_store(pipeline_store.name, pipeline_store.store)
-
         self.context.statistics = PipelineStatistics()
         self.context.parameters = parameters
 
@@ -572,11 +568,6 @@ class Pipeline:
 
                 self.context.statistics.processed_document(document)
                 self.context.output_document = document
-
-                # Determine if any of the stores will automatically extract the data
-                for store in self.stores:
-                    if store.extract_labelled:
-                        store.extract(document)
 
             else:
                 logger.warning("A step did not return a document?")

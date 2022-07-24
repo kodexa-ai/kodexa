@@ -14,7 +14,6 @@ from typing import Any, List, Optional
 import msgpack
 from addict import Dict
 
-from kodexa.mixins import registry
 from kodexa.model.objects import ContentObject
 
 
@@ -1690,6 +1689,7 @@ class Document(object):
 
     def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
                  kddb_path: str = None, delete_on_close=False):
+
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -1729,8 +1729,6 @@ class Document(object):
         """A list of the taxonomy references for this document"""
         self.classes: List[ContentClassification] = []
         """A list of the content classifications associated at the document level"""
-
-        self.add_mixin('core')
 
         # Start persistence layer
         from kodexa.model import PersistenceManager
@@ -1983,8 +1981,6 @@ class Document(object):
         >>> Document.from_dict(doc_dict)
         """
         new_document = Document(DocumentMetadata(doc_dict['metadata']))
-        for mixin in doc_dict['mixins']:
-            registry.add_mixin_to_document(mixin, new_document)
         new_document.version = doc_dict['version'] if 'version' in doc_dict and doc_dict[
             'version'] else Document.PREVIOUS_VERSION  # some older docs don't have a version or it's None
         new_document.log = doc_dict['log'] if 'log' in doc_dict else []
@@ -2038,22 +2034,30 @@ class Document(object):
         return Document.from_dict(msgpack.unpackb(msgpack_bytes, raw=False))
 
     def get_mixins(self):
-        """Get the list of mixins that have been enabled on this document."""
+        """
+        Get the list of mixins that have been enabled on this document
+
+        Returns:
+            mixins: list[str] a list of the mixin names
+        """
         return self._mixins
 
     def add_mixin(self, mixin):
-        """Add the given mixin to this document,  this will apply the mixin to all the content nodes,
+        """
+        Add the given mixin to this document,  this will apply the mixin to all the content nodes,
         and also register it with the document so that future invocations of create_node will ensure
         the node has the mixin appled.
 
         Args:
-          mixin:
+          mixin:str the name of the mixin to add
 
         Returns:
-
+        >>> import * from kodexa
+        >>> document = Document()
         >>> document.add_mixin('spatial')
         """
-        registry.add_mixin_to_document(mixin, self)
+        self._mixins.append(mixin)
+        self.get_persistence().update_metadata()
 
     def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
                     parent: ContentNode = None,
