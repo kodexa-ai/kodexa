@@ -19,7 +19,6 @@ The following topic areas will help you understand and use the Kodexa.
 
    getting_started
 
-
 Indices and tables
 ==================
 

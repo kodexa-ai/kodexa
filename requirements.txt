@@ -27,4 +27,5 @@ better-exceptions~=0.3.3
 pyfunctional~=1.4.3
 pydantic_yaml~=0.8.0
 sphinx~=5.0.2
+sphinx_autoapi~=1.9.0
 sphinx_rtd_theme~=1.0.0
