@@ -32,12 +32,17 @@ master_doc = "index"
 extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
-    "sphinx.ext.autodoc",
 ]
 
 napoleon_google_docstring = True
 napoleon_use_param = True
 napoleon_use_ivar = True
+
+extensions.append('autoapi.extension')
+
+autoapi_type = 'python'
+autoapi_dirs = ['../kodexa']
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
