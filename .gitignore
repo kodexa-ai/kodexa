@@ -16,3 +16,4 @@ default.profraw
 kodexa.egg-info/
 .openapigenerator
 /kodexa.iml
+/docs/_autosummary/
