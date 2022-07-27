@@ -1,9 +1,9 @@
 Getting Started
-============
+===============
 
 
 Installation
------------
+------------
 
 You can install Kodexa using the pip command
 

@@ -9,7 +9,8 @@ Kodexa
 Kodexa is a python library and command-line interface that can be used with the Kodexa Platform to support
 Intelligent Document Automation.
 
-# Topic areas
+Topic areas
+-----------
 
 The following topic areas will help you understand and use the Kodexa.
 
@@ -17,7 +18,6 @@ The following topic areas will help you understand and use the Kodexa.
    :maxdepth: 2
 
    getting_started
-   source/modules
 
 
 Indices and tables
