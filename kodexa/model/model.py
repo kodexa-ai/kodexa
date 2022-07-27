@@ -1044,7 +1044,7 @@ class ContentNode(object):
                                                           part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index, note=note))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note, status=status))
                             return -1
                         if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1053,7 +1053,7 @@ class ContentNode(object):
                                                           value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index, note=note))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note, status=status))
 
                         end = end - part_length
                         content_length = content_length + part_length
