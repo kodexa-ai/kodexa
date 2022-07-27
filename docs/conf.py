@@ -15,7 +15,6 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../'))
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'Kodexa'
@@ -32,7 +31,8 @@ master_doc = "index"
 # ones.
 extensions = [
     'sphinx.ext.napoleon',
-    'sphinx.ext.intersphinx'
+    'sphinx.ext.intersphinx',
+    "sphinx.ext.autodoc",
 ]
 
 napoleon_google_docstring = True
