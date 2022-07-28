@@ -94,10 +94,19 @@ def project(_: Info, project_id: str, token: str, url: str):
     """Get all the details for a specific project
     """
 
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
+    client = KodexaClient(url=url, access_token=token)
+    project_instance = client.get_project(project_id)
+    print(f"Name: [bold]{project_instance.name}[/bold]")
+    print(f"Description: [bold]{project_instance.description}[/bold]\n")
 
-    KodexaPlatform.get_project(project_id)
+    print("[bold]Document Stores[/bold]")
+    project_instance.document_stores.print_table()
+    print("[bold]Data Stores[/bold]")
+    cls.get_project_resource(project_id, 'dataStores', 'stores')
+    print("[bold]Data Structures[/bold]")
+    cls.get_project_resource(project_id, 'contentTaxonomies', 'taxonomies')
+    print("[bold]Assistants[/bold]")
+    cls.get_project_resource(project_id, 'assistants', 'assistants')
 
 
 @cli.command()
@@ -361,8 +370,7 @@ def platform(_: Info, python: bool):
         if python:
             print("\nPython example:\n\n")
             print(f"from kodexa import *")
-            print(f"KodexaPlatform.set_url('{KodexaPlatform.get_url()}')")
-            print(f"KodexaPlatform.set_access_token('{KodexaPlatform.get_access_token()}')")
+            print(f"client = KodexaClient('{KodexaPlatform.get_url()}', '{KodexaPlatform.get_access_token()}')")
     else:
         print("Kodexa is not logged in")
 
@@ -427,11 +435,10 @@ def version(_: Info):
 @click.option('--output', default=os.getcwd() + "/dist",
               help='Path to the output folder (defaults to dist under current)')
 @click.option('--version', default=os.getenv('VERSION'), help='Version number (defaults to 1.0.0)')
-@click.option('--site/--no-site', default=False, help='Generate website to serve extension')
 @click.option('--sitedir', default='site', help='Path to folder for site contents')
 @click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
-def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
+def package(_: Info, path: str, output: str, version: str, site: bool, url: str):
     """
     Package an extension pack based on the kodexa.yml file
     """
@@ -469,10 +476,3 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
     os.rename(output_filename, os.path.join(output, output_filename))
 
     print("Extension has been packaged :tada:")
-
-    if site:
-        metadata_obj['json_location'] = url + metadata_obj[
-            'version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.json"
-        generate_site(metadata=metadata_obj, base_dir=sitedir, output_filename=os.path.join(output, output_filename),
-                      url=url, output_json=versioned_metadata)
-        print("Extension site has been successfully built :tada:")

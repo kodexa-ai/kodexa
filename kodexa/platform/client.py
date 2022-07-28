@@ -32,6 +32,59 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
 
 logger = logging.getLogger()
 
+# Define the columns that we want for different component types when we
+# are printing the listing of them
+
+DEFAULT_COLUMNS = {
+    'extensionPacks': [
+        'ref',
+        'name',
+        'description',
+        'type',
+        'status'
+    ],
+    'projects': [
+        'id',
+        'organization.name',
+        'name',
+        'description'
+    ],
+    'assistants': [
+        'ref',
+        'name',
+        'description',
+        'template'
+    ],
+    'executions': [
+        'id',
+        'startDate',
+        'endDate',
+        'status',
+        'assistant.name',
+        'documentFamily.path'
+    ],
+    'memberships': [
+        'organization.slug',
+        'organization.name'
+    ],
+
+    'stores': [
+        'ref',
+        'name',
+        'description',
+        'storeType',
+        'storePurpose',
+        'template'
+    ],
+    'default': [
+        'ref',
+        'name',
+        'description',
+        'type',
+        'template'
+    ]
+}
+
 
 #
 # Declare all the endpoints that we will have
@@ -117,6 +170,34 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def get_instance_class(self, object_dict=None) -> Type[ClientEndpoint]:
         pass
 
+    def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
+        cols = DEFAULT_COLUMNS['default']
+
+        object_type, object_type_metadata = resolve_object_type(self.get_type())
+
+        if object_type in DEFAULT_COLUMNS:
+            cols = DEFAULT_COLUMNS[object_type]
+
+        from rich.table import Table
+
+        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
+        for col in cols:
+            table.add_column(col)
+
+        for object_dict in self.list(query=query, page=page, pagesize=pagesize, sort=sort, filters=filters):
+            row = []
+
+            for col in cols:
+                from simpleeval import simple_eval
+                from simpleeval import AttributeDoesNotExist
+                try:
+                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
+                except AttributeDoesNotExist:
+                    row.append("")
+            table.add_row(*row)
+
+        print(table)
+
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
 
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
@@ -193,6 +274,35 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         return self.get_page_class(list_response.json()).parse_obj(list_response.json()).set_client(
             self.client).to_endpoints()
 
+    def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
+        cols = DEFAULT_COLUMNS['default']
+
+        object_type, object_type_metadata = resolve_object_type(self.get_type())
+
+        if object_type in DEFAULT_COLUMNS:
+            cols = DEFAULT_COLUMNS[object_type]
+
+        from rich.table import Table
+
+        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
+        for col in cols:
+            table.add_column(col)
+
+        list_page = self.list(query=query, page=page, pagesize=pagesize, sort=sort, filters=filters)
+        for object_dict in list_page.content:
+            row = []
+
+            for col in cols:
+                from simpleeval import simple_eval
+                from simpleeval import AttributeDoesNotExist
+                try:
+                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
+                except AttributeDoesNotExist:
+                    row.append("")
+            table.add_row(*row)
+
+        print(table)
+
     def create(self, component):
         url = f"/api/{self.get_type()}/{self.organization.slug}/"
         get_response = self.client.post(url, component.to_dict())
@@ -207,7 +317,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         return self.get_instance_class(get_response.json()).parse_obj(get_response.json())
 
 
-class OrganizationsEndpoint:
+class OrganizationsEndpoint('EntitiesEndpoint'):
     """
     Represents the organization endpoint
     """
@@ -218,24 +328,6 @@ class OrganizationsEndpoint:
         :param client:
         """
         self.client: "KodexaClient" = client
-
-    def reindex(self):
-        """
-        Reindex the organization
-        :return:
-        """
-        url = f'/api/organizations/_reindex'
-        self.client.post(url)
-
-    def create(self, organization: Organization) -> "OrganizationEndpoint":
-        """
-        Create an organization
-        :param organization:
-        :return:
-        """
-        url = f"/api/organizations"
-        create_response = self.client.post(url, body=json.loads(organization.json(by_alias=True)))
-        return OrganizationEndpoint.parse_obj(create_response.json()).set_client(self.client)
 
     def find_by_slug(self, slug) -> Optional["OrganizationEndpoint"]:
         """
@@ -248,40 +340,6 @@ class OrganizationsEndpoint:
             return None
         return organizations.content[0]
 
-    def delete(self, organization_id: str) -> None:
-        """
-        Delete an organization by id
-        :param organization_id:
-        :return:
-        """
-        url = f"/api/organizations/{organization_id}"
-        self.client.delete(url)
-
-    def list(self, query: str = "*", page: int = 1, pagesize: int = 10, sort: Optional[str] = None,
-             filters: Optional[List[str]] = None) -> "PageOrganizationEndpoint":
-        url = f"/api/organizations"
-
-        params = {"query": query,
-                  "page": page,
-                  "pageSize": pagesize}
-
-        if sort is not None:
-            params["sort"] = sort
-        if filters is not None:
-            params["filter"] = filters
-
-        list_response = self.client.get(url, params=params)
-        return PageOrganizationEndpoint.parse_obj(list_response.json()).set_client(self.client)
-
-    def get(self, organization_id) -> "OrganizationEndpoint":
-        """
-        Get an organization by id
-        :param organization_id:
-        :return:
-        """
-        url = f"/api/organizations/{organization_id}"
-        get_response = self.client.get(url)
-        return OrganizationEndpoint.parse_obj(**get_response.json()).set_client(self.client)
 
 
 class PageEndpoint(ClientEndpoint):
@@ -772,12 +830,6 @@ class EntitiesEndpoint:
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
 
-    def reindex(self):
-        """Reindex the entity"""
-        url = f'/api/{self.get_type()}/_reindex'
-
-        self.client.post(url)
-
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}"
 
@@ -793,6 +845,35 @@ class EntitiesEndpoint:
 
         list_response = self.client.get(url, params=params)
         return self.get_page_class().parse_obj(list_response.json()).set_client(self.client)
+
+    def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
+        cols = DEFAULT_COLUMNS['default']
+
+        object_type, object_type_metadata = resolve_object_type('organization')
+
+        if object_type in DEFAULT_COLUMNS:
+            cols = DEFAULT_COLUMNS[object_type]
+
+        from rich.table import Table
+
+        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
+        for col in cols:
+            table.add_column(col)
+
+        list_page = self.list(query=query, page=page, pagesize=pagesize, sort=sort, filters=filters)
+        for object_dict in list_page.content:
+            row = []
+
+            for col in cols:
+                from simpleeval import simple_eval
+                from simpleeval import AttributeDoesNotExist
+                try:
+                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
+                except AttributeDoesNotExist:
+                    row.append("")
+            table.add_row(*row)
+
+        print(table)
 
     def find_by_organization(self, organization: Organization) -> PageProject:
         """Find projects by organization"""
@@ -1356,13 +1437,17 @@ class DataStoreEndpoint(StoreEndpoint):
 
     def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
                             include_id: bool = False):
-        """Get the data objects as a pandas dataframe
+        """
+        Get the data objects as a pandas dataframe
+
         Args:
           path (str): The path to the data object
           query (str): A query to limit the results (Defaults to *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
           include_id (Optional[bool]): Include the data object ID as a column (defaults to False)
+
         Returns:
+
         """
         import pandas as pd
 
