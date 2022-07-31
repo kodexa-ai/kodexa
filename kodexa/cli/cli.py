@@ -91,9 +91,9 @@ def cli(info: Info, verbose: int):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def project(_: Info, project_id: str, token: str, url: str):
-    """Get all the details for a specific project
     """
-
+    Get all the details for a specific project
+    """
     client = KodexaClient(url=url, access_token=token)
     project_instance = client.get_project(project_id)
     print(f"Name: [bold]{project_instance.name}[/bold]")
@@ -102,11 +102,11 @@ def project(_: Info, project_id: str, token: str, url: str):
     print("[bold]Document Stores[/bold]")
     project_instance.document_stores.print_table()
     print("[bold]Data Stores[/bold]")
-    cls.get_project_resource(project_id, 'dataStores', 'stores')
+    project_instance.data_stores.print_table()
     print("[bold]Data Structures[/bold]")
-    cls.get_project_resource(project_id, 'contentTaxonomies', 'taxonomies')
+    project_instance.taxonomies.print_table()
     print("[bold]Assistants[/bold]")
-    cls.get_project_resource(project_id, 'assistants', 'assistants')
+    project_instance.assistants.print_table()
 
 
 @cli.command()
@@ -116,15 +116,20 @@ def project(_: Info, project_id: str, token: str, url: str):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def upload(_: Info, ref: str, path: str, token: str, url: str):
-    """Upload the contents of a file or directory to a Kodexa platform instance
+    """
+    Upload the contents of a file or directory to a Kodexa platform instance
     """
 
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
+    client = KodexaClient(url=url, access_token=token)
+    document_store = client.get_object_by_ref('store', ref)
 
-    print(f"Uploading {path}")
-    KodexaPlatform.upload_file(ref, path)
-    print("Upload complete :tada:")
+    from kodexa.platform.client import DocumentStoreEndpoint
+    if isinstance(document_store, DocumentStoreEndpoint):
+        print(f"Uploading {path}")
+        document_store.upload_file(path)
+        print("Upload complete :tada:")
+    else:
+        print(f"{ref} is not a document store")
 
 
 @cli.command()
@@ -217,8 +222,11 @@ def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, format=
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def logs(_: Info, execution_id: str, url: str, token: str):
-    """Get logs for an execution
     """
+    Get logs for an execution
+    """
+    client = KodexaClient(url=url, access_token=token)
+
     KodexaPlatform.set_url(url)
     KodexaPlatform.set_access_token(token)
     KodexaPlatform.logs(execution_id)

@@ -16,6 +16,7 @@ def test_serialization():
 
     def update_name(taxon):
         taxon['name'] = taxon['id']
+        taxon['externalName'] = taxon['id']
         for child in taxon['children']:
             update_name(child)
 

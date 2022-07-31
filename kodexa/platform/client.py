@@ -317,17 +317,158 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         return self.get_instance_class(get_response.json()).parse_obj(get_response.json())
 
 
-class OrganizationsEndpoint('EntitiesEndpoint'):
+class EntityEndpoint(BaseEntity, ClientEndpoint):
+    """
+    Represents an entity endpoint
+    """
+
+    def reload(self):
+        """
+        Reload the entity
+        :return:
+        """
+        url = f"/api/{self.get_type()}/{self.id}"
+        response = self.client.get(url)
+        return self.parse_obj(response.json()).set_client(self.client)
+
+    def get_type(self) -> str:
+        raise NotImplementedError()
+
+    def create(self):
+        """
+        Create the entity
+        :return:
+        """
+        url = f"/api/{self.get_type()}"
+        exists = self.client.exists(url)
+        if exists:
+            raise Exception("Can't create as it already exists")
+        url = f"/api/{self.get_type()}"
+        self.client.post(url, self.to_dict())
+
+    def update(self):
+        """
+        Update the entity
+        :return:
+        """
+        url = f"/api/{self.get_type()}/{self.id}"
+        exists = self.client.exists(url)
+        if not exists:
+            raise Exception("Can't update as it doesn't exist?")
+        self.client.put(url, self.to_dict())
+
+    def delete(self):
+        """
+        Delete the entity
+        :return:
+        """
+        url = f"/api/{self.get_type()}/{self.id}"
+        exists = self.client.exists(url)
+        if not exists:
+            raise Exception("Component doesn't exist")
+        self.client.delete(url)
+
+
+class EntitiesEndpoint:
+    """Represents an entities endpoint"""
+
+    def get_type(self) -> str:
+        raise NotImplementedError()
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        raise NotImplementedError()
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        raise NotImplementedError()
+
+    def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint" = None):
+        """Initialize the entities endpoint by client and organization"""
+        self.client: "KodexaClient" = client
+        self.organization: Optional["OrganizationEndpoint"] = organization
+
+    def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
+        url = f"/api/{self.get_type()}"
+
+        params = {"query": query,
+                  "page": page,
+                  "pageSize": pagesize}
+
+        if sort is not None:
+            params["sort"] = sort
+
+        if filters is not None:
+            params["filter"] = filters
+
+        list_response = self.client.get(url, params=params)
+        return self.get_page_class().parse_obj(list_response.json()).set_client(self.client)
+
+    def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
+        cols = DEFAULT_COLUMNS['default']
+
+        object_type, object_type_metadata = resolve_object_type('organization')
+
+        if object_type in DEFAULT_COLUMNS:
+            cols = DEFAULT_COLUMNS[object_type]
+
+        from rich.table import Table
+
+        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
+        for col in cols:
+            table.add_column(col)
+
+        list_page = self.list(query=query, page=page, pagesize=pagesize, sort=sort, filters=filters)
+        for object_dict in list_page.content:
+            row = []
+
+            for col in cols:
+                from simpleeval import simple_eval
+                from simpleeval import AttributeDoesNotExist
+                try:
+                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
+                except AttributeDoesNotExist:
+                    row.append("")
+            table.add_row(*row)
+
+        print(table)
+
+    def find_by_organization(self, organization: Organization) -> PageProject:
+        """Find projects by organization"""
+        url = f"/api/{self.get_type()}/"
+        get_response = self.client.get(url, params={'filter': f'organization.id={organization.id}'})
+        return self.get_page_class().parse_obj(get_response.json()).set_client(self.client)
+
+    def get(self, entity_id: str) -> "EntityEndpoint":
+        """Get an entity by id"""
+        url = f"/api/{self.get_type()}/{entity_id}"
+        get_response = self.client.get(url)
+        return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
+
+    def create(self, new_entity: EntityEndpoint) -> EntityEndpoint:
+        """Create an entity"""
+        url = f"/api/{self.get_type()}"
+
+        create_response = self.client.post(url, body=json.loads(new_entity.json(exclude={'client'}, by_alias=True)))
+        return self.get_instance_class().parse_obj(create_response.json()).set_client(self.client)
+
+    def delete(self, self_id: str) -> None:
+        """Delete an entity by id"""
+        url = f"/api/{self.get_type()}/{self_id}"
+        self.client.delete(url)
+
+
+class OrganizationsEndpoint(EntitiesEndpoint):
     """
     Represents the organization endpoint
     """
 
-    def __init__(self, client: "KodexaClient"):
-        """
-        Initialize the organization endpoint with a client
-        :param client:
-        """
-        self.client: "KodexaClient" = client
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        return PageOrganization
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        return Organization
+
+    def get_type(self) -> str:
+        return 'organization'
 
     def find_by_slug(self, slug) -> Optional["OrganizationEndpoint"]:
         """
@@ -457,58 +598,6 @@ class PageDocumentFamilyEndpoint(PageDocumentFamily, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint"""
         return "documentFamily"
-
-
-class EntityEndpoint(BaseEntity, ClientEndpoint):
-    """
-    Represents an entity endpoint
-    """
-
-    def reload(self):
-        """
-        Reload the entity
-        :return:
-        """
-        url = f"/api/{self.get_type()}/{self.id}"
-        response = self.client.get(url)
-        return self.parse_obj(response.json()).set_client(self.client)
-
-    def get_type(self) -> str:
-        raise NotImplementedError()
-
-    def create(self):
-        """
-        Create the entity
-        :return:
-        """
-        url = f"/api/{self.get_type()}"
-        exists = self.client.exists(url)
-        if exists:
-            raise Exception("Can't create as it already exists")
-        url = f"/api/{self.get_type()}"
-        self.client.post(url, self.to_dict())
-
-    def update(self):
-        """
-        Update the entity
-        :return:
-        """
-        url = f"/api/{self.get_type()}/{self.id}"
-        exists = self.client.exists(url)
-        if not exists:
-            raise Exception("Can't update as it doesn't exist?")
-        self.client.put(url, self.to_dict())
-
-    def delete(self):
-        """
-        Delete the entity
-        :return:
-        """
-        url = f"/api/{self.get_type()}/{self.id}"
-        exists = self.client.exists(url)
-        if not exists:
-            raise Exception("Component doesn't exist")
-        self.client.delete(url)
 
 
 class OrganizationEndpoint(Organization, EntityEndpoint):
@@ -812,92 +901,6 @@ class ProjectEndpoint(EntityEndpoint, Project):
         """Get the assistants endpoint of the project"""
         return ProjectAssistantsEndpoint().set_client(self.client).set_project(self)
 
-
-class EntitiesEndpoint:
-    """Represents an entities endpoint"""
-
-    def get_type(self) -> str:
-        raise NotImplementedError()
-
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
-        raise NotImplementedError()
-
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
-        raise NotImplementedError()
-
-    def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint" = None):
-        """Initialize the entities endpoint by client and organization"""
-        self.client: "KodexaClient" = client
-        self.organization: Optional["OrganizationEndpoint"] = organization
-
-    def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
-        url = f"/api/{self.get_type()}"
-
-        params = {"query": query,
-                  "page": page,
-                  "pageSize": pagesize}
-
-        if sort is not None:
-            params["sort"] = sort
-
-        if filters is not None:
-            params["filter"] = filters
-
-        list_response = self.client.get(url, params=params)
-        return self.get_page_class().parse_obj(list_response.json()).set_client(self.client)
-
-    def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
-        cols = DEFAULT_COLUMNS['default']
-
-        object_type, object_type_metadata = resolve_object_type('organization')
-
-        if object_type in DEFAULT_COLUMNS:
-            cols = DEFAULT_COLUMNS[object_type]
-
-        from rich.table import Table
-
-        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
-        for col in cols:
-            table.add_column(col)
-
-        list_page = self.list(query=query, page=page, pagesize=pagesize, sort=sort, filters=filters)
-        for object_dict in list_page.content:
-            row = []
-
-            for col in cols:
-                from simpleeval import simple_eval
-                from simpleeval import AttributeDoesNotExist
-                try:
-                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
-                except AttributeDoesNotExist:
-                    row.append("")
-            table.add_row(*row)
-
-        print(table)
-
-    def find_by_organization(self, organization: Organization) -> PageProject:
-        """Find projects by organization"""
-        url = f"/api/{self.get_type()}/"
-        get_response = self.client.get(url, params={'filter': f'organization.id={organization.id}'})
-        return self.get_page_class().parse_obj(get_response.json()).set_client(self.client)
-
-    def get(self, entity_id: str) -> "EntityEndpoint":
-        """Get an entity by id"""
-        url = f"/api/{self.get_type()}/{entity_id}"
-        get_response = self.client.get(url)
-        return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
-
-    def create(self, new_entity: EntityEndpoint) -> EntityEndpoint:
-        """Create an entity"""
-        url = f"/api/{self.get_type()}"
-
-        create_response = self.client.post(url, body=json.loads(new_entity.json(exclude={'client'}, by_alias=True)))
-        return self.get_instance_class().parse_obj(create_response.json()).set_client(self.client)
-
-    def delete(self, self_id: str) -> None:
-        """Delete an entity by id"""
-        url = f"/api/{self.get_type()}/{self_id}"
-        self.client.delete(url)
 
 
 class ProjectsEndpoint(EntitiesEndpoint):

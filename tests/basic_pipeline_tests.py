@@ -102,7 +102,7 @@ def test_function_step():
     assert stats.documents_processed == 1
     assert stats.document_exceptions == 0
     assert len(test_capture.documents) == 1
-    assert test_capture[0].metadata.cheese == 'fishstick'
+    assert test_capture.documents[0].metadata.cheese == 'fishstick'
 
 
 def test_fluent_pipeline():

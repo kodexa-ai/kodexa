@@ -944,16 +944,6 @@ class KodexaPlatform:
             raise Exception("Unable to reindex check your reference and platform settings")
 
     @classmethod
-    def upload_file(cls, ref, path):
-        store = KodexaPlatform.get_object_instance(ref, 'store')
-
-        if isinstance(store, RemoteDocumentStore):
-            with open(path, 'rb') as content:
-                store.put_native(path, content)
-        else:
-            raise Exception("Reference must be a document store")
-
-    @classmethod
     def get_project(cls, project_id):
         project_instance = cls.get_object_instance(project_id, 'project')
         print(f"Name: [bold]{project_instance.name}[/bold]")
