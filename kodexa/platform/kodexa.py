@@ -1143,43 +1143,6 @@ class RemoteSession:
         logger.info("No output document")
         return None
 
-    def get_store(self, execution, store):
-        """
-        Download a store from an execution
-
-        Args:
-          execution: the execution containing the store
-          store: the store
-
-        Returns:
-            The full store
-
-        """
-        logger.debug("Downloading store from server")
-        response = requests.get(
-            f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/stores/{store.id}",
-            headers={"x-access-token": KodexaPlatform.get_access_token()})
-        logger.debug(f"Response from server [{response.text}] [{response.status_code}]")
-        raw_store = Dict(response.json())
-
-        return TableDataStore(raw_store.data.columns, raw_store.data.rows)
-
-    def merge_stores(self, execution, context: PipelineContext):
-        """
-        Merge the stores between an execution and a context
-
-        Args:
-          execution:
-          context: PipelineContext:
-
-        Returns:
-
-        """
-        for store in execution.stores:
-            logger.debug(f"Merging store {store.id}")
-            context.merge_store(store.name, self.get_store(execution, store))
-
-
 class RemotePipeline:
     """Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform"""
 
