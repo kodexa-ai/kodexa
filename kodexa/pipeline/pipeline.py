@@ -140,30 +140,6 @@ class PipelineContext:
         """
         self.content_provider.put_content(content_object, content)
 
-    def add_store(self, name: str, store):
-        """Add a store with given name to the context
-
-        Args:
-          name: the name to refer to the store with
-          store: the instance of the store
-          name: str:
-
-        Returns:
-
-        """
-        self.store_provider.put_store(name, store)
-
-    def get_store_names(self):
-        """
-
-        Args:
-
-        Returns:
-          :return: the list of store names
-
-        """
-        return self.store_provider.get_store_names()
-
     def set_current_document(self, current_document: Document):
         """Set the Document that is currently being processed in the pipeline
 
@@ -200,45 +176,6 @@ class PipelineContext:
 
         """
         self.output_document = output_document
-
-    def get_store(self, name: str, default: Store = None) -> Store:
-        """Get a store with given name from the context
-
-        Args:
-          name: the name to refer to the store with
-          default: optionally the default to create the store as if it isn't there
-          name: str:
-          default: Store:  (Default value = None)
-
-        Returns:
-          the store, or None is not available
-
-        """
-        store = self.store_provider.get_store(name) if name in self.get_store_names() else None
-
-        if not store and default:
-            self.store_provider.put_store(name, default)
-            default.set_pipeline_context(self)
-
-        return self.store_provider.get_store(name)
-
-    def merge_store(self, name, store):
-        """
-        Merge a store into the pipeline context
-
-        Args:
-          name:
-          store:
-
-        Returns:
-
-        """
-        if name not in self.get_store_names():
-            logger.debug("New store, adding")
-            self.add_store(name, store)
-        else:
-            logger.debug("Existing store, merging")
-            self.get_store(name).merge(store)
 
 
 class PipelineStep:
