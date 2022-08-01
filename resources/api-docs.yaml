@@ -16113,6 +16113,60 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PagePlatformEvent'
+  /api/dataForms/{organizationSlug}/{slug}/{version}/dataSources/{dataSourceId}:
+    get:
+      tags:
+      - Data Forms
+      description: Return the data source definition for the given data source id
+        within the data form
+      operationId: getDataFormSourceDefinition
+      parameters:
+      - name: organizationSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/DataFormSourceDefinition'
   /api/availableExtensionPacks:
     get:
       tags:
@@ -16328,9 +16382,9 @@ components:
             type: object
         status:
           $ref: '#/components/schemas/StatusType'
-        title:
-          type: string
         detail:
+          type: string
+        title:
           type: string
         suppressed:
           type: array
@@ -16541,6 +16595,556 @@ components:
           type: string
         organization:
           $ref: '#/components/schemas/Organization'
+    Action:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      description: The definition of an available action
+      allOf:
+      - $ref: '#/components/schemas/ExtensionPackProvided'
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          step:
+            $ref: '#/components/schemas/StepImplementation'
+          metadata:
+            $ref: '#/components/schemas/ObjectMetadata'
+    AssistantDefinition:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - $ref: '#/components/schemas/ExtensionPackProvided'
+      - type: object
+        properties:
+          template:
+            type: boolean
+          schedulable:
+            type: boolean
+            description: The assistant can be scheduled
+          reactive:
+            type: boolean
+            description: The assistant is reactive to content changes
+          assistant:
+            $ref: '#/components/schemas/AssistantImplementation'
+          metadata:
+            $ref: '#/components/schemas/AssistantMetadata'
+          services:
+            type: array
+            description: Services used by the assistant
+            items:
+              $ref: '#/components/schemas/SlugBasedMetadata'
+          processingTaxonomies:
+            type: array
+            description: Taxonomies that the assistant uses
+            items:
+              $ref: '#/components/schemas/AssistantTaxonomy'
+          options:
+            type: array
+            description: Options for the assistant
+            items:
+              $ref: '#/components/schemas/Option'
+          additionalTaxonOptions:
+            type: array
+            description: This are additional properties that can be set on a label
+              when the assistant is part of the project
+            items:
+              $ref: '#/components/schemas/Option'
+          eventTypes:
+            type: array
+            description: Custom event types that the assistant is able to response
+              to
+            items:
+              $ref: '#/components/schemas/CustomEvent'
+          defaultSchedules:
+            type: array
+            description: The default schedules that the assistant has
+            items:
+              $ref: '#/components/schemas/ScheduleDefinition'
+          subscription:
+            type: string
+            description: "The subscription that the assistant has, this can not be\
+              \ overridden by the subscription in the instance"
+    AssistantImplementation:
+      type: object
+      properties:
+        package:
+          type: string
+        class:
+          type: string
+      description: The implementation of the assistant
+    AssistantMetadata:
+      type: object
+      properties:
+        avatar:
+          $ref: '#/components/schemas/Avatar'
+        tags:
+          type: array
+          items:
+            type: string
+        tabs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TabGroup'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/Option'
+      description: Additional metadata for the assistant
+    AssistantTaxonomy:
+      type: object
+      properties:
+        ref:
+          type: string
+      description: Taxonomies that the assistant uses
+    Avatar:
+      type: object
+      properties:
+        icon:
+          type: string
+        iconGroup:
+          type: string
+    Card:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          description: The type of the card
+        path:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+        taxonPath:
+          type: string
+        dataType:
+          type: string
+          enum:
+          - STRING
+          - DATE
+          - DATE_TIME
+          - NUMBER
+          - DECIMAL
+          - FLOAT
+          - BOOLEAN
+          - CURRENCY
+          - URL
+          - EMAIL_ADDRESS
+          - PHONE_NUMBER
+          - SELECTION
+        multiValue:
+          type: boolean
+        class:
+          type: object
+          additionalProperties:
+            type: object
+    ChartWidget:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/DashboardWidget'
+      - type: object
+        properties:
+          options:
+            type: object
+            additionalProperties:
+              type: object
+    ColumnState:
+      type: object
+      properties:
+        field:
+          type: string
+        title:
+          type: string
+        cell:
+          type: string
+        width:
+          type: string
+        groupable:
+          type: boolean
+        sortable:
+          type: boolean
+        resizeable:
+          type: boolean
+    ContainerResources:
+      type: object
+      properties:
+        memory:
+          type: string
+        cpu:
+          type: string
+    ContentMetadata:
+      type: object
+      properties:
+        type:
+          type: string
+      description: The metadata for this store
+      discriminator:
+        propertyName: type
+        mapping:
+          document: '#/components/schemas/DocumentContentMetadata'
+          model: '#/components/schemas/ModelContentMetadata'
+          data: '#/components/schemas/ModelContentMetadata'
+      oneOf:
+      - $ref: '#/components/schemas/DocumentContentMetadata'
+      - $ref: '#/components/schemas/ModelContentMetadata'
+    Credential:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ExtensionPackProvided'
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          credentialType:
+            type: string
+          properties:
+            type: object
+            additionalProperties:
+              type: object
+              description: A map of key/value pairs that define the credential
+            description: A map of key/value pairs that define the credential
+    CustomEvent:
+      type: object
+      properties:
+        name:
+          pattern: "^[a-zA-Z0-9\\-_]{0,40}$"
+          type: string
+          description: The name of the event
+        icon:
+          type: string
+          description: The name of a Material Design Icon to use for the event
+        label:
+          type: string
+          description: The label to use on the event in the UI
+        description:
+          type: string
+          description: The long description for the event
+        contentObject:
+          type: boolean
+          description: Does the event require a content object
+        options:
+          type: array
+          description: Options available for this event
+          items:
+            $ref: '#/components/schemas/Option'
+      description: A Custom Event allows you to define an subtype of assistant event
+        with options
+    Dashboard:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ExtensionPackProvided'
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          rows:
+            type: array
+            items:
+              $ref: '#/components/schemas/DashboardRow'
+    DashboardColumn:
+      type: object
+      properties:
+        id:
+          type: string
+        cols:
+          type: string
+        height:
+          type: string
+        widgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardWidget'
+    DashboardRow:
+      type: object
+      properties:
+        id:
+          type: string
+        height:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardColumn'
+    DashboardWidget:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        height:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          chart: '#/components/schemas/ChartWidget'
+          textbox: '#/components/schemas/TextboxWidget'
+    DataForm:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ExtensionPackProvided'
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          sources:
+            type: array
+            items:
+              $ref: '#/components/schemas/DataFormSource'
+          views:
+            type: array
+            items:
+              $ref: '#/components/schemas/DataFormView'
+    DataFormSource:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+    DataFormView:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+    DeploymentMetadata:
+      type: object
+      properties:
+        deploymentType:
+          type: string
+          enum:
+          - KUBERNETES
+          - AWS_LAMBDA
+          - AZURE_CLOUD_FUNCTION
+          - NONE
+        minReplicas:
+          type: integer
+          format: int32
+        maxReplicas:
+          type: integer
+          format: int32
+        reservedConcurrency:
+          type: integer
+          format: int32
+        limits:
+          $ref: '#/components/schemas/ContainerResources'
+        requests:
+          $ref: '#/components/schemas/ContainerResources'
+        memoryAssigned:
+          type: string
+        schedulerToken:
+          type: string
+        serviceName:
+          type: string
+        containerName:
+          type: string
+        functionArn:
+          type: string
+        environment:
+          type: object
+          additionalProperties:
+            type: string
+        podMatchLabels:
+          type: array
+          items:
+            $ref: '#/components/schemas/MatchLabel'
+        subscriptionId:
+          type: string
+        planName:
+          type: string
+        resourceGroup:
+          type: string
+        functionUrl:
+          type: string
+        appKey:
+          type: string
+    DockerSource:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ExtensionPackSource'
+      - type: object
+        properties:
+          location:
+            type: string
+    DocumentColumn:
+      type: object
+      properties:
+        label:
+          type: string
+          description: The label to use for the column heading
+        path:
+          type: string
+          description: The path to the data
+    DocumentContentMetadata:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ContentMetadata'
+      - type: object
+        properties:
+          type:
+            type: string
+            description: The type of content metadata
+    ExtensionPack:
+      required:
+      - description
+      - name
+      - slug
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          orgSlug:
+            pattern: "^[a-zA-Z0-9\\-_]{0,100}$"
+            type: string
+          slug:
+            pattern: "^[a-zA-Z0-9\\-_]{0,100}$"
+            type: string
+          name:
+            type: string
+          description:
+            type: string
+          publicAccess:
+            type: boolean
+          packUri:
+            type: string
+          status:
+            type: string
+            enum:
+            - PENDING
+            - BUILDING
+            - BUILT
+            - AVAILABLE
+            - FAILED
+            - UNDEPLOYED
+            - AWAITING_DEPLOYMENT
+            - DEPLOYING
+            - DEPLOYMENT_FAILED
+          deployable:
+            type: boolean
+          services:
+            type: array
+            items:
+              $ref: '#/components/schemas/SlugBasedMetadata'
+          source:
+            $ref: '#/components/schemas/ExtensionPackSource'
+          deployment:
+            $ref: '#/components/schemas/DeploymentMetadata'
+    ExtensionPackProvided:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      properties:
+        ref:
+          type: string
+          description: The reference to the metadata object
+        schemaVersion:
+          type: integer
+          description: The version of the schema
+          format: int32
+        template:
+          type: boolean
+          description: Is this component a template that can be used to create new
+            components
+        orgSlug:
+          type: string
+          description: The slug of the organization that owns this metadata object
+        slug:
+          pattern: "^[a-zA-Z0-9\\-_]{0,255}$"
+          type: string
+          description: The slug used when referencing this metadata object
+        type:
+          type: string
+          description: The type of metadata object
+        name:
+          type: string
+          description: The name of the object
+        description:
+          type: string
+          description: The description of the object
+        version:
+          type: string
+          description: The version of the object
+        deployed:
+          type: string
+          description: The date/time the object was deployed into this Kodexa instance
+          format: date-time
+        publicAccess:
+          type: boolean
+          description: Is the metadata object publicly accessible by other organizations
+        imageUrl:
+          type: string
+          description: URL of image when presenting this object in a UI
+        icon:
+          type: string
+          description: Material Icon name to use in the UI
+        overviewMarkdown:
+          type: string
+          description: Markdown that is used to present the overview of the object
+        metadataTag:
+          type: array
+          description: A list of associated tags
+          items:
+            $ref: '#/components/schemas/MetadataTag'
+        provider:
+          type: string
+          description: The details of the of provider
+        providerUrl:
+          type: string
+          description: The link to the provider website
+        providerImageUrl:
+          type: string
+          description: The link to the model image
+        extensionPackRef:
+          type: string
+          description: The reference to the extension pack (if the metadata object
+            was created by an extension pack)
+    ExtensionPackSource:
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          docker: '#/components/schemas/DockerSource'
+    MatchLabel:
+      type: object
+      properties:
+        label:
+          type: string
+        value:
+          type: string
     MetadataTag:
       type: object
       properties:
@@ -16549,6 +17153,159 @@ components:
         imageUrl:
           type: string
       description: A list of associated tags
+    ModelContentMetadata:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/ContentMetadata'
+      - type: object
+        properties:
+          type:
+            type: string
+            description: The type of content metadata
+          modelRuntimeRef:
+            type: string
+            description: The reference to the model runtime to use
+          stateHash:
+            type: string
+            description: The state has is used to determine the last update of the
+              model
+          modelRuntimeParameters:
+            type: object
+            additionalProperties:
+              type: object
+              description: The parameters to be passed to the model runtime
+            description: The parameters to be passed to the model runtime
+          state:
+            type: string
+            description: The state of the model in this store
+            enum:
+            - PENDING
+            - PREPARING
+            - PREPARED
+            - TRAINING
+            - TRAINED
+            - DEPLOYED
+            - UNDEPLOYED
+            - FAILED
+          trainable:
+            type: boolean
+            description: Can this model be trained
+          useImplementationFromTemplate:
+            type: boolean
+            description: Use implementation from template
+          templateRef:
+            type: string
+            description: The template ref that will be used if we are going to use
+              the implementation from the template
+          vueTemplate:
+            type: string
+            description: The Vue template to render for the configuration of this
+              model
+          trainingOptions:
+            type: array
+            description: The training options for this model
+            items:
+              $ref: '#/components/schemas/Option'
+          trainingParameters:
+            type: object
+            additionalProperties:
+              type: object
+              description: The values for the training options
+            description: The values for the training options
+          inferenceOptions:
+            type: array
+            description: The inference options for this model
+            items:
+              $ref: '#/components/schemas/Option'
+          inferenceParameters:
+            type: object
+            additionalProperties:
+              type: object
+              description: The values for the inference options
+            description: The values for the inference options
+          buildStatistics:
+            type: object
+            additionalProperties:
+              type: object
+              description: Build statistics (note this will update if the model is
+                training)
+            description: Build statistics (note this will update if the model is training)
+          finalStatistics:
+            type: object
+            additionalProperties:
+              type: object
+              description: Final statistics from the model
+            description: Final statistics from the model
+          deployment:
+            $ref: '#/components/schemas/DeploymentMetadata'
+          taxonomy:
+            $ref: '#/components/schemas/Taxonomy'
+          additionalTaxonOptions:
+            type: array
+            description: This are additional properties that can be set on a label
+              when the model is part of the project
+            items:
+              $ref: '#/components/schemas/Option'
+          contents:
+            type: array
+            description: A list of the paths (with wildcards) that hold the content
+              of this model
+            items:
+              type: string
+              description: A list of the paths (with wildcards) that hold the content
+                of this model
+          ignoredContents:
+            type: array
+            description: A list of the paths (with wildcards) that are ignored when
+              picking up the content of this model
+            items:
+              type: string
+              description: A list of the paths (with wildcards) that are ignored when
+                picking up the content of this model
+          baseDir:
+            type: string
+            description: A base directory that was used for uploading of the model
+    ModelRuntime:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          extensionPackRef:
+            type: string
+            description: The reference to the extension pack (if the metadata object
+              was created by an extension pack)
+          inferenceAction:
+            type: string
+            description: The reference to the action that will be used for inference
+          trainingAction:
+            type: string
+            description: A reference to the action that will be used for training
+          deploymentType:
+            type: string
+            description: "The deployment to use, local means that the model runtime\
+              \ can be re-used across models, while container means that the model\
+              \ store must be deployed with the model runtime"
+            enum:
+            - LOCAL
+            - CONTAINER
+          containerUrl:
+            type: string
+            description: The URL of the container to use if the deployment type is
+              CONTAINER
+          deploymentDefaults:
+            $ref: '#/components/schemas/DeploymentMetadata'
+    ObjectMetadata:
+      type: object
+      properties:
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/Option'
     Option:
       type: object
       properties:
@@ -16590,8 +17347,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PossibleValue'
-      description: Options that can be shown for the taxon (usually used in assistant
-        taxonomies)
+      description: Options available for this event
     Overlay:
       type: object
       properties:
@@ -16608,6 +17364,53 @@ components:
         \ and enrichment"
     OverlayCondition:
       type: object
+    Pipeline:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          extensionPackRef:
+            type: string
+            description: The reference to the extension pack (if the metadata object
+              was created by an extension pack)
+          metadata:
+            $ref: '#/components/schemas/PipelineImplementationMetadata'
+    PipelineImplementationMetadata:
+      type: object
+      properties:
+        steps:
+          type: array
+          description: The metadata for the steps in this pipeline
+          items:
+            $ref: '#/components/schemas/PipelineStepMetadata'
+      description: Metadata captured when publishing a pipeline definition
+    PipelineStepMetadata:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the step
+        ref:
+          type: string
+          description: The reference to the action
+        options:
+          type: object
+          additionalProperties:
+            type: object
+            description: The options for the step in the pipeline
+          description: The options for the step in the pipeline
+        stepType:
+          type: string
+          description: The type of step (ACTION or MODEL)
+          enum:
+          - ACTION
+          - MODEL
+      description: The metadata for the steps in this pipeline
     PossibleValue:
       type: object
       properties:
@@ -16617,6 +17420,142 @@ components:
           type: object
         description:
           type: string
+    ProjectAssistant:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        assistantDefinitionRef:
+          type: string
+        options:
+          type: object
+          additionalProperties:
+            type: object
+        stores:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        schedules:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleDefinition'
+        subscription:
+          type: string
+      description: The assistants that will be created with the project template
+    ProjectDashboard:
+      type: object
+      properties:
+        slug:
+          pattern: "^[a-zA-Z0-9\\-_]{0,255}$"
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardRow'
+        templateRef:
+          type: string
+      description: The dashboards that will be created with the project template
+    ProjectStore:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        storeType:
+          type: string
+          enum:
+          - DOCUMENT
+          - TABLE
+          - DICTIONARY
+          - MODEL
+        storePurpose:
+          type: string
+          enum:
+          - OPERATIONAL
+          - TRAINING
+        templateRef:
+          type: string
+      description: The stores that will be created with the project template
+    ProjectTaxonomy:
+      type: object
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        taxonomyType:
+          type: string
+          description: The type of taxonomy
+          enum:
+          - CONTENT
+          - CLASSIFICATION
+          - PROCESSING
+          - MODEL
+        taxons:
+          type: array
+          description: The hierarchical structure of taxon's in this taxonomy
+          items:
+            $ref: '#/components/schemas/Taxon'
+        templateRef:
+          type: string
+      description: The taxonomies that will be created with the project template
+    ProjectTemplate:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      description: A template for new project
+      allOf:
+      - $ref: '#/components/schemas/ExtensionPackProvided'
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          stores:
+            type: array
+            description: The stores that will be created with the project template
+            items:
+              $ref: '#/components/schemas/ProjectStore'
+          assistants:
+            type: array
+            description: The assistants that will be created with the project template
+            items:
+              $ref: '#/components/schemas/ProjectAssistant'
+          taxonomies:
+            type: array
+            description: The taxonomies that will be created with the project template
+            items:
+              $ref: '#/components/schemas/ProjectTaxonomy'
+          dashboards:
+            type: array
+            description: The dashboards that will be created with the project template
+            items:
+              $ref: '#/components/schemas/ProjectDashboard'
+          helpUrl:
+            type: string
+            description: A help URL where you can learn more about the assistant
+          category:
+            type: string
+            description: The category of project template
+            enum:
+            - TASK
+            - DOCUMENT
+            - CONNECTOR
+            - MACHINE_LEARNING
+            - SUPPLEMENTAL
     RelatedTaxon:
       type: object
       properties:
@@ -16632,6 +17571,20 @@ components:
           format: int32
       description: A list of relationships to other taxons and the purpose of the
         relationship
+    ScheduleDefinition:
+      type: object
+      properties:
+        type:
+          type: string
+        cronExpression:
+          type: string
+        lastEvent:
+          type: string
+          format: date-time
+        nextEvent:
+          type: string
+          format: date-time
+      description: The default schedules that the assistant has
     SelectionOption:
       type: object
       properties:
@@ -16642,6 +17595,185 @@ components:
         description:
           type: string
       description: "If data type is SELECTION, this is the list of available options"
+    SlugBasedMetadata:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      properties:
+        ref:
+          type: string
+          description: The reference to the metadata object
+        schemaVersion:
+          type: integer
+          description: The version of the schema
+          format: int32
+        template:
+          type: boolean
+          description: Is this component a template that can be used to create new
+            components
+        orgSlug:
+          type: string
+          description: The slug of the organization that owns this metadata object
+        slug:
+          pattern: "^[a-zA-Z0-9\\-_]{0,255}$"
+          type: string
+          description: The slug used when referencing this metadata object
+        type:
+          type: string
+          description: The type of metadata object
+        name:
+          type: string
+          description: The name of the object
+        description:
+          type: string
+          description: The description of the object
+        version:
+          type: string
+          description: The version of the object
+        deployed:
+          type: string
+          description: The date/time the object was deployed into this Kodexa instance
+          format: date-time
+        publicAccess:
+          type: boolean
+          description: Is the metadata object publicly accessible by other organizations
+        imageUrl:
+          type: string
+          description: URL of image when presenting this object in a UI
+        icon:
+          type: string
+          description: Material Icon name to use in the UI
+        overviewMarkdown:
+          type: string
+          description: Markdown that is used to present the overview of the object
+        metadataTag:
+          type: array
+          description: A list of associated tags
+          items:
+            $ref: '#/components/schemas/MetadataTag'
+        provider:
+          type: string
+          description: The details of the of provider
+        providerUrl:
+          type: string
+          description: The link to the provider website
+        providerImageUrl:
+          type: string
+          description: The link to the model image
+      discriminator:
+        propertyName: type
+        mapping:
+          action: '#/components/schemas/Action'
+          pipeline: '#/components/schemas/Pipeline'
+          dataForm: '#/components/schemas/DataForm'
+          dashboard: '#/components/schemas/Dashboard'
+          store: '#/components/schemas/Store'
+          taxonomy: '#/components/schemas/Taxonomy'
+          projectTemplate: '#/components/schemas/ProjectTemplate'
+          assistantDefinition: '#/components/schemas/AssistantDefinition'
+          credential: '#/components/schemas/Credential'
+          modelRuntime: '#/components/schemas/ModelRuntime'
+      oneOf:
+      - $ref: '#/components/schemas/Action'
+      - $ref: '#/components/schemas/Pipeline'
+      - $ref: '#/components/schemas/Dashboard'
+      - $ref: '#/components/schemas/Store'
+      - $ref: '#/components/schemas/Taxonomy'
+      - $ref: '#/components/schemas/AssistantDefinition'
+      - $ref: '#/components/schemas/ProjectTemplate'
+      - $ref: '#/components/schemas/Credential'
+      - $ref: '#/components/schemas/DataForm'
+    StepImplementation:
+      type: object
+      properties:
+        package:
+          type: string
+        class:
+          type: string
+    Store:
+      required:
+      - name
+      - slug
+      - type
+      type: object
+      description: Provides the definition and metadata for a store
+      allOf:
+      - $ref: '#/components/schemas/ExtensionPackProvided'
+      - $ref: '#/components/schemas/SlugBasedMetadata'
+      - type: object
+        properties:
+          metadata:
+            $ref: '#/components/schemas/ContentMetadata'
+          storeType:
+            type: string
+            description: The type of object the store will contain
+            enum:
+            - DOCUMENT
+            - TABLE
+            - DICTIONARY
+            - MODEL
+          searchable:
+            type: boolean
+            description: "Is the store indexed, and thus searchable"
+          storePurpose:
+            type: string
+            description: The purpose of the store (used by UI and assistants to understand
+              how to interact with the store events)
+            enum:
+            - OPERATIONAL
+            - TRAINING
+          viewOptions:
+            $ref: '#/components/schemas/StoreViewOptions'
+          viewPresets:
+            type: array
+            description: View presets that have been saved for this store
+            items:
+              $ref: '#/components/schemas/ViewPreset'
+    StoreViewOptions:
+      type: object
+      properties:
+        showLastEvent:
+          type: boolean
+        showExtension:
+          type: boolean
+        showCreated:
+          type: boolean
+        showModified:
+          type: boolean
+        showPathCounts:
+          type: boolean
+        showClassifications:
+          type: boolean
+        showSize:
+          type: boolean
+        showAssignments:
+          type: boolean
+        showStatus:
+          type: boolean
+        additionalColumns:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentColumn'
+        columnStates:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/ColumnState'
+      description: Options for viewing this store
+    TabGroup:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        showIf:
+          type: string
     Taxon:
       required:
       - externalName
@@ -16796,16 +17928,13 @@ components:
       description: Provides the taxonomy hierarchy that is used for content and document
         classification and labeling
       allOf:
+      - $ref: '#/components/schemas/ExtensionPackProvided'
       - $ref: '#/components/schemas/SlugBasedMetadata'
       - type: object
         properties:
           type:
             type: string
             description: The metadata object type
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
           taxonomyType:
             type: string
             description: The type of taxonomy
@@ -16832,308 +17961,18 @@ components:
             type: integer
             description: The total number of taxons in the taxonomy
             format: int32
-    ColumnState:
-      type: object
-      properties:
-        field:
-          type: string
-        title:
-          type: string
-        cell:
-          type: string
-        width:
-          type: string
-        groupable:
-          type: boolean
-        sortable:
-          type: boolean
-        resizeable:
-          type: boolean
-    ContainerResources:
-      type: object
-      properties:
-        memory:
-          type: string
-        cpu:
-          type: string
-    ContentMetadata:
-      type: object
-      properties:
-        type:
-          type: string
-      description: The metadata for this store
-      discriminator:
-        propertyName: type
-        mapping:
-          document: '#/components/schemas/DocumentContentMetadata'
-          model: '#/components/schemas/ModelContentMetadata'
-          data: '#/components/schemas/ModelContentMetadata'
-      oneOf:
-      - $ref: '#/components/schemas/DocumentContentMetadata'
-      - $ref: '#/components/schemas/ModelContentMetadata'
-    DeploymentMetadata:
-      type: object
-      properties:
-        deploymentType:
-          type: string
-          enum:
-          - KUBERNETES
-          - AWS_LAMBDA
-          - AZURE_CLOUD_FUNCTION
-          - NONE
-        minReplicas:
-          type: integer
-          format: int32
-        maxReplicas:
-          type: integer
-          format: int32
-        reservedConcurrency:
-          type: integer
-          format: int32
-        limits:
-          $ref: '#/components/schemas/ContainerResources'
-        requests:
-          $ref: '#/components/schemas/ContainerResources'
-        memoryAssigned:
-          type: string
-        schedulerToken:
-          type: string
-        serviceName:
-          type: string
-        containerName:
-          type: string
-        functionArn:
-          type: string
-        environment:
-          type: object
-          additionalProperties:
-            type: string
-        podMatchLabels:
-          type: array
-          items:
-            $ref: '#/components/schemas/MatchLabel'
-        subscriptionId:
-          type: string
-        planName:
-          type: string
-        resourceGroup:
-          type: string
-        functionUrl:
-          type: string
-        appKey:
-          type: string
-      description: Details of the model deployment (if available)
-    DocumentColumn:
-      type: object
-      properties:
-        label:
-          type: string
-          description: The label to use for the column heading
-        path:
-          type: string
-          description: The path to the data
-    DocumentContentMetadata:
+    TextboxWidget:
       type: object
       allOf:
-      - $ref: '#/components/schemas/ContentMetadata'
+      - $ref: '#/components/schemas/DashboardWidget'
       - type: object
         properties:
-          type:
+          title:
             type: string
-            description: The type of content metadata
-    MatchLabel:
-      type: object
-      properties:
-        label:
-          type: string
-        value:
-          type: string
-    ModelContentMetadata:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ContentMetadata'
-      - type: object
-        properties:
-          type:
+          subtitle:
             type: string
-            description: The type of content metadata
-          modelRuntimeRef:
+          body:
             type: string
-            description: The reference to the model runtime to use
-          stateHash:
-            type: string
-            description: The state has is used to determine the last update of the
-              model
-          modelRuntimeParameters:
-            type: object
-            additionalProperties:
-              type: object
-              description: The parameters to be passed to the model runtime
-            description: The parameters to be passed to the model runtime
-          state:
-            type: string
-            description: The state of the model in this store
-            enum:
-            - PENDING
-            - PREPARING
-            - PREPARED
-            - TRAINING
-            - TRAINED
-            - DEPLOYED
-            - UNDEPLOYED
-            - FAILED
-          trainable:
-            type: boolean
-            description: Can this model be trained
-          useImplementationFromTemplate:
-            type: boolean
-            description: Use implementation from template
-          templateRef:
-            type: string
-            description: The template ref that will be used if we are going to use
-              the implementation from the template
-          vueTemplate:
-            type: string
-            description: The Vue template to render for the configuration of this
-              model
-          trainingOptions:
-            type: array
-            description: The training options for this model
-            items:
-              $ref: '#/components/schemas/Option'
-          trainingParameters:
-            type: object
-            additionalProperties:
-              type: object
-              description: The values for the training options
-            description: The values for the training options
-          inferenceOptions:
-            type: array
-            description: The inference options for this model
-            items:
-              $ref: '#/components/schemas/Option'
-          inferenceParameters:
-            type: object
-            additionalProperties:
-              type: object
-              description: The values for the inference options
-            description: The values for the inference options
-          buildStatistics:
-            type: object
-            additionalProperties:
-              type: object
-              description: Build statistics (note this will update if the model is
-                training)
-            description: Build statistics (note this will update if the model is training)
-          finalStatistics:
-            type: object
-            additionalProperties:
-              type: object
-              description: Final statistics from the model
-            description: Final statistics from the model
-          deployment:
-            $ref: '#/components/schemas/DeploymentMetadata'
-          taxonomy:
-            $ref: '#/components/schemas/Taxonomy'
-          additionalTaxonOptions:
-            type: array
-            description: This are additional properties that can be set on a label
-              when the model is part of the project
-            items:
-              $ref: '#/components/schemas/Option'
-          contents:
-            type: array
-            description: A list of the paths (with wildcards) that hold the content
-              of this model
-            items:
-              type: string
-              description: A list of the paths (with wildcards) that hold the content
-                of this model
-          ignoredContents:
-            type: array
-            description: A list of the paths (with wildcards) that are ignored when
-              picking up the content of this model
-            items:
-              type: string
-              description: A list of the paths (with wildcards) that are ignored when
-                picking up the content of this model
-          baseDir:
-            type: string
-            description: A base directory that was used for uploading of the model
-    Store:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      description: Provides the definition and metadata for a store
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          metadata:
-            $ref: '#/components/schemas/ContentMetadata'
-          storeType:
-            type: string
-            description: The type of object the store will contain
-            enum:
-            - DOCUMENT
-            - TABLE
-            - DICTIONARY
-            - MODEL
-          searchable:
-            type: boolean
-            description: "Is the store indexed, and thus searchable"
-          storePurpose:
-            type: string
-            description: The purpose of the store (used by UI and assistants to understand
-              how to interact with the store events)
-            enum:
-            - OPERATIONAL
-            - TRAINING
-          viewOptions:
-            $ref: '#/components/schemas/StoreViewOptions'
-          viewPresets:
-            type: array
-            description: View presets that have been saved for this store
-            items:
-              $ref: '#/components/schemas/ViewPreset'
-    StoreViewOptions:
-      type: object
-      properties:
-        showLastEvent:
-          type: boolean
-        showExtension:
-          type: boolean
-        showCreated:
-          type: boolean
-        showModified:
-          type: boolean
-        showPathCounts:
-          type: boolean
-        showClassifications:
-          type: boolean
-        showSize:
-          type: boolean
-        showAssignments:
-          type: boolean
-        showStatus:
-          type: boolean
-        additionalColumns:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentColumn'
-        columnStates:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/ColumnState'
-      description: Options for viewing this store
     ViewPreset:
       type: object
       properties:
@@ -17161,172 +18000,6 @@ components:
             type: string
         all:
           type: boolean
-    Action:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          step:
-            $ref: '#/components/schemas/StepImplementation'
-          metadata:
-            $ref: '#/components/schemas/ObjectMetadata'
-    AssistantDefinition:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          template:
-            type: boolean
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          schedulable:
-            type: boolean
-            description: The assistant can be scheduled
-          reactive:
-            type: boolean
-            description: The assistant is reactive to content changes
-          assistant:
-            $ref: '#/components/schemas/AssistantImplementation'
-          metadata:
-            $ref: '#/components/schemas/AssistantMetadata'
-          services:
-            type: array
-            description: Services used by the assistant
-            items:
-              $ref: '#/components/schemas/SlugBasedMetadata'
-          processingTaxonomies:
-            type: array
-            description: Taxonomies that the assistant uses
-            items:
-              $ref: '#/components/schemas/AssistantTaxonomy'
-          options:
-            type: array
-            description: Options for the assistant
-            items:
-              $ref: '#/components/schemas/Option'
-          additionalTaxonOptions:
-            type: array
-            description: This are additional properties that can be set on a label
-              when the assistant is part of the project
-            items:
-              $ref: '#/components/schemas/Option'
-          eventTypes:
-            type: array
-            description: Custom event types that the assistant is able to response
-              to
-            items:
-              $ref: '#/components/schemas/CustomEvent'
-          defaultSchedules:
-            type: array
-            description: The default schedules that the assistant has
-            items:
-              $ref: '#/components/schemas/ScheduleDefinition'
-          subscription:
-            type: string
-            description: "The subscription that the assistant has, this can not be\
-              \ overridden by the subscription in the instance"
-    AssistantImplementation:
-      type: object
-      properties:
-        package:
-          type: string
-        class:
-          type: string
-      description: The implementation of the assistant
-    AssistantMetadata:
-      type: object
-      properties:
-        avatar:
-          $ref: '#/components/schemas/Avatar'
-        tags:
-          type: array
-          items:
-            type: string
-        tabs:
-          type: array
-          items:
-            $ref: '#/components/schemas/TabGroup'
-        options:
-          type: array
-          items:
-            $ref: '#/components/schemas/Option'
-      description: Additional metadata for the assistant
-    AssistantTaxonomy:
-      type: object
-      properties:
-        ref:
-          type: string
-      description: Taxonomies that the assistant uses
-    Avatar:
-      type: object
-      properties:
-        icon:
-          type: string
-        iconGroup:
-          type: string
-    Card:
-      type: object
-      properties:
-        id:
-          type: string
-        type:
-          type: string
-          description: The type of the card
-        path:
-          type: string
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/Card'
-        taxonPath:
-          type: string
-        dataType:
-          type: string
-          enum:
-          - STRING
-          - DATE
-          - DATE_TIME
-          - NUMBER
-          - DECIMAL
-          - FLOAT
-          - BOOLEAN
-          - CURRENCY
-          - URL
-          - EMAIL_ADDRESS
-          - PHONE_NUMBER
-          - SELECTION
-        multiValue:
-          type: boolean
-        class:
-          type: object
-          additionalProperties:
-            type: object
-    ChartWidget:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/DashboardWidget'
-      - type: object
-        properties:
-          options:
-            type: object
-            additionalProperties:
-              type: object
     ContentClassification:
       type: object
       properties:
@@ -17429,160 +18102,6 @@ components:
           type: string
         documentFamilyId:
           type: string
-    Credential:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          credentialType:
-            type: string
-          properties:
-            type: object
-            additionalProperties:
-              type: object
-              description: A map of key/value pairs that define the credential
-            description: A map of key/value pairs that define the credential
-    CustomEvent:
-      type: object
-      properties:
-        name:
-          pattern: "^[a-zA-Z0-9\\-_]{0,40}$"
-          type: string
-          description: The name of the event
-        icon:
-          type: string
-          description: The name of a Material Design Icon to use for the event
-        label:
-          type: string
-          description: The label to use on the event in the UI
-        description:
-          type: string
-          description: The long description for the event
-        contentObject:
-          type: boolean
-          description: Does the event require a content object
-        options:
-          type: array
-          description: Options available for this event
-          items:
-            $ref: '#/components/schemas/Option'
-      description: A Custom Event allows you to define an subtype of assistant event
-        with options
-    Dashboard:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          rows:
-            type: array
-            items:
-              $ref: '#/components/schemas/DashboardRow'
-    DashboardColumn:
-      type: object
-      properties:
-        id:
-          type: string
-        cols:
-          type: string
-        height:
-          type: string
-        widgets:
-          type: array
-          items:
-            $ref: '#/components/schemas/DashboardWidget'
-    DashboardRow:
-      type: object
-      properties:
-        id:
-          type: string
-        height:
-          type: string
-        columns:
-          type: array
-          items:
-            $ref: '#/components/schemas/DashboardColumn'
-    DashboardWidget:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        type:
-          type: string
-        height:
-          type: string
-      discriminator:
-        propertyName: type
-        mapping:
-          chart: '#/components/schemas/ChartWidget'
-          textbox: '#/components/schemas/TextboxWidget'
-    DataForm:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          taxonomyRef:
-            type: string
-          path:
-            type: string
-          sources:
-            type: array
-            items:
-              $ref: '#/components/schemas/DataFormSource'
-          views:
-            type: array
-            items:
-              $ref: '#/components/schemas/DataFormView'
-    DataFormSource:
-      type: object
-      properties:
-        id:
-          type: string
-    DataFormView:
-      type: object
-      properties:
-        id:
-          type: string
-        cards:
-          type: array
-          items:
-            $ref: '#/components/schemas/Card'
-    DockerSource:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/ExtensionPackSource'
-      - type: object
-        properties:
-          location:
-            type: string
     DocumentActor:
       type: object
       properties:
@@ -18052,103 +18571,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ExecutionTarget'
-    ExtensionPack:
-      required:
-      - description
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          orgSlug:
-            pattern: "^[a-zA-Z0-9\\-_]{0,100}$"
-            type: string
-          slug:
-            pattern: "^[a-zA-Z0-9\\-_]{0,100}$"
-            type: string
-          name:
-            type: string
-          description:
-            type: string
-          publicAccess:
-            type: boolean
-          packUri:
-            type: string
-          status:
-            type: string
-            enum:
-            - PENDING
-            - BUILDING
-            - BUILT
-            - AVAILABLE
-            - FAILED
-            - UNDEPLOYED
-            - AWAITING_DEPLOYMENT
-            - DEPLOYING
-            - DEPLOYMENT_FAILED
-          deployable:
-            type: boolean
-          services:
-            type: array
-            items:
-              $ref: '#/components/schemas/SlugBasedMetadata'
-          source:
-            $ref: '#/components/schemas/ExtensionPackSource'
-          deployment:
-            $ref: '#/components/schemas/DeploymentMetadata'
-    ExtensionPackSource:
-      type: object
-      properties:
-        type:
-          type: string
-      discriminator:
-        propertyName: type
-        mapping:
-          docker: '#/components/schemas/DockerSource'
-    ModelRuntime:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          inferenceAction:
-            type: string
-            description: The reference to the action that will be used for inference
-          trainingAction:
-            type: string
-            description: A reference to the action that will be used for training
-          deploymentType:
-            type: string
-            description: "The deployment to use, local means that the model runtime\
-              \ can be re-used across models, while container means that the model\
-              \ store must be deployed with the model runtime"
-            enum:
-            - LOCAL
-            - CONTAINER
-          containerUrl:
-            type: string
-            description: The URL of the container to use if the deployment type is
-              CONTAINER
-          deploymentDefaults:
-            $ref: '#/components/schemas/DeploymentMetadata'
-    ObjectMetadata:
-      type: object
-      properties:
-        options:
-          type: array
-          items:
-            $ref: '#/components/schemas/Option'
     PathExtractedData:
       type: object
       properties:
@@ -18166,204 +18588,6 @@ components:
         exceptionCount:
           type: integer
           format: int64
-    Pipeline:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          metadata:
-            $ref: '#/components/schemas/PipelineImplementationMetadata'
-    PipelineImplementationMetadata:
-      type: object
-      properties:
-        steps:
-          type: array
-          description: The metadata for the steps in this pipeline
-          items:
-            $ref: '#/components/schemas/PipelineStepMetadata'
-      description: Metadata captured when publishing a pipeline definition
-    PipelineStepMetadata:
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of the step
-        ref:
-          type: string
-          description: The reference to the action
-        options:
-          type: object
-          additionalProperties:
-            type: object
-            description: The options for the step in the pipeline
-          description: The options for the step in the pipeline
-        stepType:
-          type: string
-          description: The type of step (ACTION or MODEL)
-          enum:
-          - ACTION
-          - MODEL
-      description: The metadata for the steps in this pipeline
-    ProjectAssistant:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        assistantDefinitionRef:
-          type: string
-        options:
-          type: object
-          additionalProperties:
-            type: object
-        stores:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        schedules:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ScheduleDefinition'
-        subscription:
-          type: string
-      description: The assistants that will be created with the project template
-    ProjectDashboard:
-      type: object
-      properties:
-        slug:
-          pattern: "^[a-zA-Z0-9\\-_]{0,255}$"
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        rows:
-          type: array
-          items:
-            $ref: '#/components/schemas/DashboardRow'
-        templateRef:
-          type: string
-      description: The dashboards that will be created with the project template
-    ProjectStore:
-      type: object
-      properties:
-        slug:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        storeType:
-          type: string
-          enum:
-          - DOCUMENT
-          - TABLE
-          - DICTIONARY
-          - MODEL
-        storePurpose:
-          type: string
-          enum:
-          - OPERATIONAL
-          - TRAINING
-        templateRef:
-          type: string
-      description: The stores that will be created with the project template
-    ProjectTaxonomy:
-      type: object
-      properties:
-        slug:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        taxonomyType:
-          type: string
-          description: The type of taxonomy
-          enum:
-          - CONTENT
-          - CLASSIFICATION
-          - PROCESSING
-          - MODEL
-        taxons:
-          type: array
-          description: The hierarchical structure of taxon's in this taxonomy
-          items:
-            $ref: '#/components/schemas/Taxon'
-        templateRef:
-          type: string
-      description: The taxonomies that will be created with the project template
-    ProjectTemplate:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/SlugBasedMetadata'
-      - type: object
-        properties:
-          extensionPackRef:
-            type: string
-            description: The reference to the extension pack (if the metadata object
-              was created by an extension pack)
-          stores:
-            type: array
-            description: The stores that will be created with the project template
-            items:
-              $ref: '#/components/schemas/ProjectStore'
-          assistants:
-            type: array
-            description: The assistants that will be created with the project template
-            items:
-              $ref: '#/components/schemas/ProjectAssistant'
-          taxonomies:
-            type: array
-            description: The taxonomies that will be created with the project template
-            items:
-              $ref: '#/components/schemas/ProjectTaxonomy'
-          dashboards:
-            type: array
-            description: The dashboards that will be created with the project template
-            items:
-              $ref: '#/components/schemas/ProjectDashboard'
-          helpUrl:
-            type: string
-            description: A help URL where you can learn more about the assistant
-          category:
-            type: string
-            description: The category of project template
-            enum:
-            - TASK
-            - DOCUMENT
-            - CONNECTOR
-            - MACHINE_LEARNING
-            - SUPPLEMENTAL
-    ScheduleDefinition:
-      type: object
-      properties:
-        type:
-          type: string
-        cronExpression:
-          type: string
-        lastEvent:
-          type: string
-          format: date-time
-        nextEvent:
-          type: string
-          format: date-time
     Session:
       required:
       - state
@@ -18390,97 +18614,6 @@ components:
         lastAccessed:
           type: string
           format: date-time
-    SlugBasedMetadata:
-      required:
-      - name
-      - slug
-      - type
-      type: object
-      properties:
-        ref:
-          type: string
-          description: The reference to the metadata object
-        schemaVersion:
-          type: integer
-          description: The version of the schema
-          format: int32
-        template:
-          type: boolean
-          description: Is this component a template that can be used to create new
-            components
-        orgSlug:
-          type: string
-          description: The slug of the organization that owns this metadata object
-        slug:
-          pattern: "^[a-zA-Z0-9\\-_]{0,255}$"
-          type: string
-          description: The slug used when referencing this metadata object
-        type:
-          type: string
-          description: The type of metadata object
-        name:
-          type: string
-          description: The name of the object
-        description:
-          type: string
-          description: The description of the object
-        version:
-          type: string
-          description: The version of the object
-        deployed:
-          type: string
-          description: The date/time the object was deployed into this Kodexa instance
-          format: date-time
-        publicAccess:
-          type: boolean
-          description: Is the metadata object publicly accessible by other organizations
-        imageUrl:
-          type: string
-          description: URL of image when presenting this object in a UI
-        icon:
-          type: string
-          description: Material Icon name to use in the UI
-        overviewMarkdown:
-          type: string
-          description: Markdown that is used to present the overview of the object
-        metadataTag:
-          type: array
-          description: A list of associated tags
-          items:
-            $ref: '#/components/schemas/MetadataTag'
-        provider:
-          type: string
-          description: The details of the of provider
-        providerUrl:
-          type: string
-          description: The link to the provider website
-        providerImageUrl:
-          type: string
-          description: The link to the model image
-      description: Services used by the assistant
-      discriminator:
-        propertyName: type
-        mapping:
-          action: '#/components/schemas/Action'
-          pipeline: '#/components/schemas/Pipeline'
-          dataForm: '#/components/schemas/DataForm'
-          dashboard: '#/components/schemas/Dashboard'
-          store: '#/components/schemas/Store'
-          taxonomy: '#/components/schemas/Taxonomy'
-          projectTemplate: '#/components/schemas/ProjectTemplate'
-          assistantDefinition: '#/components/schemas/AssistantDefinition'
-          credential: '#/components/schemas/Credential'
-          modelRuntime: '#/components/schemas/ModelRuntime'
-      oneOf:
-      - $ref: '#/components/schemas/Action'
-      - $ref: '#/components/schemas/Pipeline'
-      - $ref: '#/components/schemas/Dashboard'
-      - $ref: '#/components/schemas/Store'
-      - $ref: '#/components/schemas/Taxonomy'
-      - $ref: '#/components/schemas/AssistantDefinition'
-      - $ref: '#/components/schemas/ProjectTemplate'
-      - $ref: '#/components/schemas/Credential'
-      - $ref: '#/components/schemas/DataForm'
     StatusDetails:
       type: object
       properties:
@@ -18506,36 +18639,6 @@ components:
         progress:
           type: integer
           format: int32
-    StepImplementation:
-      type: object
-      properties:
-        package:
-          type: string
-        class:
-          type: string
-    TabGroup:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        icon:
-          type: string
-        showIf:
-          type: string
-    TextboxWidget:
-      type: object
-      allOf:
-      - $ref: '#/components/schemas/DashboardWidget'
-      - type: object
-        properties:
-          title:
-            type: string
-          subtitle:
-            type: string
-          body:
-            type: string
     ValidationError:
       type: object
       properties:
@@ -18723,13 +18826,13 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
+        label:
+          type: string
+          writeOnly: true
         numberOfNotes:
           type: integer
           description: The number of notes associated with this attribute
           format: int64
-        label:
-          type: string
-          writeOnly: true
     DataException:
       required:
       - message
@@ -19627,16 +19730,16 @@ components:
           format: int64
         sort:
           $ref: '#/components/schemas/Sort'
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
         pageNumber:
           type: integer
           format: int32
         pageSize:
           type: integer
           format: int32
-        paged:
-          type: boolean
-        unpaged:
-          type: boolean
     Sort:
       type: object
       properties:
@@ -20495,6 +20598,8 @@ components:
           $ref: '#/components/schemas/PageableObject'
         empty:
           type: boolean
+    DataFormSourceDefinition:
+      type: object
     PageDashboard:
       type: object
       properties:
