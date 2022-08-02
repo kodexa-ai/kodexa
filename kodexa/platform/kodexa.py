@@ -13,16 +13,12 @@ import os
 import sys
 import time
 from json import JSONDecodeError
-from pprint import pprint
 
-import better_exceptions
-import jsonpickle
 import requests
 import yaml
 from addict import Dict
 from appdirs import AppDirs
-from functional import seq
-from rich import print, get_console
+from rich import print
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
@@ -380,31 +376,6 @@ class KodexaPlatform:
 
         raise Exception("An error occurred connecting to the Kodexa platform")
 
-    @classmethod
-    def deploy_extension(cls, metadata):
-        response = requests.post(f"{KodexaPlatform.get_url()}/api/extensionPacks/{metadata['orgSlug']}",
-                                 json=metadata.to_dict(),
-                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                          "content-type": "application/json"})
-        if response.status_code == 200:
-            logger.info("Extension deployed")
-        else:
-            logger.warning(response.text)
-            raise Exception("Unable to deploy new extension")
-
-    @staticmethod
-    def deploy_extension_from_uri(path, organisation_slug):
-        url = f"{KodexaPlatform.get_url()}/api/extensionPacks/{organisation_slug}?uri={path}"
-        logger.info(f"Publishing extension pack to organization {organisation_slug}")
-        response = requests.post(url,
-                                 headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                          "content-type": "application/json"})
-        if response.status_code == 200:
-            logger.info("Extension deployed")
-        else:
-            logger.warning(response.text)
-            raise Exception("Unable to deploy new extension")
-
     @staticmethod
     def resolve_ref(ref: str):
 
@@ -417,412 +388,6 @@ class KodexaPlatform:
             version = ref.split('/')[1].split(":")[1]
 
         return [org_slug, slug, version]
-
-    @staticmethod
-    def __build_object(ref, object_type_metadata, object_class):
-        from kodexa import KodexaPlatform
-        url = f"{KodexaPlatform.get_url()}/api/{object_type_metadata['plural']}/{ref.replace(':', '/')}"
-        import requests
-        response = requests.get(url,
-                                headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                         "content-type": "application/json"})
-
-        if response.status_code == 200:
-            return object_class(**response.json())
-        if response.status_code == 404:
-            return None
-
-        raise Exception(
-            f"Unable to create {object_type_metadata['plural']} with ref {ref} [{response.status_code} {response.text}]")
-
-    @staticmethod
-    def get_object_instance(ref: str, object_type):
-        object_type, object_type_metadata = resolve_object_type(object_type)
-
-        if 'type' in object_type_metadata:
-            return KodexaPlatform.__build_object(ref, object_type_metadata, object_type_metadata['type'])
-
-        if object_type == 'stores':
-            # We need to work out what type of store we have
-            return KodexaPlatform.get_object(ref, object_type)
-
-        # TODO - there are other things we need?
-        raise Exception(f"Unable to get a local instance of {ref} of type {object_type}")
-
-    @staticmethod
-    def deploy(ref: str, kodexa_object, name: str = None, description: str = None,
-               options=None, public=False, force_replace=False, dry_run=False, print_yaml=False):
-
-        if '/' not in ref:
-            logger.warning("A ref must be valid, i.e. org_slug/pipeline_slug:version")
-            raise Exception("Invalid slug")
-
-        [organization_slug, object_slug, object_version] = KodexaPlatform.resolve_ref(ref)
-
-        if options is None:
-            options = {}
-
-        metadata_object = Dict()
-        metadata_object.orgSlug = organization_slug
-        metadata_object.publicAccess = public
-        metadata_object.slug = object_slug
-        metadata_object.version = object_version
-        metadata_object.name = name
-        metadata_object.description = description
-
-        from kodexa import RemoteDataStore
-
-        if isinstance(kodexa_object, Pipeline):
-
-            metadata_object.name = 'New Pipeline' if metadata_object.name is None else metadata_object.name
-            metadata_object.description = 'A new pipeline' if metadata_object.description is None else metadata_object.description
-
-            object_url = "pipelines"
-
-            if "example_urls" not in options:
-                example_urls = []
-            else:
-                example_urls = options["example_urls"]
-
-            if "more_info_url" not in options:
-                more_info_url = None
-            else:
-                more_info_url = options["more_info_url"]
-
-            builder = PipelineMetadataBuilder(kodexa_object)
-
-            metadata_object.type = 'pipeline'
-            metadata_object.metadata.parameters = []
-            metadata_object.metadata.steps = []
-            metadata_object.exampleUrls = example_urls
-            metadata_object.moreInfoUrl = more_info_url
-
-            builder.build_steps(metadata_object)
-
-        elif isinstance(kodexa_object, DocumentStore):
-            object_url = 'stores'
-            metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
-            metadata_object.description = 'A document store' if kodexa_object.description is None else kodexa_object.description
-            metadata_object.type = 'store'
-            metadata_object.storeType = 'DOCUMENT'
-        elif isinstance(kodexa_object, ModelStore):
-            object_url = 'stores'
-            metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
-            metadata_object.description = 'A model store' if kodexa_object.description is None else kodexa_object.description
-            metadata_object.type = 'store'
-            metadata_object.storeType = 'MODEL'
-        elif isinstance(kodexa_object, RemoteDataStore):
-            object_url = 'stores'
-            metadata_object.name = 'New Store' if kodexa_object.name is None else kodexa_object.name
-            metadata_object.description = 'A table data store' if kodexa_object.description is None else kodexa_object.description
-            metadata_object.type = 'store'
-            metadata_object.storeType = 'TABLE'
-        elif isinstance(kodexa_object, Taxonomy):
-            metadata_object.name = 'New Taxonomy' if kodexa_object.name is None else kodexa_object.name
-            metadata_object.description = 'A new taxonomy' if kodexa_object.description is None else kodexa_object.description
-            object_url = 'taxonomies'
-            metadata_object.type = 'taxonomy'
-            metadata_object.enabled = kodexa_object.enabled
-            metadata_object.taxonomyType = kodexa_object.taxonomy_type
-            metadata_object.taxons = jsonpickle.decode(
-                jsonpickle.encode([taxon.to_dict() for taxon in kodexa_object.taxons], unpicklable=False))
-        elif isinstance(kodexa_object, AssistantDefinition):
-            metadata_object.name = 'New Assistant Definition' if kodexa_object.name is None else kodexa_object.name
-            metadata_object.description = 'A new assistant definition' if kodexa_object.description is None else kodexa_object.description
-            object_url = 'assistants'
-            metadata_object.type = 'assistant'
-
-        else:
-            raise Exception("Unknown object type, unable to deploy")
-
-        if dry_run:
-
-            if print_yaml:
-                logger.info(f"Dry run output for {metadata_object.type} {ref}")
-                logger.info(f"YAML output:\n")
-                logger.info(yaml.dump(metadata_object.to_dict()))
-
-        else:
-            logger.info(f"Deploying {metadata_object.type} {ref}")
-
-            if object_version:
-                url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}/{object_version}"
-            else:
-                url = f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}/{object_slug}"
-
-            response = requests.get(url,
-                                    headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                             "content-type": "application/json"})
-
-            if response.status_code == 401:
-                logger.warning(f"You do not have the permissions to access this {metadata_object.type}")
-                raise Exception("Not authorized on pipeline")
-
-            if response.status_code == 404:
-                logger.info("Object doesn't exist, will deploy")
-                response = requests.post(f"{KodexaPlatform.get_url()}/api/{object_url}/{organization_slug}",
-                                         json=metadata_object.to_dict(),
-                                         headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                                  "content-type": "application/json"})
-                if response.status_code == 200:
-                    logger.info("Deployed")
-                else:
-                    logger.warning(response.text)
-                    raise Exception("Unable to deploy")
-            elif response.status_code == 200:
-                logger.info(f"{ref} already exists")
-                if force_replace:
-                    logger.info(f"Replacing {ref}")
-                    response = requests.put(url,
-                                            json=metadata_object.to_dict(),
-                                            headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                                     "content-type": "application/json"})
-                    if response.status_code == 200:
-                        logger.info("Deployed")
-                    else:
-                        logger.warning(response.text)
-                        raise Exception("Unable to deploy and replace")
-                else:
-                    logger.warning("Not updating")
-                    return
-            else:
-                logger.warning("Unable to deploy")
-                logger.warning(response.content)
-
-        return metadata_object
-
-    @staticmethod
-    def list_objects(organization_slug, object_type, query="*", page=1, pagesize=10, sort=None):
-
-        url = f"{KodexaPlatform.get_url()}/api/{object_type}/{organization_slug}" if organization_slug else f"{KodexaPlatform.get_url()}/api/{object_type}"
-
-        params = {"query": query,
-                  "page": page,
-                  "pageSize": pagesize}
-
-        if sort is not None:
-            params["sort"] = sort
-
-        list_response = requests.get(url,
-                                     params=params,
-                                     headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                              "content-type": "application/json"})
-        if list_response.status_code == 200:
-            return list_response.json()
-
-        logger.warning(list_response.text)
-        raise Exception("Unable to list objects [" + list_response.text + "]")
-
-    @staticmethod
-    def undeploy(object_type: str, ref: str):
-        object_type, object_type_metadata = resolve_object_type(object_type)
-
-        url_ref = ref.replace(':', '/')
-        response = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type_metadata['plural']}/{url_ref}",
-                                   headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                            "content-type": "application/json"})
-        if response.status_code == 200:
-            logger.info(f"Undeployed {object_type_metadata['name']} {ref}")
-        else:
-            logger.warning(response.text)
-            raise Exception(f"Unable to undeploy {object_type_metadata['name']} {ref}")
-
-    @staticmethod
-    def delete_object(ref, object_type):
-        # Generate a URL ref
-        object_type, object_type_metadata = resolve_object_type(object_type)
-        url_ref = ref.replace(':', '/')
-        delete_response = requests.delete(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
-                                          headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                                   "content-type": "application/json"})
-        if delete_response.status_code != 200:
-            logger.warning(delete_response.text)
-            raise Exception(f"Unable to delete object {ref}")
-
-    @staticmethod
-    def get_object(ref, object_type):
-        object_type, object_type_metadata = resolve_object_type(object_type)
-        url_ref = ref.replace(':', '/')
-        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
-                                    headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                             "content-type": "application/json"})
-
-        if obj_response.status_code == 404:
-            logger.info(f"Object {ref} not found")
-            return None
-        if obj_response.status_code != 200:
-            logger.warning(obj_response.text)
-            raise Exception(f"Unable to get object {ref}")
-
-        obj_json = obj_response.json()
-        if obj_json is None:
-            return None
-        if 'type' in object_type_metadata:
-            return object_type_metadata['type'].parse_obj(obj_json)
-        if object_type == 'stores':
-            if obj_json['storeType'] == 'TABLE':
-                return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDataStore)
-            if obj_json['storeType'] == 'DOCUMENT':
-                return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteDocumentStore)
-            if obj_json['storeType'] == 'MODEL':
-                return KodexaPlatform.__build_object(ref, object_type_metadata, RemoteModelStore)
-        else:
-            print("errr")
-            return obj_json
-
-    @classmethod
-    def executions(cls):
-        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/executions",
-                                    headers={"content-type": "application/json",
-                                             "x-access-token": KodexaPlatform.get_access_token()})
-
-        if obj_response.status_code == 200:
-            print("\n")
-            from rich.table import Table
-
-            table = Table(title=f"Listing Executions")
-
-            cols = ['id', 'startDate', 'endDate', 'status', 'name', 'description']
-            for col in cols:
-                table.add_column(col)
-            for object_dict in obj_response.json()['content']:
-                row = []
-
-                for col in cols:
-                    row.append(object_dict[col] if col in object_dict else '')
-                table.add_row(*row)
-
-            print(table)
-        else:
-            print(f"Check your URL and password [{obj_response.status_code}]")
-
-    @classmethod
-    def get_project_resource(cls, resource_id, resource_name, resource_type):
-        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects/{resource_id}/{resource_name}",
-                                    headers={"content-type": "application/json",
-                                             "x-access-token": KodexaPlatform.get_access_token()})
-
-        if obj_response.status_code == 200:
-            cls.__print_table(obj_response.json(), resource_type, False, False)
-        else:
-            print(f"Check your URL and password [{obj_response.status_code}]")
-
-    @classmethod
-    def projects(cls):
-        obj_response = requests.get(f"{KodexaPlatform.get_url()}/api/projects",
-                                    headers={"content-type": "application/json",
-                                             "x-access-token": KodexaPlatform.get_access_token()})
-
-        if obj_response.status_code == 200:
-            print("\n")
-            from rich.table import Table
-
-            table = Table(title=f"Listing Projects")
-
-            cols = ['id', 'organization.slug', 'name', 'description']
-            for col in cols:
-                table.add_column(col)
-            for object_dict in obj_response.json()['content']:
-                row = []
-
-                for col in cols:
-                    row.append(object_dict[col] if col in object_dict else '')
-                table.add_row(*row)
-
-            print(table)
-        else:
-            print(f"Check your URL and password [{obj_response.status_code}]")
-
-    @classmethod
-    def apply(cls, obj, org_slug=None):
-
-        object_type, object_type_metadata = resolve_object_type(obj['type'])
-
-        if 'global' not in object_type_metadata and not org_slug:
-            print(":fire: You must provide an organization slug for this type of resource")
-            return
-
-        url_ref = f"{org_slug}/{obj['slug']}" if 'global' not in object_type_metadata else f"{object_type}/{obj['id']}"
-
-        existing = KodexaPlatform.get_object(url_ref, object_type)
-        if existing is not None:
-
-            obj_response = requests.put(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref}",
-                                        json=obj,
-                                        headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                                 "content-type": "application/json"})
-        else:
-            obj_response = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/{url_ref.split('/')[0]}",
-                                         json=obj,
-                                         headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                                  "content-type": "application/json"})
-        if obj_response.status_code != 200:
-            logger.warning(obj_response.text)
-            raise Exception(f"Unable to {'update' if existing is not None else 'create'} object {url_ref}")
-
-        obj_json = obj_response.json()
-        if 'type' in object_type_metadata:
-            return object_type_metadata['type'].parse_obj(obj_json)
-
-        return obj_json
-
-    @classmethod
-    def get(cls, object_type, ref, path=None, output_format=None, query="*", page: int = 1, pagesize: int = 10,
-            sort: str = None):
-
-        object_type, object_type_metadata = resolve_object_type(object_type)
-
-        if sort is None and 'sort' in object_type_metadata:
-            sort = object_type_metadata['sort']
-
-        if 'global' not in object_type_metadata and not ref:
-            print(":fire: You must provide a ref for this type of resource")
-            return
-
-        try:
-
-            # If ref is just the org then we will list them
-            if ref and ('/' in ref or 'global' in object_type_metadata):
-                obj = KodexaPlatform.get_object(ref, object_type)
-
-                if obj is None:
-                    print(f":fire: Unable to find {object_type_metadata['name']} {ref}")
-                    return
-
-                if path is not None:
-                    import jq
-                    obj = jq.compile(path).input(obj).all()
-                import yaml
-                if output_format == 'yaml':
-                    def represent_none(self, _):
-                        return self.represent_scalar('tag:yaml.org,2002:null', '')
-
-                    yaml.add_representer(type(None), represent_none)
-
-                    print(yaml.dump(obj.dict(by_alias=True)))
-                elif output_format == 'json':
-                    print(obj.json(by_alias=True, indent=4))
-                else:
-                    pprint(obj)
-
-            else:
-                objects = KodexaPlatform.list_objects(ref, object_type, query, page, pagesize, sort)
-                cls.__print_table(objects, object_type)
-        except:
-            print(f"\n:exclamation: Failed to get {object_type_metadata['name']} [{sys.exc_info()[0]}]")
-            print("\n".join(
-                better_exceptions.format_exception(*sys.exc_info())))
-
-    @classmethod
-    def delete(cls, object_type, ref):
-        object_type, object_type_metadata = resolve_object_type(object_type)
-        print(f"Deleting {object_type_metadata['name']} [bold]{ref}[/bold]")
-
-        try:
-            KodexaPlatform.delete_object(ref, object_type)
-            print(f"Deleted {object_type_metadata['name']} [bold]{ref}[/bold] :tada:")
-        except:
-            print(f"\n:exclamation: Failed to delete {object_type_metadata['name']} [{sys.exc_info()[0]}]")
 
     @classmethod
     def login(cls, kodexa_url, username, password):
@@ -854,164 +419,9 @@ class KodexaPlatform:
         raise Exception("Unable to get server information, check your platform settings")
 
     @classmethod
-    def reindex(cls, object_type):
-        object_type, object_type_metadata = resolve_object_type(object_type)
-        print(f"Reindexing {object_type_metadata['name']}")
-        r = requests.post(f"{KodexaPlatform.get_url()}/api/{object_type}/_reindex",
-                          headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                   "content-type": "application/json"})
-        if r.status_code == 401:
-            raise Exception("Your access token was not authorized")
-        if r.status_code == 200:
-            return r.text
-
-        logger.warning(r.text)
-        raise Exception("Unable to reindex check your reference and platform settings")
-
-    @classmethod
     def get_tempdir(cls):
         import tempfile
         return os.getenv('KODEXA_TMP', tempfile.gettempdir())
-
-    @classmethod
-    def query(cls, ref, query, download=False, page=1, page_size=10, sort=None, download_native=False):
-
-        client = KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
-        store = client.get_object_by_ref('store', ref)
-
-        if isinstance(store, DocumentStoreEndpoint):
-            if download:
-                page_document_families = store.query(query, page=page, page_size=page_size, sort=sort)
-                for family_endpoint in page_document_families.content:
-                    print(f"Downloading {family_endpoint.path}")
-                    import os
-                    file_path = os.path.splitext(family_endpoint.path)[0] + '.kddb'
-                    directory = os.path.dirname(file_path)
-                    if not os.path.exists(directory):
-                        os.makedirs(directory)
-                    family_endpoint.get_document().to_kddb(file_path)
-            if download_native:
-                page_document_families = store.query(query, page=page, page_size=page_size, sort=sort)
-                for family_endpoint in page_document_families.content:
-                    print(f"Downloading {family_endpoint.path}")
-                    import os
-                    file_path = family_endpoint.path
-                    directory = os.path.dirname(file_path)
-                    if not os.path.exists(directory):
-                        os.makedirs(directory)
-                    with open(file_path, 'wb') as f:
-                        f.write(family_endpoint.get_native())
-            else:
-                print("\n")
-                from rich.table import Table
-
-                table = Table(title=f"Listing Documents")
-
-                cols = ['id', 'path', 'labels', 'document_status', 'assignments', 'mixins', 'locked', 'created']
-                for col in cols:
-                    table.add_column(col)
-
-                def format_col(col, value):
-                    if col == 'labels':
-                        return ", ".join(seq(value).map(lambda x: x.label).to_list())
-
-                    return str(value)
-
-                page_document_families = store.query(query, page=page, page_size=page_size, sort=sort)
-                for family_endpoint in page_document_families.content:
-                    row = []
-                    for col in cols:
-                        row.append(format_col(col, getattr(family_endpoint, col)))
-                    table.add_row(*row)
-
-                print(table)
-
-                print(f"Total Matching Documents: {page_document_families.total_elements}")
-
-    @classmethod
-    def logs(cls, execution_id):
-        r = requests.get(f"{KodexaPlatform.get_url()}/api/executions/{execution_id}/logs",
-                         params={"page": 1, "pageSize": 10000, "sort": "logDate:asc"},
-                         headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                  "content-type": "application/json"})
-        if r.status_code == 401:
-            raise Exception("Your access token was not authorized")
-        if r.status_code == 200:
-            for entry in r.json()['content']:
-                get_console().print(entry['entry'], end='', markup=False)
-        else:
-            logger.warning(r.text)
-            raise Exception("Unable to reindex check your reference and platform settings")
-
-    @classmethod
-    def get_project(cls, project_id):
-        project_instance = cls.get_object_instance(project_id, 'project')
-        print(f"Name: [bold]{project_instance.name}[/bold]")
-        print(f"Description: [bold]{project_instance.description}[/bold]\n")
-
-        print("[bold]Document Stores[/bold]")
-        cls.get_project_resource(project_id, 'documentStores', 'stores')
-        print("[bold]Data Stores[/bold]")
-        cls.get_project_resource(project_id, 'dataStores', 'stores')
-        print("[bold]Content Taxonomies[/bold]")
-        cls.get_project_resource(project_id, 'contentTaxonomies', 'taxonomies')
-        print("[bold]Assistants[/bold]")
-        cls.get_project_resource(project_id, 'assistants', 'assistants')
-
-    @classmethod
-    def __print_table(cls, objects, object_type, title=True, show_count=True):
-        cols = DEFAULT_COLUMNS['default']
-
-        object_type, object_type_metadata = resolve_object_type(object_type)
-
-        if object_type in DEFAULT_COLUMNS:
-            cols = DEFAULT_COLUMNS[object_type]
-
-        from rich.table import Table
-
-        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
-        for col in cols:
-            table.add_column(col)
-
-        if 'content' in objects:
-            hits = objects['content']
-        else:
-            hits = objects
-
-        for object_dict in hits:
-            row = []
-
-            for col in cols:
-                from simpleeval import simple_eval
-                from simpleeval import AttributeDoesNotExist
-                try:
-                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
-                except AttributeDoesNotExist:
-                    row.append("")
-            table.add_row(*row)
-
-        print(table)
-
-        if 'content' in objects and show_count:
-            print(
-                f"\n{objects['totalElements']} {object_type_metadata['plural']} found, page {objects['number'] + 1} of {objects['totalPages']}")
-
-    @classmethod
-    def send_event(cls, project_id, assistant_id, obj):
-        r = requests.post(f"{KodexaPlatform.get_url()}/api/projects/{project_id}/assistants/{assistant_id}/events",
-                          data={
-                              'eventType': obj['eventType'],
-                              'options': json.dumps(obj['options'])
-                          },
-                          headers={"x-access-token": KodexaPlatform.get_access_token()})
-        if r.status_code == 401:
-            raise Exception("Your access token was not authorized")
-        if r.status_code == 200:
-            print(f"Starting an execution with id {r.json()['id']}")
-            return r.json()
-
-        print(r.text)
-        raise Exception("Unable to send event")
 
 
 class RemoteSession:
@@ -1181,7 +591,6 @@ class RemotePipeline:
             logger.info("Capturing output")
             result_document = cloud_session.get_output_document(execution)
             self.context.set_output_document(result_document)
-            cloud_session.merge_stores(execution, self.context)
 
             self.context.statistics.processed_document(result_document)
             self.context.context = execution.context
@@ -1304,11 +713,11 @@ class RemoteStep:
         return f"Remote Action ({self.ref})"
 
     def process(self, document, context):
-        cloud_session = RemoteSession("service", self.slug)
+        cloud_session = RemoteSession("service", self.ref)
         cloud_session.start()
 
-        logger.info(f"Loading metadata for {self.slug}")
-        action_metadata = cloud_session.get_action_metadata(self.slug)
+        logger.info(f"Loading metadata for {self.ref}")
+        action_metadata = cloud_session.get_action_metadata(self.ref)
 
         requires_source = False
         if 'requiresSource' in action_metadata['metadata']:
@@ -1327,9 +736,6 @@ class RemoteStep:
         logger.debug("Set the context to match the context from the execution")
         context.context = execution.context
 
-        logger.debug("Merge the stores from the execution back into the context")
-        cloud_session.merge_stores(execution, context)
-
         return result_document if result_document else document
 
     def to_configuration(self):
@@ -1343,7 +749,7 @@ class RemoteStep:
 
         """
         return {
-            "ref": self.slug,
+            "ref": self.ref,
             "options": self.options
         }
 
