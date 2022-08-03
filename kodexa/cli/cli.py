@@ -227,10 +227,6 @@ def logs(_: Info, execution_id: str, url: str, token: str):
     """
     client = KodexaClient(url=url, access_token=token)
 
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.logs(execution_id)
-
 
 @cli.command()
 @click.argument('object_type', required=True)
@@ -249,9 +245,40 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
     """
     List the instance of the object type
     """
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref, path, format, query, page, pagesize, sort)
+    client = KodexaClient(url=url, access_token=token)
+
+    from kodexa.platform.client import resolve_object_type
+    object_name, object_metadata = resolve_object_type(object_type)
+
+    if 'global' in object_metadata and object_metadata['global']:
+        objects_endpoint = client.get_object_type(object_type)
+        if ref and not ref.isspace():
+            object_instance = objects_endpoint.get(ref)
+            if format == 'json':
+                print(object_instance.json(indent=4))
+            elif format == 'yaml':
+                print(object_instance.yaml(indent=4))
+        else:
+            objects_endpoint.print_table(query=query, page=page, pagesize=pagesize, sort=sort)
+    else:
+
+        if ref and not ref.isspace():
+
+            if '/' in ref:
+                object_instance = client.get_object_by_ref(object_name, ref)
+
+                if format == 'json':
+                    print(object_instance.json(indent=4))
+                elif format == 'yaml':
+                    print(object_instance.yaml(indent=4))
+            else:
+
+                organization = client.organizations.find_by_slug(ref)
+                objects_endpoint = client.get_object_type(object_type, organization)
+                objects_endpoint.print_table(query=query, page=page, pagesize=pagesize, sort=sort)
+        else:
+
+            print(f"You must provide a ref to get a specific object")
 
 
 @cli.command()
@@ -270,10 +297,15 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
     """
     Query the documents in a given document store
     """
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.query(ref, query, download, page, pagesize, sort, download_native)
+    client = KodexaClient(url=url, access_token=token)
+    from kodexa.platform.client import DocumentStoreEndpoint
 
+    document_store: DocumentStoreEndpoint = client.get_object_by_ref('store', ref)
+    if isinstance(document_store, DocumentStoreEndpoint):
+        results = document_store.query(query, page, pagesize, sort)
+
+    else:
+        raise Exception("Unable to find document store with ref " + ref)
 
 @cli.command()
 @click.argument('project_id', required=True)
@@ -317,8 +349,7 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
     """Send an event to an assistant
     """
 
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.set_url(url)
+    client = KodexaClient(url, token)
 
     obj = None
     if file is None:
@@ -340,24 +371,10 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
                 raise Exception("Unsupported file type")
 
     print("Sending event")
-    KodexaPlatform.send_event(project_id, assistant_id, obj)
+    from kodexa.platform.client import AssistantEndpoint
+    assistant_endpoint: AssistantEndpoint = client.get_project(project_id).assistants.get(assistant_id)
+    assistant_endpoint.send_event(obj)
     print("Event sent :tada:")
-
-
-@cli.command()
-@click.argument('object_type', required=True)
-@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
-@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
-@pass_info
-def reindex(_: Info, object_type: str, url: str, token: str):
-    """
-    Reindex the given resource (based on ref)
-    """
-    print("Starting global reindexing")
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.reindex(object_type)
-    print(":tada: Global reindexing complete")
 
 
 @cli.command()
@@ -393,20 +410,8 @@ def delete(_: Info, object_type: str, ref: str, url: str, token: str):
     """
     Delete the given resource (based on ref)
     """
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.delete(object_type, ref)
-
-
-@cli.command()
-@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
-@pass_info
-def metadata(_: Info, path: str):
-    """
-    Load metadata
-    """
-    metadata = ExtensionHelper.load_metadata(path)
-    print(f"Metadata loaded")
+    client = KodexaClient(url, token)
+    client.get_object_by_ref(object_type, ref).delete()
 
 
 @cli.command()

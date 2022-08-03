@@ -836,13 +836,11 @@ class EventHelper:
         return ContentObject.parse_obj(co_response.json())
 
     def build_pipeline_context(self) -> PipelineContext:
-        context = PipelineContext(context={}, content_provider=self,
-                                  store_provider=self, execution_id=self.event.execution.id)
+        context = PipelineContext(context={}, content_provider=self, execution_id=self.event.execution.id)
 
         if self.event.store_ref and self.event.document_family_id:
             logger.info("We have storeRef and document family")
-            client = KodexaClient()
-            rds: DocumentStoreEndpoint = client.get_object_by_ref('store', self.event.store_ref)
+            rds: DocumentStoreEndpoint = KodexaClient().get_object_by_ref('store', self.event.store_ref)
             document_family = rds.get_family(self.event.document_family_id)
 
             context.document_family = document_family
@@ -862,7 +860,7 @@ class EventHelper:
                 input_document.uuid = context.content_object.id
 
                 if content_object.store_ref is not None:
-                    context.document_store = KodexaPlatform.get_object_instance(content_object.store_ref, 'store')
+                    context.document_store = KodexaClient().get_object_by_ref('store', content_object.store_ref)
 
                 return input_document
 
