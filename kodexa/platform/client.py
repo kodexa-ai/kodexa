@@ -28,7 +28,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
-    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store
+    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution
 
 logger = logging.getLogger()
 
@@ -220,6 +220,11 @@ class ProjectResourceEndpoint(ClientEndpoint):
         get_response = self.client.post(url, component.to_dict())
         return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
 
+    def get(self, component_id):
+        url = f"/api/projects/{self.project.id}/{self.get_type()}/{component_id}"
+        get_response = self.client.get(url)
+        return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
+
 
 class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
     """
@@ -405,7 +410,7 @@ class EntitiesEndpoint:
     def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
         cols = DEFAULT_COLUMNS['default']
 
-        object_type, object_type_metadata = resolve_object_type('organization')
+        object_type, object_type_metadata = resolve_object_type(self.get_type())
 
         if object_type in DEFAULT_COLUMNS:
             cols = DEFAULT_COLUMNS[object_type]
@@ -468,7 +473,7 @@ class OrganizationsEndpoint(EntitiesEndpoint):
         return Organization
 
     def get_type(self) -> str:
-        return 'organization'
+        return 'organizations'
 
     def find_by_slug(self, slug) -> Optional["OrganizationEndpoint"]:
         """
@@ -570,6 +575,14 @@ class PageMembershipEndpoint(PageMembership, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint"""
         return "membership"
+
+
+class PageExecutionEndpoint(PageExecution, PageEndpoint):
+    """Represents a page membership endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "execution"
 
 
 class PageProjectEndpoint(PageProject, PageEndpoint):
@@ -773,6 +786,11 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         response = self.client.get(url)
         return [Execution.parse_obj(execution) for execution in response.json()]
 
+    def send_event(self, event_object: dict):
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
+        response = self.client.post(url, body=event_object)
+        process_response(response)
+
 
 class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
     """Represents a project assistants endpoint"""
@@ -900,7 +918,6 @@ class ProjectEndpoint(EntityEndpoint, Project):
     def assistants(self) -> ProjectAssistantsEndpoint:
         """Get the assistants endpoint of the project"""
         return ProjectAssistantsEndpoint().set_client(self.client).set_project(self)
-
 
 
 class ProjectsEndpoint(EntitiesEndpoint):
@@ -1049,6 +1066,30 @@ class ProjectTemplateEndpoint(ComponentInstanceEndpoint, ProjectTemplate):
         return "projectTemplates"
 
 
+class PipelinesEndpoint(ComponentInstanceEndpoint, Credential):
+    """Represents a pipeline endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "pipelines"
+
+
+class AssistantDefinitionsEndpoint(ComponentInstanceEndpoint, Credential):
+    """Represents a assistant definition endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "assistants"
+
+
+class ActionsEndpoint(ComponentInstanceEndpoint, Credential):
+    """Represents a pipeline endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "actions"
+
+
 class CredentialEndpoint(ComponentInstanceEndpoint, Credential):
     """Represents a credential endpoint"""
 
@@ -1148,13 +1189,23 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
 class MembershipEndpoint(Membership, EntityEndpoint):
     """Represents a membership endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "memberships"
 
 
+class ExecutionEndpoint(Execution, EntityEndpoint):
+    """Represents a execution endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "executions"
+
+
 class UserEndpoint(User, EntityEndpoint):
     """Represents a user endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "users"
@@ -1182,6 +1233,22 @@ class UserEndpoint(User, EntityEndpoint):
         url = f"/api/users/{self.id}/memberships"
         response = self.client.get(url)
         return [MembershipEndpoint.parse_obj(membership) for membership in response.json()]
+
+
+class ExecutionsEndpoint(EntitiesEndpoint):
+    """Represents a executions endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return f"executions"
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the instance class of the endpoint"""
+        return ExecutionEndpoint
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the page class of the endpoint"""
+        return PageExecutionEndpoint
 
 
 class MembershipsEndpoint(EntitiesEndpoint):
@@ -1908,65 +1975,77 @@ OBJECT_TYPES = {
     "extensionPacks": {
         "name": "extension pack",
         "plural": "extension packs",
-        "type": ExtensionPack
+        "type": ExtensionPackEndpoint,
+        "endpoint": ExtensionPacksEndpoint
     },
     "pipelines": {
         "name": "pipeline",
         "plural": "pipelines",
-        "type": Pipeline
+        "type": PipelineEndpoint,
+        "endpoint": PipelinesEndpoint
     },
     "assistants": {
         "name": "assistant",
         "plural": "assistants",
-        "type": AssistantDefinition
+        "type": AssistantDefinitionEndpoint,
+        "endpoint": AssistantDefinitionsEndpoint
     },
     "actions": {
         "name": "action",
         "plural": "actions",
-        "type": Action
+        "type": ActionEndpoint,
+        "endpoint": ActionsEndpoint
     },
     "modelRuntimes": {
         "name": "modelRuntime",
         "plural": "modelRuntimes",
-        "type": ModelRuntime
+        "type": ModelRuntimeEndpoint,
+        "endpoint": ModelRuntimesEndpoint
     },
     "credentials": {
         "name": "credential",
         "plural": "credentials",
-        "type": Credential
+        "type": CredentialEndpoint,
+        "endpoint": CredentialsEndpoint
     },
     "taxonomies": {
         "name": "taxonomy",
         "plural": "taxonomies",
-        "type": TaxonomyEndpoint
+        "type": TaxonomyEndpoint,
+        "endpoint": TaxonomiesEndpoint
     },
     "stores": {
         "name": "store",
-        "plural": "stores"
+        "plural": "stores",
+        "endpoint": StoresEndpoint
     },
     "projects": {
         "name": "project",
         "plural": "projects",
         "type": ProjectEndpoint,
+        "endpoint": ProjectsEndpoint,
         "global": True
     },
     "projectTemplates": {
         "name": "projectTemplate",
         "plural": "projectTemplates",
-        "type": ProjectTemplate
+        "type": ProjectTemplateEndpoint,
+        "endpoint": ProjectTemplatesEndpoint
     },
     "executions": {
         "name": "execution",
         "plural": "executions",
         "type": Execution,
         "global": True,
-        "sort": "startDate:desc"
+        "sort": "startDate:desc",
+        "endpoint": ExecutionsEndpoint
     },
     "memberships": {
         "name": "membership",
         "plural": "memberships",
-        "type": Membership,
-        "global": True
+        "type": MembershipEndpoint,
+        "global": True,
+        "endpoint": MembershipsEndpoint
     }
 }
 
@@ -2054,6 +2133,9 @@ class KodexaClient:
 
     def get_object_by_ref(self, object_type: str, ref: str) -> BaseModel:
         return self.__build_object(ref, resolve_object_type(object_type)[1])
+
+    def get_object_endpoint(self, object_type: str) -> BaseModel:
+        pass
 
     def get_platform(self):
         return PlatformOverview.parse_obj(self.get(f"{self.base_url}/api").json())
@@ -2250,6 +2332,7 @@ class KodexaClient:
                     raise Exception("Unknown store type: " + store_type)
 
                 raise Exception("A store must have a storeType")
+
             known_components = {
                 "taxonomy": TaxonomyEndpoint,
                 "pipeline": PipelineEndpoint,
@@ -2263,7 +2346,8 @@ class KodexaClient:
                 "membership": MembershipEndpoint,
                 "documentFamily": DocumentFamilyEndpoint,
                 "organization": OrganizationEndpoint,
-                "dataForm": DataFormEndpoint
+                "dataForm": DataFormEndpoint,
+                "execution": ExecutionEndpoint
             }
 
             if component_type in known_components:
@@ -2275,3 +2359,16 @@ class KodexaClient:
     def get_project(self, project_id) -> ProjectEndpoint:
         project = self.get(f"/api/projects/{project_id}")
         return ProjectEndpoint.parse_obj(project.json()).set_client(self)
+
+    def get_object_type(self, object_type, organization:Optional[OrganizationEndpoint] = None) -> ClientEndpoint:
+        obj_type, obj_metadata = resolve_object_type(object_type)
+
+        if 'endpoint' in obj_metadata:
+
+            obj_inst = obj_metadata['endpoint']().set_client(self)
+            if 'global' in obj_metadata and obj_metadata['global']:
+                obj_inst.set_organization(organization)
+
+            return obj_inst
+
+        raise Exception(f"Unknown object type: {object_type}")
