@@ -7687,7 +7687,7 @@ paths:
             '*/*':
               schema:
                 type: boolean
-  /api/dataForms/{organizationSlug}/{slug}/{version}/sources/{dataSourceId}:
+  /api/dataForms/{organizationSlug}/{slug}/{version}/sources/{sourceId}:
     put:
       tags:
       - Data Forms
@@ -7710,7 +7710,7 @@ paths:
         required: true
         schema:
           type: string
-      - name: dataSourceId
+      - name: sourceId
         in: path
         required: true
         schema:
@@ -17058,6 +17058,13 @@ components:
       properties:
         id:
           type: string
+        sourceType:
+          type: string
+          enum:
+          - DATA_OBJECT
+          - DATA_ATTRIBUTE
+        dataSourceId:
+          type: string
         name:
           type: string
         cards:
@@ -18883,6 +18890,7 @@ components:
       description: A list of messages relating to the validity
     DataAttribute:
       required:
+      - dataObject
       - tag
       - validationState
       type: object
@@ -18898,6 +18906,8 @@ components:
         updatedOn:
           type: string
           format: date-time
+        dataObject:
+          $ref: '#/components/schemas/DataObject'
         value:
           type: string
         truncated:
@@ -18992,36 +19002,6 @@ components:
         open:
           type: boolean
       description: A list of the data exceptions
-    ExtractedTagMetadata:
-      type: object
-      properties:
-        scaledBoundingBox:
-          type: array
-          items:
-            type: number
-            format: double
-        parentSelector:
-          type: string
-        parentIndex:
-          type: integer
-          format: int32
-    TagMetadata:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the object
-        uuid:
-          type: string
-        createdOn:
-          type: string
-          format: date-time
-        updatedOn:
-          type: string
-          format: date-time
-        metadata:
-          $ref: '#/components/schemas/ExtractedTagMetadata'
-      description: A list tag metadata for the data attribute
     DataLineage:
       type: object
       properties:
@@ -19077,17 +19057,42 @@ components:
           format: date-time
         lineage:
           $ref: '#/components/schemas/DataLineage'
-        attributes:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/DataAttribute'
         parentId:
           type: string
         storeRef:
           type: string
         taxon:
           $ref: '#/components/schemas/Taxon'
+    ExtractedTagMetadata:
+      type: object
+      properties:
+        scaledBoundingBox:
+          type: array
+          items:
+            type: number
+            format: double
+        parentSelector:
+          type: string
+        parentIndex:
+          type: integer
+          format: int32
+    TagMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the object
+        uuid:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        updatedOn:
+          type: string
+          format: date-time
+        metadata:
+          $ref: '#/components/schemas/ExtractedTagMetadata'
+      description: A list tag metadata for the data attribute
     Note:
       type: object
       properties:
@@ -19850,12 +19855,12 @@ components:
     PageUser:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -19909,12 +19914,12 @@ components:
     PageTeam:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -19941,12 +19946,12 @@ components:
     PageTaxonomy:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -19973,12 +19978,12 @@ components:
     PageStore:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20005,12 +20010,12 @@ components:
     PageModelTraining:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20037,12 +20042,12 @@ components:
     PageDocumentFamily:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20069,12 +20074,12 @@ components:
     PageExecution:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20127,12 +20132,12 @@ components:
     PageDataObject:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20235,12 +20240,12 @@ components:
     PageAuditEvent:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20267,12 +20272,12 @@ components:
     PageNote:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20299,12 +20304,12 @@ components:
     PageDataAttribute:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20331,12 +20336,12 @@ components:
     PageSession:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20363,12 +20368,12 @@ components:
     PageRole:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20395,12 +20400,12 @@ components:
     PageProject:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20427,12 +20432,12 @@ components:
     PageProjectTemplate:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20459,12 +20464,12 @@ components:
     PagePipeline:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20491,12 +20496,12 @@ components:
     PageOrganization:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20523,12 +20528,12 @@ components:
     PageModelRuntime:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20555,12 +20560,12 @@ components:
     PageMembership:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20587,12 +20592,12 @@ components:
     PageSlugBasedMetadata:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20630,12 +20635,12 @@ components:
     PageExtensionPack:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20662,12 +20667,12 @@ components:
     PageExecutionLogEntry:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20694,12 +20699,12 @@ components:
     PagePlatformEvent:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20726,12 +20731,12 @@ components:
     PageDataForm:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20758,12 +20763,12 @@ components:
     PageDashboard:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20790,12 +20795,12 @@ components:
     PageCredential:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20822,12 +20827,12 @@ components:
     PageAssistantDefinition:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
@@ -20854,12 +20859,12 @@ components:
     PageAction:
       type: object
       properties:
-        totalPages:
-          type: integer
-          format: int32
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+          format: int32
         first:
           type: boolean
         last:
