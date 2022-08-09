@@ -69,7 +69,7 @@ class Tag(Dict):
                  uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
                  group_uuid: Optional[str] = None, parent_group_uuid: Optional[str] = None,
                  cell_index: Optional[int] = None, index: Optional[int] = None, bbox: Optional[List[int]] = None,
-                 note: Optional[str] = None, status:Optional[str] = None, **kwargs):
+                 note: Optional[str] = None, status: Optional[str] = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
         """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
@@ -1043,7 +1043,7 @@ class ContentNode(object):
                                                           part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index, note=note))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note, status=status))
                             return -1
                         if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1052,7 +1052,7 @@ class ContentNode(object):
                                                           value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index, note=note))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note, status=status))
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1123,7 +1123,7 @@ class ContentNode(object):
                     node.add_feature('tag', tag_to_apply,
                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value,
                                          index=index, parent_group_uuid=parent_group_uuid, group_uuid=group_uuid,
-                                         cell_index=cell_index, note=note))
+                                         cell_index=cell_index, note=note, status=status))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1144,7 +1144,8 @@ class ContentNode(object):
                                     node.add_feature('tag', tag_to_apply,
                                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
                                                          value=value, index=index, parent_group_uuid=parent_group_uuid,
-                                                         group_uuid=group_uuid, cell_index=cell_index, note=note))
+                                                         group_uuid=group_uuid, cell_index=cell_index, note=note,
+                                                         status=status))
                             else:
                                 if matches:
                                     for match in matches:
