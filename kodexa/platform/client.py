@@ -1978,6 +1978,12 @@ OBJECT_TYPES = {
         "type": ExtensionPackEndpoint,
         "endpoint": ExtensionPacksEndpoint
     },
+    "dataForms": {
+        "name": "data form",
+        "plural": "data forms",
+        "type": DataFormEndpoint,
+        "endpoint": DataFormsEndpoint
+    },
     "pipelines": {
         "name": "pipeline",
         "plural": "pipelines",
