@@ -254,10 +254,11 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
         objects_endpoint = client.get_object_type(object_type)
         if ref and not ref.isspace():
             object_instance = objects_endpoint.get(ref)
+            from rich.syntax import Syntax
             if format == 'json':
-                print(object_instance.json(indent=4))
+                print(Syntax(object_instance.json(indent=4), "json"))
             elif format == 'yaml':
-                print(object_instance.yaml(indent=4))
+                print(Syntax(object_instance.yaml(indent=4), "yaml"))
         else:
             objects_endpoint.print_table(query=query, page=page, pagesize=pagesize, sort=sort)
     else:
@@ -265,12 +266,12 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
         if ref and not ref.isspace():
 
             if '/' in ref:
-                object_instance = client.get_object_by_ref(object_name, ref)
-
+                object_instance = client.get_object_by_ref(object_metadata['plural'], ref)
+                from rich.syntax import Syntax
                 if format == 'json':
-                    print(object_instance.json(indent=4))
-                elif format == 'yaml':
-                    print(object_instance.yaml(indent=4))
+                    print(Syntax(object_instance.json(indent=4), "json"))
+                elif format == 'yaml' or not format:
+                    print(Syntax(object_instance.yaml(indent=4), "yaml"))
             else:
 
                 organization = client.organizations.find_by_slug(ref)

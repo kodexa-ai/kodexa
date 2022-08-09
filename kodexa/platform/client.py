@@ -1973,14 +1973,14 @@ def process_response(response) -> requests.Response:
 
 OBJECT_TYPES = {
     "extensionPacks": {
-        "name": "extension pack",
-        "plural": "extension packs",
+        "name": "extensionPack",
+        "plural": "extensionPacks",
         "type": ExtensionPackEndpoint,
         "endpoint": ExtensionPacksEndpoint
     },
     "dataForms": {
-        "name": "data form",
-        "plural": "data forms",
+        "name": "dataForm",
+        "plural": "dataForms",
         "type": DataFormEndpoint,
         "endpoint": DataFormsEndpoint
     },
