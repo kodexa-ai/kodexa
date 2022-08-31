@@ -449,10 +449,8 @@ def version(_: Info):
 @click.option('--output', default=os.getcwd() + "/dist",
               help='Path to the output folder (defaults to dist under current)')
 @click.option('--version', default=os.getenv('VERSION'), help='Version number (defaults to 1.0.0)')
-@click.option('--sitedir', default='site', help='Path to folder for site contents')
-@click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
-def package(_: Info, path: str, output: str, version: str, site: bool, url: str):
+def package(_: Info, path: str, output: str, version: str):
     """
     Package an extension pack based on the kodexa.yml file
     """
@@ -471,10 +469,6 @@ def package(_: Info, path: str, output: str, version: str, site: bool, url: str)
         metadata_obj['source']['location'] = metadata_obj['source']['location'].format(**metadata_obj)
 
     versioned_metadata = os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json")
-
-    if site:
-        metadata_obj['source']['location'] = url + metadata_obj[
-            'version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.tar.gz"
 
     unversioned_metadata = os.path.join(output, "kodexa.json")
     with open(versioned_metadata, 'w') as outfile:
