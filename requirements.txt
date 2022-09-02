@@ -21,7 +21,7 @@ simpleeval==0.9.12
 jq==1.2.2
 jsonpickle==2.2.0
 python_dateutil >= 2.5.3
-datamodel-code-generator==0.13.0
+datamodel-code-generator~=0.13.0
 better-exceptions~=0.3.3
 pyfunctional~=1.4.3
 pydantic[email]==1.9.0
