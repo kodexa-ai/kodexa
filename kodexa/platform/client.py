@@ -1464,6 +1464,10 @@ def process_response(response) -> requests.Response:
             raise Exception(', '.join(messages))
 
         raise Exception("Bad request " + response.text)
+
+    if response.status_code != 200:
+        raise Exception(f"Unexpected status code ({response.status_code})")
+    
     return response
 
 
