@@ -1978,25 +1978,11 @@ class PageExecution(KodexaBaseModel):
 
 
 class ContentMetadata1(KodexaBaseModel):
-    __root__: Union[
-        ContentMetadata, DocumentContentMetadata, ModelContentMetadata
-    ] = Field(..., description='The metadata for this store')
+    pass
 
 
 class SlugBasedMetadata(KodexaBaseModel):
-    __root__: Union[
-        SlugBasedMetadata1,
-        ExtensionPack,
-        Action,
-        Pipeline,
-        Dashboard,
-        Store,
-        Taxonomy,
-        AssistantDefinition,
-        ProjectTemplate,
-        Credential,
-        DataForm,
-    ]
+    pass
 
 
 class DocumentFamily(KodexaBaseModel):
@@ -2302,14 +2288,7 @@ class AssistantResponsePipeline(KodexaBaseModel):
 
 
 class BaseEvent(KodexaBaseModel):
-    __root__: Union[
-        BaseEvent1,
-        DocumentFamilyEvent,
-        DataObjectEvent,
-        ContentEvent,
-        ScheduledEvent,
-        AssistantEvent,
-    ]
+    pass
 
 
 class ExecutionEvent(KodexaBaseModel):
