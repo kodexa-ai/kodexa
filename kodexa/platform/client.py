@@ -230,6 +230,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
     """
     Represents a component endpoint
     """
+
     def get_type(self) -> str:
         pass
 
@@ -467,7 +468,7 @@ class OrganizationsEndpoint(EntitiesEndpoint):
     """
 
     def get_page_class(self, object_dict=None) -> Type[BaseModel]:
-        return PageOrganization
+        return PageOrganizationEndpoint
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return Organization
@@ -485,7 +486,6 @@ class OrganizationsEndpoint(EntitiesEndpoint):
         if organizations.number_of_elements == 0:
             return None
         return organizations.content[0]
-
 
 
 class PageEndpoint(ClientEndpoint):
@@ -564,6 +564,7 @@ class PageUserEndpoint(PageUser, PageEndpoint):
     """
     Represents a page user endpoint
     """
+
     def get_type(self) -> Optional[str]:
         """Get the type of the page user"""
         return "user"
@@ -603,6 +604,14 @@ class PageOrganizationEndpoint(PageOrganization, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint"""
         return "organization"
+
+
+class PageDataFormEndpoint(PageDataForm, PageEndpoint):
+    """Represents a page data form endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "dataForm"
 
 
 class PageDocumentFamilyEndpoint(PageDocumentFamily, PageEndpoint):
@@ -806,6 +815,7 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
 
 class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
     """Represents a project document stores endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return f"documentStores"
@@ -959,6 +969,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
 
 class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents a stores endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "stores"
@@ -981,6 +992,7 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
 
 class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents an extension packs endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "extensionPacks"
@@ -1004,6 +1016,7 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
 
 class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents a project templates endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "projectTemplates"
@@ -1019,6 +1032,7 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
 
 class CredentialsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents a credentials endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "credentials"
@@ -1037,7 +1051,7 @@ class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         return "dataForms"
 
     def get_page_class(self, object_dict=None) -> Type[BaseModel]:
-        return PageDataForm
+        return PageDataFormEndpoint
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return DataFormEndpoint
@@ -1045,6 +1059,7 @@ class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
 
 class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents a model runtimes endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "modelRuntimes"
@@ -2370,7 +2385,7 @@ class KodexaClient:
         project = self.get(f"/api/projects/{project_id}")
         return ProjectEndpoint.parse_obj(project.json()).set_client(self)
 
-    def get_object_type(self, object_type, organization:Optional[OrganizationEndpoint] = None) -> ClientEndpoint:
+    def get_object_type(self, object_type, organization: Optional[OrganizationEndpoint] = None) -> ClientEndpoint:
         obj_type, obj_metadata = resolve_object_type(object_type)
 
         if 'endpoint' in obj_metadata:
