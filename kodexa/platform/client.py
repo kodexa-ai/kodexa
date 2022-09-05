@@ -25,7 +25,7 @@ from kodexa.model import Taxonomy, Document
 from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
-    AssistantDefinition, Action, ModelRuntime, Credential, Execution, PageAssistantDefinition, PageCredential, \
+    AssistantDefinition, Action, ModelRuntime, CredentialDefinition, Execution, PageAssistantDefinition, PageCredentialDefinition, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution
@@ -556,7 +556,7 @@ class PageAssistantDefinitionEndpoint(PageAssistantDefinition, PageEndpoint):
     pass
 
 
-class PageCredentialEndpoint(PageCredential, PageEndpoint):
+class PageCredentialDefinitionEndpoint(PageCredentialDefinition, PageEndpoint):
     pass
 
 
@@ -663,11 +663,11 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
     @property
     def credentials(self):
         """Get the credentials endpoint of the organization"""
-        return CredentialsEndpoint().set_organization(self).set_client(self.client)
+        return CredentialDefinitionsEndpoint().set_organization(self).set_client(self.client)
 
     @property
     def dataForms(self):
-        return CredentialsEndpoint().set_organization(self).set_client(self.client)
+        return CredentialDefinitionsEndpoint().set_organization(self).set_client(self.client)
 
     @property
     def stores(self):
@@ -1030,7 +1030,7 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
         return ProjectTemplateEndpoint
 
 
-class CredentialsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+class CredentialDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents a credentials endpoint"""
 
     def get_type(self) -> str:
@@ -1039,11 +1039,11 @@ class CredentialsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
 
     def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         """Get the page class of the endpoint"""
-        return PageCredentialEndpoint
+        return PageCredentialDefinitionEndpoint
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         """Get the instance class of the endpoint"""
-        return CredentialEndpoint
+        return CredentialDefinitionEndpoint
 
 
 class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -1081,7 +1081,7 @@ class ProjectTemplateEndpoint(ComponentInstanceEndpoint, ProjectTemplate):
         return "projectTemplates"
 
 
-class PipelinesEndpoint(ComponentInstanceEndpoint, Credential):
+class PipelinesEndpoint(ComponentInstanceEndpoint, Pipeline):
     """Represents a pipeline endpoint"""
 
     def get_type(self) -> str:
@@ -1089,7 +1089,7 @@ class PipelinesEndpoint(ComponentInstanceEndpoint, Credential):
         return "pipelines"
 
 
-class AssistantDefinitionsEndpoint(ComponentInstanceEndpoint, Credential):
+class AssistantDefinitionsEndpoint(ComponentInstanceEndpoint, CredentialDefinition):
     """Represents a assistant definition endpoint"""
 
     def get_type(self) -> str:
@@ -1097,7 +1097,7 @@ class AssistantDefinitionsEndpoint(ComponentInstanceEndpoint, Credential):
         return "assistants"
 
 
-class ActionsEndpoint(ComponentInstanceEndpoint, Credential):
+class ActionsEndpoint(ComponentInstanceEndpoint, CredentialDefinition):
     """Represents a pipeline endpoint"""
 
     def get_type(self) -> str:
@@ -1105,7 +1105,7 @@ class ActionsEndpoint(ComponentInstanceEndpoint, Credential):
         return "actions"
 
 
-class CredentialEndpoint(ComponentInstanceEndpoint, Credential):
+class CredentialDefinitionEndpoint(ComponentInstanceEndpoint, CredentialDefinition):
     """Represents a credential endpoint"""
 
     def get_type(self) -> str:
@@ -2030,8 +2030,8 @@ OBJECT_TYPES = {
     "credentials": {
         "name": "credential",
         "plural": "credentials",
-        "type": CredentialEndpoint,
-        "endpoint": CredentialsEndpoint
+        "type": CredentialDefinitionEndpoint,
+        "endpoint": CredentialDefinitionsEndpoint
     },
     "taxonomies": {
         "name": "taxonomy",
@@ -2362,7 +2362,7 @@ class KodexaClient:
                 "taxonomy": TaxonomyEndpoint,
                 "pipeline": PipelineEndpoint,
                 "action": ActionEndpoint,
-                "credential": CredentialEndpoint,
+                "credential": CredentialDefinitionEndpoint,
                 "projectTemplate": ProjectTemplateEndpoint,
                 "modelRuntime": ModelRuntimeEndpoint,
                 "extensionPack": ExtensionPackEndpoint,
