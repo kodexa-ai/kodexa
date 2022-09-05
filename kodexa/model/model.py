@@ -1,7 +1,6 @@
 """
 The core model provides definitions for all the base objects in the Kodexa Content Model
 """
-import abc
 import dataclasses
 import inspect
 import json
@@ -1043,7 +1042,8 @@ class ContentNode(object):
                                                           part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index, note=note, status=status))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note,
+                                                          status=status))
                             return -1
                         if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1052,7 +1052,8 @@ class ContentNode(object):
                                                           value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index, note=note, status=status))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note,
+                                                          status=status))
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1688,8 +1689,11 @@ class Document(object):
     def add_exception(self, exception: ContentException):
         self._persistence_layer.add_exception(exception)
 
-    def get_exceptions(self):
+    def get_exceptions(self) -> List[ContentException]:
         return self._persistence_layer.get_exceptions()
+
+    def replace_exceptions(self, exceptions: list[ContentException]):
+        self._persistence_layer.replace_exceptions(exceptions)
 
     def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
                  kddb_path: str = None, delete_on_close=False):

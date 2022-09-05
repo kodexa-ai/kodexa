@@ -544,13 +544,19 @@ class SqliteDocumentPersistence(object):
                             [exception.tag, exception.message, exception.exception_details, exception.group_uuid,
                              exception.tag_uuid, exception.exception_type, exception.severity, exception.node_uuid])
 
-    def get_exceptions(self):
+    def get_exceptions(self) -> list[ContentException]:
         exceptions = []
         for exception in self.cursor.execute(EXCEPTION_SELECT).fetchall():
             exceptions.append(ContentException(tag=exception[0], message=exception[1], exception_details=exception[2],
-                                   group_uuid=exception[3], tag_uuid=exception[4], exception_type=exception[5],
-                                   severity=exception[6], node_uuid=exception[7]))
+                                               group_uuid=exception[3], tag_uuid=exception[4],
+                                               exception_type=exception[5],
+                                               severity=exception[6], node_uuid=exception[7]))
         return exceptions
+
+    def replace_exceptions(self, exceptions: list[ContentException]):
+        self.cursor.execute("delete from content_exceptions")
+        for exception in exceptions:
+            self.add_exception(exception)
 
 
 class SimpleObjectCache(object):
@@ -618,8 +624,11 @@ class PersistenceManager(object):
     def add_exception(self, exception: ContentException):
         self._underlying_persistence.add_exception(exception)
 
-    def get_exceptions(self):
+    def get_exceptions(self) -> list[ContentException]:
         return self._underlying_persistence.get_exceptions()
+
+    def replace_exceptions(self, exceptions: list[ContentException]):
+        self._underlying_persistence.replace_exceptions(exceptions)
 
     def get_all_tags(self):
         return self._underlying_persistence.get_all_tags()
