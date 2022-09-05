@@ -1692,7 +1692,7 @@ class Document(object):
     def get_exceptions(self) -> List[ContentException]:
         return self._persistence_layer.get_exceptions()
 
-    def replace_exceptions(self, exceptions: list[ContentException]):
+    def replace_exceptions(self, exceptions: List[ContentException]):
         self._persistence_layer.replace_exceptions(exceptions)
 
     def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
