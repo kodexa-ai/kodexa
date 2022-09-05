@@ -1688,6 +1688,9 @@ class Document(object):
     def add_exception(self, exception: ContentException):
         self._persistence_layer.add_exception(exception)
 
+    def get_exceptions(self):
+        return self._persistence_layer.get_exceptions()
+
     def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
                  kddb_path: str = None, delete_on_close=False):
 

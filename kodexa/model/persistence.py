@@ -14,6 +14,8 @@ logger = logging.getLogger()
 
 # Heavily used SQL
 EXCEPTION_INSERT = "INSERT INTO content_exceptions (tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+EXCEPTION_SELECT = "select tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid from content_exceptions"
+
 FEATURE_INSERT = "INSERT INTO ft (id, cn_id, f_type, binary_value, single, tag_uuid) VALUES (?,?,?,?,?,?)"
 FEATURE_DELETE = "DELETE FROM ft where cn_id=? and f_type=?"
 
@@ -542,6 +544,14 @@ class SqliteDocumentPersistence(object):
                             [exception.tag, exception.message, exception.exception_details, exception.group_uuid,
                              exception.tag_uuid, exception.exception_type, exception.severity, exception.node_uuid])
 
+    def get_exceptions(self):
+        exceptions = []
+        for exception in self.cursor.execute(EXCEPTION_SELECT).fetchall():
+            exceptions.append(ContentException(tag=exception[0], message=exception[1], exception_details=exception[2],
+                                   group_uuid=exception[3], tag_uuid=exception[4], exception_type=exception[5],
+                                   severity=exception[6], node_uuid=exception[7]))
+        return exceptions
+
 
 class SimpleObjectCache(object):
     """
@@ -607,6 +617,9 @@ class PersistenceManager(object):
 
     def add_exception(self, exception: ContentException):
         self._underlying_persistence.add_exception(exception)
+
+    def get_exceptions(self):
+        return self._underlying_persistence.get_exceptions()
 
     def get_all_tags(self):
         return self._underlying_persistence.get_all_tags()
