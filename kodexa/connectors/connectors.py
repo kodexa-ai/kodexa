@@ -249,6 +249,31 @@ def get_source(document):
     return connector.get_source(document)
 
 
+class DocumentStoreConnector:
+
+    @staticmethod
+    def get_name():
+        """ """
+        return "document-store"
+
+    @staticmethod
+    def get_source(document):
+        from kodexa import KodexaClient
+        client = KodexaClient()
+        from kodexa.platform.client import DocumentStoreEndpoint
+        document_store: DocumentStoreEndpoint = client.get_object_by_ref('store', document.source.headers['ref'])
+        from kodexa.platform.client import DocumentFamilyEndpoint
+        family: DocumentFamilyEndpoint = document_store.get_family(document.source.headers['family'])
+        document_bytes = family.get_native()
+        if document_bytes is None:
+            raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
+
+        import io
+        return io.BytesIO(document_bytes)
+
+
+add_connector(DocumentStoreConnector)
+
 add_connector(FolderConnector)
 add_connector(FileHandleConnector)
 add_connector(UrlConnector)
