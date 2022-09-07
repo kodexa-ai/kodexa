@@ -2119,7 +2119,13 @@ class DataObject(KodexaBaseModel):
         alias='dataExceptions',
         description='A list of the data exceptions',
         unique_items=True,
-    )
+    ),
+    attributes: Optional[List[DataAttribute]] = Field(
+        None,
+        alias='attributes',
+        description='A list of the attributes',
+        unique_items=True,
+    ),
     taxonomy_ref: Optional[str] = Field(None, alias='taxonomyRef')
     path: Optional[str] = None
     row_num: Optional[int] = Field(None, alias='rowNum')
