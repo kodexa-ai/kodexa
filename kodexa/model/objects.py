@@ -152,7 +152,7 @@ class Card(KodexaBaseModel):
     id: Optional[str] = None
     type: Optional[str] = Field(None, description='The type of the card')
     properties: Optional[Dict[str, Any]] = None
-
+    children: Optional[List[Card]] = None
 
 class ColumnState(KodexaBaseModel):
     field: Optional[str] = None
