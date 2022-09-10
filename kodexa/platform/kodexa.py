@@ -23,7 +23,8 @@ from rich import print
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document, ExtensionPack
-from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, CredentialDefinition, ExecutionEvent, \
+from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, CredentialDefinition, \
+    ExecutionEvent, \
     ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate, Membership, \
     DataForm
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
@@ -70,60 +71,6 @@ def save_config(config_obj):
                 raise
     with open(path, 'w') as outfile:
         json.dump(config_obj, outfile)
-
-
-class PipelineMetadataBuilder:
-    """
-    Build a metadata representation of the pipeline for passing to an instance of the
-    Kodexa platform
-    """
-
-    def __init__(self, pipeline: Pipeline):
-        """
-        Initialize the pipeline builder based on the given pipeline
-
-        Args:
-            pipeline:
-        """
-        self.pipeline = pipeline
-
-    def build_steps(self, pipeline_metadata: Dict):
-        """
-        Build up the pipeline metadata definition (extending the argument) based on the pipeline.
-
-        This will create a serializable representation of the pipeline that we can send to a Kodexa platform
-        instance for execution
-
-        Args:
-          pipeline_metadata: Dict: The dictionary that will hold the metadata representation of the pipeline
-
-        Returns: The updated pipeline_metadata
-
-        """
-        pipeline_metadata.metadata.steps = []
-        pipeline_metadata.metadata.stores = []
-
-        for idx, step in enumerate(self.pipeline.steps):
-
-            step_meta = step.to_dict()
-            if step_meta['name'] is None:
-                step_meta['name'] = f"Step {idx + 1}"
-
-            if 'script' in step_meta:
-                pipeline_metadata.metadata.steps.append({
-                    'ref': 'kodexa/python-step',
-                    'name': step_meta['name'],
-                    'enabled': True,
-                    'condition': None,
-                    'options': {
-                        'function_name': step_meta['function'],
-                        'script': step_meta['script']
-                    }
-                })
-            else:
-                pipeline_metadata.metadata.steps.append(step_meta)
-
-        return pipeline_metadata
 
 
 DEFAULT_COLUMNS = {
@@ -552,6 +499,7 @@ class RemoteSession:
 
         logger.info("No output document")
         return None
+
 
 class RemotePipeline:
     """Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform"""
