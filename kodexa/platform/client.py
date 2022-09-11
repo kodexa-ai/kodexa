@@ -471,7 +471,7 @@ class OrganizationsEndpoint(EntitiesEndpoint):
         return PageOrganizationEndpoint
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
-        return Organization
+        return OrganizationEndpoint
 
     def get_type(self) -> str:
         return 'organizations'
