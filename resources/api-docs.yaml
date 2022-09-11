@@ -5,7 +5,7 @@ info:
   license:
     name: Commercial
     url: https://kodexa.ai
-  version: 5.1.170
+  version: 0.0.0-3029802452
 externalDocs:
   description: Kodexa Support Portal
   url: https://support.kodexa.com
@@ -10407,137 +10407,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ViewPreset'
-  /api/stores/{orgSlug}/{slug}/{version}/families/{id}/searchContents:
-    get:
-      tags:
-      - Stores
-      description: Perform a search on a specific document family
-      operationId: searchFamilyWithVersion
-      parameters:
-      - name: orgSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: query
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: queryContext
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/QueryContext'
-      responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ExceptionResponse'
-        "401":
-          description: Unauthorized
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ThrowableProblem'
-        "403":
-          description: Forbidden
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ThrowableProblem'
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ExceptionResponse'
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SearchContent'
-    post:
-      tags:
-      - Stores
-      description: Replace the searchable contents for a given document
-      operationId: updateSearchContentsForFamily
-      parameters:
-      - name: orgSlug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: slug
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: version
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/SearchContent'
-        required: true
-      responses:
-        "400":
-          description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ExceptionResponse'
-        "401":
-          description: Unauthorized
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ThrowableProblem'
-        "403":
-          description: Forbidden
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ThrowableProblem'
-        "404":
-          description: Not Found
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ExceptionResponse'
-        "200":
-          description: OK
   /api/stores/{orgSlug}/{slug}/{version}/families/{id}/objects/{objectId}/content:
     post:
       tags:
@@ -14192,6 +14061,76 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/PageStoreStatistics'
+  /api/stores/{orgSlug}/{slug}/{version}/families/{id}/searchContents:
+    get:
+      tags:
+      - Stores
+      description: Perform a search on a specific document family
+      operationId: searchFamilyWithVersion
+      parameters:
+      - name: orgSlug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: queryContext
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/QueryContext'
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ThrowableProblem'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExceptionResponse'
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchContent'
   /api/stores/{orgSlug}/{slug}/{version}/families/{id}/pathCounts:
     get:
       tags:
@@ -16928,9 +16867,9 @@ components:
           type: object
           additionalProperties:
             type: object
-        detail:
-          type: string
         title:
+          type: string
+        detail:
           type: string
         status:
           $ref: '#/components/schemas/StatusType'
@@ -17597,6 +17536,7 @@ components:
           type: string
           description: The description of the object
         version:
+          pattern: ^\d+\.\d+\.\d+(?:\-\d+)?$
           type: string
           description: The version of the object
         deployed:
@@ -18132,6 +18072,7 @@ components:
           type: string
           description: The description of the object
         version:
+          pattern: ^\d+\.\d+\.\d+(?:\-\d+)?$
           type: string
           description: The version of the object
         deployed:
@@ -18580,6 +18521,8 @@ components:
           type: string
         tagUuid:
           type: string
+        contentObject:
+          $ref: '#/components/schemas/ContentObject'
       description: A list of the content exceptions from the content objects
     ContentObject:
       required:
@@ -18756,6 +18699,14 @@ components:
             type: object
             description: The metadata from the latest document content object
           description: The metadata from the latest document content object
+        metadataSource:
+          type: object
+          additionalProperties:
+            type: string
+            description: This identified the content object ID that added each of
+              the metadata keys
+          description: This identified the content object ID that added each of the
+            metadata keys
         statistics:
           $ref: '#/components/schemas/DocumentFamilyStatistics'
         classes:
@@ -19411,7 +19362,6 @@ components:
             $ref: '#/components/schemas/ContentFeature'
     DataAttribute:
       required:
-      - dataObject
       - tag
       type: object
       properties:
@@ -19426,8 +19376,6 @@ components:
         updatedOn:
           type: string
           format: date-time
-        dataObject:
-          $ref: '#/components/schemas/DataObject'
         value:
           type: string
         truncated:
@@ -19472,6 +19420,10 @@ components:
             type: object
             description: Additional features for the data
           description: Additional features for the data
+        path:
+          type: string
+        dataObjId:
+          type: string
         label:
           type: string
           writeOnly: true
@@ -19553,6 +19505,11 @@ components:
           format: date-time
         lineage:
           $ref: '#/components/schemas/DataLineage'
+        attributes:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/DataAttribute'
         parentId:
           type: string
         storeRef:
@@ -19615,6 +19572,7 @@ components:
             type: string
             description: The description of the object
           version:
+            pattern: ^\d+\.\d+\.\d+(?:\-\d+)?$
             type: string
             description: The version of the object
           deployed:
@@ -19934,130 +19892,6 @@ components:
         trainingDate:
           type: string
           format: date-time
-    SearchContent:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the object
-        uuid:
-          type: string
-        createdOn:
-          type: string
-          format: date-time
-        updatedOn:
-          type: string
-          format: date-time
-        store:
-          $ref: '#/components/schemas/StoreMetadata'
-        documentFamily:
-          $ref: '#/components/schemas/DocumentFamily'
-        containerType:
-          type: string
-          description: The container node type
-        containerUuid:
-          type: string
-          description: The container node UUID
-        containerIndex:
-          type: integer
-          description: The index of the container
-          format: int64
-        sourceOrdering:
-          type: integer
-          description: The source ordering for the content (starting at 0)
-          format: int64
-        entities:
-          type: array
-          description: Entities found in the search content
-          items:
-            $ref: '#/components/schemas/SearchEntity'
-        nodeUuid:
-          type: string
-          description: The unique ID of the content node
-        nodeType:
-          type: string
-          description: The node type
-        content:
-          type: string
-        childContent:
-          type: array
-          description: The content broken out in children
-          items:
-            type: string
-            description: The content broken out in children
-      description: A document family is the representation of a single peice of external
-        content (ie. a PDF) and all the related document representations of that file
-    SearchEntity:
-      type: object
-      properties:
-        id:
-          type: string
-        entity:
-          type: string
-          description: The type of entity
-        value:
-          type: string
-          description: The entity value
-        start:
-          type: integer
-          description: Start position
-          format: int32
-        end:
-          type: integer
-          description: End position
-          format: int32
-      description: Entities identified in search content
-    StoreMetadata:
-      required:
-      - slug
-      type: object
-      properties:
-        template:
-          type: boolean
-          description: Is this component a template that can be used to create new
-            components
-        organization:
-          $ref: '#/components/schemas/Organization'
-        slug:
-          type: string
-        extensionPackRef:
-          type: string
-        id:
-          type: string
-        uuid:
-          type: string
-        version:
-          type: string
-        createdOn:
-          type: string
-          format: date-time
-        updatedOn:
-          type: string
-          format: date-time
-        createdBy:
-          type: string
-        updatedBy:
-          type: string
-        name:
-          type: string
-        publicAccess:
-          type: boolean
-          description: Is this component available to all organizations
-        ref:
-          type: string
-        projects:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/Project'
-        assistants:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/Assistant'
-        metadata:
-          $ref: '#/components/schemas/Store'
-      description: The store containing the document family
     AssistantEvent:
       type: object
       allOf:
@@ -20440,11 +20274,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20499,11 +20333,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20531,11 +20365,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20563,11 +20397,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20595,11 +20429,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20627,11 +20461,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20687,17 +20521,141 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
           type: boolean
         empty:
           type: boolean
+    SearchContent:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the object
+        uuid:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        updatedOn:
+          type: string
+          format: date-time
+        store:
+          $ref: '#/components/schemas/StoreMetadata'
+        documentFamily:
+          $ref: '#/components/schemas/DocumentFamily'
+        containerType:
+          type: string
+          description: The container node type
+        containerUuid:
+          type: string
+          description: The container node UUID
+        containerIndex:
+          type: integer
+          description: The index of the container
+          format: int64
+        sourceOrdering:
+          type: integer
+          description: The source ordering for the content (starting at 0)
+          format: int64
+        entities:
+          type: array
+          description: Entities found in the search content
+          items:
+            $ref: '#/components/schemas/SearchEntity'
+        nodeUuid:
+          type: string
+          description: The unique ID of the content node
+        nodeType:
+          type: string
+          description: The node type
+        content:
+          type: string
+        childContent:
+          type: array
+          description: The content broken out in children
+          items:
+            type: string
+            description: The content broken out in children
+      description: A document family is the representation of a single peice of external
+        content (ie. a PDF) and all the related document representations of that file
+    SearchEntity:
+      type: object
+      properties:
+        id:
+          type: string
+        entity:
+          type: string
+          description: The type of entity
+        value:
+          type: string
+          description: The entity value
+        start:
+          type: integer
+          description: Start position
+          format: int32
+        end:
+          type: integer
+          description: End position
+          format: int32
+      description: Entities identified in search content
+    StoreMetadata:
+      required:
+      - slug
+      type: object
+      properties:
+        template:
+          type: boolean
+          description: Is this component a template that can be used to create new
+            components
+        organization:
+          $ref: '#/components/schemas/Organization'
+        slug:
+          type: string
+        extensionPackRef:
+          type: string
+        id:
+          type: string
+        uuid:
+          type: string
+        version:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        updatedOn:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+        name:
+          type: string
+        publicAccess:
+          type: boolean
+          description: Is this component available to all organizations
+        ref:
+          type: string
+        projects:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+        assistants:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Assistant'
+        metadata:
+          $ref: '#/components/schemas/Store'
+      description: The store containing the document family
     PageExecution:
       type: object
       properties:
@@ -20719,11 +20677,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20779,11 +20737,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20828,7 +20786,6 @@ components:
     DataAttributeValues:
       required:
       - tag
-      - validationState
       type: object
       properties:
         value:
@@ -20859,13 +20816,6 @@ components:
         confidence:
           type: number
           format: float
-        validationState:
-          type: string
-          description: The current validation state
-          enum:
-          - VALID
-          - INVALID
-          - WARNING
     PageAuditEvent:
       type: object
       properties:
@@ -20887,11 +20837,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20919,11 +20869,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20951,11 +20901,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -20983,11 +20933,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21015,11 +20965,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21047,11 +20997,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21079,11 +21029,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21111,11 +21061,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21143,11 +21093,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21175,11 +21125,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21207,11 +21157,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21239,11 +21189,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21283,11 +21233,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21315,11 +21265,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21347,11 +21297,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21379,11 +21329,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21411,11 +21361,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21443,11 +21393,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21475,11 +21425,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21507,11 +21457,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
@@ -21539,11 +21489,11 @@ components:
           format: int32
         sort:
           $ref: '#/components/schemas/SortObject'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
         numberOfElements:
           type: integer
           format: int32
-        pageable:
-          $ref: '#/components/schemas/PageableObject'
         first:
           type: boolean
         last:
