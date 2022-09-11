@@ -25,10 +25,12 @@ from kodexa.model import Taxonomy, Document
 from kodexa.model.base import BaseEntity
 from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
-    AssistantDefinition, Action, ModelRuntime, CredentialDefinition, Execution, PageAssistantDefinition, PageCredentialDefinition, \
+    AssistantDefinition, Action, ModelRuntime, CredentialDefinition, Execution, PageAssistantDefinition, \
+    PageCredentialDefinition, \
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
-    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution
+    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
+    Dashboard
 
 logger = logging.getLogger()
 
@@ -1117,6 +1119,12 @@ class DataFormEndpoint(ComponentInstanceEndpoint, DataForm):
 
     def get_type(self) -> str:
         return "dataForms"
+
+
+class DashboardEndpoint(ComponentInstanceEndpoint, Dashboard):
+
+    def get_type(self) -> str:
+        return "dashboards"
 
 
 class AssistantDefinitionEndpoint(ComponentInstanceEndpoint, AssistantDefinition):
@@ -2372,6 +2380,7 @@ class KodexaClient:
                 "documentFamily": DocumentFamilyEndpoint,
                 "organization": OrganizationEndpoint,
                 "dataForm": DataFormEndpoint,
+                "dashboard": DashboardEndpoint,
                 "execution": ExecutionEndpoint
             }
 

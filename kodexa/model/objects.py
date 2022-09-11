@@ -183,6 +183,7 @@ class DashboardWidget(KodexaBaseModel):
     name: Optional[str] = None
     type: Optional[str] = None
     properties: Optional[Dict[str, Any]] = None
+    children: Optional[List[DashboardWidget]] = None
 
 
 class DataFormSource(KodexaBaseModel):
