@@ -204,7 +204,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
 
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
 
-        params = {"query": query,
+        params = {"query": requests.utils.quote(query),
                   "page": page,
                   "pageSize": pagesize}
 
@@ -268,7 +268,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}/{self.organization.slug}"
 
-        params = {"query": query,
+        params = {"query": requests.utils.quote(query),
                   "page": page,
                   "pageSize": pagesize}
 
@@ -397,7 +397,7 @@ class EntitiesEndpoint:
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}"
 
-        params = {"query": query,
+        params = {"query": requests.utils.quote(query),
                   "page": page,
                   "pageSize": pagesize}
 
@@ -1807,7 +1807,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         params = {
             'page': page,
             'pageSize': page_size,
-            'query': query
+            'query': requests.utils.quote(query)
         }
 
         if sort is not None:
