@@ -20,6 +20,7 @@ import requests
 from functional import seq
 from pydantic import BaseModel
 from pydantic_yaml import YamlModel
+from rich.console import Console
 
 from kodexa.model import Taxonomy, Document
 from kodexa.model.base import BaseEntity
@@ -198,7 +199,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
                     row.append("")
             table.add_row(*row)
 
-        print(table)
+        Console().print(table)
 
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
 
@@ -309,7 +310,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
                     row.append("")
             table.add_row(*row)
 
-        print(table)
+        Console().print(table)
 
     def create(self, component):
         url = f"/api/{self.get_type()}/{self.organization.slug}/"
@@ -437,7 +438,7 @@ class EntitiesEndpoint:
                     row.append("")
             table.add_row(*row)
 
-        print(table)
+        Console().print(table)
 
     def find_by_organization(self, organization: Organization) -> PageProject:
         """Find projects by organization"""
@@ -2399,9 +2400,10 @@ class KodexaClient:
 
         if 'endpoint' in obj_metadata:
 
-            obj_inst = obj_metadata['endpoint']().set_client(self)
             if 'global' in obj_metadata and obj_metadata['global']:
-                obj_inst.set_organization(organization)
+                obj_inst = obj_metadata['endpoint'](self, organization)
+            else:
+                obj_inst = obj_metadata['endpoint']().set_client(self).set_organization(organization)
 
             return obj_inst
 
