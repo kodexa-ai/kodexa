@@ -2422,7 +2422,8 @@ class KodexaClient:
                 "organization": OrganizationEndpoint,
                 "dataForm": DataFormEndpoint,
                 "dashboard": DashboardEndpoint,
-                "execution": ExecutionEndpoint
+                "execution": ExecutionEndpoint,
+                "assistant": AssistantEndpoint
             }
 
             if component_type in known_components:
