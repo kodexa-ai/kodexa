@@ -2423,7 +2423,7 @@ class KodexaClient:
                 "dataForm": DataFormEndpoint,
                 "dashboard": DashboardEndpoint,
                 "execution": ExecutionEndpoint,
-                "assistant": AssistantEndpoint
+                "assistant": AssistantDefinitionEndpoint
             }
 
             if component_type in known_components:
