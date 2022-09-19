@@ -31,7 +31,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
-    Dashboard
+    Dashboard, PageAction, PagePipeline
 
 logger = logging.getLogger()
 
@@ -582,11 +582,27 @@ class PageMembershipEndpoint(PageMembership, PageEndpoint):
 
 
 class PageExecutionEndpoint(PageExecution, PageEndpoint):
-    """Represents a page membership endpoint"""
+    """Represents a page execution endpoint"""
 
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint"""
         return "execution"
+
+
+class PageActionEndpoint(PageAction, PageEndpoint):
+    """Represents a page action endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "action"
+
+
+class PagePipelineEndpoint(PagePipeline, PageEndpoint):
+    """Represents a page pipeline endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "pipeline"
 
 
 class PageProjectEndpoint(PageProject, PageEndpoint):
@@ -1060,6 +1076,54 @@ class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         return DataFormEndpoint
 
 
+class AssistantDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    """Represents a model runtimes endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "assistantDefinitions"
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the page class of the endpoint"""
+        return PageAssistantDefinitionEndpoint
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the instance class of the endpoint"""
+        return AssistantDefinitionEndpoint
+
+
+class PipelinesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    """Represents a model runtimes endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "pipelines"
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the page class of the endpoint"""
+        return PagePipelineEndpoint
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the instance class of the endpoint"""
+        return PipelineEndpoint
+
+
+class ActionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    """Represents a model runtimes endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "actions"
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the page class of the endpoint"""
+        return PageActionEndpoint
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the instance class of the endpoint"""
+        return ActionEndpoint
+
+
 class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents a model runtimes endpoint"""
 
@@ -1084,7 +1148,7 @@ class ProjectTemplateEndpoint(ComponentInstanceEndpoint, ProjectTemplate):
         return "projectTemplates"
 
 
-class PipelinesEndpoint(ComponentInstanceEndpoint, Pipeline):
+class PipelineEndpoint(ComponentInstanceEndpoint, Pipeline):
     """Represents a pipeline endpoint"""
 
     def get_type(self) -> str:
@@ -1092,7 +1156,7 @@ class PipelinesEndpoint(ComponentInstanceEndpoint, Pipeline):
         return "pipelines"
 
 
-class AssistantDefinitionsEndpoint(ComponentInstanceEndpoint, CredentialDefinition):
+class AssistantDefinitionEndpoint(ComponentInstanceEndpoint, AssistantDefinition):
     """Represents a assistant definition endpoint"""
 
     def get_type(self) -> str:
@@ -1100,7 +1164,7 @@ class AssistantDefinitionsEndpoint(ComponentInstanceEndpoint, CredentialDefiniti
         return "assistants"
 
 
-class ActionsEndpoint(ComponentInstanceEndpoint, CredentialDefinition):
+class ActionEndpoint(ComponentInstanceEndpoint, Action):
     """Represents a pipeline endpoint"""
 
     def get_type(self) -> str:
@@ -1128,22 +1192,6 @@ class DashboardEndpoint(ComponentInstanceEndpoint, Dashboard):
         return "dashboards"
 
 
-class AssistantDefinitionEndpoint(ComponentInstanceEndpoint, AssistantDefinition):
-    """Represents an assistant definition endpoint"""
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint"""
-        return "assistants"
-
-
-class PipelineEndpoint(ComponentInstanceEndpoint, Pipeline):
-    """Represents a pipeline endpoint"""
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint"""
-        return "pipelines"
-
-
 class ModelRuntimeEndpoint(ComponentInstanceEndpoint, ModelRuntime):
     """Represents a model runtime endpoint"""
 
@@ -1158,14 +1206,6 @@ class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "extensionPacks"
-
-
-class ActionEndpoint(ComponentInstanceEndpoint, Action):
-    """Represents an action endpoint"""
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint"""
-        return "actions"
 
 
 class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
