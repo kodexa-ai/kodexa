@@ -1852,7 +1852,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         }
 
         if sort is not None:
-            params.sort = sort
+            params['sort'] = sort
 
         get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
                                        params=params)
