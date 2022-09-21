@@ -1054,7 +1054,7 @@ class CredentialDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, Organizat
 
     def get_type(self) -> str:
         """Get the type of the endpoint"""
-        return "credentials"
+        return "credentialDefinitions"
 
     def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         """Get the page class of the endpoint"""
@@ -1177,7 +1177,7 @@ class CredentialDefinitionEndpoint(ComponentInstanceEndpoint, CredentialDefiniti
 
     def get_type(self) -> str:
         """Get the type of the endpoint"""
-        return "credentials"
+        return "credentialDefinitions"
 
 
 class DataFormEndpoint(ComponentInstanceEndpoint, DataForm):
@@ -2076,9 +2076,9 @@ OBJECT_TYPES = {
         "type": ModelRuntimeEndpoint,
         "endpoint": ModelRuntimesEndpoint
     },
-    "credentials": {
-        "name": "credential",
-        "plural": "credentials",
+    "credentialDefinitions": {
+        "name": "credentialDefinition",
+        "plural": "credentialDefinitions",
         "type": CredentialDefinitionEndpoint,
         "endpoint": CredentialDefinitionsEndpoint
     },
