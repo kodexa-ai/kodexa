@@ -744,7 +744,7 @@ class PersistenceManager(object):
 
             if node._parent_uuid not in self.child_cache:
                 self.child_cache[node._parent_uuid] = [node]
-                self.child_id_cache[node._parent_uuid] = set([node.uuid])
+                self.child_id_cache[node._parent_uuid] = {node.uuid}
             else:
                 if node.uuid not in self.child_id_cache[node._parent_uuid]:
                     self.child_id_cache[node._parent_uuid].add(node.uuid)
@@ -776,7 +776,9 @@ class PersistenceManager(object):
 
         if node.uuid in self.node_parent_cache:
             self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
-            self.child_id_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
+
+            # We have a sitation where we seem to fail here?
+            self.child_id_cache[self.node_parent_cache[node.uuid]].discard(node.uuid)
             del self.node_parent_cache[node.uuid]
 
         self.content_parts_cache.pop(node.uuid, None)
