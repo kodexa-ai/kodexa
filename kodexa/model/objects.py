@@ -800,7 +800,7 @@ class ProjectMemory(KodexaBaseModel):
 
 
 class ProjectMetadata(KodexaBaseModel):
-    tags: Optional[List[str]] = Field(None, unique_items=True)
+    tags: Optional[List[str]] = Field(default_factory=list, unique_items=True)
 
 
 class State1(Enum):
@@ -1343,8 +1343,8 @@ class ProjectAssistant(KodexaBaseModel):
         None, alias='assistantDefinitionRef'
     )
     options: Optional[Dict[str, Any]] = None
-    stores: Optional[List[str]] = Field(None, unique_items=True)
-    schedules: Optional[List[ScheduleDefinition]] = Field(None, unique_items=True)
+    stores: Optional[List[str]] = Field(default_factory=list, unique_items=True)
+    schedules: Optional[List[ScheduleDefinition]] = Field(default_factory=list, unique_items=True)
     subscription: Optional[str] = None
 
 
@@ -1482,9 +1482,9 @@ class ContentObject(KodexaBaseModel):
     )
     document_version: Optional[str] = Field(None, alias='documentVersion')
     index: Optional[int] = None
-    labels: Optional[List[Label]] = Field(None, unique_items=True)
+    labels: Optional[List[Label]] = Field(default_factory=list, unique_items=True)
     metadata: Optional[Dict[str, Any]] = None
-    mixins: Optional[List[str]] = Field(None, unique_items=True)
+    mixins: Optional[List[str]] = Field(default_factory=list, unique_items=True)
     created: Optional[datetime] = None
     modified: Optional[datetime] = None
     size: Optional[int] = None
@@ -1631,8 +1631,8 @@ class Role(KodexaBaseModel):
     created_by: Optional[str] = Field(None, alias='createdBy')
     updated_by: Optional[str] = Field(None, alias='updatedBy')
     name: str
-    users: Optional[List[User]] = Field(None, unique_items=True)
-    teams: Optional[List[Team]] = Field(None, unique_items=True)
+    users: Optional[List[User]] = Field(default_factory=list, unique_items=True)
+    teams: Optional[List[Team]] = Field(default_factory=list, unique_items=True)
 
 
 class Membership(KodexaBaseModel):
@@ -2033,7 +2033,7 @@ class DocumentFamily(KodexaBaseModel):
         unique_items=True,
     )
     content_exceptions: Optional[List[ContentException]] = Field(
-        None,
+        default_factory=list,
         alias='contentExceptions',
         description='A list of the content exceptions from the content objects',
         unique_items=True,
@@ -2086,7 +2086,7 @@ class ExecutionAssistant(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     subscription: Optional[str] = None
-    schedules: Optional[List[AssistantSchedule]] = Field(None, unique_items=True)
+    schedules: Optional[List[AssistantSchedule]] = Field(default_factory=list, unique_items=True)
     project: Optional[Project] = None
     name: str
     description: Optional[str] = None
@@ -2126,7 +2126,7 @@ class DataObject(KodexaBaseModel):
     source_ordering: Optional[str] = Field(None, alias='sourceOrdering')
     date_time: Optional[datetime] = Field(None, alias='dateTime')
     lineage: Optional[DataLineage] = None
-    attributes: Optional[List[DataAttribute]] = Field(None, unique_items=True)
+    attributes: Optional[List[DataAttribute]] = Field(default_factory=list, unique_items=True)
     parent_id: Optional[str] = Field(None, alias='parentId')
     store_ref: Optional[str] = Field(None, alias='storeRef')
 
@@ -2137,7 +2137,7 @@ class Assistant(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     subscription: Optional[str] = None
-    schedules: Optional[List[AssistantSchedule]] = Field(None, unique_items=True)
+    schedules: Optional[List[AssistantSchedule]] = Field(default_factory=list, unique_items=True)
     project: Optional[Project] = None
     name: str
     description: Optional[str] = None
@@ -2335,8 +2335,8 @@ class StoreMetadata(KodexaBaseModel):
         description='Is this component available to all organizations',
     )
     ref: Optional[str] = None
-    projects: Optional[List[Project]] = Field(None, unique_items=True)
-    assistants: Optional[List[Assistant]] = Field(None, unique_items=True)
+    projects: Optional[List[Project]] = Field(default_factory=list, unique_items=True)
+    assistants: Optional[List[Assistant]] = Field(default_factory=list, unique_items=True)
     metadata: Optional[Store] = None
 
 
