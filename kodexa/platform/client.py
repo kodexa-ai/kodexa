@@ -31,7 +31,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
-    Dashboard, PageAction, PagePipeline
+    Dashboard, PageAction, PagePipeline, DocumentStatus
 
 logger = logging.getLogger()
 
@@ -1466,6 +1466,11 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/reprocess"
         self.client.put(url, params={'assistantId': assistant.id})
 
+    def set_document_status(self, document_status: DocumentStatus):
+        """Set the document status of the document family"""
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/status"
+        self.client.put(url, body=document_status.dict(by_alias=True))
+
     def add_document(self, document: Document, content_object: Optional[ContentObject] = None):
         """Add a document to the document family"""
         url = f'/api/stores/{self.store_ref.replace(":", "/")}/families/{self.id}/objects'
@@ -1498,7 +1503,6 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                     node_feature['features'].append(feature_dict)
 
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
-        print(feature_set.json())
         self.client.put(url, body=feature_set.dict(by_alias=True))
 
 
