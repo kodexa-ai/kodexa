@@ -335,6 +335,8 @@ class SqliteDocumentPersistence(object):
             self.document.source = SourceMetadata.from_dict(metadata['source'])
         if 'labels' in metadata and metadata['labels']:
             self.document.labels = metadata['labels']
+        if 'mixins' in metadata and metadata['mixins']:
+            self.document._mixins = metadata['mixins']
         if 'taxomomies' in metadata and metadata['taxomomies']:
             self.document.taxonomies = metadata['taxomomies']
         if 'classes' in metadata and metadata['classes']:
