@@ -2158,7 +2158,7 @@ def resolve_object_type(obj_type):
     raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
 
 
-class ExtractionEngine:
+class ExtractionEngineEndpoint:
     """
     Provides endpoint access to the extraction engine
     """
@@ -2168,13 +2168,14 @@ class ExtractionEngine:
 
     def extract_data_objects(self, taxonomy: Taxonomy, document: Document) -> List[DataObject]:
         response = self.client.post(f"/api/extractionEngine/extract",
-                                    params={'taxonomyJson': taxonomy.json(exclude={'client'})},
+                                    data={'taxonomyJson': taxonomy.json(exclude={'client'})},
                                     files={'document': document.to_kddb()})
         return response.json()
 
     def extract_to_format(self, taxonomy: Taxonomy, document: Document, format: str) -> str:
         response = self.client.post(f"/api/extractionEngine/extract",
-                                    params={'taxonomyJson': taxonomy.json(exclude={'client'}), 'format': format},
+                                    params={ 'format': format},
+                                    data={'taxonomyJson': taxonomy.json(exclude={'client'})},
                                     files={'document': document.to_kddb()})
         return response.text
 
