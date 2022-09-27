@@ -2158,6 +2158,27 @@ def resolve_object_type(obj_type):
     raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
 
 
+class ExtractionEngine:
+    """
+    Provides endpoint access to the extraction engine
+    """
+
+    def __init__(self, client: "KodexaClient"):
+        self.client = client
+
+    def extract_data_objects(self, taxonomy: Taxonomy, document: Document) -> List[DataObject]:
+        response = self.client.post(f"/api/extractionEngine/extract",
+                                    params={'taxonomyJson': taxonomy.json(exclude={'client'})},
+                                    files={'document': document.to_kddb()})
+        return response.json()
+
+    def extract_to_format(self, taxonomy: Taxonomy, document: Document, format: str) -> str:
+        response = self.client.post(f"/api/extractionEngine/extract",
+                                    params={'taxonomyJson': taxonomy.json(exclude={'client'}), 'format': format},
+                                    files={'document': document.to_kddb()})
+        return response.text
+
+
 class KodexaClient:
 
     def __init__(self, url=None, access_token=None):
@@ -2183,6 +2204,10 @@ class KodexaClient:
     @property
     def me(self):
         return UserEndpoint.parse_obj(self.get("/api/account/me").json()).set_client(self)
+
+    @property
+    def extraction_engine(self):
+        return ExtractionEngineEndpoint(self)
 
     @property
     def platform(self) -> PlatformOverview:
