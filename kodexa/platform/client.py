@@ -1250,6 +1250,10 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
         path_parts = path.split("/")
         return self.find_taxon(self.taxons, path_parts)
 
+    def to_xsd(self) -> str:
+        """Convert the taxonomy to an XSD"""
+        return self.client.get(f'/api/taxonomies/{self.ref.replace(":", "/")}/export', params={'format': 'xsd'}).text
+
 
 class MembershipEndpoint(Membership, EntityEndpoint):
     """Represents a membership endpoint"""
@@ -2174,7 +2178,7 @@ class ExtractionEngineEndpoint:
 
     def extract_to_format(self, taxonomy: Taxonomy, document: Document, format: str) -> str:
         response = self.client.post(f"/api/extractionEngine/extract",
-                                    params={ 'format': format},
+                                    params={'format': format},
                                     data={'taxonomyJson': taxonomy.json(exclude={'client'})},
                                     files={'document': document.to_kddb()})
         return response.text
