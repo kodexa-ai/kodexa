@@ -370,8 +370,7 @@ class SqliteDocumentPersistence(object):
             self.document.version = "4.0.1"
             self.update_metadata()
 
-        if self.document.version == '4.0.1':
-            self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
                                     (
                                         id           integer primary key,
                                         tag          text,
@@ -383,8 +382,8 @@ class SqliteDocumentPersistence(object):
                                         severity     text,
                                         node_uuid    text
                                     )""")
-            self.document.version = "4.0.2"
-            self.update_metadata()
+        self.document.version = "4.0.2"
+        self.update_metadata()
 
     def get_content_parts(self, new_node):
         content_parts = self.cursor.execute(
