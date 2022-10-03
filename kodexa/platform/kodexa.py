@@ -149,9 +149,9 @@ OBJECT_TYPES = {
         "plural": "modelRuntimes",
         "type": ModelRuntime
     },
-    "credentials": {
-        "name": "credential",
-        "plural": "credentials",
+    "credentialDefinitions": {
+        "name": "credential definition",
+        "plural": "credential definitions",
         "type": CredentialDefinition
     },
     "dataForms": {
@@ -175,8 +175,8 @@ OBJECT_TYPES = {
         "global": True
     },
     "projectTemplates": {
-        "name": "projectTemplate",
-        "plural": "projectTemplates",
+        "name": "project template",
+        "plural": "project templates",
         "type": ProjectTemplate
     },
     "executions": {
