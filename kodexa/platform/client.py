@@ -406,6 +406,7 @@ class EntitiesEndpoint:
             params["sort"] = sort
 
         if filters is not None:
+            params["legacyFilter"] = True
             params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
