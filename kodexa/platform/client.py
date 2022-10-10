@@ -1924,31 +1924,38 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         results = []
         final_wildcard = "**/*" if base_path is None else f"{base_path}/**/*"
         num_hits = 0
-        for path_hit in glob.glob(final_wildcard, recursive=True):
-            relative_path = path_hit.replace(base_path + '/', '') if base_path else path_hit
+        import os
+        import zipfile
 
-            # We will put the implementation in one place
+        with zipfile.ZipFile('training.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
 
-            relative_path = self.TRAINED_MODELS_PREFIX + training_run_id + '/' + relative_path
-            if Path(path_hit).is_file():
-                logger.info(f"Uploading model file {path_hit}")
-                with open(path_hit, 'rb') as path_content:
-                    self.upload_bytes(relative_path, path_content, replace=True)
+            for path_hit in glob.glob(final_wildcard, recursive=True):
+                relative_path = path_hit.replace(base_path + '/', '') if base_path else path_hit
+
+                if Path(path_hit).is_file():
+                    zipf.write(path_hit, relative_path)
                     num_hits += 1
+
         if num_hits > 0:
+            with open('training.zip', 'rb') as zip_content:
+                self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/training/{training_run_id}/content",
+                                 files={"training": zip_content})
             results.append(f"{num_hits} files uploaded for {final_wildcard}")
+
+        Path('training.zip').unlink()
         return results
 
-    def download_trained_model(self, training_run_id: str, download_path: Optional[str] = ""):
-        """Download a trained model from the store"""
-        for path in self.list_contents():
-            if path.startswith(self.TRAINED_MODELS_PREFIX + training_run_id):
-                file_path = os.path.join(download_path, path.replace(self.TRAINED_MODELS_PREFIX, ''))
-                logger.info(f"Downloading trained model file {file_path}")
-                Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
-
-                with open(file_path, 'wb') as output_file:
-                    output_file.write(self.get_bytes(path))
+    def download_trained_model(self, training_id: str, download_path: Optional[str] = ""):
+        """Download the content for the given training id"""
+        if download_path is None:
+            download_path = ""
+        if download_path != "":
+            os.makedirs(download_path, exist_ok=True)
+        response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}/content")
+        from zipfile import ZipFile
+        from io import BytesIO
+        zipped_contents = ZipFile(BytesIO(response.content))
+        zipped_contents.extractall(download_path)
 
     def download_implementation(self, download_path: Optional[str] = ""):
         """Download the implementation from the store"""
