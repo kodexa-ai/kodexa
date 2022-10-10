@@ -31,7 +31,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
-    Dashboard, PageAction, PagePipeline, DocumentStatus
+    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining
 
 logger = logging.getLogger()
 
@@ -1199,6 +1199,18 @@ class ModelRuntimeEndpoint(ComponentInstanceEndpoint, ModelRuntime):
     def get_type(self) -> str:
         """Get the type of the endpoint"""
         return "modelRuntimes"
+
+    def create_training(self) -> ModelTraining:
+        """Create a new model training"""
+        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings"
+        response = self.client.post(url, body={})
+        return ModelTraining.parse_obj(response.json())
+
+    def list_trainings(self) -> PageModelTraining:
+        """List all model trainings"""
+        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings"
+        response = self.client.get(url)
+        return PageModelTraining.parse_obj(response.json())
 
 
 class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
