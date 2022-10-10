@@ -1957,19 +1957,19 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
     def create_training(self) -> ModelTraining:
         """Create a new model training"""
-        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings"
+        url = f"/api/stores/{self.ref.replace(':','/')}/trainings"
         response = self.client.post(url, body={})
         return ModelTraining.parse_obj(response.json())
 
     def get_training(self, training_id: str) -> ModelTraining:
         """Get a model training"""
-        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings/{training_id}"
+        url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training_id}"
         response = self.client.get(url)
         return ModelTraining.parse_obj(response.json())
 
     def list_trainings(self) -> PageModelTraining:
         """List all model trainings"""
-        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings"
+        url = f"/api/stores/{self.ref.replace(':','/')}/trainings"
         response = self.client.get(url)
         return PageModelTraining.parse_obj(response.json())
 
