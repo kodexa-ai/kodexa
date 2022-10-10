@@ -1200,24 +1200,6 @@ class ModelRuntimeEndpoint(ComponentInstanceEndpoint, ModelRuntime):
         """Get the type of the endpoint"""
         return "modelRuntimes"
 
-    def create_training(self) -> ModelTraining:
-        """Create a new model training"""
-        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings"
-        response = self.client.post(url, body={})
-        return ModelTraining.parse_obj(response.json())
-
-    def get_training(self, training_id: str) -> ModelTraining:
-        """Get a model training"""
-        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings/{training_id}"
-        response = self.client.get(url)
-        return ModelTraining.parse_obj(response.json())
-
-    def list_trainings(self) -> PageModelTraining:
-        """List all model trainings"""
-        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings"
-        response = self.client.get(url)
-        return PageModelTraining.parse_obj(response.json())
-
 
 class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
     """Represents an extension pack endpoint"""
@@ -1972,6 +1954,24 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
     def upload_implementation(self, metadata):
         """Upload the implementation to the store"""
         return self.upload_contents(metadata)
+
+    def create_training(self) -> ModelTraining:
+        """Create a new model training"""
+        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings"
+        response = self.client.post(url, body={})
+        return ModelTraining.parse_obj(response.json())
+
+    def get_training(self, training_id: str) -> ModelTraining:
+        """Get a model training"""
+        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings/{training_id}"
+        response = self.client.get(url)
+        return ModelTraining.parse_obj(response.json())
+
+    def list_trainings(self) -> PageModelTraining:
+        """List all model trainings"""
+        url = f"/api/modelRuntimes/{self.ref.replace(':','/')}/trainings"
+        response = self.client.get(url)
+        return PageModelTraining.parse_obj(response.json())
 
     def upload_contents(self, metadata):
         """Upload the contents of the metadata to the store"""
