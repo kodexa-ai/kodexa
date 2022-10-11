@@ -1868,6 +1868,21 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
+    def filter(self, filter_string: str = "", page: int = 1, page_size: int = 100, sort=None) -> PageDocumentFamilyEndpoint:
+        params = {
+            'page': page,
+            'pageSize': page_size,
+            'filter': filter_string
+        }
+
+        if sort is not None:
+            params['sort'] = sort
+
+        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
+                                       params=params)
+
+        return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
+
     def upload_document(self, path: str, document: "Document") -> DocumentFamilyEndpoint:
         """Upload a document to the store at the given path"""
         logger.info(f"Putting document to path {path}")
