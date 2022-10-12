@@ -1976,6 +1976,12 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.post(url, body={})
         return ModelTraining.parse_obj(response.json())
 
+    def update_training(self, training: ModelTraining) -> ModelTraining:
+        """Update a model training"""
+        url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training.id}"
+        response = self.client.put(url, body=training.dict())
+        return ModelTraining.parse_obj(response.json())
+
     def get_training(self, training_id: str) -> ModelTraining:
         """Get a model training"""
         url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training_id}"
