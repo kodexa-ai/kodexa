@@ -991,6 +991,17 @@ class ModelTraining(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     training_date: Optional[datetime] = Field(None, alias='trainingDate')
+    properties: Optional[Dict[str, Any]] = None
+    training_parameters: Optional[Dict[str, Any]] = Field(
+        None,
+        alias='trainingParameters',
+        description='The values for the training options',
+    )
+    inference_options: Optional[List[Option]] = Field(
+        None,
+        alias='inferenceOptions',
+        description='The inference options for this model',
+    )
 
 
 class Status5(Enum):
