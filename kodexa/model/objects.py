@@ -988,6 +988,7 @@ class UserActivation(KodexaBaseModel):
 class ModelTraining(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
+    name: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     training_date: Optional[datetime] = Field(None, alias='trainingDate')
