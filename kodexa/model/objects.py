@@ -2637,21 +2637,13 @@ class ModelContentMetadata(KodexaBaseModel):
     training_options: Optional[List[Option]] = Field(
         None, alias='trainingOptions', description='The training options for this model'
     )
-    training_parameters: Optional[Dict[str, Any]] = Field(
-        None,
-        alias='trainingParameters',
-        description='The values for the training options',
-    )
+
     inference_options: Optional[List[Option]] = Field(
         None,
         alias='inferenceOptions',
         description='The inference options for this model',
     )
-    inference_parameters: Optional[Dict[str, Any]] = Field(
-        None,
-        alias='inferenceParameters',
-        description='The values for the inference options',
-    )
+
     build_statistics: Optional[Dict[str, Any]] = Field(
         None,
         alias='buildStatistics',
