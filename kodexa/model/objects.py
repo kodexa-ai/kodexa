@@ -317,7 +317,7 @@ class ProjectDashboard(KodexaBaseModel):
     The dashboards that will be created with the project template
     """
 
-    slug: Optional[constr(regex=r'^[a-zA-Z0-9\-_]{0,255}$')] = None
+    slug: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
     widgets: Optional[List[DashboardWidget]] = None
