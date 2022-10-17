@@ -1485,6 +1485,12 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                                       'documentVersion': document.version},
                          files={'file': document.to_kddb()})
 
+    def export_as_zip(self) -> bytes:
+        """Export the document family as bytes"""
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
+        get_response = self.client.get(url)
+        return get_response.content
+
     def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
         """Replace the tags of the document family"""
         feature_set = FeatureSet()
