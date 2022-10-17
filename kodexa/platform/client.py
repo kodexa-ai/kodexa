@@ -1927,7 +1927,6 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         results = []
         final_wildcard = "**/*" if base_path is None else f"{base_path}/**/*"
         num_hits = 0
-        import os
         import zipfile
 
         with zipfile.ZipFile('training.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -1976,10 +1975,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         """Upload the implementation to the store"""
         return self.upload_contents(metadata)
 
-    def create_training(self) -> ModelTraining:
+    def create_training(self, name: Optional[str] = None) -> ModelTraining:
         """Create a new model training"""
-        url = f"/api/stores/{self.ref.replace(':','/')}/trainings"
-        response = self.client.post(url, body={})
+        url = f"/api/stores/{self.ref.replace(':', '/')}/trainings"
+        new_training = ModelTraining(name=name)
+        response = self.client.post(url, body=new_training)
         return ModelTraining.parse_obj(response.json())
 
     def update_training(self, training: ModelTraining) -> ModelTraining:
