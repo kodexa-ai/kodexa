@@ -8,8 +8,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from kodexa.model.base import KodexaBaseModel
 from pydantic import AnyUrl, Field, constr
+
+from kodexa.model.base import KodexaBaseModel
 
 
 class ExceptionResponse(KodexaBaseModel):
@@ -2833,6 +2834,16 @@ class ProjectTemplate(ExtensionPackProvided):
     )
     category: Optional[Category] = Field(
         None, description='The category of project template'
+    )
+    document_statuses: Optional[List[DocumentStatus]] = Field(
+        None,
+        alias='documentStatuses',
+        description='The document statuses that will be created with the project template',
+    )
+    attribute_statuses: Optional[List[AttributeStatus]] = Field(
+        None,
+        alias='attributeStatuses',
+        description='The attribute statuses that will be created with the project template',
     )
 
 
