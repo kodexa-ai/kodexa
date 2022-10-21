@@ -1271,6 +1271,9 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
         """Get the type of the endpoint"""
         return "executions"
 
+    def cancel(self):
+        """Cancel the execution"""
+        self.client.put(f'/api/executions/{self.id}/cancel')
 
 class UserEndpoint(User, EntityEndpoint):
     """Represents a user endpoint"""
