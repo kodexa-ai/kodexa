@@ -995,6 +995,8 @@ class ModelTraining(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     training_date: Optional[datetime] = Field(None, alias='trainingDate')
+    content: Optional[bool] = Field(None, description='Has content')
+
     properties: Optional[Dict[str, Any]] = None
     training_parameters: Optional[Dict[str, Any]] = Field(
         None,
