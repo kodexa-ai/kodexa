@@ -2003,10 +2003,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(url)
         return PageModelTraining.parse_obj(response.json())
 
-    def upload_contents(self, metadata):
+    def upload_contents(self, metadata: ModelContentMetadata):
         """Upload the contents of the metadata to the store"""
 
         # First we are going to delete anything we have in the implementation
+
         for imp_file in self.list_contents():
             if imp_file.startswith(self.IMPLEMENTATION_PREFIX):
                 self.delete_by_path(imp_file)
