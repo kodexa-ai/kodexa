@@ -2013,9 +2013,19 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(url)
         return ModelTraining.parse_obj(response.json())
 
-    def list_trainings(self) -> PageModelTraining:
+    def list_trainings(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None) -> PageModelTraining:
         """List all model trainings"""
-        url = f"/api/stores/{self.ref.replace(':','/')}/trainings"
+        url = f"/api/stores/{self.ref.replace(':', '/')}/trainings"
+        params = {"query": requests.utils.quote(query),
+                  "page": page,
+                  "pageSize": pagesize}
+
+        if sort is not None:
+            params["sort"] = sort
+
+        if filters is not None:
+            params["filter"] = filters
+
         response = self.client.get(url)
         return PageModelTraining.parse_obj(response.json())
 
