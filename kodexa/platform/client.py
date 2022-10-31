@@ -35,6 +35,17 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
 
 logger = logging.getLogger()
 
+class Notifier:
+    def __init__(self):
+        pass
+
+    def log(self, message: str):
+        print(message)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print("Done")
+
+
 # Define the columns that we want for different component types when we
 # are printing the listing of them
 
@@ -1988,7 +1999,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
     def update_training(self, training: ModelTraining) -> ModelTraining:
         """Update a model training"""
         url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training.id}"
-        response = self.client.put(url, body=json.loads(self.json(exclude={'client'}, by_alias=True)))
+        response = self.client.put(url, body=json.loads(training.json(exclude={'client'}, by_alias=True)))
         return ModelTraining.parse_obj(response.json())
 
     def get_training(self, training_id: str) -> ModelTraining:
