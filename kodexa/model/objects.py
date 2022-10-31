@@ -323,6 +323,7 @@ class ProjectDashboard(KodexaBaseModel):
     description: Optional[str] = None
     widgets: Optional[List[DashboardWidget]] = None
     template_ref: Optional[str] = Field(None, alias='templateRef')
+    ref: Optional[str] = None
 
 
 class StoreType(Enum):
@@ -348,7 +349,7 @@ class ProjectStore(KodexaBaseModel):
     store_type: Optional[StoreType] = Field(None, alias='storeType')
     store_purpose: Optional[StorePurpose] = Field(None, alias='storePurpose')
     template_ref: Optional[str] = Field(None, alias='templateRef')
-
+    ref: Optional[str] = None
 
 class TaxonomyType(Enum):
     """
@@ -1873,6 +1874,7 @@ class ProjectTaxonomy(KodexaBaseModel):
     """
 
     slug: Optional[str] = None
+
     name: Optional[str] = None
     description: Optional[str] = None
     taxonomy_type: Optional[TaxonomyType] = Field(
@@ -1882,6 +1884,7 @@ class ProjectTaxonomy(KodexaBaseModel):
         None, description="The hierarchical structure of taxon's in this taxonomy"
     )
     template_ref: Optional[str] = Field(None, alias='templateRef')
+    ref: Optional[str] = None
 
 
 class ContentException(KodexaBaseModel):
@@ -2749,6 +2752,13 @@ class DataForm(ExtensionPackProvided):
     sources: Optional[List[DataFormSource]] = None
     views: Optional[List[DataFormView]] = None
 
+
+class ProjectDataForm(ExtensionPackProvided):
+    entrypoints: Optional[List[str]] = None
+    sources: Optional[List[DataFormSource]] = None
+    views: Optional[List[DataFormView]] = None
+    template_ref: Optional[str] = Field(None, alias='templateRef')
+    ref: Optional[str] = None
 
 class ExtensionPack(ExtensionPackProvided):
     """
