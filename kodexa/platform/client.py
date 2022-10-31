@@ -979,7 +979,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
     def find_by_name(self, project_name: str) -> ProjectEndpoint:
         """Find a project by name"""
         url = f"/api/{self.get_type()}/"
-        get_response = self.client.get(url, params={'filter': f'name={project_name}'})
+        get_response = self.client.get(url, params={'filter': f"name: '{project_name}'"})
         if len(get_response.json()['content']) > 0:
             return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
         raise Exception("Project not found")
