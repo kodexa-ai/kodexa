@@ -976,13 +976,13 @@ class ProjectsEndpoint(EntitiesEndpoint):
         """Get the page class of the endpoint"""
         return PageProjectEndpoint
 
-    def find_by_name(self, project_name: str) -> ProjectEndpoint:
+    def find_by_name(self, project_name: str) -> Optional[ProjectEndpoint]:
         """Find a project by name"""
         url = f"/api/{self.get_type()}/"
         get_response = self.client.get(url, params={'filter': f"name: '{project_name}'"})
         if len(get_response.json()['content']) > 0:
             return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
-        raise Exception("Project not found")
+        return None
 
     def create(self, project: Project, template_ref: str = None) -> Project:
         """Create a project"""
