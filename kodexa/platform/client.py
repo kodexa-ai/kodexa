@@ -988,7 +988,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
         """Create a project"""
         url = f"/api/{self.get_type()}"
 
-        if self.organization is not None:
+        if self.organization is None:
             project.organization = self.organization.detach()
         else:
             raise Exception("Organization not set on the project")
