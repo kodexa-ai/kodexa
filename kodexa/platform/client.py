@@ -991,7 +991,8 @@ class ProjectsEndpoint(EntitiesEndpoint):
         if self.organization is not None and project.organization is None:
             project.organization = self.organization.detach()
         else:
-            raise Exception("Organization not set on the project")
+            if project.organization is None:
+                raise Exception("Organization not set on the project")
 
         if template_ref is not None:
             params = {"templateRef": template_ref}
