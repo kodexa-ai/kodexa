@@ -1272,6 +1272,19 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
         """Convert the taxonomy to an XSD"""
         return self.client.get(f'/api/taxonomies/{self.ref.replace(":", "/")}/export', params={'format': 'xsd'}).text
 
+    def get_taxon_by_path(self, path) -> Optional[Taxon]:
+        def find_taxon(taxons, path):
+            for taxon in taxons:
+                if taxon.path == path:
+                    return taxon
+                if taxon.children:
+                    found_taxon = find_taxon(taxon.children, path)
+                    if found_taxon:
+                        return found_taxon
+            return None
+
+        return find_taxon(self.taxons, path)
+
 
 class MembershipEndpoint(Membership, EntityEndpoint):
     """Represents a membership endpoint"""
@@ -1622,6 +1635,11 @@ class DataStoreEndpoint(StoreEndpoint):
 
         data_objects = self.get_data_objects(path, query, document_family)
 
+        if len(data_objects) == 0:
+            return pd.DataFrame()
+
+        taxonomy: TaxonomyEndpoint = self.client.get_object_by_ref('taxonomies', data_objects[0].taxonomy_ref)
+
         table_result = {
             'rows': [],
             'columns': [],
@@ -1633,7 +1651,8 @@ class DataStoreEndpoint(StoreEndpoint):
                 if include_id:
                     table_result['column_headers'].append('Data Object ID')
                     table_result['columns'].append('data_object_id')
-                for taxon in data_object.taxon.children:
+
+                for taxon in taxonomy.get_taxon_by_path(data_object.path).children:
                     if not taxon.group:
                         table_result['column_headers'].append(taxon.label)
                         table_result['columns'].append(taxon.name)
