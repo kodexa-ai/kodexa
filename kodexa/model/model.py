@@ -163,6 +163,14 @@ class ContentNode(object):
     def set_content_parts(self, content_parts):
         self.document.get_persistence().update_content_parts(self, content_parts)
 
+    def update(self):
+        """
+        Update this node in the document persistence
+
+        :return:
+        """
+        self.document.get_persistence().update_node(self)
+
     @property
     def content(self):
 
@@ -352,6 +360,16 @@ class ContentNode(object):
         self.remove_feature(feature_type, name)
         return self.add_feature(feature_type, name, value)
 
+    def update_feature(self, feature: "ContentFeature"):
+        """
+        Update a feature on this node in document persistence
+
+        :param feature:
+        :return:
+        """
+        self.document.get_persistence().remove_feature(self, feature.feature_type, feature.name)
+        self.document.get_persistence().add_feature(self, feature)
+
     def add_feature(self, feature_type, name, value, single=True, serialized=False):
         """
         Add a new feature to this ContentNode.
@@ -377,8 +395,7 @@ class ContentNode(object):
             feature = self.get_feature(feature_type, name)
             feature.single = False  # always setting to false if we already have a feature of this type/name
             feature.value.append(value)
-            self.document.get_persistence().remove_feature(self, feature_type, name)
-            self.document.get_persistence().add_feature(self, feature)
+            self.update_feature(feature)
             return feature
 
         # Make sure that we treat the value as list all the time
