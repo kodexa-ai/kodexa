@@ -2624,22 +2624,23 @@ class ModelContentMetadata(KodexaBaseModel):
     state: Optional[State] = Field(
         None, description='The state of the model in this store'
     )
+
     trainable: Optional[bool] = Field(None, description='Can this model be trained')
+
+    atomic: Optional[bool] = Field(None, description='Is the model uploaded/downloaded atomically')
+
     use_implementation_from_template: Optional[bool] = Field(
         None,
         alias='useImplementationFromTemplate',
         description='Use implementation from template',
     )
+
     template_ref: Optional[str] = Field(
         None,
         alias='templateRef',
         description='The template ref that will be used if we are going to use the implementation from the template',
     )
-    vue_template: Optional[str] = Field(
-        None,
-        alias='vueTemplate',
-        description='The Vue template to render for the configuration of this model',
-    )
+
     training_options: Optional[List[Option]] = Field(
         None, alias='trainingOptions', description='The training options for this model'
     )
