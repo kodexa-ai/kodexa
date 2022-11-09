@@ -2000,15 +2000,26 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
     def download_implementation(self, download_path: Optional[str] = ""):
         """Download the implementation from the store"""
-        for path in self.list_contents():
-            if path.startswith(self.IMPLEMENTATION_PREFIX):
-                logger.info(f"Downloading implementation file {path}")
-                file_path = os.path.join(download_path, path.replace(self.IMPLEMENTATION_PREFIX, ''))
-                logger.info(f"Downloading model file {file_path}")
-                Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
+        if self.get_metadata().atomic:
+            if download_path is None:
+                download_path = ""
+            if download_path != "":
+                os.makedirs(download_path, exist_ok=True)
+            response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/implementation")
+            from zipfile import ZipFile
+            from io import BytesIO
+            zipped_contents = ZipFile(BytesIO(response.content))
+            zipped_contents.extractall(download_path)
+        else:
+            for path in self.list_contents():
+                if path.startswith(self.IMPLEMENTATION_PREFIX):
+                    logger.info(f"Downloading implementation file {path}")
+                    file_path = os.path.join(download_path, path.replace(self.IMPLEMENTATION_PREFIX, ''))
+                    logger.info(f"Downloading model file {file_path}")
+                    Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
 
-                with open(file_path, 'wb') as output_file:
-                    output_file.write(self.get_bytes(path))
+                    with open(file_path, 'wb') as output_file:
+                        output_file.write(self.get_bytes(path))
 
     def upload_implementation(self, metadata):
         """Upload the implementation to the store"""
@@ -2054,39 +2065,75 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
         # First we are going to delete anything we have in the implementation
 
-        for imp_file in self.list_contents():
-            if imp_file.startswith(self.IMPLEMENTATION_PREFIX):
-                self.delete_by_path(imp_file)
+        if metadata.atomic:
+            results = []
+            if metadata.contents:
 
-        results = []
-        if metadata.contents:
+                import zipfile
 
-            ignore_files = []
-            if metadata.ignored_contents:
-                for ignore_path in metadata.ignored_contents:
-                    final_wildcard = os.path.join(metadata.base_dir, ignore_path) if metadata.base_dir else ignore_path
+                with zipfile.ZipFile('implementation.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
+
+                    ignore_files = []
+                    if metadata.ignored_contents:
+                        for ignore_path in metadata.ignored_contents:
+                            final_wildcard = os.path.join(metadata.base_dir, ignore_path) if metadata.base_dir else ignore_path
+                            for path_hit in glob.glob(final_wildcard, recursive=True):
+                                ignore_files.append(path_hit)
+
+                    for content_path in metadata.contents:
+                        final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
+                        num_hits = 0
+
+                        for path_hit in glob.glob(final_wildcard, recursive=True):
+                            if path_hit in ignore_files:
+                                continue
+                            relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
+
+                            # We will put the implementation in one place
+                            relative_path = self.IMPLEMENTATION_PREFIX + relative_path
+                            if Path(path_hit).is_file():
+                                zipf.write(path_hit, relative_path)
+                                num_hits += 1
+                        if num_hits > 0:
+                            with open('training.zip', 'rb') as zip_content:
+                                self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
+                                                 files={"training": zip_content})
+                            results.append(f"{num_hits} files uploaded for {final_wildcard}")
+            return results
+        else:
+            for imp_file in self.list_contents():
+                if imp_file.startswith(self.IMPLEMENTATION_PREFIX):
+                    self.delete_by_path(imp_file)
+
+            results = []
+            if metadata.contents:
+
+                ignore_files = []
+                if metadata.ignored_contents:
+                    for ignore_path in metadata.ignored_contents:
+                        final_wildcard = os.path.join(metadata.base_dir, ignore_path) if metadata.base_dir else ignore_path
+                        for path_hit in glob.glob(final_wildcard, recursive=True):
+                            ignore_files.append(path_hit)
+
+                for content_path in metadata.contents:
+                    final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
+                    num_hits = 0
+
                     for path_hit in glob.glob(final_wildcard, recursive=True):
-                        ignore_files.append(path_hit)
+                        if path_hit in ignore_files:
+                            continue
+                        relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
 
-            for content_path in metadata.contents:
-                final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
-                num_hits = 0
-
-                for path_hit in glob.glob(final_wildcard, recursive=True):
-                    if path_hit in ignore_files:
-                        continue
-                    relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
-
-                    # We will put the implementation in one place
-                    relative_path = self.IMPLEMENTATION_PREFIX + relative_path
-                    if Path(path_hit).is_file():
-                        with open(path_hit, 'rb') as path_content:
-                            results.append(f"Uploading model file {path_hit}")
-                            self.upload_bytes(relative_path, path_content, replace=True)
-                            num_hits += 1
-                if num_hits > 0:
-                    results.append(f"{num_hits} files uploaded for {final_wildcard}")
-        return results
+                        # We will put the implementation in one place
+                        relative_path = self.IMPLEMENTATION_PREFIX + relative_path
+                        if Path(path_hit).is_file():
+                            with open(path_hit, 'rb') as path_content:
+                                results.append(f"Uploading model file {path_hit}")
+                                self.upload_bytes(relative_path, path_content, replace=True)
+                                num_hits += 1
+                    if num_hits > 0:
+                        results.append(f"{num_hits} files uploaded for {final_wildcard}")
+            return results
 
     def list_contents(self) -> List[str]:
         """List the contents of the store"""
