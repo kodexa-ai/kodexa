@@ -2097,7 +2097,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                         if num_hits > 0:
                             with open('implementation.zip', 'rb') as zip_content:
                                 self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
-                                                 files={"training": zip_content})
+                                                 files={"implementation": zip_content})
                             results.append(f"{num_hits} files uploaded for {final_wildcard}")
             Path('implementation.zip').unlink()
             return results
