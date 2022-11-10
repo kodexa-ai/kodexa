@@ -2008,6 +2008,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/implementation")
             from zipfile import ZipFile
             from io import BytesIO
+            logger.info(f"Downloading implementation package to {download_path}, and extracting")
             zipped_contents = ZipFile(BytesIO(response.content))
             zipped_contents.extractall(download_path)
         else:
@@ -2098,7 +2099,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                             with open('implementation.zip', 'rb') as zip_content:
                                 self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
                                                  files={"implementation": zip_content})
-                            results.append(f"{num_hits} files uploaded for {final_wildcard}")
+                            results.append(f"{num_hits} files packaged for {final_wildcard}")
             Path('implementation.zip').unlink()
             return results
         else:
