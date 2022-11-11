@@ -2091,15 +2091,14 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                             relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
 
                             # We will put the implementation in one place
-                            relative_path = self.IMPLEMENTATION_PREFIX + relative_path
                             if Path(path_hit).is_file():
                                 zipf.write(path_hit, relative_path)
                                 num_hits += 1
-                        if num_hits > 0:
-                            with open('implementation.zip', 'rb') as zip_content:
-                                self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
-                                                 files={"implementation": zip_content})
-                            results.append(f"{num_hits} files packaged for {final_wildcard}")
+                if num_hits > 0:
+                    with open('implementation.zip', 'rb') as zip_content:
+                        self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
+                                         files={"implementation": zip_content})
+                    results.append(f"{num_hits} files packaged for {final_wildcard}")
             Path('implementation.zip').unlink()
             return results
         else:
