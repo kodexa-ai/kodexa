@@ -420,6 +420,12 @@ class EntitiesEndpoint:
             params["legacyFilter"] = True
             params["filter"] = filters
 
+        if self.organization is not None:
+            if 'filter' not in params:
+                params['filter'] = [f"organization.id: '{self.organization.id}'"]
+            else:
+                params['filter'].append(f"organization.id={self.organization.id}")
+
         list_response = self.client.get(url, params=params)
         return self.get_page_class().parse_obj(list_response.json()).set_client(self.client)
 
@@ -978,8 +984,12 @@ class ProjectsEndpoint(EntitiesEndpoint):
 
     def find_by_name(self, project_name: str) -> Optional[ProjectEndpoint]:
         """Find a project by name"""
+
         url = f"/api/{self.get_type()}/"
-        get_response = self.client.get(url, params={'filter': f"name: '{project_name}'"})
+        filters = {'filter': [f"name: '{project_name}'"]}
+        if self.organization is not None:
+            filters['filter'].append(f"organization.id: '{self.organization.id}'")
+        get_response = self.client.get(url, params=filters)
         if len(get_response.json()['content']) > 0:
             return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
         return None
