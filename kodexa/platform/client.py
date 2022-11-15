@@ -1961,6 +1961,9 @@ class DocumentStoreEndpoint(StoreEndpoint):
                                        params={"path": path, "meta": True})
         return DocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
+    def delete_families(self):
+        """Delete all the families in the store"""
+        delete_response = self.client.delete(f"api/stores/{self.ref.replace(':', '/')}/families")
 
 class ModelStoreEndpoint(DocumentStoreEndpoint):
     """Represents a model store"""
