@@ -125,8 +125,12 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
 
     from kodexa.platform.client import DocumentStoreEndpoint
     if isinstance(document_store, DocumentStoreEndpoint):
-        print(f"Uploading {path}")
-        document_store.upload_file(path)
+        import glob
+        for path_match in glob.glob(path):
+
+            print(f"Uploading {path_match}")
+            document_store.upload_file(path_match)
+
         print("Upload complete :tada:")
     else:
         print(f"{ref} is not a document store")
