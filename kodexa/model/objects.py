@@ -1366,6 +1366,9 @@ class ProjectAssistant(KodexaBaseModel):
     schedules: Optional[List[ScheduleDefinition]] = Field(default_factory=list, unique_items=True)
     subscription: Optional[str] = None
 
+    logging_enabled: Optional[bool] = Field(None, alias='loggingEnabled')
+    show_in_training: Optional[bool] = Field(None, alias='showInTraining')
+
 
 class Taxon(KodexaBaseModel):
     """
@@ -2173,7 +2176,7 @@ class Assistant(KodexaBaseModel):
         None, alias='validationErrors'
     )
     definition: Optional[AssistantDefinition] = None
-
+    show_in_training: Optional[bool] = Field(None, alias='showInTraining')
 
 class AssistantExecution(KodexaBaseModel):
     assistant_id: Optional[str] = Field(None, alias='assistantId')
