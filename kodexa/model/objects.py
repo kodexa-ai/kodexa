@@ -933,6 +933,7 @@ class DeploymentOptions(KodexaBaseModel):
     memory_assigned: Optional[str] = Field(None, alias='memoryAssigned')
     cpu: Optional[str] = None
     pod_match_labels: Optional[List[MatchLabel]] = Field(None, alias='podMatchLabels')
+    child_process: Optional[bool] = Field(None, alias='childProcess')
 
 
 class SourceType(Enum):
@@ -1232,7 +1233,7 @@ class DeploymentMetadata(KodexaBaseModel):
     resource_group: Optional[str] = Field(None, alias='resourceGroup')
     function_url: Optional[str] = Field(None, alias='functionUrl')
     app_key: Optional[str] = Field(None, alias='appKey')
-
+    child_process: Optional[bool] = Field(None, alias='childProcess')
 
 class DockerSource(ExtensionPackSource):
     location: Optional[str] = None
