@@ -14,7 +14,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Type, Optional, List
+from typing import Type, Optional, List, Dict
 
 import requests
 from functional import seq
@@ -31,7 +31,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
-    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining
+    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException
 
 logger = logging.getLogger()
 
@@ -2338,7 +2338,16 @@ class ExtractionEngineEndpoint:
         response = self.client.post(f"/api/extractionEngine/extract",
                                     data={'taxonomyJson': taxonomy.json(exclude={'client'})},
                                     files={'document': document.to_kddb()})
-        return response.json()
+        return [DataObject.parse_obj(data_object) for data_object in response.json()]
+
+    def extract_data_objects_with_exceptions(self, taxonomy: Taxonomy, document: Document) -> Dict:
+        response = self.client.post(f"/api/extractionEngine/extract", params="full",
+                                    data={'taxonomyJson': taxonomy.json(exclude={'client'})},
+                                    files={'document': document.to_kddb()})
+        return {
+            'dataObjects': [DataObject.parse_obj(data_object) for data_object in response.json()['dataObjects']],
+            'exceptions': [ContentException.parse_obj(exception) for exception in response.json()['contentExceptions']]
+        }
 
     def extract_to_format(self, taxonomy: Taxonomy, document: Document, format: str) -> str:
         response = self.client.post(f"/api/extractionEngine/extract",
