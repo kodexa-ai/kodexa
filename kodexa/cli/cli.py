@@ -129,7 +129,10 @@ def upload(_: Info, ref: str, path: str, token: str, url: str):
         for path_match in glob.glob(path):
 
             print(f"Uploading {path_match}")
-            document_store.upload_file(path_match)
+            try:
+                document_store.upload_file(path_match)
+            except Exception as e:
+                print(f"Error uploading {path_match}: {e}")
 
         print("Upload complete :tada:")
     else:
