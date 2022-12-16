@@ -1965,6 +1965,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """Delete all the families in the store"""
         delete_response = self.client.delete(f"api/stores/{self.ref.replace(':', '/')}/families")
 
+
 class ModelStoreEndpoint(DocumentStoreEndpoint):
     """Represents a model store"""
     IMPLEMENTATION_PREFIX = "model_implementation/"
@@ -2051,6 +2052,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training.id}"
         response = self.client.put(url, body=json.loads(training.json(exclude={'client'}, by_alias=True)))
         return ModelTraining.parse_obj(response.json())
+
+    def delete_training(self, training_id: str):
+        """Delete a model training"""
+        url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training_id}"
+        self.client.delete(url)
 
     def get_training(self, training_id: str) -> ModelTraining:
         """Get a model training"""
