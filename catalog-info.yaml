@@ -2,6 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: kodexa
+  namespace: kodexa
   description: |
     Python client for Kodexa and Kodexa Document
   annotations:
