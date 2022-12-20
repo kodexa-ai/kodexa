@@ -4,8 +4,7 @@ nav:
   - Home: index.md
   - 'Kodexa Document':
       - 'Introduction': kodexa-document/index.md
-      - 'Selectors': kodexa-document/document-stores.md
-  - Selectors: selectors.md
+      - 'Selectors': kodexa-document/selectors.md
 
 plugins:
   - techdocs-core
