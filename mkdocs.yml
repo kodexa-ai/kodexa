@@ -2,6 +2,10 @@ site_name: 'platform'
 
 nav:
   - Home: index.md
+  - 'Kodexa Document':
+      - 'Introduction': kodexa-document/index.md
+      - 'Selectors': kodexa-document/document-stores.md
+  - Selectors: selectors.md
 
 plugins:
   - techdocs-core
