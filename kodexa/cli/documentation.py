@@ -48,7 +48,9 @@ def generate_documentation(metadata):
     if metadata.type == 'action':
         options = metadata.metadata.options
         print(json.dumps(options, indent=2))
-        write_template("options.j2", f"docs/{metadata.type}-{metadata.slug}", "options.md", metadata, options)
+        write_template("options.j2", f"docs/{metadata.type}-{metadata.slug}/docs/", "options.md", metadata, options)
+        write_template("index.j2", f"docs/{metadata.type}-{metadata.slug}/docs/", "index.md", metadata, options)
+        write_template("mkdocs.j2", f"docs/{metadata.type}-{metadata.slug}/", "mkdocs.yaml", metadata, options)
 
     if 'services' in metadata:
         for service in metadata['services']:
