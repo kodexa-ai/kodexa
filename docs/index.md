@@ -1,3 +1,3 @@
-# example docs
+# Kodexa
 
-This is a basic example of documentation.
+This library supports working with Kodexa both as a Document and also the platform.

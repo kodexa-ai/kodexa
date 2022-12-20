@@ -16,7 +16,7 @@ This would return an iterator of the content nodes (see the [What is a Kodexa Do
 
 Selectors are a powerful way to work and offer a number of clever features, the syntax is broken into a few parts:
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a0ea7f3f-3280-43cb-8336-54fc425cb54a/Untitled.png)
+![img_4.png](img_4.png)
 
 ### Axis & Node Type
 
