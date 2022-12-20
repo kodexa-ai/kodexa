@@ -315,6 +315,7 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
     else:
         raise Exception("Unable to find document store with ref " + ref)
 
+
 @cli.command()
 @click.argument('project_id', required=True)
 @click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
@@ -442,6 +443,15 @@ def login(_: Info):
         print('ERROR', error)
     else:
         KodexaPlatform.login(kodexa_url, username, password)
+
+
+@cli.command()
+@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml (defaults to current)')
+@pass_info
+def document(_: Info, path: str):
+    metadata_obj = ExtensionHelper.load_metadata(path)
+    from kodexa.cli.documentation import generate_documentation
+    generate_documentation(metadata_obj)
 
 
 @cli.command()
