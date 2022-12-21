@@ -2815,12 +2815,8 @@ class ModelRuntime(ExtensionPackProvided):
     )
 
 
-class Pipeline(KodexaBaseModel):
-    extension_pack_ref: Optional[str] = Field(
-        None,
-        alias='extensionPackRef',
-        description='The reference to the extension pack (if the metadata object was created by an extension pack)',
-    )
+class Pipeline(ExtensionPackProvided):
+
     metadata: Optional[PipelineImplementationMetadata] = None
 
 
