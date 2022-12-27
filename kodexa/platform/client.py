@@ -832,9 +832,13 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         response = self.client.get(url)
         return [Execution.parse_obj(execution) for execution in response.json()]
 
-    def send_event(self, event_object: dict):
+    def send_event(self, event_type: str, options: dict):
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
-        response = self.client.post(url, body=event_object)
+        event_options = {
+            "eventType": event_type,
+            "options": json.dumps(options)
+        }
+        response = self.client.post(url, data=event_object)
         process_response(response)
 
 
