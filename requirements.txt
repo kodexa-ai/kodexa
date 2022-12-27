@@ -1,11 +1,11 @@
-setuptools==63.2.0
+setuptools==65.5.1
 twine==4.0.1
 texttable
 addict==2.4.0
 requests
 msgpack==1.0.4
 urllib3
-wheel==0.37.1
+wheel==0.38.1
 ply~=3.11
 pytest==7.1.2
 pytest-runner==6.0.0
