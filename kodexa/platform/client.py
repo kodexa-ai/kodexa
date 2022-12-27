@@ -834,7 +834,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
 
     def send_event(self, event_type: str, options: dict):
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
-        event_options = {
+        event_object = {
             "eventType": event_type,
             "options": json.dumps(options)
         }
