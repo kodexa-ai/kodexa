@@ -5,7 +5,7 @@ addict==2.4.0
 requests
 msgpack==1.0.3
 urllib3
-wheel==0.37.1
+wheel==0.38.1
 ply
 pytest==7.1.1
 pytest-runner==6.0.0
