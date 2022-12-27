@@ -1,4 +1,4 @@
-setuptools==62.0.0
+setuptools==65.5.1
 twine==3.8.0
 texttable
 addict==2.4.0
