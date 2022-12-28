@@ -842,9 +842,9 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
 
         return None
 
-    def get_event_type_options(self, event_type: str) -> Dict[str, Any]:
+    def get_event_type_options(self, event_type: str, training:bool = False) -> Dict[str, Any]:
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events/{event_type}/options"
-        event_type_options = self.client.get(url)
+        event_type_options = self.client.get(url, params={"training": training})
         return event_type_options.json()
 
     def get_event_type(self, event_type_name: str) -> Optional[CustomEvent]:
