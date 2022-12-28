@@ -1332,6 +1332,20 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
         """Cancel the execution"""
         self.client.put(f'/api/executions/{self.id}/cancel')
 
+    def wait_for(self, status: str,
+                 timeout: int = 60) -> "ExecutionEndpoint":
+        logger.info("Waiting for status %s", status)
+        start = time.time()
+        execution = self
+        while time.time() - start < timeout:
+            execution = execution.reload()
+            if execution.status == status:
+                return execution
+
+            time.sleep(5)
+
+        raise Exception(f"Not available on document family {self.id}")
+
 
 class UserEndpoint(User, EntityEndpoint):
     """Represents a user endpoint"""
