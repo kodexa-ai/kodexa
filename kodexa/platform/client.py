@@ -854,11 +854,11 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
         """Get the instance class of the project assistants endpoint"""
         return AssistantEndpoint
 
-    def get_assistant_names(self):
+    def get_names(self):
         """Get the names of the assistants"""
         return [assistant.name for assistant in self.list()]
 
-    def find_assistant_by_name(self, assistant_name) -> Optional[AssistantEndpoint]:
+    def find_by_name(self, assistant_name) -> Optional[AssistantEndpoint]:
         """Find an assistant by name"""
         for assistant in self.list():
             if assistant.name == assistant_name:
