@@ -833,7 +833,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         response = self.client.get(url)
         return [Execution.parse_obj(execution) for execution in response.json()]
 
-    def send_event(self, event_type: str, options: dict):
+    def send_event(self, event_type: str, options: dict) -> "ExecutionEndpoint":
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
         event_object = {
             "eventType": event_type,
@@ -841,7 +841,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         }
         response = self.client.post(url, data=event_object)
         process_response(response)
-        return response.json()
+        return ExecutionEndpoint.parse_obj(response.json()).set_client(self.client)
 
 
 class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
