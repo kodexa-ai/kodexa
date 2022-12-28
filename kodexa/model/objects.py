@@ -351,6 +351,7 @@ class ProjectStore(KodexaBaseModel):
     template_ref: Optional[str] = Field(None, alias='templateRef')
     ref: Optional[str] = None
 
+
 class TaxonomyType(Enum):
     """
     The type of taxonomy
@@ -786,6 +787,16 @@ class Label(KodexaBaseModel):
     name: str
     color: Optional[str] = None
     label: str
+
+
+class ProjectTag(KodexaBaseModel):
+    """
+    A project tag
+    """
+
+    id: Optional[str] = Field(None, description='The ID of the object')
+    name: str
+    color: Optional[str] = None
 
 
 class PathExtractedData(KodexaBaseModel):
@@ -1234,6 +1245,7 @@ class DeploymentMetadata(KodexaBaseModel):
     function_url: Optional[str] = Field(None, alias='functionUrl')
     app_key: Optional[str] = Field(None, alias='appKey')
     child_process: Optional[bool] = Field(None, alias='childProcess')
+
 
 class DockerSource(ExtensionPackSource):
     location: Optional[str] = None
@@ -2178,6 +2190,7 @@ class Assistant(KodexaBaseModel):
     definition: Optional[AssistantDefinition] = None
     show_in_training: Optional[bool] = Field(None, alias='showInTraining')
 
+
 class AssistantExecution(KodexaBaseModel):
     assistant_id: Optional[str] = Field(None, alias='assistantId')
     project_id: Optional[str] = Field(None, alias='projectId')
@@ -2765,6 +2778,7 @@ class ProjectDataForm(ExtensionPackProvided):
     template_ref: Optional[str] = Field(None, alias='templateRef')
     ref: Optional[str] = None
 
+
 class ExtensionPack(ExtensionPackProvided):
     """
     Extension packs provide new components to the platform
@@ -2816,7 +2830,6 @@ class ModelRuntime(ExtensionPackProvided):
 
 
 class Pipeline(ExtensionPackProvided):
-
     metadata: Optional[PipelineImplementationMetadata] = None
 
 
@@ -3059,6 +3072,3 @@ ContentEvent.update_forward_refs()
 DataObjectEvent.update_forward_refs()
 DocumentFamilyEvent.update_forward_refs()
 ScheduledEvent.update_forward_refs()
-
-
-
