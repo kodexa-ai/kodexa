@@ -2397,6 +2397,7 @@ class KodexaClient:
         self.projects = ProjectsEndpoint(self)
         self.users = UsersEndpoint(self)
         self.memberships = MembershipsEndpoint(self)
+        self.executions = ExecutionsEndpoint(self)
 
     @staticmethod
     def login(url, email, password):
