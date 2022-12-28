@@ -35,6 +35,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
 
 logger = logging.getLogger()
 
+
 class Notifier:
     def __init__(self):
         pass
@@ -853,6 +854,17 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
         """Get the instance class of the project assistants endpoint"""
         return AssistantEndpoint
 
+    def get_assistant_names(self):
+        """Get the names of the assistants"""
+        return [assistant.name for assistant in self.list()]
+
+    def find_assistant_by_name(self, assistant_name) -> Optional[AssistantEndpoint]:
+        """Find an assistant by name"""
+        for assistant in self.list():
+            if assistant.name == assistant_name:
+                return assistant
+        return None
+
 
 class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
     """Represents a project document stores endpoint"""
@@ -1318,6 +1330,7 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
     def cancel(self):
         """Cancel the execution"""
         self.client.put(f'/api/executions/{self.id}/cancel')
+
 
 class UserEndpoint(User, EntityEndpoint):
     """Represents a user endpoint"""
@@ -1927,7 +1940,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
-    def filter(self, filter_string: str = "", page: int = 1, page_size: int = 100, sort=None) -> PageDocumentFamilyEndpoint:
+    def filter(self, filter_string: str = "", page: int = 1, page_size: int = 100,
+               sort=None) -> PageDocumentFamilyEndpoint:
         params = {
             'page': page,
             'pageSize': page_size,
@@ -2053,18 +2067,18 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
     def update_training(self, training: ModelTraining) -> ModelTraining:
         """Update a model training"""
-        url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training.id}"
+        url = f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training.id}"
         response = self.client.put(url, body=json.loads(training.json(exclude={'client'}, by_alias=True)))
         return ModelTraining.parse_obj(response.json())
 
     def delete_training(self, training_id: str):
         """Delete a model training"""
-        url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training_id}"
+        url = f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}"
         self.client.delete(url)
 
     def get_training(self, training_id: str) -> ModelTraining:
         """Get a model training"""
-        url = f"/api/stores/{self.ref.replace(':','/')}/trainings/{training_id}"
+        url = f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}"
         response = self.client.get(url)
         return ModelTraining.parse_obj(response.json())
 
@@ -2100,18 +2114,21 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                     ignore_files = []
                     if metadata.ignored_contents:
                         for ignore_path in metadata.ignored_contents:
-                            final_wildcard = os.path.join(metadata.base_dir, ignore_path) if metadata.base_dir else ignore_path
+                            final_wildcard = os.path.join(metadata.base_dir,
+                                                          ignore_path) if metadata.base_dir else ignore_path
                             for path_hit in glob.glob(final_wildcard, recursive=True):
                                 ignore_files.append(path_hit)
 
                     for content_path in metadata.contents:
-                        final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
+                        final_wildcard = os.path.join(metadata.base_dir,
+                                                      content_path) if metadata.base_dir else content_path
                         num_hits = 0
 
                         for path_hit in glob.glob(final_wildcard, recursive=True):
                             if path_hit in ignore_files:
                                 continue
-                            relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
+                            relative_path = path_hit.replace(metadata.base_dir + '/',
+                                                             '') if metadata.base_dir else path_hit
 
                             # We will put the implementation in one place
                             if Path(path_hit).is_file():
@@ -2135,12 +2152,14 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                 ignore_files = []
                 if metadata.ignored_contents:
                     for ignore_path in metadata.ignored_contents:
-                        final_wildcard = os.path.join(metadata.base_dir, ignore_path) if metadata.base_dir else ignore_path
+                        final_wildcard = os.path.join(metadata.base_dir,
+                                                      ignore_path) if metadata.base_dir else ignore_path
                         for path_hit in glob.glob(final_wildcard, recursive=True):
                             ignore_files.append(path_hit)
 
                 for content_path in metadata.contents:
-                    final_wildcard = os.path.join(metadata.base_dir, content_path) if metadata.base_dir else content_path
+                    final_wildcard = os.path.join(metadata.base_dir,
+                                                  content_path) if metadata.base_dir else content_path
                     num_hits = 0
 
                     for path_hit in glob.glob(final_wildcard, recursive=True):
