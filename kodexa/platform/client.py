@@ -842,10 +842,15 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
 
         return None
 
-    def get_event_type(self, event_type: str) -> Optional[CustomEvent]:
+    def get_event_type_options(self, event_type: str) -> Dict[str, Any]:
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/events/{event_type}/options"
+        event_type_options = self.client.get(url)
+        return event_type_options.json()
+
+    def get_event_type(self, event_type_name: str) -> Optional[CustomEvent]:
         """Get the event type of the assistant"""
         for event_type in self.definition.event_types:
-            if event_type.name == event_type:
+            if event_type.name == event_type_name:
                 return event_type
 
         return None
@@ -2448,12 +2453,6 @@ class KodexaClient:
     @property
     def extraction_engine(self):
         return ExtractionEngineEndpoint(self)
-
-    def build_options_defaults(self, options: List[Option]) -> Dict[str, "Any"]:
-        """Use the server to resolve the default options for a list of options"""
-        url = '/api/optionsBuilder'
-        default_options = self.client.post(url, body=options)
-        return default_options.json()
 
     @property
     def platform(self) -> PlatformOverview:
