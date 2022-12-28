@@ -841,6 +841,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         }
         response = self.client.post(url, data=event_object)
         process_response(response)
+        return response.json()
 
 
 class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
