@@ -31,7 +31,8 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
-    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option
+    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
+    CustomEvent
 
 logger = logging.getLogger()
 
@@ -841,7 +842,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
 
         return None
 
-    def get_event_type(self, event_type: str) -> Optional["EventType"]:
+    def get_event_type(self, event_type: str) -> Optional[CustomEvent]:
         """Get the event type of the assistant"""
         for event_type in self.definition.event_types:
             if event_type.name == event_type:
