@@ -14,7 +14,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Type, Optional, List, Dict
+from typing import Type, Optional, List, Dict, Any
 
 import requests
 from functional import seq
@@ -31,7 +31,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
-    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException
+    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option
 
 logger = logging.getLogger()
 
@@ -832,6 +832,22 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/executions"
         response = self.client.get(url)
         return [Execution.parse_obj(execution) for execution in response.json()]
+
+    def get_event_type(self, event_type: str) -> Optional["CustomEvent"]:
+        """Get the event type of the assistant"""
+        for event_type in self.definition.event_types:
+            if event_type.name == event_type:
+                return event_type
+
+        return None
+
+    def get_event_type(self, event_type: str) -> Optional["EventType"]:
+        """Get the event type of the assistant"""
+        for event_type in self.definition.event_types:
+            if event_type.name == event_type:
+                return event_type
+
+        return None
 
     def send_event(self, event_type: str, options: dict) -> "ExecutionEndpoint":
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
@@ -2431,6 +2447,12 @@ class KodexaClient:
     @property
     def extraction_engine(self):
         return ExtractionEngineEndpoint(self)
+
+    def build_options_defaults(self, options: List[Option]) -> Dict[str, "Any"]:
+        """Use the server to resolve the default options for a list of options"""
+        url = '/api/optionsBuilder'
+        default_options = self.client.post(url, body=options)
+        return default_options.json()
 
     @property
     def platform(self) -> PlatformOverview:
