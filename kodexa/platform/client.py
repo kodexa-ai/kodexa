@@ -32,7 +32,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
     Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
-    CustomEvent
+    CustomEvent, ProjectTag
 
 logger = logging.getLogger()
 
@@ -842,7 +842,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
 
         return None
 
-    def get_event_type_options(self, event_type: str, training:bool = False) -> Dict[str, Any]:
+    def get_event_type_options(self, event_type: str, training: bool = False) -> Dict[str, Any]:
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events/{event_type}/options"
         event_type_options = self.client.get(url, params={"training": training})
         return event_type_options.json()
@@ -1004,6 +1004,17 @@ class ProjectEndpoint(EntityEndpoint, Project):
     def assistants(self) -> ProjectAssistantsEndpoint:
         """Get the assistants endpoint of the project"""
         return ProjectAssistantsEndpoint().set_client(self.client).set_project(self)
+
+    def get_tags(self) -> List[ProjectTag]:
+        """Get the tags of the project"""
+        response = self.client.get(f"/api/projects/{self.id}/tags")
+        return [ProjectTag.parse_obj(tag) for tag in response.json()]
+
+    def update_tags(self, tags: List[ProjectTag]) -> List[ProjectTag]:
+        """Update the tags of the project"""
+        response = self.client.put(f"/api/projects/{self.id}/tags",
+                                   body=[tag.dict(exclude={'client'}, by_alias=True) for tag in tags])
+        return [ProjectTag.parse_obj(tag) for tag in response.json()]
 
 
 class ProjectsEndpoint(EntitiesEndpoint):
