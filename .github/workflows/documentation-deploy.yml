@@ -24,7 +24,7 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: mvn -B package
-          working-directory: ./docs
+          working-directory: ./docs/.
 
       - name: deploy documentation
         uses: peaceiris/actions-gh-pages@v3
