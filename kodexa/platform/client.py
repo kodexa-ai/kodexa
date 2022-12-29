@@ -1365,8 +1365,11 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
         """Cancel the execution"""
         self.client.put(f'/api/executions/{self.id}/cancel')
 
-    def wait_for(self, status: str = 'SUCCEEDED',
-                 timeout: int = 60, follow_child_executions: bool = True) -> "ExecutionEndpoint":
+    def wait_for(self, status: str = 'SUCCEEDED', fail_on_statuses=None,
+                 timeout: int = 300, follow_child_executions: bool = True) -> List["ExecutionEndpoint"]:
+        if fail_on_statuses is None:
+            fail_on_statuses = ['FAILED']
+
         logger.info("Waiting for status %s", status)
         start = time.time()
         execution = self
@@ -1374,14 +1377,21 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
             execution = execution.reload()
             if execution.status == status:
                 if follow_child_executions:
-                    for child_execution in execution.child_executions:
-                        return child_execution.wait_for(status, timeout, follow_child_executions)
+                    all_executions = []
+                    for child_execution in [ExecutionEndpoint.parse_obj(child_execution.dict()).set_client(self.client)
+                                            for child_execution in
+                                            execution.child_executions]:
+                        all_executions.extend(child_execution.wait_for(status, timeout, follow_child_executions))
+                    return all_executions
                 else:
-                    return execution
+                    return [execution]
+
+            if execution.status in fail_on_statuses:
+                raise Exception(f"Execution failed with status {execution.status}")
 
             time.sleep(5)
 
-        raise Exception(f"Not available on document family {self.id}")
+        raise Exception(f"Timed out waiting on execution {self.id}")
 
 
 class UserEndpoint(User, EntityEndpoint):
