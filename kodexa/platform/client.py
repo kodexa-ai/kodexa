@@ -411,7 +411,7 @@ class EntitiesEndpoint:
     def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}"
 
-        params = {"query": requests.utils.quote(query),
+        params = {"query": query,
                   "page": page,
                   "pageSize": pagesize}
 
@@ -861,7 +861,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
             "eventType": event_type,
             "options": json.dumps(options)
         }
-        response = self.client.post(url, data=event_object)
+        response = self.client.post(url, data=event_object, files={})
         process_response(response)
         return ExecutionEndpoint.parse_obj(response.json()).set_client(self.client)
 

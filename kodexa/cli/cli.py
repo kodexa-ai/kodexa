@@ -382,7 +382,7 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
     print("Sending event")
     from kodexa.platform.client import AssistantEndpoint
     assistant_endpoint: AssistantEndpoint = client.get_project(project_id).assistants.get(assistant_id)
-    assistant_endpoint.send_event(obj)
+    assistant_endpoint.send_event(obj['eventType'], obj['options'])
     print("Event sent :tada:")
 
 
