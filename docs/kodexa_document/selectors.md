@@ -2,17 +2,17 @@
 
 Part of the core of the Kodexa platform is the ability to use selectors to find content within our document structure.
 
-A selector works in a similar way to a CSS selector or an XPath.  It allows you to build a query that can be executed on an instance of a document.
+A selector works in a similar way to a CSS selector or an XPath. It allows you to build a query that can be executed on
+an instance of a document.
 
 For example if you wanted find all content nodes with the value “Name” you can do:
-
-
 
 ```python
 document.select('//*[contentRegex("Name")]')
 ```
 
-This would return an iterator of the content nodes (see the [What is a Kodexa Document?](https://www.notion.so/What-is-a-Kodexa-Document-59052954fbd54b4a97c5462de1b83068))
+This would return an iterator of the content nodes (see
+the [What is a Kodexa Document?](kodexa_document/introduction))
 
 Selectors are a powerful way to work and offer a number of clever features, the syntax is broken into a few parts:
 
@@ -20,18 +20,20 @@ Selectors are a powerful way to work and offer a number of clever features, the 
 
 # Axis & Node Type
 
-The axis is used to define how we are going to navigate the tree structure to identify the node types we want to match.  Some basic examples are:
+The axis is used to define how we are going to navigate the tree structure to identify the node types we want to match.
+Some basic examples are:
 
-| // | Root node and all children |
-| --- | --- |
-| / | Root node |
-| . | Current Node  (or root if from the document) |
-| ./line/. | All nodes of type line under the current node |
+| //           | Root node and all children                                              |
+|--------------|-------------------------------------------------------------------------|
+| /            | Root node                                                               |
+| .            | Current Node  (or root if from the document)                            |
+| ./line/.     | All nodes of type line under the current node                           |
 | parent::line | Any node in the parent structure of this node that is of node type line |
 
 # Predicate
 
-The predicate for the nodes selected with the axis and node type is in square brackets.  It can be made up a functions, attributes and operators to allow you to further filter the nodes that you want to select.
+The predicate for the nodes selected with the axis and node type is in square brackets. It can be made up a functions,
+attributes and operators to allow you to further filter the nodes that you want to select.
 
 Functions can be used in the predicate, these are:
 
@@ -78,15 +80,19 @@ Also we support operators to allow you to combine functions, these are:
 
 Another concept that is available in selectors is a “pipeline”.
 
-This allows use to chain together a list of selectors, where the results of the first selector are passed into the next selector.  This can be a useful way to build more complex queries against document structures.
+This allows use to chain together a list of selectors, where the results of the first selector are passed into the next
+selector. This can be a useful way to build more complex queries against document structures.
 
 For example:
 
 ```python
-//word stream *[hasTag("ORG")] stream *[hasTag("PERSON")]
+// word
+stream * [hasTag("ORG")]
+stream * [hasTag("PERSON")]
 ```
 
-In the example above we stream all nodes of type word and then filter those that have the tag ORG, then filter those that have the tag PERSON.
+In the example above we stream all nodes of type word and then filter those that have the tag ORG, then filter those
+that have the tag PERSON.
 
 # Examples
 
