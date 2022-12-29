@@ -1,9 +1,10 @@
 kodexa
     introduction
-kodexa-document
-    introduction
+documents
+    overview
+    first-steps
     selectors
-kodexa-client
+client
     installation
     configuration
     usage

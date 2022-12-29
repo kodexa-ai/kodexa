@@ -12,7 +12,7 @@ document.select('//*[contentRegex("Name")]')
 ```
 
 This would return an iterator of the content nodes (see
-the [What is a Kodexa Document?](kodexa-document/introduction))
+the [What is a Kodexa Document?](documents/overview))
 
 Selectors are a powerful way to work and offer a number of clever features, the syntax is broken into a few parts:
 
