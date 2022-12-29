@@ -1,4 +1,4 @@
-# Selectors
+# Introduction
 
 Part of the core of the Kodexa platform is the ability to use selectors to find content within our document structure.
 
@@ -16,9 +16,9 @@ This would return an iterator of the content nodes (see the [What is a Kodexa Do
 
 Selectors are a powerful way to work and offer a number of clever features, the syntax is broken into a few parts:
 
-![img_4.png](img_4.png)
+:include-image: img_4.png {title: "Selector Structure", fit: true}
 
-### Axis & Node Type
+# Axis & Node Type
 
 The axis is used to define how we are going to navigate the tree structure to identify the node types we want to match.  Some basic examples are:
 
@@ -29,7 +29,7 @@ The axis is used to define how we are going to navigate the tree structure to id
 | ./line/. | All nodes of type line under the current node |
 | parent::line | Any node in the parent structure of this node that is of node type line |
 
-### Predicate
+# Predicate
 
 The predicate for the nodes selected with the axis and node type is in square brackets.  It can be made up a functions, attributes and operators to allow you to further filter the nodes that you want to select.
 
@@ -74,7 +74,7 @@ Also we support operators to allow you to combine functions, these are:
 | and | Boolean AND operation on the two sides |
 | or | Boolean OR operation on the two sides |
 
-## Pipelines
+# Pipelines
 
 Another concept that is available in selectors is a “pipeline”.
 
@@ -88,6 +88,6 @@ For example:
 
 In the example above we stream all nodes of type word and then filter those that have the tag ORG, then filter those that have the tag PERSON.
 
-## Examples
+# Examples
 
 Below are some examples of how you can use selectors:
