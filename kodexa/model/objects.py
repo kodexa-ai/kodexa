@@ -1975,6 +1975,9 @@ class Execution(KodexaBaseModel):
     content_objects: Optional[List[ContentObject]] = Field(
         None, alias='contentObjects', unique_items=True
     )
+    child_executions: Optional[List[Execution]] = Field(
+        None, alias='childExecutions'
+    )
 
 
 class ExecutionSnapshot(KodexaBaseModel):
