@@ -23,7 +23,8 @@ jobs:
       - name: Build with xvfb enabled
         uses: GabrielBB/xvfb-action@v1.0
         with:
-          run: cd docs && mvn -B package
+          run: mvn -B package
+          working-directory: ./docs
 
       - name: deploy documentation
         uses: peaceiris/actions-gh-pages@v3
