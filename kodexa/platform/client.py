@@ -1365,15 +1365,19 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
         """Cancel the execution"""
         self.client.put(f'/api/executions/{self.id}/cancel')
 
-    def wait_for(self, status: str,
-                 timeout: int = 60) -> "ExecutionEndpoint":
+    def wait_for(self, status: str = 'SUCCEEDED',
+                 timeout: int = 60, follow_child_executions: bool = True) -> "ExecutionEndpoint":
         logger.info("Waiting for status %s", status)
         start = time.time()
         execution = self
         while time.time() - start < timeout:
             execution = execution.reload()
             if execution.status == status:
-                return execution
+                if follow_child_executions:
+                    for child_execution in execution.child_executions:
+                        return child_execution.wait_for(status, timeout, follow_child_executions)
+                else:
+                    return execution
 
             time.sleep(5)
 
