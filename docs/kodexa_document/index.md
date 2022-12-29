@@ -10,7 +10,7 @@ This resulting Kodexa document object can then be accessed using a common API, a
 methods to extract the content they need. By storing data in this manner, we can structure content in such a way that it
 is **flexible** while also **allowing for the addition of features** to describe the contents further.
 
-![img.png](img.png)
+:include-image: img.png {fit: true}
 
 ## II. Structure
 
@@ -30,7 +30,7 @@ structure** **composed of content nodes**. These content nodes can be one of a v
 - **Word Nodes**
     - Word nodes are the leaf nodes of our document tree. These nodes contain the actual content of our document.
 
-![img_1.png](img_1.png)
+:include-image: img_1.png {fit: true}
 
 Each content node consists of the following:
 
@@ -56,8 +56,8 @@ below
    lines, we’ll need to create two line nodes.
 5. Lastly, we can create word nodes for each of our line nodes to reference each of the words in a line.
 
-![img_2.png](img_2.png)
+:include-image: img_2.png {fit: true}
 
 Our final Kodexa document tree can also be visualized by layering its data on top of our initial PDF
 
-![img_3.png](img_3.png)
+:include-image: img_3.png {fit: true}
