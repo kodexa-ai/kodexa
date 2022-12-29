@@ -3,4 +3,4 @@ an **information-oriented** approach. Use it as a
 reference for the technical implementation of the
 `calculator` project code.
 
-::: kodexa.platform.client
+:include-python: kodexa/platform/client.py {entry: "KodexaClient"}

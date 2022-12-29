@@ -1,8 +1,9 @@
-introduction
-kodexa_document
+kodexa
+    introduction
+kodexa-document
     introduction
     selectors
-kodexa_client
+kodexa-client
     installation
     configuration
     usage
