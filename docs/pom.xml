@@ -43,6 +43,7 @@
                         <configuration>
                             <sourceRoot>.</sourceRoot>
                             <docId>znai-build</docId>
+                            <deployRoot>kodexa/</deployRoot>
                         </configuration>
                     </execution>
                 </executions>
