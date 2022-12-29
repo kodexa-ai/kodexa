@@ -1,6 +1,4 @@
-# What is a Kodexa Document
-
-## I. Purpose
+# What is a  Document
 
 The purpose of a Kodexa document is to represent unstructured data as a **generalized structured document** that can *
 *support a wide variety of use cases**. The underlying idea is that given unstructured data, how do we introduce
@@ -12,7 +10,7 @@ is **flexible** while also **allowing for the addition of features** to describe
 
 :include-image: img.png {fit: true}
 
-## II. Structure
+# Structure
 
 Now, we can start discussing the structure of a Kodexa document. A Kodexa document is a **hierarchical tree like
 structure** **composed of content nodes**. These content nodes can be one of a variety of types, such as:
@@ -42,7 +40,7 @@ Each content node consists of the following:
     - Content features can also be described by their **type**. Some examples of these types are spatial features like
       bounding boxes and text features like font.
 
-## III. A Simple Kodexa Document
+# Example Document
 
 To help you better understand and visualize what has been discussed so far, here is an example of a simple PDF and its
 corresponding Kodexa document. The step-by-step process for converting the PDF into a Kodexa document is also described
