@@ -1381,13 +1381,14 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
                     for child_execution in [ExecutionEndpoint.parse_obj(child_execution.dict()).set_client(self.client)
                                             for child_execution in
                                             execution.child_executions]:
-                        all_executions.extend(child_execution.wait_for(status, timeout, follow_child_executions))
+                        all_executions.extend(
+                            child_execution.wait_for(status, fail_on_statuses, timeout, follow_child_executions))
                     return all_executions
                 else:
                     return [execution]
 
             if execution.status in fail_on_statuses:
-                raise Exception(f"Execution failed with status {execution.status}")
+                raise Exception(f"Execution {execution.id} failed with status {execution.status}")
 
             time.sleep(5)
 
