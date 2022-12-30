@@ -186,7 +186,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def get_instance_class(self, object_dict=None) -> Type[ClientEndpoint]:
         pass
 
-    def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
+    def print_table(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None, title: str = None):
         cols = DEFAULT_COLUMNS['default']
 
         object_type, object_type_metadata = resolve_object_type(self.get_type())
@@ -200,7 +200,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
         for col in cols:
             table.add_column(col)
 
-        for object_dict in self.list(query=query, page=page, pagesize=pagesize, sort=sort, filters=filters):
+        for object_dict in self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters):
             row = []
 
             for col in cols:
@@ -214,13 +214,24 @@ class ProjectResourceEndpoint(ClientEndpoint):
 
         Console().print(table)
 
-    def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
+    def to_df(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None) -> pd.DataFrame:
+        """
+        Convert resources to data frame
+
+        :return:
+        """
+        import pandas as pd
+        df = pd.DataFrame(seq(self.list(query, page, page_size, sort, filters)).map(lambda x: x.dict()).to_list())
+        df.drop(columns='client', axis=1)
+        return df
+
+    def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
 
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
 
         params = {"query": requests.utils.quote(query),
                   "page": page,
-                  "pageSize": pagesize}
+                  "pageSize": page_size}
 
         if sort is not None:
             params["sort"] = sort
@@ -240,6 +251,13 @@ class ProjectResourceEndpoint(ClientEndpoint):
         url = f"/api/projects/{self.project.id}/{self.get_type()}/{component_id}"
         get_response = self.client.get(url)
         return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
+
+    def find_by_name(self, name) -> Optional[Any]:
+        """Find resource by name"""
+        for resource in self.list():
+            if resource.name == name:
+                return resource
+        return None
 
 
 class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
@@ -279,12 +297,12 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             return None
         return component_page.content[0]
 
-    def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
+    def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}/{self.organization.slug}"
 
         params = {"query": requests.utils.quote(query),
                   "page": page,
-                  "pageSize": pagesize}
+                  "pageSize": page_size}
 
         if sort is not None:
             params["sort"] = sort
@@ -296,7 +314,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         return self.get_page_class(list_response.json()).parse_obj(list_response.json()).set_client(
             self.client).to_endpoints()
 
-    def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
+    def print_table(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None, title: str = None):
         cols = DEFAULT_COLUMNS['default']
 
         object_type, object_type_metadata = resolve_object_type(self.get_type())
@@ -310,7 +328,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         for col in cols:
             table.add_column(col)
 
-        list_page = self.list(query=query, page=page, pagesize=pagesize, sort=sort, filters=filters)
+        list_page = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
         for object_dict in list_page.content:
             row = []
 
@@ -408,12 +426,12 @@ class EntitiesEndpoint:
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
 
-    def list(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None):
+    def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}"
 
         params = {"query": query,
                   "page": page,
-                  "pageSize": pagesize}
+                  "pageSize": page_size}
 
         if sort is not None:
             params["sort"] = sort
@@ -431,7 +449,7 @@ class EntitiesEndpoint:
         list_response = self.client.get(url, params=params)
         return self.get_page_class().parse_obj(list_response.json()).set_client(self.client)
 
-    def print_table(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None, title: str = None):
+    def print_table(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None, title: str = None):
         cols = DEFAULT_COLUMNS['default']
 
         object_type, object_type_metadata = resolve_object_type(self.get_type())
@@ -445,7 +463,7 @@ class EntitiesEndpoint:
         for col in cols:
             table.add_column(col)
 
-        list_page = self.list(query=query, page=page, pagesize=pagesize, sort=sort, filters=filters)
+        list_page = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
         for object_dict in list_page.content:
             row = []
 
@@ -880,13 +898,6 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
     def get_names(self):
         """Get the names of the assistants"""
         return [assistant.name for assistant in self.list()]
-
-    def find_by_name(self, assistant_name) -> Optional[AssistantEndpoint]:
-        """Find an assistant by name"""
-        for assistant in self.list():
-            if assistant.name == assistant_name:
-                return assistant
-        return None
 
 
 class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
@@ -1377,7 +1388,7 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
             execution = execution.reload()
             if execution.status == status:
                 if follow_child_executions:
-                    all_executions = []
+                    all_executions = [execution]
                     for child_execution in [ExecutionEndpoint.parse_obj(child_execution.dict()).set_client(self.client)
                                             for child_execution in
                                             execution.child_executions]:
@@ -2146,12 +2157,12 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(url)
         return ModelTraining.parse_obj(response.json())
 
-    def list_trainings(self, query="*", page=1, pagesize=10, sort=None, filters: List[str] = None) -> PageModelTraining:
+    def list_trainings(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None) -> PageModelTraining:
         """List all model trainings"""
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings"
         params = {"query": requests.utils.quote(query),
                   "page": page,
-                  "pageSize": pagesize}
+                  "pageSize": page_size}
 
         if sort is not None:
             params["sort"] = sort

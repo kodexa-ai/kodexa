@@ -248,7 +248,7 @@ def logs(_: Info, execution_id: str, url: str, token: str):
 @click.option('--sort', default=None, help='Sort by (ie. startDate:desc)')
 @pass_info
 def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, format=None,
-        page: int = 1, pagesize: int = 10, sort: str = None):
+        page: int = 1, page_size: int = 10, sort: str = None):
     """
     List the instance of the object type
     """
@@ -267,7 +267,7 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
             elif format == 'yaml':
                 print(Syntax(object_instance.yaml(indent=4), "yaml"))
         else:
-            objects_endpoint.print_table(query=query, page=page, pagesize=pagesize, sort=sort)
+            objects_endpoint.print_table(query=query, page=page, page_size=page_size, sort=sort)
     else:
 
         if ref and not ref.isspace():
@@ -283,7 +283,7 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
 
                 organization = client.organizations.find_by_slug(ref)
                 objects_endpoint = client.get_object_type(object_type, organization)
-                objects_endpoint.print_table(query=query, page=page, pagesize=pagesize, sort=sort)
+                objects_endpoint.print_table(query=query, page=page, page_size=page_size, sort=sort)
         else:
 
             print(f"You must provide a ref to get a specific object")
@@ -301,7 +301,7 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
 @click.option('--sort', default=None, help='Sort by ie. name:asc')
 @pass_info
 def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, download_native: bool, page: int,
-          pagesize: int, sort: None):
+          page_size: int, sort: None):
     """
     Query the documents in a given document store
     """
@@ -310,7 +310,7 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
 
     document_store: DocumentStoreEndpoint = client.get_object_by_ref('store', ref)
     if isinstance(document_store, DocumentStoreEndpoint):
-        results = document_store.query(query, page, pagesize, sort)
+        results = document_store.query(query, page, page_size, sort)
 
     else:
         raise Exception("Unable to find document store with ref " + ref)
