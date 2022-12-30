@@ -953,7 +953,7 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         """Get the instance class of the project model stores endpoint"""
-        return DataStoreEndpoint
+        return ModelStoreEndpoint
 
 
 class ProjectEndpoint(EntityEndpoint, Project):
