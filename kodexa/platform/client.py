@@ -2074,9 +2074,8 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
         if num_hits > 0:
             logger.info(f"Uploading {num_hits} files to store (training.zip)")
-            with open('training.zip', 'rb') as zip_content:
-                self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_run_id}/content",
-                                 files={"training": zip_content})
+            self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_run_id}/content",
+                             files={"training": open('training.zip', 'rb')})
             results.append(f"{num_hits} files uploaded for {final_wildcard}")
 
         logger.info(f"Uploading training run {training_run_id} to store, deleting local")
