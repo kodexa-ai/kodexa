@@ -27,3 +27,36 @@ find the original document.
 ```python
 document.source
 ```
+
+# Saving a Document (Filesystem)
+
+A document can be saved to a file, or to a store. In this example we will save the document to a
+local file. By default the document will be saved in the Kodexa format, which is a SQLite database.
+
+```python
+document.to_kddb('my-document.kddb')
+```
+
+Note: By convention we store Kodexa documents in files with the extension .kddb (Kodexa Document Database)
+
+# Loading a Document (Filesystem)
+
+A document can be loaded from a file, or from a store. In this example we will load the document from a
+local file. By default the document will be loaded from the Kodexa format, which is a SQLite database.
+
+```python
+document = Document.from_kddb('my-document.kddb')
+```
+
+## Detached Documents
+
+When a document is loaded from a file by default any changes you make are then made to the file immediately. This is
+useful for many use cases, but sometimes you want to make changes to a document without affecting the original file.
+
+For example, you may want to make changes to a document, but not save them until you are sure that they are correct.
+
+To do this you can load the document in detached mode.
+
+```python
+document = Document.from_kddb('my-document.kddb', detached=True)
+```

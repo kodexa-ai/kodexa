@@ -214,7 +214,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
 
         Console().print(table)
 
-    def to_df(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None) -> pd.DataFrame:
+    def to_df(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         """
         Convert resources to data frame
 
