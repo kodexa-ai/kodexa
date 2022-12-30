@@ -1,8 +1,8 @@
 {
-  "title": "Kodexa",
+  "title": "Kodexa Python",
   "type": "Guide",
   "viewOn": {
-    "link": "https://kodexa.github.io",
-    "title": "View On Label"
+    "link": "https://docs.kodeax.com/kodexa",
+    "title": "Documentation"
   }
 }
