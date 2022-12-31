@@ -58,7 +58,9 @@ def generate_documentation(metadata):
     os.makedirs('docs', exist_ok=True)
     components = document_component(metadata)
 
-    toc = ""
+    write_template("index.j2", f"docs/overview", f"index.md", components)
+
+    toc = "overview\n    index\n"
 
     toc = toc + "assistant\n"
     for assistantDefinition in components['assistantDefinitions']:
@@ -162,7 +164,8 @@ def document_component(metadata):
         'pipelines': [],
         'taxonomies': [],
         'assistantDefinitions': [],
-        'modelRuntimes': []
+        'modelRuntimes': [],
+        'extensionPacks': []
     }
 
     if metadata.type == 'action':
@@ -180,6 +183,10 @@ def document_component(metadata):
     if metadata.type == 'projectTemplate':
         write_template("project-template.j2", f"docs/{camel_to_kebab(metadata.type)}", f"{metadata.slug}.md", metadata)
         components['projectTemplates'].append(f"{metadata.slug}")
+
+    if metadata.type == 'extensionPack':
+        write_template("extension-pack.j2", f"docs/{camel_to_kebab(metadata.type)}", f"{metadata.slug}.md", metadata)
+        components['extensionPacks'].append(f"{metadata.slug}")
 
     if metadata.type == 'pipeline':
         write_template("pipeline.j2", f"docs/{camel_to_kebab(metadata.type)}", f"{metadata.slug}.md", metadata)
@@ -218,6 +225,7 @@ def document_component(metadata):
             components['taxonomies'] += service_components['taxonomies']
             components['assistantDefinitions'] += service_components['assistantDefinitions']
             components['modelRuntimes'] += service_components['modelRuntimes']
+            components['extensionPacks'] += service_components['extensionPacks']
 
     return components
 
