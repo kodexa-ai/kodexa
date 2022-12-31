@@ -5,6 +5,7 @@ been configured in your environment.
 
 The client will use the following environment variables to determine the connection details:
 
+
 * `KODEXA_URL` - The URL of the Kodexa instance
 * `KODEXA_ACCESS_TOKEN` - The access token to use to connect to the Kodexa instance
 
@@ -14,3 +15,7 @@ You can also specify a different Kodexa instance to connect to.
 client = KodexaClient('https://my-kodexa-instance.com', 'xxxx-xxxx-xxxx-xxxx')
 ```
 
+```api-parameters
+Server URL, String, The URL of the server; it needs to include the protocol and port (if needed)
+Access Token, String, The Access Token to use
+```
