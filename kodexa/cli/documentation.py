@@ -106,8 +106,8 @@ def transform_taxons(taxons):
     for taxon in taxons:
         simple_taxon = {
             'name': taxon['name'],
-            'type': taxon['type'],
-            'description': taxon['description']
+            'taxonType': taxon['type'],
+            'description': taxon['description'] if 'description' in taxon else ''
         }
 
         if 'children' in taxon:
@@ -133,7 +133,9 @@ def transform_options(options):
         description = ""
         if option['required'] == True:
             description += "**Required**\n"
-        description = description + option['description']
+
+        if 'description' in option:
+            description = description + option['description']
 
         if 'default' in option:
             description = description + f" \nDefault: {option['default']}"
