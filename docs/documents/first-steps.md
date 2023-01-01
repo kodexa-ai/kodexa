@@ -1,3 +1,7 @@
+---
+title: First Steps
+---
+
 # Creating a Document
 
 Typically one of the first steps in Kodexa is create a new document. For this example, lets

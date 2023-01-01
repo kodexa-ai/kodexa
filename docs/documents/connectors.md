@@ -1,3 +1,7 @@
+---
+title: Connectors
+---
+
 # What is a Connector?
 
 A connector is a way to go from a Kodexa Document instance and get the original source for the content.
