@@ -247,11 +247,6 @@ class ProjectResourceEndpoint(ClientEndpoint):
         get_response = self.client.post(url, component.to_dict())
         return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
 
-    def get(self, component_id):
-        url = f"/api/projects/{self.project.id}/{self.get_type()}/{component_id}"
-        get_response = self.client.get(url)
-        return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
-
     def find_by_name(self, name) -> Optional[Any]:
         """Find resource by name"""
         for resource in self.list():
@@ -898,6 +893,13 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
     def get_names(self):
         """Get the names of the assistants"""
         return [assistant.name for assistant in self.list()]
+
+    def find_by_id(self, id:str) -> Optional[AssistantEndpoint]:
+        """Find assistant by ID"""
+        for resource in self.list():
+            if resource.id == id:
+                return resource
+        return None
 
 
 class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
