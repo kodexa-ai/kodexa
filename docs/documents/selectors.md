@@ -25,8 +25,9 @@ Selectors are a powerful way to work and offer a number of clever features, the 
 The axis is used to define how we are going to navigate the tree structure to identify the node types we want to match.
 Some basic examples are:
 
-| //           | Root node and all children                                              |
+| Path         | Meaning                                                                 |
 |--------------|-------------------------------------------------------------------------|
+| //           | Current node and all children                                           |
 | /            | Root node                                                               |
 | .            | Current Node  (or root if from the document)                            |
 | ./line/.     | All nodes of type line under the current node                           |
@@ -39,44 +40,29 @@ attributes and operators to allow you to further filter the nodes that you want 
 
 Functions can be used in the predicate, these are:
 
-| contentRegex | Return true if a regular expression on the content of the node matches
-
-regularExpression:  The regular expression to use
-includeChildren: True if you want to include the children of this node for the expression (optional, default false)
-|
-| --- | --- |
-| typeRegex | Return true if a regular expression on the node type name matches
-
-regularExpression:  The regular expression to use |
-| tagRegex | Return true a regular expression on the tag name matches
-
-regularExpression:  The regular expression to use |
-| hasTag | Return true if the tag has the given name
-
-tagName:  The name of the tag |
-| hasFeature | Return true if a feature on the node has a value matching the provided type and name
-
-featureType:  The feature type
-featureName: The name of the feature |
-| hasFeatureValue | Return true if a feature on the node has a value matching the provided type, name and value
-
-featureType:  The feature type
-featureName: The name of the feature
-featureValue: The value of the feature |
-| content | Returns the content of the node |
-| uuid | Returns the UUID of the node |
-| node_type | Returns the node type of the node |
-| index | Returns the index of the node |
+| Function        | Description                                                                                                                                                                                                                                  |
+|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| contentRegex    | Return true if a regular expression on the content of the node matches regularExpression:  The regular expression to use includeChildren: True if you want to include the children of this node for the expression (optional, default false) |
+| typeRegex       | Return true if a regular expression on the node type name matches regularExpression:  The regular expression to use                                                                                                                          |
+| tagRegex        | Return true a regular expression on the tag name matches  regularExpression:  The regular expression to use                                                                                                                                  |
+| hasTag          | Return true if the tag has the given name tagName:  The name of the tag                                                                                                                                                                      |
+| hasFeature      | Return true if a feature on the node has a value matching the provided type and name featureType:  The feature type featureName: The name of the feature                                                                                     |
+| hasFeatureValue | Return true if a feature on the node has a value matching the provided type, name and value featureType:  The feature type featureName: The name of the feature featureValue: The value of the feature                                       |
+| content         | Returns the content of the node                                                                                                                                                                                                              |
+| uuid            | Returns the UUID of the node                                                                                                                                                                                                                 |
+| node_type       | Returns the node type of the node                                                                                                                                                                                                            |
+| index           | Returns the index of the node                                                                                                                                                                                                                |
 
 Also we support operators to allow you to combine functions, these are:
 
-| | | Union the results of two sides |
-| --- | --- |
-| = | Test that two sides are equal |
-| != | Test that two sides are not equal |
+| Operator  | Description                              |
+|-----------|------------------------------------------|
+| &#124;    | Union the results of two sides           |        
+| =         | Test that two sides are equal            |
+| !=        | Test that two sides are not equal        |
 | intersect | Return the intersection of the two sides |
-| and | Boolean AND operation on the two sides |
-| or | Boolean OR operation on the two sides |
+| and       | Boolean AND operation on the two sides   |
+| or        | Boolean OR operation on the two sides    |
 
 # Pipelines
 
@@ -88,9 +74,7 @@ selector. This can be a useful way to build more complex queries against documen
 For example:
 
 ```python
-// word
-stream * [hasTag("ORG")]
-stream * [hasTag("PERSON")]
+document.select('//word stream //*[hasTag("ORG")] stream * [hasTag("PERSON")]')
 ```
 
 In the example above we stream all nodes of type word and then filter those that have the tag ORG, then filter those
@@ -99,3 +83,5 @@ that have the tag PERSON.
 # Examples
 
 Below are some examples of how you can use selectors:
+
+Coming soon.
