@@ -7,3 +7,5 @@ documents
     selectors
 client
     index
+cli
+    kodexa-cli
