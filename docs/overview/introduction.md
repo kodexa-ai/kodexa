@@ -12,7 +12,7 @@ This guide will help you get started with the Kodexa Python client.
 
 You can install the Kodexa Python client using pip:
 
-```bash
+```cli
 pip install kodexa~=6.0.0b
 ```
 
