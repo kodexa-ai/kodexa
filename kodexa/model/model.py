@@ -1784,6 +1784,27 @@ class Document(object):
         if value is not None:
             self.get_persistence().add_content_node(self._content_node, None)
 
+    def get_tag_instances(self, tag):
+
+        groups = self.content_node.get_related_tag_nodes(tag, everywhere=True)
+        tag_instances = []
+
+        class TagInstance:
+
+            def __init__(self, tag_uuid, nodes):
+                self.tag_uuid = tag_uuid
+                self.nodes = nodes
+
+            def get_value(self):
+                content_parts = []
+                for node in self.nodes:
+                    content_parts.append(node.content)
+                return " ".join(content_parts)
+
+        for key in groups.keys():
+            tag_instances.append(TagInstance(key, groups[key]))
+        return tag_instances
+
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
 
