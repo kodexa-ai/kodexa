@@ -2,16 +2,10 @@
 title: Kodexa Client
 ---
 
-The Kodexa client is a Python library that allows you to connect to a Kodexa instance and work with the resources, assistants and models
-that are available.
+The Kodexa client is a Python class that you can can use to interact with an instance of Kodexa.
 
-# Installation
-
-The client is available on [PyPi](https://pypi.org/project/kodexa/) and can be installed using pip:
-
-```bash
-pip install kodexa~=6.0.0b
-```
+The purpose of the client is to allow scripting of any tasks, however, it is also the foundation
+on which all the current processing logic in Kodexa is built.
 
 # Setting up Kodexa Client
 
