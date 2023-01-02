@@ -1,5 +1,5 @@
 ---
-title: First Steps
+title: Working with Content
 ---
 
-:include-jupyter: first-steps.ipynb
+:include-jupyter: working-with-content.ipynb
