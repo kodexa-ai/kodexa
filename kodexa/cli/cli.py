@@ -248,7 +248,7 @@ def logs(_: Info, execution_id: str, url: str, token: str):
 @click.option('--sort', default=None, help='Sort by (ie. startDate:desc)')
 @pass_info
 def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, query: str, path: str = None, format=None,
-        page: int = 1, page_size: int = 10, sort: str = None):
+        page: int = 1, pagesize: int = 10, sort: str = None):
     """
     List the instance of the object type
     """
@@ -267,7 +267,7 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
             elif format == 'yaml':
                 print(Syntax(object_instance.yaml(indent=4), "yaml"))
         else:
-            objects_endpoint.print_table(query=query, page=page, page_size=page_size, sort=sort)
+            objects_endpoint.print_table(query=query, page=page, page_size=pagesize, sort=sort)
     else:
 
         if ref and not ref.isspace():
@@ -283,7 +283,7 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
 
                 organization = client.organizations.find_by_slug(ref)
                 objects_endpoint = client.get_object_type(object_type, organization)
-                objects_endpoint.print_table(query=query, page=page, page_size=page_size, sort=sort)
+                objects_endpoint.print_table(query=query, page=page, page_size=pagesize, sort=sort)
         else:
 
             print(f"You must provide a ref to get a specific object")
@@ -301,7 +301,7 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
 @click.option('--sort', default=None, help='Sort by ie. name:asc')
 @pass_info
 def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, download_native: bool, page: int,
-          page_size: int, sort: None):
+          pagesize: int, sort: None):
     """
     Query the documents in a given document store
     """
@@ -310,7 +310,33 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
 
     document_store: DocumentStoreEndpoint = client.get_object_by_ref('store', ref)
     if isinstance(document_store, DocumentStoreEndpoint):
-        results = document_store.query(query, page, page_size, sort)
+        results = document_store.query(query, page, pagesize, sort)
+
+    else:
+        raise Exception("Unable to find document store with ref " + ref)
+
+@cli.command()
+@click.argument('ref', required=True)
+@click.argument('filter', default="*")
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@click.option('--download/--no-download', default=False, help='Download the KDDB for the latest in the family')
+@click.option('--download-native/--no-download-native', default=False, help='Download the native file for the family')
+@click.option('--page', default=1, help='Page number')
+@click.option('--pageSize', default=10, help='Page size')
+@click.option('--sort', default=None, help='Sort by ie. name:asc')
+@pass_info
+def query(_: Info, filter: str, ref: str, url: str, token: str, download: bool, download_native: bool, page: int,
+          pagesize: int, sort: None):
+    """
+    Query the documents in a given document store
+    """
+    client = KodexaClient(url=url, access_token=token)
+    from kodexa.platform.client import DocumentStoreEndpoint
+
+    document_store: DocumentStoreEndpoint = client.get_object_by_ref('store', ref)
+    if isinstance(document_store, DocumentStoreEndpoint):
+        results = document_store.filter(filter, page, pagesize, sort)
 
     else:
         raise Exception("Unable to find document store with ref " + ref)
