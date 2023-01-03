@@ -315,6 +315,7 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
     else:
         raise Exception("Unable to find document store with ref " + ref)
 
+
 @cli.command()
 @click.argument('ref', required=True)
 @click.argument('filter', default="*")
