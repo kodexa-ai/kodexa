@@ -1029,10 +1029,10 @@ class ModelTraining(KodexaBaseModel):
         alias='trainingParameters',
         description='The values for the training options',
     )
-    inference_options: Optional[List[Option]] = Field(
+    inference_parameters: Optional[List[Option]] = Field(
         None,
-        alias='inferenceOptions',
-        description='The inference options for this model',
+        alias='inferenceParameters',
+        description='The values for the inference options',
     )
 
 
