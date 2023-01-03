@@ -533,6 +533,7 @@ class ValuePath(Enum):
     data_path = 'DATA_PATH'
     metadata = 'METADATA'
     expression = 'EXPRESSION'
+    script = 'SCRIPT'
 
 
 class MetadataValue(Enum):
