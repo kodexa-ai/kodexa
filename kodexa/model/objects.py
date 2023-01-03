@@ -351,6 +351,18 @@ class ProjectStore(KodexaBaseModel):
     template_ref: Optional[str] = Field(None, alias='templateRef')
     ref: Optional[str] = None
 
+    show_thumbnails: Optional[bool] = Field(
+        None, description='Show thumbnails in dtore', alias='showThumbnails'
+    )
+
+    showSearch: Optional[bool] = Field(
+        None, description='Show search in store', alias='showSearch'
+    )
+
+    allowDataEditing: Optional[bool] = Field(
+        None, description='Allow data editing', alias='allowDataEditing'
+    )
+
 
 class TaxonomyType(Enum):
     """
@@ -2903,6 +2915,19 @@ class Store(ExtensionPackProvided):
         alias='viewPresets',
         description='View presets that have been saved for this store',
     )
+
+    show_thumbnails: Optional[bool] = Field(
+        None, description='Show thumbnails in dtore', alias='showThumbnails'
+    )
+
+    showSearch: Optional[bool] = Field(
+        None, description='Show search in store', alias='showSearch'
+    )
+
+    allowDataEditing: Optional[bool] = Field(
+        None, description='Allow data editing', alias='allowDataEditing'
+    )
+
 
 
 class Taxonomy(ExtensionPackProvided):
