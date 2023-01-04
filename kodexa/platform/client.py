@@ -894,7 +894,7 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
         """Get the names of the assistants"""
         return [assistant.name for assistant in self.list()]
 
-    def find_by_id(self, id:str) -> Optional[AssistantEndpoint]:
+    def find_by_id(self, id: str) -> Optional[AssistantEndpoint]:
         """Find assistant by ID"""
         for resource in self.list():
             if resource.id == id:
@@ -2135,10 +2135,15 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         """Upload the implementation to the store"""
         return self.upload_contents(metadata)
 
-    def create_training(self, name: Optional[str] = None) -> ModelTraining:
+    def create_training(self, name: Optional[str] = None,
+                        training_parameters: Optional[Dict[str, Any]] = None) -> ModelTraining:
         """Create a new model training"""
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings"
         new_training = ModelTraining(name=name)
+
+        if training_parameters is not None:
+            new_training.training_parameters = training_parameters
+
         response = self.client.post(url, body=json.loads(new_training.json(by_alias=True)))
         return ModelTraining.parse_obj(response.json())
 
@@ -2159,7 +2164,8 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(url)
         return ModelTraining.parse_obj(response.json())
 
-    def list_trainings(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None) -> PageModelTraining:
+    def list_trainings(self, query="*", page=1, page_size=10, sort=None,
+                       filters: List[str] = None) -> PageModelTraining:
         """List all model trainings"""
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings"
         params = {"query": requests.utils.quote(query),
