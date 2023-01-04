@@ -774,7 +774,7 @@ class PersistenceManager(object):
         self.node_cache.remove_obj(node)
 
         if node.uuid in self.node_parent_cache:
-            self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
+            self.child_cache[self.node_parent_cache[node.uuid]].discard(node)
 
             # We have a sitation where we seem to fail here?
             self.child_id_cache[self.node_parent_cache[node.uuid]].discard(node.uuid)
