@@ -108,8 +108,6 @@ class Organization(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    created_by: Optional[str] = Field(None, alias='createdBy')
-    updated_by: Optional[str] = Field(None, alias='updatedBy')
     name: str
     slug: constr(regex=r'^[a-zA-Z0-9\-_]{0,100}$')
     public_access: Optional[bool] = Field(None, alias='publicAccess')
@@ -982,8 +980,6 @@ class PlatformConfiguration(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    created_by: Optional[str] = Field(None, alias='createdBy')
-    updated_by: Optional[str] = Field(None, alias='updatedBy')
     welcome_markdown: Optional[str] = Field(None, alias='welcomeMarkdown')
     news_markdown: Optional[str] = Field(None, alias='newsMarkdown')
     about_markdown: Optional[str] = Field(None, alias='aboutMarkdown')
@@ -1219,8 +1215,6 @@ class User(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    created_by: Optional[str] = Field(None, alias='createdBy')
-    updated_by: Optional[str] = Field(None, alias='updatedBy')
     email: str
     first_name: str = Field(..., alias='firstName')
     last_name: str = Field(..., alias='lastName')
@@ -1670,8 +1664,6 @@ class Role(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    created_by: Optional[str] = Field(None, alias='createdBy')
-    updated_by: Optional[str] = Field(None, alias='updatedBy')
     name: str
     users: Optional[List[User]] = Field(default_factory=list, unique_items=True)
     teams: Optional[List[Team]] = Field(default_factory=list, unique_items=True)
@@ -1682,8 +1674,6 @@ class Membership(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    created_by: Optional[str] = Field(None, alias='createdBy')
-    updated_by: Optional[str] = Field(None, alias='updatedBy')
     role: Optional[Role1] = None
     organization: Optional[Organization] = None
     user: Optional[User] = None
@@ -2374,8 +2364,6 @@ class StoreMetadata(KodexaBaseModel):
     version: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    created_by: Optional[str] = Field(None, alias='createdBy')
-    updated_by: Optional[str] = Field(None, alias='updatedBy')
     name: Optional[str] = None
     public_access: Optional[bool] = Field(
         None,
