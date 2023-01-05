@@ -1801,6 +1801,12 @@ class Document(object):
                     content_parts.append(node.content)
                 return " ".join(content_parts)
 
+            def get_data(self):
+                if len(self.nodes) > 0:
+                    return self.nodes[0].get_tag_data(self.tag_uuid)
+                else:
+                    return {}
+                
         for key in groups.keys():
             tag_instances.append(TagInstance(key, groups[key]))
         return tag_instances
