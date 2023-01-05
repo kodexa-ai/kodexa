@@ -2667,15 +2667,6 @@ class ModelContentMetadata(KodexaBaseModel):
         description='The inference options for this model',
     )
 
-    build_statistics: Optional[Dict[str, Any]] = Field(
-        None,
-        alias='buildStatistics',
-        description='Build statistics (note this will update if the model is training)',
-    )
-    final_statistics: Optional[Dict[str, Any]] = Field(
-        None, alias='finalStatistics', description='Final statistics from the model'
-    )
-    deployment: Optional[DeploymentMetadata] = None
     taxonomy: Optional[Taxonomy] = None
     additional_taxon_options: Optional[List[Option]] = Field(
         None,
