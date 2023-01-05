@@ -2185,6 +2185,9 @@ class Assistant(KodexaBaseModel):
     active: Optional[bool] = None
     run_on_existing_content: Optional[bool] = Field(None, alias='runOnExistingContent')
     options: Optional[Dict[str, Any]] = None
+    test_options: Optional[Dict[str, Any]] = Field(
+        None, alias='testOptions'
+    )
     validation_errors: Optional[ValidationResults] = Field(
         None, alias='validationErrors'
     )
