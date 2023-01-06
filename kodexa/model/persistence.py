@@ -778,11 +778,15 @@ class PersistenceManager(object):
                 self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
             except ValueError:
                 pass
+            except KeyError:
+                pass
 
             # We have a sitation where we seem to fail here?
             try:
                 self.child_id_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
             except ValueError:
+                pass
+            except KeyError:
                 pass
             del self.node_parent_cache[node.uuid]
 
