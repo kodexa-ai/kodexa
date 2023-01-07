@@ -1,7 +1,3 @@
----
-title: Introduction
----
-
 The Kodexa CLI is a command line tool that allows you to interact with an instance of the Kodexa platform.  
 
 It is a powerful tool that allows you to create resources, deploy models and interact with deployed components.
