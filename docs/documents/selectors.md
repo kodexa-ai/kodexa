@@ -18,7 +18,7 @@ the [What is a Kodexa Document?](https://docs.kodexa.com/introduction/documents/
 
 Selectors are a powerful way to work and offer a number of clever features, the syntax is broken into a few parts:
 
-:include-image: img_4.png {title: "Selector Structure", fit: true}
+![img_4.png](img_4.png)
 
 # Axis & Node Type
 

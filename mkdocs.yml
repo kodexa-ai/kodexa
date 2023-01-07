@@ -1,0 +1,12 @@
+site_name: "Kodexa for Python"
+
+nav:
+  - Getting Started: getting-started.md
+  - First Steps:
+      - Document Basics: documents/first-steps.ipynb
+      - Connectors: documents/connectors.md
+      - Working with Content: documents/working-with-content.ipynb
+      - Selectors: documents/selectors.md
+  - Command Line Interface:
+      - Introduction: cli/getting-started.md
+      - Commands: cli/commands.md
