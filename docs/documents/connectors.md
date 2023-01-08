@@ -15,9 +15,9 @@ a step in the pipeline to parse a PDF, and a later step to get the original PDF 
 
 ``` mermaid
 graph LR
-  A[Parse PDF] --> B
-  B[Layout Analysis] --> C
-  C[Table Identification (Computer Vision)];
+    A[Parse PDF] -->B(Parse PDF)
+    B --> C(Layout Analysis)
+    C --> D(Table Identification)
 ```
 
 # How is Connector implemented?
