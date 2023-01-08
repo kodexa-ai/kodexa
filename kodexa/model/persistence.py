@@ -177,9 +177,10 @@ class SqliteDocumentPersistence(object):
 
     def close(self):
         if self.is_tmp or self.delete_on_close:
+            pathlib.Path(self.current_filename).unlink()
+        else:
             self.cursor.close()
             self.connection.close()
-            pathlib.Path(self.current_filename).unlink()
 
     def get_max_feature_id(self):
         max_id = self.cursor.execute("select max(id) from ft").fetchone()
