@@ -13,11 +13,12 @@ from the PDF.
 Working with the source can be done any any point of processing in a Kodexa document, for example you might want
 a step in the pipeline to parse a PDF, and a later step to get the original PDF file to look for table using computer vision.
 
-:include-meta: {bulletListType: "Steps", differentColors: true}
-
-* Parse PDF
-* Layout Analysis
-* Table Identification (Computer Vision)
+``` mermaid
+graph LR
+  A[Parse PDF] --> B
+  B[Layout Analysis] --> C
+  C[Table Identification (Computer Vision)];
+```
 
 # How is Connector implemented?
 
