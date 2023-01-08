@@ -10,6 +10,7 @@ nav:
   - Platform Client:
       - Introduction: client/index.md
       - Organizations: client/organizations.ipynb
+      - Projects: client/projects.ipynb
   - Command Line Tools:
       - Introduction: cli/introduction.md
       - Working with Components:
