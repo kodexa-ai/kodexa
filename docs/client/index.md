@@ -2,14 +2,14 @@
 title: Kodexa Client
 ---
 
-The Kodexa client is a Python class that you can can use to interact with an instance of Kodexa.
+The Kodexa client is a Python class that you can use to interact with an instance of Kodexa.
 
 The purpose of the client is to allow scripting of any tasks, however, it is also the foundation
 on which all the current processing logic in Kodexa is built.
 
 # Setting up Kodexa Client
 
-By default when you instantiate a Kodexa client it will connect to the Kodexa instance that has
+By default, when you instantiate a Kodexa client it will connect to the Kodexa instance that has
 been configured in your environment.
 
 The client will use the following environment variables to determine the connection details:
@@ -21,6 +21,8 @@ The client will use the following environment variables to determine the connect
 You can also specify a different Kodexa instance to connect to.
 
 ```python
+from kodexa.platform import KodexaClient
+
 client = KodexaClient('https://my-kodexa-instance.com', 'xxxx-xxxx-xxxx-xxxx')
 ```
 
@@ -29,13 +31,4 @@ Server URL, String, The URL of the server; it needs to include the protocol and 
 Access Token, String, The Access Token to use
 ```
 
-# First Steps with the Client
 
-Once you have a client you can start to work with the resources that are available on the server.
-
-The client object has a number of methods that allow you to work with the resources that are available on the server, for
-example if you want to work with organizations then you can use:
-
-```python
-client.orgnizations.list()
-```
