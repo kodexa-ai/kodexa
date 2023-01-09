@@ -1,8 +1,8 @@
 import os
 
-from kodexa import Pipeline, FolderConnector, LocalDocumentStore
+from kodexa import Pipeline, FolderConnector
 from kodexa.steps.common import TextParser
-from kodexa.testing.test_utils import compare_document
+from kodexa.testing.test_utils import compare_document, DocumentTestCaptureStep
 
 
 def get_test_directory():
@@ -30,14 +30,16 @@ def test_hello_txt():
 
 
 def test_folder_connector_unpack_wildcard():
-    document_sink = LocalDocumentStore()
+
+    document_captures = DocumentTestCaptureStep()
+
     pipeline = Pipeline(
         FolderConnector(path=str(get_test_directory()) + 'folder_unpack_test', file_filter='*.*', unpack=True))
+    pipeline.add_step(document_captures)
     pipeline.run()
 
     # let's make sure we properly unpacked each document and have all ContentNodes
-    for document_family in document_sink.query_families():
-        doc = document_sink.get_latest_document_in_family(document_family)
+    for doc in document_captures.documents:
         if doc.get_root().get_all_content().find('HSBC') > -1:
             assert len(doc.select("//*")) == 39
         elif doc.get_root().get_all_content().find('flea') > -1:

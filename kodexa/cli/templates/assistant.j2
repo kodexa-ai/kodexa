@@ -1,0 +1,29 @@
+---
+title: {{service.name}}
+---
+
+# Description
+
+{{service.description}}
+
+# Options
+
+:include-api-parameters: {{service.slug}}-options.json
+
+{% if service.event_types %}
+# Custom Events
+
+{% for event_type in service.event_types %}
+## {{ event_type.label }}
+
+{% if event_type.description is defined %}
+{{ event_type.description }}
+{% endif %}
+
+:include-api-parameters: {{service.slug}}-{{event_type.name}}-options.json
+
+{% endfor %}
+{% endif %}
+
+
+

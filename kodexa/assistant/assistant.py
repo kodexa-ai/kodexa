@@ -5,7 +5,7 @@ instance of the Kodexa platform
 from typing import List, Optional
 
 from kodexa.model import ContentObject, Document
-from kodexa.model.objects import BaseEvent, Store, Taxonomy
+from kodexa.model.objects import Store, Taxonomy, BaseEvent
 from kodexa.platform.client import DocumentStoreEndpoint
 
 
@@ -14,11 +14,13 @@ class AssistantMetadata:
     A set of metadata for the assistant that can be made available on from the context
     """
 
-    def __init__(self, assistant_id: str, assistant_name: str):
+    def __init__(self, assistant_id: str, assistant_name: str, project_id: Optional[str] = None):
         self.assistant_id = assistant_id
         """The ID of the assistant"""
         self.assistant_name = assistant_name
         """The name of the assistant"""
+        self.project_id = project_id
+        """The ID of the project that the assistant is owned by"""
 
 
 class AssistantPipeline:

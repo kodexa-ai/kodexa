@@ -4,6 +4,7 @@ import pathlib
 import sqlite3
 import tempfile
 import uuid
+from typing import List
 
 import msgpack
 
@@ -14,6 +15,8 @@ logger = logging.getLogger()
 
 # Heavily used SQL
 EXCEPTION_INSERT = "INSERT INTO content_exceptions (tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+EXCEPTION_SELECT = "select tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid from content_exceptions"
+
 FEATURE_INSERT = "INSERT INTO ft (id, cn_id, f_type, binary_value, single, tag_uuid) VALUES (?,?,?,?,?,?)"
 FEATURE_DELETE = "DELETE FROM ft where cn_id=? and f_type=?"
 
@@ -174,9 +177,10 @@ class SqliteDocumentPersistence(object):
 
     def close(self):
         if self.is_tmp or self.delete_on_close:
+            pathlib.Path(self.current_filename).unlink()
+        else:
             self.cursor.close()
             self.connection.close()
-            pathlib.Path(self.current_filename).unlink()
 
     def get_max_feature_id(self):
         max_id = self.cursor.execute("select max(id) from ft").fetchone()
@@ -323,9 +327,6 @@ class SqliteDocumentPersistence(object):
 
         metadata = msgpack.unpackb(self.cursor.execute("select * from metadata").fetchone()[1])
         self.document.metadata = DocumentMetadata(metadata['metadata'])
-        for mixin in metadata['mixins']:
-            from kodexa.mixins import registry
-            registry.add_mixin_to_document(mixin, self.document)
         self.document.version = metadata['version'] if 'version' in metadata and metadata[
             'version'] else Document.PREVIOUS_VERSION  # some older docs don't have a version or it's None
 
@@ -335,6 +336,8 @@ class SqliteDocumentPersistence(object):
             self.document.source = SourceMetadata.from_dict(metadata['source'])
         if 'labels' in metadata and metadata['labels']:
             self.document.labels = metadata['labels']
+        if 'mixins' in metadata and metadata['mixins']:
+            self.document._mixins = metadata['mixins']
         if 'taxomomies' in metadata and metadata['taxomomies']:
             self.document.taxonomies = metadata['taxomomies']
         if 'classes' in metadata and metadata['classes']:
@@ -368,8 +371,7 @@ class SqliteDocumentPersistence(object):
             self.document.version = "4.0.1"
             self.update_metadata()
 
-        if self.document.version == '4.0.1':
-            self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
                                     (
                                         id           integer primary key,
                                         tag          text,
@@ -381,8 +383,8 @@ class SqliteDocumentPersistence(object):
                                         severity     text,
                                         node_uuid    text
                                     )""")
-            self.document.version = "4.0.2"
-            self.update_metadata()
+        self.document.version = "4.0.2"
+        self.update_metadata()
 
     def get_content_parts(self, new_node):
         content_parts = self.cursor.execute(
@@ -545,6 +547,20 @@ class SqliteDocumentPersistence(object):
                             [exception.tag, exception.message, exception.exception_details, exception.group_uuid,
                              exception.tag_uuid, exception.exception_type, exception.severity, exception.node_uuid])
 
+    def get_exceptions(self) -> List[ContentException]:
+        exceptions = []
+        for exception in self.cursor.execute(EXCEPTION_SELECT).fetchall():
+            exceptions.append(ContentException(tag=exception[0], message=exception[1], exception_details=exception[2],
+                                               group_uuid=exception[3], tag_uuid=exception[4],
+                                               exception_type=exception[5],
+                                               severity=exception[6], node_uuid=exception[7]))
+        return exceptions
+
+    def replace_exceptions(self, exceptions: List[ContentException]):
+        self.cursor.execute("delete from content_exceptions")
+        for exception in exceptions:
+            self.add_exception(exception)
+
 
 class SimpleObjectCache(object):
     """
@@ -610,6 +626,12 @@ class PersistenceManager(object):
 
     def add_exception(self, exception: ContentException):
         self._underlying_persistence.add_exception(exception)
+
+    def get_exceptions(self) -> List[ContentException]:
+        return self._underlying_persistence.get_exceptions()
+
+    def replace_exceptions(self, exceptions: List[ContentException]):
+        self._underlying_persistence.replace_exceptions(exceptions)
 
     def get_all_tags(self):
         return self._underlying_persistence.get_all_tags()
@@ -722,7 +744,7 @@ class PersistenceManager(object):
 
             if node._parent_uuid not in self.child_cache:
                 self.child_cache[node._parent_uuid] = [node]
-                self.child_id_cache[node._parent_uuid] = set([node.uuid])
+                self.child_id_cache[node._parent_uuid] = {node.uuid}
             else:
                 if node.uuid not in self.child_id_cache[node._parent_uuid]:
                     self.child_id_cache[node._parent_uuid].add(node.uuid)
@@ -753,8 +775,20 @@ class PersistenceManager(object):
         self.node_cache.remove_obj(node)
 
         if node.uuid in self.node_parent_cache:
-            self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
-            self.child_id_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
+            try:
+                self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
+            except ValueError:
+                pass
+            except KeyError:
+                pass
+
+            # We have a sitation where we seem to fail here?
+            try:
+                self.child_id_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
+            except ValueError:
+                pass
+            except KeyError:
+                pass
             del self.node_parent_cache[node.uuid]
 
         self.content_parts_cache.pop(node.uuid, None)

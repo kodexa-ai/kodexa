@@ -22,7 +22,6 @@ from rich import print
 logging.root.addHandler(logging.StreamHandler(sys.stdout))
 
 from kodexa import KodexaClient
-from kodexa.cli.documentation import generate_site
 from kodexa.platform.kodexa import ExtensionHelper, KodexaPlatform
 
 LOGGING_LEVELS = {
@@ -92,13 +91,22 @@ def cli(info: Info, verbose: int):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def project(_: Info, project_id: str, token: str, url: str):
-    """Get all the details for a specific project
     """
+    Get all the details for a specific project
+    """
+    client = KodexaClient(url=url, access_token=token)
+    project_instance = client.get_project(project_id)
+    print(f"Name: [bold]{project_instance.name}[/bold]")
+    print(f"Description: [bold]{project_instance.description}[/bold]\n")
 
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-
-    KodexaPlatform.get_project(project_id)
+    print("[bold]Document Stores[/bold]")
+    project_instance.document_stores.print_table()
+    print("[bold]Data Stores[/bold]")
+    project_instance.data_stores.print_table()
+    print("[bold]Data Structures[/bold]")
+    project_instance.taxonomies.print_table()
+    print("[bold]Assistants[/bold]")
+    project_instance.assistants.print_table()
 
 
 @cli.command()
@@ -108,15 +116,27 @@ def project(_: Info, project_id: str, token: str, url: str):
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def upload(_: Info, ref: str, path: str, token: str, url: str):
-    """Upload the contents of a file or directory to a Kodexa platform instance
+    """
+    Upload the contents of a file or directory to a Kodexa platform instance
     """
 
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
+    client = KodexaClient(url=url, access_token=token)
+    document_store = client.get_object_by_ref('store', ref)
 
-    print(f"Uploading {path}")
-    KodexaPlatform.upload_file(ref, path)
-    print("Upload complete :tada:")
+    from kodexa.platform.client import DocumentStoreEndpoint
+    if isinstance(document_store, DocumentStoreEndpoint):
+        import glob
+        for path_match in glob.glob(path):
+
+            print(f"Uploading {path_match}")
+            try:
+                document_store.upload_file(path_match)
+            except Exception as e:
+                print(f"Error uploading {path_match}: {e}")
+
+        print("Upload complete :tada:")
+    else:
+        print(f"{ref} is not a document store")
 
 
 @cli.command()
@@ -209,11 +229,10 @@ def deploy(_: Info, org: Optional[str], file: str, url: str, token: str, format=
 @click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
 @pass_info
 def logs(_: Info, execution_id: str, url: str, token: str):
-    """Get logs for an execution
     """
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.logs(execution_id)
+    Get logs for an execution
+    """
+    client = KodexaClient(url=url, access_token=token)
 
 
 @cli.command()
@@ -233,9 +252,41 @@ def get(_: Info, object_type: str, ref: Optional[str], url: str, token: str, que
     """
     List the instance of the object type
     """
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.get(object_type, ref, path, format, query, page, pagesize, sort)
+    client = KodexaClient(url=url, access_token=token)
+
+    from kodexa.platform.client import resolve_object_type
+    object_name, object_metadata = resolve_object_type(object_type)
+
+    if 'global' in object_metadata and object_metadata['global']:
+        objects_endpoint = client.get_object_type(object_type)
+        if ref and not ref.isspace():
+            object_instance = objects_endpoint.get(ref)
+            from rich.syntax import Syntax
+            if format == 'json':
+                print(Syntax(object_instance.json(indent=4), "json"))
+            elif format == 'yaml':
+                print(Syntax(object_instance.yaml(indent=4), "yaml"))
+        else:
+            objects_endpoint.print_table(query=query, page=page, page_size=pagesize, sort=sort)
+    else:
+
+        if ref and not ref.isspace():
+
+            if '/' in ref:
+                object_instance = client.get_object_by_ref(object_metadata['plural'], ref)
+                from rich.syntax import Syntax
+                if format == 'json':
+                    print(Syntax(object_instance.json(indent=4), "json"))
+                elif format == 'yaml' or not format:
+                    print(Syntax(object_instance.yaml(indent=4), "yaml"))
+            else:
+
+                organization = client.organizations.find_by_slug(ref)
+                objects_endpoint = client.get_object_type(object_type, organization)
+                objects_endpoint.print_table(query=query, page=page, page_size=pagesize, sort=sort)
+        else:
+
+            print(f"You must provide a ref to get a specific object")
 
 
 @cli.command()
@@ -254,9 +305,42 @@ def query(_: Info, query: str, ref: str, url: str, token: str, download: bool, d
     """
     Query the documents in a given document store
     """
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.query(ref, query, download, page, pagesize, sort, download_native)
+    client = KodexaClient(url=url, access_token=token)
+    from kodexa.platform.client import DocumentStoreEndpoint
+
+    document_store: DocumentStoreEndpoint = client.get_object_by_ref('store', ref)
+    if isinstance(document_store, DocumentStoreEndpoint):
+        results = document_store.query(query, page, pagesize, sort)
+
+    else:
+        raise Exception("Unable to find document store with ref " + ref)
+
+
+@cli.command()
+@click.argument('ref', required=True)
+@click.argument('filter', default="*")
+@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
+@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
+@click.option('--download/--no-download', default=False, help='Download the KDDB for the latest in the family')
+@click.option('--download-native/--no-download-native', default=False, help='Download the native file for the family')
+@click.option('--page', default=1, help='Page number')
+@click.option('--pageSize', default=10, help='Page size')
+@click.option('--sort', default=None, help='Sort by ie. name:asc')
+@pass_info
+def query(_: Info, filter: str, ref: str, url: str, token: str, download: bool, download_native: bool, page: int,
+          pagesize: int, sort: None):
+    """
+    Query the documents in a given document store
+    """
+    client = KodexaClient(url=url, access_token=token)
+    from kodexa.platform.client import DocumentStoreEndpoint
+
+    document_store: DocumentStoreEndpoint = client.get_object_by_ref('store', ref)
+    if isinstance(document_store, DocumentStoreEndpoint):
+        results = document_store.filter(filter, page, pagesize, sort)
+
+    else:
+        raise Exception("Unable to find document store with ref " + ref)
 
 
 @cli.command()
@@ -301,8 +385,7 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
     """Send an event to an assistant
     """
 
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.set_url(url)
+    client = KodexaClient(url, token)
 
     obj = None
     if file is None:
@@ -324,24 +407,10 @@ def send_event(_: Info, project_id: str, assistant_id: str, url: str, file: str,
                 raise Exception("Unsupported file type")
 
     print("Sending event")
-    KodexaPlatform.send_event(project_id, assistant_id, obj)
+    from kodexa.platform.client import AssistantEndpoint
+    assistant_endpoint: AssistantEndpoint = client.get_project(project_id).assistants.get(assistant_id)
+    assistant_endpoint.send_event(obj['eventType'], obj['options'])
     print("Event sent :tada:")
-
-
-@cli.command()
-@click.argument('object_type', required=True)
-@click.option('--url', default=KodexaPlatform.get_url(), help='The URL to the Kodexa server')
-@click.option('--token', default=KodexaPlatform.get_access_token(), help='Access token')
-@pass_info
-def reindex(_: Info, object_type: str, url: str, token: str):
-    """
-    Reindex the given resource (based on ref)
-    """
-    print("Starting global reindexing")
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.reindex(object_type)
-    print(":tada: Global reindexing complete")
 
 
 @cli.command()
@@ -362,8 +431,7 @@ def platform(_: Info, python: bool):
         if python:
             print("\nPython example:\n\n")
             print(f"from kodexa import *")
-            print(f"KodexaPlatform.set_url('{KodexaPlatform.get_url()}')")
-            print(f"KodexaPlatform.set_access_token('{KodexaPlatform.get_access_token()}')")
+            print(f"client = KodexaClient('{KodexaPlatform.get_url()}', '{KodexaPlatform.get_access_token()}')")
     else:
         print("Kodexa is not logged in")
 
@@ -378,20 +446,8 @@ def delete(_: Info, object_type: str, ref: str, url: str, token: str):
     """
     Delete the given resource (based on ref)
     """
-    KodexaPlatform.set_url(url)
-    KodexaPlatform.set_access_token(token)
-    KodexaPlatform.delete(object_type, ref)
-
-
-@cli.command()
-@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
-@pass_info
-def metadata(_: Info, path: str):
-    """
-    Load metadata
-    """
-    metadata = ExtensionHelper.load_metadata(path)
-    print(f"Metadata loaded")
+    client = KodexaClient(url, token)
+    client.get_object_by_ref(object_type, ref).delete()
 
 
 @cli.command()
@@ -417,17 +473,12 @@ def login(_: Info):
 
 
 @cli.command()
-@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml')
+@click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml (defaults to current)')
 @pass_info
 def document(_: Info, path: str):
-    """
-    Build markdown documentation for this extension
-    """
-    metadata = ExtensionHelper.load_metadata(path)
-    print("Metadata loaded")
+    metadata_obj = ExtensionHelper.load_metadata(path)
     from kodexa.cli.documentation import generate_documentation
-    generate_documentation(metadata)
-    print("Extension documentation has been successfully built :tada:")
+    generate_documentation(metadata_obj)
 
 
 @cli.command()
@@ -442,11 +493,8 @@ def version(_: Info):
 @click.option('--output', default=os.getcwd() + "/dist",
               help='Path to the output folder (defaults to dist under current)')
 @click.option('--version', default=os.getenv('VERSION'), help='Version number (defaults to 1.0.0)')
-@click.option('--site/--no-site', default=False, help='Generate website to serve extension')
-@click.option('--sitedir', default='site', help='Path to folder for site contents')
-@click.option('--url', default='http://www.example.com/', help='The base URL for the site links')
 @pass_info
-def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: str, url: str):
+def package(_: Info, path: str, output: str, version: str):
     """
     Package an extension pack based on the kodexa.yml file
     """
@@ -466,10 +514,6 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
 
     versioned_metadata = os.path.join(output, f"{metadata_obj['slug']}-{metadata_obj['version']}.json")
 
-    if site:
-        metadata_obj['source']['location'] = url + metadata_obj[
-            'version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.tar.gz"
-
     unversioned_metadata = os.path.join(output, "kodexa.json")
     with open(versioned_metadata, 'w') as outfile:
         json.dump(metadata_obj, outfile)
@@ -484,10 +528,3 @@ def package(_: Info, path: str, output: str, version: str, site: bool, sitedir: 
     os.rename(output_filename, os.path.join(output, output_filename))
 
     print("Extension has been packaged :tada:")
-
-    if site:
-        metadata_obj['json_location'] = url + metadata_obj[
-            'version'] + '/' + f"{metadata_obj['slug']}-{metadata_obj['version']}.json"
-        generate_site(metadata=metadata_obj, base_dir=sitedir, output_filename=os.path.join(output, output_filename),
-                      url=url, output_json=versioned_metadata)
-        print("Extension site has been successfully built :tada:")
