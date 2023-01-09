@@ -244,8 +244,8 @@ class ProjectResourceEndpoint(ClientEndpoint):
 
     def replace(self, components):
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
-        get_response = self.client.put(url, [component.to_dict() for component in components])
-        return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
+        replace_response = self.client.put(url, [component.to_dict() for component in components])
+        return [self.get_instance_class().parse_obj(item).set_client(self.client) for item in replace_response.json()]
 
     def find_by_name(self, name) -> Optional[Any]:
         """Find resource by name"""
