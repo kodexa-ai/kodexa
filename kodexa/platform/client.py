@@ -1722,7 +1722,7 @@ class DataStoreEndpoint(StoreEndpoint):
         return [TaxonomyEndpoint.parse_obj(taxonomy_response) for taxonomy_response in taxonomy_response.json()]
 
     def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
-                            include_id: bool = False):
+                            include_id: bool = False, parent_id: Optional[str] = None):
         """
         Get the data objects as a pandas dataframe
 
@@ -1737,7 +1737,7 @@ class DataStoreEndpoint(StoreEndpoint):
         """
         import pandas as pd
 
-        data_objects = self.get_data_objects(path, query, document_family)
+        data_objects = self.get_data_objects(path, query, document_family, parent_id)
 
         if len(data_objects) == 0:
             return pd.DataFrame()
@@ -1776,28 +1776,31 @@ class DataStoreEndpoint(StoreEndpoint):
 
         return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
 
-    def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None) -> List[
-        DataObjectEndpoint]:
+    def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
+                         parent_id: Optional[str] = None) -> List[DataObjectEndpoint]:
         """
         Get the data objects of the store
         Args:
           path (str): The path to the data object
           query (str): A query to limit the results (Default *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+          parent_id (Optional[str]): Optionally the parent ID to limit results to
         Returns:
+            List[DataObjectEndpoint]: The data objects
 
         """
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family)
+        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family, parent_id=parent_id)
 
         # lets work out the last page
         rows = rows + row_response.content
         total_pages = row_response.total_pages
 
         for page in range(2, total_pages):
-            row_response = self.get_data_objects_page_request(path, page, query=query, document_family=document_family)
+            row_response = self.get_data_objects_page_request(path, page, query=query, document_family=document_family,
+                                                              parent_id=parent_id)
             rows = rows + row_response.content
 
         return rows
@@ -1812,7 +1815,8 @@ class DataStoreEndpoint(StoreEndpoint):
         return DataObjectEndpoint.parse_obj(data_object_response.json())
 
     def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
-                                      document_family: Optional[DocumentFamily] = None) -> PageDataObject:
+                                      document_family: Optional[DocumentFamily] = None,
+                                      parent_id: Optional[str] = None) -> PageDataObject:
         """
         Get a page of data objects
 
@@ -1822,11 +1826,15 @@ class DataStoreEndpoint(StoreEndpoint):
           page_size (int):  (Default value = 5000)
           query (str): The query to limit results (Default *)
           document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+          parent_id (Optional[str]): Optionally the parent ID to limit results to
 
         Returns:
-
+          PageDataObject: A page of data objects
         """
         url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
+
+        if parent_id:
+            url += f"/{parent_id}/children"
         logger.debug(f"Downloading a specific table from {url}")
 
         # We need to go through and pull all the pages
