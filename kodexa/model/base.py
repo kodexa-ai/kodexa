@@ -17,6 +17,9 @@ class KodexaBaseModel(BaseModel):
             datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
         }
 
+    def to_dict(self):
+        return self.dict(by_alias=True, exclude_none=True)
+
 
 class BaseEntity(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
