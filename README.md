@@ -6,13 +6,13 @@ Kodexa is designed to allow you to work with a wide range of unstructured and se
 
 ## Documentation & Examples
 
-Documentation is available on [Github](https://python.kodexa.com)
+Documentation is available on [Github](https://docs.kodexa.com)
 
-For more information on how to use Kodexa see https://support.kodexa.com/
+For more information on how to use Kodexa see https://www.kodexa.com/
 
 ## Current Development
 
-The main branch is 5.0.x which is a production release.
+The main branch is 6.0 which is a production release.
 
 ## Set-up
 
