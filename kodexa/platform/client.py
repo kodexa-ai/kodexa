@@ -242,9 +242,9 @@ class ProjectResourceEndpoint(ClientEndpoint):
         list_response = self.client.get(url, params=params)
         return [self.get_instance_class().parse_obj(item).set_client(self.client) for item in list_response.json()]
 
-    def create(self, component):
+    def replace(self, components):
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
-        get_response = self.client.post(url, component.to_dict())
+        get_response = self.client.put(url, [component.to_dict() for component in components])
         return self.get_instance_class().parse_obj(get_response.json()).set_client(self.client)
 
     def find_by_name(self, name) -> Optional[Any]:
