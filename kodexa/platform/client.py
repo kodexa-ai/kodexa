@@ -303,7 +303,8 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["sort"] = sort
 
         if filters is not None:
-            params["filters"] = filters
+            params["legacyFilter"] = True
+            params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
         return self.get_page_class(list_response.json()).parse_obj(list_response.json()).set_client(
