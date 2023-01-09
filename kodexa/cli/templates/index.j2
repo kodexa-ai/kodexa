@@ -1,0 +1,15 @@
+---
+title: Available Components
+---
+
+This is a collection of components for Kodexa.
+
+You can learn more about what components are in Kodexa (here)[https://kodexa-ai.github.io/platform/overview/components].
+
+{% for service_type in service %}
+## {{service_type}}
+
+{% for slug in service['actions'] %}
+* {{slug}}
+{% endfor %}
+{% endfor %}

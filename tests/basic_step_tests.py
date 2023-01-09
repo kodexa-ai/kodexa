@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from kodexa import Document, Pipeline, PipelineContext, TagsToKeyValuePairExtractor, RollupTransformer
+from kodexa import Document, Pipeline, RollupTransformer
 
 
 def get_test_directory():
@@ -27,52 +27,6 @@ def test_html_rollup():
     # see where the href rolled up
     assert document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_all_content() == 'The London-headquartered bank is a heavyweight component of the  Hang Seng Index . HSBC shares in Hong Kong closed 2.78% lower.'
     assert len(document.select('//*[contentRegex(".*Hang Seng Index.*")]')[0].get_content_parts()) == 3
-
-
-def test_tag_key_value():
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
-    step = TagsToKeyValuePairExtractor(store_name='test_store')
-    context = PipelineContext()
-    step.process(document, context)
-
-    assert context.get_store('test_store').count() == 45
-    assert context.get_store('test_store').rows[14][0] == 'LOC'
-    assert context.get_store('test_store').rows[14][1] == 'Europe'
-
-
-def test_tag_key_value_include_exclude():
-    # Testing include parameter
-    include_tags = ['DATE', 'LOC']
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
-    step = TagsToKeyValuePairExtractor(store_name='test_store', include=include_tags)
-    context = PipelineContext()
-    step.process(document, context)
-    assert context.get_store('test_store').count() == 11
-
-    # Testing exclude parameter
-    exclude_tags = ['DATE', 'LOC']
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
-    step = TagsToKeyValuePairExtractor(store_name='test_store', exclude=exclude_tags)
-    context = PipelineContext()
-    step.process(document, context)
-    assert context.get_store('test_store').count() == 34
-
-    # Testing both include and exclude parameters
-    include_tags = ['LOC']
-    exclude_tags = ['DATE']
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
-    step = TagsToKeyValuePairExtractor(store_name='test_store', include=include_tags, exclude=exclude_tags)
-    context = PipelineContext()
-    step.process(document, context)
-    assert context.get_store('test_store').count() == 5
-
-    # Testing both include - this should be the same as before as 'exclude' shouldn't have really done anything
-    include_tags = ['LOC']
-    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
-    step = TagsToKeyValuePairExtractor(store_name='test_store', include=include_tags)
-    context = PipelineContext()
-    step.process(document, context)
-    assert context.get_store('test_store').count() == 5
 
 
 @pytest.mark.skip

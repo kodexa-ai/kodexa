@@ -6,7 +6,6 @@ import sys
 import time
 import traceback
 import uuid
-from collections import KeysView
 from inspect import signature
 from textwrap import dedent
 from typing import List, Optional, Dict
@@ -15,9 +14,8 @@ from uuid import uuid4
 import yaml
 
 from kodexa.connectors import FolderConnector
-from kodexa.connectors.connectors import get_caller_dir, DocumentStoreConnector
-from kodexa.model import Document, Store, ContentObject
-from kodexa.stores.stores import DocumentStore
+from kodexa.connectors.connectors import get_caller_dir
+from kodexa.model import Document, ContentObject
 
 logger = logging.getLogger()
 
@@ -64,40 +62,6 @@ class InMemoryContentProvider:
         self.content_objects[content_object.id] = content
 
 
-class InMemoryStoreProvider:
-    """A store provider is used to support getting stores from the pipeline"""
-
-    def __init__(self):
-        self.stores = {}
-
-    def put_store(self, name: str, store: Store):
-        """
-
-        Args:
-          name: str:
-          store: Store:
-
-        Returns:
-
-        """
-        self.stores[name] = store
-
-    def get_store(self, name):
-        """
-
-        Args:
-          name:
-
-        Returns:
-
-        """
-        return self.stores[name] if name in self.stores else None
-
-    def get_store_names(self) -> KeysView:
-        """ """
-        return self.stores.keys()
-
-
 class PipelineContext:
     """Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
@@ -110,14 +74,12 @@ class PipelineContext:
 
     """
 
-    def __init__(self, content_provider=None, store_provider=None,
+    def __init__(self, content_provider=None,
                  existing_content_objects=None,
                  context=None, execution_id=None,
                  status_handler=None, cancellation_handler=None):
         if content_provider is None:
             content_provider = InMemoryContentProvider()
-        if store_provider is None:
-            store_provider = InMemoryStoreProvider()
         if context is None:
             context = {}
         if existing_content_objects is None:
@@ -129,7 +91,6 @@ class PipelineContext:
         self.content_objects: List[ContentObject] = existing_content_objects
         self.content_provider = content_provider
         self.context: Dict = context
-        self.store_provider = store_provider
         self.stop_on_exception = True
         self.current_document = None
         self.document_family = None
@@ -179,30 +140,6 @@ class PipelineContext:
         """
         self.content_provider.put_content(content_object, content)
 
-    def add_store(self, name: str, store):
-        """Add a store with given name to the context
-
-        Args:
-          name: the name to refer to the store with
-          store: the instance of the store
-          name: str:
-
-        Returns:
-
-        """
-        self.store_provider.put_store(name, store)
-
-    def get_store_names(self) -> KeysView:
-        """
-
-        Args:
-
-        Returns:
-          :return: the list of store names
-
-        """
-        return self.store_provider.get_store_names()
-
     def set_current_document(self, current_document: Document):
         """Set the Document that is currently being processed in the pipeline
 
@@ -239,45 +176,6 @@ class PipelineContext:
 
         """
         self.output_document = output_document
-
-    def get_store(self, name: str, default: Store = None) -> Store:
-        """Get a store with given name from the context
-
-        Args:
-          name: the name to refer to the store with
-          default: optionally the default to create the store as if it isn't there
-          name: str:
-          default: Store:  (Default value = None)
-
-        Returns:
-          the store, or None is not available
-
-        """
-        store = self.store_provider.get_store(name) if name in self.get_store_names() else None
-
-        if not store and default:
-            self.store_provider.put_store(name, default)
-            default.set_pipeline_context(self)
-
-        return self.store_provider.get_store(name)
-
-    def merge_store(self, name, store):
-        """
-        Merge a store into the pipeline context
-
-        Args:
-          name:
-          store:
-
-        Returns:
-
-        """
-        if name not in self.get_store_names():
-            logger.debug("New store, adding")
-            self.add_store(name, store)
-        else:
-            logger.debug("Existing store, merging")
-            self.get_store(name).merge(store)
 
 
 class PipelineStep:
@@ -409,26 +307,6 @@ class LabelStep(object):
         return document
 
 
-class PipelineStore:
-    """ """
-
-    def __init__(self, name: str, store: Store, extracted_labelled: bool = False):
-        self.name = name
-        self.store = store
-        self.extract_labelled = extracted_labelled
-
-    def extract(self, document):
-        """
-
-        Args:
-          document:
-
-        Returns:
-
-        """
-        # TODO implement
-
-
 class Pipeline:
     """A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
 
@@ -456,30 +334,10 @@ class Pipeline:
             self.connector = connector
 
         self.steps: List[PipelineStep] = []
-        self.stores: List[PipelineStore] = []
         self.name = name
         self.stop_on_exception = stop_on_exception
         self.logging_level = logging_level
         self.apply_lineage = apply_lineage
-
-    def add_store(self, name: str, store: Store, extracted_labelled=False):
-        """Add the store to the pipeline so that it is available to the pipeline
-
-        Args:
-          name: the name of the store (to refer to it)
-          store: the store that should be added
-          extracted_labelled: at the end of the pipeline we will extract the labelled data
-        to this store (Default value = False)
-          name: str:
-          store: Store:
-
-        Returns:
-
-        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.add_store("test-store", TableDataStore())
-        """
-        self.stores.append(PipelineStore(name, store, extracted_labelled))
-        return self
 
     def add_label(self, label: str, options=None, attach_source=False):
         """Adds a label to the document
@@ -582,8 +440,7 @@ class Pipeline:
         return yaml.dump(configuration_steps)
 
     def run(self, parameters=None):
-        """Run the current pipeline, note that you must have a sink in place to allow the pipeline to run
-
+        """Run the current pipeline
 
         :return: The context from the run
 
@@ -593,7 +450,6 @@ class Pipeline:
         Returns:
 
         >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.set_sink(ExampleSink())
             >>> pipeline.run()
         """
         if parameters is None:
@@ -604,10 +460,6 @@ class Pipeline:
 
         self.context = PipelineContext()
         self.context.stop_on_exception = self.stop_on_exception
-
-        for pipeline_store in self.stores:
-            logger.info(f"Adding store {pipeline_store.name}")
-            self.context.add_store(pipeline_store.name, pipeline_store.store)
 
         self.context.statistics = PipelineStatistics()
         self.context.parameters = parameters
@@ -654,34 +506,12 @@ class Pipeline:
                 self.context.statistics.processed_document(document)
                 self.context.output_document = document
 
-                # Determine if any of the stores will automatically extract the data
-                for store in self.stores:
-                    if store.extract_labelled:
-                        store.extract(document)
-
             else:
                 logger.warning("A step did not return a document?")
 
         logger.info(f"Completed pipeline {self.name}")
 
         return self.context
-
-    @staticmethod
-    def from_store(store: DocumentStore, subscription=None, *args, **kwargs):
-        """Build a new pipeline with the input documents from a document store
-
-        Args:
-          store: DocumentStore The URL ie. https://www.google.com
-          subscription: str The subscription query to use (Default value = None)
-          store: DocumentStore:
-          *args:
-          **kwargs:
-
-        Returns:
-          A new instance of a pipeline
-
-        """
-        return Pipeline(DocumentStoreConnector(store, subscription), *args, **kwargs)
 
     @staticmethod
     def from_url(url, headers=None, *args, **kwargs):

@@ -1,7 +1,6 @@
 """
 The core model provides definitions for all the base objects in the Kodexa Content Model
 """
-import abc
 import dataclasses
 import inspect
 import json
@@ -14,8 +13,7 @@ from typing import Any, List, Optional
 import msgpack
 from addict import Dict
 
-from kodexa.mixins import registry
-from kodexa.model.objects import ModelContentMetadata, ContentObject, DocumentTransition, Store, DocumentFamily
+from kodexa.model.objects import ContentObject
 
 
 class Ref:
@@ -70,7 +68,7 @@ class Tag(Dict):
                  uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
                  group_uuid: Optional[str] = None, parent_group_uuid: Optional[str] = None,
                  cell_index: Optional[int] = None, index: Optional[int] = None, bbox: Optional[List[int]] = None,
-                 note: Optional[str] = None, **kwargs):
+                 note: Optional[str] = None, status: Optional[str] = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
         """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
@@ -96,6 +94,9 @@ class Tag(Dict):
         """The cell index of the cell that this tag belongs to, this is used to allow us to group tags together"""
         self.note: Optional[str] = note
         """A note that can be associated with the tag"""
+        self.status: Optional[str] = status
+        """The status of the tag, this can be passed to an attribute status during extraction"""
+
         # Pull the cell index from the data to the tag if we have it in the data
         if self.cell_index is None:
             if data and 'cell_index' in data:
@@ -161,6 +162,14 @@ class ContentNode(object):
 
     def set_content_parts(self, content_parts):
         self.document.get_persistence().update_content_parts(self, content_parts)
+
+    def update(self):
+        """
+        Update this node in the document persistence
+
+        :return:
+        """
+        self.document.get_persistence().update_node(self)
 
     @property
     def content(self):
@@ -312,16 +321,7 @@ class ContentNode(object):
         self.document.get_persistence().add_content_node(child, self)
 
     def remove_child(self, content_node):
-        try:
-            child_idx = self.get_children().index(content_node)
-            child = self.get_children()[child_idx]
-            self.document.get_persistence().remove_content_node(child)
-        except ValueError as e:
-            import better_exceptions
-            import sys
-            et, ev, tb = sys.exc_info()
-            print("\n".join(
-                better_exceptions.format_exception(*sys.exc_info())))
+        self.document.get_persistence().remove_content_node(content_node)
 
     def get_children(self):
         """Returns a list of the children of this node.
@@ -351,6 +351,16 @@ class ContentNode(object):
         self.remove_feature(feature_type, name)
         return self.add_feature(feature_type, name, value)
 
+    def update_feature(self, feature: "ContentFeature"):
+        """
+        Update a feature on this node in document persistence
+
+        :param feature:
+        :return:
+        """
+        self.document.get_persistence().remove_feature(self, feature.feature_type, feature.name)
+        self.document.get_persistence().add_feature(self, feature)
+
     def add_feature(self, feature_type, name, value, single=True, serialized=False):
         """
         Add a new feature to this ContentNode.
@@ -376,8 +386,7 @@ class ContentNode(object):
             feature = self.get_feature(feature_type, name)
             feature.single = False  # always setting to false if we already have a feature of this type/name
             feature.value.append(value)
-            self.document.get_persistence().remove_feature(self, feature_type, name)
-            self.document.get_persistence().add_feature(self, feature)
+            self.update_feature(feature)
             return feature
 
         # Make sure that we treat the value as list all the time
@@ -970,7 +979,8 @@ class ContentNode(object):
     def tag(self, tag_to_apply, selector=".", content_re=None,
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
-            use_match=True, index=None, cell_index=None, group_uuid=None, parent_group_uuid=None, note=None):
+            use_match=True, index=None, cell_index=None, group_uuid=None, parent_group_uuid=None, note=None,
+            status=None):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
@@ -1003,6 +1013,7 @@ class ContentNode(object):
           group_uuid: The group uuid for the tag
           parent_group_uuid: The parent group uuid for the tag
           note: a text note for the tag
+          status: a status for the tag, this can be transistioned to an attribute status during extraction
 
         >>> document.content_node.tag('is_cheese')
         """
@@ -1039,7 +1050,8 @@ class ContentNode(object):
                                                           part[start:end] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index, note=note))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note,
+                                                          status=status))
                             return -1
                         if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1048,7 +1060,8 @@ class ContentNode(object):
                                                           value=part[start:] if value is None else value,
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
-                                                          group_uuid=group_uuid, cell_index=cell_index, note=note))
+                                                          group_uuid=group_uuid, cell_index=cell_index, note=note,
+                                                          status=status))
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1119,7 +1132,7 @@ class ContentNode(object):
                     node.add_feature('tag', tag_to_apply,
                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value,
                                          index=index, parent_group_uuid=parent_group_uuid, group_uuid=group_uuid,
-                                         cell_index=cell_index, note=note))
+                                         cell_index=cell_index, note=note, status=status))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1140,7 +1153,8 @@ class ContentNode(object):
                                     node.add_feature('tag', tag_to_apply,
                                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
                                                          value=value, index=index, parent_group_uuid=parent_group_uuid,
-                                                         group_uuid=group_uuid, cell_index=cell_index, note=note))
+                                                         group_uuid=group_uuid, cell_index=cell_index, note=note,
+                                                         status=status))
                             else:
                                 if matches:
                                     for match in matches:
@@ -1286,10 +1300,11 @@ class ContentNode(object):
             tag_instances = tagged_node.get_tag(tag_name)
 
             for tag_instance in tag_instances:
-                if tag_instance['uuid'] not in node_groups:
-                    node_groups[tag_instance['uuid']] = [tagged_node]
-                else:
-                    node_groups[tag_instance['uuid']].append(tagged_node)
+                if 'uuid' in tag_instance:
+                    if tag_instance['uuid'] not in node_groups:
+                        node_groups[tag_instance['uuid']] = [tagged_node]
+                    else:
+                        node_groups[tag_instance['uuid']].append(tagged_node)
 
         return node_groups
 
@@ -1682,8 +1697,15 @@ class Document(object):
     def add_exception(self, exception: ContentException):
         self._persistence_layer.add_exception(exception)
 
+    def get_exceptions(self) -> List[ContentException]:
+        return self._persistence_layer.get_exceptions()
+
+    def replace_exceptions(self, exceptions: List[ContentException]):
+        self._persistence_layer.replace_exceptions(exceptions)
+
     def __init__(self, metadata=None, content_node: ContentNode = None, source=None, ref: str = None,
                  kddb_path: str = None, delete_on_close=False):
+
         if metadata is None:
             metadata = DocumentMetadata()
         if source is None:
@@ -1724,8 +1746,6 @@ class Document(object):
         self.classes: List[ContentClassification] = []
         """A list of the content classifications associated at the document level"""
 
-        self.add_mixin('core')
-
         # Start persistence layer
         from kodexa.model import PersistenceManager
 
@@ -1763,6 +1783,33 @@ class Document(object):
         self._content_node = value
         if value is not None:
             self.get_persistence().add_content_node(self._content_node, None)
+
+    def get_tag_instances(self, tag):
+
+        groups = self.content_node.get_related_tag_nodes(tag, everywhere=True)
+        tag_instances = []
+
+        class TagInstance:
+
+            def __init__(self, tag_uuid, nodes):
+                self.tag_uuid = tag_uuid
+                self.nodes = nodes
+
+            def get_value(self):
+                content_parts = []
+                for node in self.nodes:
+                    content_parts.append(node.content)
+                return " ".join(content_parts)
+
+            def get_data(self):
+                if len(self.nodes) > 0:
+                    return self.nodes[0].get_tag_data(self.tag_uuid)
+                else:
+                    return {}
+                
+        for key in groups.keys():
+            tag_instances.append(TagInstance(key, groups[key]))
+        return tag_instances
 
     def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
         """Add a content classification to the document
@@ -1977,8 +2024,6 @@ class Document(object):
         >>> Document.from_dict(doc_dict)
         """
         new_document = Document(DocumentMetadata(doc_dict['metadata']))
-        for mixin in doc_dict['mixins']:
-            registry.add_mixin_to_document(mixin, new_document)
         new_document.version = doc_dict['version'] if 'version' in doc_dict and doc_dict[
             'version'] else Document.PREVIOUS_VERSION  # some older docs don't have a version or it's None
         new_document.log = doc_dict['log'] if 'log' in doc_dict else []
@@ -2032,22 +2077,30 @@ class Document(object):
         return Document.from_dict(msgpack.unpackb(msgpack_bytes, raw=False))
 
     def get_mixins(self):
-        """Get the list of mixins that have been enabled on this document."""
+        """
+        Get the list of mixins that have been enabled on this document
+
+        Returns:
+            mixins: list[str] a list of the mixin names
+        """
         return self._mixins
 
     def add_mixin(self, mixin):
-        """Add the given mixin to this document,  this will apply the mixin to all the content nodes,
+        """
+        Add the given mixin to this document,  this will apply the mixin to all the content nodes,
         and also register it with the document so that future invocations of create_node will ensure
         the node has the mixin appled.
 
         Args:
-          mixin:
+          mixin:str the name of the mixin to add
 
         Returns:
-
+        >>> import * from kodexa
+        >>> document = Document()
         >>> document.add_mixin('spatial')
         """
-        registry.add_mixin_to_document(mixin, self)
+        self._mixins.append(mixin)
+        self.get_persistence().update_metadata()
 
     def create_node(self, node_type: str, content: Optional[str] = None, virtual: bool = False,
                     parent: ContentNode = None,
@@ -2215,337 +2268,12 @@ class Document(object):
         return self.labels
 
 
-class DocumentStore(Store):
-    """
-    A document store supports storing, listing and retrieving Kodexa documents and document families
-    """
-
-    @abc.abstractmethod
-    def get_ref(self) -> str:
-        """
-        Returns the reference (org-slug/store-slug:version)
-
-        Returns:
-            The reference of the document store (i.e. myorg/myslug:1.0.0)
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_by_content_object_id(self, document_family: DocumentFamily, content_object_id: str) -> Optional[Document]:
-        """Get a Document based on the ID of the ContentObject
-
-        Args:
-          document_family(DocumentFamily): The document family
-          content_object_id(str): the ID of the ContentObject
-
-        Returns:
-          A document (or None if not found)
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def replace_content_object(self, document_family: DocumentFamily, content_object_id: str,
-                               document: Document) -> Optional[DocumentFamily]:
-        """Replace the document in a specific content object in a document family.
-
-        Args:
-          document_family (DocumentFamily): The document family
-          content_object_id (str): the ID of the ContentObject
-          document (Document): the document to replace the content object with
-
-        Returns:
-          The document family (or None if it wasn't found)
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def put_native(self, path: str, content):
-        """
-        Push content directly, this will create both a native object in the store and also a
-        related Document that refers to it.
-
-        :param path: the path where you want to put the native content
-        :param content: the binary content for the native file
-        :return: None
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_family(self, document_family_id: str) -> Optional[DocumentFamily]:
-        """
-        Returns a document family based on the ID
-
-        Args:
-            document_family_id (str): the ID of the document family
-
-        Returns:
-            The document family (or None if not found)
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def delete(self, path: str):
-        """
-        Delete the document family stored at the given path
-
-        Args:
-          path: the path to the content (ie. mymodel.dat)
-
-        Returns:
-          True if deleted, False if there was no file at the path
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def add_related_document_to_family(self, document_family_id: str, transition: DocumentTransition,
-                                       document: Document):
-        """Add a document to a family as a new transition
-
-        Args:
-          document_family_id (str): the ID for the document family
-          transition (DocumentTransition): the document transition
-          document (Document): the document
-
-        Returns:
-          None
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_document_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
-            Optional[Document]:
-        """
-        Get a document for a given content object
-
-        Args:
-          document_family (DocumentFamily): the document family
-          content_object  (ContentObject): the content object
-
-        Returns:
-          the Document (or None if not found)
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_source_by_content_object(self, document_family: DocumentFamily, content_object: ContentObject) -> \
-            Any:
-        """
-        Get the source for a given content object
-
-        Args:
-          document_family (DocumentFamily): the document family
-          content_object  (ContentObject): the content object
-
-        Returns:
-          the source (or None if not found)
-
-        """
-        raise NotImplementedError
-
-    def query(self, query: str = "*"):
-        """
-
-        Args:
-          query (str):  The query (Default value = "*")
-
-        Returns:
-
-        """
-        families = self.query_families(query)
-        self._draw_table(families)
-
-    @abc.abstractmethod
-    def register_listener(self, listener):
-        """Register a listener to this store.
-
-        A store listener must have the method
-
-            process_event(content_event:ContentEvent)
-
-        Args:
-          listener: the listener to register
-
-        Returns:
-          None
-
-        """
-        raise NotImplementedError
-
-    def _draw_table(self, objects):
-        """Internal method to draw a table
-
-        Args:
-          objects: return:
-
-        Returns:
-
-        """
-        from rich.table import Table
-        from rich import print
-
-        table = Table(title="Listing Objects")
-
-        cols = ['id', 'content_type', 'path']
-        for col in cols:
-            table.add_column(col)
-        for object_dict in objects:
-            row = []
-
-            for col in cols:
-                row.append(object_dict[col] if col in object_dict else '')
-            table.add_row(*row)
-
-        print(table)
-
-    @abc.abstractmethod
-    def query_families(self, query: str = "*", page: int = 1, page_size: int = 100) -> List[DocumentFamily]:
-        """
-        Query the document families
-
-        Args:
-          page (int): The page number
-          page_size (int): The page size
-          query (str): The query (Default is *)
-
-        Returns:
-            A list of matching document families
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def put(self, path: str, document: Document) -> DocumentFamily:
-        """Puts a new document in the store with the given path.
-
-        There mustn't be a family in the path, this method will create a new family based around the
-        document
-
-        Args:
-          path (str): the path you wish to add the document in the store
-          document (Document): the document
-        Returns:
-            A new document family
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_family_by_path(self, path: str) -> Optional[DocumentFamily]:
-        """
-        Returns the document family (or None is not available) for a specific path in the store
-
-        Args:
-            path (str): the path within the store
-
-        Returns:
-            The document family, or None is no family exists at that path
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def count(self) -> int:
-        """The number of document families in the store
-
-        Returns:
-            the count of families
-        """
-        raise NotImplementedError
-
-    def accept(self, document: Document):
-        """Determine if the store will accept this document.  This would typically mean that the store does
-        not yet have a document at the derived family path
-
-        Args:
-          document (Document): the document to check
-
-        Returns:
-          True if there is no current family at derived path, False is there is one
-
-        """
-        return True
-
-    def get_latest_document_in_family(self, document_family: DocumentFamily) -> Optional[Document]:
-        """
-        Returns the latest instance
-        Args:
-            document_family (DocumentFamily): The document family which we want the latest document in
-
-        Returns:
-            The last document to be stored in the family or None if there isn't one available
-
-        """
-        last_co = document_family.content_objects[-1]
-        document = self.get_document_by_content_object(document_family, last_co)
-
-        if document is not None:
-            document.ref = f"{self.get_ref()}/{document_family.id}/{last_co.id}"
-
-        return document
-
-
-class ModelStore(Store):
-    """A model store supports storing and retrieving of a ML models"""
-
-    def get(self, path: str):
-        """Returns the bytes object for the given path (or None is there nothing at that path)
-
-        Args:
-          path(str): the path to get content from
-
-        Returns:
-          Bytes or None is there is nothing at the path
-
-        """
-
-    def put(self, path: str, content: Any, replace=False) -> DocumentFamily:
-        """
-
-        Args:
-          path (str): The path to put the content at
-          content: The content to put in the store
-          replace: Replace the object if it exists
-        Returns:
-          The document family that was created
-
-        """
-
-    def set_content_metadata(self, model_content_metadata: ModelContentMetadata):
-        """
-        Updates the model content metadata for the model store
-
-        :param model_content_metadata: The metadata object
-        """
-
-    def get_content_metadata(self) -> ModelContentMetadata:
-        """
-        Gets the latest model content metadata for the model store
-
-        :return: the model content metadata
-        """
-
-    def list_contents(self) -> List[str]:
-        """
-        Returns a list of the objects that have been uploaded into this model store
-
-        :return: a list of the object names
-        """
-
-
 class ContentObjectReference:
     """ """
 
-    def __init__(self, content_object: ContentObject, store: DocumentStore, document: Document,
+    def __init__(self, content_object: ContentObject, store, document: Document,
                  document_family):
         self.content_object = content_object
         self.store = store
         self.document = document
-        from kodexa.model import DocumentFamily
-        self.document_family: DocumentFamily = document_family
+        self.document_family = document_family
