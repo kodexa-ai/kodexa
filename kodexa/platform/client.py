@@ -1755,6 +1755,8 @@ class DataStoreEndpoint(StoreEndpoint):
                 if include_id:
                     table_result['column_headers'].append('Data Object ID')
                     table_result['columns'].append('data_object_id')
+                    table_result['column_headers'].append('Parent Data Object ID')
+                    table_result['columns'].append('parent_id')
 
                 for taxon in taxonomy.get_taxon_by_path(data_object.path).children:
                     if not taxon.group:
@@ -1767,6 +1769,8 @@ class DataStoreEndpoint(StoreEndpoint):
                 if include_id:
                     if column == 'data_object_id':
                         column_value = data_object.id
+                    if column == 'parent_id':
+                        column_value = data_object.parent_id
                 for attribute in data_object.attributes:
                     if attribute.tag == column:
                         column_value = attribute.string_value
