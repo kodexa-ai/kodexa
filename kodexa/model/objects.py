@@ -1596,6 +1596,7 @@ class Project(KodexaBaseModel):
     show_thumbnails: Optional[bool] = Field(None, alias='showThumbnails')
     has_image: Optional[bool] = Field(None, alias='hasImage')
     show_search: Optional[bool] = Field(None, alias='showSearch')
+    show_tooltips_on_labeling: Optional[bool] = Field(None, alias='showTooltipsOnLabeling')
     project_template_ref: Optional[str] = Field(None, alias='projectTemplateRef')
     memory: Optional[ProjectMemory] = None
     document_statuses: Optional[List[DocumentStatus]] = Field(
@@ -2904,7 +2905,6 @@ class Store(ExtensionPackProvided):
     allowDataEditing: Optional[bool] = Field(
         None, description='Allow data editing', alias='allowDataEditing'
     )
-
 
 
 class Taxonomy(ExtensionPackProvided):
