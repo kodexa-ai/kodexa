@@ -1798,7 +1798,7 @@ class Document(object):
             def get_value(self):
                 content_parts = []
                 for node in self.nodes:
-                    content_parts.append(node.content)
+                    content_parts.append(node.get_all_content())
                 return " ".join(content_parts)
 
             def get_data(self):
