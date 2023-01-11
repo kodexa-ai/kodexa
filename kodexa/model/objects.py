@@ -1594,9 +1594,13 @@ class Project(KodexaBaseModel):
     metadata: Optional[ProjectMetadata] = None
     show_tasks: Optional[bool] = Field(None, alias='showTasks')
     show_thumbnails: Optional[bool] = Field(None, alias='showThumbnails')
-    has_image: Optional[bool] = Field(None, alias='hasImage')
+    show_notes_on_project: Optional[bool] = Field(None, alias='showNotesOnProject')
+    use_new_labeling: Optional[bool] = Field(None, alias='useNewLabeling')
     show_search: Optional[bool] = Field(None, alias='showSearch')
     show_tooltips_on_labeling: Optional[bool] = Field(None, alias='showTooltipsOnLabeling')
+    
+    has_image: Optional[bool] = Field(None, alias='hasImage')
+
     project_template_ref: Optional[str] = Field(None, alias='projectTemplateRef')
     memory: Optional[ProjectMemory] = None
     document_statuses: Optional[List[DocumentStatus]] = Field(
