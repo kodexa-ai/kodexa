@@ -404,6 +404,13 @@ class EntityEndpoint(BaseEntity, ClientEndpoint):
             raise Exception("Component doesn't exist")
         self.client.delete(url)
 
+    def to_dict(self):
+        """
+        Convert the client endpoint to a dictionary
+        :return: A dictionary representation of the endpoint
+        """
+        return json.loads(self.json(exclude={'client'}, by_alias=True))
+
 
 class EntitiesEndpoint:
     """Represents an entities endpoint"""
