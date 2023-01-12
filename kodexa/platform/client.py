@@ -1677,10 +1677,6 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
     def upload_contents(self, metadata) -> List[str]:
         return []
 
-    def reindex(self):
-        """Reindex the store"""
-        self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/_reindex")
-
     def update_metadata(self):
         """Update the metadata of the store"""
         self.client.put(f"/api/stores/{self.ref.replace(':', '/')}/metadata",
