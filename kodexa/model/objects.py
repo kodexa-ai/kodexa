@@ -913,6 +913,8 @@ class DataException(KodexaBaseModel):
     exception_type: Optional[str] = Field(None, alias='exceptionType')
     closing_comment: Optional[str] = Field(None, alias='closingComment')
     open: Optional[bool] = None
+    data_object: Optional[DataObject] = Field(None, alias='dataObject')
+    data_attribute: Optional[DataAttribute] = Field(None, alias='dataAttribute')
 
 
 class DataLineage(KodexaBaseModel):
