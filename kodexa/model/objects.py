@@ -900,7 +900,7 @@ class NodeFeatures(KodexaBaseModel):
 
 class DataException(KodexaBaseModel):
     """
-    A list of the data exceptions
+    A data exception
     """
 
     id: Optional[str] = Field(None, description='The ID of the object')
@@ -1608,6 +1608,7 @@ class Project(KodexaBaseModel):
     show_tasks: Optional[bool] = Field(None, alias='showTasks')
     show_thumbnails: Optional[bool] = Field(None, alias='showThumbnails')
     show_notes_on_project: Optional[bool] = Field(None, alias='showNotesOnProject')
+    show_exceptions_on_project: Optional[bool] = Field(None, alias='showExceptionsOnProject')
     use_new_labeling: Optional[bool] = Field(None, alias='useNewLabeling')
     show_search: Optional[bool] = Field(None, alias='showSearch')
     show_tooltips_on_labeling: Optional[bool] = Field(None, alias='showTooltipsOnLabeling')
