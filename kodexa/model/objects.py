@@ -1582,12 +1582,13 @@ class ExecutionStep(KodexaBaseModel):
     extension_pack_ref: Optional[str] = Field(None, alias='extensionPackRef')
     step_type: Optional[StepType1] = Field(None, alias='stepType')
 
+
 class ProjectStatus(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    status: Status = Field(None, description='The status of the project')
+    status:  Optional[str] = Field(None, description='The status of the project')
     color: Optional[str] = None
     organization: Organization
     icon: Optional[str] = None
