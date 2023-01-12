@@ -1588,7 +1588,7 @@ class ProjectStatus(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    status:  Optional[str] = Field(None, description='The status of the project')
+    status: Optional[str] = Field(None, description='The status of the project')
     color: Optional[str] = None
     organization: Organization
     icon: Optional[str] = None
@@ -1609,7 +1609,7 @@ class Project(KodexaBaseModel):
     use_new_labeling: Optional[bool] = Field(None, alias='useNewLabeling')
     show_search: Optional[bool] = Field(None, alias='showSearch')
     show_tooltips_on_labeling: Optional[bool] = Field(None, alias='showTooltipsOnLabeling')
-    
+
     has_image: Optional[bool] = Field(None, alias='hasImage')
 
     project_template_ref: Optional[str] = Field(None, alias='projectTemplateRef')
@@ -2562,6 +2562,19 @@ class PagePlatformEvent(KodexaBaseModel):
     total_elements: Optional[int] = Field(None, alias='totalElements')
     size: Optional[int] = None
     content: Optional[List[PlatformEvent]] = None
+    number: Optional[int] = None
+    pageable: Optional[PageableObject] = None
+    number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class PageDataException(KodexaBaseModel):
+    total_pages: Optional[int] = Field(None, alias='totalPages')
+    total_elements: Optional[int] = Field(None, alias='totalElements')
+    size: Optional[int] = None
+    content: Optional[List[DataException]] = None
     number: Optional[int] = None
     pageable: Optional[PageableObject] = None
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
