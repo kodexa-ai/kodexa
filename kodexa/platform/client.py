@@ -32,7 +32,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
     Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
-    CustomEvent, ProjectTag, PageDataException
+    CustomEvent, ProjectTag, PageDataException, DataException
 
 logger = logging.getLogger()
 
@@ -658,6 +658,14 @@ class PageDataFormEndpoint(PageDataForm, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint"""
         return "dataForm"
+
+
+class PageDataExceptionEndpoint(PageDataException, PageEndpoint):
+    """Represents a page of data exceptions endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "exception"
 
 
 class PageDocumentFamilyEndpoint(PageDocumentFamily, PageEndpoint):
@@ -1683,19 +1691,19 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
         return []
 
 
-class DataExceptionEndpoint(EntityEndpoint):
+class DataExceptionEndpoint(DataException, EntityEndpoint):
 
     def get_type(self) -> str:
         return "exceptions"
 
 
-class DataStoreExceptions(EntitiesEndpoint):
+class DataStoreExceptionsEndpoint(EntitiesEndpoint):
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return DataExceptionEndpoint
 
     def get_page_class(self, object_dict=None) -> Type[BaseModel]:
-        return PageDataException
+        return PageDataExceptionEndpoint
 
     def get_type(self) -> str:
         return "exceptions"
@@ -1710,7 +1718,7 @@ class DataStoreExceptions(EntitiesEndpoint):
         if filters is None:
             filters = []
 
-        filters.append(f"dataObject.store.slug: '{self.data_store.slug}'")
+        filters.append(f"dataObject.store.slug={self.data_store.slug}")
 
         return super().list(query, page, page_size, sort, filters)
 
@@ -1721,7 +1729,7 @@ class DataStoreEndpoint(StoreEndpoint):
     @property
     def exceptions(self) -> ProjectDocumentStoresEndpoint:
         """Get the document stores endpoint of the project"""
-        return DataStoreExceptions().set_client(self.client).set_project(self)
+        return DataStoreExceptionsEndpoint(self, self.client)
 
     def get_data_objects_export(self, document_family: Optional[DocumentFamily] = None,
                                 output_format: str = "json", path: Optional[str] = None, root_name: str = "",
@@ -2782,7 +2790,8 @@ class KodexaClient:
                 "dataForm": DataFormEndpoint,
                 "dashboard": DashboardEndpoint,
                 "execution": ExecutionEndpoint,
-                "assistant": AssistantDefinitionEndpoint
+                "assistant": AssistantDefinitionEndpoint,
+                "exception": DataExceptionEndpoint
             }
 
             if component_type in known_components:
