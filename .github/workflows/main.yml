@@ -52,6 +52,8 @@ jobs:
           VERSION=$(cat VERSION)
           PAYLOAD=$(jq -c -n --arg version "$VERSION" '$ARGS.named')
           echo "payload=$PAYLOAD" >> $GITHUB_OUTPUT
+          # Wait for 1 minute; just to make sure the package is published
+          sleep 60
       - name: Trigger a build in kodexa-playground
         uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
