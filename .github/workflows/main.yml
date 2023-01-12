@@ -44,3 +44,27 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
+      # The steps below are used to setup payload 
+      # and triggers workflow in kodexa-playground
+      - name: Prepare Workflow Client Payload
+        id: workflow_payload
+        run: |
+          VERSION=$(cat VERSION)
+          PAYLOAD=$(jq -c -n --arg version "$VERSION" '$ARGS.named')
+          echo "payload=$PAYLOAD" >> $GITHUB_OUTPUT
+          # Wait for 1 minute; just to make sure the package is published
+          sleep 60
+      - name: Trigger a build in kodexa-playground
+        uses: convictional/trigger-workflow-and-wait@v1.6.1
+        with:
+          owner: kodexa-ai
+          repo: kodexa-playground
+          github_token: ${{ secrets.WORKFLOW_GITHUB_TOKEN }}
+          github_user: rcablao-kodexa
+          workflow_file_name: aws.yml
+          ref: main
+          client_payload: ${{ steps.workflow_payload.outputs.payload }}
+          wait_interval: 10
+          trigger_workflow: true
+          propagate_failure: false
+          wait_workflow: false
