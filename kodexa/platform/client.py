@@ -903,6 +903,12 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
                 return resource
         return None
 
+    def create(self, assistant: Assistant) -> AssistantEndpoint:
+        """Create an assistant"""
+        url = f"/api/projects/{self.project.id}/assistants"
+        response = self.client.post(url, body=assistant.to_dict())
+        return AssistantEndpoint.parse_obj(response.json()).set_client(self.client)
+
 
 class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
     """Represents a project document stores endpoint"""
