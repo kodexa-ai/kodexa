@@ -2211,6 +2211,7 @@ class Assistant(KodexaBaseModel):
     )
     definition: Optional[AssistantDefinition] = None
     show_in_training: Optional[bool] = Field(None, alias='showInTraining')
+    color: Optional[str] = Field(None, description='The color to use for the assistant')
 
 
 class AssistantExecution(KodexaBaseModel):

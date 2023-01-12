@@ -18,7 +18,7 @@ class KodexaBaseModel(BaseModel):
         }
 
     def to_dict(self):
-        return self.dict(by_alias=True, exclude_none=True)
+        return self.dict(by_alias=True, exclude_none=True, exclude={'client'})
 
 
 class BaseEntity(KodexaBaseModel):
