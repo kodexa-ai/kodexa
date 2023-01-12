@@ -915,6 +915,7 @@ class DataException(KodexaBaseModel):
     open: Optional[bool] = None
     data_object: Optional[DataObject] = Field(None, alias='dataObject')
     data_attribute: Optional[DataAttribute] = Field(None, alias='dataAttribute')
+    data_object_id: Optional[str] = Field(None, alias='dataObjId')
 
 
 class DataLineage(KodexaBaseModel):
@@ -2171,9 +2172,9 @@ class DataObject(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    document_family: DocumentFamily = Field(..., alias='documentFamily')
+    document_family: Optional[DocumentFamily] = Field(None, alias='documentFamily')
     data_exceptions: Optional[List[DataException]] = Field(
-        None,
+        default_factory=list,
         alias='dataExceptions',
         description='A list of the data exceptions',
         unique_items=True,
