@@ -58,43 +58,43 @@ def generate_documentation(metadata):
 
     """
     os.makedirs('docs', exist_ok=True)
-    components = document_component(metadata)
+    # components = document_component(metadata)
+    #
+    # with open('mkdocs.yml', 'w') as mkdocs_file:
+    #     mkdocs = yaml.parser(mkdocs_file)
 
-    with open('mkdocs.yml', 'w') as mkdocs_file:
-        mkdocs = yaml.parser(mkdocs_file)
-
-    nav_items = mkdocs['nav'].items()
-
-    toc = toc + "assistant\n"
-    for assistantDefinition in components['assistantDefinitions']:
-        toc += f"    {assistantDefinition}\n"
-
-    toc = toc + "project-template\n"
-    for projectTemplate in components['projectTemplates']:
-        toc += f"    {projectTemplate}\n"
-
-    toc = toc + "model-runtime\n"
-    for projectTemplate in components['modelRuntimes']:
-        toc += f"    {projectTemplate}\n"
-
-    toc = toc + "taxonomy\n"
-    for taxonomy in components['taxonomies']:
-        toc += f"    {taxonomy}\n"
-
-    toc = toc + "store\n"
-    for store in components['stores']:
-        toc += f"    {store}\n"
-
-    toc = toc + "action\n"
-    for action in components['actions']:
-        toc += f"    {action}\n"
-
-    toc = toc + "pipeline\n"
-    for pipeline in components['pipelines']:
-        toc += f"    {pipeline}\n"
-
-    with open("docs/toc", "w") as text_file:
-        text_file.write(toc)
+    # nav_items = mkdocs['nav'].items()
+    # 
+    # toc = toc + "assistant\n"
+    # for assistantDefinition in components['assistantDefinitions']:
+    #     toc += f"    {assistantDefinition}\n"
+    # 
+    # toc = toc + "project-template\n"
+    # for projectTemplate in components['projectTemplates']:
+    #     toc += f"    {projectTemplate}\n"
+    # 
+    # toc = toc + "model-runtime\n"
+    # for projectTemplate in components['modelRuntimes']:
+    #     toc += f"    {projectTemplate}\n"
+    # 
+    # toc = toc + "taxonomy\n"
+    # for taxonomy in components['taxonomies']:
+    #     toc += f"    {taxonomy}\n"
+    # 
+    # toc = toc + "store\n"
+    # for store in components['stores']:
+    #     toc += f"    {store}\n"
+    # 
+    # toc = toc + "action\n"
+    # for action in components['actions']:
+    #     toc += f"    {action}\n"
+    # 
+    # toc = toc + "pipeline\n"
+    # for pipeline in components['pipelines']:
+    #     toc += f"    {pipeline}\n"
+    # 
+    # with open("docs/toc", "w") as text_file:
+    #     text_file.write(toc)
 
 
 def transform_taxons(taxons):
