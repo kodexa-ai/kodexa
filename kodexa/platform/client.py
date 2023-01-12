@@ -140,13 +140,6 @@ class ClientEndpoint(YamlModel):
             self.ref = f"{self.org_slug}/{self.slug}:{self.version}"
         return self
 
-    def to_dict(self):
-        """
-        Convert the client endpoint to a dictionary
-        :return: A dictionary representation of the endpoint
-        """
-        return json.loads(self.json(exclude={'client'}, by_alias=True))
-
     def yaml(self, **kwargs):
         """
         Convert the client endpoint to a yaml string
@@ -403,13 +396,6 @@ class EntityEndpoint(BaseEntity, ClientEndpoint):
         if not exists:
             raise Exception("Component doesn't exist")
         self.client.delete(url)
-
-    def to_dict(self):
-        """
-        Convert the client endpoint to a dictionary
-        :return: A dictionary representation of the endpoint
-        """
-        return json.loads(self.json(exclude={'client'}, by_alias=True))
 
 
 class EntitiesEndpoint:

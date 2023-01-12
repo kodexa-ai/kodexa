@@ -475,7 +475,7 @@ def login(_: Info):
 @cli.command()
 @click.option('--path', default=os.getcwd(), help='Path to folder container kodexa.yml (defaults to current)')
 @pass_info
-def document(_: Info, path: str):
+def mkdocs(_: Info, path: str):
     metadata_obj = ExtensionHelper.load_metadata(path)
     from kodexa.cli.documentation import generate_documentation
     generate_documentation(metadata_obj)

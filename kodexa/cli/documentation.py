@@ -4,6 +4,7 @@ Utilities to support generating documentation based on the metadata in a kodexa.
 import json
 import os
 import jinja2
+import yaml
 from addict import Dict
 
 
@@ -49,7 +50,8 @@ def get_template_env():
 
 
 def generate_documentation(metadata):
-    """Given the metadata object from a kodexa.yml generate the documentation
+    """Given the metadata object from a kodexa.yml generate a set of
+    mkdocs markdown files and update the nav information for reference
 
     Args:
       metadata:Dict: A dictionary of the metadata
@@ -58,9 +60,10 @@ def generate_documentation(metadata):
     os.makedirs('docs', exist_ok=True)
     components = document_component(metadata)
 
-    write_template("index.j2", f"docs/overview", f"index.md", components)
+    with open('mkdocs.yml', 'w') as mkdocs_file:
+        mkdocs = yaml.parser(mkdocs_file)
 
-    toc = "overview\n    index\n"
+    nav_items = mkdocs['nav'].items()
 
     toc = toc + "assistant\n"
     for assistantDefinition in components['assistantDefinitions']:

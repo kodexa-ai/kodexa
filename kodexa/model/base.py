@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import Optional
 
@@ -18,7 +19,7 @@ class KodexaBaseModel(BaseModel):
         }
 
     def to_dict(self):
-        return self.dict(by_alias=True, exclude_none=True, exclude={'client'})
+        return json.loads(self.json(by_alias=True, exclude={'client'}))
 
 
 class BaseEntity(KodexaBaseModel):
