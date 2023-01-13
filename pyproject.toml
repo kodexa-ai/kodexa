@@ -38,7 +38,7 @@ pydantic-yaml = ">=0.8.0,<0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 mkdocs-material = "^9.0.3"
-pytest = "7.1.2"
+pytest = "7.2.0"
 pytest-runner = "6.0.0"
 mypy = "^0.991"
 flake8 = "^6.0.0"
