@@ -20,7 +20,6 @@ import requests
 from functional import seq
 from pydantic import BaseModel
 from pydantic_yaml import YamlModel
-from rich.console import Console
 
 from kodexa.model import Taxonomy, Document
 from kodexa.model.base import BaseEntity
@@ -187,8 +186,6 @@ class ProjectResourceEndpoint(ClientEndpoint):
         if object_type in DEFAULT_COLUMNS:
             cols = DEFAULT_COLUMNS[object_type]
 
-        from rich.table import Table
-
         table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
         for col in cols:
             table.add_column(col)
@@ -204,8 +201,6 @@ class ProjectResourceEndpoint(ClientEndpoint):
                 except AttributeDoesNotExist:
                     row.append("")
             table.add_row(*row)
-
-        Console().print(table)
 
     def to_df(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         """
