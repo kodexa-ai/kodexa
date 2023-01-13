@@ -6,41 +6,41 @@ on:
       - 'develop'
 
 jobs:
-  build-linux:
+  Build and Publish Python Package:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
           python-version: '3.10'
+      - name: Run image
+        uses: abatilo/actions-poetry@v2
       - name: Increment version
-        id: version
-        uses: pdodds/Bump-N-Tag-Version@master
+        run: poetry version prerelease
+      - uses: EndBug/add-and-commit@v9
         with:
-          file_name: './VERSION'
-          tag_version: "true"
-          postfix: 'beta'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: 'Update version'
+          add: 'pyproject.toml'
       - name: Install dependencies
-        run: |
-          sudo chmod -R ugo+rwX .
-          pip install -r requirements.txt
+        run: poetry install
       - name: Lint with flake8
         run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-          yes | mypy --install-types kodexa || true
+          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          yes | poetry run mypy --install-types kodexa || true
       - name: Test with pytest
         run: |
-          pytest
-      - name: Package
+          poetry run pytest
+      - name: Build Package
         run: |
-          python setup.py bdist_wheel sdist
+          poetry build
       - name: Publish a Python distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+          poetry publish
+    #      - name: Publish a Python distribution to PyPI
+    #        uses: pypa/gh-action-pypi-publish@release/v1
+    #        with:
+    #          user: __token__
+    #          password: ${{ secrets.PYPI_TOKEN }}

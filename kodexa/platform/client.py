@@ -20,7 +20,6 @@ import requests
 from functional import seq
 from pydantic import BaseModel
 from pydantic_yaml import YamlModel
-from rich.console import Console
 
 from kodexa.model import Taxonomy, Document
 from kodexa.model.base import BaseEntity
@@ -179,34 +178,6 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def get_instance_class(self, object_dict=None) -> Type[ClientEndpoint]:
         pass
 
-    def print_table(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None, title: str = None):
-        cols = DEFAULT_COLUMNS['default']
-
-        object_type, object_type_metadata = resolve_object_type(self.get_type())
-
-        if object_type in DEFAULT_COLUMNS:
-            cols = DEFAULT_COLUMNS[object_type]
-
-        from rich.table import Table
-
-        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
-        for col in cols:
-            table.add_column(col)
-
-        for object_dict in self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters):
-            row = []
-
-            for col in cols:
-                from simpleeval import simple_eval
-                from simpleeval import AttributeDoesNotExist
-                try:
-                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
-                except AttributeDoesNotExist:
-                    row.append("")
-            table.add_row(*row)
-
-        Console().print(table)
-
     def to_df(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         """
         Convert resources to data frame
@@ -302,35 +273,6 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         list_response = self.client.get(url, params=params)
         return self.get_page_class(list_response.json()).parse_obj(list_response.json()).set_client(
             self.client).to_endpoints()
-
-    def print_table(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None, title: str = None):
-        cols = DEFAULT_COLUMNS['default']
-
-        object_type, object_type_metadata = resolve_object_type(self.get_type())
-
-        if object_type in DEFAULT_COLUMNS:
-            cols = DEFAULT_COLUMNS[object_type]
-
-        from rich.table import Table
-
-        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
-        for col in cols:
-            table.add_column(col)
-
-        list_page = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
-        for object_dict in list_page.content:
-            row = []
-
-            for col in cols:
-                from simpleeval import simple_eval
-                from simpleeval import AttributeDoesNotExist
-                try:
-                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
-                except AttributeDoesNotExist:
-                    row.append("")
-            table.add_row(*row)
-
-        Console().print(table)
 
     def create(self, component):
         url = f"/api/{self.get_type()}/{self.organization.slug}/"
@@ -437,35 +379,6 @@ class EntitiesEndpoint:
 
         list_response = self.client.get(url, params=params)
         return self.get_page_class().parse_obj(list_response.json()).set_client(self.client)
-
-    def print_table(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None, title: str = None):
-        cols = DEFAULT_COLUMNS['default']
-
-        object_type, object_type_metadata = resolve_object_type(self.get_type())
-
-        if object_type in DEFAULT_COLUMNS:
-            cols = DEFAULT_COLUMNS[object_type]
-
-        from rich.table import Table
-
-        table = Table(title=f"Listing {object_type_metadata['plural']}" if title else None)
-        for col in cols:
-            table.add_column(col)
-
-        list_page = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
-        for object_dict in list_page.content:
-            row = []
-
-            for col in cols:
-                from simpleeval import simple_eval
-                from simpleeval import AttributeDoesNotExist
-                try:
-                    row.append(str(simple_eval('object.' + col, names={'object': object_dict})))
-                except AttributeDoesNotExist:
-                    row.append("")
-            table.add_row(*row)
-
-        Console().print(table)
 
     def find_by_organization(self, organization: Organization) -> PageProject:
         """Find projects by organization"""

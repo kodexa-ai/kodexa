@@ -18,7 +18,6 @@ import requests
 import yaml
 from addict import Dict
 from appdirs import AppDirs
-from rich import print
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
