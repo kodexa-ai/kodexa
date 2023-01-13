@@ -900,7 +900,7 @@ class NodeFeatures(KodexaBaseModel):
 
 class DataException(KodexaBaseModel):
     """
-    A list of the data exceptions
+    A data exception
     """
 
     id: Optional[str] = Field(None, description='The ID of the object')
@@ -913,6 +913,9 @@ class DataException(KodexaBaseModel):
     exception_type: Optional[str] = Field(None, alias='exceptionType')
     closing_comment: Optional[str] = Field(None, alias='closingComment')
     open: Optional[bool] = None
+    data_object: Optional[DataObject] = Field(None, alias='dataObject')
+    data_attribute: Optional[DataAttribute] = Field(None, alias='dataAttribute')
+    data_object_id: Optional[str] = Field(None, alias='dataObjId')
 
 
 class DataLineage(KodexaBaseModel):
@@ -1583,6 +1586,17 @@ class ExecutionStep(KodexaBaseModel):
     step_type: Optional[StepType1] = Field(None, alias='stepType')
 
 
+class ProjectStatus(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the object')
+    uuid: Optional[str] = None
+    created_on: Optional[datetime] = Field(None, alias='createdOn')
+    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    status: Optional[str] = Field(None, description='The status of the project')
+    color: Optional[str] = None
+    organization: Organization
+    icon: Optional[str] = None
+
+
 class Project(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
@@ -1594,9 +1608,14 @@ class Project(KodexaBaseModel):
     metadata: Optional[ProjectMetadata] = None
     show_tasks: Optional[bool] = Field(None, alias='showTasks')
     show_thumbnails: Optional[bool] = Field(None, alias='showThumbnails')
-    has_image: Optional[bool] = Field(None, alias='hasImage')
+    show_notes_on_project: Optional[bool] = Field(None, alias='showNotesOnProject')
+    show_exceptions_on_project: Optional[bool] = Field(None, alias='showExceptionsOnProject')
+    use_new_labeling: Optional[bool] = Field(None, alias='useNewLabeling')
     show_search: Optional[bool] = Field(None, alias='showSearch')
     show_tooltips_on_labeling: Optional[bool] = Field(None, alias='showTooltipsOnLabeling')
+
+    has_image: Optional[bool] = Field(None, alias='hasImage')
+
     project_template_ref: Optional[str] = Field(None, alias='projectTemplateRef')
     memory: Optional[ProjectMemory] = None
     document_statuses: Optional[List[DocumentStatus]] = Field(
@@ -1605,6 +1624,8 @@ class Project(KodexaBaseModel):
     attribute_statuses: Optional[List[AttributeStatus]] = Field(
         None, alias='attributeStatuses', unique_items=True
     )
+    status: Optional[ProjectStatus] = None
+    owner: Optional[User] = None
 
 
 class FeatureSet(KodexaBaseModel):
@@ -2151,9 +2172,9 @@ class DataObject(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    document_family: DocumentFamily = Field(..., alias='documentFamily')
+    document_family: Optional[DocumentFamily] = Field(None, alias='documentFamily')
     data_exceptions: Optional[List[DataException]] = Field(
-        None,
+        default_factory=list,
         alias='dataExceptions',
         description='A list of the data exceptions',
         unique_items=True,
@@ -2194,6 +2215,7 @@ class Assistant(KodexaBaseModel):
     )
     definition: Optional[AssistantDefinition] = None
     show_in_training: Optional[bool] = Field(None, alias='showInTraining')
+    color: Optional[str] = Field(None, description='The color to use for the assistant')
 
 
 class AssistantExecution(KodexaBaseModel):
@@ -2544,6 +2566,19 @@ class PagePlatformEvent(KodexaBaseModel):
     total_elements: Optional[int] = Field(None, alias='totalElements')
     size: Optional[int] = None
     content: Optional[List[PlatformEvent]] = None
+    number: Optional[int] = None
+    pageable: Optional[PageableObject] = None
+    number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class PageDataException(KodexaBaseModel):
+    total_pages: Optional[int] = Field(None, alias='totalPages')
+    total_elements: Optional[int] = Field(None, alias='totalElements')
+    size: Optional[int] = None
+    content: Optional[List[DataException]] = None
     number: Optional[int] = None
     pageable: Optional[PageableObject] = None
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
@@ -3078,3 +3113,4 @@ ContentEvent.update_forward_refs()
 DataObjectEvent.update_forward_refs()
 DocumentFamilyEvent.update_forward_refs()
 ScheduledEvent.update_forward_refs()
+DataException.update_forward_refs()

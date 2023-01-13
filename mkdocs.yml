@@ -11,3 +11,4 @@ nav:
       - Introduction: client/index.md
       - Organizations: client/organizations.ipynb
       - Projects: client/projects.ipynb
+      - Assistants: client/assistants.ipynb
