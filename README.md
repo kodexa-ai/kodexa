@@ -27,7 +27,7 @@ It is built on a set of core principles:
 # Python SDK
 
 This repository contains the Python SDK for Kodexa. The SDK is the primary way to interact with Kodexa. It allows you to
-define actions, models, and pipelines that can be executed on Kodexa. It also includes a complete SDK client for 
+define actions, models, and pipelines that can be executed on Kodexa. It also includes a complete SDK client for
 working with a Kodexa platform instance.
 
 ## Documentation & Examples
@@ -45,9 +45,13 @@ We use poetry to manage our dependencies, so you can install them with:
     poetry install
 
 You can then run the tests with:
-    
+
     poetry run pytest
 
-## License
+# Contributing
+
+We welcome contributions to the Kodexa platform. Please see our [contributing guide](CONTRIBUTING.md) for more details.
+
+# License
 
 Apache 2.0
