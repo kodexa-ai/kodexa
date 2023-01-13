@@ -18,7 +18,7 @@ jobs:
       - name: Run image
         uses: abatilo/actions-poetry@v2
       - name: Increment version
-        run: poetry version prerelease
+        run: poetry version patch
       - uses: EndBug/add-and-commit@v9
         with:
           message: 'Update version'
