@@ -21,6 +21,10 @@ jobs:
         uses: abatilo/actions-poetry@v2
       - name: Increment version
         run: poetry version prerelease
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Update version'
+          add: 'pyproject.toml'
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
