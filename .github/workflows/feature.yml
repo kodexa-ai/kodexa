@@ -8,7 +8,7 @@ on:
       - develop
 
 jobs:
-  build-linux:
+  Build and Publish Python Package:
     runs-on: ubuntu-latest
 
     steps:
