@@ -32,7 +32,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
     Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
-    CustomEvent, ProjectTag
+    CustomEvent, ProjectTag, PageDataException, DataException
 
 logger = logging.getLogger()
 
@@ -139,13 +139,6 @@ class ClientEndpoint(YamlModel):
         if isinstance(self, ComponentInstanceEndpoint):
             self.ref = f"{self.org_slug}/{self.slug}:{self.version}"
         return self
-
-    def to_dict(self):
-        """
-        Convert the client endpoint to a dictionary
-        :return: A dictionary representation of the endpoint
-        """
-        return json.loads(self.json(exclude={'client'}, by_alias=True))
 
     def yaml(self, **kwargs):
         """
@@ -667,6 +660,14 @@ class PageDataFormEndpoint(PageDataForm, PageEndpoint):
         return "dataForm"
 
 
+class PageDataExceptionEndpoint(PageDataException, PageEndpoint):
+    """Represents a page of data exceptions endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "exception"
+
+
 class PageDocumentFamilyEndpoint(PageDocumentFamily, PageEndpoint):
     """Represents a page document family endpoint"""
 
@@ -901,6 +902,12 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
             if resource.id == id:
                 return resource
         return None
+
+    def create(self, assistant: Assistant) -> AssistantEndpoint:
+        """Create an assistant"""
+        url = f"/api/projects/{self.project.id}/assistants"
+        response = self.client.post(url, body=assistant.to_dict())
+        return AssistantEndpoint.parse_obj(response.json()).set_client(self.client)
 
 
 class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
@@ -1478,7 +1485,7 @@ class UsersEndpoint(EntitiesEndpoint):
 
     def get_type(self) -> str:
         """Get the type of the endpoint"""
-        return f"users"
+        return "users"
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         """Get the instance class of the endpoint"""
@@ -1670,10 +1677,6 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
     def upload_contents(self, metadata) -> List[str]:
         return []
 
-    def reindex(self):
-        """Reindex the store"""
-        self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/_reindex")
-
     def update_metadata(self):
         """Update the metadata of the store"""
         self.client.put(f"/api/stores/{self.ref.replace(':', '/')}/metadata",
@@ -1694,8 +1697,45 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
         return []
 
 
+class DataExceptionEndpoint(DataException, EntityEndpoint):
+
+    def get_type(self) -> str:
+        return "exceptions"
+
+
+class DataStoreExceptionsEndpoint(EntitiesEndpoint):
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        return DataExceptionEndpoint
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        return PageDataExceptionEndpoint
+
+    def get_type(self) -> str:
+        return "exceptions"
+
+    def __init__(self, data_store: "DataStoreEndpoint", client: "KodexaClient"):
+        self.data_store = data_store
+        super().__init__(client)
+
+    def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+        """List the data exceptions"""
+
+        if filters is None:
+            filters = []
+
+        filters.append(f"dataObject.store.slug={self.data_store.slug}")
+
+        return super().list(query, page, page_size, sort, filters)
+
+
 class DataStoreEndpoint(StoreEndpoint):
     """Represents a data store endpoint"""
+
+    @property
+    def exceptions(self) -> ProjectDocumentStoresEndpoint:
+        """Get the document stores endpoint of the project"""
+        return DataStoreExceptionsEndpoint(self, self.client)
 
     def get_data_objects_export(self, document_family: Optional[DocumentFamily] = None,
                                 output_format: str = "json", path: Optional[str] = None, root_name: str = "",
@@ -2756,7 +2796,8 @@ class KodexaClient:
                 "dataForm": DataFormEndpoint,
                 "dashboard": DashboardEndpoint,
                 "execution": ExecutionEndpoint,
-                "assistant": AssistantDefinitionEndpoint
+                "assistant": AssistantDefinitionEndpoint,
+                "exception": DataExceptionEndpoint
             }
 
             if component_type in known_components:
