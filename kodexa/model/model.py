@@ -1802,11 +1802,13 @@ class Document(object):
                 return " ".join(content_parts)
 
             def get_data(self):
-                if len(self.nodes) > 0:
-                    return self.nodes[0].get_tag_data(self.tag_uuid)
-                else:
-                    return {}
-                
+                for node in self.nodes:
+                    for tag_feature in node.get_tag_features():
+                        data = tag_feature.value[0]
+                        if 'uuid' in data and data['uuid'] == self.tag_uuid:
+                            return data
+                return {}
+
         for key in groups.keys():
             tag_instances.append(TagInstance(key, groups[key]))
         return tag_instances
