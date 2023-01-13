@@ -2,7 +2,7 @@
 
 ![Build](https://github.com/kodexa-ai/kodexa/workflows/Python%20Package%20Using%20Anaconda/badge.svg)
 
-![img.png](docs%2Fimg.png)
+![img.png](https://docs.kodexa.com/img.png)
 
 Kodexa is a platform for building intelligent document processing pipelines. It is a set of tools and services that
 allow you to build a pipeline that can take a document, extract the content, and then process it to extract the
