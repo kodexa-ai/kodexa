@@ -6,9 +6,8 @@ on:
       - 'develop'
 
 jobs:
-  build-linux:
+  Build and Publish Python Package:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.10
@@ -19,6 +18,10 @@ jobs:
         uses: abatilo/actions-poetry@v2
       - name: Increment version
         run: poetry version prerelease
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Update version'
+          add: 'pyproject.toml'
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
@@ -32,8 +35,12 @@ jobs:
       - name: Build Package
         run: |
           poetry build
-#      - name: Publish a Python distribution to PyPI
-#        uses: pypa/gh-action-pypi-publish@release/v1
-#        with:
-#          user: __token__
-#          password: ${{ secrets.PYPI_TOKEN }}
+      - name: Publish a Python distribution to PyPI
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+          poetry publish
+    #      - name: Publish a Python distribution to PyPI
+    #        uses: pypa/gh-action-pypi-publish@release/v1
+    #        with:
+    #          user: __token__
+    #          password: ${{ secrets.PYPI_TOKEN }}
