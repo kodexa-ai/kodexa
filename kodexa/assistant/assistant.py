@@ -63,8 +63,8 @@ class AssistantResponse:
     event.
     """
 
-    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None, available_intents=None,
-                 output_document: Document = None):
+    def __init__(self, pipelines: List[AssistantPipeline] = None, text: Optional[str] = None,
+                 output_document: Document = None, enabled_logging=False):
         """
         Initialize the response from the assistant
 
@@ -72,11 +72,9 @@ class AssistantResponse:
             pipelines: zero or more pipelines that you want executed on the content object for which the
                        event was raised
             text: the to be presented with the response
-            available_intents: a list of the available intents that you can return for this document
+            enabled_logging: should logging be enabled for this response
             output_document: the output document, if the assistant has created a document directly
         """
-        if available_intents is None:
-            available_intents = []
         if pipelines is None:
             pipelines = []
 
@@ -86,11 +84,11 @@ class AssistantResponse:
         self.text = text
         """The text that will be provided back to the user from the assistant"""
 
-        self.available_intents = available_intents
-        """Any available intentions that the assistant will further respond to"""
-
         self.output_document = output_document
         """The output document, if the assistant has directly created one"""
+
+        self.enabled_logging = enabled_logging
+        """Should logging be enabled for this response"""
 
 
 class AssistantContext:
