@@ -40,11 +40,12 @@ jobs:
         run: |
           poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
           poetry publish
-      #      - name: Publish a Python distribution to PyPI
-      #        uses: pypa/gh-action-pypi-publish@release/v1
-      #        with:
-      #          user: __token__
-      #          password: ${{ secrets.PYPI_TOKEN }}
+      - name: Prepare Workflow Client Payload
+        id: workflow_payload
+        run: |
+          VERSION=$(poetry version | awk 'END {print $NF}')
+          PAYLOAD=$(jq -c -n --arg version "$VERSION" '$ARGS.named')
+          echo "payload=$PAYLOAD" >> $GITHUB_OUTPUT
       - name: Trigger a build in kodexa-playground
         uses: convictional/trigger-workflow-and-wait@v1.6.1
         with:
