@@ -186,7 +186,9 @@ class ProjectResourceEndpoint(ClientEndpoint):
         """
         import pandas as pd
         df = pd.DataFrame(seq(self.list(query, page, page_size, sort, filters)).map(lambda x: x.dict()).to_list())
-        df.drop(columns='client', axis=1)
+
+        if 'client' in df:
+            df.drop(columns='client', axis=1)
         return df
 
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
@@ -446,7 +448,9 @@ class PageEndpoint(ClientEndpoint):
         """
         import pandas as pd
         df = pd.DataFrame(seq(self.content).map(lambda x: x.dict()).to_list())
-        df.drop(columns='client', axis=1)
+
+        if 'client' in df:
+            df.drop(columns='client', axis=1)
         return df
 
     def get(self, index: int) -> "ComponentInstanceEndpoint":
@@ -1639,7 +1643,9 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
 
         filters.append(f"dataObject.store.slug={self.data_store.slug}")
 
-        return super().list(query, page, page_size, sort, filters)
+        page = super().list(query, page, page_size, sort, filters)
+        page.content = [DataExceptionEndpoint(self.client, data_exception) for data_exception in page.content]
+        return page
 
 
 class DataStoreEndpoint(StoreEndpoint):
