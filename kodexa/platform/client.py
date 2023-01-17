@@ -1102,7 +1102,7 @@ class AssistantDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, Organizati
 
     def get_type(self) -> str:
         """Get the type of the endpoint"""
-        return "assistants"
+        return "assistantDefinitions"
 
     def get_page_class(self, object_dict=None) -> Type[BaseModel]:
         """Get the page class of the endpoint"""
