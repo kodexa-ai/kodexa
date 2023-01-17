@@ -2276,6 +2276,7 @@ class ExecutionEvent(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     type: Type1
+    priority: Optional[int] = None
     status: Optional[Status6] = None
     execution: Optional[Execution] = None
     store_ref: Optional[str] = Field(None, alias='storeRef')
