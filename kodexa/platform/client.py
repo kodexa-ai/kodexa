@@ -632,12 +632,17 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         return ProjectTemplatesEndpoint().set_organization(self).set_client(self.client)
 
     @property
+    def assistant_definitions(self) -> "AssistantDefinitionsEndpoint":
+        """Get the assistant definitions endpoint of the organization"""
+        return AssistantDefinitionsEndpoint().set_organization(self).set_client(self.client)
+
+    @property
     def credentials(self):
         """Get the credentials endpoint of the organization"""
         return CredentialDefinitionsEndpoint().set_organization(self).set_client(self.client)
 
     @property
-    def dataForms(self):
+    def data_forms(self):
         return CredentialDefinitionsEndpoint().set_organization(self).set_client(self.client)
 
     @property
@@ -1644,7 +1649,7 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         filters.append(f"dataObject.store.slug={self.data_store.slug}")
 
         page = super().list(query, page, page_size, sort, filters)
-        page.content = [DataExceptionEndpoint(self.client, data_exception) for data_exception in page.content]
+        page.content = [DataExceptionEndpoint.parse_obj(data_exception.to_dict()).set_client(self.client) for data_exception in page.content]
         return page
 
 
