@@ -57,6 +57,8 @@ def create_kddb_from_azure(azure_data, keep_azure_lines=True, overlap_percentage
     for page_index, azure_page in enumerate(azure_data['analyzeResult']['pages']):
         page_node = document.create_node("page", parent=root_node)
         page_node.set_bbox([0, 0, azure_page['width'], azure_page['height']])
+        if 'angle' in azure_page.keys() and azure_page['angle'] is not None:
+            page_node.add_feature('page', 'angle', azure_page['angle'])
 
         # Create the kddb document (keeping Azure lines or matching them with Kodexa lines)
         issue_found = create_page_node_keep_azure_lines(document, page_node, azure_page,
