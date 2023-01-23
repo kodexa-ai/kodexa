@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kodexa"
-version = "6.0.149"
+version = "6.0.150"
 description = "Python SDK for the Kodexa Platform"
 authors = ["Austin Redenbaugh <austin@kodexa.com>", "Philip Dodds <philip@kodexa.com>", "Romar Cablao <rcablao@kodexa.com>", "Amadea Paula Dodds <amadeapaula@kodexa.com>"]
 readme = "README.md"
