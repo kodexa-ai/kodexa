@@ -1496,6 +1496,16 @@ class Taxon(KodexaBaseModel):
         alias='userEditable',
         description='Can the value of this taxon be edited by a user',
     )
+    denormalize_to_children: Optional[bool] = Field(
+        None,
+        alias='denormalizeToChildren',
+        description='Should the value of this taxon be denormalized to the children',
+    )
+    not_user_labelled: Optional[bool] = Field(
+        None,
+        alias='notUserLabelled',
+        description='The taxon is not user labelled',
+    )
     use_post_expression: Optional[bool] = Field(
         None, alias='usePostExpression', description='Use a post extraction expression'
     )
