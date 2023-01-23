@@ -2160,7 +2160,11 @@ class DocumentFamily(KodexaBaseModel):
     )
     statistics: Optional[DocumentFamilyStatistics] = None
 
-    label_statistics: Optional[LabelStatistics] = None
+    label_statistics: Optional[LabelStatistics] = Field(
+        None,
+        alias='labelStatistics',
+        description='The statistics about the labels in the document family',
+    )
 
     classes: Optional[List[ContentClassification]] = Field(
         None,
