@@ -1346,6 +1346,7 @@ class Option(KodexaBaseModel):
     support_article: Optional[str] = Field(None, alias='supportArticle')
     show_if: Optional[str] = Field(None, alias='showIf')
     possible_values: Optional[List[PossibleValue]] = Field(None, alias='possibleValues')
+    properties: Optional[Dict[str, Any]] = None
 
 
 class Overlay(KodexaBaseModel):
