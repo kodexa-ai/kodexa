@@ -202,6 +202,9 @@ class ContentNode(object):
     def __eq__(self, other):
         return other is not None and self.uuid == other.uuid and (self.uuid is not None and other.uuid is not None)
 
+    def __hash__(self):
+        return hash(self.uuid)
+
     def get_parent(self):
         return self.document.get_persistence().get_parent(self)
 
