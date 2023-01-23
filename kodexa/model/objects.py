@@ -2064,6 +2064,32 @@ class SlugBasedMetadata(KodexaBaseModel):
     pass
 
 
+class LabelStatistics(KodexaBaseModel):
+    label_counts: Optional[Dict[str, int]] = Field(
+        None,
+        alias='labelCounts',
+        description='The counts of each label in the document',
+    )
+
+    average_label_confidence: Optional[Dict[str, float]] = Field(
+        None,
+        alias='averageLabelConfidence',
+        description='The average confidence of each label in the document',
+    )
+
+    max_label_confidence: Optional[Dict[str, float]] = Field(
+        None,
+        alias='maxLabelConfidence',
+        description='The maximum confidence of each label in the document',
+    )
+
+    min_label_confidence: Optional[Dict[str, float]] = Field(
+        None,
+        alias='minLabelConfidence',
+        description='The minimum confidence of each label in the document',
+    )
+
+
 class DocumentFamily(KodexaBaseModel):
     """
     A document family is the representation of a single piece of external content (ie. a PDF) and all the related document representations of that file
@@ -2133,6 +2159,9 @@ class DocumentFamily(KodexaBaseModel):
         description='This identified the content object ID that added each of the metadata keys',
     )
     statistics: Optional[DocumentFamilyStatistics] = None
+
+    label_statistics: Optional[LabelStatistics] = None
+
     classes: Optional[List[ContentClassification]] = Field(
         None,
         description='The classification classes from the latest content object in the family',
