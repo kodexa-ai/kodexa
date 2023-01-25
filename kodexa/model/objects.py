@@ -1302,6 +1302,7 @@ class ExtensionPackProvided(KodexaBaseModel):
         alias='imageUrl',
         description='URL of image when presenting this object in a UI',
     )
+    lifecycle: Optional[str] = Field(None, description='The lifecycle stage of the component')
     icon: Optional[str] = Field(None, description='Material Icon name to use in the UI')
     overview_markdown: Optional[str] = Field(
         None,
