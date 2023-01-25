@@ -2976,7 +2976,7 @@ class Store(ExtensionPackProvided):
     )
 
     show_thumbnails: Optional[bool] = Field(
-        None, description='Show thumbnails in dtore', alias='showThumbnails'
+        None, description='Show thumbnails in store', alias='showThumbnails'
     )
 
     show_search: Optional[bool] = Field(
