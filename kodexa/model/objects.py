@@ -1346,6 +1346,7 @@ class Option(KodexaBaseModel):
     default: Optional[Any] = None
     description: Optional[str] = None
     support_article: Optional[str] = Field(None, alias='supportArticle')
+    overview_markdown: Optional[str] = Field(None, alias='overviewMarkdown')
     show_if: Optional[str] = Field(None, alias='showIf')
     possible_values: Optional[List[PossibleValue]] = Field(None, alias='possibleValues')
     properties: Optional[Dict[str, Any]] = None
