@@ -1452,6 +1452,7 @@ class Taxon(KodexaBaseModel):
         description='Allows the setting of a value to replace null if the taxon is nullable',
     )
     description: Optional[str] = Field(None, description='The description of the taxon')
+    overview_markdown: Optional[str] = Field(None, alias='overviewMarkdown')
     enabled: Optional[bool] = Field(
         None, description='Is the taxon enabled (used in the UI)'
     )
