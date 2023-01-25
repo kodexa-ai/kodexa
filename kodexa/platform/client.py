@@ -2728,7 +2728,7 @@ class KodexaClient:
                 return known_components[component_type].parse_obj(component_dict).set_client(self)
             raise Exception("Unknown component type: " + component_type)
 
-        raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_dict})")
+        raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_type})")
 
     def get_project(self, project_id) -> ProjectEndpoint:
         project = self.get(f"/api/projects/{project_id}")
