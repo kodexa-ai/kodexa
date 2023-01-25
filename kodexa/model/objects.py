@@ -2987,6 +2987,9 @@ class Store(ExtensionPackProvided):
         None, description='Allow data editing', alias='allowDataEditing'
     )
 
+    delete_protection: Optional[bool] = Field(
+        None, description='Delete protection', alias='deleteProtection')
+
 
 class Taxonomy(ExtensionPackProvided):
     """
