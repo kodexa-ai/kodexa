@@ -2979,11 +2979,11 @@ class Store(ExtensionPackProvided):
         None, description='Show thumbnails in dtore', alias='showThumbnails'
     )
 
-    showSearch: Optional[bool] = Field(
+    show_search: Optional[bool] = Field(
         None, description='Show search in store', alias='showSearch'
     )
 
-    allowDataEditing: Optional[bool] = Field(
+    allow_data_editing: Optional[bool] = Field(
         None, description='Allow data editing', alias='allowDataEditing'
     )
 
