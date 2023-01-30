@@ -1649,7 +1649,8 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         filters.append(f"dataObject.store.slug={self.data_store.slug}")
 
         page = super().list(query, page, page_size, sort, filters)
-        page.content = [DataExceptionEndpoint.parse_obj(data_exception.to_dict()).set_client(self.client) for data_exception in page.content]
+        page.content = [DataExceptionEndpoint.parse_obj(data_exception.to_dict()).set_client(self.client) for
+                        data_exception in page.content]
         return page
 
 
@@ -2113,10 +2114,10 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         return self.upload_contents(metadata)
 
     def create_training(self, name: Optional[str] = None,
-                        training_parameters: Optional[Dict[str, Any]] = None) -> ModelTraining:
+                        training_parameters: Optional[Dict[str, Any]] = None, user_test=False) -> ModelTraining:
         """Create a new model training"""
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings"
-        new_training = ModelTraining(name=name)
+        new_training = ModelTraining(name=name, user_test=user_test)
 
         if training_parameters is not None:
             new_training.training_parameters = training_parameters
