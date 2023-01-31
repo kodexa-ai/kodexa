@@ -987,6 +987,27 @@ class ProjectsEndpoint(EntitiesEndpoint):
             return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
         return None
 
+    def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> Optional[ProjectEndpoint]:
+        params = {
+            'page': page,
+            'pageSize': page_size,
+            'query': requests.utils.quote(query),
+            'filter': []
+        }
+
+        if sort is not None:
+            params['sort'] = sort
+
+        if self.organization is not None:
+            params['filter'].append(f"organization.id: '{self.organization.id}'")
+
+        get_response = self.client.get(f"/api/{self.get_type()}/", params=params)
+
+        if len(get_response.json()['content']) > 0:
+            return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
+
+        return None
+
     def create(self, project: Project, template_ref: str = None) -> Project:
         """Create a project"""
         url = f"/api/{self.get_type()}"
