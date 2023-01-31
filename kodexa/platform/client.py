@@ -987,7 +987,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
             return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
         return None
 
-    def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> Optional[ProjectEndpoint]:
+    def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> Optional[PageProjectEndpoint]:
         params = {
             'page': page,
             'pageSize': page_size,
@@ -1003,7 +1003,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
 
         get_response = self.client.get(f"/api/{self.get_type()}/", params=params)
 
-        return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
+        return PageProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
 
     def create(self, project: Project, template_ref: str = None) -> Project:
