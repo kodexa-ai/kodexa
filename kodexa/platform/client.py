@@ -984,7 +984,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
             filters['filter'].append(f"organization.id: '{self.organization.id}'")
         get_response = self.client.get(url, params=filters)
         if len(get_response.json()['content']) > 0:
-            return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
+            return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
         return None
 
     def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> Optional[ProjectEndpoint]:
