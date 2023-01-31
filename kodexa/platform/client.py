@@ -1003,10 +1003,8 @@ class ProjectsEndpoint(EntitiesEndpoint):
 
         get_response = self.client.get(f"/api/{self.get_type()}/", params=params)
 
-        if len(get_response.json()['content']) > 0:
-            return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
+        return ProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
-        return None
 
     def create(self, project: Project, template_ref: str = None) -> Project:
         """Create a project"""
