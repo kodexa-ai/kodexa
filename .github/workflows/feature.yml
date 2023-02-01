@@ -21,7 +21,7 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
+          base: ${{ github.event.ref_name }}
           head: HEAD
           extra_args: --debug 
       - name: Run image
