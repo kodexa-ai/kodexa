@@ -1,0 +1,1 @@
+::: kodexa.model.Document
