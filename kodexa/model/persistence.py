@@ -9,13 +9,16 @@ from typing import List
 import msgpack
 
 from kodexa.model import Document, ContentNode, SourceMetadata
-from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature, ContentException
+from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature, ContentException, ModelInsight
 
 logger = logging.getLogger()
 
 # Heavily used SQL
 EXCEPTION_INSERT = "INSERT INTO content_exceptions (tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 EXCEPTION_SELECT = "select tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid from content_exceptions"
+
+MODEL_INSIGHT_INSERT = "INSERT INTO model_insights (model_insight) VALUES (?)"
+MODEL_INSIGHT_SELECT = "select model_insight from model_insights"
 
 FEATURE_INSERT = "INSERT INTO ft (id, cn_id, f_type, binary_value, single, tag_uuid) VALUES (?,?,?,?,?,?)"
 FEATURE_DELETE = "DELETE FROM ft where cn_id=? and f_type=?"
@@ -226,6 +229,7 @@ class SqliteDocumentPersistence(object):
                                         severity     text,
                                         node_uuid    text
                                     )""")
+        self.cursor.execute("CREATE TABLE model_insights (id integer primary key,model_insight text);")
         self.document.version = "4.0.2"
 
         self.__update_metadata()
@@ -312,7 +316,6 @@ class SqliteDocumentPersistence(object):
                              'metadata': self.document.metadata.to_dict(),
                              'source': self.__clean_none_values(dataclasses.asdict(self.document.source)),
                              'mixins': self.document.get_mixins(),
-                             'taxonomies': self.document.taxonomies,
                              'classes': [content_class.to_dict() for content_class in self.document.classes],
                              'labels': self.document.labels,
                              'uuid': self.document.uuid}
@@ -338,8 +341,6 @@ class SqliteDocumentPersistence(object):
             self.document.labels = metadata['labels']
         if 'mixins' in metadata and metadata['mixins']:
             self.document._mixins = metadata['mixins']
-        if 'taxomomies' in metadata and metadata['taxomomies']:
-            self.document.taxonomies = metadata['taxomomies']
         if 'classes' in metadata and metadata['classes']:
             self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
                                      metadata['classes']]
@@ -382,6 +383,11 @@ class SqliteDocumentPersistence(object):
                                         exception_type text,
                                         severity     text,
                                         node_uuid    text
+                                    )""")
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS model_insights
+                                    (
+                                        id           integer primary key,
+                                        model_insight text
                                     )""")
         self.document.version = "4.0.2"
         self.update_metadata()
@@ -541,6 +547,17 @@ class SqliteDocumentPersistence(object):
 
         return content_nodes
 
+    def add_model_insight(self, model_insights: ModelInsight):
+        self.cursor.execute(MODEL_INSIGHT_INSERT,
+                            [model_insights.json()])
+
+    def get_model_insights(self) -> List[ModelInsight]:
+        model_insights = []
+        for model_insight in self.cursor.execute(MODEL_INSIGHT_SELECT).fetchall():
+            model_insights.append(ModelInsight.parse_raw(model_insight[0]))
+
+        return model_insights
+
     def add_exception(self, exception: ContentException):
         # Add an exception to the exception table
         self.cursor.execute(EXCEPTION_INSERT,
@@ -623,6 +640,12 @@ class PersistenceManager(object):
         self.node_parent_cache = {}
 
         self._underlying_persistence = SqliteDocumentPersistence(document, filename, delete_on_close)
+
+    def add_model_insight(self, model_insight: ModelInsight):
+        self._underlying_persistence.add_model_insight(model_insight)
+
+    def get_model_insights(self) -> List[ModelInsight]:
+        return self._underlying_persistence.get_model_insights()
 
     def add_exception(self, exception: ContentException):
         self._underlying_persistence.add_exception(exception)
