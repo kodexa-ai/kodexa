@@ -13,6 +13,7 @@ from typing import Any, List, Optional
 import msgpack
 from addict import Dict
 
+from kodexa.model.base import KodexaBaseModel
 from kodexa.model.objects import ContentObject
 
 
@@ -1620,6 +1621,14 @@ class ContentFeature(object):
         return self.value
 
 
+class ModelInsight(KodexaBaseModel):
+    model_ref: str
+    insight_type: str
+    description: Optional[str] = None
+    details: Optional[str] = None
+    properties: Optional[Dict] = None
+
+
 @dataclasses.dataclass()
 class SourceMetadata:
     """Class for keeping track of the original source information for a
@@ -1733,10 +1742,6 @@ class Document(object):
         self._mixins: List[str] = []
         """A list of the mixins for this document"""
         self.uuid: str = str(uuid.uuid4())
-        """The UUID of this document"""
-        self.exceptions: List = []
-        """A list of the exceptions on this document (deprecated)"""
-        self.log: List[str] = []
         """A log for this document (deprecated)"""
         self.version = Document.CURRENT_VERSION
         """The version of the document"""
@@ -1744,8 +1749,6 @@ class Document(object):
         """Source metadata for this document"""
         self.labels: List[str] = []
         """A list of the document level labels for the document"""
-        self.taxonomies: List[str] = []
-        """A list of the taxonomy references for this document"""
         self.classes: List[ContentClassification] = []
         """A list of the content classifications associated at the document level"""
 
@@ -1763,14 +1766,14 @@ class Document(object):
     def get_all_tags(self):
         return self._persistence_layer.get_all_tags()
 
+    def add_model_insight(self, model_insight: ModelInsight):
+        self._persistence_layer.add_model_insight(model_insight)
+
+    def get_model_insights(self) -> List[ModelInsight]:
+        return self._persistence_layer.get_model_insights()
+
     def get_tagged_nodes(self, tag_name, tag_uuid=None):
         return self._persistence_layer.get_tagged_nodes(tag_name, tag_uuid)
-
-    # def get_content_exceptions(self) -> List[ContentException]:
-    #     return self._persistence_layer.get_content_exceptions()
-    # 
-    # def add_content_exception(self, content_exception: ContentException):
-    #     self._persistence_layer.add_content_exception(content_exception)
 
     @property
     def content_node(self):
