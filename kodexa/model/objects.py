@@ -2848,11 +2848,15 @@ class DataForm(ExtensionPackProvided):
     views: Optional[List[DataFormView]] = None
 
 
-class ProjectDataForm(ExtensionPackProvided):
+class ProjectDataForm(KodexaBaseModel):
+    slug: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+
     entrypoints: Optional[List[str]] = None
     sources: Optional[List[DataFormSource]] = None
     views: Optional[List[DataFormView]] = None
-    template_ref: Optional[str] = Field(None, alias='templateRef')
+
     ref: Optional[str] = None
 
 
