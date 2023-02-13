@@ -1901,6 +1901,11 @@ class CustomEvent(KodexaBaseModel):
         alias='entryPoints',
         description='Entrypoints should we show this event (test, assistantBar, documentFamily)',
     )
+
+    option_tabs: Optional[List[OptionTab]] = Field(
+        None, alias='optionTabs', description='The tab groups that options will be organized into'
+    )
+
     options: Optional[List[Option]] = Field(
         None, description='Options available for this event'
     )
