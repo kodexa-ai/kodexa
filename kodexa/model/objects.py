@@ -2744,6 +2744,10 @@ class ModelContentMetadata(KodexaBaseModel):
         description='The template ref that will be used if we are going to use the implementation from the template',
     )
 
+    tabs: Optional[List[TabGroup]] = Field(
+        None, alias='tabs', description='The tab groups that options will be organized into'
+    )
+
     training_options: Optional[List[Option]] = Field(
         None, alias='trainingOptions', description='The training options for this model'
     )
