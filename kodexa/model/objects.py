@@ -525,11 +525,13 @@ class StoreViewOptions(KodexaBaseModel):
     )
 
 
-class TabGroup(KodexaBaseModel):
-    id: Optional[str] = None
+class OptionTab(KodexaBaseModel):
     name: Optional[str] = None
+    description: Optional[str] = None
     icon: Optional[str] = None
     show_if: Optional[str] = Field(None, alias='showIf')
+    option_names: Optional[List[str]] = Field(None, alias='optionNames')
+    show_in_training: Optional[bool] = Field(None, alias='showInTraining')
 
 
 class ValuePath(Enum):
@@ -1872,17 +1874,6 @@ class PageExecutionLogEntry(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class AssistantMetadata(KodexaBaseModel):
-    """
-    Additional metadata for the assistant
-    """
-
-    avatar: Optional[Avatar] = None
-    tags: Optional[List[str]] = None
-    tabs: Optional[List[TabGroup]] = None
-    options: Optional[List[Option]] = None
-
-
 class CustomEvent(KodexaBaseModel):
     """
     A Custom Event allows you to define an subtype of assistant event with options
@@ -2744,8 +2735,8 @@ class ModelContentMetadata(KodexaBaseModel):
         description='The template ref that will be used if we are going to use the implementation from the template',
     )
 
-    tabs: Optional[List[TabGroup]] = Field(
-        None, alias='tabs', description='The tab groups that options will be organized into'
+    option_tabs: Optional[List[OptionTab]] = Field(
+        None, alias='optionTabs', description='The tab groups that options will be organized into'
     )
 
     training_options: Optional[List[Option]] = Field(
@@ -2798,7 +2789,6 @@ class AssistantDefinition(ExtensionPackProvided):
         None, description='The assistant is reactive to content changes'
     )
     assistant: Optional[AssistantImplementation] = None
-    metadata: Optional[AssistantMetadata] = None
     services: Optional[List[SlugBasedMetadata]] = Field(
         None, description='Services used by the assistant'
     )
@@ -2807,6 +2797,11 @@ class AssistantDefinition(ExtensionPackProvided):
         alias='processingTaxonomies',
         description='Taxonomies that the assistant uses',
     )
+
+    option_tabs: Optional[List[OptionTab]] = Field(
+        None, alias='optionTabs', description='The tab groups that options will be organized into'
+    )
+
     options: Optional[List[Option]] = Field(
         None, description='Options for the assistant'
     )
