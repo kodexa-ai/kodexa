@@ -2930,6 +2930,10 @@ class ProjectTemplate(ExtensionPackProvided):
         None,
         description='The dashboards that will be created with the project template',
     )
+    data_forms: Optional[List[ProjectDataForm]] = Field(
+        None,
+        description='The data forms that will be created with the project template',
+    )
     help_url: Optional[str] = Field(
         None,
         alias='helpUrl',
