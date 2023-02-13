@@ -2932,6 +2932,7 @@ class ProjectTemplate(ExtensionPackProvided):
     )
     data_forms: Optional[List[ProjectDataForm]] = Field(
         None,
+        alias='dataForms',
         description='The data forms that will be created with the project template',
     )
     help_url: Optional[str] = Field(
