@@ -1,4 +1,16 @@
-from kodexa.spatial.bbox_common import overlaps_with, width_of_overlap
+import re
+
+from kodexa import ContentNode
+from kodexa.spatial.bbox_common import overlaps_with, width_of_overlap, percent_nodes_overlap
+from typing import Optional, List, Dict, Tuple
+import logging
+
+logger = logging.getLogger()
+
+OVERLAP_PERCENTAGE = 0.4
+MIN_OVERLAP_PERCENTAGE_X = 0.2
+MIN_OVERLAP_PERCENTAGE_Y = 0.4
+COL_SPACE_MULTIPLIER = 2.0
 
 
 def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=None,
@@ -8,6 +20,7 @@ def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=No
     a new set of nodes (type column).
     Note that this action will transform the document.
 
+    :param node: The node that we want to transform to columns
     :param col_space_multiplier: Number of spaces between columns relative to the mean width of
     the characters on the page. Default is 3.0.
     :param col_marker_line: Line that dictates the positions of the columns. Default is None - which means the columns
@@ -581,3 +594,82 @@ def update_bbox_for_columns(col1, col2, update_col1=True):
 
     col2_new_bbox = [min_x1, col2.get_bbox()[1], max_x2, col2.get_bbox()[3]]
     col2.set_bbox(col2_new_bbox)
+
+
+class DataMarker:
+    data_marker_text: Optional[str] = ''
+    data_marker_text_re: Optional[str] = ''
+    data_marker_bbox: Optional[List[float]]
+    data_value_bbox: Optional[List[float]]
+    data_value_direction: Optional[str] = ''
+    data_type: Optional[str] = ''
+
+
+def get_data_marker_column_and_index(data_marker_line: ContentNode, data_marker: DataMarker):
+    # Get column and column index where the data marker is and the column overlaps with the marker (x-axis)
+    try:
+        column_index = [col_idx for col_idx, column in enumerate(data_marker_line.select('//column'))
+                        if re.match(f'(?i){data_marker.data_marker_text_re}', column.get_all_content()) and
+                        percent_nodes_overlap(column.get_bbox(), data_marker.data_marker_bbox,
+                                              axis_overlap='x') >= MIN_OVERLAP_PERCENTAGE_X][0]
+
+    except IndexError:
+        return None, None
+
+    return data_marker_line.select('//column')[column_index], column_index
+
+
+def data_marker_overlaps_with_target_marker(data_marker_line_bbox, data_word_bbox, target_data_marker: DataMarker,
+                                            overlap_percentage=OVERLAP_PERCENTAGE):
+    # Checks that data_marker_line overlaps with the bbox provided in the template
+    template_data_marker_bbox = target_data_marker.data_marker_bbox
+    template_data_value_bbox = target_data_marker.data_value_bbox
+    return (percent_nodes_overlap(data_marker_line_bbox, template_data_marker_bbox, 'x') >= overlap_percentage
+            and percent_nodes_overlap(data_word_bbox, template_data_value_bbox, 'x') >= overlap_percentage)
+
+
+def get_column_below_or_above_data(data_marker_line: ContentNode, data_marker: DataMarker,
+                                   target_lines: List[ContentNode],
+                                   col_space_multiplier=2.0, column_direction='column_below'):
+    data_marker_line_index = target_lines.index(data_marker_line)
+    logger.info("get_column_below_or_above_data: %s", data_marker)
+
+    # Can't get a next line
+    if len(target_lines) <= data_marker_line_index:
+        logger.info(f'No next line for data marker {data_marker.data_marker_text_re} in line {data_marker_line_index}')
+        return None
+
+    # Check if the next line overlaps with the y value of data_value_bbox)
+    # Make the words as children again of this line
+    for count in range(1, 4):
+        if len(target_lines) <= data_marker_line_index + count:
+            return None
+        try:
+            next_line = target_lines[data_marker_line_index + count] if column_direction == 'column_below' \
+                else target_lines[data_marker_line_index - count]
+        except IndexError:
+            return None
+
+        # Do not set col_marker_line since the line where the marker is does not guarantee the correct column markers
+        [line.adopt_children(line.select('//word'), replace=True) for line in [data_marker_line, next_line]]
+        [transform_line_to_columns(tl, col_space_multiplier=col_space_multiplier) for tl in
+         [data_marker_line, next_line]]
+
+        column, column_index = get_data_marker_column_and_index(data_marker_line, data_marker)
+        if column_index is None:
+            return None
+
+        try:
+            column_below = [col for col in next_line.select('//column')
+                            if percent_nodes_overlap(column.get_bbox(), col.get_bbox(),
+                                                     axis_overlap='x') >= 0.4][0]
+        except IndexError:
+            logger.info("No column below found")
+            column_below = None
+
+        if column and column_below and column_below.get_all_content() and \
+                data_marker_overlaps_with_target_marker(column.get_bbox(), column_below.get_bbox(), data_marker):
+            # This is the data found in the data_marker_line
+            return column_below
+
+    return None
