@@ -1988,7 +1988,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """Reprocess the document families with the given ids through the assistant in a bulk fashion"""
         request = ReprocessRequest()
         request.assistant_ids = [assistant.id]
-        request.document_family_ids = document_family_ids
+        request.family_ids = document_family_ids
         self.client.put(f"api/stores/{self.ref.replace(':', '/')}/reprocess", body=request.to_dict())
 
     def get_metadata_class(self) -> Type[BaseModel]:
