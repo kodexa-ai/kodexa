@@ -31,7 +31,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
     Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
-    CustomEvent, ProjectTag, PageDataException, DataException
+    CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest
 
 logger = logging.getLogger()
 
@@ -1004,7 +1004,6 @@ class ProjectsEndpoint(EntitiesEndpoint):
         get_response = self.client.get(f"/api/{self.get_type()}/", params=params)
 
         return PageProjectEndpoint.parse_obj(get_response.json()).set_client(self.client)
-
 
     def create(self, project: Project, template_ref: str = None) -> Project:
         """Create a project"""
@@ -1984,6 +1983,13 @@ class DocumentStoreEndpoint(StoreEndpoint):
             export_bytes = document_family.export()
             with open(os.path.join(output_dir, document_family.id + ".dfm"), 'wb') as f:
                 f.write(export_bytes)
+
+    def reprocess_document_families(self, document_family_ids: List[str], assistant: AssistantEndpoint):
+        """Reprocess the document families with the given ids through the assistant in a bulk fashion"""
+        request = ReprocessRequest()
+        request.assistant_ids = [assistant.id]
+        request.document_family_ids = document_family_ids
+        self.client.put(f"api/stores/{self.ref.replace(':', '/')}/reprocess", body=request.to_dict())
 
     def get_metadata_class(self) -> Type[BaseModel]:
         """
