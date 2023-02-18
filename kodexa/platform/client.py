@@ -2225,7 +2225,8 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                         self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
                                          files={"implementation": zip_content})
                     results.append(f"{num_hits} files packaged for {final_wildcard}")
-            Path('implementation.zip').unlink()
+            if not metadata.keep_zip:
+                Path('implementation.zip').unlink()
             return results
         else:
             for imp_file in self.list_contents():
