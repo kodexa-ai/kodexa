@@ -2774,6 +2774,11 @@ class ModelContentMetadata(KodexaBaseModel):
         alias='baseDir',
         description='A base directory that was used for uploading of the model',
     )
+    keep_zip: Optional[bool] = Field(
+        False,
+        alias='keepZip',
+        description='Should the zip file be kept after the model has been uploaded',
+    )
 
 
 class Action(ExtensionPackProvided):
