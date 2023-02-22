@@ -1511,7 +1511,7 @@ class ContentNode(object):
         """
         return self.previous_node(node_type_re=node_type_re, skip_virtual=skip_virtual) is not None
 
-    def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=True):
+    def next_node(self, node_type_re='.*', skip_virtual=False, has_no_content=True, traverse=Traverse.SIBLING):
         """Returns the next sibling content node.
 
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
@@ -1534,6 +1534,11 @@ class ContentNode(object):
             node = self.get_parent().get_node_at_index(search_index) if self.get_parent() else None
 
             if not node:
+                if (traverse == traverse.ALL or traverse == traverse.PARENT) and self.get_parent().get_parent():
+                    # can now traverse content-areas.. can add traversal of pages if needed, but don't think the scenario exists.
+                    potential_next_node = self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
+                    if potential_next_node:
+                        return potential_next_node
                 return node
 
             if compiled_node_type_re.match(node.node_type) and (not skip_virtual or not node.virtual):
