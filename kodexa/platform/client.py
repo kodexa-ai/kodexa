@@ -2516,7 +2516,7 @@ class KodexaClient:
 
     def __build_object(self, ref, object_type_metadata):
         url = f"/api/{object_type_metadata['plural']}/{ref.replace(':', '/')}"
-        response = self.get(url)
+        response = process_response(self.get(url))
 
         # We need to merge the use of the object type metadata
         # and the deserialize method better
