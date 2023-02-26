@@ -68,6 +68,8 @@ def create_kddb_from_azure(azure_data, keep_azure_lines=True, overlap_percentage
         if issue_found:
             return None
 
+
+
     document.content_node = root_node
     document.add_mixin('spatial')
 
@@ -230,6 +232,22 @@ def get_azure_next_line(document_lines, ref_line, direction='right', overlap_per
          if up_line.get_bbox()[1] < sorted_next_up_lines[0].get_bbox()[1]]
 
         return sorted_next_up_lines[0]
+
+    elif direction == 'up_left':
+        # Get all the lines above of the cell, where the x is to the left of the cell
+        up_left_lines = [up_line for up_line in possible_lines if
+                         up_line.get_bbox()[1] >= ref_bbox[3] and
+                         ref_bbox[2] > up_line.get_x() and ref_bbox[0] - up_line.get_bbox()[2] <= 0.75]
+
+        if not up_left_lines:
+            return None
+
+        # Sort by y (decreasing since 0 is at the bottom of the page)
+        sorted_next_up_left_lines = [up_left_lines[0]]
+        [sorted_next_up_left_lines.insert(0, up_left_line) for up_left_line in up_left_lines
+         if up_left_line.get_bbox()[1] < sorted_next_up_left_lines[0].get_bbox()[1]]
+
+        return sorted_next_up_left_lines[0]
 
     return None
 
