@@ -603,7 +603,6 @@ class PipelineStatistics:
 
     def __init__(self):
         self.documents_processed = 0
-        self.document_exceptions = 0
 
     def processed_document(self, document):
         """Update statistics based on this document completing processing
@@ -615,6 +614,3 @@ class PipelineStatistics:
 
         """
         self.documents_processed += 1
-
-        if document and document.exceptions:
-            self.document_exceptions += 1
