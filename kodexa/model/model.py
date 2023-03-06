@@ -2016,10 +2016,7 @@ class Document(object):
                 'content_node': self.content_node.to_dict() if self.content_node else None,
                 'source': clean_none_values(dataclasses.asdict(self.source)),
                 'mixins': self._mixins,
-                'taxonomies': self.taxonomies,
                 'classes': [content_class.to_dict() for content_class in self.classes],
-                'exceptions': self.exceptions,
-                'log': self.log,
                 'labels': self.labels,
                 'uuid': self.uuid}
 
@@ -2039,8 +2036,6 @@ class Document(object):
         new_document = Document(DocumentMetadata(doc_dict['metadata']))
         new_document.version = doc_dict['version'] if 'version' in doc_dict and doc_dict[
             'version'] else Document.PREVIOUS_VERSION  # some older docs don't have a version or it's None
-        new_document.log = doc_dict['log'] if 'log' in doc_dict else []
-        new_document.exceptions = doc_dict['exceptions'] if 'exceptions' in doc_dict else []
         new_document.uuid = doc_dict['uuid'] if 'uuid' in doc_dict else str(
             uuid.uuid5(uuid.NAMESPACE_DNS, 'kodexa.com'))
 
@@ -2051,11 +2046,6 @@ class Document(object):
             new_document.source = SourceMetadata.from_dict(doc_dict['source'])
         if 'labels' in doc_dict and doc_dict['labels']:
             new_document.labels = doc_dict['labels']
-        if 'taxomomies' in doc_dict and doc_dict['taxomomies']:
-            new_document.labels = doc_dict['taxomomies']
-        if 'classes' in doc_dict and doc_dict['classes']:
-            new_document.classes = [ContentClassification.from_dict(content_class) for content_class in
-                                    doc_dict['classes']]
 
         new_document.get_persistence().update_metadata()
         return new_document
