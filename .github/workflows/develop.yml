@@ -23,6 +23,8 @@ jobs:
           extra_args: --debug 
       - name: Run image
         uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.3.2"
       - name: Increment version
         run: poetry version prerelease
       - uses: EndBug/add-and-commit@v9
