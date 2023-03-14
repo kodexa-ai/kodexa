@@ -2853,8 +2853,8 @@ class Dashboard(ExtensionPackProvided):
 
 class DataForm(ExtensionPackProvided):
     entrypoints: Optional[List[str]] = None
-    sources: Optional[List[DataFormSource]] = None
-    views: Optional[List[DataFormView]] = None
+    entrypoint: Optional[str] = None
+    cards: Optional[List[Card]] = None
 
 
 class ProjectDataForm(KodexaBaseModel):
