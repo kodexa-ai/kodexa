@@ -2862,9 +2862,7 @@ class ProjectDataForm(KodexaBaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
 
-    entrypoints: Optional[List[str]] = None
-    sources: Optional[List[DataFormSource]] = None
-    views: Optional[List[DataFormView]] = None
+    cards: Optional[List[Card]] = None
 
     ref: Optional[str] = None
 
