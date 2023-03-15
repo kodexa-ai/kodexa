@@ -1649,6 +1649,16 @@ class FeatureSet(KodexaBaseModel):
     node_features: Optional[List[NodeFeatures]] = Field(None, alias='nodeFeatures')
 
 
+class Workspace(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the workspace')
+    uuid: Optional[str] = None
+    created_on: Optional[datetime] = Field(None, alias='createdOn')
+    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    project: Optional[Project] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+
 class DataAttribute(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
@@ -1827,6 +1837,19 @@ class PageProject(KodexaBaseModel):
     total_elements: Optional[int] = Field(None, alias='totalElements')
     size: Optional[int] = None
     content: Optional[List[Project]] = None
+    number: Optional[int] = None
+    pageable: Optional[PageableObject] = None
+    number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class PageWorkspace(KodexaBaseModel):
+    total_pages: Optional[int] = Field(None, alias='totalPages')
+    total_elements: Optional[int] = Field(None, alias='totalElements')
+    size: Optional[int] = None
+    content: Optional[List[Workspace]] = None
     number: Optional[int] = None
     pageable: Optional[PageableObject] = None
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
