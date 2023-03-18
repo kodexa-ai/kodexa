@@ -258,6 +258,35 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             return None
         return component_page.content[0]
 
+    def stream_list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+        url = f"/api/{self.get_type()}/{self.organization.slug}"
+
+        params = {"query": requests.utils.quote(query),
+                  "page": page,
+                  "pageSize": page_size}
+
+        if sort is not None:
+            params["sort"] = sort
+
+        if filters is not None:
+            params["legacyFilter"] = True
+            params["filter"] = filters
+
+        while True:
+            list_response = self.client.get(url, params=params)
+
+            # If there are no more results, exit the loop
+            if not list_response.json()["content"]:
+                break
+
+            # Yield each endpoint in the current page
+            for endpoint in self.get_page_class(list_response.json()).parse_obj(list_response.json()).set_client(
+                    self.client).to_endpoints():
+                yield endpoint
+
+            # Move to the next page
+            params["page"] += 1
+
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}/{self.organization.slug}"
 
@@ -986,6 +1015,28 @@ class ProjectsEndpoint(EntitiesEndpoint):
         if len(get_response.json()['content']) > 0:
             return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
         return None
+
+    def stream_query(self, query: str = "*", sort=None):
+        """
+            Stream the query for the project endpoints
+        :param query: the query to run
+        :param sort: sorting order of the query
+        :return:
+            A generator of the project endpoints
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.query(query=query, page=page, page_size=page_size, sort=sort)
+            if not page_response.content:
+                break
+            for project_endpoint in page_response.content:
+                yield project_endpoint
+            page += 1
 
     def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> Optional[PageProjectEndpoint]:
         params = {
@@ -2004,6 +2055,28 @@ class DocumentStoreEndpoint(StoreEndpoint):
             f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}")
         return DocumentFamilyEndpoint.parse_obj(document_family_response.json()).set_client(self.client)
 
+    def stream_query(self, query: str = "*", sort=None):
+        """
+            Stream the query for the document family
+        :param query: the query to run
+        :param sort: sorting order of the query
+        :return:
+            A generator of the document families
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.query(query=query, page=page, page_size=page_size, sort=sort)
+            if not page_response.content:
+                break
+            for document_family in page_response.content:
+                yield document_family
+            page += 1
+
     def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> PageDocumentFamilyEndpoint:
         params = {
             'page': page,
@@ -2018,6 +2091,28 @@ class DocumentStoreEndpoint(StoreEndpoint):
                                        params=params)
 
         return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
+
+    def stream_filter(self, filter_string: str = "", sort=None):
+        """
+            Stream the filter for the document family
+        :param query: the query to run
+        :param sort: sorting order of the query
+        :return:
+            A generator of the document families
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.filter(filter_string=filter_string, page=page, page_size=page_size, sort=sort)
+            if not page_response.content:
+                break
+            for document_family in page_response.content:
+                yield document_family
+            page += 1
 
     def filter(self, filter_string: str = "", page: int = 1, page_size: int = 100,
                sort=None) -> PageDocumentFamilyEndpoint:
