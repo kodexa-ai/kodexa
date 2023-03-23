@@ -79,7 +79,7 @@ class Tag(Dict):
         """A string representing the value that was labelled in the node"""
         self.data: Optional[Any] = data
         """Any data object (JSON serializable) that you wish to associate with the label"""
-        self.uuid: Optional[str] = uuid
+        self.uuid: Optional[str] = uuid or str(uuid.uuid4())
         """The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID"""
         self.confidence: Optional[float] = confidence
         """The confidence of the tag in a range of 0-1"""
@@ -1536,7 +1536,8 @@ class ContentNode(object):
             if not node:
                 if (traverse == traverse.ALL or traverse == traverse.PARENT) and self.get_parent().get_parent():
                     # can now traverse content-areas.. can add traversal of pages if needed, but don't think the scenario exists.
-                    potential_next_node = self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
+                    potential_next_node = \
+                        self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
                     if potential_next_node:
                         return potential_next_node
                 return node
@@ -1757,6 +1758,9 @@ class Document(object):
         self.classes: List[ContentClassification] = []
         """A list of the content classifications associated at the document level"""
 
+        self.tag_instances: List[TagInstance] = []
+        """A list of tag instances that contains a set of tag that has a set of nodes"""
+
         # Start persistence layer
         from kodexa.model import PersistenceManager
 
@@ -1764,6 +1768,36 @@ class Document(object):
                                                                                    filename=kddb_path,
                                                                                    delete_on_close=delete_on_close)
         self._persistence_layer.initialize()
+
+    def add_tag_instance(self, tag_to_apply, node_list: List[ContentNode]):
+        """
+            This will create a group of a tag with indexes
+        :param tag: name of the tag
+        :param node_indices: contains the list of index of a node
+        :return:
+        """
+        # For each node in the list create/update a feature
+        tag = Tag()
+        for node in node_list:
+            node.add_feature('tag', tag_to_apply, Tag)
+        # Tag Object
+        tag_instance = TagInstance(tag, node_list)
+        self.tag_instances.append(tag_instance)
+
+    def update_tag_instance(self, tag_uuid):
+        for tag_instance in self.tag_instances:
+            if tag_instance.tag.uuid == tag_uuid:
+                # Update attributes of a Tag
+                for node in tag_instance.nodes:
+                    node.get_tag(tag_instance.tag.value, tag_uuid=tag_instance.tag.uuid)
+
+    def get_tag_instance(self, tag):
+        """
+            Get the tag instance based on the tag itself
+        :param tag: name of the tag
+        :return: a list of tag instance
+        """
+        return [tag_instance for tag_instance in self.tag_instances if tag_instance.tag == tag]
 
     def get_persistence(self):
         return self._persistence_layer
@@ -2269,6 +2303,15 @@ class Document(object):
 
         """
         return self.labels
+
+
+class TagInstance:
+    def __init__(self, tag: Tag, nodes):
+        self.tag = tag
+        self.nodes = nodes
+
+    def add_node(self, nodes: List[ContentNode]):
+        self.nodes.extend(nodes)
 
 
 class ContentObjectReference:
