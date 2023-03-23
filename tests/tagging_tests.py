@@ -2,6 +2,7 @@ import os
 import uuid
 
 from kodexa import Document, Pipeline, NodeTagger, NodeTagCopy
+from kodexa.model.model import TagInstance, ContentNode
 
 
 def get_test_directory():
@@ -201,3 +202,28 @@ def test_fax2tagging():
     kdxa_doc.content_node.tag("phone", use_all_content=True, fixed_position=[146, 158])
     assert kdxa_doc.select("//*[hasTag('phone')]")[0].content == '785-368-1772'
     assert kdxa_doc.select("//*[hasTag('phone')]")[0].get_feature_value("tag", "phone")['value'] == '785-368-1772'
+
+
+def test_tag_instances():
+    doc = Document.open_kddb(f"{get_test_directory()}tag_test.kddb")
+    # Get all nodes that have a tag of service address
+    for tag in doc.get_tag_instances('Bill/BillService/ServiceAddress'):
+        tag_uuid = tag.tag_uuid
+        node_content_list = []
+        for node in tag.nodes:
+            node_content_list.append(node.get_all_content)
+
+        print(node_content_list)
+    pass
+
+
+# Test the new tag instance
+def test_tag_instance():
+    doc = Document.from_text("Test")
+    doc.content_node.add_child_content("text", "#1234134")
+    doc.content_node.add_child_content("text", "Los")
+    doc.content_node.add_child_content("text", "Angeles")
+    # Add the first two node
+    service_address_nodes = doc.content_node.select('//text')[1:]
+    doc.add_tag_instance(tag_to_apply='ServiceAddress', node_list=service_address_nodes)
+    tag_instance = doc.get_tag_instance(tag='ServiceAddress')
