@@ -8,6 +8,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import glob
 import json
 import logging
@@ -257,6 +258,35 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         if component_page.empty:
             return None
         return component_page.content[0]
+
+    def stream_list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+        url = f"/api/{self.get_type()}/{self.organization.slug}"
+
+        params = {"query": requests.utils.quote(query),
+                  "page": page,
+                  "pageSize": page_size}
+
+        if sort is not None:
+            params["sort"] = sort
+
+        if filters is not None:
+            params["legacyFilter"] = True
+            params["filter"] = filters
+
+        while True:
+            list_response = self.client.get(url, params=params)
+
+            # If there are no more results, exit the loop
+            if not list_response.json()["content"]:
+                break
+
+            # Yield each endpoint in the current page
+            for endpoint in self.get_page_class(list_response.json()).parse_obj(list_response.json()).set_client(
+                    self.client).to_endpoints():
+                yield endpoint
+
+            # Move to the next page
+            params["page"] += 1
 
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}/{self.organization.slug}"
@@ -1034,6 +1064,28 @@ class ProjectsEndpoint(EntitiesEndpoint):
         if len(get_response.json()['content']) > 0:
             return ProjectEndpoint.parse_obj(get_response.json()['content'][0]).set_client(self.client)
         return None
+
+    def stream_query(self, query: str = "*", sort=None):
+        """
+            Stream the query for the project endpoints
+        :param query: the query to run
+        :param sort: sorting order of the query
+        :return:
+            A generator of the project endpoints
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.query(query=query, page=page, page_size=page_size, sort=sort)
+            if not page_response.content:
+                break
+            for project_endpoint in page_response.content:
+                yield project_endpoint
+            page += 1
 
     def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> Optional[PageProjectEndpoint]:
         params = {
@@ -1849,7 +1901,7 @@ class DataStoreEndpoint(StoreEndpoint):
         data_object_response = self.client.get(url)
         return DataObjectEndpoint.parse_obj(data_object_response.json())
 
-    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
+    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=20, query="*",
                                       document_family: Optional[DocumentFamily] = None,
                                       parent_id: Optional[str] = None) -> PageDataObject:
         """
@@ -2011,10 +2063,10 @@ class DocumentStoreEndpoint(StoreEndpoint):
             A list of the contents of the store
         """
 
-        # TODO this needs to be cleaned up a bit
+        # TODO We need to remove this
         params = {
             'page': 1,
-            'pageSize': 1000,
+            'pageSize': 90,
             'query': '*'
         }
         get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
@@ -2052,6 +2104,28 @@ class DocumentStoreEndpoint(StoreEndpoint):
             f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}")
         return DocumentFamilyEndpoint.parse_obj(document_family_response.json()).set_client(self.client)
 
+    def stream_query(self, query: str = "*", sort=None):
+        """
+            Stream the query for the document family
+        :param query: the query to run
+        :param sort: sorting order of the query
+        :return:
+            A generator of the document families
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.query(query=query, page=page, page_size=page_size, sort=sort)
+            if not page_response.content:
+                break
+            for document_family in page_response.content:
+                yield document_family
+            page += 1
+
     def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> PageDocumentFamilyEndpoint:
         params = {
             'page': page,
@@ -2066,6 +2140,28 @@ class DocumentStoreEndpoint(StoreEndpoint):
                                        params=params)
 
         return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
+
+    def stream_filter(self, filter_string: str = "", sort=None):
+        """
+            Stream the filter for the document family
+        :param query: the query to run
+        :param sort: sorting order of the query
+        :return:
+            A generator of the document families
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.filter(filter_string=filter_string, page=page, page_size=page_size, sort=sort)
+            if not page_response.content:
+                break
+            for document_family in page_response.content:
+                yield document_family
+            page += 1
 
     def filter(self, filter_string: str = "", page: int = 1, page_size: int = 100,
                sort=None) -> PageDocumentFamilyEndpoint:
@@ -2160,27 +2256,16 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
     def download_implementation(self, download_path: Optional[str] = ""):
         """Download the implementation from the store"""
-        if self.get_metadata().atomic:
-            if download_path is None:
-                download_path = ""
-            if download_path != "":
-                os.makedirs(download_path, exist_ok=True)
-            response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/implementation")
-            from zipfile import ZipFile
-            from io import BytesIO
-            logger.info(f"Downloading implementation package to {download_path}, and extracting")
-            zipped_contents = ZipFile(BytesIO(response.content))
-            zipped_contents.extractall(download_path)
-        else:
-            for path in self.list_contents():
-                if path.startswith(self.IMPLEMENTATION_PREFIX):
-                    logger.info(f"Downloading implementation file {path}")
-                    file_path = os.path.join(download_path, path.replace(self.IMPLEMENTATION_PREFIX, ''))
-                    logger.info(f"Downloading model file {file_path}")
-                    Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
-
-                    with open(file_path, 'wb') as output_file:
-                        output_file.write(self.get_bytes(path))
+        if download_path is None:
+            download_path = ""
+        if download_path != "":
+            os.makedirs(download_path, exist_ok=True)
+        response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/implementation")
+        from zipfile import ZipFile
+        from io import BytesIO
+        logger.info(f"Downloading implementation package to {download_path}, and extracting")
+        zipped_contents = ZipFile(BytesIO(response.content))
+        zipped_contents.extractall(download_path)
 
     def upload_implementation(self, metadata):
         """Upload the implementation to the store"""
@@ -2234,55 +2319,12 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
     def upload_contents(self, metadata: ModelContentMetadata):
         """Upload the contents of the metadata to the store"""
+        results = []
+        if metadata.contents:
 
-        # First we are going to delete anything we have in the implementation
+            import zipfile
 
-        if metadata.atomic:
-            results = []
-            if metadata.contents:
-
-                import zipfile
-
-                with zipfile.ZipFile('implementation.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-
-                    ignore_files = []
-                    if metadata.ignored_contents:
-                        for ignore_path in metadata.ignored_contents:
-                            final_wildcard = os.path.join(metadata.base_dir,
-                                                          ignore_path) if metadata.base_dir else ignore_path
-                            for path_hit in glob.glob(final_wildcard, recursive=True):
-                                ignore_files.append(path_hit)
-
-                    for content_path in metadata.contents:
-                        final_wildcard = os.path.join(metadata.base_dir,
-                                                      content_path) if metadata.base_dir else content_path
-                        num_hits = 0
-
-                        for path_hit in glob.glob(final_wildcard, recursive=True):
-                            if path_hit in ignore_files:
-                                continue
-                            relative_path = path_hit.replace(metadata.base_dir + '/',
-                                                             '') if metadata.base_dir else path_hit
-
-                            # We will put the implementation in one place
-                            if Path(path_hit).is_file():
-                                zipf.write(path_hit, relative_path)
-                                num_hits += 1
-                if num_hits > 0:
-                    with open('implementation.zip', 'rb') as zip_content:
-                        self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
-                                         files={"implementation": zip_content})
-                    results.append(f"{num_hits} files packaged for {final_wildcard}")
-            if not metadata.keep_zip:
-                Path('implementation.zip').unlink()
-            return results
-        else:
-            for imp_file in self.list_contents():
-                if imp_file.startswith(self.IMPLEMENTATION_PREFIX):
-                    self.delete_by_path(imp_file)
-
-            results = []
-            if metadata.contents:
+            with zipfile.ZipFile('implementation.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
 
                 ignore_files = []
                 if metadata.ignored_contents:
@@ -2300,33 +2342,21 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                     for path_hit in glob.glob(final_wildcard, recursive=True):
                         if path_hit in ignore_files:
                             continue
-                        relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
+                        relative_path = path_hit.replace(metadata.base_dir + '/',
+                                                         '') if metadata.base_dir else path_hit
 
                         # We will put the implementation in one place
-                        relative_path = self.IMPLEMENTATION_PREFIX + relative_path
                         if Path(path_hit).is_file():
-                            with open(path_hit, 'rb') as path_content:
-                                results.append(f"Uploading model file {path_hit}")
-                                self.upload_bytes(relative_path, path_content, replace=True)
-                                num_hits += 1
-                    if num_hits > 0:
-                        results.append(f"{num_hits} files uploaded for {final_wildcard}")
-            return results
-
-    def list_contents(self) -> List[str]:
-        """List the contents of the store"""
-        # TODO this needs to be cleaned up a bit
-        params = {
-            'page': 1,
-            'pageSize': 1000,
-            'query': '*'
-        }
-        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
-                                       params=params)
-        paths = []
-        for fam_dict in get_response.json()['content']:
-            paths.append(fam_dict['path'])
-        return paths
+                            zipf.write(path_hit, relative_path)
+                            num_hits += 1
+            if num_hits > 0:
+                with open('implementation.zip', 'rb') as zip_content:
+                    self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
+                                     files={"implementation": zip_content})
+                results.append(f"{num_hits} files packaged for {final_wildcard}")
+        if not metadata.keep_zip:
+            Path('implementation.zip').unlink()
+        return results
 
 
 class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
