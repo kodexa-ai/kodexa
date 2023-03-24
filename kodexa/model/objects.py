@@ -1649,6 +1649,28 @@ class FeatureSet(KodexaBaseModel):
     node_features: Optional[List[NodeFeatures]] = Field(None, alias='nodeFeatures')
 
 
+class DocumentViewState(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the document view')
+    index: Optional[int] = None
+    document_family_id: Optional[str] = Field(None, alias='documentFamilyId')
+    properties: Optional[Dict[str, Any]] = None
+
+
+class DataFormState(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the document view')
+    index: Optional[int] = None
+    properties: Optional[Dict[str, Any]] = None
+
+    data_form_ref: Optional[str] = Field(None, alias='dataFormRef')
+    document_family_ids: Optional[List[str]] = Field(None, alias='documentFamilyIds')
+    data_object_ids: Optional[List[str]] = Field(None, alias='dataObjectIds')
+
+
+class WorkspaceStorage(KodexaBaseModel):
+    document_view_states: Optional[List[DocumentViewState]] = Field(None, alias='documentViewStates')
+    data_form_states: Optional[List[DataFormState]] = Field(None, alias='dataFormStates')
+
+
 class Workspace(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the workspace')
     uuid: Optional[str] = None
