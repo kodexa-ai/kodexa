@@ -1679,7 +1679,12 @@ class Workspace(KodexaBaseModel):
     project: Optional[Project] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    workspace_storage: Optional[WorkspaceStorage] = Field(None, alias='workspaceStorage')
 
+class ProjectWorkspace(KodexaBaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    workspace_storage: Optional[WorkspaceStorage] = Field(None, alias='workspaceStorage')
 
 class DataAttribute(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
@@ -2985,6 +2990,10 @@ class ProjectTemplate(ExtensionPackProvided):
     dashboards: Optional[List[ProjectDashboard]] = Field(
         None,
         description='The dashboards that will be created with the project template',
+    )
+    workspaces: Optional[List[ProjectWorkspace]] = Field(
+        None,
+        description='The workspaces that will be created with the project template',
     )
     data_forms: Optional[List[ProjectDataForm]] = Field(
         None,
