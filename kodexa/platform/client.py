@@ -1853,7 +1853,7 @@ class DataStoreEndpoint(StoreEndpoint):
         data_object_response = self.client.get(url)
         return DataObjectEndpoint.parse_obj(data_object_response.json())
 
-    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
+    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=20, query="*",
                                       document_family: Optional[DocumentFamily] = None,
                                       parent_id: Optional[str] = None) -> PageDataObject:
         """
