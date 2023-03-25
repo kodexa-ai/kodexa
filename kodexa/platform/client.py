@@ -1889,6 +1889,31 @@ class DataStoreEndpoint(StoreEndpoint):
                                     data_object_page.content]
         return data_object_page
 
+    def get_stream_data_objects_request(self, path: str, query="*", document_family: Optional[DocumentFamily] = None,
+                                        parent_id: Optional[str] = None):
+        """
+        Stream page request
+        :param path (str): The parent taxon (/ is root)
+        :param query (str): The query to limit results (Default *)
+        :param document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+        :param parent_id (Optional[str]): Optionally the parent ID to limit results to
+        :return:
+        """
+        page_size = 20
+        page = 1
+
+        while True:
+            data_object_response = self.get_data_objects_page_request(self, path, page, page_size, query,
+                                                                      document_family, parent_id)
+            if not data_object_response.content:
+                break
+
+            yield data_object_response.content
+            for data_object in data_object_response.content:
+                yield data_object
+
+            page += 1
+
     def create_data_objects(self, data_objects: List[DataObject]) -> List[DataObjectEndpoint]:
         """
         Create data objects in the store
@@ -2031,7 +2056,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
     def download_document_families(self, output_dir: str):
         """Download all the document families in the store to the given directory"""
 
-        for document_family in self.query(page_size=9999).content:
+        for document_family in self.stream_query():
             export_bytes = document_family.export()
             with open(os.path.join(output_dir, document_family.id + ".dfm"), 'wb') as f:
                 f.write(export_bytes)
