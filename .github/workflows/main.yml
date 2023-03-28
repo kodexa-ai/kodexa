@@ -31,7 +31,7 @@ jobs:
         run: |
           poetry version patch
           VERSION=$(poetry version --short)"-"$GITHUB_RUN_ID
-          VERSION=$(python -c "from packaging.version import Version; v = Version('$VERSION'); v = str(v.release); print(v)")
+          VERSION=$(echo $VERSION | sed 's/\.post.*$//')
           echo "::set-output name=version::$VERSION"
           echo "::set-output name=versionType::Release"
           poetry version $VERSION --no-ansi
