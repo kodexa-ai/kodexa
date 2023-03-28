@@ -1774,6 +1774,9 @@ class Document(object):
     def add_model_insight(self, model_insight: ModelInsight):
         self._persistence_layer.add_model_insight(model_insight)
 
+    def clear_model_insights(self):
+        self._persistence_layer.clear_model_insights()
+
     def get_model_insights(self) -> List[ModelInsight]:
         return self._persistence_layer.get_model_insights()
 
