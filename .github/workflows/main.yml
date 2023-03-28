@@ -27,11 +27,13 @@ jobs:
         with:
           poetry-version: "1.3.2"
       - name: Increment version
-        run: poetry version patch
-      - uses: EndBug/add-and-commit@v9
-        with:
-          message: 'Update version'
-          add: 'pyproject.toml'
+        id: version
+        run: |
+          poetry version patch
+          VERSION=$(poetry version --short)"-"$GITHUB_RUN_ID
+          echo "::set-output name=version::$VERSION"
+          echo "::set-output name=versionType::Release"
+          poetry version $VERSION --no-ansi
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
