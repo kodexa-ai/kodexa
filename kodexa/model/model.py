@@ -1535,10 +1535,15 @@ class ContentNode(object):
 
             if not node:
                 if (traverse == traverse.ALL or traverse == traverse.PARENT) and self.get_parent().get_parent():
-                    # can now traverse content-areas.. can add traversal of pages if needed, but don't think the scenario exists.
-                    potential_next_node = self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
-                    if potential_next_node:
-                        return potential_next_node
+                    try:
+                        potential_next_node = self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
+                        if potential_next_node:
+                            return potential_next_node
+                    except:
+                        # traverse additional layer
+                        potential_next_node = self.get_parent().get_parent().get_parent().get_children()[self.get_parent().get_parent().index + 1].get_children()[0].get_children()[0]
+                        if potential_next_node:
+                            return potential_next_node
                 return node
 
             if compiled_node_type_re.match(node.node_type) and (not skip_virtual or not node.virtual):
