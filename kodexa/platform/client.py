@@ -32,7 +32,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
     Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
-    CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest
+    CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest, PageWorkspace, Workspace
 
 logger = logging.getLogger()
 
@@ -587,6 +587,14 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
         return "project"
 
 
+class PageWorkspaceEndpoint(PageWorkspace, PageEndpoint):
+    """Represents a page workspace endpoints"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "workspace"
+
+
 class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
     pass
 
@@ -929,6 +937,30 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
         return ModelStoreEndpoint
 
 
+class WorkspaceEndpoint(EntityEndpoint, Workspace):
+    """Represents a workspace endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "workspaces"
+
+    def add_document_family(self, document_family: DocumentFamily):
+        url = f"/api/workspaces/{self.id}/documentFamilies"
+        response = self.client.post(url, body=document_family.to_dict())
+        process_response(response)
+
+    def remove_document_family(self, document_family: DocumentFamily):
+        url = f"/api/workspaces/{self.id}/documentFamilies/{document_family.id}"
+        response = self.client.delete(url)
+        process_response(response)
+
+    def list_document_families(self, page_size=10, page=1) -> PageDocumentFamilyEndpoint:
+        url = f"/api/workspaces/{self.id}/documentFamilies"
+        response = self.client.get(url, {"pageSize": page_size, "page": page})
+        process_response(response)
+        return PageDocumentFamilyEndpoint.parse_obj(response.json()).set_client(self.client)
+
+
 class ProjectEndpoint(EntityEndpoint, Project):
     """Represents a project endpoint"""
 
@@ -988,6 +1020,22 @@ class ProjectEndpoint(EntityEndpoint, Project):
         response = self.client.put(f"/api/projects/{self.id}/tags",
                                    body=[tag.dict(exclude={'client'}, by_alias=True) for tag in tags])
         return [ProjectTag.parse_obj(tag) for tag in response.json()]
+
+
+class WorkspacesEndpoint(EntitiesEndpoint):
+    """Represents a workspaces endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return f"workspaces"
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the instance class of the endpoint"""
+        return WorkspaceEndpoint
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the page class of the endpoint"""
+        return PageWorkspaceEndpoint
 
 
 class ProjectsEndpoint(EntitiesEndpoint):
@@ -1853,7 +1901,7 @@ class DataStoreEndpoint(StoreEndpoint):
         data_object_response = self.client.get(url)
         return DataObjectEndpoint.parse_obj(data_object_response.json())
 
-    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
+    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=20, query="*",
                                       document_family: Optional[DocumentFamily] = None,
                                       parent_id: Optional[str] = None) -> PageDataObject:
         """
@@ -2443,6 +2491,13 @@ OBJECT_TYPES = {
         "endpoint": ProjectsEndpoint,
         "global": True
     },
+    "workspaces": {
+        "name": "workspace",
+        "plural": "workspaces",
+        "type": WorkspaceEndpoint,
+        "endpoint": WorkspacesEndpoint,
+        "global": True
+    },
     "projectTemplates": {
         "name": "projectTemplate",
         "plural": "projectTemplates",
@@ -2536,6 +2591,7 @@ class KodexaClient:
         self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
+        self.workspaces = WorkspacesEndpoint(self)
         self.users = UsersEndpoint(self)
         self.memberships = MembershipsEndpoint(self)
         self.executions = ExecutionsEndpoint(self)
@@ -2803,7 +2859,8 @@ class KodexaClient:
                 "dashboard": DashboardEndpoint,
                 "execution": ExecutionEndpoint,
                 "assistant": AssistantDefinitionEndpoint,
-                "exception": DataExceptionEndpoint
+                "exception": DataExceptionEndpoint,
+                "workspace": WorkspaceEndpoint,
             }
 
             if component_type in known_components:
