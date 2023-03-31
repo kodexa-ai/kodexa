@@ -31,10 +31,9 @@ jobs:
         run: |
           poetry version patch
           VERSION=$(poetry version --short)"-"$GITHUB_RUN_ID
-          VERSION=$(python -c "from packaging.version import Version; v = Version('$VERSION'); v = str(v.release); print(v)")
           echo "::set-output name=version::$VERSION"
           echo "::set-output name=versionType::Release"
-          poetry version $VERSION --no-ansi
+          poetry version $VERSION
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
@@ -47,6 +46,7 @@ jobs:
           poetry run pytest
       - name: Build Package
         run: |
+          VERSION=$(poetry version --short)
           poetry build
       - name: Publish a Python distribution to PyPI
         run: |
