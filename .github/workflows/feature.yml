@@ -34,7 +34,8 @@ jobs:
           echo "::set-output name=latest_version::$LATEST_VERSION"
       - name: Increment version
         run: |
-          poetry version prerelease
+          LATEST_VERSION=$(echo "${{ steps.latest_version.outputs.latest_version }}")
+          poetry version prerelease --preid="rc" --version="${LATEST_VERSION}"
           VERSION=$(poetry version --short)
           echo "::set-output name=version::$VERSION"
           echo "::set-output name=versionType::Release"
