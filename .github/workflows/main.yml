@@ -30,7 +30,7 @@ jobs:
         id: version
         run: |
           poetry version patch
-          VERSION=$(poetry version --short)"-"$GITHUB_RUN_ID
+          VERSION=$(poetry version --short)
           echo "::set-output name=version::$VERSION"
           echo "::set-output name=versionType::Release"
           poetry version $VERSION
