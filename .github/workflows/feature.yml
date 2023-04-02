@@ -35,6 +35,7 @@ jobs:
           echo "Latest pre release version ${LATEST_VERSION}"
       - name: Increment version
         run: |
+          echo "Checking jsons ${{ toJson(steps) }}"
           LATEST_VERSION=$(echo "${{ steps.latest_version.outputs.latest_version }}")
           poetry version prerelease --preid="rc" --version="${LATEST_VERSION}"
           VERSION=$(poetry version --short)
