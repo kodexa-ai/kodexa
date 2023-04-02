@@ -28,15 +28,9 @@ jobs:
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: "1.3.2"
-      - name: Get latest pre-release package version
-        run: |
-          LATEST_VERSION=$(curl -s "https://pypi.org/pypi/kodexa/json" | python -c "import sys, json; print(max([v for v in json.load(sys.stdin)['releases'] if 'rc' in v or 'a' in v or 'b' in v]))")
-          echo "::set-output name=latest_version::$LATEST_VERSION"
-          echo "Latest pre release version ${LATEST_VERSION}"
       - name: Increment version
         run: |
-          echo "Checking jsons ${{ toJson(steps) }}"
-          LATEST_VERSION=$(echo "${{ steps.latest_version.outputs.latest_version }}")
+          LATEST_VERSION=$(curl -s "https://pypi.org/pypi/kodexa/json" | python -c "import sys, json; print(max([v for v in json.load(sys.stdin)['releases'] if 'rc' in v or 'a' in v or 'b' in v]))")
           poetry version prerelease --preid="rc" --version="${LATEST_VERSION}"
           VERSION=$(poetry version --short)
           echo "::set-output name=version::$VERSION"
