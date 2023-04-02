@@ -23,17 +23,22 @@ jobs:
           path: ./
           base: ${{ github.event.ref_name }}
           head: HEAD
-          extra_args: --debug 
+          extra_args: --debug
       - name: Run image
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: "1.3.2"
+      - name: Get latest pre-release package version
+        run: |
+          LATEST_VERSION=$(curl -s "https://pypi.org/pypi/kodexa/json?pre_release=true" | python -c "import sys, json; print(json.load(sys.stdin)['info']['version'])")
+          echo "::set-output name=latest_version::$LATEST_VERSION"
       - name: Increment version
-        run: poetry version prerelease
-      - uses: EndBug/add-and-commit@v9
-        with:
-          message: 'Update version'
-          add: 'pyproject.toml'
+        run: |
+          poetry version prerelease
+          VERSION=$(poetry version --short)
+          echo "::set-output name=version::$VERSION"
+          echo "::set-output name=versionType::Release"
+          poetry version $VERSION
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
