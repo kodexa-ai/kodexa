@@ -29,6 +29,8 @@ jobs:
       - name: Increment version
         id: version
         run: |
+          LATEST_VERSION=$(curl -s "https://pypi.org/pypi/kodexa/json" | python -c "import sys, json; print(max([v for v in json.load(sys.stdin)['releases'] if not ('rc' in v or 'a' in v or 'b' in v)]))")
+          poetry version ${LATEST_VERSION}
           poetry version patch
           VERSION=$(poetry version --short)
           echo "::set-output name=version::$VERSION"
