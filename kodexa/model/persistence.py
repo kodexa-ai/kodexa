@@ -578,6 +578,9 @@ class SqliteDocumentPersistence(object):
         for exception in exceptions:
             self.add_exception(exception)
 
+    def clear_model_insights(self):
+        self.cursor.execute("delete from model_insights")
+
 
 class SimpleObjectCache(object):
     """
@@ -643,6 +646,9 @@ class PersistenceManager(object):
 
     def add_model_insight(self, model_insight: ModelInsight):
         self._underlying_persistence.add_model_insight(model_insight)
+
+    def clear_model_insights(self):
+        self._underlying_persistence.clear_model_insights()
 
     def get_model_insights(self) -> List[ModelInsight]:
         return self._underlying_persistence.get_model_insights()
