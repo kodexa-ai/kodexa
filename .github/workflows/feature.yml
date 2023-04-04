@@ -30,11 +30,14 @@ jobs:
           poetry-version: "1.3.2"
       - name: Increment version
         run: |
-          poetry version prerelease
-          VERSION=$(poetry version --short)"."$GITHUB_RUN_ID"-alpha"
-          echo "::set-output name=version::$VERSION"
+          VERSION=$(poetry version --short)
+          LAST_VERSION_PART=${VERSION#*.}
+          LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART%??}
+          NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}rc${GITHUB_RUN_ID}
+          NEW_VERSION=${VERSION%.*}.${NEW_LAST_VERSION_PART}
+          echo "::set-output name=version::$NEW_VERSION"
           echo "::set-output name=versionType::Release"
-          poetry version $VERSION --no-ansi
+          poetry version NEW_VERSION --no-ansi
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
