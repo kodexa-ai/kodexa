@@ -35,6 +35,7 @@ jobs:
           LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART%??}
           NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}rc${GITHUB_RUN_ID}
           NEW_VERSION=${VERSION%.*}.${NEW_LAST_VERSION_PART}
+          echo $NEW_VERSION
           echo "::set-output name=version::$NEW_VERSION"
           echo "::set-output name=versionType::Release"
           poetry version NEW_VERSION --no-ansi
