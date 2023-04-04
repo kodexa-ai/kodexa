@@ -30,23 +30,17 @@ jobs:
           poetry-version: "1.3.2"
       - name: Increment version
         run: |
-#          Gets the branch name
           BRANCH_NAME=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
-#          Create versioning
           VERSION=$(poetry version --short)
           LAST_VERSION_PART=${VERSION#*.}
           LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART%??}
           LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART_PREFIX%.*}
-#          If branch name starts with bugs; append b where it stands as BUGS
           if [[ $BRANCH_NAME == "fix"* ]]; then
             NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}b${GITHUB_RUN_ID}
-#          If branch name starts with bugs; append f where it stands for FEEATURE
           elif [[ $BRANCH_NAME == "feature"* ]]; then
             NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}f${GITHUB_RUN_ID}
-#          If branch name starts test; append RC on it
           elif [[ $BRANCH_NAME == "test"* ]]; then
             NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}rc${GITHUB_RUN_ID}
-#          If branch name starts with MAIN
           elif [[ $BRANCH_NAME == "main"* ]]; then
             NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}${GITHUB_RUN_ID}
           else
@@ -71,10 +65,10 @@ jobs:
       - name: Build Package
         run: |
           poetry build
-      - name: Publish a Python distribution to PyPI
-        run: |
-          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
-          poetry publish
+#      - name: Publish a Python distribution to PyPI
+#        run: |
+#          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+#          poetry publish
     #      - name: Publish a Python distribution to PyPI
     #        uses: pypa/gh-action-pypi-publish@release/v1
     #        with:
