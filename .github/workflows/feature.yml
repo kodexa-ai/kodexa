@@ -39,7 +39,7 @@ jobs:
           echo $NEW_VERSION
           echo "::set-output name=version::$NEW_VERSION"
           echo "::set-output name=versionType::Release"
-          poetry version NEW_VERSION --no-ansi
+          poetry version $NEW_VERSION --no-ansi
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
