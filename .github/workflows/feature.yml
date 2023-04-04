@@ -32,7 +32,8 @@ jobs:
         run: |
           VERSION=$(poetry version --short)
           LAST_VERSION_PART=${VERSION#*.}
-          LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART%[a-z][0-9]}
+          LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART%??}
+          LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART_PREFIX%.*}
           NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}rc${GITHUB_RUN_ID}
           NEW_VERSION=${VERSION%.*}.${NEW_LAST_VERSION_PART}
           echo $NEW_VERSION
