@@ -38,10 +38,10 @@ jobs:
           LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART%??}
           LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART_PREFIX%.*}
         # If branch name starts with bugs; append b where it stands as BUGS
-          if [[ $BRANCH_NAME == "bugs"* ]]; then
+          if [[ $BRANCH_NAME == "fix"* ]]; then
             NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}b${GITHUB_RUN_ID}
         # If branch name starts with bugs; append f where it stands for FEEATURE
-          elif [[ $BRANCH_NAME == "fix"* ]]; then
+          elif [[ $BRANCH_NAME == "feature"* ]]; then
             NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}f${GITHUB_RUN_ID}
         # If branch name starts test; append RC on it
           elif [[ $BRANCH_NAME == "test"* ]]; then
