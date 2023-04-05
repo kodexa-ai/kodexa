@@ -32,22 +32,27 @@ jobs:
         run: |
           BRANCH_NAME=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
           VERSION=$(poetry version --short)
-          LAST_VERSION_PART=${VERSION#*.}
-          LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART%??}
-          LAST_VERSION_PART_PREFIX=${LAST_VERSION_PART_PREFIX%.*}
-          if [[ $BRANCH_NAME == "fix"* ]]; then
-            NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}b${GITHUB_RUN_ID}
+          MINOR_PATCH_PART=${VERSION#*.}
+          LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
+          PATCH_PART=${LAST_VERSION_PART_PREFIX%.*}
+          if [[ $BRANCH_NAME == "fix"* || $BRANCH_NAME == "bugs"* ]]; then
+            NEW_LATEST_PATCH_PART=$((PATCH_PART+1))b${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "feature"* ]]; then
-            NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}f${GITHUB_RUN_ID}
+            NEW_LATEST_PATCH_PART=$((PATCH_PART+1))f${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "test"* ]]; then
-            NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}rc${GITHUB_RUN_ID}
+            NEW_LATEST_PATCH_PART=$((PATCH_PART+1))rc${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "main"* ]]; then
-            NEW_LAST_VERSION_PART=${LAST_VERSION_PART_PREFIX}${GITHUB_RUN_ID}
+            poetry version patch
+            VERSION=$(poetry version --short)
+            MINOR_PATCH_PART=${VERSION#*.}
+            LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
+            PATCH_PART=${LAST_VERSION_PART_PREFIX%.*}
+            NEW_LATEST_PATCH_PART=${PATCH_PART}${GITHUB_RUN_ID}
           else
             echo "Invalid branch name"
             exit 1
           fi
-          NEW_VERSION=${VERSION%.*}.${NEW_LAST_VERSION_PART}
+          NEW_VERSION=${VERSION%.*}.${NEW_LATEST_PATCH_PART}
           echo $NEW_VERSION
           echo "::set-output name=version::$NEW_VERSION"
           echo "::set-output name=versionType::Release"

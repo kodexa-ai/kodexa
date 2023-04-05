@@ -1,14 +1,16 @@
-name: Build and Package with Poetry
+name: Build and Package with Poetry (Feature)
 
 on:
   push:
-    branches:
-      - 'main'
+    branches-ignore:
+      - main
       - 'releases/*'
+      - develop
 
 jobs:
   build-and-publish-python-package:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.10
@@ -21,20 +23,40 @@ jobs:
           path: ./
           base: ${{ github.event.ref_name }}
           head: HEAD
-          extra_args: --debug 
+          extra_args: --debug
       - name: Run image
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: "1.3.2"
       - name: Increment version
-        id: version
         run: |
-          poetry version patch
-          VERSION=$(poetry version --short)"-"$GITHUB_RUN_ID
-          VERSION=$(python -c "from packaging.version import Version; v = Version('$VERSION'); v = str(v.release); print(v)")
-          echo "::set-output name=version::$VERSION"
+          BRANCH_NAME=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
+          VERSION=$(poetry version --short)
+          MINOR_PATCH_PART=${VERSION#*.}
+          LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
+          PATCH_PART=${LAST_VERSION_PART_PREFIX%.*}
+          if [[ $BRANCH_NAME == "fix"* || $BRANCH_NAME == "bugs"* ]]; then
+            NEW_LATEST_PATCH_PART=$((PATCH_PART+1))b${GITHUB_RUN_ID}
+          elif [[ $BRANCH_NAME == "feature"* ]]; then
+            NEW_LATEST_PATCH_PART=$((PATCH_PART+1))f${GITHUB_RUN_ID}
+          elif [[ $BRANCH_NAME == "test"* ]]; then
+            NEW_LATEST_PATCH_PART=$((PATCH_PART+1))rc${GITHUB_RUN_ID}
+          elif [[ $BRANCH_NAME == "main"* ]]; then
+            poetry version patch
+            VERSION=$(poetry version --short)
+            MINOR_PATCH_PART=${VERSION#*.}
+            LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
+            PATCH_PART=${LAST_VERSION_PART_PREFIX%.*}
+            NEW_LATEST_PATCH_PART=${PATCH_PART}${GITHUB_RUN_ID}
+          else
+            echo "Invalid branch name"
+            exit 1
+          fi
+          NEW_VERSION=${VERSION%.*}.${NEW_LATEST_PATCH_PART}
+          echo $NEW_VERSION
+          echo "::set-output name=version::$NEW_VERSION"
           echo "::set-output name=versionType::Release"
-          poetry version $VERSION --no-ansi
+          poetry version $NEW_VERSION --no-ansi
       - name: Install dependencies
         run: poetry install
       - name: Lint with flake8
@@ -48,27 +70,12 @@ jobs:
       - name: Build Package
         run: |
           poetry build
-      - name: Publish a Python distribution to PyPI
-        run: |
-          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
-          poetry publish
-      - name: Prepare Workflow Client Payload
-        id: workflow_payload
-        run: |
-          VERSION=$(poetry version | awk 'END {print $NF}')
-          PAYLOAD=$(jq -c -n --arg version "$VERSION" '$ARGS.named')
-          echo "payload=$PAYLOAD" >> $GITHUB_OUTPUT
-      - name: Trigger a build in kodexa-playground
-        uses: convictional/trigger-workflow-and-wait@v1.6.1
-        with:
-          owner: kodexa-ai
-          repo: kodexa-playground
-          github_token: ${{ secrets.WORKFLOW_GITHUB_TOKEN }}
-          github_user: rcablao-kodexa
-          workflow_file_name: aws.yml
-          ref: main
-          client_payload: ${{ steps.workflow_payload.outputs.payload }}
-          wait_interval: 10
-          trigger_workflow: true
-          propagate_failure: false
-          wait_workflow: false
+    #      - name: Publish a Python distribution to PyPI
+    #        run: |
+    #          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+    #          poetry publish
+    #      - name: Publish a Python distribution to PyPI
+    #        uses: pypa/gh-action-pypi-publish@release/v1
+    #        with:
+    #          user: __token__
+    #          password: ${{ secrets.PYPI_TOKEN }}
