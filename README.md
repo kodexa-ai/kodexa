@@ -39,7 +39,6 @@ Documentation is available at the [Kodexa Documentation Portal](https://docs.kod
 [//]: # (Replace it with the diagrams and descriptions for build releases)
 **BUILD VERSION FLOW**
 ![build-version-flow.png](docs%2Fbuild-version-flow.png)
-
 Build version will differ based on the branches that are published to pypi.
 
 **GITHUB PROCESS**
