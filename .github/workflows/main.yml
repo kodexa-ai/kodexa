@@ -5,6 +5,10 @@ on:
     branches-ignore:
       - 'releases/*'
       - develop
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!.github/**'
 
 jobs:
   build-and-publish-python-package:
@@ -37,7 +41,7 @@ jobs:
           if [[ $BRANCH_NAME == "fix"* || $BRANCH_NAME == "bugs"* ]]; then
             NEW_LATEST_PATCH_PART=$((PATCH_PART+1))b${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "feature"* ]]; then
-            NEW_LATEST_PATCH_PART=$((PATCH_PART+1))f${GITHUB_RUN_ID}
+            NEW_LATEST_PATCH_PART=$((PATCH_PART+1))a${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "test"* ]]; then
             NEW_LATEST_PATCH_PART=$((PATCH_PART+1))rc${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "main"* ]]; then
