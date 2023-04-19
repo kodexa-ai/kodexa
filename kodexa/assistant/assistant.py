@@ -7,6 +7,115 @@ from typing import List, Optional
 from kodexa.model import ContentObject, Document
 from kodexa.model.objects import Store, Taxonomy, BaseEvent
 from kodexa.platform.client import DocumentStoreEndpoint
+import logging
+from kodexa import Pipeline
+
+logger = logging.getLogger()
+
+
+def replace_option(option_type, option_value, event_helper, cache, kodexa_client):
+    logger.info("Replacing option")
+    if option_type == 'document':
+        # We need to download the document from the store and replace the option with it
+
+        full_url = option_value
+        logger.info(f"Breaking down the full url for the document {full_url}")
+
+        if '/' in full_url:
+            url_parts = full_url.split(':')
+
+            # Each part, split by "/"
+            version = url_parts[1].split("/")[0]
+            store_ref = f"{url_parts[0]}:{version}"
+            document_family_id = url_parts[1].split("/")[1]
+            logger.info(f"Downloading document parameter {store_ref}/{document_family_id}")
+
+            if store_ref != "" and document_family_id != "undefined":
+                try:
+
+                    logger.info(f"Using store {store_ref}")
+                    cache_key = f'store-{store_ref}'
+
+                    if cache_key not in cache:
+                        logger.info(f"Using store {store_ref}")
+                        from kodexa.platform.client import DocumentStoreEndpoint
+                        store: DocumentStoreEndpoint = kodexa_client.get_object_by_ref('store', store_ref)
+                        from kodexa.platform.client import DocumentFamilyEndpoint
+                        document_family: DocumentFamilyEndpoint = store.get_family(document_family_id)
+                        document = document_family.get_document()
+                        document.ref = full_url
+                        cache[cache_key] = document
+                        logger.info(f"Downloaded document")
+
+                    # We keep the ref of the document so we can use it later
+                    return cache[cache_key]
+
+                except Exception as e:
+                    logger.warning(f"Unable to access the document ({e})")
+                    return None
+            else:
+                logger.info(f"Document reference not available")
+                return None
+
+        elif len(full_url) > 0:
+            # We have an ID to a Content Object
+            return Document.from_kddb(event_helper.get_content_object(content_object_id=full_url).read())
+
+    if 'store' in option_type.lower():
+        logger.info(f"Getting Store object instance {option_type} as {option_value}")
+
+        # We need to create a remote store
+        store = kodexa_client.get_object_by_ref('store', option_value)
+        return store
+
+    if 'pipeline' in option_type.lower():
+        logger.info(f"Getting pipeline instance {option_type} as {option_value}")
+
+        # To create a pipeline to represent the option
+        pipeline = Pipeline()
+        pipeline.steps = []
+
+        if isinstance(option_value['steps'], list):
+
+            for index, step in enumerate(option_value['steps']):
+                logger.info(f"Creating step {step}")
+                pipeline.add_step(step['ref'], name=f'Step {index}', step_type=step['stepType'],
+                                  options=step['options'] if 'options' in step else {})
+
+        return pipeline
+
+    if option_type == 'taxonomy':
+        logger.info(f"Getting Taxonomy object instance {option_type} as {option_value}")
+
+        try:
+            taxonomy = kodexa_client.get_object_by_ref('taxo', option_value)
+        except Exception as e:
+            logger.warning(f"Unable to access the taxonomy ({e})")
+            return None
+        return taxonomy
+
+    logger.info("Returning option value")
+    return option_value
+
+
+def replace_options(step, event_helper, cache, kodexa_client):
+    logger.info(f"Determine is we have any options that need replacement")
+    # We need to document any documents that are part of the options
+    for key in step.option_types.keys():
+        logger.info(f"Check option type for key {key}")
+
+        if key in step.options:
+            logger.info(f"Type is {step.option_types[key]}")
+            if step.option_types[key].startswith('list:'):
+                result = []
+                logger.info("Is a list type")
+                for value in step.options[key]:
+                    result.append(
+                        replace_option(step.option_types[key].split(':')[1], value, event_helper, cache, kodexa_client))
+                step.options[key] = result
+            else:
+                step.options[key] = replace_option(step.option_types[key], step.options[key], event_helper,
+                                                   cache, kodexa_client)
 
 
 class AssistantMetadata:
