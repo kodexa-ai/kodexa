@@ -8,7 +8,7 @@ from kodexa.model import ContentObject, Document
 from kodexa.model.objects import Store, Taxonomy, BaseEvent
 from kodexa.platform.client import DocumentStoreEndpoint
 import logging
-from kodexa import Pipeline
+from kodexa.pipeline import Pipeline
 
 logger = logging.getLogger()
 
