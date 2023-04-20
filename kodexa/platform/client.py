@@ -1677,28 +1677,10 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
         """Replace the tags of the document family"""
-        feature_set = FeatureSet()
         if content_object is None:
             content_object = self.content_objects[-1]
-        feature_set.node_features = []
-        for tagged_node in document.select('//*[hasTag()]'):
-            node_feature = {
-                'nodeUuid': str(tagged_node.uuid),
-                'features': []
-            }
-
-            feature_set.node_features.append(node_feature)
-
-            # TODO this needs to be cleaned up
-            for feature in tagged_node.get_features():
-                if feature.feature_type == 'tag':
-                    feature_dict = feature.to_dict()
-                    feature_dict['featureType'] = feature.feature_type
-                    feature_dict['name'] = feature.name
-                    node_feature['features'].append(feature_dict)
-
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
-        self.client.put(url, body=feature_set.dict(by_alias=True))
+        self.client.put(url, body=document.get_feature_set().dict(by_alias=True))
 
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):

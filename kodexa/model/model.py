@@ -14,7 +14,7 @@ import msgpack
 from addict import Dict
 
 from kodexa.model.base import KodexaBaseModel
-from kodexa.model.objects import ContentObject
+from kodexa.model.objects import ContentObject, FeatureSet
 
 
 class Ref:
@@ -1536,12 +1536,14 @@ class ContentNode(object):
             if not node:
                 if (traverse == traverse.ALL or traverse == traverse.PARENT) and self.get_parent().get_parent():
                     try:
-                        potential_next_node = self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
+                        potential_next_node = \
+                            self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
                         if potential_next_node:
                             return potential_next_node
                     except:
                         # traverse additional layer
-                        potential_next_node = self.get_parent().get_parent().get_parent().get_children()[self.get_parent().get_parent().index + 1].get_children()[0].get_children()[0]
+                        potential_next_node = self.get_parent().get_parent().get_parent().get_children()[
+                            self.get_parent().get_parent().index + 1].get_children()[0].get_children()[0]
                         if potential_next_node:
                             return potential_next_node
                 return node
@@ -1705,6 +1707,21 @@ class ContentClassification(object):
     def from_dict(cls, dict_val):
         return ContentClassification(label=dict_val['label'], taxonomy=dict_val.get('taxonomy'),
                                      selector=dict_val.get('selector'), confidence=dict_val.get('confidence'))
+
+
+class FeatureSetDiff:
+    """
+    A utility class that can be used to diff two feature sets
+    """
+
+    def __init__(self, first_feature_set: FeatureSet, second_feature_set: FeatureSet):
+        self.first_feature_set = first_feature_set
+        self.second_feature_set = second_feature_set
+
+    def diff(self):
+        # TODO Implement a deepdiff
+
+        pass
 
 
 class Document(object):
@@ -2277,6 +2294,38 @@ class Document(object):
 
         """
         return self.labels
+
+    def get_feature_set(self) -> FeatureSet:
+        """
+        Build a feature set of all the tagged nodes
+
+        :return:
+        """
+        feature_set = FeatureSet()
+        feature_set.node_features = []
+        for tagged_node in self.get_all_tagged_nodes():
+            node_feature = {
+                'nodeUuid': str(tagged_node.uuid),
+                'features': []
+            }
+
+            feature_set.node_features.append(node_feature)
+
+            # TODO this needs to be cleaned up
+            for feature in tagged_node.get_features():
+                if feature.feature_type == 'tag':
+                    feature_dict = feature.to_dict()
+                    feature_dict['featureType'] = feature.feature_type
+                    feature_dict['name'] = feature.name
+                    node_feature['features'].append(feature_dict)
+
+    def get_all_tagged_nodes(self) -> List[ContentNode]:
+        """
+        Get all the tagged nodes in the document
+
+        :return:
+        """
+        return self._persistence_layer.get_all_tagged_nodes()
 
 
 class ContentObjectReference:
