@@ -50,7 +50,8 @@ class ContentException(Dict):
 
     def __init__(self, exception_type: str, message: str, severity: str = 'ERROR', tag: Optional[str] = None,
                  group_uuid: Optional[str] = None, tag_uuid: Optional[str] = None,
-                 exception_details: Optional[str] = None, node_uuid: Optional[str] = None, *args, **kwargs):
+                 exception_details: Optional[str] = None, node_uuid: Optional[str] = None, value: Optional[str] = None,
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tag = tag
         self.message = message
@@ -60,6 +61,7 @@ class ContentException(Dict):
         self.exception_type = exception_type
         self.node_uuid = node_uuid
         self.severity = severity
+        self.value = value
 
 
 class Tag(Dict):
