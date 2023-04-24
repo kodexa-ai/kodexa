@@ -1719,7 +1719,8 @@ class FeatureSetDiff:
         self.first_feature_set = first_feature_set
         self.second_feature_set = second_feature_set
         self._differences = deepdiff.DeepDiff(first_feature_set, second_feature_set, ignore_type_subclasses=True,
-                                              ignore_order=True).to_dict()
+                                              exclude_types={Tag}).to_dict()
+        self.get_new_items()
         self.diff_parser()
 
     def diff_parser(self):
@@ -1729,7 +1730,6 @@ class FeatureSetDiff:
         changed = diff.get('values_changed', {})
 
         result = {}
-
         for key in set(added.keys()) | set(removed.keys()) | set(changed.keys()):
             key_diff = {}
 
@@ -1746,6 +1746,23 @@ class FeatureSetDiff:
                 }
 
             result[key] = key_diff
+
+    def get_new_items(self) -> List[dict]:
+        """
+        :return: Show items that were added
+        """
+        new_item_list = []
+        new_item = {}
+        for key, value in self._differences.get('iterable_item_added').items():
+            new_item['name'] = value['name']
+            for value_item in value['value']:
+                # Check if the value_item is an object of Tag
+                if isinstance(value_item, Tag):
+                    value_item = value_item.to_dict()
+
+                new_item['value'] = value_item['value']
+            new_item_list.append(new_item)
+        return new_item_list
 
     def get_differences(self):
         """
