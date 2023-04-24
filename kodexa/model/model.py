@@ -1718,7 +1718,34 @@ class FeatureSetDiff:
     def __init__(self, first_feature_set: FeatureSet, second_feature_set: FeatureSet):
         self.first_feature_set = first_feature_set
         self.second_feature_set = second_feature_set
-        self._differences = deepdiff.DeepDiff(first_feature_set, second_feature_set).to_dict()
+        self._differences = deepdiff.DeepDiff(first_feature_set, second_feature_set, ignore_type_subclasses=True,
+                                              ignore_order=True).to_dict()
+        self.diff_parser()
+
+    def diff_parser(self):
+        diff = self._differences
+        added = diff.get('iterable_item_added', {})
+        removed = diff.get('iterable_item_removed', {})
+        changed = diff.get('values_changed', {})
+
+        result = {}
+
+        for key in set(added.keys()) | set(removed.keys()) | set(changed.keys()):
+            key_diff = {}
+
+            if key in added:
+                key_diff['added'] = added[key]['new_value']
+
+            if key in removed:
+                key_diff['removed'] = removed[key]['old_value']
+
+            if key in changed:
+                key_diff['changed'] = {
+                    'old': changed[key]['old_value'],
+                    'new': changed[key]['new_value']
+                }
+
+            result[key] = key_diff
 
     def get_differences(self):
         """
@@ -1748,7 +1775,6 @@ class FeatureSetDiff:
         :return: The total number of differences between the feature sets
         """
         return len(self._differences().keys())
-
 
     def get_all_differences(self):
         """
