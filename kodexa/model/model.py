@@ -15,6 +15,7 @@ from addict import Dict
 
 from kodexa.model.base import KodexaBaseModel
 from kodexa.model.objects import ContentObject, FeatureSet
+import deepdiff
 
 
 class Ref:
@@ -1717,12 +1718,46 @@ class FeatureSetDiff:
     def __init__(self, first_feature_set: FeatureSet, second_feature_set: FeatureSet):
         self.first_feature_set = first_feature_set
         self.second_feature_set = second_feature_set
+        self._differences = deepdiff.DeepDiff(first_feature_set, second_feature_set).to_dict()
 
-    def diff(self):
-        # TODO Implement a deepdiff
+    def get_differences(self):
+        """
+        :return: This returns a dictionary representing the differences between the two feature sets
+        """
+        return self._differences
 
-        pass
+    def is_equal(self) -> bool:
+        """
+        Checks if the two feature set is equal to each other
+        :return: This returns a bool
+        """
+        return self._differences == {}
 
+    def get_changed_nodes(self):
+        if self._differences == {}:
+            return []
+
+        changed_nodes = []
+        for node_path, node_diff in self._differences.get('values_changed', {}).items():
+            node_uuid = node_path[0]
+            changed_nodes.append(node_uuid)
+        return changed_nodes
+
+    def get_difference_count(self):
+        """
+        :return: The total number of differences between the feature sets
+        """
+        return len(self._differences().keys())
+
+
+    def get_all_differences(self):
+        """
+        :return: List of all differences between the feature sets
+        """
+        all_differences = []
+        for key in self._differences.keys():
+            all_differences.extend(self._differences[key])
+        return all_differences
 
 class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
@@ -2318,6 +2353,8 @@ class Document(object):
                     feature_dict['featureType'] = feature.feature_type
                     feature_dict['name'] = feature.name
                     node_feature['features'].append(feature_dict)
+
+        return feature_set
 
     def get_all_tagged_nodes(self) -> List[ContentNode]:
         """
