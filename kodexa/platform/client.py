@@ -192,6 +192,28 @@ class ProjectResourceEndpoint(ClientEndpoint):
             df.drop(columns='client', axis=1)
         return df
 
+    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of resources
+        :param query:
+        :param sort:
+        :param filters:
+        :return:
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for resource in page_response.content:
+                yield resource
+            page += 1
+
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
 
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
