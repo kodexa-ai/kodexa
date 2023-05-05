@@ -1716,59 +1716,57 @@ class FeatureSetDiff:
     """
 
     def __init__(self, first_feature_set: FeatureSet, second_feature_set: FeatureSet):
-        self.first_feature_set = first_feature_set
-        self.second_feature_set = second_feature_set
-        self._differences = deepdiff.DeepDiff(first_feature_set, second_feature_set, ignore_type_subclasses=True,
-                                              exclude_types={Tag}).to_dict()
-        self.get_new_items()
-        self.diff_parser()
-
-    def diff_parser(self):
-        diff = self._differences
-        added = diff.get('iterable_item_added', {})
-        removed = diff.get('iterable_item_removed', {})
-        changed = diff.get('values_changed', {})
-
-        result = {}
-        for key in set(added.keys()) | set(removed.keys()) | set(changed.keys()):
-            key_diff = {}
-
-            if key in added:
-                key_diff['added'] = added[key]['new_value']
-
-            if key in removed:
-                key_diff['removed'] = removed[key]['old_value']
-
-            if key in changed:
-                key_diff['changed'] = {
-                    'old': changed[key]['old_value'],
-                    'new': changed[key]['new_value']
-                }
-
-            result[key] = key_diff
-
-    def get_new_items(self) -> List[dict]:
-        """
-        :return: Show items that were added
-        """
-        new_item_list = []
-        new_item = {}
-        for key, value in self._differences.get('iterable_item_added').items():
-            new_item['name'] = value['name']
-            for value_item in value['value']:
-                # Check if the value_item is an object of Tag
-                if isinstance(value_item, Tag):
-                    value_item = value_item.to_dict()
-
-                new_item['value'] = value_item['value']
-            new_item_list.append(new_item)
-        return new_item_list
+        self.first_feature_map = self.parse_feature_set(first_feature_set)
+        self.second_feature_map = self.parse_feature_set(second_feature_set)
+        self._differences = deepdiff.DeepDiff(self.first_feature_map, self.second_feature_map,
+                                              exclude_obj_callback=self.exclude_callback).to_dict()
+        self._changed_nodes = self.get_changed_nodes()
 
     def get_differences(self):
         """
-        :return: This returns a dictionary representing the differences between the two feature sets
+        :return: Data dictionaries that contains the differences of two feature sets
         """
+        if 'type_changes' in self._differences:
+            self._differences.pop('type_changes')
+
         return self._differences
+
+    def get_changed_nodes(self):
+        """
+        :return: Data dictionary of added and removed nodes
+        """
+        return self._changed_nodes
+
+    def get_exclude_paths(self):
+        """
+        :return: List of paths to exclude
+        """
+        return ['shape', 'group_uuid', 'uuid', 'parent_group_uuid', 'single']
+
+    def exclude_callback(self, path, key):
+        """
+        Checks if the key is to be exluceded from the diff
+        :param path: contains the values of that key
+        :param key: The key of the data dictionary to compare
+        :return: boolean
+        """
+        if any(re.search(exclude_key, key) for exclude_key in self.get_exclude_paths()):
+            return True
+        else:
+            return False
+
+    def parse_feature_set(self, feature_set: FeatureSet):
+        """
+        :param feature_set: The feature set to be parsed
+        :return: Dictionary of feature with the key as the nodeUuid
+        """
+        return {feature.get('nodeUuid'): feature for feature in feature_set.node_features}
+
+    def parsed_values_changed(self):
+        for key, value in self._differences.get('values_changed').items():
+            # Check if the old_value is stil in the second_feature_map. If it is remove the key
+            if key in self.second_feature_map.node_features:
+                self._differences.get('values_changed').remove(key)
 
     def is_equal(self) -> bool:
         """
@@ -1778,14 +1776,36 @@ class FeatureSetDiff:
         return self._differences == {}
 
     def get_changed_nodes(self):
-        if self._differences == {}:
+        """
+        :return: A list of nodes that were changed
+        """
+        if self.is_equal():
             return []
 
-        changed_nodes = []
-        for node_path, node_diff in self._differences.get('values_changed', {}).items():
-            node_uuid = node_path[0]
-            changed_nodes.append(node_uuid)
-        return changed_nodes
+        # Check for new nodes added in the second_feature_map
+        new_added_nodes = []
+
+        # Checked for removed nodes in the first_feature_map
+        removed_nodes = []
+
+        # Checked for modified nodes
+        modified_nodes = []
+        for key, value in self._differences.get('values_changed').items():
+            modified_nodes.append(self.parsed_node_uuid(key))
+
+        # Merge unique nodeUuid of first_feature_map and second_feature_map
+        merged_node_uuids = set(self.first_feature_map.keys()).union(set(self.second_feature_map.keys()))
+        for node_uuid in merged_node_uuids:
+            if node_uuid not in self.first_feature_map:
+                new_added_nodes.append(node_uuid)
+            elif node_uuid not in self.second_feature_map:
+                removed_nodes.append(node_uuid)
+
+        return {
+            'new_added_nodes': new_added_nodes,
+            'removed_nodes': removed_nodes,
+            'existing_modified_nodes': modified_nodes
+        }
 
     def get_difference_count(self):
         """
@@ -1793,14 +1813,28 @@ class FeatureSetDiff:
         """
         return len(self._differences().keys())
 
-    def get_all_differences(self):
+    def parsed_item_added(self):
+        item_added: Dict = self._differences.get('iterable_item_added')
+        if item_added:
+            return {}
+
+        for key, value in item_added.items():
+            node = self.parsed_node_uuid(key)
+            if node in self._changed_nodes['new_added_nodes']:
+                self._differences['iterable_item_added'][key]['details'] = f'Node: {node} was added'
+                continue
+
+            # if node in
+        return self.get_difference_count()
+
+    def parsed_node_uuid(self, key):
         """
-        :return: List of all differences between the feature sets
+        :param key: Key of data dictionary
+        :return: node uuid from the key
         """
-        all_differences = []
-        for key in self._differences.keys():
-            all_differences.extend(self._differences[key])
-        return all_differences
+        node = key.split("['")[1].split("']")[0]
+        return node
+
 
 class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
