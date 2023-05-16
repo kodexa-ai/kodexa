@@ -2191,7 +2191,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
-    def stream_filter(self, filter_string: str = "", sort=None):
+    def stream_filter(self, filter_string: str = "", sort=None, limit=None):
         """
             Stream the filter for the document family
         :param query: the query to run
