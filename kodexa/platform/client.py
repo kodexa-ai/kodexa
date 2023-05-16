@@ -192,6 +192,28 @@ class ProjectResourceEndpoint(ClientEndpoint):
             df.drop(columns='client', axis=1)
         return df
 
+    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of resources
+        :param query:
+        :param sort:
+        :param filters:
+        :return:
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for resource in page_response.content:
+                yield resource
+            page += 1
+
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
 
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
@@ -388,6 +410,27 @@ class EntitiesEndpoint:
         """Initialize the entities endpoint by client and organization"""
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
+
+    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of resources
+        :param query:
+        :param sort:
+        :param filters:
+        :return:
+        """
+        page_size = 5
+        page = 1
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for resource in page_response.content:
+                yield resource
+            page += 1
 
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}"
@@ -2148,7 +2191,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
-    def stream_filter(self, filter_string: str = "", sort=None):
+    def stream_filter(self, filter_string: str = "", sort=None, limit=None):
         """
             Stream the filter for the document family
         :param query: the query to run
