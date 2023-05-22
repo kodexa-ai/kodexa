@@ -2610,10 +2610,10 @@ class ExtractionEngineEndpoint:
 
 class KodexaClient:
 
-    def __init__(self, url=None, access_token=None):
+    def __init__(self, url=None, access_token=None, profile=None):
         from kodexa import KodexaPlatform
-        self.base_url = url if url is not None else KodexaPlatform.get_url()
-        self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
+        self.base_url = url if url is not None else KodexaPlatform.get_url(profile)
+        self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token(profile)
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
         self.workspaces = WorkspacesEndpoint(self)
