@@ -192,6 +192,28 @@ class ProjectResourceEndpoint(ClientEndpoint):
             df.drop(columns='client', axis=1)
         return df
 
+    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of resources
+        :param query:
+        :param sort:
+        :param filters:
+        :return:
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for resource in page_response.content:
+                yield resource
+            page += 1
+
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
 
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
@@ -388,6 +410,27 @@ class EntitiesEndpoint:
         """Initialize the entities endpoint by client and organization"""
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
+
+    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of resources
+        :param query:
+        :param sort:
+        :param filters:
+        :return:
+        """
+        page_size = 5
+        page = 1
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for resource in page_response.content:
+                yield resource
+            page += 1
 
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}"
@@ -2148,7 +2191,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
-    def stream_filter(self, filter_string: str = "", sort=None):
+    def stream_filter(self, filter_string: str = "", sort=None, limit=None):
         """
             Stream the filter for the document family
         :param query: the query to run
@@ -2567,10 +2610,10 @@ class ExtractionEngineEndpoint:
 
 class KodexaClient:
 
-    def __init__(self, url=None, access_token=None):
+    def __init__(self, url=None, access_token=None, profile=None):
         from kodexa import KodexaPlatform
-        self.base_url = url if url is not None else KodexaPlatform.get_url()
-        self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
+        self.base_url = url if url is not None else KodexaPlatform.get_url(profile)
+        self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token(profile)
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
         self.workspaces = WorkspacesEndpoint(self)
@@ -2647,6 +2690,9 @@ class KodexaClient:
         headers = {"x-access-token": self.access_token}
         if files is None:
             headers["content-type"] = "application/json"
+        else:
+            headers["content-type"] = "multipart/form-data"
+
         response = requests.post(self.get_url(url), json=body, data=data, files=files, params=params,
                                  headers=headers)
         return process_response(response)
@@ -2657,6 +2703,7 @@ class KodexaClient:
             headers["content-type"] = "application/json"
         else:
             headers["content-type"] = "multipart/form-data"
+
         response = requests.put(self.get_url(url), json=body, data=data, files=files, params=params,
                                 headers=headers)
         return process_response(response)
