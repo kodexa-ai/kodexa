@@ -34,7 +34,7 @@ logger = logging.getLogger()
 dirs = AppDirs("Kodexa", "Kodexa")
 
 
-def get_config():
+def get_config(profile=None):
     """Get the kodexa config object we use when you want to store your PAT locally
 
     :return: the config as a dict
@@ -47,9 +47,12 @@ def get_config():
     path = os.path.join(dirs.user_config_dir, '.kodexa.json')
     if os.path.exists(path):
         with open(path, 'r') as outfile:
-            return json.load(outfile)
+            kodexa_config = json.load(outfile)
+            if profile and profile not in kodexa_config:
+                kodexa_config[profile] = {'url': None, 'access_token': None}
+            return kodexa_config
     else:
-        return {'url': None, 'access_token': None}
+        return {'url': None, 'access_token': None} if not profile else {profile: {'url': None, 'access_token': None}}
 
 
 def save_config(config_obj):
@@ -244,7 +247,7 @@ class KodexaPlatform:
         return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
-    def get_access_token() -> str:
+    def get_access_token(profile=None) -> str:
         """
         Returns the access token
 
@@ -253,12 +256,13 @@ class KodexaPlatform:
         Returns: The access token if it is defined in the user config store, or as an environment variable
 
         """
-        kodexa_config = get_config()
+        kodexa_config = get_config(profile)
         access_token = os.getenv('KODEXA_ACCESS_TOKEN')
-        return access_token if access_token is not None else kodexa_config['access_token']
+        return access_token if access_token is not None else \
+            kodexa_config[profile]['access_token'] if profile else kodexa_config['access_token']
 
     @staticmethod
-    def get_url() -> str:
+    def get_url(profile=None) -> str:
         """
         Returns the URL to use to access a Kodexa Platform
 
@@ -269,9 +273,9 @@ class KodexaPlatform:
         Returns: The URL if it is defined in the user config store, or as an environment variable
 
         """
-        kodexa_config = get_config()
+        kodexa_config = get_config(profile)
         env_url = os.getenv('KODEXA_URL', None)
-        return env_url if env_url is not None else kodexa_config['url']
+        return env_url if env_url is not None else kodexa_config[profile]['url'] if profile else kodexa_config['url']
 
     @staticmethod
     def set_access_token(access_token: str):
@@ -336,15 +340,19 @@ class KodexaPlatform:
         return [org_slug, slug, version]
 
     @classmethod
-    def login(cls, kodexa_url, username, password):
+    def login(cls, kodexa_url, username, password, profile=None):
         from requests.auth import HTTPBasicAuth
         obj_response = requests.get(f"{kodexa_url}/api/account/me/token",
                                     auth=HTTPBasicAuth(username, password),
                                     headers={"content-type": "application/json"})
         if obj_response.status_code == 200:
-            kodexa_config = get_config()
-            kodexa_config['url'] = kodexa_url
-            kodexa_config['access_token'] = obj_response.text
+            kodexa_config = get_config(profile)
+            if profile and profile in kodexa_config:
+                kodexa_config[profile]['url'] = kodexa_url
+                kodexa_config[profile]['access_token'] = obj_response.text
+            else:
+                kodexa_config['url'] = kodexa_url
+                kodexa_config['access_token'] = obj_response.text
             save_config(kodexa_config)
             print("Logged in")
         else:

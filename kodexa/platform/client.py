@@ -8,6 +8,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import glob
 import json
 import logging
@@ -31,7 +32,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
     Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
-    CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest
+    CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest, PageWorkspace, Workspace
 
 logger = logging.getLogger()
 
@@ -190,6 +191,28 @@ class ProjectResourceEndpoint(ClientEndpoint):
         if 'client' in df:
             df.drop(columns='client', axis=1)
         return df
+
+    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of resources
+        :param query:
+        :param sort:
+        :param filters:
+        :return:
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for resource in page_response.content:
+                yield resource
+            page += 1
 
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
 
@@ -388,6 +411,27 @@ class EntitiesEndpoint:
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
 
+    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of resources
+        :param query:
+        :param sort:
+        :param filters:
+        :return:
+        """
+        page_size = 5
+        page = 1
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for resource in page_response.content:
+                yield resource
+            page += 1
+
     def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
         url = f"/api/{self.get_type()}"
 
@@ -584,6 +628,14 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint"""
         return "project"
+
+
+class PageWorkspaceEndpoint(PageWorkspace, PageEndpoint):
+    """Represents a page workspace endpoints"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "workspace"
 
 
 class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
@@ -928,6 +980,30 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
         return ModelStoreEndpoint
 
 
+class WorkspaceEndpoint(EntityEndpoint, Workspace):
+    """Represents a workspace endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "workspaces"
+
+    def add_document_family(self, document_family: DocumentFamily):
+        url = f"/api/workspaces/{self.id}/documentFamilies"
+        response = self.client.post(url, body=document_family.to_dict())
+        process_response(response)
+
+    def remove_document_family(self, document_family: DocumentFamily):
+        url = f"/api/workspaces/{self.id}/documentFamilies/{document_family.id}"
+        response = self.client.delete(url)
+        process_response(response)
+
+    def list_document_families(self, page_size=10, page=1) -> PageDocumentFamilyEndpoint:
+        url = f"/api/workspaces/{self.id}/documentFamilies"
+        response = self.client.get(url, {"pageSize": page_size, "page": page})
+        process_response(response)
+        return PageDocumentFamilyEndpoint.parse_obj(response.json()).set_client(self.client)
+
+
 class ProjectEndpoint(EntityEndpoint, Project):
     """Represents a project endpoint"""
 
@@ -987,6 +1063,22 @@ class ProjectEndpoint(EntityEndpoint, Project):
         response = self.client.put(f"/api/projects/{self.id}/tags",
                                    body=[tag.dict(exclude={'client'}, by_alias=True) for tag in tags])
         return [ProjectTag.parse_obj(tag) for tag in response.json()]
+
+
+class WorkspacesEndpoint(EntitiesEndpoint):
+    """Represents a workspaces endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return f"workspaces"
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the instance class of the endpoint"""
+        return WorkspaceEndpoint
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the page class of the endpoint"""
+        return PageWorkspaceEndpoint
 
 
 class ProjectsEndpoint(EntitiesEndpoint):
@@ -1556,7 +1648,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
                 self.client)
             if mixin and mixin in updated_document_family.mixins:
                 return updated_document_family
-            if label and label in updated_document_family.labels:
+            if label and any(l.name == label for l in updated_document_family.labels):
                 return updated_document_family
 
             time.sleep(5)
@@ -1628,28 +1720,10 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
         """Replace the tags of the document family"""
-        feature_set = FeatureSet()
         if content_object is None:
             content_object = self.content_objects[-1]
-        feature_set.node_features = []
-        for tagged_node in document.select('//*[hasTag()]'):
-            node_feature = {
-                'nodeUuid': str(tagged_node.uuid),
-                'features': []
-            }
-
-            feature_set.node_features.append(node_feature)
-
-            # TODO this needs to be cleaned up
-            for feature in tagged_node.get_features():
-                if feature.feature_type == 'tag':
-                    feature_dict = feature.to_dict()
-                    feature_dict['featureType'] = feature.feature_type
-                    feature_dict['name'] = feature.name
-                    node_feature['features'].append(feature_dict)
-
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
-        self.client.put(url, body=feature_set.dict(by_alias=True))
+        self.client.put(url, body=document.get_feature_set().dict(by_alias=True))
 
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):
@@ -1852,7 +1926,7 @@ class DataStoreEndpoint(StoreEndpoint):
         data_object_response = self.client.get(url)
         return DataObjectEndpoint.parse_obj(data_object_response.json())
 
-    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=5000, query="*",
+    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=20, query="*",
                                       document_family: Optional[DocumentFamily] = None,
                                       parent_id: Optional[str] = None) -> PageDataObject:
         """
@@ -1887,6 +1961,31 @@ class DataStoreEndpoint(StoreEndpoint):
         data_object_page.content = [DataObjectEndpoint.parse_obj(data_object) for data_object in
                                     data_object_page.content]
         return data_object_page
+
+    def get_stream_data_objects_request(self, path: str, query="*", document_family: Optional[DocumentFamily] = None,
+                                        parent_id: Optional[str] = None):
+        """
+        Stream page request
+        :param path (str): The parent taxon (/ is root)
+        :param query (str): The query to limit results (Default *)
+        :param document_family (Optional[DocumentFamily): Optionally the document family to limit results to
+        :param parent_id (Optional[str]): Optionally the parent ID to limit results to
+        :return:
+        """
+        page_size = 20
+        page = 1
+
+        while True:
+            data_object_response = self.get_data_objects_page_request(self, path, page, page_size, query,
+                                                                      document_family, parent_id)
+            if not data_object_response.content:
+                break
+
+            yield data_object_response.content
+            for data_object in data_object_response.content:
+                yield data_object
+
+            page += 1
 
     def create_data_objects(self, data_objects: List[DataObject]) -> List[DataObjectEndpoint]:
         """
@@ -2014,10 +2113,10 @@ class DocumentStoreEndpoint(StoreEndpoint):
             A list of the contents of the store
         """
 
-        # TODO this needs to be cleaned up a bit
+        # TODO We need to remove this
         params = {
             'page': 1,
-            'pageSize': 1000,
+            'pageSize': 90,
             'query': '*'
         }
         get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
@@ -2030,7 +2129,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
     def download_document_families(self, output_dir: str):
         """Download all the document families in the store to the given directory"""
 
-        for document_family in self.query(page_size=9999).content:
+        for document_family in self.stream_query():
             export_bytes = document_family.export()
             with open(os.path.join(output_dir, document_family.id + ".dfm"), 'wb') as f:
                 f.write(export_bytes)
@@ -2092,7 +2191,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         return PageDocumentFamilyEndpoint.parse_obj(get_response.json()).set_client(self.client)
 
-    def stream_filter(self, filter_string: str = "", sort=None):
+    def stream_filter(self, filter_string: str = "", sort=None, limit=None):
         """
             Stream the filter for the document family
         :param query: the query to run
@@ -2207,27 +2306,16 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
     def download_implementation(self, download_path: Optional[str] = ""):
         """Download the implementation from the store"""
-        if self.get_metadata().atomic:
-            if download_path is None:
-                download_path = ""
-            if download_path != "":
-                os.makedirs(download_path, exist_ok=True)
-            response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/implementation")
-            from zipfile import ZipFile
-            from io import BytesIO
-            logger.info(f"Downloading implementation package to {download_path}, and extracting")
-            zipped_contents = ZipFile(BytesIO(response.content))
-            zipped_contents.extractall(download_path)
-        else:
-            for path in self.list_contents():
-                if path.startswith(self.IMPLEMENTATION_PREFIX):
-                    logger.info(f"Downloading implementation file {path}")
-                    file_path = os.path.join(download_path, path.replace(self.IMPLEMENTATION_PREFIX, ''))
-                    logger.info(f"Downloading model file {file_path}")
-                    Path(os.path.dirname(file_path)).mkdir(parents=True, exist_ok=True)
-
-                    with open(file_path, 'wb') as output_file:
-                        output_file.write(self.get_bytes(path))
+        if download_path is None:
+            download_path = ""
+        if download_path != "":
+            os.makedirs(download_path, exist_ok=True)
+        response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/implementation")
+        from zipfile import ZipFile
+        from io import BytesIO
+        logger.info(f"Downloading implementation package to {download_path}, and extracting")
+        zipped_contents = ZipFile(BytesIO(response.content))
+        zipped_contents.extractall(download_path)
 
     def upload_implementation(self, metadata):
         """Upload the implementation to the store"""
@@ -2281,55 +2369,12 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
     def upload_contents(self, metadata: ModelContentMetadata):
         """Upload the contents of the metadata to the store"""
+        results = []
+        if metadata.contents:
 
-        # First we are going to delete anything we have in the implementation
+            import zipfile
 
-        if metadata.atomic:
-            results = []
-            if metadata.contents:
-
-                import zipfile
-
-                with zipfile.ZipFile('implementation.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-
-                    ignore_files = []
-                    if metadata.ignored_contents:
-                        for ignore_path in metadata.ignored_contents:
-                            final_wildcard = os.path.join(metadata.base_dir,
-                                                          ignore_path) if metadata.base_dir else ignore_path
-                            for path_hit in glob.glob(final_wildcard, recursive=True):
-                                ignore_files.append(path_hit)
-
-                    for content_path in metadata.contents:
-                        final_wildcard = os.path.join(metadata.base_dir,
-                                                      content_path) if metadata.base_dir else content_path
-                        num_hits = 0
-
-                        for path_hit in glob.glob(final_wildcard, recursive=True):
-                            if path_hit in ignore_files:
-                                continue
-                            relative_path = path_hit.replace(metadata.base_dir + '/',
-                                                             '') if metadata.base_dir else path_hit
-
-                            # We will put the implementation in one place
-                            if Path(path_hit).is_file():
-                                zipf.write(path_hit, relative_path)
-                                num_hits += 1
-                if num_hits > 0:
-                    with open('implementation.zip', 'rb') as zip_content:
-                        self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
-                                         files={"implementation": zip_content})
-                    results.append(f"{num_hits} files packaged for {final_wildcard}")
-            if not metadata.keep_zip:
-                Path('implementation.zip').unlink()
-            return results
-        else:
-            for imp_file in self.list_contents():
-                if imp_file.startswith(self.IMPLEMENTATION_PREFIX):
-                    self.delete_by_path(imp_file)
-
-            results = []
-            if metadata.contents:
+            with zipfile.ZipFile('implementation.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
 
                 ignore_files = []
                 if metadata.ignored_contents:
@@ -2347,33 +2392,21 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                     for path_hit in glob.glob(final_wildcard, recursive=True):
                         if path_hit in ignore_files:
                             continue
-                        relative_path = path_hit.replace(metadata.base_dir + '/', '') if metadata.base_dir else path_hit
+                        relative_path = path_hit.replace(metadata.base_dir + '/',
+                                                         '') if metadata.base_dir else path_hit
 
                         # We will put the implementation in one place
-                        relative_path = self.IMPLEMENTATION_PREFIX + relative_path
                         if Path(path_hit).is_file():
-                            with open(path_hit, 'rb') as path_content:
-                                results.append(f"Uploading model file {path_hit}")
-                                self.upload_bytes(relative_path, path_content, replace=True)
-                                num_hits += 1
-                    if num_hits > 0:
-                        results.append(f"{num_hits} files uploaded for {final_wildcard}")
-            return results
-
-    def list_contents(self) -> List[str]:
-        """List the contents of the store"""
-        # TODO this needs to be cleaned up a bit
-        params = {
-            'page': 1,
-            'pageSize': 1000,
-            'query': '*'
-        }
-        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
-                                       params=params)
-        paths = []
-        for fam_dict in get_response.json()['content']:
-            paths.append(fam_dict['path'])
-        return paths
+                            zipf.write(path_hit, relative_path)
+                            num_hits += 1
+            if num_hits > 0:
+                with open('implementation.zip', 'rb') as zip_content:
+                    self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
+                                     files={"implementation": zip_content})
+                results.append(f"{num_hits} files packaged for {final_wildcard}")
+        if not metadata.keep_zip:
+            Path('implementation.zip').unlink()
+        return results
 
 
 class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -2483,6 +2516,13 @@ OBJECT_TYPES = {
         "endpoint": ProjectsEndpoint,
         "global": True
     },
+    "workspaces": {
+        "name": "workspace",
+        "plural": "workspaces",
+        "type": WorkspaceEndpoint,
+        "endpoint": WorkspacesEndpoint,
+        "global": True
+    },
     "projectTemplates": {
         "name": "projectTemplate",
         "plural": "projectTemplates",
@@ -2570,12 +2610,13 @@ class ExtractionEngineEndpoint:
 
 class KodexaClient:
 
-    def __init__(self, url=None, access_token=None):
+    def __init__(self, url=None, access_token=None, profile=None):
         from kodexa import KodexaPlatform
-        self.base_url = url if url is not None else KodexaPlatform.get_url()
-        self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token()
+        self.base_url = url if url is not None else KodexaPlatform.get_url(profile)
+        self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token(profile)
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
+        self.workspaces = WorkspacesEndpoint(self)
         self.users = UsersEndpoint(self)
         self.memberships = MembershipsEndpoint(self)
         self.executions = ExecutionsEndpoint(self)
@@ -2649,6 +2690,9 @@ class KodexaClient:
         headers = {"x-access-token": self.access_token}
         if files is None:
             headers["content-type"] = "application/json"
+        else:
+            headers["content-type"] = "multipart/form-data"
+
         response = requests.post(self.get_url(url), json=body, data=data, files=files, params=params,
                                  headers=headers)
         return process_response(response)
@@ -2659,6 +2703,7 @@ class KodexaClient:
             headers["content-type"] = "application/json"
         else:
             headers["content-type"] = "multipart/form-data"
+
         response = requests.put(self.get_url(url), json=body, data=data, files=files, params=params,
                                 headers=headers)
         return process_response(response)
@@ -2843,7 +2888,8 @@ class KodexaClient:
                 "dashboard": DashboardEndpoint,
                 "execution": ExecutionEndpoint,
                 "assistant": AssistantDefinitionEndpoint,
-                "exception": DataExceptionEndpoint
+                "exception": DataExceptionEndpoint,
+                "workspace": WorkspaceEndpoint,
             }
 
             if component_type in known_components:

@@ -14,7 +14,8 @@ import msgpack
 from addict import Dict
 
 from kodexa.model.base import KodexaBaseModel
-from kodexa.model.objects import ContentObject
+from kodexa.model.objects import ContentObject, FeatureSet
+import deepdiff
 
 
 class Ref:
@@ -50,7 +51,8 @@ class ContentException(Dict):
 
     def __init__(self, exception_type: str, message: str, severity: str = 'ERROR', tag: Optional[str] = None,
                  group_uuid: Optional[str] = None, tag_uuid: Optional[str] = None,
-                 exception_details: Optional[str] = None, node_uuid: Optional[str] = None, *args, **kwargs):
+                 exception_details: Optional[str] = None, node_uuid: Optional[str] = None, value: Optional[str] = None,
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tag = tag
         self.message = message
@@ -60,6 +62,7 @@ class ContentException(Dict):
         self.exception_type = exception_type
         self.node_uuid = node_uuid
         self.severity = severity
+        self.value = value
 
 
 class Tag(Dict):
@@ -1535,11 +1538,17 @@ class ContentNode(object):
 
             if not node:
                 if (traverse == traverse.ALL or traverse == traverse.PARENT) and self.get_parent().get_parent():
-                    # can now traverse content-areas.. can add traversal of pages if needed, but don't think the scenario exists.
-                    potential_next_node = \
-                        self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
-                    if potential_next_node:
-                        return potential_next_node
+                    try:
+                        potential_next_node = \
+                            self.get_parent().get_parent().get_children()[self.get_parent().index + 1].get_children()[0]
+                        if potential_next_node:
+                            return potential_next_node
+                    except:
+                        # traverse additional layer
+                        potential_next_node = self.get_parent().get_parent().get_parent().get_children()[
+                            self.get_parent().get_parent().index + 1].get_children()[0].get_children()[0]
+                        if potential_next_node:
+                            return potential_next_node
                 return node
 
             if compiled_node_type_re.match(node.node_type) and (not skip_virtual or not node.virtual):
@@ -1703,6 +1712,132 @@ class ContentClassification(object):
                                      selector=dict_val.get('selector'), confidence=dict_val.get('confidence'))
 
 
+class FeatureSetDiff:
+    """
+    A utility class that can be used to diff two feature sets
+    """
+
+    def __init__(self, first_feature_set: FeatureSet, second_feature_set: FeatureSet):
+        self.first_feature_map = self.parse_feature_set(first_feature_set)
+        self.second_feature_map = self.parse_feature_set(second_feature_set)
+        self._differences = deepdiff.DeepDiff(self.first_feature_map, self.second_feature_map,
+                                              exclude_obj_callback=self.exclude_callback).to_dict()
+        self._changed_nodes = self.get_changed_nodes()
+
+    def get_differences(self):
+        """
+        :return: Data dictionaries that contains the differences of two feature sets
+        """
+        if 'type_changes' in self._differences:
+            self._differences.pop('type_changes')
+
+        return self._differences
+
+    def get_changed_nodes(self):
+        """
+        :return: Data dictionary of added and removed nodes
+        """
+        return self._changed_nodes
+
+    def get_exclude_paths(self):
+        """
+        :return: List of paths to exclude
+        """
+        return ['shape', 'group_uuid', 'uuid', 'parent_group_uuid', 'single']
+
+    def exclude_callback(self, path, key):
+        """
+        Checks if the key is to be exluceded from the diff
+        :param path: contains the values of that key
+        :param key: The key of the data dictionary to compare
+        :return: boolean
+        """
+        if any(re.search(exclude_key, key) for exclude_key in self.get_exclude_paths()):
+            return True
+        else:
+            return False
+
+    def parse_feature_set(self, feature_set: FeatureSet):
+        """
+        :param feature_set: The feature set to be parsed
+        :return: Dictionary of feature with the key as the nodeUuid
+        """
+        return {feature.get('nodeUuid'): feature for feature in feature_set.node_features}
+
+    def parsed_values_changed(self):
+        for key, value in self._differences.get('values_changed').items():
+            # Check if the old_value is stil in the second_feature_map. If it is remove the key
+            if key in self.second_feature_map.node_features:
+                self._differences.get('values_changed').remove(key)
+
+    def is_equal(self) -> bool:
+        """
+        Checks if the two feature set is equal to each other
+        :return: This returns a bool
+        """
+        return self._differences == {}
+
+    def get_changed_nodes(self):
+        """
+        :return: A list of nodes that were changed
+        """
+        if self.is_equal():
+            return []
+
+        # Check for new nodes added in the second_feature_map
+        new_added_nodes = []
+
+        # Checked for removed nodes in the first_feature_map
+        removed_nodes = []
+
+        # Checked for modified nodes
+        modified_nodes = []
+        for key, value in self._differences.get('values_changed').items():
+            modified_nodes.append(self.parsed_node_uuid(key))
+
+        # Merge unique nodeUuid of first_feature_map and second_feature_map
+        merged_node_uuids = set(self.first_feature_map.keys()).union(set(self.second_feature_map.keys()))
+        for node_uuid in merged_node_uuids:
+            if node_uuid not in self.first_feature_map:
+                new_added_nodes.append(node_uuid)
+            elif node_uuid not in self.second_feature_map:
+                removed_nodes.append(node_uuid)
+
+        return {
+            'new_added_nodes': new_added_nodes,
+            'removed_nodes': removed_nodes,
+            'existing_modified_nodes': modified_nodes
+        }
+
+    def get_difference_count(self):
+        """
+        :return: The total number of differences between the feature sets
+        """
+        return len(self._differences().keys())
+
+    def parsed_item_added(self):
+        item_added: Dict = self._differences.get('iterable_item_added')
+        if item_added:
+            return {}
+
+        for key, value in item_added.items():
+            node = self.parsed_node_uuid(key)
+            if node in self._changed_nodes['new_added_nodes']:
+                self._differences['iterable_item_added'][key]['details'] = f'Node: {node} was added'
+                continue
+
+            # if node in
+        return self.get_difference_count()
+
+    def parsed_node_uuid(self, key):
+        """
+        :param key: Key of data dictionary
+        :return: node uuid from the key
+        """
+        node = key.split("['")[1].split("']")[0]
+        return node
+
+
 class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
 
@@ -1807,6 +1942,9 @@ class Document(object):
 
     def add_model_insight(self, model_insight: ModelInsight):
         self._persistence_layer.add_model_insight(model_insight)
+
+    def clear_model_insights(self):
+        self._persistence_layer.clear_model_insights()
 
     def get_model_insights(self) -> List[ModelInsight]:
         return self._persistence_layer.get_model_insights()
@@ -2303,6 +2441,40 @@ class Document(object):
 
         """
         return self.labels
+
+    def get_feature_set(self) -> FeatureSet:
+        """
+        Build a feature set of all the tagged nodes
+
+        :return:
+        """
+        feature_set = FeatureSet()
+        feature_set.node_features = []
+        for tagged_node in self.get_all_tagged_nodes():
+            node_feature = {
+                'nodeUuid': str(tagged_node.uuid),
+                'features': []
+            }
+
+            feature_set.node_features.append(node_feature)
+
+            # TODO this needs to be cleaned up
+            for feature in tagged_node.get_features():
+                if feature.feature_type == 'tag':
+                    feature_dict = feature.to_dict()
+                    feature_dict['featureType'] = feature.feature_type
+                    feature_dict['name'] = feature.name
+                    node_feature['features'].append(feature_dict)
+
+        return feature_set
+
+    def get_all_tagged_nodes(self) -> List[ContentNode]:
+        """
+        Get all the tagged nodes in the document
+
+        :return:
+        """
+        return self._persistence_layer.get_all_tagged_nodes()
 
 
 class TagInstance:

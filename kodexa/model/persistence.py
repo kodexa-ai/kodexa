@@ -578,6 +578,19 @@ class SqliteDocumentPersistence(object):
         for exception in exceptions:
             self.add_exception(exception)
 
+    def clear_model_insights(self):
+        self.cursor.execute("delete from model_insights")
+
+    def get_all_tagged_nodes(self):
+        content_nodes = []
+        query = f"select cn_id from ft where f_type in (select id from f_type where name like 'tag:%')"
+        for content_node_ids in self.cursor.execute(
+                query).fetchall():
+            content_nodes.append(self.get_node(content_node_ids[0]))
+
+        return content_nodes
+
+
 
 class SimpleObjectCache(object):
     """
@@ -644,6 +657,9 @@ class PersistenceManager(object):
     def add_model_insight(self, model_insight: ModelInsight):
         self._underlying_persistence.add_model_insight(model_insight)
 
+    def clear_model_insights(self):
+        self._underlying_persistence.clear_model_insights()
+
     def get_model_insights(self) -> List[ModelInsight]:
         return self._underlying_persistence.get_model_insights()
 
@@ -662,6 +678,10 @@ class PersistenceManager(object):
     def get_tagged_nodes(self, tag, tag_uuid=None):
         self.flush_cache()
         return self._underlying_persistence.get_tagged_nodes(tag, tag_uuid)
+
+    def get_all_tagged_nodes(self):
+        self.flush_cache()
+        return self._underlying_persistence.get_all_tagged_nodes()
 
     def initialize(self):
         self._underlying_persistence.initialize()

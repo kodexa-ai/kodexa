@@ -1350,6 +1350,7 @@ class Option(KodexaBaseModel):
     support_article: Optional[str] = Field(None, alias='supportArticle')
     overview_markdown: Optional[str] = Field(None, alias='overviewMarkdown')
     show_if: Optional[str] = Field(None, alias='showIf')
+    show_on_popup: Optional[bool] = Field(None, alias='showOnPopup')
     possible_values: Optional[List[PossibleValue]] = Field(None, alias='possibleValues')
     properties: Optional[Dict[str, Any]] = None
 
@@ -1649,6 +1650,43 @@ class FeatureSet(KodexaBaseModel):
     node_features: Optional[List[NodeFeatures]] = Field(None, alias='nodeFeatures')
 
 
+class DocumentViewState(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the document view')
+    index: Optional[int] = None
+    document_family_id: Optional[str] = Field(None, alias='documentFamilyId')
+    properties: Optional[Dict[str, Any]] = None
+
+
+class DataFormState(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the document view')
+    index: Optional[int] = None
+    properties: Optional[Dict[str, Any]] = None
+
+    data_form_ref: Optional[str] = Field(None, alias='dataFormRef')
+    document_family_ids: Optional[List[str]] = Field(None, alias='documentFamilyIds')
+    data_object_ids: Optional[List[str]] = Field(None, alias='dataObjectIds')
+
+
+class WorkspaceStorage(KodexaBaseModel):
+    document_view_states: Optional[List[DocumentViewState]] = Field(None, alias='documentViewStates')
+    data_form_states: Optional[List[DataFormState]] = Field(None, alias='dataFormStates')
+
+
+class Workspace(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the workspace')
+    uuid: Optional[str] = None
+    created_on: Optional[datetime] = Field(None, alias='createdOn')
+    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    project: Optional[Project] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    workspace_storage: Optional[WorkspaceStorage] = Field(None, alias='workspaceStorage')
+
+class ProjectWorkspace(KodexaBaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    workspace_storage: Optional[WorkspaceStorage] = Field(None, alias='workspaceStorage')
+
 class DataAttribute(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
@@ -1827,6 +1865,19 @@ class PageProject(KodexaBaseModel):
     total_elements: Optional[int] = Field(None, alias='totalElements')
     size: Optional[int] = None
     content: Optional[List[Project]] = None
+    number: Optional[int] = None
+    pageable: Optional[PageableObject] = None
+    number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class PageWorkspace(KodexaBaseModel):
+    total_pages: Optional[int] = Field(None, alias='totalPages')
+    total_elements: Optional[int] = Field(None, alias='totalElements')
+    size: Optional[int] = None
+    content: Optional[List[Workspace]] = None
     number: Optional[int] = None
     pageable: Optional[PageableObject] = None
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
@@ -2940,6 +2991,10 @@ class ProjectTemplate(ExtensionPackProvided):
     dashboards: Optional[List[ProjectDashboard]] = Field(
         None,
         description='The dashboards that will be created with the project template',
+    )
+    workspaces: Optional[List[ProjectWorkspace]] = Field(
+        None,
+        description='The workspaces that will be created with the project template',
     )
     data_forms: Optional[List[ProjectDataForm]] = Field(
         None,
