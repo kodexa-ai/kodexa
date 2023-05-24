@@ -2690,8 +2690,6 @@ class KodexaClient:
         headers = {"x-access-token": self.access_token}
         if files is None:
             headers["content-type"] = "application/json"
-        else:
-            headers["content-type"] = "multipart/form-data"
 
         response = requests.post(self.get_url(url), json=body, data=data, files=files, params=params,
                                  headers=headers)
@@ -2701,8 +2699,6 @@ class KodexaClient:
         headers = {"x-access-token": self.access_token}
         if files is None:
             headers["content-type"] = "application/json"
-        else:
-            headers["content-type"] = "multipart/form-data"
 
         response = requests.put(self.get_url(url), json=body, data=data, files=files, params=params,
                                 headers=headers)
