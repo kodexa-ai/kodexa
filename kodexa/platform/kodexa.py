@@ -709,26 +709,6 @@ class RemoteStep:
         }
 
 
-class ExtensionHelper:
-    """ """
-
-    @staticmethod
-    def load_metadata(path) -> dict:
-
-        if os.path.exists(os.path.join(path, 'dharma.json')):
-            dharma_metadata_file = open(os.path.join(path, 'dharma.json'))
-            dharma_metadata = json.loads(dharma_metadata_file.read())
-        elif os.path.exists(os.path.join(path, 'dharma.yml')):
-            dharma_metadata_file = open(os.path.join(path, 'dharma.yml'))
-            dharma_metadata = yaml.safe_load(dharma_metadata_file.read())
-        elif os.path.exists(os.path.join(path, 'kodexa.yml')):
-            dharma_metadata_file = open(os.path.join(path, 'kodexa.yml'))
-            dharma_metadata = yaml.safe_load(dharma_metadata_file.read())
-        else:
-            raise Exception("Unable to find a kodexa.yml file describing your extension")
-        return dharma_metadata
-
-
 class EventHelper:
 
     def __init__(self, event: ExecutionEvent):

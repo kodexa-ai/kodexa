@@ -2367,43 +2367,48 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(url)
         return PageModelTraining.parse_obj(response.json())
 
-    def upload_contents(self, metadata: ModelContentMetadata):
+    @staticmethod
+    def build_implementation_zip(metadata: ModelContentMetadata):
+        import zipfile
+        num_hits = 0
+
+        with zipfile.ZipFile('implementation.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
+
+            ignore_files = []
+            if metadata.ignored_contents:
+                for ignore_path in metadata.ignored_contents:
+                    final_wildcard = os.path.join(metadata.base_dir,
+                                                  ignore_path) if metadata.base_dir else ignore_path
+                    for path_hit in glob.glob(final_wildcard, recursive=True):
+                        ignore_files.append(path_hit)
+
+            for content_path in metadata.contents:
+                final_wildcard = os.path.join(metadata.base_dir,
+                                              content_path) if metadata.base_dir else content_path
+
+                for path_hit in glob.glob(final_wildcard, recursive=True):
+                    if path_hit in ignore_files:
+                        continue
+                    relative_path = path_hit.replace(metadata.base_dir + '/',
+                                                     '') if metadata.base_dir else path_hit
+
+                    # We will put the implementation in one place
+                    if Path(path_hit).is_file():
+                        zipf.write(path_hit, relative_path)
+                        num_hits += 1
+
+        return num_hits
+
+    def upload_contents(self, metadata: ModelContentMetadata, dry_run=False):
         """Upload the contents of the metadata to the store"""
         results = []
         if metadata.contents:
-
-            import zipfile
-
-            with zipfile.ZipFile('implementation.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-
-                ignore_files = []
-                if metadata.ignored_contents:
-                    for ignore_path in metadata.ignored_contents:
-                        final_wildcard = os.path.join(metadata.base_dir,
-                                                      ignore_path) if metadata.base_dir else ignore_path
-                        for path_hit in glob.glob(final_wildcard, recursive=True):
-                            ignore_files.append(path_hit)
-
-                for content_path in metadata.contents:
-                    final_wildcard = os.path.join(metadata.base_dir,
-                                                  content_path) if metadata.base_dir else content_path
-                    num_hits = 0
-
-                    for path_hit in glob.glob(final_wildcard, recursive=True):
-                        if path_hit in ignore_files:
-                            continue
-                        relative_path = path_hit.replace(metadata.base_dir + '/',
-                                                         '') if metadata.base_dir else path_hit
-
-                        # We will put the implementation in one place
-                        if Path(path_hit).is_file():
-                            zipf.write(path_hit, relative_path)
-                            num_hits += 1
-            if num_hits > 0:
+            num_hits = self.build_implementation_zip(metadata)
+            if num_hits > 0 and not dry_run:
                 with open('implementation.zip', 'rb') as zip_content:
                     self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
                                      files={"implementation": zip_content})
-                results.append(f"{num_hits} files packaged for {final_wildcard}")
+                results.append(f"{num_hits} files packaged and deployed to {self.ref}")
         if not metadata.keep_zip:
             Path('implementation.zip').unlink()
         return results
