@@ -1682,10 +1682,37 @@ class Workspace(KodexaBaseModel):
     description: Optional[str] = None
     workspace_storage: Optional[WorkspaceStorage] = Field(None, alias='workspaceStorage')
 
+
 class ProjectWorkspace(KodexaBaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     workspace_storage: Optional[WorkspaceStorage] = Field(None, alias='workspaceStorage')
+
+
+class Channel(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the channel')
+    uuid: Optional[str] = None
+    created_on: Optional[datetime] = Field(None, alias='createdOn')
+    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    workspace: Optional[Workspace] = None
+
+
+class MessageBlock(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the message block')
+    type: Optional[str] = None
+    properties: Optional[Dict[str, Any]] = None
+    channel: Optional[Channel] = None
+    children: Optional[List[MessageBlock]] = Field(None, alias='messageBlock')
+
+
+class Message(KodexaBaseModel):
+    id: Optional[str] = Field(None, description='The ID of the message')
+    uuid: Optional[str] = None
+    created_on: Optional[datetime] = Field(None, alias='createdOn')
+    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    channel: Optional[Channel] = None
+    message_blocks: Optional[MessageBlock] = Field(None, alias='messageBlock')
+
 
 class DataAttribute(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
@@ -1775,7 +1802,7 @@ class PageTeam(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Team]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1788,7 +1815,7 @@ class PageModelTraining(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[ModelTraining]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1801,7 +1828,7 @@ class PageStoreStatistics(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[StoreStatistics]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1814,7 +1841,7 @@ class PageNote(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Note]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1827,7 +1854,7 @@ class PageDataAttribute(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[DataAttribute]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1840,7 +1867,7 @@ class PageSession(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Session]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1853,7 +1880,7 @@ class PageRole(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Role]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1866,7 +1893,7 @@ class PageProject(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Project]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1879,12 +1906,35 @@ class PageWorkspace(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Workspace]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
     empty: Optional[bool] = None
 
+class PageMessage(KodexaBaseModel):
+    total_pages: Optional[int] = Field(None, alias='totalPages')
+    total_elements: Optional[int] = Field(None, alias='totalElements')
+    size: Optional[int] = None
+    content: Optional[List[Message]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+class PageChannel(KodexaBaseModel):
+    total_pages: Optional[int] = Field(None, alias='totalPages')
+    total_elements: Optional[int] = Field(None, alias='totalElements')
+    size: Optional[int] = None
+    content: Optional[List[Channel]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
 
 class PageOrganization(KodexaBaseModel):
     total_pages: Optional[int] = Field(None, alias='totalPages')
@@ -1892,7 +1942,7 @@ class PageOrganization(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Organization]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1905,7 +1955,7 @@ class PageMembership(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Membership]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -1918,7 +1968,7 @@ class PageExecutionLogEntry(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[ExecutionLogEntry]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2024,7 +2074,7 @@ class PageUser(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[User]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2099,7 +2149,7 @@ class PageExecution(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Execution]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2395,7 +2445,7 @@ class PageTaxonomy(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Taxonomy]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2408,7 +2458,7 @@ class PageStore(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Store]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2421,7 +2471,7 @@ class PageDocumentFamily(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[DocumentFamily]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2522,7 +2572,7 @@ class PageDataObject(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[DataObject]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2554,7 +2604,7 @@ class PageAuditEvent(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[AuditEvent]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2567,7 +2617,7 @@ class PageRuleSet(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[RuleSet]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2580,7 +2630,7 @@ class PageProjectTemplate(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[ProjectTemplate]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2593,7 +2643,7 @@ class PagePipeline(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Pipeline]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2606,7 +2656,7 @@ class PageModelRuntime(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[ModelRuntime]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2636,7 +2686,7 @@ class PageSlugBasedMetadata(KodexaBaseModel):
         ]
     ] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2649,7 +2699,7 @@ class PageExtensionPack(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[ExtensionPack]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2662,7 +2712,7 @@ class PagePlatformEvent(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[PlatformEvent]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2675,7 +2725,7 @@ class PageDataException(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[DataException]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2688,7 +2738,7 @@ class PageDataForm(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[DataForm]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2701,7 +2751,7 @@ class PageDashboard(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Dashboard]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2714,7 +2764,7 @@ class PageCredentialDefinition(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[CredentialDefinition]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2727,7 +2777,7 @@ class PageAssistantDefinition(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[AssistantDefinition]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None
@@ -2740,7 +2790,7 @@ class PageAction(KodexaBaseModel):
     size: Optional[int] = None
     content: Optional[List[Action]] = None
     number: Optional[int] = None
-    pageable: Optional[PageableObject] = None
+
     number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
     first: Optional[bool] = None
     last: Optional[bool] = None

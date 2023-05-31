@@ -32,7 +32,8 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
     Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
-    CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest, PageWorkspace, Workspace
+    CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest, PageWorkspace, Workspace, PageChannel, \
+    PageMessage, Message
 
 logger = logging.getLogger()
 
@@ -638,6 +639,22 @@ class PageWorkspaceEndpoint(PageWorkspace, PageEndpoint):
         return "workspace"
 
 
+class PageChannelEndpoint(PageChannel, PageEndpoint):
+    """Represents a page channel endpoints"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "channel"
+
+
+class PageMessageEndpoint(PageMessage, PageEndpoint):
+    """Represents a page message endpoints"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "message"
+
+
 class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
     pass
 
@@ -978,6 +995,22 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         """Get the instance class of the project model stores endpoint"""
         return ModelStoreEndpoint
+
+
+class ChannelEndpoint(EntityEndpoint, Workspace):
+    """Represents a channel endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "channels"
+
+
+class MessageEndpoint(EntityEndpoint, Message):
+    """Represents a message endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "messages"
 
 
 class WorkspaceEndpoint(EntityEndpoint, Workspace):
@@ -1801,7 +1834,7 @@ class DataStoreEndpoint(StoreEndpoint):
     """Represents a data store endpoint"""
 
     @property
-    def exceptions(self) -> ProjectDocumentStoresEndpoint:
+    def exceptions(self) -> DataStoreExceptionsEndpoint:
         """Get the document stores endpoint of the project"""
         return DataStoreExceptionsEndpoint(self, self.client)
 
