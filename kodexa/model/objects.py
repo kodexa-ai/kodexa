@@ -1680,6 +1680,7 @@ class Workspace(KodexaBaseModel):
     project: Optional[Project] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    channel: Optional[Channel] = None
     workspace_storage: Optional[WorkspaceStorage] = Field(None, alias='workspaceStorage')
 
 

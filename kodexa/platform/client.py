@@ -997,7 +997,7 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
         return ModelStoreEndpoint
 
 
-class ChannelEndpoint(EntityEndpoint, Workspace):
+class ChannelEndpoint(EntityEndpoint, Channel):
     """Represents a channel endpoint"""
 
     def get_type(self) -> str:
