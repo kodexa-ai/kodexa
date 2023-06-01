@@ -33,7 +33,7 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
     Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
     CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest, PageWorkspace, Workspace, PageChannel, \
-    PageMessage, Message, Channel
+    PageMessage, Message, Channel, PageDashboard
 
 logger = logging.getLogger()
 
@@ -675,6 +675,14 @@ class PageDataFormEndpoint(PageDataForm, PageEndpoint):
         return "dataForm"
 
 
+class PageDashboardEndpoint(PageDashboard, PageEndpoint):
+    """Represents a page data form endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "dashboard"
+
+
 class PageDataExceptionEndpoint(PageDataException, PageEndpoint):
     """Represents a page of data exceptions endpoint"""
 
@@ -1289,6 +1297,17 @@ class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
 
     def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
         return DataFormEndpoint
+
+
+class DashboardsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    def get_type(self) -> str:
+        return "dashboards"
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        return PageDashboardEndpoint
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        return DashboardEndpoint
 
 
 class AssistantDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -2499,6 +2518,12 @@ OBJECT_TYPES = {
         "plural": "extensionPacks",
         "type": ExtensionPackEndpoint,
         "endpoint": ExtensionPacksEndpoint
+    },
+    "dashboards": {
+        "name": "dashboard",
+        "plural": "dashboards",
+        "type": DashboardEndpoint,
+        "endpoint": DashboardsEndpoint
     },
     "dataForms": {
         "name": "dataForm",
