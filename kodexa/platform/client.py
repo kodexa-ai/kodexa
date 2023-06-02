@@ -1962,7 +1962,7 @@ class DataStoreEndpoint(StoreEndpoint):
         rows = rows + row_response.content
         total_pages = row_response.total_pages
 
-        for page in range(2, total_pages):
+        for page in range(2, total_pages + 1):
             row_response = self.get_data_objects_page_request(path, page, query=query, document_family=document_family,
                                                               parent_id=parent_id)
             rows = rows + row_response.content
