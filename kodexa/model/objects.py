@@ -2951,7 +2951,7 @@ class CredentialDefinition(ExtensionPackProvided):
 
 class Dashboard(ExtensionPackProvided):
     widgets: Optional[List[DashboardWidget]] = None
-    single_widget: Optional[DashboardWidget] = None
+    single_widget: Optional[DashboardWidget] = Field(None, alias='singleWidget')
 
 
 class DataForm(ExtensionPackProvided):
