@@ -25,7 +25,7 @@ from kodexa.model import Document, ExtensionPack
 from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, CredentialDefinition, \
     ExecutionEvent, \
     ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate, Membership, \
-    DataForm
+    DataForm, DocumentFamilyEvent, ChannelEvent, DataObjectEvent
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
 
@@ -722,6 +722,12 @@ class EventHelper:
             return ContentEvent(**event_dict)
         if event_dict['type'] == 'scheduled':
             return ScheduledEvent(**event_dict)
+        if event_dict['type'] == 'channel':
+            return ChannelEvent(**event_dict)
+        if event_dict['type'] == 'documentFamily':
+            return DocumentFamilyEvent(**event_dict)
+        if event_dict['type'] == 'dataObject':
+            return DataObjectEvent(**event_dict)
 
         raise f"Unknown event type {event_dict}"
 

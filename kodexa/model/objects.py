@@ -1913,6 +1913,7 @@ class PageWorkspace(KodexaBaseModel):
     last: Optional[bool] = None
     empty: Optional[bool] = None
 
+
 class PageMessage(KodexaBaseModel):
     total_pages: Optional[int] = Field(None, alias='totalPages')
     total_elements: Optional[int] = Field(None, alias='totalElements')
@@ -1925,6 +1926,7 @@ class PageMessage(KodexaBaseModel):
     last: Optional[bool] = None
     empty: Optional[bool] = None
 
+
 class PageChannel(KodexaBaseModel):
     total_pages: Optional[int] = Field(None, alias='totalPages')
     total_elements: Optional[int] = Field(None, alias='totalElements')
@@ -1936,6 +1938,7 @@ class PageChannel(KodexaBaseModel):
     first: Optional[bool] = None
     last: Optional[bool] = None
     empty: Optional[bool] = None
+
 
 class PageOrganization(KodexaBaseModel):
     total_pages: Optional[int] = Field(None, alias='totalPages')
@@ -2416,6 +2419,15 @@ class BaseEvent(KodexaBaseModel):
     ]
 
 
+class MessageEvent(KodexaBaseModel):
+    message: Optional[Message] = None
+
+
+class ChannelEvent(KodexaBaseModel):
+    channel: Optional[Channel] = None
+    message_events: Optional[List[MessageEvent]] = Field(None, alias='messageEvents')
+
+
 class ExecutionEvent(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
@@ -2426,6 +2438,7 @@ class ExecutionEvent(KodexaBaseModel):
     execution: Optional[Execution] = None
     store_ref: Optional[str] = Field(None, alias='storeRef')
     document_family_id: Optional[str] = Field(None, alias='documentFamilyId')
+    data_object_id: Optional[str] = Field(None, alias='dataObjectId')
     session_id: str = Field(..., alias='sessionId')
     token: str
     pipeline: Optional[ExecutionPipeline] = None
