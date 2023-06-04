@@ -1655,6 +1655,8 @@ class DocumentViewState(KodexaBaseModel):
     index: Optional[int] = None
     document_family_id: Optional[str] = Field(None, alias='documentFamilyId')
     properties: Optional[Dict[str, Any]] = None
+    current_page: Optional[int] = Field(None, alias='currentPage')
+    selected_node_ids: Optional[List[str]] = Field(None, alias='selectedNodeIds')
 
 
 class DataFormState(KodexaBaseModel):
@@ -1670,6 +1672,7 @@ class DataFormState(KodexaBaseModel):
 class WorkspaceStorage(KodexaBaseModel):
     document_view_states: Optional[List[DocumentViewState]] = Field(None, alias='documentViewStates')
     data_form_states: Optional[List[DataFormState]] = Field(None, alias='dataFormStates')
+    current_view_id: Optional[str] = Field(None, alias='currentViewId')
 
 
 class Workspace(KodexaBaseModel):
@@ -1706,6 +1709,11 @@ class MessageBlock(KodexaBaseModel):
     children: Optional[List[MessageBlock]] = Field(None, alias='messageBlock')
 
 
+class MessageFeedback(KodexaBaseModel):
+    user_id: Optional[str] = Field(None, alias='userId')
+    options: Optional[Dict[str, Any]] = None
+
+
 class Message(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the message')
     uuid: Optional[str] = None
@@ -1713,6 +1721,9 @@ class Message(KodexaBaseModel):
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     channel: Optional[Channel] = None
     message_blocks: Optional[MessageBlock] = Field(None, alias='messageBlock')
+    message_type: Optional[str] = Field(None, alias='messageType')
+    content: Optional[str] = None
+    message_feedback: Optional[MessageFeedback] = Field(None, alias='messageFeedback')
 
 
 class DataAttribute(KodexaBaseModel):
