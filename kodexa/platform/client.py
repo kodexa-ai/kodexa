@@ -1044,6 +1044,12 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
         process_response(response)
         return PageDocumentFamilyEndpoint.parse_obj(response.json()).set_client(self.client)
 
+    def get_channel(self):
+        if self.channel is not None:
+            return ChannelEndpoint.parse_obj(self.channel).set_client(self.client)
+        else:
+            raise ValueError("Workspace has no channel")
+
 
 class ProjectEndpoint(EntityEndpoint, Project):
     """Represents a project endpoint"""
