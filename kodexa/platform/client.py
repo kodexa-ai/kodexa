@@ -972,7 +972,7 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         new_message = MessageEndpoint().set_client(self.client)
         new_message.channel = self
         new_message.content = content
-        new_message.type = "TEXT"
+        new_message.message_type = "TEXT"
         return new_message.create()
 
 
