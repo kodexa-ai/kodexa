@@ -49,60 +49,6 @@ class Notifier:
         print("Done")
 
 
-# Define the columns that we want for different component types when we
-# are printing the listing of them
-
-DEFAULT_COLUMNS = {
-    'extensionPacks': [
-        'ref',
-        'name',
-        'description',
-        'type',
-        'status'
-    ],
-    'projects': [
-        'id',
-        'organization.name',
-        'name',
-        'description'
-    ],
-    'assistants': [
-        'ref',
-        'name',
-        'description',
-        'template'
-    ],
-    'executions': [
-        'id',
-        'startDate',
-        'endDate',
-        'status',
-        'assistant.name',
-        'documentFamily.path'
-    ],
-    'memberships': [
-        'organization.slug',
-        'organization.name'
-    ],
-
-    'stores': [
-        'ref',
-        'name',
-        'description',
-        'storeType',
-        'storePurpose',
-        'template'
-    ],
-    'default': [
-        'ref',
-        'name',
-        'description',
-        'type',
-        'template'
-    ]
-}
-
-
 #
 # Declare all the endpoints that we will have
 #

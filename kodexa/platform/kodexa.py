@@ -74,57 +74,6 @@ def save_config(config_obj):
     with open(path, 'w') as outfile:
         json.dump(config_obj, outfile)
 
-
-DEFAULT_COLUMNS = {
-    'extensionPacks': [
-        'ref',
-        'name',
-        'description',
-        'type',
-        'status'
-    ],
-    'projects': [
-        'id',
-        'organization.name',
-        'name',
-        'description'
-    ],
-    'assistants': [
-        'ref',
-        'name',
-        'description',
-        'template'
-    ],
-    'executions': [
-        'id',
-        'startDate',
-        'endDate',
-        'status',
-        'assistant.name',
-        'documentFamily.path'
-    ],
-    'memberships': [
-        'organization.slug',
-        'organization.name'
-    ],
-
-    'stores': [
-        'ref',
-        'name',
-        'description',
-        'storeType',
-        'storePurpose',
-        'template'
-    ],
-    'default': [
-        'ref',
-        'name',
-        'description',
-        'type',
-        'template'
-    ]
-}
-
 OBJECT_TYPES = {
     "extensionPacks": {
         "name": "extension pack",
