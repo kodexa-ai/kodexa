@@ -28,10 +28,10 @@ from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrgan
     PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
     AssistantDefinition, Action, ModelRuntime, CredentialDefinition, Execution, PageAssistantDefinition, \
     PageCredentialDefinition, \
-    PageProjectTemplate, PageUser, User, FeatureSet, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
+    PageProjectTemplate, PageUser, User, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
     PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
     PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
-    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, Option, \
+    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, \
     CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest, PageWorkspace, Workspace, PageChannel, \
     PageMessage, Message, Channel, PageDashboard
 
@@ -737,6 +737,7 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             raise Exception("Can't create as it already exists")
         url = f"/api/{self.get_type()}/{self.org_slug}"
         self.client.post(url, self.to_dict())
+        return self
 
     def update(self):
         """Update the component instance"""
@@ -745,6 +746,7 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
         if not exists:
             raise Exception("Can't update as it doesn't exist?")
         self.client.put(url, self.to_dict())
+        return self
 
     def delete(self):
         """Delete the component instance"""
@@ -951,6 +953,14 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
         return ModelStoreEndpoint
 
 
+class MessageEndpoint(EntityEndpoint, Message):
+    """Represents a message endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return "messages"
+
+
 class ChannelEndpoint(EntityEndpoint, Channel):
     """Represents a channel endpoint"""
 
@@ -958,13 +968,12 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         """Get the type of the endpoint"""
         return "channels"
 
-
-class MessageEndpoint(EntityEndpoint, Message):
-    """Represents a message endpoint"""
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint"""
-        return "messages"
+    def send_text_message(self, content: str) -> MessageEndpoint:
+        new_message = MessageEndpoint().set_client(self.client)
+        new_message.channel = self
+        new_message.content = content
+        new_message.type = "TEXT"
+        return new_message.create()
 
 
 class WorkspaceEndpoint(EntityEndpoint, Workspace):
