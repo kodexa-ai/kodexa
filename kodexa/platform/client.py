@@ -311,10 +311,9 @@ class EntityEndpoint(BaseEntity, ClientEndpoint):
         Create the entity
         :return:
         """
-        url = f"/api/{self.get_type()}"
-        exists = self.client.exists(url)
-        if exists:
+        if self.id is not None:
             raise Exception("Can't create as it already exists")
+        
         url = f"/api/{self.get_type()}"
         self.client.post(url, self.to_dict())
 

@@ -100,7 +100,8 @@ class Tag(Dict):
         """A note that can be associated with the tag"""
         self.status: Optional[str] = status
         """The status of the tag, this can be passed to an attribute status during extraction"""
-
+        self.owner_uri: Optional[str] = None
+        """The URI of the owner (ie. model://kodexa/narrative:1.0.0 or user://pdodds)"""
         # Pull the cell index from the data to the tag if we have it in the data
         if self.cell_index is None:
             if data and 'cell_index' in data:
