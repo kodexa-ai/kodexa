@@ -313,7 +313,7 @@ class EntityEndpoint(BaseEntity, ClientEndpoint):
         """
         if self.id is not None:
             raise Exception("Can't create as it already exists")
-        
+
         url = f"/api/{self.get_type()}"
         self.client.post(url, self.to_dict())
 
@@ -969,7 +969,7 @@ class ChannelEndpoint(EntityEndpoint, Channel):
 
     def send_text_message(self, content: str) -> MessageEndpoint:
         new_message = MessageEndpoint().set_client(self.client)
-        new_message.channel = self
+        new_message.channel = self.detach()
         new_message.content = content
         new_message.message_type = "TEXT"
         return new_message.create()
