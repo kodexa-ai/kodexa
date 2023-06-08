@@ -1066,6 +1066,22 @@ class ProjectEndpoint(EntityEndpoint, Project):
         return [ProjectTag.parse_obj(tag) for tag in response.json()]
 
 
+class ChannelsEndpoint(EntitiesEndpoint):
+    """Represents a channels endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return f"channels"
+
+    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the instance class of the endpoint"""
+        return ChannelEndpoint
+
+    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+        """Get the page class of the endpoint"""
+        return PageChannelEndpoint
+
+
 class WorkspacesEndpoint(EntitiesEndpoint):
     """Represents a workspaces endpoint"""
 
@@ -2643,6 +2659,7 @@ class KodexaClient:
         self.users = UsersEndpoint(self)
         self.memberships = MembershipsEndpoint(self)
         self.executions = ExecutionsEndpoint(self)
+        self.channels = ChannelsEndpoint(self)
 
     @staticmethod
     def login(url, email, password):
