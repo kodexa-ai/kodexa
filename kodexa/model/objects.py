@@ -1714,6 +1714,11 @@ class MessageFeedback(KodexaBaseModel):
     options: Optional[Dict[str, Any]] = None
 
 
+class MessageMetadata(KodexaBaseModel):
+    sender_id: Optional[str] = Field(None, alias='senderId')
+    sender_type: Optional[str] = Field(None, alias='senderType')
+
+
 class Message(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the message')
     uuid: Optional[str] = None
@@ -1724,6 +1729,7 @@ class Message(KodexaBaseModel):
     message_type: Optional[str] = Field(None, alias='messageType')
     content: Optional[str] = None
     message_feedback: Optional[MessageFeedback] = Field(None, alias='messageFeedback')
+    message_metadata: Optional[MessageMetadata] = Field(None, alias='messageMetadata')
 
 
 class DataAttribute(KodexaBaseModel):
@@ -2435,6 +2441,7 @@ class MessageEvent(KodexaBaseModel):
 
 
 class ChannelEvent(KodexaBaseModel):
+    type: Optional[str] = None
     channel: Optional[Channel] = None
     message_events: Optional[List[MessageEvent]] = Field(None, alias='messageEvents')
 
