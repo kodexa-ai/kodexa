@@ -1060,7 +1060,7 @@ class ContentNode(object):
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
                                                           group_uuid=group_uuid, cell_index=cell_index, note=note,
-                                                          status=status))
+                                                          status=status, owner_uri=owner_uri))
                             return -1
                         if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1070,7 +1070,7 @@ class ContentNode(object):
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
                                                           group_uuid=group_uuid, cell_index=cell_index, note=note,
-                                                          status=status))
+                                                          status=status, owner_uri=owner_uri))
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1141,7 +1141,7 @@ class ContentNode(object):
                     node.add_feature('tag', tag_to_apply,
                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value,
                                          index=index, parent_group_uuid=parent_group_uuid, group_uuid=group_uuid,
-                                         cell_index=cell_index, note=note, status=status))
+                                         cell_index=cell_index, note=note, status=status, owner_uri=owner_uri))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1163,7 +1163,7 @@ class ContentNode(object):
                                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
                                                          value=value, index=index, parent_group_uuid=parent_group_uuid,
                                                          group_uuid=group_uuid, cell_index=cell_index, note=note,
-                                                         status=status))
+                                                         status=status, owner_uri=owner_uri))
                             else:
                                 if matches:
                                     for match in matches:
