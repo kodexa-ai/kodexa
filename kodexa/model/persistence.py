@@ -14,8 +14,8 @@ from kodexa.model.model import ContentClassification, DocumentMetadata, ContentF
 logger = logging.getLogger()
 
 # Heavily used SQL
-EXCEPTION_INSERT = "INSERT INTO content_exceptions (tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-EXCEPTION_SELECT = "select tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid from content_exceptions"
+EXCEPTION_INSERT = "INSERT INTO content_exceptions (tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid, exception_type_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+EXCEPTION_SELECT = "select tag, message, exception_details, group_uuid, tag_uuid, exception_type, severity, node_uuid, exception_type_id from content_exceptions"
 
 MODEL_INSIGHT_INSERT = "INSERT INTO model_insights (model_insight) VALUES (?)"
 MODEL_INSIGHT_SELECT = "select model_insight from model_insights"
@@ -226,11 +226,12 @@ class SqliteDocumentPersistence(object):
                                         group_uuid   text,
                                         tag_uuid     text,
                                         exception_type text,
+                                        exception_type_id text,
                                         severity     text,
                                         node_uuid    text
                                     )""")
         self.cursor.execute("CREATE TABLE model_insights (id integer primary key,model_insight text);")
-        self.document.version = "4.0.2"
+        self.document.version = "6.0.0"
 
         self.__update_metadata()
 
@@ -346,12 +347,13 @@ class SqliteDocumentPersistence(object):
                                      metadata['classes']]
         self.uuid = metadata.get('uuid')
 
+        import semver
         root_node = self.cursor.execute("select id, pid, nt, idx from cn where pid is null").fetchone()
         if root_node:
             self.document.content_node = self.__build_node(
                 root_node)
 
-        if self.document.version != '4.0.1' and self.document.version != '4.0.2':
+        if semver.compare(self.document.version, '4.0.1') < 0:
             # We need to migrate this to a 4.0.1 document
             self.cursor.execute("""CREATE TABLE ft
                                     (
@@ -369,27 +371,31 @@ class SqliteDocumentPersistence(object):
             self.cursor.execute("drop table f_value")
             self.cursor.execute("CREATE INDEX f_perf ON ft(cn_id);")
             self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
-            self.document.version = "4.0.1"
-            self.update_metadata()
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
-                                    (
-                                        id           integer primary key,
-                                        tag          text,
-                                        message      text,
-                                        exception_details text,
-                                        group_uuid   text,
-                                        tag_uuid     text,
-                                        exception_type text,
-                                        severity     text,
-                                        node_uuid    text
-                                    )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS model_insights
-                                    (
-                                        id           integer primary key,
-                                        model_insight text
-                                    )""")
-        self.document.version = "4.0.2"
+        if semver.compare(self.document.version, '4.0.2') < 0:
+
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
+                                        (
+                                            id           integer primary key,
+                                            tag          text,
+                                            message      text,
+                                            exception_details text,
+                                            group_uuid   text,
+                                            tag_uuid     text,
+                                            exception_type text,
+                                            severity     text,
+                                            node_uuid    text
+                                        )""")
+            self.cursor.execute("""CREATE TABLE IF NOT EXISTS model_insights
+                                        (
+                                            id           integer primary key,
+                                            model_insight text
+                                        )""")
+
+        if semver.compare(self.document.version, "6.0.0") < 0:
+            self.cursor.execute("ALTER TABLE content_exceptions ADD COLUMN exception_type_id text")
+
+        self.document.version = "6.0.0"
         self.update_metadata()
 
     def get_content_parts(self, new_node):
@@ -562,7 +568,7 @@ class SqliteDocumentPersistence(object):
         # Add an exception to the exception table
         self.cursor.execute(EXCEPTION_INSERT,
                             [exception.tag, exception.message, exception.exception_details, exception.group_uuid,
-                             exception.tag_uuid, exception.exception_type, exception.severity, exception.node_uuid])
+                             exception.tag_uuid, exception.exception_type, exception.severity, exception.node_uuid, exception.exception_type_id])
 
     def get_exceptions(self) -> List[ContentException]:
         exceptions = []
@@ -570,7 +576,7 @@ class SqliteDocumentPersistence(object):
             exceptions.append(ContentException(tag=exception[0], message=exception[1], exception_details=exception[2],
                                                group_uuid=exception[3], tag_uuid=exception[4],
                                                exception_type=exception[5],
-                                               severity=exception[6], node_uuid=exception[7]))
+                                               severity=exception[6], node_uuid=exception[7], exception_type_id=exception[8]))
         return exceptions
 
     def replace_exceptions(self, exceptions: List[ContentException]):

@@ -50,7 +50,7 @@ class ContentException(Dict):
     """A content exception represents an issue identified during labeling or validation at the document level"""
 
     def __init__(self, exception_type: str, message: str, severity: str = 'ERROR', tag: Optional[str] = None,
-                 group_uuid: Optional[str] = None, tag_uuid: Optional[str] = None,
+                 group_uuid: Optional[str] = None, tag_uuid: Optional[str] = None, exception_type_id: Optional[str] = None,
                  exception_details: Optional[str] = None, node_uuid: Optional[str] = None, value: Optional[str] = None,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -63,6 +63,7 @@ class ContentException(Dict):
         self.node_uuid = node_uuid
         self.severity = severity
         self.value = value
+        self.exception_type_id = exception_type_id
 
 
 class Tag(Dict):
@@ -1843,7 +1844,7 @@ class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
 
     PREVIOUS_VERSION: str = "1.0.0"
-    CURRENT_VERSION: str = "4.0.2"
+    CURRENT_VERSION: str = "6.0.0"
 
     def __str__(self):
         return f"kodexa://{self.uuid}"
@@ -2327,11 +2328,17 @@ class Document(object):
         """
         if isinstance(source, str):
             if isinstance(source, str):
-                document = Document(kddb_path=source)
-            if detached:
-                return Document.from_kddb(document.to_kddb())
 
-            return document
+                # If we are using the detached flag we will create a copy of the KDDB file
+                if detached:
+                    import tempfile
+                    from kodexa import KodexaPlatform
+                    fp = tempfile.NamedTemporaryFile(suffix='.kddb', delete=False, dir=KodexaPlatform.get_tempdir())
+                    fp.write(open(source, 'rb').read())
+                    fp.close()
+                    return Document(kddb_path=fp.name, delete_on_close=True)
+
+                return Document(kddb_path=source)
 
         # We will assume the input is of byte type
         import tempfile
