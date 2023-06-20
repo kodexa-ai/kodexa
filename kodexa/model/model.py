@@ -73,7 +73,7 @@ class Tag(Dict):
                  uuid: Optional[str] = None, data: Any = None, *args, confidence: Optional[float] = None,
                  group_uuid: Optional[str] = None, parent_group_uuid: Optional[str] = None,
                  cell_index: Optional[int] = None, index: Optional[int] = None, bbox: Optional[List[int]] = None,
-                 note: Optional[str] = None, status: Optional[str] = None, **kwargs):
+                 note: Optional[str] = None, status: Optional[str] = None, owner_uri: Optional[str] = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
         """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
@@ -101,7 +101,7 @@ class Tag(Dict):
         """A note that can be associated with the tag"""
         self.status: Optional[str] = status
         """The status of the tag, this can be passed to an attribute status during extraction"""
-        self.owner_uri: Optional[str] = None
+        self.owner_uri: Optional[str] = owner_uri
         """The URI of the owner (ie. model://kodexa/narrative:1.0.0 or user://pdodds)"""
         # Pull the cell index from the data to the tag if we have it in the data
         if self.cell_index is None:
@@ -989,7 +989,7 @@ class ContentNode(object):
             use_all_content=False, node_only=None,
             fixed_position=None, data=None, separator=" ", tag_uuid: str = None, confidence=None, value=None,
             use_match=True, index=None, cell_index=None, group_uuid=None, parent_group_uuid=None, note=None,
-            status=None):
+            status=None, owner_uri=None):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
 
@@ -1023,6 +1023,7 @@ class ContentNode(object):
           parent_group_uuid: The parent group uuid for the tag
           note: a text note for the tag
           status: a status for the tag, this can be transistioned to an attribute status during extraction
+          owner_uri: the uri of the entity that created the tag (model vs user; example: model://cdad-healthcare/cdad-excel-model:1.0.0 or user://pdodds)
 
         >>> document.content_node.tag('is_cheese')
         """
@@ -1060,7 +1061,7 @@ class ContentNode(object):
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
                                                           group_uuid=group_uuid, cell_index=cell_index, note=note,
-                                                          status=status))
+                                                          status=status, owner_uri=owner_uri))
                             return -1
                         if start < part_length <= end:
                             node_to_check.add_feature('tag', tag_to_apply,
@@ -1070,7 +1071,7 @@ class ContentNode(object):
                                                           data=node_data, uuid=tag_uuid, confidence=confidence,
                                                           index=index, parent_group_uuid=parent_group_uuid,
                                                           group_uuid=group_uuid, cell_index=cell_index, note=note,
-                                                          status=status))
+                                                          status=status, owner_uri=owner_uri))
 
                         end = end - part_length
                         content_length = content_length + part_length
@@ -1141,7 +1142,7 @@ class ContentNode(object):
                     node.add_feature('tag', tag_to_apply,
                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence, value=value,
                                          index=index, parent_group_uuid=parent_group_uuid, group_uuid=group_uuid,
-                                         cell_index=cell_index, note=note, status=status))
+                                         cell_index=cell_index, note=note, status=status, owner_uri=owner_uri))
                 else:
                     if not use_all_content:
                         if node.content:
@@ -1163,7 +1164,7 @@ class ContentNode(object):
                                                      Tag(data=data, uuid=get_tag_uuid(tag_uuid), confidence=confidence,
                                                          value=value, index=index, parent_group_uuid=parent_group_uuid,
                                                          group_uuid=group_uuid, cell_index=cell_index, note=note,
-                                                         status=status))
+                                                         status=status, owner_uri=owner_uri))
                             else:
                                 if matches:
                                     for match in matches:
