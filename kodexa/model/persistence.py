@@ -372,25 +372,24 @@ class SqliteDocumentPersistence(object):
             self.cursor.execute("CREATE INDEX f_perf ON ft(cn_id);")
             self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
 
-        if semver.compare(self.document.version, '4.0.2') < 0:
-
-            self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
-                                        (
-                                            id           integer primary key,
-                                            tag          text,
-                                            message      text,
-                                            exception_details text,
-                                            group_uuid   text,
-                                            tag_uuid     text,
-                                            exception_type text,
-                                            severity     text,
-                                            node_uuid    text
-                                        )""")
-            self.cursor.execute("""CREATE TABLE IF NOT EXISTS model_insights
-                                        (
-                                            id           integer primary key,
-                                            model_insight text
-                                        )""")
+        # We always run this
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
+                                    (
+                                        id           integer primary key,
+                                        tag          text,
+                                        message      text,
+                                        exception_details text,
+                                        group_uuid   text,
+                                        tag_uuid     text,
+                                        exception_type text,
+                                        severity     text,
+                                        node_uuid    text
+                                    )""")
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS model_insights
+                                    (
+                                        id           integer primary key,
+                                        model_insight text
+                                    )""")
 
         if semver.compare(self.document.version, "6.0.0") < 0:
             self.cursor.execute("ALTER TABLE content_exceptions ADD COLUMN exception_type_id text")
