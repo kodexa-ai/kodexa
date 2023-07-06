@@ -273,11 +273,6 @@ class PipelineStep:
             return result_document
         except:
             logger.warning("Step failed")
-            tt, value, tb = sys.exc_info()
-            document.exceptions.append({
-                "step": self.step.__name__ if callable(self.step) else type(self.step),
-                "traceback": traceback.format_exception(tt, value, tb)
-            })
             if context.stop_on_exception:
                 raise
 
