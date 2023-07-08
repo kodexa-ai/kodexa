@@ -18,8 +18,8 @@ class KodexaBaseModel(BaseModel):
             datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
         }
 
-    def to_dict(self):
-        return json.loads(self.json(by_alias=True, exclude={'client'}))
+    def to_dict(self, **kwargs):
+        return json.loads(self.json(by_alias=True, exclude={'client'}, **kwargs))
 
 
 class BaseEntity(KodexaBaseModel):
