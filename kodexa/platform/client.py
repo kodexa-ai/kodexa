@@ -1116,7 +1116,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
     def find_by_name(self, project_name: str) -> Optional[ProjectEndpoint]:
         """Find a project by name"""
 
-        url = f"/api/{self.get_type()}/"
+        url = f"/api/{self.get_type()}"
         filters = {'filter': [f"name: '{project_name}'"]}
         if self.organization is not None:
             filters['filter'].append(f"organization.id: '{self.organization.id}'")
