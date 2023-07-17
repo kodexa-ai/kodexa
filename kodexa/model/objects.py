@@ -2985,7 +2985,7 @@ class DataForm(ExtensionPackProvided):
     entrypoints: Optional[List[str]] = None
     entrypoint: Optional[str] = None
     cards: Optional[List[Card]] = None
-    vs_filters: Optional[str] = None
+    filters: Optional[str] = None
 
 
 class ProjectDataForm(KodexaBaseModel):
