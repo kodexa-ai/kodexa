@@ -826,7 +826,7 @@ class ProjectMemory(KodexaBaseModel):
 
 
 class ProjectMetadata(KodexaBaseModel):
-    tags: Optional[List[str]] = Field(default_factory=list, unique_items=True)
+    tags: Optional[List[str]] = Field(default_factory=list, set=True)
 
 
 class State1(Enum):
@@ -1386,8 +1386,8 @@ class ProjectAssistant(KodexaBaseModel):
         None, alias='assistantDefinitionRef'
     )
     options: Optional[Dict[str, Any]] = None
-    stores: Optional[List[str]] = Field(default_factory=list, unique_items=True)
-    schedules: Optional[List[ScheduleDefinition]] = Field(default_factory=list, unique_items=True)
+    stores: Optional[List[str]] = Field(default_factory=list)
+    schedules: Optional[List[ScheduleDefinition]] = Field(default_factory=list)
     subscription: Optional[str] = None
 
     logging_enabled: Optional[bool] = Field(None, alias='loggingEnabled')
@@ -1539,9 +1539,9 @@ class ContentObject(KodexaBaseModel):
     )
     document_version: Optional[str] = Field(None, alias='documentVersion')
     index: Optional[int] = None
-    labels: Optional[List[Label]] = Field(default_factory=list, unique_items=True)
+    labels: Optional[List[Label]] = Field(default_factory=list)
     metadata: Optional[Dict[str, Any]] = None
-    mixins: Optional[List[str]] = Field(default_factory=list, unique_items=True)
+    mixins: Optional[List[str]] = Field(default_factory=list)
     created: Optional[datetime] = None
     modified: Optional[datetime] = None
     size: Optional[int] = None
@@ -1595,7 +1595,7 @@ class ExecutionStep(KodexaBaseModel):
     option_types: Optional[Dict[str, str]] = Field(None, alias='optionTypes')
     context: Optional[Dict[str, Any]] = None
     content_objects: Optional[List[ContentObject]] = Field(
-        None, alias='contentObjects', unique_items=True
+        None, alias='contentObjects'
     )
     input_id: Optional[str] = Field(None, alias='inputId')
     output_id: Optional[str] = Field(None, alias='outputId')
@@ -1637,10 +1637,10 @@ class Project(KodexaBaseModel):
     project_template_ref: Optional[str] = Field(None, alias='projectTemplateRef')
     memory: Optional[ProjectMemory] = None
     document_statuses: Optional[List[DocumentStatus]] = Field(
-        None, alias='documentStatuses', unique_items=True
+        None, alias='documentStatuses'
     )
     attribute_statuses: Optional[List[AttributeStatus]] = Field(
-        None, alias='attributeStatuses', unique_items=True
+        None, alias='attributeStatuses'
     )
     status: Optional[ProjectStatus] = None
     owner: Optional[User] = None
@@ -1783,8 +1783,8 @@ class Role(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     name: str
-    users: Optional[List[User]] = Field(default_factory=list, unique_items=True)
-    teams: Optional[List[Team]] = Field(default_factory=list, unique_items=True)
+    users: Optional[List[User]] = Field(default_factory=list)
+    teams: Optional[List[Team]] = Field(default_factory=list)
 
 
 class Membership(KodexaBaseModel):
@@ -2122,7 +2122,7 @@ class Execution(KodexaBaseModel):
     )
     context: Optional[Dict[str, Any]] = None
     content_objects: Optional[List[ContentObject]] = Field(
-        None, alias='contentObjects', unique_items=True
+        None, alias='contentObjects'
     )
     child_executions: Optional[List[Execution]] = Field(
         None, alias='childExecutions'
@@ -2153,10 +2153,10 @@ class ExecutionSnapshot(KodexaBaseModel):
     )
     context: Optional[Dict[str, Any]] = None
     child_executions: Optional[List[Execution]] = Field(
-        None, alias='childExecutions', unique_items=True
+        None, alias='childExecutions'
     )
     content_objects: Optional[List[ContentObject]] = Field(
-        None, alias='contentObjects', unique_items=True
+        None, alias='contentObjects'
     )
 
 
@@ -2307,7 +2307,7 @@ class ExecutionAssistant(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     subscription: Optional[str] = None
-    schedules: Optional[List[AssistantSchedule]] = Field(default_factory=list, unique_items=True)
+    schedules: Optional[List[AssistantSchedule]] = Field(default_factory=list)
     project: Optional[Project] = None
     name: str
     description: Optional[str] = None
@@ -2347,7 +2347,7 @@ class DataObject(KodexaBaseModel):
     source_ordering: Optional[str] = Field(None, alias='sourceOrdering')
     date_time: Optional[datetime] = Field(None, alias='dateTime')
     lineage: Optional[DataLineage] = None
-    attributes: Optional[List[DataAttribute]] = Field(default_factory=list, unique_items=True)
+    attributes: Optional[List[DataAttribute]] = Field(default_factory=list)
     parent_id: Optional[str] = Field(None, alias='parentId')
     store_ref: Optional[str] = Field(None, alias='storeRef')
 
@@ -2358,7 +2358,7 @@ class Assistant(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     subscription: Optional[str] = None
-    schedules: Optional[List[AssistantSchedule]] = Field(default_factory=list, unique_items=True)
+    schedules: Optional[List[AssistantSchedule]] = Field(default_factory=list)
     project: Optional[Project] = None
     name: str
     description: Optional[str] = None
@@ -2570,8 +2570,8 @@ class StoreMetadata(KodexaBaseModel):
         description='Is this component available to all organizations',
     )
     ref: Optional[str] = None
-    projects: Optional[List[Project]] = Field(default_factory=list, unique_items=True)
-    assistants: Optional[List[Assistant]] = Field(default_factory=list, unique_items=True)
+    projects: Optional[List[Project]] = Field(default_factory=list)
+    assistants: Optional[List[Assistant]] = Field(default_factory=list)
     metadata: Optional[Store] = None
 
 
