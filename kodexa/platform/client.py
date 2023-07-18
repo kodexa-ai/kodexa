@@ -19,7 +19,7 @@ from typing import Type, Optional, List, Dict, Any, ClassVar
 
 import requests
 from functional import seq
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Taxonomy, Document
@@ -74,7 +74,7 @@ class ClientEndpoint(BaseModel):
     """
     Represents a client endpoint
     """
-    client: Optional["KodexaClient"] = None
+    client: Optional["KodexaClient"] = Field(exclude=True)
 
     def set_client(self, client):
         """
@@ -92,11 +92,6 @@ class ClientEndpoint(BaseModel):
         Convert the client endpoint to a yaml string
         :return: A yaml string representation of the endpoint
         """
-        if 'exclude' in kwargs:
-            kwargs['exclude']['client']
-        else:
-            kwargs['exclude'] = {'client'}
-
         kwargs['exclude_unset'] = True
         kwargs['exclude_none'] = True
 
@@ -106,7 +101,7 @@ class ClientEndpoint(BaseModel):
         """
         Detach the client from the endpoint
         """
-        return self.copy(exclude={'client'})
+        return self.model_copy()
 
 
 class ProjectResourceEndpoint(ClientEndpoint):
@@ -418,7 +413,7 @@ class EntitiesEndpoint:
         """Create an entity"""
         url = f"/api/{self.get_type()}"
 
-        create_response = self.client.post(url, body=json.loads(new_entity.json(exclude={'client'}, by_alias=True)))
+        create_response = self.client.post(url, body=json.loads(new_entity.model_dump_json(by_alias=True)))
         return self.get_instance_class().model_validate(create_response.json()).set_client(self.client)
 
     def delete(self, self_id: str) -> None:
@@ -498,7 +493,7 @@ class PageEndpoint(ClientEndpoint):
         :return:
         """
         self.content = seq(self.content).map(
-            lambda x: self.client.deserialize(x.dict(exclude={'client'}, by_alias=True),
+            lambda x: self.client.deserialize(x.dict(by_alias=True),
                                               component_type=self.get_type())).to_list()
         return self
 
@@ -1063,7 +1058,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
     def update_tags(self, tags: List[ProjectTag]) -> List[ProjectTag]:
         """Update the tags of the project"""
         response = self.client.put(f"/api/projects/{self.id}/tags",
-                                   body=[tag.dict(exclude={'client'}, by_alias=True) for tag in tags])
+                                   body=[tag.to_dict(by_alias=True) for tag in tags])
         return [ProjectTag.model_validate(tag) for tag in response.json()]
 
 
@@ -1181,7 +1176,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
         else:
             params = None
 
-        create_response = self.client.post(url, body=json.loads(project.json(exclude={'client'}, by_alias=True)),
+        create_response = self.client.post(url, body=json.loads(project.model_dump_json(by_alias=True)),
                                            params=params)
         return ProjectEndpoint.model_validate(create_response.json()).set_client(self.client)
 
@@ -2366,7 +2361,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
     def update_training(self, training: ModelTraining) -> ModelTraining:
         """Update a model training"""
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training.id}"
-        response = self.client.put(url, body=json.loads(training.json(exclude={'client'}, by_alias=True)))
+        response = self.client.put(url, body=json.loads(training.model_dump_json(by_alias=True)))
         return ModelTraining.model_validate(response.json())
 
     def delete_training(self, training_id: str):
@@ -2628,13 +2623,13 @@ class ExtractionEngineEndpoint:
 
     def extract_data_objects(self, taxonomy: Taxonomy, document: Document) -> List[DataObject]:
         response = self.client.post(f"/api/extractionEngine/extract",
-                                    data={'taxonomyJson': taxonomy.json(exclude={'client'})},
+                                    data={'taxonomyJson': taxonomy.model_dump_json()},
                                     files={'document': document.to_kddb()})
         return [DataObject.model_validate(data_object) for data_object in response.json()]
 
     def extract_data_objects_with_exceptions(self, taxonomy: Taxonomy, document: Document) -> Dict:
         response = self.client.post(f"/api/extractionEngine/extract", params="full",
-                                    data={'taxonomyJson': taxonomy.json(exclude={'client'})},
+                                    data={'taxonomyJson': taxonomy.model_dump_json()},
                                     files={'document': document.to_kddb()})
         return {
             'dataObjects': [DataObject.model_validate(data_object) for data_object in response.json()['dataObjects']],
@@ -2645,7 +2640,7 @@ class ExtractionEngineEndpoint:
     def extract_to_format(self, taxonomy: Taxonomy, document: Document, format: str) -> str:
         response = self.client.post(f"/api/extractionEngine/extract",
                                     params={'format': format},
-                                    data={'taxonomyJson': taxonomy.json(exclude={'client'})},
+                                    data={'taxonomyJson': taxonomy.model_dump_json()},
                                     files={'document': document.to_kddb()})
         return response.text
 
