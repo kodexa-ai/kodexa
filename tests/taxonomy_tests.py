@@ -23,11 +23,11 @@ def test_serialization():
     for taxon in taxonomy_dict['taxons']:
         update_name(taxon)
 
-    taxonomy = TaxonomyEndpoint.parse_obj(taxonomy_dict)
+    taxonomy = TaxonomyEndpoint.model_validate(taxonomy_dict)
 
     assert taxonomy.find_taxon_by_path(
         '5a9f6c65-8226-4ac6-925b-a1fe91683e7c/4241d1ac-38eb-448b-a28c-9ba69f2f33de').label == 'TrancheName'
 
-    new_taxonomy = Taxonomy.parse_obj(taxonomy.dict())
+    new_taxonomy = Taxonomy.model_validate(taxonomy.dict())
 
     print(json.dumps(new_taxonomy.dict(), indent=4))
