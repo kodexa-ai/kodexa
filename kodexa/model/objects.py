@@ -8,7 +8,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyUrl, Field, constr
+from pydantic import AnyUrl, Field, constr, RootModel
 
 from kodexa.model.base import KodexaBaseModel, StandardDateTime
 
@@ -2421,15 +2421,15 @@ class AssistantResponsePipeline(KodexaBaseModel):
     logging_enabled: Optional[bool] = Field(None, alias='loggingEnabled')
 
 
-class BaseEvent(KodexaBaseModel):
-    __root__: Union[
-        BaseEvent1,
-        DocumentFamilyEvent,
-        DataObjectEvent,
-        ContentEvent,
-        ScheduledEvent,
-        AssistantEvent,
-    ]
+class BaseEvent(RootModel[Union[
+    BaseEvent1,
+    'DocumentFamilyEvent',
+    'DataObjectEvent',
+    'ContentEvent',
+    'ScheduledEvent',
+    'AssistantEvent',
+]]):
+    pass
 
 
 class MessageEvent(KodexaBaseModel):

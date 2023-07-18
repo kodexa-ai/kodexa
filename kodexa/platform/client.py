@@ -15,12 +15,12 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Type, Optional, List, Dict, Any
+from typing import Type, Optional, List, Dict, Any, ClassVar
 
 import requests
 from functional import seq
 from pydantic import BaseModel
-from pydantic_yaml import YamlModel
+from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Taxonomy, Document
 from kodexa.model.base import BaseEntity
@@ -70,7 +70,7 @@ class OrganizationOwned(BaseModel):
         return self
 
 
-class ClientEndpoint(YamlModel):
+class ClientEndpoint(BaseModel):
     """
     Represents a client endpoint
     """
@@ -100,7 +100,7 @@ class ClientEndpoint(YamlModel):
         kwargs['exclude_unset'] = True
         kwargs['exclude_none'] = True
 
-        return YamlModel.yaml(self, **kwargs)
+        return to_yaml_str(self, **kwargs)
 
     def detach(self):
         """
@@ -2289,8 +2289,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
 class ModelStoreEndpoint(DocumentStoreEndpoint):
     """Represents a model store"""
-    IMPLEMENTATION_PREFIX = "model_implementation/"
-    TRAINED_MODELS_PREFIX = "trained_models/"
+    IMPLEMENTATION_PREFIX: ClassVar[str] = "model_implementation/"
+    TRAINED_MODELS_PREFIX: ClassVar[str] = "trained_models/"
 
     def get_metadata_class(self) -> Type[BaseModel]:
         """Get the metadata class for the store"""
