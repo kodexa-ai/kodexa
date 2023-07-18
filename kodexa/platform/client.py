@@ -24,16 +24,7 @@ from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Taxonomy, Document
 from kodexa.model.base import BaseEntity
-from kodexa.model.objects import PageStore, PageTaxonomy, PageProject, PageOrganization, Project, Organization, \
-    PlatformOverview, DocumentFamily, DocumentContentMetadata, ModelContentMetadata, ExtensionPack, Pipeline, \
-    AssistantDefinition, Action, ModelRuntime, CredentialDefinition, Execution, PageAssistantDefinition, \
-    PageCredentialDefinition, \
-    PageProjectTemplate, PageUser, User, ContentObject, Taxon, SlugBasedMetadata, DataObject, \
-    PageDataObject, Assistant, ProjectTemplate, PageExtensionPack, DeploymentOptions, PageMembership, Membership, \
-    PageDocumentFamily, ProjectResourcesUpdate, DataAttribute, PageNote, PageDataForm, DataForm, Store, PageExecution, \
-    Dashboard, PageAction, PagePipeline, DocumentStatus, ModelTraining, PageModelTraining, ContentException, \
-    CustomEvent, ProjectTag, PageDataException, DataException, ReprocessRequest, PageWorkspace, Workspace, PageChannel, \
-    PageMessage, Message, Channel, PageDashboard
+from kodexa.model.objects import *
 
 logger = logging.getLogger()
 
@@ -121,7 +112,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     def get_type(self) -> str:
         pass
 
-    def get_instance_class(self, object_dict=None) -> Type[ClientEndpoint]:
+    def get_instance_class(self, object_dict=None):
         pass
 
     def to_df(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
@@ -198,10 +189,10 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         pass
 
-    def get_instance_class(self, obj_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, obj_dict=None):
         pass
 
-    def get_page_class(self, obj_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, obj_dict=None):
         pass
 
     def reindex(self):
@@ -212,7 +203,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         url = f"/api/{self.get_type()}/_reindex"
         self.client.post(url)
 
-    def find_by_slug(self, slug, version=None) -> Optional[Type[BaseModel]]:
+    def find_by_slug(self, slug, version=None):
         """
         Find a component by slug
         :param slug:
@@ -345,10 +336,10 @@ class EntitiesEndpoint:
     def get_type(self) -> str:
         raise NotImplementedError()
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None):
         raise NotImplementedError()
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None):
         raise NotImplementedError()
 
     def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint" = None):
@@ -430,10 +421,10 @@ class OrganizationsEndpoint(EntitiesEndpoint):
     Represents the organization endpoint
     """
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None):
         return PageOrganizationEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None):
         return OrganizationEndpoint
 
     def get_type(self) -> str:
@@ -862,7 +853,7 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
         """Get the type of the endpoint"""
         return f"assistants"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None):
         """Get the instance class of the project assistants endpoint"""
         return AssistantEndpoint
 
@@ -891,7 +882,7 @@ class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
         """Get the type of the endpoint"""
         return f"documentStores"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the project document stores endpoint"""
         return DocumentStoreEndpoint
 
@@ -903,7 +894,7 @@ class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
         """Get the type of the endpoint"""
         return f"taxonomies"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the project taxonomies endpoint"""
         return TaxonomyEndpoint
 
@@ -915,7 +906,7 @@ class ProjectStoresEndpoint(ProjectResourceEndpoint):
         """Get the type of the endpoint"""
         return f"stores"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the project stores endpoint"""
         if object_dict['storeType'] == "DOCUMENT":
             return DocumentStoreEndpoint
@@ -934,7 +925,7 @@ class ProjectDataStoresEndpoint(ProjectResourceEndpoint):
         """Get the type of the endpoint"""
         return f"dataStores"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the project data stores endpoint"""
         return DataStoreEndpoint
 
@@ -946,7 +937,7 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
         """Get the type of the endpoint"""
         return f"modelStores"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the project model stores endpoint"""
         return ModelStoreEndpoint
 
@@ -1072,11 +1063,11 @@ class ChannelsEndpoint(EntitiesEndpoint):
         """Get the type of the endpoint"""
         return f"channels"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return ChannelEndpoint
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageChannelEndpoint
 
@@ -1088,11 +1079,11 @@ class WorkspacesEndpoint(EntitiesEndpoint):
         """Get the type of the endpoint"""
         return f"workspaces"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return WorkspaceEndpoint
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageWorkspaceEndpoint
 
@@ -1104,11 +1095,11 @@ class ProjectsEndpoint(EntitiesEndpoint):
         """Get the type of the endpoint"""
         return f"projects"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return ProjectEndpoint
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageProjectEndpoint
 
@@ -1191,11 +1182,11 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         """Get the type of the endpoint"""
         return "stores"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageStoreEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         if object_dict['storeType'] == "DOCUMENT":
             return DocumentStoreEndpoint
@@ -1214,11 +1205,11 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
         """Get the type of the endpoint"""
         return "extensionPacks"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageExtensionPackEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return ExtensionPackEndpoint
 
@@ -1238,11 +1229,11 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
         """Get the type of the endpoint"""
         return "projectTemplates"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageProjectTemplateEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return ProjectTemplateEndpoint
 
@@ -1254,11 +1245,11 @@ class CredentialDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, Organizat
         """Get the type of the endpoint"""
         return "credentialDefinitions"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageCredentialDefinitionEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return CredentialDefinitionEndpoint
 
@@ -1267,10 +1258,10 @@ class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "dataForms"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         return PageDataFormEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         return DataFormEndpoint
 
 
@@ -1278,10 +1269,10 @@ class DashboardsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_type(self) -> str:
         return "dashboards"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         return PageDashboardEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         return DashboardEndpoint
 
 
@@ -1292,11 +1283,11 @@ class AssistantDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, Organizati
         """Get the type of the endpoint"""
         return "assistantDefinitions"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageAssistantDefinitionEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return AssistantDefinitionEndpoint
 
@@ -1308,11 +1299,11 @@ class PipelinesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         """Get the type of the endpoint"""
         return "pipelines"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PagePipelineEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return PipelineEndpoint
 
@@ -1324,11 +1315,11 @@ class ActionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         """Get the type of the endpoint"""
         return "actions"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageActionEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return ActionEndpoint
 
@@ -1340,11 +1331,11 @@ class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned
         """Get the type of the endpoint"""
         return "modelRuntimes"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageModelRuntimeEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return ModelRuntimeEndpoint
 
@@ -1566,11 +1557,11 @@ class ExecutionsEndpoint(EntitiesEndpoint):
         """Get the type of the endpoint"""
         return f"executions"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return ExecutionEndpoint
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageExecutionEndpoint
 
@@ -1582,11 +1573,11 @@ class MembershipsEndpoint(EntitiesEndpoint):
         """Get the type of the endpoint"""
         return f"memberships"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return MembershipEndpoint
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageMembershipEndpoint
 
@@ -1598,11 +1589,11 @@ class UsersEndpoint(EntitiesEndpoint):
         """Get the type of the endpoint"""
         return "users"
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class of the endpoint"""
         return UserEndpoint
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class of the endpoint"""
         return PageUserEndpoint
 
@@ -1761,7 +1752,7 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
         """Get the type of the endpoint"""
         return "stores"
 
-    def get_metadata_class(self) -> Optional[Type[BaseModel]]:
+    def get_metadata_class(self):
         return None
 
     def set_metadata(self, metadata):
@@ -1798,10 +1789,10 @@ class DataExceptionEndpoint(DataException, EntityEndpoint):
 
 class DataStoreExceptionsEndpoint(EntitiesEndpoint):
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         return DataExceptionEndpoint
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         return PageDataExceptionEndpoint
 
     def get_type(self) -> str:
@@ -2169,7 +2160,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         request.family_ids = document_family_ids
         self.client.put(f"api/stores/{self.ref.replace(':', '/')}/reprocess", body=request.to_dict())
 
-    def get_metadata_class(self) -> Type[BaseModel]:
+    def get_metadata_class(self) :
         """
         Get the metadata class for the store
         """
@@ -2290,7 +2281,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
     IMPLEMENTATION_PREFIX: ClassVar[str] = "model_implementation/"
     TRAINED_MODELS_PREFIX: ClassVar[str] = "trained_models/"
 
-    def get_metadata_class(self) -> Type[BaseModel]:
+    def get_metadata_class(self) :
         """Get the metadata class for the store"""
         return ModelContentMetadata
 
@@ -2449,11 +2440,11 @@ class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         """Get the type of the endpoint"""
         return "taxonomies"
 
-    def get_page_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_page_class(self, object_dict=None) :
         """Get the page class for the endpoint"""
         return PageTaxonomyEndpoint
 
-    def get_instance_class(self, object_dict=None) -> Type[BaseModel]:
+    def get_instance_class(self, object_dict=None) :
         """Get the instance class for the endpoint"""
         return TaxonomyEndpoint
 
@@ -2961,7 +2952,6 @@ class KodexaClient:
 
 
 ClientEndpoint.model_rebuild()
-DocumentFamilyEndpoint.model_rebuild()
 DocumentStoreEndpoint.model_rebuild()
 ModelStoreEndpoint.model_rebuild()
 DataStoreEndpoint.model_rebuild()
@@ -2982,3 +2972,5 @@ ExecutionEndpoint.model_rebuild()
 AssistantDefinitionEndpoint.model_rebuild()
 DataExceptionEndpoint.model_rebuild()
 WorkspaceEndpoint.model_rebuild()
+DocumentFamilyEndpoint.model_rebuild()
+ClientEndpoint.model_rebuild()
