@@ -1756,6 +1756,17 @@ files = [
 ]
 
 [[package]]
+name = "semver"
+version = "3.0.1"
+description = "Python helper for Semantic Versioning (https://semver.org)"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "semver-3.0.1-py3-none-any.whl", hash = "sha256:2a23844ba1647362c7490fe3995a86e097bb590d16f0f32dfc383008f19e4cdf"},
+    {file = "semver-3.0.1.tar.gz", hash = "sha256:9ec78c5447883c67b97f98c3b6212796708191d22e4ad30f4570f840171cbce1"},
+]
+
+[[package]]
 name = "setuptools"
 version = "65.7.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -1913,4 +1924,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <4.0"
-content-hash = "fd9c2c86b922328cb13b3269cde31540db119d6d703e7d18ee21dc5c555f4ad8"
+content-hash = "0d1c928a6ff61aa86678de69f058bfd9c105ba62eb65c99313bfdd6f4b7d6f2d"
