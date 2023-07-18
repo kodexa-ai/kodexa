@@ -10,11 +10,11 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyUrl, Field, constr
 
-from kodexa.model.base import KodexaBaseModel
+from kodexa.model.base import KodexaBaseModel, StandardDateTime
 
 
 class ExceptionResponse(KodexaBaseModel):
-    date_time: Optional[datetime] = Field(None, alias='dateTime')
+    date_time: Optional[StandardDateTime] = Field(None, alias='dateTime')
     message: Optional[str] = None
     incident_id: Optional[str] = Field(None, alias='incidentId')
     context_path: Optional[str] = Field(None, alias='contextPath')
@@ -106,8 +106,8 @@ class CompletePasswordReset(KodexaBaseModel):
 class Organization(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     name: str
     slug: constr(pattern=r'^[a-zA-Z0-9\-_]{0,100}$')
     public_access: Optional[bool] = Field(None, alias='publicAccess')
@@ -118,8 +118,8 @@ class Organization(KodexaBaseModel):
 class Team(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     name: Optional[str] = None
     description: Optional[str] = None
     organization: Optional[Organization] = None
@@ -407,8 +407,8 @@ class ScheduleDefinition(KodexaBaseModel):
 
     type: Optional[str] = None
     cron_expression: Optional[str] = Field(None, alias='cronExpression')
-    last_event: Optional[datetime] = Field(None, alias='lastEvent')
-    next_event: Optional[datetime] = Field(None, alias='nextEvent')
+    last_event: Optional[StandardDateTime] = Field(None, alias='lastEvent')
+    next_event: Optional[StandardDateTime] = Field(None, alias='nextEvent')
 
 
 class SelectionOption(KodexaBaseModel):
@@ -446,7 +446,7 @@ class SlugBasedMetadata1(KodexaBaseModel):
     version: Optional[constr(pattern=r'^\d+\.\d+\.\d+(?:\-\d+)?$')] = Field(
         None, description='The version of the object'
     )
-    deployed: Optional[datetime] = Field(
+    deployed: Optional[StandardDateTime] = Field(
         None,
         description='The date/time the object was deployed into this Kodexa instance',
     )
@@ -608,8 +608,8 @@ class ReprocessRequest(KodexaBaseModel):
 class AssistantSchedule(KodexaBaseModel):
     type: Optional[str] = None
     cron_expression: Optional[str] = Field(None, alias='cronExpression')
-    last_event: Optional[datetime] = Field(None, alias='lastEvent')
-    next_event: Optional[datetime] = Field(None, alias='nextEvent')
+    last_event: Optional[StandardDateTime] = Field(None, alias='lastEvent')
+    next_event: Optional[StandardDateTime] = Field(None, alias='nextEvent')
     id: Optional[str] = None
 
 
@@ -621,8 +621,8 @@ class StatusType1(Enum):
 class AttributeStatus(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     color: Optional[str] = None
     icon: Optional[str] = None
     status: Optional[str] = None
@@ -683,8 +683,8 @@ class StatusType2(Enum):
 class DocumentStatus(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     color: Optional[str] = None
     icon: Optional[str] = None
     status: str
@@ -706,14 +706,14 @@ class DocumentTransition(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     unknown_fields: Optional[Dict[str, str]] = Field(None, alias='unknownFields')
     transition_type: Optional[TransitionType] = Field(
         None, alias='transitionType', description='The type of transition'
     )
     index: Optional[int] = None
-    date_time: Optional[datetime] = Field(
+    date_time: Optional[StandardDateTime] = Field(
         None, alias='dateTime', description='The date/time of the transition'
     )
     actor: Optional[DocumentActor] = None
@@ -795,8 +795,8 @@ class Label(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     name: str
     color: Optional[str] = None
     label: str
@@ -837,11 +837,11 @@ class State1(Enum):
 class Session(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     state: State1
     token: Optional[str] = None
-    last_accessed: Optional[datetime] = Field(None, alias='lastAccessed')
+    last_accessed: Optional[StandardDateTime] = Field(None, alias='lastAccessed')
 
 
 class Status4(Enum):
@@ -867,8 +867,8 @@ class StatusDetails(KodexaBaseModel):
 class ValidationError(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     message: Optional[str] = None
     option: Optional[str] = None
     description: Optional[str] = None
@@ -907,8 +907,8 @@ class DataException(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     message: str
     exception_details: Optional[str] = Field(None, alias='exceptionDetails')
     severity: Optional[str] = None
@@ -983,8 +983,8 @@ class DataFormProviderExchange(KodexaBaseModel):
 class PlatformConfiguration(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     welcome_markdown: Optional[str] = Field(None, alias='welcomeMarkdown')
     news_markdown: Optional[str] = Field(None, alias='newsMarkdown')
     about_markdown: Optional[str] = Field(None, alias='aboutMarkdown')
@@ -1019,9 +1019,9 @@ class ModelTraining(KodexaBaseModel):
     name: Optional[str] = None
     state: Optional[str] = None
     training_materials_generated: Optional[bool] = Field(None, alias='trainingMaterialsGenerated')
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    training_date: Optional[datetime] = Field(None, alias='trainingDate')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
+    training_date: Optional[StandardDateTime] = Field(None, alias='trainingDate')
     content: Optional[bool] = Field(None, description='Has content')
     user_test: Optional[bool] = Field(None, alias='userTest')
 
@@ -1076,9 +1076,9 @@ class Status6(Enum):
 class ExecutionLogEntry(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    log_date: Optional[datetime] = Field(None, alias='logDate')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
+    log_date: Optional[StandardDateTime] = Field(None, alias='logDate')
     entry: Optional[str] = None
 
 
@@ -1165,13 +1165,13 @@ class StoreStatistics(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     statistic_name: Optional[str] = Field(None, alias='statisticName')
     label: Optional[str] = None
     count: Optional[int] = None
     size: Optional[int] = None
-    point_in_time: Optional[datetime] = Field(None, alias='pointInTime')
+    point_in_time: Optional[StandardDateTime] = Field(None, alias='pointInTime')
 
 
 class SearchEntity(KodexaBaseModel):
@@ -1197,7 +1197,7 @@ class DataAttributeValues(KodexaBaseModel):
     truncated: Optional[bool] = None
     tag: str
     tag_uuid: Optional[str] = Field(None, alias='tagUuid')
-    date_value: Optional[datetime] = Field(None, alias='dateValue')
+    date_value: Optional[StandardDateTime] = Field(None, alias='dateValue')
     float_value: Optional[float] = Field(None, alias='floatValue')
     decimal_value: Optional[float] = Field(None, alias='decimalValue')
     number_value: Optional[int] = Field(None, alias='numberValue')
@@ -1219,15 +1219,15 @@ class User(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     email: str
     first_name: str = Field(..., alias='firstName')
     last_name: str = Field(..., alias='lastName')
     activated: Optional[bool] = None
     platform_admin: Optional[bool] = Field(None, alias='platformAdmin')
-    password_reset_date: Optional[datetime] = Field(None, alias='passwordResetDate')
-    last_connected: Optional[datetime] = Field(None, alias='lastConnected')
+    password_reset_date: Optional[StandardDateTime] = Field(None, alias='passwordResetDate')
+    last_connected: Optional[StandardDateTime] = Field(None, alias='lastConnected')
     user_storage: Optional[UserStorage] = Field(None, alias='userStorage')
     has_image: Optional[bool] = Field(None, alias='hasImage')
     show_developer_tools: Optional[bool] = Field(None, alias='showDeveloperTools')
@@ -1290,7 +1290,7 @@ class ExtensionPackProvided(KodexaBaseModel):
     version: Optional[constr(pattern=r'^\d+\.\d+\.\d+(?:\-\d+)?$')] = Field(
         None, description='The version of the object'
     )
-    deployed: Optional[datetime] = Field(
+    deployed: Optional[StandardDateTime] = Field(
         None,
         description='The date/time the object was deployed into this Kodexa instance',
     )
@@ -1532,8 +1532,8 @@ class Taxon(KodexaBaseModel):
 class ContentObject(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     content_type: ContentType = Field(
         ..., alias='contentType', description='The type of content'
     )
@@ -1542,8 +1542,8 @@ class ContentObject(KodexaBaseModel):
     labels: Optional[List[Label]] = Field(default_factory=list)
     metadata: Optional[Dict[str, Any]] = None
     mixins: Optional[List[str]] = Field(default_factory=list)
-    created: Optional[datetime] = None
-    modified: Optional[datetime] = None
+    created: Optional[StandardDateTime] = None
+    modified: Optional[StandardDateTime] = None
     size: Optional[int] = None
     store_ref: Optional[str] = Field(None, alias='storeRef')
     document_family_id: Optional[str] = Field(None, alias='documentFamilyId')
@@ -1556,8 +1556,8 @@ class DocumentAssignment(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     user: User
 
 
@@ -1588,8 +1588,8 @@ class ExecutionStep(KodexaBaseModel):
         None, alias='exceptionDetails'
     )
     name: Optional[str] = None
-    start: Optional[datetime] = None
-    end: Optional[datetime] = None
+    start: Optional[StandardDateTime] = None
+    end: Optional[StandardDateTime] = None
     processing_time: Optional[int] = Field(None, alias='processingTime')
     options: Optional[Dict[str, Any]] = None
     option_types: Optional[Dict[str, str]] = Field(None, alias='optionTypes')
@@ -1607,8 +1607,8 @@ class ExecutionStep(KodexaBaseModel):
 class ProjectStatus(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     status: Optional[str] = Field(None, description='The status of the project')
     color: Optional[str] = None
     organization: Organization
@@ -1618,8 +1618,8 @@ class ProjectStatus(KodexaBaseModel):
 class Project(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     organization: Optional[Organization] = None
     name: Optional[str] = None
     description: Optional[str] = None
@@ -1678,8 +1678,8 @@ class WorkspaceStorage(KodexaBaseModel):
 class Workspace(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the workspace')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     project: Optional[Project] = None
     name: Optional[str] = None
     description: Optional[str] = None
@@ -1696,8 +1696,8 @@ class ProjectWorkspace(KodexaBaseModel):
 class Channel(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the channel')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     workspace: Optional[Workspace] = None
 
 
@@ -1717,8 +1717,8 @@ class MessageFeedback(KodexaBaseModel):
 class Message(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the message')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     channel: Optional[Channel] = None
     message_blocks: Optional[MessageBlock] = Field(None, alias='messageBlock')
     message_type: Optional[str] = Field(None, alias='messageType')
@@ -1731,8 +1731,8 @@ class Message(KodexaBaseModel):
 class DataAttribute(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     value: Optional[str] = None
     truncated: Optional[bool] = None
     data_exceptions: Optional[List[DataException]] = Field(
@@ -1743,7 +1743,7 @@ class DataAttribute(KodexaBaseModel):
     )
     tag: str
     tag_uuid: Optional[str] = Field(None, alias='tagUuid')
-    date_value: Optional[datetime] = Field(None, alias='dateValue')
+    date_value: Optional[StandardDateTime] = Field(None, alias='dateValue')
     float_value: Optional[float] = Field(None, alias='floatValue')
     decimal_value: Optional[float] = Field(None, alias='decimalValue')
     number_value: Optional[int] = Field(None, alias='numberValue')
@@ -1767,8 +1767,8 @@ class DataAttribute(KodexaBaseModel):
 class Note(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     user: Optional[User] = None
     content: Optional[str] = None
 
@@ -1780,8 +1780,8 @@ class Role(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     name: str
     users: Optional[List[User]] = Field(default_factory=list)
     teams: Optional[List[Team]] = Field(default_factory=list)
@@ -1790,8 +1790,8 @@ class Role(KodexaBaseModel):
 class Membership(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     role: Optional[Role1] = None
     organization: Optional[Organization] = None
     user: Optional[User] = None
@@ -2059,8 +2059,8 @@ class ContentException(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     tag: Optional[str] = None
     message: str
     exception_type: str = Field(..., alias='exceptionType')
@@ -2101,13 +2101,13 @@ class PageUser(KodexaBaseModel):
 class Execution(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     description: Optional[str] = None
     targets: Optional[ExecutionTargets] = None
     session: Optional[Session] = None
-    start_date: Optional[datetime] = Field(None, alias='startDate')
-    end_date: Optional[datetime] = Field(None, alias='endDate')
+    start_date: Optional[StandardDateTime] = Field(None, alias='startDate')
+    end_date: Optional[StandardDateTime] = Field(None, alias='endDate')
     processing_time: Optional[int] = Field(None, alias='processingTime')
     logging_enabled: Optional[bool] = Field(None, alias='loggingEnabled')
     status: Optional[Status1] = None
@@ -2132,13 +2132,13 @@ class Execution(KodexaBaseModel):
 class ExecutionSnapshot(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     description: Optional[str] = None
     targets: Optional[ExecutionTargets] = None
     session: Optional[Session] = None
-    start_date: Optional[datetime] = Field(None, alias='startDate')
-    end_date: Optional[datetime] = Field(None, alias='endDate')
+    start_date: Optional[StandardDateTime] = Field(None, alias='startDate')
+    end_date: Optional[StandardDateTime] = Field(None, alias='endDate')
     processing_time: Optional[int] = Field(None, alias='processingTime')
     logging_enabled: Optional[bool] = Field(None, alias='loggingEnabled')
     status: Optional[Status2] = None
@@ -2214,8 +2214,8 @@ class DocumentFamily(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     document_status: Optional[DocumentStatus] = Field(None, alias='documentStatus')
     assignments: Optional[List[DocumentAssignment]] = Field(
         None,
@@ -2232,8 +2232,8 @@ class DocumentFamily(KodexaBaseModel):
         None,
         description='Is the document family locked. If locked then you can no longer modify or add any new document transitions',
     )
-    created: Optional[datetime] = Field(None, description='Date/Time Created')
-    modified: Optional[datetime] = Field(None, description='Date/Time Modified')
+    created: Optional[StandardDateTime] = Field(None, description='Date/Time Created')
+    modified: Optional[StandardDateTime] = Field(None, description='Date/Time Modified')
     size: Optional[int] = Field(
         None, description='Size of the original native content in bytes'
     )
@@ -2304,8 +2304,8 @@ class DocumentFamilyStatistics(KodexaBaseModel):
 class ExecutionAssistant(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     subscription: Optional[str] = None
     schedules: Optional[List[AssistantSchedule]] = Field(default_factory=list)
     project: Optional[Project] = None
@@ -2332,8 +2332,8 @@ class ExecutionOverview(KodexaBaseModel):
 class DataObject(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     document_family: Optional[DocumentFamily] = Field(None, alias='documentFamily')
     data_exceptions: Optional[List[DataException]] = Field(
         default_factory=list,
@@ -2345,7 +2345,7 @@ class DataObject(KodexaBaseModel):
     path: Optional[str] = None
     row_num: Optional[int] = Field(None, alias='rowNum')
     source_ordering: Optional[str] = Field(None, alias='sourceOrdering')
-    date_time: Optional[datetime] = Field(None, alias='dateTime')
+    date_time: Optional[StandardDateTime] = Field(None, alias='dateTime')
     lineage: Optional[DataLineage] = None
     attributes: Optional[List[DataAttribute]] = Field(default_factory=list)
     parent_id: Optional[str] = Field(None, alias='parentId')
@@ -2355,8 +2355,8 @@ class DataObject(KodexaBaseModel):
 class Assistant(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     subscription: Optional[str] = None
     schedules: Optional[List[AssistantSchedule]] = Field(default_factory=list)
     project: Optional[Project] = None
@@ -2401,8 +2401,8 @@ class AssistantExecution(KodexaBaseModel):
         ]
     ] = None
     response: Optional[AssistantExecutionResponse] = None
-    start_date: Optional[datetime] = Field(None, alias='startDate')
-    end_date: Optional[datetime] = Field(None, alias='endDate')
+    start_date: Optional[StandardDateTime] = Field(None, alias='startDate')
+    end_date: Optional[StandardDateTime] = Field(None, alias='endDate')
     processing_time: Optional[int] = Field(None, alias='processingTime')
 
 
@@ -2445,8 +2445,8 @@ class ChannelEvent(KodexaBaseModel):
 class ExecutionEvent(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     type: Type1
     status: Optional[Status6] = None
     execution: Optional[Execution] = None
@@ -2462,9 +2462,9 @@ class ExecutionEvent(KodexaBaseModel):
     input_id: Optional[str] = Field(None, alias='inputId')
     platform_url: Optional[str] = Field(None, alias='platformUrl')
     session_call_back_url: Optional[str] = Field(None, alias='sessionCallBackUrl')
-    created: Optional[datetime] = None
-    start_date: Optional[datetime] = Field(None, alias='startDate')
-    end_date: Optional[datetime] = Field(None, alias='endDate')
+    created: Optional[StandardDateTime] = None
+    start_date: Optional[StandardDateTime] = Field(None, alias='startDate')
+    end_date: Optional[StandardDateTime] = Field(None, alias='endDate')
 
 
 class PageTaxonomy(KodexaBaseModel):
@@ -2513,8 +2513,8 @@ class SearchContent(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     store: Optional[StoreMetadata] = None
     document_family: Optional[DocumentFamily] = Field(None, alias='documentFamily')
     container_type: Optional[str] = Field(
@@ -2561,8 +2561,8 @@ class StoreMetadata(KodexaBaseModel):
     id: Optional[str] = None
     uuid: Optional[str] = None
     version: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     name: Optional[str] = None
     public_access: Optional[bool] = Field(
         None,
@@ -2578,9 +2578,9 @@ class StoreMetadata(KodexaBaseModel):
 class PlatformEvent(KodexaBaseModel):
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
-    date_time: Optional[datetime] = Field(None, alias='dateTime')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
+    date_time: Optional[StandardDateTime] = Field(None, alias='dateTime')
     assistant: Optional[Assistant] = None
     event_detail: Optional[
         Union[
@@ -2614,8 +2614,8 @@ class AuditEvent(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description='The ID of the object')
     uuid: Optional[str] = None
-    created_on: Optional[datetime] = Field(None, alias='createdOn')
-    updated_on: Optional[datetime] = Field(None, alias='updatedOn')
+    created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
+    updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
     platform_user: Optional[User] = Field(None, alias='platformUser')
     document_family: Optional[DocumentFamily] = Field(None, alias='documentFamily')
     data_object: Optional[DataObject] = Field(None, alias='dataObject')
@@ -3260,8 +3260,8 @@ class DocumentFamilyEvent(KodexaBaseModel):
 
 class ScheduledEvent(KodexaBaseModel):
     type: Optional[str] = None
-    last_event: Optional[datetime] = Field(None, alias='lastEvent')
-    next_event: Optional[datetime] = Field(None, alias='nextEvent')
+    last_event: Optional[StandardDateTime] = Field(None, alias='lastEvent')
+    next_event: Optional[StandardDateTime] = Field(None, alias='nextEvent')
 
 
 ThrowableProblem.model_rebuild()
