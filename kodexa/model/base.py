@@ -11,15 +11,17 @@ def to_camel(string: str) -> str:
 
 class KodexaBaseModel(BaseModel):
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         use_enum_values = True
+
+        # TODO - we need to replace this?
         json_encoders = {
             # custom output conversion for datetime (yyyy-MM-dd'T'HH:mm:ss.SSS'Z')
             datetime: lambda v: v.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + 'Z'
         }
 
     def to_dict(self, **kwargs):
-        return json.loads(self.json(by_alias=True, exclude={'client'}, **kwargs))
+        return json.loads(self.model_dump_json(by_alias=True, exclude={'client'}, **kwargs))
 
 
 class BaseEntity(KodexaBaseModel):

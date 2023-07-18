@@ -109,7 +109,7 @@ class Organization(KodexaBaseModel):
     created_on: Optional[datetime] = Field(None, alias='createdOn')
     updated_on: Optional[datetime] = Field(None, alias='updatedOn')
     name: str
-    slug: constr(regex=r'^[a-zA-Z0-9\-_]{0,100}$')
+    slug: constr(pattern=r'^[a-zA-Z0-9\-_]{0,100}$')
     public_access: Optional[bool] = Field(None, alias='publicAccess')
     description: Optional[str] = None
     has_image: Optional[bool] = Field(None, alias='hasImage')
@@ -435,7 +435,7 @@ class SlugBasedMetadata1(KodexaBaseModel):
         alias='orgSlug',
         description='The slug of the organization that owns this metadata object',
     )
-    slug: constr(regex=r'^[a-zA-Z0-9\-_]{0,255}$') = Field(
+    slug: constr(pattern=r'^[a-zA-Z0-9\-_]{0,255}$') = Field(
         ..., description='The slug used when referencing this metadata object'
     )
     type: str = Field(..., description='The type of metadata object')
@@ -443,7 +443,7 @@ class SlugBasedMetadata1(KodexaBaseModel):
     description: Optional[str] = Field(
         None, description='The description of the object'
     )
-    version: Optional[constr(regex=r'^\d+\.\d+\.\d+(?:\-\d+)?$')] = Field(
+    version: Optional[constr(pattern=r'^\d+\.\d+\.\d+(?:\-\d+)?$')] = Field(
         None, description='The version of the object'
     )
     deployed: Optional[datetime] = Field(
@@ -1279,7 +1279,7 @@ class ExtensionPackProvided(KodexaBaseModel):
         alias='orgSlug',
         description='The slug of the organization that owns this metadata object',
     )
-    slug: constr(regex=r'^[a-zA-Z0-9\-_]{0,255}$') = Field(
+    slug: constr(pattern=r'^[a-zA-Z0-9\-_]{0,255}$') = Field(
         ..., description='The slug used when referencing this metadata object'
     )
     type: str = Field(..., description='The type of metadata object')
@@ -1287,7 +1287,7 @@ class ExtensionPackProvided(KodexaBaseModel):
     description: Optional[str] = Field(
         None, description='The description of the object'
     )
-    version: Optional[constr(regex=r'^\d+\.\d+\.\d+(?:\-\d+)?$')] = Field(
+    version: Optional[constr(pattern=r'^\d+\.\d+\.\d+(?:\-\d+)?$')] = Field(
         None, description='The version of the object'
     )
     deployed: Optional[datetime] = Field(
@@ -1410,7 +1410,7 @@ class Taxon(KodexaBaseModel):
         None,
         description="Is this taxon a group, and therefore can't have a value, can only have children",
     )
-    name: constr(regex=r'^[a-zA-Z0-9\-_]{0,255}$') = Field(
+    name: constr(pattern=r'^[a-zA-Z0-9\-_]{0,255}$') = Field(
         ..., description='The name to be used'
     )
     external_name: Optional[str] = Field(
@@ -1997,7 +1997,7 @@ class CustomEvent(KodexaBaseModel):
     A Custom Event allows you to define an subtype of assistant event with options
     """
 
-    name: Optional[constr(regex=r'^[a-zA-Z0-9\-_]{0,40}$')] = Field(
+    name: Optional[constr(pattern=r'^[a-zA-Z0-9\-_]{0,40}$')] = Field(
         None, description='The name of the event'
     )
     icon: Optional[str] = Field(
@@ -3003,10 +3003,10 @@ class ExtensionPack(ExtensionPackProvided):
     Extension packs provide new components to the platform
     """
 
-    org_slug: Optional[constr(regex=r'^[a-zA-Z0-9\-_]{0,100}$')] = Field(
+    org_slug: Optional[constr(pattern=r'^[a-zA-Z0-9\-_]{0,100}$')] = Field(
         None, alias='orgSlug'
     )
-    slug: Optional[constr(regex=r'^[a-zA-Z0-9\-_]{0,100}$')] = None
+    slug: Optional[constr(pattern=r'^[a-zA-Z0-9\-_]{0,100}$')] = None
     name: Optional[str] = None
     description: Optional[str] = None
     public_access: Optional[bool] = Field(None, alias='publicAccess')
@@ -3188,7 +3188,7 @@ class RuleSet(ExtensionPackProvided):
         alias='orgSlug',
         description='The slug of the organization that owns this metadata object',
     )
-    slug: Optional[constr(regex=r'^[a-zA-Z0-9\-_]{0,255}$')] = Field(
+    slug: Optional[constr(pattern=r'^[a-zA-Z0-9\-_]{0,255}$')] = Field(
         None, description='The slug used when referencing this metadata object'
     )
     type: Optional[str] = Field(None, description='The type of metadata object')
@@ -3196,13 +3196,10 @@ class RuleSet(ExtensionPackProvided):
     description: Optional[str] = Field(
         None, description='The description of the object'
     )
-    version: Optional[constr(regex=r'^\d+\.\d+\.\d+(?:\-\d+)?$')] = Field(
+    version: Optional[constr(pattern=r'^\d+\.\d+\.\d+(?:\-\d+)?$')] = Field(
         None, description='The version of the object'
     )
-    deployed: Optional[datetime] = Field(
-        None,
-        description='The date/time the object was deployed into this Kodexa instance',
-    )
+
     public_access: Optional[bool] = Field(
         None,
         alias='publicAccess',
@@ -3267,53 +3264,53 @@ class ScheduledEvent(KodexaBaseModel):
     next_event: Optional[datetime] = Field(None, alias='nextEvent')
 
 
-ThrowableProblem.update_forward_refs()
-Option.update_forward_refs()
-Taxon.update_forward_refs()
-ContentMetadata1.update_forward_refs()
-SlugBasedMetadata.update_forward_refs()
-DocumentFamily.update_forward_refs()
-DocumentFamilyStatistics.update_forward_refs()
-ExecutionAssistant.update_forward_refs()
-Assistant.update_forward_refs()
-AssistantExecution.update_forward_refs()
-AssistantExecutionResponse.update_forward_refs()
-AssistantResponsePipeline.update_forward_refs()
-BaseEvent.update_forward_refs()
-PageTaxonomy.update_forward_refs()
-PageStore.update_forward_refs()
-SearchContent.update_forward_refs()
-StoreMetadata.update_forward_refs()
-PlatformEvent.update_forward_refs()
-PageRuleSet.update_forward_refs()
-PageProjectTemplate.update_forward_refs()
-PagePipeline.update_forward_refs()
-PageModelRuntime.update_forward_refs()
-PageSlugBasedMetadata.update_forward_refs()
-PageExtensionPack.update_forward_refs()
-PageDataForm.update_forward_refs()
-PageDashboard.update_forward_refs()
-PageCredentialDefinition.update_forward_refs()
-PageAssistantDefinition.update_forward_refs()
-PageAction.update_forward_refs()
-DocumentContentMetadata.update_forward_refs()
-ModelContentMetadata.update_forward_refs()
-Action.update_forward_refs()
-AssistantDefinition.update_forward_refs()
-CredentialDefinition.update_forward_refs()
-Dashboard.update_forward_refs()
-DataForm.update_forward_refs()
-ExtensionPack.update_forward_refs()
-ModelRuntime.update_forward_refs()
-Pipeline.update_forward_refs()
-ProjectTemplate.update_forward_refs()
-Store.update_forward_refs()
-Taxonomy.update_forward_refs()
-RuleSet.update_forward_refs()
-AssistantEvent.update_forward_refs()
-ContentEvent.update_forward_refs()
-DataObjectEvent.update_forward_refs()
-DocumentFamilyEvent.update_forward_refs()
-ScheduledEvent.update_forward_refs()
-DataException.update_forward_refs()
-Workspace.update_forward_refs()
+ThrowableProblem.model_rebuild()
+Option.model_rebuild()
+Taxon.model_rebuild()
+ContentMetadata1.model_rebuild()
+SlugBasedMetadata.model_rebuild()
+DocumentFamily.model_rebuild()
+DocumentFamilyStatistics.model_rebuild()
+ExecutionAssistant.model_rebuild()
+Assistant.model_rebuild()
+AssistantExecution.model_rebuild()
+AssistantExecutionResponse.model_rebuild()
+AssistantResponsePipeline.model_rebuild()
+BaseEvent.model_rebuild()
+PageTaxonomy.model_rebuild()
+PageStore.model_rebuild()
+SearchContent.model_rebuild()
+StoreMetadata.model_rebuild()
+PlatformEvent.model_rebuild()
+PageRuleSet.model_rebuild()
+PageProjectTemplate.model_rebuild()
+PagePipeline.model_rebuild()
+PageModelRuntime.model_rebuild()
+PageSlugBasedMetadata.model_rebuild()
+PageExtensionPack.model_rebuild()
+PageDataForm.model_rebuild()
+PageDashboard.model_rebuild()
+PageCredentialDefinition.model_rebuild()
+PageAssistantDefinition.model_rebuild()
+PageAction.model_rebuild()
+DocumentContentMetadata.model_rebuild()
+ModelContentMetadata.model_rebuild()
+Action.model_rebuild()
+AssistantDefinition.model_rebuild()
+CredentialDefinition.model_rebuild()
+Dashboard.model_rebuild()
+DataForm.model_rebuild()
+ExtensionPack.model_rebuild()
+ModelRuntime.model_rebuild()
+Pipeline.model_rebuild()
+ProjectTemplate.model_rebuild()
+Store.model_rebuild()
+Taxonomy.model_rebuild()
+RuleSet.model_rebuild()
+AssistantEvent.model_rebuild()
+ContentEvent.model_rebuild()
+DataObjectEvent.model_rebuild()
+DocumentFamilyEvent.model_rebuild()
+ScheduledEvent.model_rebuild()
+DataException.model_rebuild()
+Workspace.model_rebuild()
