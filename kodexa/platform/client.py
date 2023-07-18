@@ -74,7 +74,7 @@ class ClientEndpoint(BaseModel):
     """
     Represents a client endpoint
     """
-    client: Optional["KodexaClient"] = Field(exclude=True)
+    client: Optional["KodexaClient"] = Field(None, exclude=True)
 
     def set_client(self, client):
         """
