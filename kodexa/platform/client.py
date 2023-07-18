@@ -76,6 +76,9 @@ class ClientEndpoint(BaseModel):
     """
     client: Optional["KodexaClient"] = Field(None, exclude=True)
 
+    class Config:
+        arbitrary_types_allowed = True
+
     def set_client(self, client):
         """
         Set the client that this endpoint is associated with
