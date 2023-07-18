@@ -1739,7 +1739,7 @@ class DataAttribute(KodexaBaseModel):
         None,
         alias='dataExceptions',
         description='A list of the data exceptions',
-        unique_items=True,
+        
     )
     tag: str
     tag_uuid: Optional[str] = Field(None, alias='tagUuid')
@@ -2220,7 +2220,7 @@ class DocumentFamily(KodexaBaseModel):
     assignments: Optional[List[DocumentAssignment]] = Field(
         None,
         description='A list of the assignments to users for this document',
-        unique_items=True,
+        
     )
     store_ref: Optional[str] = Field(
         None,
@@ -2244,28 +2244,28 @@ class DocumentFamily(KodexaBaseModel):
         None,
         alias='contentObjects',
         description='An ordered list of the content objects in the document family',
-        unique_items=True,
+        
     )
     content_exceptions: Optional[List[ContentException]] = Field(
         default_factory=list,
         alias='contentExceptions',
         description='A list of the content exceptions from the content objects',
-        unique_items=True,
+        
     )
     transitions: Optional[List[DocumentTransition]] = Field(
         None,
         description='An ordered list of the transitions in the document family',
-        unique_items=True,
+        
     )
     labels: Optional[List[Label]] = Field(
         None,
         description='The labels from the latest content object in the family',
-        unique_items=True,
+        
     )
     mixins: Optional[List[str]] = Field(
         None,
         description='The mixins from the latest content object in the family',
-        unique_items=True,
+        
     )
     metadata: Optional[Dict[str, Any]] = Field(
         None, description='The metadata from the latest document content object'
@@ -2286,7 +2286,7 @@ class DocumentFamily(KodexaBaseModel):
     classes: Optional[List[ContentClassification]] = Field(
         None,
         description='The classification classes from the latest content object in the family',
-        unique_items=True,
+        
     )
 
 
@@ -2339,7 +2339,7 @@ class DataObject(KodexaBaseModel):
         default_factory=list,
         alias='dataExceptions',
         description='A list of the data exceptions',
-        unique_items=True,
+        
     )
     taxonomy_ref: Optional[str] = Field(None, alias='taxonomyRef')
     path: Optional[str] = None
