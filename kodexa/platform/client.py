@@ -2955,3 +2955,27 @@ class KodexaClient:
             return obj_inst
 
         raise Exception(f"Unknown object type: {object_type}")
+
+
+ClientEndpoint.model_rebuild()
+DocumentFamilyEndpoint.model_rebuild()
+DocumentStoreEndpoint.model_rebuild()
+ModelStoreEndpoint.model_rebuild()
+DataStoreEndpoint.model_rebuild()
+TaxonomyEndpoint.model_rebuild()
+PipelineEndpoint.model_rebuild()
+ActionEndpoint.model_rebuild()
+CredentialDefinitionEndpoint.model_rebuild()
+ProjectTemplateEndpoint.model_rebuild()
+ModelRuntimeEndpoint.model_rebuild()
+ExtensionPackEndpoint.model_rebuild()
+UserEndpoint.model_rebuild()
+ProjectEndpoint.model_rebuild()
+MembershipEndpoint.model_rebuild()
+OrganizationEndpoint.model_rebuild()
+DataFormEndpoint.model_rebuild()
+DashboardEndpoint.model_rebuild()
+ExecutionEndpoint.model_rebuild()
+AssistantDefinitionEndpoint.model_rebuild()
+DataExceptionEndpoint.model_rebuild()
+WorkspaceEndpoint.model_rebuild()
