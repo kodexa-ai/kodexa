@@ -2666,14 +2666,14 @@ class KodexaClient:
         self.channels = ChannelsEndpoint(self)
 
     @staticmethod
-    def login(url, email, password):
+    def login(url, email, password, insecure=False):
         from requests.auth import HTTPBasicAuth
         obj_response = requests.get(f"{url}/api/account/me/token",
                                     auth=HTTPBasicAuth(email, password),
                                     headers={"content-type": "application/json"},
-                                    verify=not self.insecure)
+                                    verify=not insecure)
         if obj_response.status_code == 200:
-            return KodexaClient(url, obj_response.text)
+            return KodexaClient(url, obj_response.text, insecure=insecure)
 
         raise Exception(f"Check your URL and password [{obj_response.status_code}]")
 
