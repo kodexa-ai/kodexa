@@ -65,7 +65,8 @@ class ClientEndpoint(BaseModel):
     """
     Represents a client endpoint
     """
-    client: Optional["KodexaClient"] = Field(None, exclude=True)
+    client = Field(None, exclude=True)
+    ref = Field(None, exclude=False)
 
     class Config:
         arbitrary_types_allowed = True
@@ -2949,7 +2950,6 @@ class KodexaClient:
             return obj_inst
 
         raise Exception(f"Unknown object type: {object_type}")
-
 
 ClientEndpoint.model_rebuild()
 DocumentStoreEndpoint.model_rebuild()
