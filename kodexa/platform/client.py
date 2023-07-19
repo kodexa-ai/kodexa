@@ -102,7 +102,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     """
     Represents a project resource endpoint
     """
-    project: Optional["ProjectEndpoint"]
+    project: Optional["ProjectEndpoint"] = Field(None)
 
     def set_project(self, project: "ProjectEndpoint"):
         """Set the project that this endpoint is associated with"""
