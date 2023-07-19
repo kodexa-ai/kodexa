@@ -353,7 +353,7 @@ class SqliteDocumentPersistence(object):
             self.document.content_node = self.__build_node(
                 root_node)
 
-        if semver.Version.compare(self.document.version, '4.0.1') < 0:
+        if semver.compare(self.document.version, '4.0.1') < 0:
             # We need to migrate this to a 4.0.1 document
             self.cursor.execute("""CREATE TABLE ft
                                     (
@@ -391,7 +391,7 @@ class SqliteDocumentPersistence(object):
                                         model_insight text
                                     )""")
 
-        if semver.Version.compare(self.document.version, "6.0.0") < 0:
+        if semver.compare(self.document.version, "6.0.0") < 0:
             from sqlite3 import OperationalError
             try:
                 self.cursor.execute("ALTER TABLE content_exception ADD COLUMN exception_type_id text")
