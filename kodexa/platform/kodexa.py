@@ -48,7 +48,13 @@ def get_config(profile=None):
         with open(path, 'r') as outfile:
             kodexa_config = json.load(outfile)
             if profile and profile not in kodexa_config:
-                kodexa_config[profile] = {'url': None, 'access_token': None}
+                kodexa_config[profile] = {'url': None, 'access_token': None, 'insecure': False}
+
+            if not profile and 'insecure' not in kodexa_config:
+                kodexa_config['insecure'] = False
+            elif profile and 'insecure' not in kodexa_config[profile]:
+                kodexa_config[profile]['insecure'] = False
+
             return kodexa_config
     else:
         return {'url': None, 'access_token': None, 'insecure': False} if not profile else {
@@ -335,8 +341,8 @@ class KodexaPlatform:
     @classmethod
     def get_insecure(cls, profile=None):
         kodexa_config = get_config(profile)
-        env_url = os.getenv('KODEXA_URL_INSECURE', None)
-        return env_url if env_url is not None else kodexa_config[profile]['insecure'] if profile else kodexa_config[
+        insecure = os.getenv('KODEXA_URL_INSECURE', None)
+        return insecure if insecure is not None else kodexa_config[profile]['insecure'] if profile else kodexa_config[
             'insecure']
 
 
