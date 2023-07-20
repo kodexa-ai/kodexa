@@ -17,10 +17,12 @@ StandardDateTime = Annotated[
 
 
 class KodexaBaseModel(BaseModel):
+
     class Config:
         populate_by_name = True
         use_enum_values = True
         arbitrary_types_allowed = True
+        protected_namespaces = ('model_config',)
 
     def to_dict(self, **kwargs):
         return json.loads(self.model_dump_json(by_alias=True, exclude={'client'}, **kwargs))
