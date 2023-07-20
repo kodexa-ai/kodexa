@@ -66,7 +66,7 @@ class ClientEndpoint(BaseModel):
     Represents a client endpoint
     """
     client: Optional[Any] = Field(None, exclude=True)
-    ref: Optional[str] = Field(None, exclude=True)
+    ref: Optional[str] = Field(None, exclude=False)
 
     class Config:
         arbitrary_types_allowed = True
