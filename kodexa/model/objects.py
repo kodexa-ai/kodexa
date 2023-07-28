@@ -1674,6 +1674,8 @@ class WorkspaceStorage(KodexaBaseModel):
     document_view_states: Optional[List[DocumentViewState]] = Field(None, alias='documentViewStates')
     data_form_states: Optional[List[DataFormState]] = Field(None, alias='dataFormStates')
     current_view_id: Optional[str] = Field(None, alias='currentViewId')
+    default_sidebar: Optional[str] = Field(None, alias='defaultSidebar')
+    overview: Optional[str] = None
 
 
 class Workspace(KodexaBaseModel):
