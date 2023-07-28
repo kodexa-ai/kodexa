@@ -322,7 +322,7 @@ class ProjectDashboard(KodexaBaseModel):
     widgets: Optional[List[DashboardWidget]] = None
     template_ref: Optional[str] = Field(None, alias='templateRef')
     ref: Optional[str] = None
-
+    single_widget: Optional[DashboardWidget] = Field(None, alias='singleWidget')
 
 class StoreType(Enum):
     document = 'DOCUMENT'
