@@ -324,6 +324,7 @@ class ProjectDashboard(KodexaBaseModel):
     ref: Optional[str] = None
     single_widget: Optional[DashboardWidget] = Field(None, alias='singleWidget')
 
+
 class StoreType(Enum):
     document = 'DOCUMENT'
     table = 'TABLE'
