@@ -2551,6 +2551,20 @@ OBJECT_TYPES = {
         "endpoint": WorkspacesEndpoint,
         "global": True
     },
+    "organizations": {
+        "name": "organization",
+        "plural": "organizations",
+        "type": OrganizationEndpoint,
+        "endpoint": OrganizationsEndpoint,
+        "global": True
+    },
+    "channels": {
+        "name": "channel",
+        "plural": "channels",
+        "type": ChannelEndpoint,
+        "endpoint": ChannelsEndpoint,
+        "global": True
+    },
     "projectTemplates": {
         "name": "projectTemplate",
         "plural": "projectTemplates",
@@ -2590,9 +2604,11 @@ def resolve_object_type(obj_type):
 
     if not isinstance(obj_type, str):
         obj_type = str(obj_type).lower()
+    else:
+        obj_type = obj_type.lower()
 
     for target_type in OBJECT_TYPES.keys():
-        if obj_type in target_type:
+        if obj_type in target_type.lower():
             hits.append(OBJECT_TYPES[target_type])
             keys.append(target_type)
 
