@@ -384,7 +384,7 @@ class EntitiesEndpoint:
             if 'filter' not in params:
                 params['filter'] = [f"organization.id: '{self.organization.id}'"]
             else:
-                params['filter'].append(f"organization.id={self.organization.id}")
+                params['filter'].append(f"organization.id: '{self.organization.id}'")
 
         list_response = self.client.get(url, params=params)
         return self.get_page_class().model_validate(list_response.json()).set_client(self.client)
@@ -392,7 +392,7 @@ class EntitiesEndpoint:
     def find_by_organization(self, organization: Organization) -> PageProject:
         """Find projects by organization"""
         url = f"/api/{self.get_type()}/"
-        get_response = self.client.get(url, params={'filter': f'organization.id={organization.id}'})
+        get_response = self.client.get(url, params={'filter': f"organization.id: '{organization.id}'"})
         return self.get_page_class().model_validate(get_response.json()).set_client(self.client)
 
     def get(self, entity_id: str) -> "EntityEndpoint":
