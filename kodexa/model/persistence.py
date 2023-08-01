@@ -385,6 +385,7 @@ class SqliteDocumentPersistence(object):
                                         severity     text,
                                         node_uuid    text
                                     )""")
+        
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS model_insights
                                     (
                                         id           integer primary key,
