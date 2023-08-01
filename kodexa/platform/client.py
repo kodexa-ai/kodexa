@@ -564,6 +564,14 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
         return "project"
 
 
+class PageAssistantEndpoint(PageAssistant, PageEndpoint):
+    """Represents a page assistant endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint"""
+        return "assistant"
+
+
 class PageWorkspaceEndpoint(PageWorkspace, PageEndpoint):
     """Represents a page workspace endpoints"""
 
@@ -1084,6 +1092,21 @@ class WorkspacesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         """Get the page class of the endpoint"""
         return PageWorkspaceEndpoint
+
+class AssistantsEndpoints(EntitiesEndpoint):
+    """Represents a assistants endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint"""
+        return f"assistants"
+
+    def get_instance_class(self, object_dict=None):
+        """Get the instance class of the endpoint"""
+        return AssistantEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """Get the page class of the endpoint"""
+        return PageAssistantEndpoint
 
 
 class ProjectsEndpoint(EntitiesEndpoint):
@@ -2503,6 +2526,13 @@ OBJECT_TYPES = {
         "endpoint": PipelinesEndpoint
     },
     "assistants": {
+        "name": "assistant",
+        "plural": "assistants",
+        "type": AssistantEndpoint,
+        "endpoint": AssistantsEndpoint,
+        "global": True
+    },
+    "assistantDefinitions": {
         "name": "assistant",
         "plural": "assistants",
         "type": AssistantDefinitionEndpoint,

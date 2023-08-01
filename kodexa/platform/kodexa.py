@@ -10,7 +10,6 @@ import io
 import json
 import logging
 import os
-import sys
 import time
 from json import JSONDecodeError
 
@@ -20,11 +19,9 @@ from appdirs import AppDirs
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
-from kodexa.model import Document, ExtensionPack
-from kodexa.model.objects import AssistantDefinition, Action, Taxonomy, ModelRuntime, CredentialDefinition, \
-    ExecutionEvent, \
-    ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, Project, Execution, ProjectTemplate, Membership, \
-    DataForm, DocumentFamilyEvent, ChannelEvent, DataObjectEvent
+from kodexa.model import Document
+from kodexa.model.objects import ExecutionEvent, \
+    ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, DocumentFamilyEvent, ChannelEvent, DataObjectEvent
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
 
@@ -79,112 +76,6 @@ def save_config(config_obj):
                 raise
     with open(path, 'w') as outfile:
         json.dump(config_obj, outfile)
-
-
-OBJECT_TYPES = {
-    "extensionPacks": {
-        "name": "extension pack",
-        "plural": "extension packs",
-        "type": ExtensionPack
-    },
-    "pipelines": {
-        "name": "pipeline",
-        "plural": "pipelines",
-        "type": Pipeline
-    },
-    "assistants": {
-        "name": "assistant",
-        "plural": "assistants",
-        "type": AssistantDefinition
-    },
-    "actions": {
-        "name": "action",
-        "plural": "actions",
-        "type": Action
-    },
-    "modelRuntimes": {
-        "name": "modelRuntime",
-        "plural": "modelRuntimes",
-        "type": ModelRuntime
-    },
-    "credentialDefinitions": {
-        "name": "credential definition",
-        "plural": "credential definitions",
-        "type": CredentialDefinition
-    },
-    "dataForms": {
-        "name": "dataForm",
-        "plural": "dataForms",
-        "type": DataForm
-    },
-    "taxonomies": {
-        "name": "taxonomy",
-        "plural": "taxonomies",
-        "type": Taxonomy
-    },
-    "stores": {
-        "name": "store",
-        "plural": "stores"
-    },
-    "projects": {
-        "name": "project",
-        "plural": "projects",
-        "type": Project,
-        "global": True
-    },
-    "projectTemplates": {
-        "name": "project template",
-        "plural": "project templates",
-        "type": ProjectTemplate
-    },
-    "executions": {
-        "name": "execution",
-        "plural": "executions",
-        "type": Execution,
-        "global": True,
-        "sort": "startDate:desc"
-    },
-    "memberships": {
-        "name": "membership",
-        "plural": "memberships",
-        "type": Membership,
-        "global": True
-    }
-}
-
-
-def resolve_object_type(obj_type):
-    """Takes part of an object type (ie. pipeline) and then resolves the object type (pipelines)
-
-    Args:
-      obj_type: part of the object type
-
-    Returns:
-      The object type dict (if found)
-
-    """
-    hits = []
-    keys = []
-
-    if not isinstance(obj_type, str):
-        obj_type = str(obj_type).lower()
-    else:
-        obj_type = obj_type.lower()
-
-    for target_type in OBJECT_TYPES.keys():
-        if obj_type in target_type.lower():
-            hits.append(OBJECT_TYPES[target_type])
-            keys.append(target_type)
-
-    if len(hits) == 1:
-        return keys[0], hits[0]
-
-    if len(hits) == 0:
-        print(f":exclaimation: Unable to find object type {obj_type}")
-        sys.exit(1)
-    else:
-        print(f":exclaimation: To many potential matches for object type ({','.join(keys)}")
-        sys.exit(1)
 
 
 class KodexaPlatform:

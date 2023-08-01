@@ -1916,6 +1916,19 @@ class PageProject(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
+class PageAssistant(KodexaBaseModel):
+    total_pages: Optional[int] = Field(None, alias='totalPages')
+    total_elements: Optional[int] = Field(None, alias='totalElements')
+    size: Optional[int] = None
+    content: Optional[List[Assistant]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias='numberOfElements')
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
 class PageWorkspace(KodexaBaseModel):
     total_pages: Optional[int] = Field(None, alias='totalPages')
     total_elements: Optional[int] = Field(None, alias='totalElements')
