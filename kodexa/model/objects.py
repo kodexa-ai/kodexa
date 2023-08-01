@@ -840,7 +840,6 @@ class Session(KodexaBaseModel):
     uuid: Optional[str] = None
     created_on: Optional[StandardDateTime] = Field(None, alias='createdOn')
     updated_on: Optional[StandardDateTime] = Field(None, alias='updatedOn')
-    state: State1
     token: Optional[str] = None
     last_accessed: Optional[StandardDateTime] = Field(None, alias='lastAccessed')
 
