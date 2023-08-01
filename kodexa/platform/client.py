@@ -1093,6 +1093,7 @@ class WorkspacesEndpoint(EntitiesEndpoint):
         """Get the page class of the endpoint"""
         return PageWorkspaceEndpoint
 
+
 class AssistantsEndpoints(EntitiesEndpoint):
     """Represents a assistants endpoint"""
 
