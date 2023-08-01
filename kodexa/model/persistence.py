@@ -397,6 +397,7 @@ class SqliteDocumentPersistence(object):
                 self.cursor.execute("ALTER TABLE content_exceptions ADD COLUMN exception_type_id text")
             except OperationalError:
                 pass
+            
         self.document.version = "6.0.0"
         self.update_metadata()
 
