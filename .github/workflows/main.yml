@@ -50,6 +50,13 @@ jobs:
             LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
             PATCH_PART=${LAST_VERSION_PART_PREFIX%.*}
             NEW_LATEST_PATCH_PART=${PATCH_PART}${GITHUB_RUN_ID}
+          elif [[ $BRANCH_NAME == "release"* ]]; then
+            poetry version patch
+            VERSION=$(poetry version --short)
+            MINOR_PATCH_PART=${VERSION#*.}
+            LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
+            PATCH_PART=${LAST_VERSION_PART_PREFIX%.*}
+            NEW_LATEST_PATCH_PART=${PATCH_PART}${GITHUB_RUN_ID}
           else
             echo "Invalid branch name"
             exit 1
