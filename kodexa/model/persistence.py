@@ -394,7 +394,7 @@ class SqliteDocumentPersistence(object):
         if semver.compare(self.document.version, "6.0.0") < 0:
             from sqlite3 import OperationalError
             try:
-                self.cursor.execute("ALTER TABLE content_exception ADD COLUMN exception_type_id text")
+                self.cursor.execute("ALTER TABLE content_exceptions ADD COLUMN exception_type_id text")
             except OperationalError:
                 pass
         self.document.version = "6.0.0"
