@@ -211,9 +211,9 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         :param version:
         :return:
         """
-        filters = ["slug=" + slug]
+        filters = ["slug: '" + slug + "'"]
         if version is not None:
-            filters.append("version=" + version)
+            filters.append("version: '" + version + "'")
         component_page = self.list(filters=filters)
         if component_page.empty:
             return None
@@ -230,7 +230,6 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["sort"] = sort
 
         if filters is not None:
-            params["legacyFilter"] = True
             params["filter"] = filters
 
         while True:
@@ -259,7 +258,6 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["sort"] = sort
 
         if filters is not None:
-            params["legacyFilter"] = True
             params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
@@ -380,7 +378,6 @@ class EntitiesEndpoint:
             params["sort"] = sort
 
         if filters is not None:
-            params["legacyFilter"] = True
             params["filter"] = filters
 
         if self.organization is not None:
@@ -437,7 +434,7 @@ class OrganizationsEndpoint(EntitiesEndpoint):
         :param slug:
         :return:
         """
-        organizations = self.list(filters=["slug=" + slug])
+        organizations = self.list(filters=["slug: '" + slug + "'"])
         if organizations.number_of_elements == 0:
             return None
         return organizations.content[0]
