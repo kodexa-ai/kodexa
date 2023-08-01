@@ -1094,7 +1094,7 @@ class WorkspacesEndpoint(EntitiesEndpoint):
         return PageWorkspaceEndpoint
 
 
-class AssistantsEndpoints(EntitiesEndpoint):
+class AssistantsEndpoint(EntitiesEndpoint):
     """Represents a assistants endpoint"""
 
     def get_type(self) -> str:
