@@ -1509,6 +1509,9 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
         """Cancel the execution"""
         self.client.put(f'/api/executions/{self.id}/cancel')
 
+    def logs(self):
+        return self.client.get(f'/api/executions/{self.id}/logs')
+
     def wait_for(self, status: str = 'SUCCEEDED', fail_on_statuses=None,
                  timeout: int = 300, follow_child_executions: bool = True) -> List["ExecutionEndpoint"]:
         if fail_on_statuses is None:
@@ -2726,9 +2729,6 @@ class KodexaClient:
     def change_password(self, old_password: str, new_password: str):
         return self.post("/api/account/passwordChange", body={"oldPassword": old_password, "newPassword": new_password})
 
-    def reindex(self):
-        self.post("/api/indices/_reindex")
-
     def __build_object(self, ref, object_type_metadata):
         url = f"/api/{object_type_metadata['plural']}/{ref.replace(':', '/')}"
         response = process_response(self.get(url))
@@ -2752,6 +2752,8 @@ class KodexaClient:
 
     def get_platform(self):
         return PlatformOverview.model_validate(self.get(f"{self.base_url}/api").json())
+
+    # The followings methods are helpers for working with requests
 
     def exists(self, url, params=None) -> bool:
         response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
