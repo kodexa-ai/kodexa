@@ -2006,7 +2006,7 @@ class DataStoreEndpoint(StoreEndpoint):
                                     data_object_page.content]
         return data_object_page
 
-    def get_stream_data_objects_request(self, path: str, query="*", document_family: Optional[DocumentFamily] = None,
+    def stream_data_objects(self, path: str, query="*", document_family: Optional[DocumentFamily] = None,
                                         parent_id: Optional[str] = None):
         """
         Stream page request
@@ -2020,7 +2020,7 @@ class DataStoreEndpoint(StoreEndpoint):
         page = 1
 
         while True:
-            data_object_response = self.get_data_objects_page_request(self, path, page, page_size, query,
+            data_object_response = self.get_data_objects_page_request(path, page, page_size, query,
                                                                       document_family, parent_id)
             if not data_object_response.content:
                 break
