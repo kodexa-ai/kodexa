@@ -2024,8 +2024,6 @@ class DataStoreEndpoint(StoreEndpoint):
                                                                       document_family, parent_id)
             if not data_object_response.content:
                 break
-
-            yield data_object_response.content
             for data_object in data_object_response.content:
                 yield data_object
 
