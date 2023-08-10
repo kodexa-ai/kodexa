@@ -1762,12 +1762,12 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         get_response = self.client.get(url)
         return get_response.content
 
-    def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None):
+    def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None, owner_uri:Optional[str]=None):
         """Replace the tags of the document family"""
         if content_object is None:
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
-        self.client.put(url, body=document.get_feature_set().dict(by_alias=True))
+        self.client.put(url, body=document.get_feature_set(owner_uri).dict(by_alias=True))
 
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):

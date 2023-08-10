@@ -2451,11 +2451,9 @@ class Document(object):
         """
         return self.labels
 
-    def get_feature_set(self) -> FeatureSet:
+    def get_feature_set(self, owner_uri: Optional[str]=None) -> FeatureSet:
         """
-        Build a feature set of all the tagged nodes
 
-        :return:
         """
         feature_set = FeatureSet()
         feature_set.node_features = []
@@ -2467,9 +2465,14 @@ class Document(object):
 
             feature_set.node_features.append(node_feature)
 
-            # TODO this needs to be cleaned up
+            # TODO this needs to be cleaned up, also should it only really
+            # be the tag features?
             for feature in tagged_node.get_features():
                 if feature.feature_type == 'tag':
+                    if owner_uri is not None:
+                        if 'owner_uri' in feature.value[0] and feature.value[0]['owner_uri'] != owner_uri:
+                            continue
+
                     feature_dict = feature.to_dict()
                     feature_dict['featureType'] = feature.feature_type
                     feature_dict['name'] = feature.name
