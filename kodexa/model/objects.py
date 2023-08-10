@@ -1647,6 +1647,7 @@ class Project(KodexaBaseModel):
 
 
 class FeatureSet(KodexaBaseModel):
+    owner_uri: Optional[str] = Field(None, alias='ownerUri')
     node_features: Optional[List[NodeFeatures]] = Field(None, alias='nodeFeatures')
 
 
