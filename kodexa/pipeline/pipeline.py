@@ -21,7 +21,8 @@ logger = logging.getLogger()
 
 
 def new_id():
-    """Generates a new unique ID.
+    """
+    Generates a new unique ID.
     
     Returns:
         str: A new unique ID generated using the UUID version 4 algorithm.
@@ -30,6 +31,12 @@ def new_id():
 
 
 class InMemoryContentProvider:
+    """A class used to support getting content (documents or native) to
+    and from the pipeline.
+
+    Attributes:
+        content_objects (dict): A dictionary to store content objects.
+    """
     """A content provider is used to support getting content (documents or native) to
     and from the pipeline
 
@@ -43,30 +50,46 @@ class InMemoryContentProvider:
         self.content_objects = {}
 
     def get_content(self, content_object: ContentObject):
-        """
+        """Method to get the content of a specific content object.
 
         Args:
-          content_object: ContentObject:
+            content_object (ContentObject): The content object whose content is to be fetched.
 
         Returns:
-
+            content: The content of the specified content object.
         """
         return self.content_objects[content_object.id]
 
     def put_content(self, content_object: ContentObject, content):
-        """
+        """Method to put the content of a specific content object.
 
         Args:
-          content_object: ContentObject:
-          content:
-
-        Returns:
-
+            content_object (ContentObject): The content object whose content is to be stored.
+            content: The content to be stored.
         """
         self.content_objects[content_object.id] = content
 
 
 class PipelineContext:
+    """Pipeline context is created when you create a pipeline and it provides a way to access information about the
+    pipeline that is running. It can be made available to steps/functions so they can interact with it.
+    It also provides access to the 'stores' that have been added to the pipeline.
+
+    Attributes:
+        execution_id (str): Unique identifier for the execution.
+        statistics (PipelineStatistics): Statistics related to the pipeline.
+        output_document (Optional[Document]): The final output document from the pipeline.
+        content_objects (List[ContentObject]): List of content objects.
+        content_provider (InMemoryContentProvider): Provider for the content.
+        context (Dict): Contextual information.
+        stop_on_exception (bool): Flag to indicate whether to stop on exception.
+        current_document (Document): The current document being processed in the pipeline.
+        document_family (None): Not used.
+        content_object (None): Not used.
+        document_store (None): Not used.
+        status_handler (function): Handler for status updates.
+        cancellation_handler (function): Handler for cancellation requests.
+    """
     """Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
 
@@ -104,85 +127,98 @@ class PipelineContext:
         self.cancellation_handler = cancellation_handler
 
     def update_status(self, status_message: str, status_full_message: Optional[str] = None):
+        """Updates the status of the pipeline.
+
+        Args:
+            status_message (str): The status message.
+            status_full_message (str, optional): The full status message. Defaults to None.
+        """
         if self.status_handler is not None:
             self.status_handler(status_message, status_full_message)
 
+    
     def is_cancelled(self) -> bool:
+        """Checks if the pipeline is cancelled.
+
+        Returns:
+            bool: True if the pipeline is cancelled, False otherwise.
+        """
         if self.cancellation_handler is not None:
             return self.cancellation_handler()
 
         return False
 
     def get_context(self) -> Dict:
-        """ """
+        """Gets the context of the pipeline.
+
+        Returns:
+            Dict: The context of the pipeline.
+        """
         return self.context
 
     def get_content_objects(self) -> List[ContentObject]:
-        """ """
+        """Gets the content objects of the pipeline.
+
+        Returns:
+            List[ContentObject]: The content objects of the pipeline.
+        """
         return self.content_objects
 
     def get_content(self, content_object: ContentObject):
-        """
+        """Gets the content of a content object.
 
         Args:
-          content_object: ContentObject:
-
-        Returns:
-
+            content_object (ContentObject): The content object to get the content of.
         """
         self.content_provider.get_content(content_object)
 
     def put_content(self, content_object: ContentObject, content):
-        """
+        """Puts content into a content object.
 
         Args:
-          content_object: ContentObject:
-          content:
-
-        Returns:
-
+            content_object (ContentObject): The content object to put the content into.
+            content: The content to put into the content object.
         """
         self.content_provider.put_content(content_object, content)
 
     def set_current_document(self, current_document: Document):
-        """Set the Document that is currently being processed in the pipeline
+        """Sets the current document being processed in the pipeline.
 
         Args:
-          current_document: The current document
-          current_document: Document:
-
-        Returns:
-
+            current_document (Document): The current document to set.
         """
         self.current_document = current_document
 
     def get_current_document(self) -> Document:
-        """Get the current document that is being processed in the pipeline
-
-        :return: The current document, or None
-
-        Args:
+        """Gets the current document being processed in the pipeline.
 
         Returns:
-
+            Document: The current document being processed in the pipeline.
         """
         return self.current_document
 
     def set_output_document(self, output_document: Document):
-        """Set the output document from the pipeline
+        """Sets the output document from the pipeline.
 
         Args:
-          output_document: the final output document from the pipeline
-          output_document: Document:
-
-        Returns:
-          the final output document
-
+            output_document (Document): The output document to set.
         """
         self.output_document = output_document
 
 
 class PipelineStep:
+    """The representation of a step within a step, which captures both the step itself and
+    also the details around the step's use.
+
+    It is internally used by the Pipeline and is not a public API
+
+    Attributes:
+        step: The step to be added to the pipeline.
+        name (str, optional): The name of the step. Defaults to None.
+        options (dict, optional): The options for the step. Defaults to None.
+        attach_source (bool, optional): Whether to attach the source to the step. Defaults to False.
+        step_type (str, optional): The type of the step. Defaults to 'ACTION'.
+    """
     """The representation of a step within a step, which captures both the step itself and
     also the details around the step's use.
 
@@ -212,7 +248,14 @@ class PipelineStep:
             logger.info(f"Adding new step {type(step)} to pipeline")
 
     def to_dict(self):
-        """ """
+        """Converts the PipelineStep to a dictionary.
+
+        Raises:
+            Exception: If the step is a class instance style step or if the step does not implement to_dict().
+
+        Returns:
+            dict: The PipelineStep as a dictionary.
+        """
         try:
             if str(type(self.step)) == "<class 'type'>":
                 raise Exception("You can not yet deploy a pipeline with a class instance style step")
@@ -235,7 +278,19 @@ class PipelineStep:
         except AttributeError as e:
             raise Exception("All steps must implement to_dict() for deployment", e)
 
-    def execute(self, context, document):
+    def execute(self, context: PipelineContext, document: Document):
+        """Executes the PipelineStep.
+
+        Args:
+            context: The context in which to execute the step.
+            document: The document to process.
+
+        Returns:
+            The processed document.
+
+        Raises:
+            Exception: If the step fails and stop_on_exception is True.
+        """
 
         start = time.perf_counter()
         try:
@@ -285,6 +340,7 @@ class PipelineStep:
 
 class LabelStep(object):
     """A simple step for handling the labelling for a document"""
+    """A simple step for handling the labelling for a document"""
 
     def __init__(self, label: str, remove=False):
         self.label = label
@@ -292,12 +348,13 @@ class LabelStep(object):
 
     def process(self, document: Document):
         """
+        Process the document by adding or removing the label.
 
         Args:
-          document: Document:
+            document (Document): The document to be processed.
 
         Returns:
-
+            Document: The processed document.
         """
         if self.remove:
             document.remove_label(self.label)
@@ -307,6 +364,29 @@ class LabelStep(object):
 
 
 class Pipeline:
+    """A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
+
+    When you create a Pipeline you must provide the connector that will be used to source the documents.
+
+    Args:
+        connector: The connector that will be the starting point for the pipeline.
+        name (str, optional): The name of the pipeline. Defaults to 'Default'.
+        stop_on_exception (bool, optional): Should the pipeline raise exceptions and stop. Defaults to True.
+        logging_level (optional): The logging level of the pipeline. Defaults to logger.info.
+        apply_lineage (bool, optional): Apply lineage to the pipeline. Defaults to True.
+
+    Attributes:
+        context (PipelineContext): The context of the pipeline.
+        connector: The connector that will be the starting point for the pipeline.
+        steps (List[PipelineStep]): The steps of the pipeline.
+        name (str): The name of the pipeline.
+        stop_on_exception (bool): Should the pipeline raise exceptions and stop.
+        logging_level: The logging level of the pipeline.
+        apply_lineage (bool): Apply lineage to the pipeline.
+
+    Examples:
+        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
+    """
     """A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
 
     When you create a Pipeline you must provide the connector that will be used to source the documents.
@@ -339,17 +419,15 @@ class Pipeline:
         self.apply_lineage = apply_lineage
 
     def add_label(self, label: str, options=None, attach_source=False):
-        """Adds a label to the document
+        """Adds a label to the document.
 
         Args:
-          label: label to add
-          options: options to be passed to the step if it is a simplified remote action (Default value = None)
-          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
-          label: str:
+            label (str): Label to add.
+            options (optional): Options to be passed to the step if it is a simplified remote action. Defaults to None.
+            attach_source (bool, optional): If step is simplified remote action this determines if we need to add the source. Defaults to False.
 
         Returns:
-          the pipeline
-
+            Pipeline: The pipeline.
         """
         self.steps.append(
             PipelineStep(step=LabelStep(label), name=f"Add label {label}",
@@ -358,17 +436,15 @@ class Pipeline:
         return self
 
     def remove_label(self, label: str, options=None, attach_source=False):
-        """Adds a label to the document
+        """Removes a label from the document.
 
         Args:
-          label: label to remove
-          options: options to be passed to the step if it is a simplified remote action (Default value = None)
-          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
-          label: str: the label to add
+            label (str): Label to remove.
+            options (optional): Options to be passed to the step if it is a simplified remote action. Defaults to None.
+            attach_source (bool, optional): If step is simplified remote action this determines if we need to add the source. Defaults to False.
 
         Returns:
-          the pipeline
-
+            Pipeline: The pipeline.
         """
         self.steps.append(
             PipelineStep(step=LabelStep(label, remove=True), name=f"Remove label {label}",
@@ -378,33 +454,17 @@ class Pipeline:
 
     def add_step(self, step, name=None, options=None, attach_source=False,
                  step_type='ACTION'):
-        """Add the given step to the current pipeline
-
-
-        Note that it is also possible to add a function as a step, for example
-
-
-        If you are using remote actions on a server, or for deployment to a remote
-        pipeline you can also use a shorthand
+        """Add the given step to the current pipeline.
 
         Args:
-          step: the step to add
-          name: the name to use to describe the step (default None)
-          options: options to be passed to the step if it is a simplified remote action (Default value = None)
-          attach_source: if step is simplified remote action this determines if we need to add the source (Default value = False)
-          step_type: the type of step to add, can either be an ACTION or MODEL
+            step: The step to add.
+            name (optional): The name to use to describe the step. Defaults to None.
+            options (optional): Options to be passed to the step if it is a simplified remote action. Defaults to None.
+            attach_source (bool, optional): If step is simplified remote action this determines if we need to add the source. Defaults to False.
+            step_type (str, optional): The type of step to add, can either be an ACTION or MODEL. Defaults to 'ACTION'.
+
         Returns:
-          the instance of the pipeline
-
-        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.add_step(ExampleStep())
-
-            >>> def my_function(doc):
-            >>>      doc.metadata.fishstick = 'foo'
-            >>>      return doc
-            >>> pipeline.add_step(my_function)
-
-            >>> pipeline.add_step('kodexa/html-parser',options={'summarize':False})
+            Pipeline: The instance of the pipeline.
         """
         if options is None:
             options = {}
@@ -415,16 +475,12 @@ class Pipeline:
         return self
 
     def to_yaml(self):
-        """Will return the YAML representation of any actions that support conversion to YAML
+        """Will return the YAML representation of any actions that support conversion to YAML.
 
-        The YAML representation for RemoteAction's can be used for metadata only pipelines in the Kodexa Platform
-
-        :return: YAML representation
-
-        Args:
+        The YAML representation for RemoteAction's can be used for metadata only pipelines in the Kodexa Platform.
 
         Returns:
-
+            str: YAML representation.
         """
 
         configuration_steps = []
@@ -439,17 +495,13 @@ class Pipeline:
         return yaml.dump(configuration_steps)
 
     def run(self, parameters=None):
-        """Run the current pipeline
-
-        :return: The context from the run
+        """Run the current pipeline.
 
         Args:
-          parameters:  (Default value = None)
+            parameters (optional): Parameters for the pipeline. Defaults to None.
 
         Returns:
-
-        >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
-            >>> pipeline.run()
+            PipelineContext: The context from the run.
         """
         if parameters is None:
             parameters = {}
@@ -514,81 +566,68 @@ class Pipeline:
 
     @staticmethod
     def from_url(url, headers=None, *args, **kwargs):
-        """Build a new pipeline with the input being a document created from the given URL
+        """Build a new pipeline with the input being a document created from the given URL.
 
         Args:
-          url: The URL ie. https://www.google.com
-          headers: A dictionary of headers (Default value = None)
-          *args:
-          **kwargs:
+            url (str): The URL ie. https://www.google.com.
+            headers (dict, optional): A dictionary of headers. Defaults to None.
 
         Returns:
-          A new instance of a pipeline
-
+            Pipeline: A new instance of a pipeline.
         """
         return Pipeline(Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
     def from_file(file_path: str, *args, **kwargs) -> Pipeline:
-        """Create a new pipeline using a file path as a source
+        """Create a new pipeline using a file path as a source.
 
         Args:
-          file_path: The path to the file
-          file_path: str:
-          *args:
-          **kwargs:
+            file_path (str): The path to the file.
 
         Returns:
-          Pipeline: A new pipeline
-
+            Pipeline: A new pipeline.
         """
         return Pipeline(Document.from_file(file_path), *args, **kwargs)
 
     @staticmethod
     def from_text(text: str, *args, **kwargs) -> Pipeline:
-        """Build a new pipeline and provide text as the basic to create a document
+        """Build a new pipeline and provide text as the basic to create a document.
 
         Args:
-          text: Text to use to create document
-          text: str:
-          *args:
-          **kwargs:
+            text (str): Text to use to create document.
 
         Returns:
-          Pipeline: A new pipeline
-
+            Pipeline: A new pipeline.
         """
         return Pipeline(Document.from_text(text), *args, **kwargs)
 
     @staticmethod
     def from_folder(folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
                     unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -> Pipeline:
-        """Create a pipeline that will run against a set of local files from a folder
+        """Create a pipeline that will run against a set of local files from a folder.
 
         Args:
-          folder_path: The folder path
-          filename_filter: The filter for filename (i.e. *.pdf)
-          recursive: Should we look recursively in sub-directories (default False)
-          relative: Is the folder path relative to the caller (default False)
-          caller_path: The caller path (defaults to trying to work this out from the stack)
-          unpack: Treat the files in the folder as KDXA documents and unpack them using from_kdxa (default False)
-          folder_path: str:
-          filename_filter: str:  (Default value = "*")
-          recursive: bool:  (Default value = False)
-          relative: bool:  (Default value = False)
-          caller_path: str:  (Default value = get_caller_dir())
-          *args:
-          **kwargs:
+            folder_path (str): The folder path.
+            filename_filter (str, optional): The filter for filename (i.e. *.pdf). Defaults to "*".
+            recursive (bool, optional): Should we look recursively in sub-directories. Defaults to False.
+            relative (bool, optional): Is the folder path relative to the caller. Defaults to False.
+            caller_path (str, optional): The caller path (defaults to trying to work this out from the stack). Defaults to get_caller_dir().
+            unpack (bool, optional): Treat the files in the folder as KDXA documents and unpack them using from_kdxa. Defaults to False.
 
         Returns:
-          Pipeline: A new pipeline
-
+            Pipeline: A new pipeline.
         """
         return Pipeline(FolderConnector(folder_path, filename_filter, recursive=recursive, relative=relative,
                                         caller_path=caller_path, unpack=unpack), *args, **kwargs)
 
 
 class PipelineStatistics:
+    """A class to represent the statistics for the processed document.
+
+    Attributes:
+        documents_processed (int): The number of documents processed.
+
+    """
     """A set of statistics for the processed document
 
     documents_processed
@@ -604,12 +643,10 @@ class PipelineStatistics:
         self.documents_processed = 0
 
     def processed_document(self, document):
-        """Update statistics based on this document completing processing
+        """Updates statistics based on this document completing processing.
 
         Args:
-          document: the document that has been processed
-
-        Returns:
+            document (str): The document that has been processed.
 
         """
         self.documents_processed += 1
