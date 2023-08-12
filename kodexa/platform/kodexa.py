@@ -31,14 +31,17 @@ dirs = AppDirs("Kodexa", "Kodexa")
 
 
 def get_config(profile=None):
-    """Get the kodexa config object we use when you want to store your PAT locally
-
-    :return: the config as a dict
-
+    """
+    Gets the kodexa config object used for local PAT storage.
+    
     Args:
-
+        profile (str, optional): The profile to get the config for. Defaults to None.
+    
     Returns:
-
+        dict: The kodexa config as a dictionary. If the profile exists in the config, it returns the config for that profile.
+        If the profile does not exist, it creates a new profile with default values and returns it. If no profile is provided,
+        it returns the default config. If the config file does not exist, it returns a default config or a new profile with
+        default values depending on whether a profile was provided or not.
     """
     path = os.path.join(dirs.user_config_dir, '.kodexa.json')
     if os.path.exists(path):
@@ -58,14 +61,16 @@ def get_config(profile=None):
             profile: {'url': None, 'access_token': None, 'insecure': False}}
 
 
+
 def save_config(config_obj):
-    """Saves the configuration dictionary for the user
-
+    """
+    Saves the configuration dictionary for the user.
+    
     Args:
-      config_obj: return:
-
-    Returns:
-
+        config_obj (dict): The configuration dictionary to be saved.
+    
+    Raises:
+        OSError: If the directory cannot be created, and the error is not that the directory already exists.
     """
     path = os.path.join(dirs.user_config_dir, '.kodexa.json')
     if not os.path.exists(os.path.dirname(path)):
@@ -81,6 +86,11 @@ def save_config(config_obj):
 class KodexaPlatform:
     """
     The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
+    components. It can also be used to get your access token and Kodexa platform URL using a user config file if available
+    or Environment variables (KODEXA_ACCESS_TOKEN and KODEXA_URL).
+    """
+    """
+    The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
     components
 
     Note it also can be used to get your access token and Kodexa platform URL using:
@@ -92,18 +102,25 @@ class KodexaPlatform:
 
     @staticmethod
     def get_client():
+        """
+        Get a Kodexa client.
+
+        Returns:
+            KodexaClient: An instance of the Kodexa client.
+        """
         from kodexa import KodexaClient
         return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
     def get_access_token(profile=None) -> str:
         """
-        Returns the access token
+        Get the access token.
 
-        >>> access_token = KodexaPlatform.get_access_token()
+        Args:
+            profile (str, optional): The profile to use. Defaults to None.
 
-        Returns: The access token if it is defined in the user config store, or as an environment variable
-
+        Returns:
+            str: The access token if it is defined in the user config store, or as an environment variable.
         """
         kodexa_config = get_config(profile)
         access_token = os.getenv('KODEXA_ACCESS_TOKEN')
@@ -113,14 +130,13 @@ class KodexaPlatform:
     @staticmethod
     def get_url(profile=None) -> str:
         """
-        Returns the URL to use to access a Kodexa Platform
+        Get the URL to use to access a Kodexa Platform.
 
-        The URL should be in the form https://my-company.kodexa.ai
+        Args:
+            profile (str, optional): The profile to use. Defaults to None.
 
-        >>> access_token = KodexaPlatform.get_url()
-
-        Returns: The URL if it is defined in the user config store, or as an environment variable
-
+        Returns:
+            str: The URL if it is defined in the user config store, or as an environment variable.
         """
         kodexa_config = get_config(profile)
         env_url = os.getenv('KODEXA_URL', None)
@@ -129,40 +145,34 @@ class KodexaPlatform:
     @staticmethod
     def set_access_token(access_token: str):
         """
-        Set to override the access token to use, not that this does not impact your user config stored
-        value
+        Set to override the access token to use. This does not impact your user config stored value.
 
         Args:
-          access_token:str: The new access token
-
-        Returns: None
-
+            access_token (str): The new access token.
         """
         if access_token is not None:
             os.environ["KODEXA_ACCESS_TOKEN"] = access_token
 
+    
     @staticmethod
     def set_url(url: str):
         """
-        Set to override the URL to use, not that this does not impact your user config stored
-        value
+        Set to override the URL to use. This does not impact your user config stored value.
 
         Args:
-          url:str: The new URL
-
-        Returns: None
-
+            url (str): The new URL.
         """
         if url is not None:
             os.environ["KODEXA_URL"] = url
 
+    
     @staticmethod
     def get_access_token_details() -> Dict:
         """
-        Pull the access token details (including a list of the available organizations)
+        Pull the access token details (including a list of the available organizations).
 
-        Returns: Dict: details of the access token
-
+        Returns:
+            Dict: Details of the access token.
         """
         response = requests.get(
             f"{KodexaPlatform.get_url()}/api/account/accessToken",
@@ -178,6 +188,15 @@ class KodexaPlatform:
 
     @staticmethod
     def resolve_ref(ref: str):
+        """
+        Resolve the reference.
+
+        Args:
+            ref (str): The reference to resolve.
+
+        Returns:
+            list: A list containing the organization slug, slug, and version.
+        """
 
         org_slug = ref.split('/')[0]
         slug = ref.split('/')[1].split(":")[0]
@@ -191,6 +210,16 @@ class KodexaPlatform:
 
     @classmethod
     def login(cls, kodexa_url, username, password, profile=None, insecure=False):
+        """
+        Login to the Kodexa platform.
+
+        Args:
+            kodexa_url (str): The URL of the Kodexa platform.
+            username (str): The username to use for login.
+            password (str): The password to use for login.
+            profile (str, optional): The profile to use. Defaults to None.
+            insecure (bool, optional): Whether to use insecure connection. Defaults to False.
+        """
         from requests.auth import HTTPBasicAuth
         obj_response = requests.get(f"{kodexa_url}/api/account/me/token",
                                     auth=HTTPBasicAuth(username, password),
@@ -211,9 +240,15 @@ class KodexaPlatform:
         else:
             print(f"Check your URL and password [{obj_response.status_code}]")
 
+    
     @classmethod
     def get_server_info(cls):
-        """ """
+        """
+        Get server information.
+
+        Returns:
+            dict: The server information.
+        """
         r = requests.get(f"{KodexaPlatform.get_url()}/api",
                          headers={"x-access-token": KodexaPlatform.get_access_token(),
                                   "content-type": "application/json"},
@@ -228,11 +263,26 @@ class KodexaPlatform:
 
     @classmethod
     def get_tempdir(cls):
+        """
+        Get the temporary directory.
+
+        Returns:
+            str: The path to the temporary directory.
+        """
         import tempfile
         return os.getenv('KODEXA_TMP', tempfile.gettempdir())
 
     @classmethod
     def get_insecure(cls, profile=None):
+        """
+        Get the insecure setting.
+
+        Args:
+            profile (str, optional): The profile to use. Defaults to None.
+
+        Returns:
+            bool: The insecure setting.
+        """
         kodexa_config = get_config(profile)
         insecure = os.getenv('KODEXA_URL_INSECURE', None)
         return insecure if insecure is not None else kodexa_config[profile]['insecure'] if profile else kodexa_config[
@@ -240,6 +290,7 @@ class KodexaPlatform:
 
 
 class RemoteSession:
+    """A Session on the Kodexa platform for leveraging pipelines and services"""
     """A Session on the Kodexa platform for leveraging pipelines and services"""
 
     def __init__(self, session_type, slug):
@@ -249,12 +300,13 @@ class RemoteSession:
 
     def get_action_metadata(self, ref):
         """
+        Download metadata for a specific action.
 
         Args:
-          ref:
+            ref (str): The reference of the action.
 
         Returns:
-
+            dict: The metadata of the action if the request is successful.
         """
         logger.debug(f"Downloading metadata for action {ref}")
         r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref.replace(':', '/')}",
@@ -269,7 +321,9 @@ class RemoteSession:
         raise Exception("Unable to get action metadata, check your reference and platform settings")
 
     def start(self):
-        """ """
+        """
+        Start the session.
+        """
         logger.info(f"Creating session {self.slug} ({KodexaPlatform.get_url()})")
         r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions", params={self.session_type: self.slug},
                           headers={"x-access-token": KodexaPlatform.get_access_token()},
@@ -283,6 +337,18 @@ class RemoteSession:
         self.cloud_session = Dict(json.loads(r.text))
 
     def execution_action(self, document, options, attach_source, context):
+        """
+        Execute an action in the session.
+
+        Args:
+            document (Document): The document to be processed.
+            options (dict): The options for the action.
+            attach_source (bool): Whether to attach the source to the call.
+            context (Context): The context of the execution.
+
+        Returns:
+            dict: The execution result.
+        """
         files = {}
         if attach_source:
             logger.debug("Attaching source to call")
@@ -313,6 +379,15 @@ class RemoteSession:
         return execution
 
     def wait_for_execution(self, execution):
+        """
+        Wait for the execution to finish.
+
+        Args:
+            execution (dict): The execution to wait for.
+
+        Returns:
+            dict: The execution result.
+        """
         status = execution.status
         while execution.status == "PENDING" or execution.status == "RUNNING":
             r = requests.get(
@@ -353,14 +428,13 @@ class RemoteSession:
 
     def get_output_document(self, execution):
         """
-        Get the output document from a given execution
+        Get the output document from a given execution.
 
         Args:
-          execution: the execution holding the document
+            execution (dict): The execution holding the document.
 
         Returns:
-            the output document (or None if there isn't one)
-
+            Document: The output document (or None if there isn't one).
         """
         if execution.outputId:
             logger.info(f"Downloading output document [{execution.outputId}]")
@@ -375,6 +449,16 @@ class RemoteSession:
 
 
 class RemotePipeline:
+    """A class to interact with a pipeline that has been deployed to an instance of Kodexa Platform.
+
+    Attributes:
+        slug (str): The slug for the remote pipeline.
+        connector (Document or list): The document or list of documents to be processed.
+        version (str, optional): The version of the pipeline. Defaults to None.
+        attach_source (bool, optional): Whether to attach the source document to the pipeline. Defaults to True.
+        parameters (dict, optional): The parameters for the pipeline. Defaults to an empty dictionary.
+        auth (list, optional): The authentication credentials. Defaults to an empty list.
+    """
     """Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform"""
 
     def __init__(self, slug, connector, version=None, attach_source=True, parameters=None, auth=None):
@@ -397,7 +481,7 @@ class RemotePipeline:
         self.auth = auth
 
     def run(self):
-        """ """
+        """Runs the pipeline and returns the context."""
         self.context.statistics = PipelineStatistics()
 
         logger.info(f"Starting remote pipeline {self.slug}")
@@ -422,57 +506,48 @@ class RemotePipeline:
 
     @staticmethod
     def from_url(slug: str, url, headers=None, *args, **kwargs) -> RemotePipeline:
-        """Build a new pipeline with the input being a document created from the given URL
+        """Creates a new pipeline with the input being a document created from the given URL.
 
         Args:
-          slug: The slug for the remote pipeline
-          url: The URL ie. https://www.google.com
-          headers: A dictionary of headers (Default value = None)
-          slug: str:
-          *args:
-          **kwargs:
+            slug (str): The slug for the remote pipeline.
+            url (str): The URL to create the document from.
+            headers (dict, optional): A dictionary of headers. Defaults to None.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
-          A new instance of a remote pipeline
-
+            RemotePipeline: A new instance of a remote pipeline.
         """
         return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
     def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -> RemotePipeline:
-        """Create a new pipeline using a file path as a source
+        """Creates a new pipeline using a file path as a source.
 
         Args:
-          slug: The slug for the remote pipeline
-          file_path: The path to the file
-          unpack: Unpack the file as a KDXA
-          slug: str:
-          file_path: str:
-          unpack: bool:  (Default value = False)
-          *args:
-          **kwargs:
+            slug (str): The slug for the remote pipeline.
+            file_path (str): The path to the file.
+            unpack (bool, optional): Whether to unpack the file as a KDXA. Defaults to False.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
-          Pipeline: A new pipeline
-
+            RemotePipeline: A new instance of a remote pipeline.
         """
         return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
 
     @staticmethod
     def from_text(slug: str, text: str, *args, **kwargs) -> RemotePipeline:
-        """Build a new pipeline and provide text as the basic to create a document
+        """Creates a new pipeline and provides text as the basis to create a document.
 
         Args:
-          slug: The slug for the remote pipeline
-          text: Text to use to create document
-          slug: str:
-          text: str:
-          *args:
-          **kwargs:
+            slug (str): The slug for the remote pipeline.
+            text (str): The text to use to create the document.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
-          RemotePipeline: A new pipeline
-
+            RemotePipeline: A new instance of a remote pipeline.
         """
 
         # need to update kwargs for attach_source
@@ -484,33 +559,26 @@ class RemotePipeline:
                     unpack: bool = False,
                     relative: bool = False,
                     caller_path: str = get_caller_dir()) -> RemotePipeline:
-        """Create a pipeline that will run against a set of local files from a folder
+        """Creates a pipeline that will run against a set of local files from a folder.
 
         Args:
-          slug: The slug for the remote pipeline
-          folder_path: The folder path
-          filename_filter: The filter for filename (i.e. *.pdf)
-          recursive: Should we look recursively in sub-directories (default False)
-          relative: Is the folder path relative to the caller (default False)
-          caller_path: The caller path (defaults to trying to work this out from the stack)
-          unpack: Unpack the file as a KDXA document
-          slug: str:
-          folder_path: str:
-          filename_filter: str:  (Default value = "*")
-          recursive: bool:  (Default value = False)
-          unpack: bool:  (Default value = False)
-          relative: bool:  (Default value = False)
-          caller_path: str:  (Default value = get_caller_dir())
+            slug (str): The slug for the remote pipeline.
+            folder_path (str): The folder path.
+            filename_filter (str, optional): The filter for filename (i.e. *.pdf). Defaults to "*".
+            recursive (bool, optional): Whether to look recursively in sub-directories. Defaults to False.
+            unpack (bool, optional): Whether to unpack the file as a KDXA document. Defaults to False.
+            relative (bool, optional): Whether the folder path is relative to the caller. Defaults to False.
+            caller_path (str, optional): The caller path. Defaults to the path from the stack.
 
         Returns:
-          RemotePipeline: A new pipeline
-
+            RemotePipeline: A new instance of a remote pipeline.
         """
         return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path,
                                                     unpack=unpack))
 
 
 class RemoteStep:
+    """Allows you to interact with a step that has been deployed in the Kodexa platform"""
     """Allows you to interact with a step that has been deployed in the Kodexa platform"""
 
     def __init__(self, ref, step_type='ACTION', attach_source=False, options=None):
@@ -522,7 +590,11 @@ class RemoteStep:
         self.options = options
 
     def to_dict(self):
-        """ """
+        """Converts the RemoteStep object to a dictionary.
+
+        Returns:
+            dict: Dictionary representation of the RemoteStep object.
+        """
         return {
             'ref': self.ref,
             'step_type': self.step_type,
@@ -530,10 +602,23 @@ class RemoteStep:
         }
 
     def get_name(self):
-        """ """
+        """Generates a name for the RemoteStep object.
+
+        Returns:
+            str: Name of the RemoteStep object.
+        """
         return f"Remote Action ({self.ref})"
 
     def process(self, document, context):
+        """Processes the document and context using the RemoteStep.
+
+        Args:
+            document (Document): The document to be processed.
+            context (Context): The context for processing.
+
+        Returns:
+            Document: The processed document.
+        """
         cloud_session = RemoteSession("service", self.ref)
         cloud_session.start()
 
@@ -560,14 +645,10 @@ class RemoteStep:
         return result_document if result_document else document
 
     def to_configuration(self):
-        """Returns a dictionary representing the configuration information for the step
-
-        :return: dictionary representing the configuration of the step
-
-        Args:
+        """Returns a dictionary representing the configuration information for the step.
 
         Returns:
-
+            dict: Dictionary representing the configuration of the step.
         """
         return {
             "ref": self.ref,
@@ -576,12 +657,25 @@ class RemoteStep:
 
 
 class EventHelper:
+    """Helper class for handling events.
+
+    Attributes:
+        event (ExecutionEvent): The execution event instance.
+    """
 
     def __init__(self, event: ExecutionEvent):
         self.event: ExecutionEvent = event
 
     @staticmethod
     def get_base_event(event_dict: Dict):
+        """Returns the base event based on the event type.
+
+        Args:
+            event_dict (Dict): The event dictionary.
+
+        Raises:
+            Exception: If the event type is unknown.
+        """
         if event_dict['type'] == 'assistant':
             return AssistantEvent(**event_dict)
         if event_dict['type'] == 'content':
@@ -598,6 +692,11 @@ class EventHelper:
         raise f"Unknown event type {event_dict}"
 
     def log(self, message: str):
+        """Logs a message to the Kodexa platform.
+
+        Args:
+            message (str): The message to log.
+        """
         response = requests.post(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/logs",
             json=[
@@ -608,7 +707,19 @@ class EventHelper:
         if response.status_code != 200:
             print(f"Logging failed {response.status_code}", flush=True)
 
+    
     def get_content_object(self, content_object_id: str):
+        """Gets a content object from the Kodexa platform.
+
+        Args:
+            content_object_id (str): The ID of the content object.
+
+        Raises:
+            Exception: If the content object cannot be found.
+
+        Returns:
+            io.BytesIO: The content object.
+        """
         logger.info(
             f"Getting content object {content_object_id} in event {self.event.id} in execution {self.event.execution.id}")
 
@@ -622,6 +733,18 @@ class EventHelper:
         return io.BytesIO(co_response.content)
 
     def put_content_object(self, content_object: ContentObject, content) -> ContentObject:
+        """Puts a content object to the Kodexa platform.
+
+        Args:
+            content_object (ContentObject): The content object.
+            content: The content.
+
+        Raises:
+            Exception: If the content object cannot be posted back.
+
+        Returns:
+            ContentObject: The posted content object.
+        """
         files = {
             "content": content
         }
@@ -646,6 +769,11 @@ class EventHelper:
         return ContentObject.model_validate(co_response.json())
 
     def build_pipeline_context(self) -> PipelineContext:
+        """Builds a pipeline context.
+
+        Returns:
+            PipelineContext: The pipeline context.
+        """
         context = PipelineContext(context={}, content_provider=self, execution_id=self.event.execution.id)
 
         if self.event.store_ref and self.event.document_family_id:
@@ -659,6 +787,14 @@ class EventHelper:
         return context
 
     def get_input_document(self, context):
+        """Gets the input document.
+
+        Args:
+            context: The context.
+
+        Returns:
+            Document: The input document.
+        """
         for content_object in self.event.execution.content_objects:
 
             if content_object.id == self.event.input_id:
@@ -676,14 +812,58 @@ class EventHelper:
 
 
 class SessionConnector:
+    """
+    A class used to represent a SessionConnector.
+
+    ...
+
+    Attributes
+    ----------
+    event_helper : object
+        a helper object used in the connector, default is None
+
+    Methods
+    -------
+    get_name():
+        Returns the name of the cloud content.
+
+    get_source(document):
+        Returns the content object of the document source.
+    """
     event_helper = None
 
     @classmethod
     def get_name(cls):
+        """
+        Gets the name of the cloud content.
+
+        Returns
+        -------
+        str
+            The name of the cloud content.
+        """
         return "cloud-content"
 
     @classmethod
     def get_source(cls, document):
+        """
+        Gets the content object of the document source.
+
+        Parameters
+        ----------
+        document : object
+            The document object to get the source from.
+
+        Raises
+        ------
+        Exception
+            If the event_helper is not set.
+
+        Returns
+        -------
+        object
+            The content object of the document source.
+        """
         if cls.event_helper is None:
             raise Exception("The event_helper needs to be set to use this connector")
 
