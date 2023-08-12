@@ -2178,9 +2178,15 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
     def reprocess_document_families(self, document_family_ids: List[str], assistant: AssistantEndpoint):
         """Reprocess the document families with the given ids through the assistant in a bulk fashion"""
+        
         request = ReprocessRequest()
         request.assistant_ids = [assistant.id]
+        # Dont process locked doc_familys. Iterate through the list in reverse to avoid index issues when removing items 
+        for i in range(len(document_family_ids) - 1, -1, -1):
+            if (self.get_family(document_family_ids[i]).locked):
+                del document_family_ids[i]
         request.family_ids = document_family_ids
+        
         self.client.put(f"api/stores/{self.ref.replace(':', '/')}/reprocess", body=request.to_dict())
 
     def get_metadata_class(self):
