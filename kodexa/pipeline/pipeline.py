@@ -21,7 +21,11 @@ logger = logging.getLogger()
 
 
 def new_id():
-    """ """
+    """Generates a new unique ID.
+    
+    Returns:
+        str: A new unique ID generated using the UUID version 4 algorithm.
+    """
     return str(uuid.uuid4()).replace("-", "")
 
 

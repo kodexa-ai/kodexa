@@ -2757,13 +2757,15 @@ class KodexaClient:
         response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
                                                                            "content-type": "application/json"})
         if response.status_code == 200 or response.status_code == 404:
-            return response.status_code == 200
+            return True
+
         process_response(response)
 
     def get(self, url, params=None) -> requests.Response:
         response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
                                                                            "content-type": "application/json"},
                                 verify=not self.insecure)
+
         return process_response(response)
 
     def post(self, url, body=None, data=None, files=None, params=None) -> requests.Response:

@@ -22,11 +22,22 @@ logger = logging.getLogger()
 
 
 def get_caller_dir():
-    """ """
+    """Returns the absolute path of the directory containing the file that called this function.
+    
+    This function uses the `inspect` module to retrieve the stack frame of the caller and extract its file path. The file path is then converted to an absolute path using the `os.path` module.
+    
+    Returns:
+        str: The absolute path of the caller's directory.
+    
+    Example:
+        >>> get_caller_dir()
+        '/path/to/caller/directory'
+    """
     # get the caller's stack frame and extract its file path
     frame_info = inspect.stack()[3]
     filepath = frame_info.filename
-    del frame_info  # drop the reference to the stack frame to avoid reference cycles
+    del frame_info
+    # drop the reference to the stack frame to avoid reference cycles
 
     # make the path absolute (optional)
     filepath = os.path.dirname(os.path.abspath(filepath))
@@ -220,17 +231,31 @@ registered_connectors: Dict[str, Type] = {}
 
 def get_connectors():
     """
-
-    Args:
-
+    Returns the keys of the registered connectors.
+    
     Returns:
-      :return:
-
+        A list of keys representing the registered connectors.
     """
     return registered_connectors.keys()
 
 
 def get_connector(connector: str, source: SourceMetadata):
+    """Get a connector based on the provided connector name and source metadata.
+    
+    Args:
+        connector (str): The name of the connector.
+        source (SourceMetadata): The metadata of the source.
+    
+    Returns:
+        The registered connector with the given name.
+    
+    Raises:
+        Exception: If the connector is not found.
+    
+    Example:
+        >>> get_connector('mysql', source_metadata)
+        <mysql_connector>
+    """
     if connector in registered_connectors:
         logger.info(f"Getting registered connector {connector}")
         return registered_connectors[connector]
@@ -240,16 +265,52 @@ def get_connector(connector: str, source: SourceMetadata):
 
 
 def add_connector(connector):
+    """Adds a connector to the list of registered connectors.
+    
+    Args:
+        connector: The connector object to be added.
+    
+    Returns:
+        None
+    
+    Raises:
+        None
+    """
     registered_connectors[connector.get_name()] = connector
 
 
 def get_source(document):
+    """
+    Returns the source of a document using the specified connector.
+    
+    Args:
+        document (Document): The document object for which to retrieve the source.
+    
+    Returns:
+        str: The source of the document.
+    
+    Raises:
+        ValueError: If the document source connector is invalid.
+    
+    Example:
+        >>> document = Document(...)
+        >>> source = get_source(document)
+        >>> print(source)
+        This is the source of the document.
+    """
     connector = get_connector(document.source.connector,
                               document.source)
     return connector.get_source(document)
 
 
 class DocumentStoreConnector:
+    """
+    A class for connecting to a document store.
+
+    Methods:
+    - get_name: Get the name of the document store.
+    - get_source: Get the source of a document from the document store.
+    """
 
     @staticmethod
     def get_name():
@@ -258,6 +319,18 @@ class DocumentStoreConnector:
 
     @staticmethod
     def get_source(document):
+        """
+        Get the source of a document from the document store.
+
+        Args:
+        document (object): The document object.
+
+        Returns:
+        io.BytesIO: The source of the document as a BytesIO object.
+
+        Raises:
+        Exception: If the source of the document cannot be retrieved.
+        """
         from kodexa import KodexaClient
         client = KodexaClient()
         from kodexa.platform.client import DocumentStoreEndpoint

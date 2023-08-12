@@ -14,6 +14,28 @@ logger = logging.getLogger()
 
 
 def replace_option(option_type, option_value, event_helper, cache, kodexa_client):
+    """Replace an option based on its type and value.
+    
+    Args:
+        option_type (str): The type of the option.
+        option_value (str): The value of the option.
+        event_helper: The event helper object.
+        cache: The cache object.
+        kodexa_client: The Kodexa client object.
+    
+    Returns:
+        The replaced option based on its type and value.
+    
+    Raises:
+        Exception: If there is an error accessing the document or taxonomy.
+    
+    Notes:
+        - If the option type is 'document', the function will download the document from the store and replace the option with it.
+        - If the option type contains the word 'store', the function will return a store object instance.
+        - If the option type contains the word 'pipeline', the function will create a pipeline object instance.
+        - If the option type is 'taxonomy', the function will return a taxonomy object instance.
+        - If the option type is not recognized, the function will return the original option value.
+    """
     logger.info("Replacing option")
     if option_type == 'document':
         # We need to download the document from the store and replace the option with it
@@ -99,6 +121,24 @@ def replace_option(option_type, option_value, event_helper, cache, kodexa_client
 
 
 def replace_options(step, event_helper, cache, kodexa_client):
+    """
+    Replaces options in a step with their corresponding values.
+    
+    Args:
+        step (Step): The step object containing the options to be replaced.
+        event_helper (EventHelper): The event helper object.
+        cache (Cache): The cache object.
+        kodexa_client (KodexaClient): The Kodexa client object.
+    
+    Returns:
+        None
+    
+    Raises:
+        None
+    
+    Example:
+        replace_options(step, event_helper, cache, kodexa_client)
+    """
     logger.info(f"Determine is we have any options that need replacement")
     # We need to document any documents that are part of the options
     for key in step.option_types.keys():
