@@ -19,6 +19,29 @@ import deepdiff
 
 
 class Ref:
+    """
+    A class to represent a reference.
+
+    Attributes
+    ----------
+    ref : str
+        a string reference
+    version : str, optional
+        a version of the reference, default is None
+    resource : str, optional
+        a resource of the reference, default is None
+    slug : str
+        a slug of the reference, default is an empty string
+    org_slug : str
+        an organization slug of the reference, default is an empty string
+    object_ref : str
+        a formatted string of the reference
+
+    Methods
+    -------
+    __init__(self, ref: str)
+        Constructs all the necessary attributes for the Ref object.
+    """
 
     def __init__(self, ref: str):
         self.ref: str = ref
@@ -40,6 +63,15 @@ class Ref:
 
 
 class DocumentMetadata(Dict):
+    """A flexible dict based approach to capturing metadata for the document.
+
+    This class extends from Dict to provide a flexible way to store and 
+    manage metadata associated with a document.
+
+    Args:
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+    """
     """A flexible dict based approach to capturing metadata for the document"""
 
     def __init__(self, *args, **kwargs):
@@ -47,6 +79,20 @@ class DocumentMetadata(Dict):
 
 
 class ContentException(Dict):
+    """A content exception represents an issue identified during labeling or validation at the document level.
+
+    Attributes:
+        tag (Optional[str]): Tag associated with the exception.
+        message (str): Message describing the exception.
+        exception_details (Optional[str]): Detailed information about the exception.
+        group_uuid (Optional[str]): UUID of the group associated with the exception.
+        tag_uuid (Optional[str]): UUID of the tag associated with the exception.
+        exception_type (str): Type of the exception.
+        node_uuid (Optional[str]): UUID of the node associated with the exception.
+        severity (str): Severity level of the exception, default is 'ERROR'.
+        value (Optional[str]): Value associated with the exception.
+        exception_type_id (Optional[str]): ID of the exception type.
+    """
     """A content exception represents an issue identified during labeling or validation at the document level"""
 
     def __init__(self, exception_type: str, message: str, severity: str = 'ERROR', tag: Optional[str] = None,
@@ -67,6 +113,24 @@ class ContentException(Dict):
 
 
 class Tag(Dict):
+    """A class to represent the metadata for a label that is applied as a feature on a content node.
+
+    Attributes:
+        start (Optional[int]): The start position (zero indexed) of the content within the node. If None, label is applied to the whole node.
+        end (Optional[int]): The end position (zero indexed) of the content within the node. If None, label is applied to the whole node.
+        value (Optional[str]): A string representing the value that was labelled in the node.
+        data (Optional[Any]): Any data object (JSON serializable) that you wish to associate with the label.
+        uuid (Optional[str]): The UUID for this tag instance. This allows tags that are on different content nodes to be related through the same UUID.
+        confidence (Optional[float]): The confidence of the tag in a range of 0-1.
+        index (Optional[int]): The tag index. This is used to allow us to order tags, and understand the ordering of parent child tag relationships.
+        bbox (Optional[List[int]]): The optional bounding box that can be used if the label is spatial (based on the node as the container).
+        group_uuid (Optional[str]): The UUID of the group that this tag belongs to. This is used to allow us to group tags together.
+        parent_group_uuid (Optional[str]): The UUID of the parent group that this tag belongs to. This is used to allow us to group tags together.
+        cell_index (Optional[int]): The cell index of the cell that this tag belongs to. This is used to allow us to group tags together.
+        note (Optional[str]): A note that can be associated with the tag.
+        status (Optional[str]): The status of the tag. This can be passed to an attribute status during extraction.
+        owner_uri (Optional[str]): The URI of the owner (ie. model://kodexa/narrative:1.0.0 or user://pdodds).
+    """
     """A tag represents the metadata for a label that is applies as a feature on a content node"""
 
     def __init__(self, start: Optional[int] = None, end: Optional[int] = None, value: Optional[str] = None,
@@ -110,12 +174,28 @@ class Tag(Dict):
 
 
 class FindDirection(Enum):
+    """
+    Enum class for defining the direction of search in a tree structure.
+
+    Attributes:
+        CHILDREN (int): Represents the direction towards children nodes.
+        PARENT (int): Represents the direction towards parent node.
+    """
     """ """
     CHILDREN = 1
     PARENT = 2
 
 
 class Traverse(Enum):
+    """
+    An enumeration class that represents different types of traversals.
+
+    Attributes:
+        SIBLING (int): Represents traversal to a sibling.
+        CHILDREN (int): Represents traversal to children.
+        PARENT (int): Represents traversal to a parent.
+        ALL (int): Represents traversal to all types of nodes.
+    """
     """ """
     SIBLING = 1
     CHILDREN = 2
@@ -1034,12 +1114,44 @@ class ContentNode(object):
             node_only = False
 
         def get_tag_uuid(tag_uuid):
+            """
+        This function returns the provided tag_uuid if it exists, otherwise it generates a new UUID.
+    
+        Args:
+            tag_uuid (str): The UUID of the tag.
+    
+        Returns:
+            str: The provided tag_uuid if it exists, otherwise a newly generated UUID.
+        """
             if tag_uuid:
                 return tag_uuid
 
             return str(uuid.uuid4())
 
         def tag_node_position(node_to_check, start, end, node_data, tag_uuid, offset=0, value=None):
+            """
+    This function tags a node position in a given data structure. It iterates over the content parts of the node to check, 
+    and based on the type of the part (string or integer), it performs different operations. If the part is a string, it 
+    adjusts the start and end positions and adds a feature to the node. If the part is an integer, it finds the corresponding 
+    child node and recursively calls the function on the child node. After processing all parts, it checks for any missing 
+    children and processes them as well. Finally, it checks if the length of all content matches the calculated content length.
+    
+    Args:
+        node_to_check (Node): The node to check and tag.
+        start (int): The start position of the tag.
+        end (int): The end position of the tag.
+        node_data (dict): The data associated with the node.
+        tag_uuid (str): The UUID of the tag.
+        offset (int, optional): The offset to apply. Defaults to 0.
+        value (str, optional): The value to use for the tag. If None, the part of the content at the start and end positions is used. Defaults to None.
+    
+    Raises:
+        Exception: If an invalid part is encountered in the content parts of the node to check.
+        Exception: If there is a mismatch between the length of all content and the calculated content length.
+    
+    Returns:
+        int: The calculated content length.
+    """
             content_length = 0
             original_start = start
             original_end = end
@@ -1247,6 +1359,21 @@ class ContentNode(object):
         """
 
         def group_tag_values(group_dict, feature_val, tag_uuid, tag_node):
+            """
+    This function groups tag values if they share the same uuid. It checks if the uuid of the feature value matches the tag uuid. 
+    If they match, it sets the final value to the feature value if it exists, otherwise it sets it to the tag node content. 
+    Then, it checks if the uuid is in the value groups keys. If it is, it appends the final value to the group. 
+    If it's the first occurrence, it sets the group to the final value.
+    
+    Args:
+        group_dict (dict): The dictionary to group the values in.
+        feature_val (dict): The feature value to check.
+        tag_uuid (str): The uuid of the tag.
+        tag_node (Node): The node of the tag.
+    
+    Returns:
+        None
+    """
             # we know the names of all these tags are the same, but we want to group them if they share the same uuid
 
             if feature_val['uuid'] != tag_uuid:
@@ -1263,6 +1390,7 @@ class ContentNode(object):
                 # first occurrence
                 group_dict[feature_val['uuid']] = [final_value]
 
+        
         if include_children:
             tagged_nodes = self.document.get_tagged_nodes(tag_name, tag_uuid=tag_uuid)
         else:
@@ -1603,6 +1731,9 @@ class ContentNode(object):
 
 
 class ContentFeature(object):
+    """
+    A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode.
+    """
     """A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode"""
 
     def __init__(self, feature_type: str, name: str, value: Any, single: bool = True):
@@ -1619,19 +1750,20 @@ class ContentFeature(object):
         return f"Feature [type='{self.feature_type}' name='{self.name}' value='{self.value}' single='{self.single}']"
 
     def to_dict(self):
-        """Create a dictionary representing this ContentFeature's structure and content.
-        Returns:
-          dict: The properties of this ContentFeature structured as a dictionary.
+        """
+        Create a dictionary representing this ContentFeature's structure and content.
 
-        >>> node.to_dict()
+        Returns:
+            dict: The properties of this ContentFeature structured as a dictionary.
         """
         return {'name': self.feature_type + ':' + self.name, 'value': self.value, 'single': self.single}
 
     def get_value(self):
-        """Get the value from the feature. This method will handle the single flag
+        """
+        Get the value from the feature. This method will handle the single flag.
 
-           Returns:
-              The value of the feature
+        Returns:
+            Any: The value of the feature.
         """
         if self.single:
             return self.value[0]
@@ -1640,6 +1772,16 @@ class ContentFeature(object):
 
 
 class ModelInsight(KodexaBaseModel):
+    """
+    A class used to represent the insights of a model.
+
+    Attributes:
+        model_ref (str): The reference to the model.
+        insight_type (str): The type of the insight.
+        description (Optional[str]): The description of the insight, default is None.
+        details (Optional[str]): The details of the insight, default is None.
+        properties (Optional[Dict]): The properties of the insight, default is None.
+    """
     model_ref: str
     insight_type: str
     description: Optional[str] = None
@@ -1649,6 +1791,22 @@ class ModelInsight(KodexaBaseModel):
 
 @dataclasses.dataclass()
 class SourceMetadata:
+    """Class for keeping track of an original source information for a document.
+
+    Attributes:
+        original_filename (Optional[str]): The original filename of the document.
+        original_path (Optional[str]): The original path of the document.
+        checksum (Optional[str]): The checksum of the document.
+        cid (Optional[str]): The ID used for internal caching.
+        last_modified (Optional[str]): The last modified date of the document.
+        created (Optional[str]): The creation date of the document.
+        connector (Optional[str]): The connector used for the document.
+        mime_type (Optional[str]): The MIME type of the document.
+        headers (Optional[Dict]): The headers of the document.
+        lineage_document_uuid (Optional[str]): The UUID of the document that this document was derived from.
+        source_document_uuid (Optional[str]): The UUID of the original first document.
+        pdf_document_uuid (Optional[str]): The UUID of the document in a PDF form (used for archiving and preview).
+    """
     """Class for keeping track of the original source information for a
     document
 
@@ -1681,13 +1839,13 @@ class SourceMetadata:
 
     @classmethod
     def from_dict(cls, env):
-        """
+        """Creates an instance of the class from a dictionary.
 
         Args:
-          env:
+            env (dict): A dictionary containing the attributes of the class.
 
         Returns:
-
+            SourceMetadata: An instance of the class.
         """
         return cls(**{
             k: v for k, v in env.items()
@@ -1696,6 +1854,14 @@ class SourceMetadata:
 
 
 class ContentClassification(object):
+    """A class to represent a content classification.
+
+    Attributes:
+        label (str): The label of the content classification.
+        taxonomy (str, optional): The taxonomy of the content classification. Defaults to None.
+        selector (str, optional): The selector of the content classification. Defaults to None.
+        confidence (float, optional): The confidence of the content classification. Defaults to None.
+    """
     """A content classification captures information at the document level to track classification metadata"""
 
     def __init__(self, label: str, taxonomy: Optional[str] = None, selector: Optional[str] = None,
@@ -1706,16 +1872,32 @@ class ContentClassification(object):
         self.confidence = confidence
 
     def to_dict(self):
+        """Converts the ContentClassification object to a dictionary.
+
+        Returns:
+            dict: A dictionary representation of the ContentClassification object.
+        """
         return {"label": self.label, "taxonomy": self.taxonomy, "selector": self.selector,
                 "confidence": self.confidence}
 
     @classmethod
     def from_dict(cls, dict_val):
+        """Creates a ContentClassification object from a dictionary.
+
+        Args:
+            dict_val (dict): A dictionary containing the attributes of the ContentClassification object.
+
+        Returns:
+            ContentClassification: A ContentClassification object.
+        """
         return ContentClassification(label=dict_val['label'], taxonomy=dict_val.get('taxonomy'),
                                      selector=dict_val.get('selector'), confidence=dict_val.get('confidence'))
 
 
 class FeatureSetDiff:
+    """
+    A utility class that can be used to diff two feature sets.
+    """
     """
     A utility class that can be used to diff two feature sets
     """
@@ -1729,7 +1911,10 @@ class FeatureSetDiff:
 
     def get_differences(self):
         """
-        :return: Data dictionaries that contains the differences of two feature sets
+        Gets the differences between the two feature sets.
+
+        Returns:
+            dict: A dictionary containing the differences between the two feature sets.
         """
         if 'type_changes' in self._differences:
             self._differences.pop('type_changes')
@@ -1738,36 +1923,55 @@ class FeatureSetDiff:
 
     def get_changed_nodes(self):
         """
-        :return: Data dictionary of added and removed nodes
+        Gets the nodes that were changed.
+
+        Returns:
+            dict: A dictionary containing the nodes that were changed.
         """
         return self._changed_nodes
 
     def get_exclude_paths(self):
         """
-        :return: List of paths to exclude
+        Gets the paths to exclude.
+
+        Returns:
+            list: A list of paths to exclude.
         """
         return ['shape', 'group_uuid', 'uuid', 'parent_group_uuid', 'single']
 
     def exclude_callback(self, path, key):
         """
-        Checks if the key is to be exluceded from the diff
-        :param path: contains the values of that key
-        :param key: The key of the data dictionary to compare
-        :return: boolean
+        Checks if the key is to be excluded from the diff.
+
+        Args:
+            path (str): The path that contains the values of the key.
+            key (str): The key of the data dictionary to compare.
+
+        Returns:
+            bool: True if the key is to be excluded, False otherwise.
         """
         if any(re.search(exclude_key, key) for exclude_key in self.get_exclude_paths()):
             return True
         else:
             return False
 
+    
     def parse_feature_set(self, feature_set: FeatureSet):
         """
-        :param feature_set: The feature set to be parsed
-        :return: Dictionary of feature with the key as the nodeUuid
+        Parses the feature set.
+
+        Args:
+            feature_set (FeatureSet): The feature set to be parsed.
+
+        Returns:
+            dict: A dictionary of features with the key as the nodeUuid.
         """
         return {feature.get('nodeUuid'): feature for feature in feature_set.node_features}
 
     def parsed_values_changed(self):
+        """
+        Checks if the old value is still in the second feature map. If it is, remove the key.
+        """
         for key, value in self._differences.get('values_changed').items():
             # Check if the old_value is stil in the second_feature_map. If it is remove the key
             if key in self.second_feature_map.node_features:
@@ -1775,14 +1979,19 @@ class FeatureSetDiff:
 
     def is_equal(self) -> bool:
         """
-        Checks if the two feature set is equal to each other
-        :return: This returns a bool
+        Checks if the two feature sets are equal to each other.
+
+        Returns:
+            bool: True if the feature sets are equal, False otherwise.
         """
         return self._differences == {}
 
     def get_changed_nodes(self):
         """
-        :return: A list of nodes that were changed
+        Gets the nodes that were changed.
+
+        Returns:
+            dict: A dictionary containing the nodes that were changed.
         """
         if self.is_equal():
             return []
@@ -1814,11 +2023,20 @@ class FeatureSetDiff:
 
     def get_difference_count(self):
         """
-        :return: The total number of differences between the feature sets
+        Gets the total number of differences between the feature sets.
+
+        Returns:
+            int: The total number of differences between the feature sets.
         """
         return len(self._differences().keys())
 
     def parsed_item_added(self):
+        """
+        Parses the items that were added.
+
+        Returns:
+            dict: A dictionary containing the items that were added.
+        """
         item_added: Dict = self._differences.get('iterable_item_added')
         if item_added:
             return {}
@@ -1834,8 +2052,13 @@ class FeatureSetDiff:
 
     def parsed_node_uuid(self, key):
         """
-        :param key: Key of data dictionary
-        :return: node uuid from the key
+        Parses the node uuid from the key.
+
+        Args:
+            key (str): The key of the data dictionary.
+
+        Returns:
+            str: The node uuid from the key.
         """
         node = key.split("['")[1].split("']")[0]
         return node
@@ -1976,18 +2199,53 @@ class Document(object):
         tag_instances = []
 
         class TagInstance:
+            """
+    A class to represent a TagInstance.
+
+    ...
+
+    Attributes
+    ----------
+    tag_uuid : str
+        a string that represents the unique identifier of the tag
+    nodes : list
+        a list of nodes associated with the tag
+
+    Methods
+    -------
+    get_value():
+        Returns the combined content of all nodes.
+    get_data():
+        Returns the data of the tag feature with the same uuid as the tag.
+    """
 
             def __init__(self, tag_uuid, nodes):
                 self.tag_uuid = tag_uuid
                 self.nodes = nodes
 
             def get_value(self):
+                """
+        Combines and returns the content of all nodes.
+
+        Returns
+        -------
+        str
+            a string that represents the combined content of all nodes
+        """
                 content_parts = []
                 for node in self.nodes:
                     content_parts.append(node.get_all_content())
                 return " ".join(content_parts)
 
             def get_data(self):
+                """
+        Returns the data of the tag feature with the same uuid as the tag.
+
+        Returns
+        -------
+        dict
+            a dictionary that represents the data of the tag feature with the same uuid as the tag
+        """
                 for node in self.nodes:
                     for tag_feature in node.get_tag_features():
                         data = tag_feature.value[0]
@@ -2170,13 +2428,14 @@ class Document(object):
         # We don't want to store the none values
         def clean_none_values(d):
             """
-
-            Args:
-              d:
-
-            Returns:
-
-            """
+    This function recursively cleans a dictionary by removing keys with None values.
+    
+    Args:
+        d (dict): The dictionary to clean.
+    
+    Returns:
+        dict: A new dictionary with the same structure as the input, but without keys that had None values.
+    """
             clean = {}
             for k, v in d.items():
                 if isinstance(v, dict):
@@ -2490,15 +2749,49 @@ class Document(object):
 
 
 class TagInstance:
+    """
+    A class to represent a TagInstance.
+
+    Attributes
+    ----------
+    tag : Tag
+        an instance of Tag class
+    nodes : list
+        a list of nodes
+
+    Methods
+    -------
+    add_node(nodes: List[ContentNode])
+        Extend the list of nodes with new nodes.
+    """
     def __init__(self, tag: Tag, nodes):
         self.tag = tag
         self.nodes = nodes
 
     def add_node(self, nodes: List[ContentNode]):
+        """
+        Extend the list of nodes with new nodes.
+
+        Parameters
+        ----------
+            nodes : List[ContentNode]
+                a list of new nodes to be added
+        """
         self.nodes.extend(nodes)
 
 
 class ContentObjectReference:
+    """A reference to a content object within a document.
+
+    This class provides a way to reference a specific content object within a document,
+    and includes information about the document's family and the store where the document is located.
+
+    Attributes:
+        content_object (ContentObject): The content object being referenced.
+        store: The store where the document is located.
+        document (Document): The document in which the content object is located.
+        document_family: The family to which the document belongs.
+    """
     """ """
 
     def __init__(self, content_object: ContentObject, store, document: Document,

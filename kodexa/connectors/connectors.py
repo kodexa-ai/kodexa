@@ -120,20 +120,22 @@ class FolderConnector:
 
 
 class FileHandleConnector:
-    """ """
+    """
+     A File Handle Connector can be used to create a document from a file path (e.g. a file like object)
+     """
 
     @staticmethod
     def get_name():
         """ """
         return 'file-handle'
 
-    def __init__(self, original_path):
+    def __init__(self, original_path: str):
         self.file = original_path
         self.index = 0
         self.completed = False
 
     @staticmethod
-    def get_source(document):
+    def get_source(document: Document):
         """
 
         Args:
@@ -158,8 +160,6 @@ class FileHandleConnector:
         document.source.original_filename = self.file
         document.source.original_path = os.path.basename(self.file)
         document.source.connector = self.get_name()
-
-        # TODO we need to get the checksum and last_updated and created times
         return document
 
 
