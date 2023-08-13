@@ -1,7 +1,6 @@
 import os
-from pathlib import Path
 
-from kodexa import *
+from kodexa import Document
 from kodexa.model import ContentException
 
 

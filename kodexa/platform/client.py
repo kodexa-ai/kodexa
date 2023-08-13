@@ -15,16 +15,22 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Optional, List, ClassVar
+from typing import Optional, List, ClassVar, Dict, Any
 
 import requests
 from functional import seq
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Document
 from kodexa.model.base import BaseEntity
-from kodexa.model.objects import *
+from kodexa.model.objects import PageUser, PageMembership, PageExecution, PageAction, PagePipeline, PageProject, \
+    PageAssistant, PageWorkspace, PageChannel, PageMessage, PageProjectTemplate, PageDataForm, PageDashboard, \
+    PageDataException, PageDocumentFamily, Organization, SlugBasedMetadata, Assistant, Execution, CustomEvent, Message, \
+    Channel, Workspace, DocumentFamily, Project, ProjectResourcesUpdate, ProjectTag, ProjectTemplate, Pipeline, \
+    CredentialDefinition, DataForm, Dashboard, ModelRuntime, ExtensionPack, Taxonomy, Taxon, Membership, User, \
+    DataAttribute, DataObject, PageNote, ContentObject, DocumentStatus, Store, PageDataObject, DocumentContentMetadata, \
+    ModelContentMetadata, ModelTraining, PageModelTraining, ContentException, PlatformOverview, Action, PageStore
 
 logger = logging.getLogger()
 
