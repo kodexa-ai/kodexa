@@ -30,7 +30,9 @@ from kodexa.model.objects import PageUser, PageMembership, PageExecution, PageAc
     Channel, Workspace, DocumentFamily, Project, ProjectResourcesUpdate, ProjectTag, ProjectTemplate, Pipeline, \
     CredentialDefinition, DataForm, Dashboard, ModelRuntime, ExtensionPack, Taxonomy, Taxon, Membership, User, \
     DataAttribute, DataObject, PageNote, ContentObject, DocumentStatus, Store, PageDataObject, DocumentContentMetadata, \
-    ModelContentMetadata, ModelTraining, PageModelTraining, ContentException, PlatformOverview, Action, PageStore
+    ModelContentMetadata, ModelTraining, PageModelTraining, ContentException, PlatformOverview, Action, PageStore, \
+    PageTaxonomy, PageAssistantDefinition, PageCredentialDefinition, DeploymentOptions, AssistantDefinition, \
+    DataException, ReprocessRequest, PageExtensionPack, PageOrganization
 
 logger = logging.getLogger()
 
@@ -240,9 +242,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
             page_response = self.list(
                 query=query, page=page, page_size=page_size, sort=sort, filters=filters
             )
-            if not page_response.content:
-                break
-            for resource in page_response.content:
+            for resource in page_response:
                 yield resource
             page += 1
 

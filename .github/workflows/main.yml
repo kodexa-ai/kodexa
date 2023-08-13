@@ -55,11 +55,6 @@ jobs:
           poetry version $NEW_VERSION --no-ansi
       - name: Install dependencies
         run: poetry install
-      - name: Lint with flake8
-        run: |
-          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-          yes | poetry run mypy --install-types kodexa || true
       - name: Test with pytest
         run: |
           poetry run pytest
