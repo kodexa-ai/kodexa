@@ -24,15 +24,70 @@ from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Document
 from kodexa.model.base import BaseEntity
-from kodexa.model.objects import PageUser, PageMembership, PageExecution, PageAction, PagePipeline, PageProject, \
-    PageAssistant, PageWorkspace, PageChannel, PageMessage, PageProjectTemplate, PageDataForm, PageDashboard, \
-    PageDataException, PageDocumentFamily, Organization, SlugBasedMetadata, Assistant, Execution, CustomEvent, Message, \
-    Channel, Workspace, DocumentFamily, Project, ProjectResourcesUpdate, ProjectTag, ProjectTemplate, Pipeline, \
-    CredentialDefinition, DataForm, Dashboard, ModelRuntime, ExtensionPack, Taxonomy, Taxon, Membership, User, \
-    DataAttribute, DataObject, PageNote, ContentObject, DocumentStatus, Store, PageDataObject, DocumentContentMetadata, \
-    ModelContentMetadata, ModelTraining, PageModelTraining, ContentException, PlatformOverview, Action, PageStore, \
-    PageTaxonomy, PageAssistantDefinition, PageCredentialDefinition, DeploymentOptions, AssistantDefinition, \
-    DataException, ReprocessRequest, PageExtensionPack, PageOrganization
+from kodexa.model.objects import (
+    PageUser,
+    PageMembership,
+    PageExecution,
+    PageAction,
+    PagePipeline,
+    PageProject,
+    PageAssistant,
+    PageWorkspace,
+    PageChannel,
+    PageMessage,
+    PageProjectTemplate,
+    PageDataForm,
+    PageDashboard,
+    PageDataException,
+    PageDocumentFamily,
+    Organization,
+    SlugBasedMetadata,
+    Assistant,
+    Execution,
+    CustomEvent,
+    Message,
+    Channel,
+    Workspace,
+    DocumentFamily,
+    Project,
+    ProjectResourcesUpdate,
+    ProjectTag,
+    ProjectTemplate,
+    Pipeline,
+    CredentialDefinition,
+    DataForm,
+    Dashboard,
+    ModelRuntime,
+    ExtensionPack,
+    Taxonomy,
+    Taxon,
+    Membership,
+    User,
+    DataAttribute,
+    DataObject,
+    PageNote,
+    ContentObject,
+    DocumentStatus,
+    Store,
+    PageDataObject,
+    DocumentContentMetadata,
+    ModelContentMetadata,
+    ModelTraining,
+    PageModelTraining,
+    ContentException,
+    PlatformOverview,
+    Action,
+    PageStore,
+    PageTaxonomy,
+    PageAssistantDefinition,
+    PageCredentialDefinition,
+    DeploymentOptions,
+    AssistantDefinition,
+    DataException,
+    ReprocessRequest,
+    PageExtensionPack,
+    PageOrganization,
+)
 
 logger = logging.getLogger()
 

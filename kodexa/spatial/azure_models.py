@@ -9,18 +9,18 @@ def create_page_node_keep_azure_lines(
     document, page_node, azure_page, overlap_percentage=0.6
 ):
     """
-    This function creates a page node and keeps azure lines. It first creates a node with the content area as the parent node. 
-    Then it sets the bounding box of the page node with the width and height of the azure page. It then checks all the lines identified 
-    by Form Recognizer and creates a line node for each line. It also sets the bounding box of the line node. It then checks if the 
-    azure nodes overlap. If they do, it adds the word to the line words and included words. It then creates a word node for each word 
+    This function creates a page node and keeps azure lines. It first creates a node with the content area as the parent node.
+    Then it sets the bounding box of the page node with the width and height of the azure page. It then checks all the lines identified
+    by Form Recognizer and creates a line node for each line. It also sets the bounding box of the line node. It then checks if the
+    azure nodes overlap. If they do, it adds the word to the line words and included words. It then creates a word node for each word
     in the line words and sets the bounding box and content parts of the word node.
-    
+
     Args:
         document (obj): The document object.
         page_node (obj): The page node object.
         azure_page (dict): The azure page dictionary.
         overlap_percentage (float, optional): The overlap percentage. Defaults to 0.6.
-    
+
     Returns:
         bool: Returns False if there is no issue.
     """
@@ -59,14 +59,14 @@ def create_page_node_keep_azure_lines(
 def create_kddb_from_azure(azure_data, keep_azure_lines=True, overlap_percentage=0.6):
     """
     This function creates a kddb document from Azure data.
-    
+
     Args:
         azure_data (dict): A dictionary of the json data returned by Azure.
         keep_azure_lines (bool, optional): If set to False, the lines returned will match how Kodexa put lines together.
             Default is True - keeping how Azure creates lines.
         overlap_percentage (float, optional): The percentage of overlap for nodes to be considered on the same line (from 0.0 to 1.0).
             Default is 0.6.
-    
+
     Returns:
         Document: A kddb document with the content nodes. If an issue is found during the creation of the document, None is returned.
     """
@@ -105,12 +105,12 @@ def create_kddb_from_azure(azure_data, keep_azure_lines=True, overlap_percentage
 def create_page_node_line_up_kodexa(document, page_node, azure_page):
     """
     This function creates a page node line up for a Kodexa document using Azure's OCR words. It groups Azure's OCR words into lines to match how Kodexa sees lines. It also sets the bounding box for the content area node and line node. It creates a word node for each word in the Azure line words and sets the bounding box for each word node. It also adds a feature for the word node if the word has a confidence key. It sets the content parts for the word node and calculates the total width of the characters and the count of characters. It sets the statistics for the line node based on the calculated total width and count of characters.
-    
+
     Args:
         document (Document): The Kodexa document.
         page_node (Node): The page node in the Kodexa document.
         azure_page (dict): The Azure page containing the OCR words.
-    
+
     Returns:
         bool: Returns False indicating that the document is a good kddb document with no issue.
     """
@@ -173,16 +173,16 @@ def get_azure_line_words(
 ):
     """
     This function is used to get the words from a line in Azure. It checks if the words overlap with the Azure line and page, and if they have not been added before.
-    
+
     Args:
         azure_line (dict): The Azure line to get words from.
         azure_page (dict): The Azure page that contains the line.
         azure_page_words (list): The list of words in the Azure page.
         already_added_azure_words (list): The list of words that have already been added.
-    
+
     Returns:
         list: A list of words from the Azure line that overlap with the Azure page and have not been added before.
-    
+
     Raises:
         IndexError: An error occurred when trying to access the first element of an empty list.
     """
@@ -213,10 +213,10 @@ def get_azure_line_words(
 def get_azure_page_words(azure_page):
     """
     This function extracts the words from a given Azure page. If the page already contains a 'words' key, it directly assigns the value to 'page_words'. If not, it iterates over the 'lines' key, extends the 'page_words' list with the words in each line, and assigns the 'text' value to the 'content' key for each word.
-    
+
     Args:
         azure_page (dict): A dictionary representing an Azure page. It should contain either a 'words' key with a list of words as its value, or a 'lines' key with a list of lines, each containing a 'words' key with a list of words as its value.
-    
+
     Returns:
         list: A list of words extracted from the Azure page. Each word is represented as a dictionary with a 'content' key.
     """
@@ -237,20 +237,20 @@ def get_azure_next_line(
 ):
     """
     Finds the next line in a given direction from a reference line in a document.
-    
-    This function searches for the next line in a document from a reference line in a specified direction. 
-    The direction can be 'right', 'left', 'down', 'up', or 'up_left'. The function returns the next line 
+
+    This function searches for the next line in a document from a reference line in a specified direction.
+    The direction can be 'right', 'left', 'down', 'up', or 'up_left'. The function returns the next line
     if it exists, otherwise it returns None.
-    
+
     Args:
         document_lines (list): A list of lines in the document.
         ref_line (str): The reference line from which to find the next line.
         direction (str, optional): The direction in which to find the next line. Defaults to 'right'.
         overlap_percentage (float, optional): The minimum percentage of overlap required to consider a line as the next line. Defaults to 0.6.
-    
+
     Returns:
         str or None: The next line in the specified direction from the reference line if it exists, otherwise None.
-    
+
     Raises:
         ValueError: If the direction is not one of 'right', 'left', 'down', 'up', or 'up_left'.
     """
@@ -384,17 +384,17 @@ def get_azure_next_line(
 
 def group_azure_lines_to_kodexa_lines(page):
     """
-    This function groups Azure lines into Kodexa lines. It first checks if the page contains any lines. If not, it returns an empty list. 
-    If there are lines, it converts Azure lines into Kodexa lines. It then sorts the remaining page lines by y1 and extends the line groups 
-    with the result of the check_azure_line_group function applied to the sorted lines. Finally, it sorts the line groups based on y and 
+    This function groups Azure lines into Kodexa lines. It first checks if the page contains any lines. If not, it returns an empty list.
+    If there are lines, it converts Azure lines into Kodexa lines. It then sorts the remaining page lines by y1 and extends the line groups
+    with the result of the check_azure_line_group function applied to the sorted lines. Finally, it sorts the line groups based on y and
     returns the sorted line groups.
-    
+
     Args:
-        page (dict): A dictionary representing a page. It should contain a key "lines" which maps to a list of lines. Each line is a 
+        page (dict): A dictionary representing a page. It should contain a key "lines" which maps to a list of lines. Each line is a
         dictionary that should contain the keys "content" or "text".
-    
+
     Returns:
-        list: A list of line groups. Each line group is a list of lines. Each line is a dictionary that contains the keys "content" or 
+        list: A list of line groups. Each line group is a list of lines. Each line is a dictionary that contains the keys "content" or
         "text" and a key KDXA_BBOX_KEY which maps to a list of four numbers representing the bounding box of the line.
     """
     # Group the azure lines into Kodexa lines
@@ -447,10 +447,10 @@ def group_azure_lines_to_kodexa_lines(page):
 def get_bbox_of_line_group(line_group):
     """
     This function calculates and returns the bounding box of a given line group. If the line group is empty, the function returns None.
-    
+
     Args:
         line_group (list): A list of lines where each line is a dictionary containing the key 'KDXA_BBOX_KEY' which maps to a list of four integers representing the bounding box of the line.
-    
+
     Returns:
         list or None: A list of four values representing the bounding box of the line group. If the line group is empty, returns None.
     """
@@ -474,16 +474,16 @@ def page_line_overlaps_with_line_group(
     min_overlap_percentage_y=0.4,
 ):
     """
-    Checks if a page line overlaps with a line group. If the page line overlaps with both the line group and the next line group, 
+    Checks if a page line overlaps with a line group. If the page line overlaps with both the line group and the next line group,
     it only returns true if the overlap is more for the line group than the next line group.
-    
+
     Args:
         page_line_dict (dict): Dictionary containing page line data.
         line_group (list): List of lines in the current line group.
         next_line_group (list): List of lines in the next line group.
         axis_overlap (str, optional): Axis to check for overlap. Defaults to 'y'.
         min_overlap_percentage_y (float, optional): Minimum overlap percentage on the y-axis to consider valid. Defaults to 0.4.
-    
+
     Returns:
         bool: True if the page line overlaps with the line group, False otherwise.
     """
@@ -528,15 +528,14 @@ def page_line_overlaps_with_line_group(
         )
 
 
-
 def node_heights_are_valid(new_bbox, line_group):
     """
     This function checks if the font size/height of the nodes are within 60% of each other. It calculates the minimum and maximum height of each line and compares it with the new height. If the ratio of the minimum of new height and min_height to the maximum of new height and min_height is greater than or equal to 0.55, or the ratio of the minimum of new height and max_height to the maximum of new height and max_height is greater than or equal to 0.55, the function returns True.
-    
+
     Args:
         new_bbox (list): A list representing the new bounding box.
         line_group (list): A list of lines.
-    
+
     Returns:
         bool: True if the font size/height of the nodes are within 60% of each other, False otherwise.
     """
@@ -558,16 +557,16 @@ def node_heights_are_valid(new_bbox, line_group):
 def check_azure_line_group(original_line_group):
     """
     This function checks if the azure lines in a given group overlap on the x-axis. If they do, the function breaks down the group into multiple groups.
-    
+
     Args:
         original_line_group (list): A list of azure lines to be checked for overlap.
-    
+
     Returns:
         list: A list of line groups where each group is a list of azure lines that do not overlap on the x-axis.
-    
+
     Raises:
         None
-    
+
     Note:
         The azure lines are sorted by x in the original_line_group. The function also checks for y-overlap (+/- 0.1).
     """
@@ -611,14 +610,14 @@ def check_azure_line_group(original_line_group):
 def convert_azure_bbox(azure_obj, azure_page):
     """
     This function converts the bounding box coordinates from an Azure object to a standard format.
-    
+
     Args:
         azure_obj (dict): The Azure object containing the bounding box information. This can be in the form of 'boundingBox', 'bounding_box', or 'polygon'.
         azure_page (dict): The Azure page object containing the page information such as 'angle' and 'height'.
-    
+
     Raises:
         Exception: If no bounding box information can be found in the Azure object.
-    
+
     Returns:
         list: A list of four elements representing the converted bounding box coordinates [x1, y1, x2, y2].
     """
@@ -665,13 +664,13 @@ def convert_azure_bbox(azure_obj, azure_page):
 def percent_azure_nodes_overlap(azure_node1, azure_node2, azure_page, axis_overlap="y"):
     """
     Calculates the percentage of overlap between two azure nodes along a specified axis.
-    
+
     Args:
         azure_node1 (dict): The first azure node.
         azure_node2 (dict): The second azure node.
         azure_page (dict): The azure page containing the nodes.
         axis_overlap (str, optional): The axis along which to calculate overlap. Defaults to "y".
-    
+
     Returns:
         float: The percentage of overlap between the two nodes.
     """
@@ -686,13 +685,13 @@ def azure_kdxa_nodes_overlap(
 ):
     """
     This function checks if the overlap between two nodes is greater than or equal to a specified percentage.
-    
+
     Args:
         azure_node1 (dict): The first node from Azure.
         kdxa_node2 (object): The second node from KDXA.
         azure_page (dict): The page from Azure where the first node is located.
         overlap_percentage (float, optional): The minimum percentage of overlap. Defaults to 0.6.
-    
+
     Returns:
         bool: True if the overlap in both x and y axis is greater than or equal to the overlap_percentage, False otherwise.
     """
@@ -710,13 +709,13 @@ def azure_kdxa_nodes_overlap(
 def azure_nodes_overlap(azure_node1, azure_node2, azure_page, overlap_percentage=0.6):
     """
     This function checks if two azure nodes overlap on a page by a certain percentage.
-    
+
     Args:
         azure_node1 (object): The first azure node.
         azure_node2 (object): The second azure node.
         azure_page (object): The azure page where the nodes are located.
         overlap_percentage (float, optional): The percentage of overlap to check for. Defaults to 0.6.
-    
+
     Returns:
         bool: True if the nodes overlap by the specified percentage on both x and y axis, False otherwise.
     """
@@ -735,14 +734,14 @@ def azure_nodes_overlap(azure_node1, azure_node2, azure_page, overlap_percentage
 def rotate(point, origin, degrees):
     """
     Rotates a point around a given origin.
-    
+
     This function takes a point and an origin (both as tuples of x, y coordinates), and a number of degrees. It rotates the point around the origin by the given number of degrees, using the rotation matrix formula.
-    
+
     Args:
         point (tuple): The x, y coordinates of the point to rotate.
         origin (tuple): The x, y coordinates of the point around which to rotate.
         degrees (float): The number of degrees by which to rotate the point.
-    
+
     Returns:
         tuple: The x, y coordinates of the rotated point.
     """
