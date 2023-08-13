@@ -584,7 +584,9 @@ def insert_col_before_or_after(
 
 def adjust_col_marker_line_columns(node, col_marker_line):
     """
-    This function adjusts the columns of a marker line in a table based on a reference column marker line. It checks if the columns of the current line align with the reference columns and updates the bounding box for each column accordingly. If the number of columns in the current line is less than the reference, it adds new columns to match the reference.
+    This function adjusts the columns of a marker line in a table based on a reference column marker line.
+    It checks if the columns of the current line align with the reference columns and updates the bounding box for each column accordingly.
+    If the number of columns in the current line is less than the reference, it adds new columns to match the reference.
 
     Args:
         node (Node): The node representing the current line in the table.
@@ -597,7 +599,9 @@ def adjust_col_marker_line_columns(node, col_marker_line):
         None
 
     Note:
-        This function assumes that the input nodes have methods such as get_children(), get_bbox(), get_x(), get_width(), and that the node.document has a method create_node(). It also assumes the existence of functions overlaps_with() and update_bbox_for_columns() in the same scope.
+        This function assumes that the input nodes have methods such as get_children(), get_bbox(), get_x(), get_width(),
+        and that the node.document has a method create_node(). It also assumes the existence of functions overlaps_with()
+        and update_bbox_for_columns() in the same scope.
     """
     # Check the other rows of the table if they align with the ref columns
     line_columns = node.get_children().copy()
@@ -701,7 +705,12 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
     """
     Adjusts the table line columns based on the reference columns.
 
-    This function checks the alignment of the rows of the table with the reference columns. If a line column overlaps with a reference column or is within the allowed column space multiplier, it extends the x value to cover both nodes. If the line column's x is before the reference column's x, it inserts an 'empty' column node in all the rows in the table. If the line column's x is after the reference column's x + width, it inserts an empty column node in the temporary line columns. If there are less columns in the given line compared to the reference, it creates a new column node and appends it to the temporary line columns.
+    This function checks the alignment of the rows of the table with the reference columns.
+    If a line column overlaps with a reference column or is within the allowed column space multiplier,
+    it extends the x value to cover both nodes. If the line column's x is before the reference column's x,
+    it inserts an 'empty' column node in all the rows in the table. If the line column's x is after the reference column's x + width,
+    it inserts an empty column node in the temporary line columns. If there are less columns in the given line compared to the reference,
+    it creates a new column node and appends it to the temporary line columns.
 
     Args:
         node (Node): The node object.
@@ -946,14 +955,16 @@ def get_data_marker_column_and_index(
     data_marker_line: ContentNode, data_marker: DataMarker
 ):
     """
-    This function retrieves the column and column index where the data marker is located and where the column overlaps with the marker on the x-axis.
+    This function retrieves the column and column index where the data marker is located and where the column overlaps
+    with the marker on the x-axis.
 
     Args:
         data_marker_line (ContentNode): The line containing the data marker.
         data_marker (DataMarker): The data marker to be located.
 
     Returns:
-        tuple: A tuple containing the column where the data marker is located and its index. If no match is found, returns (None, None).
+        tuple: A tuple containing the column where the data marker is located and its index. If no match is found,
+        returns (None, None).
 
     Raises:
         IndexError: An error occurs if the data marker is not found in the data_marker_line.
@@ -994,7 +1005,8 @@ def data_marker_overlaps_with_target_marker(
         overlap_percentage (float, optional): The percentage of overlap. Defaults to OVERLAP_PERCENTAGE.
 
     Returns:
-        bool: True if the percentage of nodes overlap for both the data marker line and the data word is greater than or equal to the overlap percentage, False otherwise.
+        bool: True if the percentage of nodes overlap for both the data marker line and the data word is
+        greater than or equal to the overlap percentage, False otherwise.
     """
     # Checks that data_marker_line overlaps with the bbox provided in the template
     template_data_marker_bbox = target_data_marker.data_marker_bbox
@@ -1022,7 +1034,8 @@ def get_column_below_or_above_data(
         data_marker (DataMarker): The data marker to be located.
         target_lines (List[ContentNode]): The list of lines to be searched.
         col_space_multiplier (float, optional): The multiplier for column space. Defaults to 2.0.
-        column_direction (str, optional): The direction to search for the column. Can be 'column_below' or 'column_above'. Defaults to 'column_below'.
+        column_direction (str, optional): The direction to search for the column. Can be 'column_below' or
+        'column_above'. Defaults to 'column_below'.
 
     Returns:
         ContentNode: The column below or above the data marker if found, None otherwise.
