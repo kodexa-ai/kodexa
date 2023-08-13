@@ -9,7 +9,7 @@ from typing import List
 import msgpack
 
 from kodexa.model import Document, ContentNode, SourceMetadata
-from kodexa.model.model import ContentClassification, DocumentMetadata, ContentFeature, ContentException, ModelInsight
+from kodexa.model.model import DocumentMetadata, ContentFeature, ContentException, ModelInsight
 
 logger = logging.getLogger()
 
@@ -426,7 +426,6 @@ class SqliteDocumentPersistence(object):
                              'metadata': self.document.metadata.to_dict(),
                              'source': self.__clean_none_values(dataclasses.asdict(self.document.source)),
                              'mixins': self.document.get_mixins(),
-                             'classes': [content_class.to_dict() for content_class in self.document.classes],
                              'labels': self.document.labels,
                              'uuid': self.document.uuid}
         self.cursor.execute(METADATA_DELETE)
@@ -455,9 +454,7 @@ class SqliteDocumentPersistence(object):
             self.document.labels = metadata['labels']
         if 'mixins' in metadata and metadata['mixins']:
             self.document._mixins = metadata['mixins']
-        if 'classes' in metadata and metadata['classes']:
-            self.document.classes = [ContentClassification.from_dict(content_class) for content_class in
-                                     metadata['classes']]
+
         self.uuid = metadata.get('uuid')
 
         import semver

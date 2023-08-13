@@ -2288,12 +2288,6 @@ class DocumentFamily(KodexaBaseModel):
         description='The statistics about the labels in the document family',
     )
 
-    classes: Optional[List[ContentClassification]] = Field(
-        None,
-        description='The classification classes from the latest content object in the family',
-        
-    )
-
 
 class DocumentFamilyStatistics(KodexaBaseModel):
     """

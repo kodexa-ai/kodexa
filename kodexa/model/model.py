@@ -1856,47 +1856,6 @@ class SourceMetadata:
         })
 
 
-class ContentClassification(object):
-    """A class to represent a content classification.
-
-    Attributes:
-        label (str): The label of the content classification.
-        taxonomy (str, optional): The taxonomy of the content classification. Defaults to None.
-        selector (str, optional): The selector of the content classification. Defaults to None.
-        confidence (float, optional): The confidence of the content classification. Defaults to None.
-    """
-    """A content classification captures information at the document level to track classification metadata"""
-
-    def __init__(self, label: str, taxonomy: Optional[str] = None, selector: Optional[str] = None,
-                 confidence: Optional[float] = None):
-        self.label = label
-        self.taxonomy = taxonomy
-        self.selector = selector
-        self.confidence = confidence
-
-    def to_dict(self):
-        """Converts the ContentClassification object to a dictionary.
-
-        Returns:
-            dict: A dictionary representation of the ContentClassification object.
-        """
-        return {"label": self.label, "taxonomy": self.taxonomy, "selector": self.selector,
-                "confidence": self.confidence}
-
-    @classmethod
-    def from_dict(cls, dict_val):
-        """Creates a ContentClassification object from a dictionary.
-
-        Args:
-            dict_val (dict): A dictionary containing the attributes of the ContentClassification object.
-
-        Returns:
-            ContentClassification: A ContentClassification object.
-        """
-        return ContentClassification(label=dict_val['label'], taxonomy=dict_val.get('taxonomy'),
-                                     selector=dict_val.get('selector'), confidence=dict_val.get('confidence'))
-
-
 class FeatureSetDiff:
     """
     A utility class that can be used to diff two feature sets.
@@ -2119,9 +2078,6 @@ class Document(object):
         """Source metadata for this document"""
         self.labels: List[str] = []
         """A list of the document level labels for the document"""
-        self.classes: List[ContentClassification] = []
-        """A list of the content classifications associated at the document level"""
-
         self.tag_instances: List[TagInstance] = []
         """A list of tag instances that contains a set of tag that has a set of nodes"""
 
@@ -2433,7 +2389,6 @@ class Document(object):
                 'content_node': self.content_node.to_dict() if self.content_node else None,
                 'source': clean_none_values(dataclasses.asdict(self.source)),
                 'mixins': self._mixins,
-                'classes': [content_class.to_dict() for content_class in self.classes],
                 'labels': self.labels,
                 'uuid': self.uuid}
 

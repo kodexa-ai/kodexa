@@ -17,11 +17,6 @@ name: Lint Code Base
 on:
   pull_request:
     branches: [ master, main, release/*, features/* ]
-  push:
-    branches:
-      - release/*
-      - features/*
-      - releases/*
 
 # Set the Job #
 ###############
