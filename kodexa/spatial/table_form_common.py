@@ -6,7 +6,7 @@ from kodexa.spatial.bbox_common import (
     width_of_overlap,
     percent_nodes_overlap,
 )
-from typing import Optional, List, Dict, Tuple
+from typing import Optional, List
 import logging
 
 logger = logging.getLogger()
@@ -25,21 +25,28 @@ def transform_line_to_columns(
     graphic_slop=1.0,
 ):
     """
-    Calculate the potential columns under this node and then transform the line to have
-    a new set of nodes (type column).
-    Note that this action will transform the document.
-
-    :param node: The node that we want to transform to columns
-    :param col_space_multiplier: Number of spaces between columns relative to the mean width of
-    the characters on the page. Default is 3.0.
-    :param col_marker_line: Line that dictates the positions of the columns. Default is None - which means the columns
-    will be identified based on the spatial values of the nodes.
-    :param use_graphical_nodes: If set to True, the graphical figures (lines and rects)
-    that are identified on the page will be used to identify the columns of the table. Default is False.
-    :param graphic_slop: The value of the slop allowed in lining up the nodes.
-    Default is 1.0 which means it is +/- 1.0 of the mean character width of the line.
-    This is only checked when use_graphical_nodes is set to True.
-
+    Transforms a line node into column nodes based on the provided parameters.
+    
+    Args:
+        node (Node): The node that we want to transform to columns.
+        col_space_multiplier (float, optional): Number of spaces between columns relative to the mean width of
+            the characters on the page. Default is 3.0.
+        col_marker_line (Line, optional): Line that dictates the positions of the columns. Default is None - which means the columns
+            will be identified based on the spatial values of the nodes.
+        use_graphical_nodes (bool, optional): If set to True, the graphical figures (lines and rects)
+            that are identified on the page will be used to identify the columns of the table. Default is False.
+        graphic_slop (float, optional): The value of the slop allowed in lining up the nodes.
+            Default is 1.0 which means it is +/- 1.0 of the mean character width of the line.
+            This is only checked when use_graphical_nodes is set to True.
+    
+    Returns:
+        None
+    
+    Raises:
+        None
+    
+    Note:
+        This function will transform the document in-place.
     """
 
     if node.node_type != "line":
@@ -153,6 +160,21 @@ def transform_line_to_columns(
 
 
 def check_graphical_nodes_break(node, graphic_slop, mean_width, line_words, i):
+    """
+    Checks if there is a break in graphical nodes.
+    
+    This function checks if there is a break in graphical nodes by comparing the x-coordinates of the nodes with a calculated range. If a break is found, the bounding box of the current and previous nodes are adjusted accordingly.
+    
+    Args:
+        node (object): The node object to be checked.
+        graphic_slop (float): The slop value for the graphic.
+        mean_width (float): The average width of the nodes.
+        line_words (list): A list of word objects in a line.
+        i (int): The index of the current word in the line_words list.
+    
+    Returns:
+        bool: True if a break is found, False otherwise.
+    """
     is_break = False
     graphical_nodes = node.select("//rect | //figure-line")
 
@@ -208,6 +230,17 @@ def check_graphical_nodes_break(node, graphic_slop, mean_width, line_words, i):
 
 
 def create_column_node_from_words(document, line, column_words):
+    """
+    Creates a column node from a list of words.
+    
+    Args:
+        document (object): The document object where the node will be created.
+        line (object): The line object where the column node will be created.
+        column_words (list): A list of word objects to be included in the column node.
+    
+    Returns:
+        object: The created column node with the bounding box set and children adopted.
+    """
     column_node = document.create_node(node_type="column")
 
     cw_first_bbox = column_words[0].get_bbox()
@@ -233,26 +266,20 @@ def to_table(
     graphic_slop=1.0,
 ):
     """
-    Uses a tag name to convert matching child nodes into tables
-    If col_marker_line is given, it will be used to identify the number of columns
-    in the table, with the col_space_multiplier.
-
-    Note that this transforms the document - adding 'columns' as children of 'lines'.
-
-    :param tag_name: The tag name used for the table rows
-    :param col_space_multiplier: Number of spaces between columns relative to the mean width of
-    the characters on the page. Default is 3.0.
-    :param col_marker_line: Line that dictates the positions of the columns. Default is None - which means the columns
-    will be identified based on the spatial values of the nodes.
-    :param insert_col_before: If set to True, the code will insert an empty column header (col 0)
-    based on col_marker_line. Default is False.
-    :param insert_col_after: If set to True, the code will append an empty column header (last column)
-    based on col_marker_line. Default is False.
-    :param insert_col_index: Index where an empty column will be inserted in col_marker_line. Default is None.
-    :param use_graphical_nodes: If set to True, th e graphical figures (lines and rects) that are identified on
-    the page will be used to identify the columns of the table. Default is False.
-    :param graphic_slop: The value of the slop allowed in lining up the nodes. Default is 1.0 which means it is
-    +/- 1.0 of the mean character width of the line. This is only checked when use_graphical_nodes is set to True.
+    Converts matching child nodes into tables using a tag name.
+    
+    This function transforms the document by adding 'columns' as children of 'lines'. If a col_marker_line is provided, it will be used to identify the number of columns in the table, with the col_space_multiplier.
+    
+    Args:
+        node: The node to be converted.
+        tag_name (str): The tag name used for the table rows.
+        col_space_multiplier (float, optional): Number of spaces between columns relative to the mean width of the characters on the page. Defaults to 3.0.
+        col_marker_line (str, optional): Line that dictates the positions of the columns. Defaults to None, which means the columns will be identified based on the spatial values of the nodes.
+        insert_col_before (bool, optional): If True, the code will insert an empty column header (col 0) based on col_marker_line. Defaults to False.
+        insert_col_after (bool, optional): If True, the code will append an empty column header (last column) based on col_marker_line. Defaults to False.
+        insert_col_index (int, optional): Index where an empty column will be inserted in col_marker_line. Defaults to None.
+        use_graphical_nodes (bool, optional): If True, the graphical figures (lines and rects) that are identified on the page will be used to identify the columns of the table. Defaults to False.
+        graphic_slop (float, optional): The value of the slop allowed in lining up the nodes. This is only checked when use_graphical_nodes is set to True. Defaults to 1.0.
     """
 
     selector_str = "//*[hasTag('" + tag_name + "')]"
@@ -285,22 +312,30 @@ def transform_lines_to_table(
     """
     Transforms each line into columns first and then groups them according to their positions.
     Note that this transforms the document.
-
-    :param tag_name: The tag name used for the table rows
-    :param table_lines: The lines that will be transformed into table
-    :param col_space_multiplier: Number of spaces between columns relative to the mean width of
-    the characters on the page. Default is 3.0.
-    :param col_marker_line: Line that dictates the positions of the columns. Default is None - which means the columns
-    will be identified based on the spatial values of the nodes.
-    :param insert_col_before: If set to True, the code will insert an empty column header (col 0)
-    based on col_marker_line. Default is False.
-    :param insert_col_after: If set to True, the code will append an empty column header (last column)
-    based on col_marker_line. Default is False.
-    :param insert_col_index: Index where an empty column will be inserted in col_marker_line. Default is None.
-    :param use_graphical_nodes: If set to True, th e graphical figures (lines and rects) that are identified on
-    the page will be used to identify the columns of the table. Default is False.
-    :param graphic_slop: The value of the slop allowed in lining up the nodes. Default is 1.0 which means it is
-    +/- 1.0 of the mean character width of the line. This is only checked when use_graphical_nodes is set to True.
+    
+    Args:
+        node: The node to be transformed.
+        tag_name (str): The tag name used for the table rows.
+        table_lines (list): The lines that will be transformed into table.
+        col_space_multiplier (float, optional): Number of spaces between columns relative to the mean width of
+            the characters on the page. Default is 3.0.
+        col_marker_line (str, optional): Line that dictates the positions of the columns. Default is None - which means the columns
+            will be identified based on the spatial values of the nodes.
+        insert_col_before (bool, optional): If set to True, the code will insert an empty column header (col 0)
+            based on col_marker_line. Default is False.
+        insert_col_after (bool, optional): If set to True, the code will append an empty column header (last column)
+            based on col_marker_line. Default is False.
+        insert_col_index (int, optional): Index where an empty column will be inserted in col_marker_line. Default is None.
+        use_graphical_nodes (bool, optional): If set to True, the graphical figures (lines and rects) that are identified on
+            the page will be used to identify the columns of the table. Default is False.
+        graphic_slop (int, optional): The value of the slop allowed in lining up the nodes. Default is 10 which means it is
+            +/- 10 of the mean character width of the line. This is only checked when use_graphical_nodes is set to True.
+    
+    Returns:
+        None
+    
+    Raises:
+        None
     """
     if len(table_lines) == 0:
         return
@@ -423,6 +458,23 @@ def insert_col_before_or_after(
     col_space_multiplier,
     use_graphical_nodes,
 ):
+    """
+    Inserts an empty column or columns in col_marker_line. The insert_col_index is expected to be the index after the column before/after is/are added.
+    
+    Args:
+        node (Node): The node where the new columns will be inserted.
+        insert_col_before (bool): If True, a new column will be inserted before the node.
+        insert_col_after (bool): If True, a new column will be inserted after the node.
+        insert_col_index (int): The index where the new column will be inserted.
+        col_space_multiplier (float): The multiplier for the space between columns.
+        use_graphical_nodes (bool): If True, graphical nodes will be used.
+    
+    Raises:
+        Exception: If the empty column has already been inserted.
+    
+    Returns:
+        None
+    """
     # Insert (an) empty column/s in col_marker_line
     # insert_col_index is expected to be the index after column before/after is/are added
 
@@ -531,6 +583,22 @@ def insert_col_before_or_after(
 
 
 def adjust_col_marker_line_columns(node, col_marker_line):
+    """
+    This function adjusts the columns of a marker line in a table based on a reference column marker line. It checks if the columns of the current line align with the reference columns and updates the bounding box for each column accordingly. If the number of columns in the current line is less than the reference, it adds new columns to match the reference.
+    
+    Args:
+        node (Node): The node representing the current line in the table.
+        col_marker_line (Node): The node representing the reference column marker line.
+    
+    Returns:
+        list: A list of updated column nodes for the current line.
+    
+    Raises:
+        None
+    
+    Note:
+        This function assumes that the input nodes have methods such as get_children(), get_bbox(), get_x(), get_width(), and that the node.document has a method create_node(). It also assumes the existence of functions overlaps_with() and update_bbox_for_columns() in the same scope.
+    """
     # Check the other rows of the table if they align with the ref columns
     line_columns = node.get_children().copy()
     ref_columns = col_marker_line.get_children().copy()
@@ -630,10 +698,27 @@ def adjust_col_marker_line_columns(node, col_marker_line):
 
 
 def adjust_table_line_columns(node, table, col_space_multiplier):
+    """
+    Adjusts the table line columns based on the reference columns.
+    
+    This function checks the alignment of the rows of the table with the reference columns. If a line column overlaps with a reference column or is within the allowed column space multiplier, it extends the x value to cover both nodes. If the line column's x is before the reference column's x, it inserts an 'empty' column node in all the rows in the table. If the line column's x is after the reference column's x + width, it inserts an empty column node in the temporary line columns. If there are less columns in the given line compared to the reference, it creates a new column node and appends it to the temporary line columns.
+    
+    Args:
+        node (Node): The node object.
+        table (list): The table data.
+        col_space_multiplier (float): The column space multiplier.
+    
+    Returns:
+        list: The adjusted line columns.
+    
+    Raises:
+        Exception: If the node type is not 'column'.
+    """
     # Check the other rows of the table if they align with the ref columns
     line_columns = node.get_children().copy()
     ref_columns = table[0]
-    temp_line_columns = []  # If there are ones to combine
+    temp_line_columns = []
+      # If there are ones to combine
     ref_col_idx = 0
     overlap_found = False
     mean_width = node.get_statistics()["updated_mean_width"]
@@ -807,10 +892,15 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
 
 def update_bbox_for_columns(col1, col2, update_col1=True):
     """
-    Updates the bounding box of the columns when lining them up in a table
-    :param col1:  column 1
-    :param col2: column 2
-    :param update_col1: if set to False, only col2's bbox will be updated. Default is True.
+    Updates the bounding box of the columns when lining them up in a table.
+    
+    Args:
+        col1 (object): The first column object.
+        col2 (object): The second column object.
+        update_col1 (bool, optional): If set to False, only col2's bbox will be updated. Default is True.
+    
+    Returns:
+        None
     """
     # Set the bounding box to cover the min x1 and max x2
     min_x1 = min(col1.get_bbox()[0], col2.get_bbox()[0])
@@ -825,6 +915,24 @@ def update_bbox_for_columns(col1, col2, update_col1=True):
 
 
 class DataMarker:
+    """
+    A class used to represent a DataMarker.
+
+    Attributes
+    ----------
+    data_marker_text : str, optional
+        Text of the data marker, by default ""
+    data_marker_text_re : str, optional
+        Regular expression of the data marker text, by default ""
+    data_marker_bbox : list of float, optional
+        Bounding box of the data marker
+    data_value_bbox : list of float, optional
+        Bounding box of the data value
+    data_value_direction : str, optional
+        Direction of the data value, by default ""
+    data_type : str, optional
+        Type of the data, by default ""
+    """
     data_marker_text: Optional[str] = ""
     data_marker_text_re: Optional[str] = ""
     data_marker_bbox: Optional[List[float]]
@@ -836,6 +944,19 @@ class DataMarker:
 def get_data_marker_column_and_index(
     data_marker_line: ContentNode, data_marker: DataMarker
 ):
+    """
+    This function retrieves the column and column index where the data marker is located and where the column overlaps with the marker on the x-axis.
+    
+    Args:
+        data_marker_line (ContentNode): The line containing the data marker.
+        data_marker (DataMarker): The data marker to be located.
+    
+    Returns:
+        tuple: A tuple containing the column where the data marker is located and its index. If no match is found, returns (None, None).
+    
+    Raises:
+        IndexError: An error occurs if the data marker is not found in the data_marker_line.
+    """
     # Get column and column index where the data marker is and the column overlaps with the marker (x-axis)
     try:
         column_index = [
@@ -862,6 +983,18 @@ def data_marker_overlaps_with_target_marker(
     target_data_marker: DataMarker,
     overlap_percentage=OVERLAP_PERCENTAGE,
 ):
+    """
+    Checks if the data marker line overlaps with the bounding box provided in the template.
+    
+    Args:
+        data_marker_line_bbox: The bounding box of the data marker line.
+        data_word_bbox: The bounding box of the data word.
+        target_data_marker (DataMarker): The target data marker.
+        overlap_percentage (float, optional): The percentage of overlap. Defaults to OVERLAP_PERCENTAGE.
+    
+    Returns:
+        bool: True if the percentage of nodes overlap for both the data marker line and the data word is greater than or equal to the overlap percentage, False otherwise.
+    """
     # Checks that data_marker_line overlaps with the bbox provided in the template
     template_data_marker_bbox = target_data_marker.data_marker_bbox
     template_data_value_bbox = target_data_marker.data_value_bbox
@@ -880,6 +1013,22 @@ def get_column_below_or_above_data(
     col_space_multiplier=2.0,
     column_direction="column_below",
 ):
+    """
+    This function retrieves the column below or above the data in a given line of content nodes. 
+    
+    Args:
+        data_marker_line (ContentNode): The line containing the data marker.
+        data_marker (DataMarker): The data marker to be located.
+        target_lines (List[ContentNode]): The list of lines to be searched.
+        col_space_multiplier (float, optional): The multiplier for column space. Defaults to 2.0.
+        column_direction (str, optional): The direction to search for the column. Can be 'column_below' or 'column_above'. Defaults to 'column_below'.
+    
+    Returns:
+        ContentNode: The column below or above the data marker if found, None otherwise.
+    
+    Raises:
+        IndexError: If the data marker line index is out of range.
+    """
     data_marker_line_index = target_lines.index(data_marker_line)
     logger.info("get_column_below_or_above_data: %s", data_marker)
 
