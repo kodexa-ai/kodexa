@@ -1,7 +1,7 @@
 """
 Some example steps that can be used locally
 """
-from common import (
+from .common import (
     NodeTagger,
     NodeTagCopy,
     TextParser,
