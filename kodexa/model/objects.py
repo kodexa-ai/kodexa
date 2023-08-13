@@ -630,17 +630,6 @@ class AttributeStatus(KodexaBaseModel):
     status_type: Optional[StatusType1] = Field(None, alias='statusType')
 
 
-class ContentClassification(KodexaBaseModel):
-    """
-    The classification classes from the latest content object in the family
-    """
-
-    label: Optional[str] = None
-    taxonomy: Optional[str] = None
-    selector: Optional[str] = None
-    confidence: Optional[float] = None
-
-
 class ContentType(Enum):
     """
     The type of content

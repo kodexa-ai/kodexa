@@ -2257,26 +2257,6 @@ class Document(object):
             tag_instances.append(TagInstance(key, groups[key]))
         return tag_instances
 
-    def add_classification(self, label: str, taxonomy_ref: Optional[str] = None) -> ContentClassification:
-        """Add a content classification to the document
-
-        Args:
-          label(str): the label
-          taxonomy_ref(Optional[str]): the reference to the taxonomy
-
-        Returns:
-          the content classification created (or the matching one if it is already on the document)
-
-        """
-        content_classification = ContentClassification(label, taxonomy=taxonomy_ref)
-
-        for existing_class in self.classes:
-            if existing_class.label == content_classification.label:
-                return existing_class
-
-        self.classes.append(content_classification)
-        return content_classification
-
     def add_label(self, label: str):
         """Add a label to the document
 
