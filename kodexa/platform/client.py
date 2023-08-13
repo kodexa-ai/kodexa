@@ -63,9 +63,6 @@ class OrganizationOwned(BaseModel):
     Attributes:
         organization (Optional[OrganizationEndpoint]): The organization that owns the object.
     """
-    """
-    A base class for objects that are owned by an organization
-    """
     organization: Optional["OrganizationEndpoint"] = None
 
     def set_organization(self, organization):
@@ -95,7 +92,7 @@ class ClientEndpoint(BaseModel):
     class Config:
         """
     This class is used to manage the configuration settings of the application.
-    
+
     Attributes:
         arbitrary_types_allowed (bool): A flag to allow arbitrary types. Default is True.
     """
@@ -153,7 +150,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
 
         Args:
             project (ProjectEndpoint): The project to associate with this endpoint.
-        
+
         Returns:
             self: The instance of the class.
         """
@@ -818,8 +815,8 @@ class PageTaxonomyEndpoint(PageTaxonomy, PageEndpoint):
     It is used to manage the endpoint requests related to the taxonomy of a page.
 
     Note:
-        Currently, this class doesn't have any methods or attributes. 
-        It's a placeholder for future methods and attributes related to 
+        Currently, this class doesn't have any methods or attributes.
+        It's a placeholder for future methods and attributes related to
         the endpoint requests of the page taxonomy.
     """
     pass
@@ -962,7 +959,7 @@ class PageExecutionEndpoint(PageExecution, PageEndpoint):
 class PageActionEndpoint(PageAction, PageEndpoint):
     """Represents a page action endpoint.
 
-    This class is used to represent a page action endpoint which is a combination of 
+    This class is used to represent a page action endpoint which is a combination of
     PageAction and PageEndpoint. It provides a method to get the type of the endpoint.
     """
     """Represents a page action endpoint"""
@@ -970,7 +967,7 @@ class PageActionEndpoint(PageAction, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint.
 
-        This method is used to get the type of the endpoint. In this case, it will always 
+        This method is used to get the type of the endpoint. In this case, it will always
         return "action".
 
         Returns:
@@ -982,7 +979,7 @@ class PageActionEndpoint(PageAction, PageEndpoint):
 class PagePipelineEndpoint(PagePipeline, PageEndpoint):
     """
     Represents a page pipeline endpoint.
-    
+
     This class is used to represent a page pipeline endpoint. It inherits from both
     the PagePipeline and PageEndpoint classes.
     """
@@ -991,10 +988,10 @@ class PagePipelineEndpoint(PagePipeline, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """
         Get the type of the endpoint.
-        
+
         This method is used to get the type of the endpoint. It returns a string
         that represents the type of the endpoint.
-        
+
         Returns:
             Optional[str]: The type of the endpoint. Returns "pipeline" for this class.
         """
@@ -1004,7 +1001,7 @@ class PagePipelineEndpoint(PagePipeline, PageEndpoint):
 class PageProjectEndpoint(PageProject, PageEndpoint):
     """Represents a page project endpoint.
 
-    This class is used to represent a page project endpoint which is a 
+    This class is used to represent a page project endpoint which is a
     combination of a page project and a page endpoint.
 
     Attributes:
@@ -1015,7 +1012,7 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint.
 
-        This method is used to get the type of the endpoint. In this case, 
+        This method is used to get the type of the endpoint. In this case,
         it will always return "project".
 
         Returns:
@@ -1027,8 +1024,8 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
 class PageAssistantEndpoint(PageAssistant, PageEndpoint):
     """
     Represents a page assistant endpoint.
-    
-    This class is used to represent a page assistant endpoint which is a 
+
+    This class is used to represent a page assistant endpoint which is a
     combination of a page assistant and a page endpoint.
     """
     """Represents a page assistant endpoint"""
@@ -1037,7 +1034,7 @@ class PageAssistantEndpoint(PageAssistant, PageEndpoint):
         """
         Get the type of the endpoint.
 
-        This method is used to get the type of the endpoint. In this case, 
+        This method is used to get the type of the endpoint. In this case,
         the type is always "assistant".
 
         Returns:
@@ -1218,7 +1215,7 @@ class PageDashboardEndpoint(PageDashboard, PageEndpoint):
 class PageDataExceptionEndpoint(PageDataException, PageEndpoint):
     """Represents a page of data exceptions endpoint.
 
-    This class is used to represent a page of data exceptions endpoint. It is a subclass of 
+    This class is used to represent a page of data exceptions endpoint. It is a subclass of
     both PageDataException and PageEndpoint.
 
     Attributes:
@@ -1232,7 +1229,7 @@ class PageDataExceptionEndpoint(PageDataException, PageEndpoint):
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint.
 
-        This method is used to get the type of the endpoint. It returns a string that 
+        This method is used to get the type of the endpoint. It returns a string that
         represents the type of the endpoint.
 
         Args:
@@ -1573,7 +1570,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
 
         Args:
             stores (List[DocumentStoreEndpoint]): The list of stores to be set.
-        
+
         Returns:
             AssistantEndpoint: The updated assistant endpoint.
         """
@@ -2395,7 +2392,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
 class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents a stores endpoint
 
-    This class is used to represent a stores endpoint. It inherits from ComponentEndpoint, 
+    This class is used to represent a stores endpoint. It inherits from ComponentEndpoint,
     ClientEndpoint, and OrganizationOwned classes.
 
     Attributes:
@@ -2429,11 +2426,11 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     def get_instance_class(self, object_dict=None):
         """Get the instance class of the endpoint
 
-        This method is used to get the instance class of the endpoint based on the 'storeType' 
+        This method is used to get the instance class of the endpoint based on the 'storeType'
         key in the object_dict.
 
         Args:
-            object_dict (dict, optional): A dictionary object that contains the 'storeType' key. 
+            object_dict (dict, optional): A dictionary object that contains the 'storeType' key.
             Defaults to None.
 
         Returns:
@@ -2833,7 +2830,7 @@ class ActionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
 class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """Represents a model runtimes endpoint.
 
-    This class is used to represent a model runtimes endpoint which is a 
+    This class is used to represent a model runtimes endpoint which is a
     component endpoint, a client endpoint and owned by an organization.
 
     Attributes:
@@ -3115,16 +3112,16 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
         def find_groups(taxons) -> List[Taxon]:
             """
     Finds and returns the group taxons from the given list of taxons.
-    
+
     Args:
         taxons (List[Taxon]): A list of taxon objects.
-    
+
     Returns:
         List[Taxon]: A list of group taxons.
-    
+
     Raises:
         None
-    
+
     Note:
         This function uses recursion to find group taxons in child taxons.
     """
@@ -3205,16 +3202,16 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
         def find_taxon(taxons, path):
             """
     Finds a taxon in a list of taxons that matches a given path.
-    
-    This function iterates over a list of taxons, checking if each taxon's path matches the given path. 
-    If a match is found, the taxon is returned. If no match is found in the top level of the list, 
-    the function recursively searches through the children of each taxon. If no taxon is found after 
+
+    This function iterates over a list of taxons, checking if each taxon's path matches the given path.
+    If a match is found, the taxon is returned. If no match is found in the top level of the list,
+    the function recursively searches through the children of each taxon. If no taxon is found after
     searching through all taxons and their children, the function returns None.
-    
+
     Args:
         taxons (list): A list of taxon objects to search through.
         path (str): The path of the taxon to find.
-    
+
     Returns:
         Taxon object if found, None otherwise.
     """
@@ -3233,7 +3230,7 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 class MembershipEndpoint(Membership, EntityEndpoint):
     """Represents a membership endpoint.
 
-    This class is used to represent a membership endpoint which is a combination of 
+    This class is used to represent a membership endpoint which is a combination of
     Membership and EntityEndpoint classes.
 
     Attributes:
@@ -3247,7 +3244,7 @@ class MembershipEndpoint(Membership, EntityEndpoint):
     def get_type(self) -> str:
         """Get the type of the endpoint.
 
-        This method is used to get the type of the endpoint. In this case, it will always 
+        This method is used to get the type of the endpoint. In this case, it will always
         return "memberships".
 
         Returns:
@@ -3700,7 +3697,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         else:
             raise Exception(f"Document family {self.id} does not exist")
 
-    
+
     def get_native(self) -> bytes:
         """
         Get the native content object of the document family.
@@ -4301,7 +4298,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         else:
             raise Exception(f"{file_path} is not a file")
 
-    
+
     def upload_file(self, file_path: str, object_path: Optional[str] = None, replace=False,
                     additional_metadata: Optional[dict] = None):
         """
@@ -4322,7 +4319,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         else:
             raise Exception(f"{file_path} is not a file")
 
-    
+
     def upload_bytes(self, path: str, content, replace=False,
                      additional_metadata: Optional[dict] = None) -> DocumentFamilyEndpoint:
         """
@@ -4414,7 +4411,14 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
         request = ReprocessRequest()
         request.assistant_ids = [assistant.id]
+
+        # Dont process locked doc_familys. Iterate through the list in reverse to avoid index issues when removing items
+        for i in range(len(document_family_ids) - 1, -1, -1):
+            if self.get_family(document_family_ids[i]).locked:
+                del document_family_ids[i]
+
         request.family_ids = document_family_ids
+
         self.client.put(f"api/stores/{self.ref.replace(':', '/')}/reprocess", body=request.to_dict())
 
     def get_metadata_class(self):
@@ -4898,13 +4902,13 @@ class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
 def process_response(response) -> requests.Response:
     """
     This function processes the server response. It checks the status code of the response and raises an exception with a specific message depending on the status code. If the status code is 401, it raises an "Unauthorized" exception. If the status code is 404, it raises a "Not found" exception. If the status code is 405, it raises a "Method not allowed" exception. If the status code is 500, it raises an "Internal server error" exception. If the status code is 400, it checks if the response has a JSON body with an "errors" field. If so, it raises an exception with a message containing all the errors. If not, it raises a "Bad request" exception. If the status code is anything other than 200, it raises an "Unexpected response" exception. If the status code is 200, it returns the response as is.
-    
+
     Args:
         response (requests.Response): The server response to process.
-    
+
     Returns:
         requests.Response: The original server response if the status code is 200.
-    
+
     Raises:
         Exception: If the status code is not 200, an exception is raised with a message specific to the status code.
     """
@@ -5058,13 +5062,13 @@ OBJECT_TYPES = {
 def resolve_object_type(obj_type):
     """
     This function takes a part of an object type (e.g., 'pipeline') and resolves it to the full object type (e.g., 'pipelines').
-    
+
     Args:
         obj_type (str): A string representing part of the object type.
-    
+
     Returns:
         tuple: A tuple containing the key and the object type dictionary, if found. If only one match is found, the key and the object type dictionary are returned. If no matches are found, an exception is raised. If multiple potential matches are found, an exception is raised.
-    
+
     Raises:
         Exception: If no matches are found for the object type, or if multiple potential matches are found.
     """
@@ -5431,7 +5435,7 @@ class KodexaClient:
         else:
             return self.base_url + "/" + url
 
-    
+
     def export_project(self, project: ProjectEndpoint, export_path: str):
         """
         A method to export a project.
