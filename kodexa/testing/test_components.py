@@ -1,4 +1,9 @@
-from kodexa.assistant import Assistant, AssistantContext, AssistantResponse, AssistantPipeline
+from kodexa.assistant import (
+    Assistant,
+    AssistantContext,
+    AssistantResponse,
+    AssistantPipeline,
+)
 from kodexa.model.objects import BaseEvent
 from kodexa.pipeline import Pipeline
 
@@ -13,7 +18,9 @@ class TestAction:
 class TestAssistant(Assistant):
     """ """
 
-    def process_event(self, event: BaseEvent, context: AssistantContext = None) -> AssistantResponse:
+    def process_event(
+        self, event: BaseEvent, context: AssistantContext = None
+    ) -> AssistantResponse:
         """
 
         Args:
@@ -28,6 +35,8 @@ class TestAssistant(Assistant):
         # adds a label to the document - creating a new version
 
         pipeline = Pipeline()
-        pipeline.add_label('hello')
+        pipeline.add_label("hello")
 
-        return AssistantResponse(pipelines=[AssistantPipeline(pipeline=pipeline, write_back_to_store=True)])
+        return AssistantResponse(
+            pipelines=[AssistantPipeline(pipeline=pipeline, write_back_to_store=True)]
+        )

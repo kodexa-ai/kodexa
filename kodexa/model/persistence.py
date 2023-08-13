@@ -9,7 +9,12 @@ from typing import List
 import msgpack
 
 from kodexa.model import Document, ContentNode, SourceMetadata
-from kodexa.model.model import DocumentMetadata, ContentFeature, ContentException, ModelInsight
+from kodexa.model.model import (
+    DocumentMetadata,
+    ContentFeature,
+    ContentException,
+    ModelInsight,
+)
 
 logger = logging.getLogger()
 
@@ -26,7 +31,9 @@ FEATURE_DELETE = "DELETE FROM ft where cn_id=? and f_type=?"
 CONTENT_NODE_INSERT = "INSERT INTO cn (pid, nt, idx) VALUES (?,?,?)"
 CONTENT_NODE_UPDATE = "UPDATE cn set pid=?, nt=?, idx=? WHERE id=?"
 
-CONTENT_NODE_PART_INSERT = "INSERT INTO cnp (cn_id, pos, content, content_idx) VALUES (?,?,?,?)"
+CONTENT_NODE_PART_INSERT = (
+    "INSERT INTO cnp (cn_id, pos, content, content_idx) VALUES (?,?,?,?)"
+)
 NOTE_TYPE_INSERT = "insert into n_type(name) values (?)"
 NODE_TYPE_LOOKUP = "select id from n_type where name = ?"
 FEATURE_TYPE_INSERT = "insert into f_type(name) values (?)"
@@ -44,6 +51,7 @@ class SqliteDocumentPersistence(object):
         filename (str): The name of the file where the document is stored.
         delete_on_close (bool): If True, the file will be deleted when the connection is closed.
     """
+
     """
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     """
@@ -68,7 +76,10 @@ class SqliteDocumentPersistence(object):
                 self.is_new = False
         else:
             from kodexa import KodexaPlatform
-            new_file, filename = tempfile.mkstemp(suffix='.kddb', dir=KodexaPlatform.get_tempdir())
+
+            new_file, filename = tempfile.mkstemp(
+                suffix=".kddb", dir=KodexaPlatform.get_tempdir()
+            )
             self.is_tmp = True
 
         self.current_filename = filename
@@ -88,8 +99,9 @@ class SqliteDocumentPersistence(object):
         """
         features = []
         for feature in self.cursor.execute(
-                "select name from f_type where name like 'tag:%'").fetchall():
-            features.append(feature[0].split(':')[1])
+            "select name from f_type where name like 'tag:%'"
+        ).fetchall():
+            features.append(feature[0].split(":")[1])
 
         return features
 
@@ -104,15 +116,24 @@ class SqliteDocumentPersistence(object):
         next_feature_id = self.get_max_feature_id()
         all_features = []
         for feature in node.get_features():
-            binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
+            binary_value = sqlite3.Binary(
+                msgpack.packb(feature.value, use_bin_type=True)
+            )
 
             tag_uuid = None
-            if feature.feature_type == 'tag' and 'uuid' in feature.value[0]:
-                tag_uuid = feature.value[0]['uuid']
+            if feature.feature_type == "tag" and "uuid" in feature.value[0]:
+                tag_uuid = feature.value[0]["uuid"]
 
             all_features.append(
-                [next_feature_id, node.uuid, self.get_feature_type_id(feature),
-                 binary_value, feature.single, tag_uuid])
+                [
+                    next_feature_id,
+                    node.uuid,
+                    self.get_feature_type_id(feature),
+                    binary_value,
+                    feature.single,
+                    tag_uuid,
+                ]
+            )
 
             next_feature_id = next_feature_id + 1
 
@@ -126,9 +147,10 @@ class SqliteDocumentPersistence(object):
         Args:
             node (Node): The node to be updated.
         """
-        self.cursor.execute('update cn set idx=?, pid=? where id=?',
-                            [node.index, node._parent_uuid,
-                             node.uuid])
+        self.cursor.execute(
+            "update cn set idx=?, pid=? where id=?",
+            [node.index, node._parent_uuid, node.uuid],
+        )
 
     def get_content_nodes(self, node_type, parent_node: ContentNode, include_children):
         """
@@ -146,7 +168,6 @@ class SqliteDocumentPersistence(object):
 
         results = []
         if include_children:
-
             if node_type == "*":
                 query = """
                             with recursive
@@ -161,12 +182,22 @@ class SqliteDocumentPersistence(object):
                             """
 
                 try:
-                    results = self.cursor.execute(query,
-                                                  [parent_node.uuid,
-                                                   parent_node.get_parent().uuid if parent_node.get_parent() else None,
-                                                   next(key for key, value in self.node_types.items() if
-                                                        value == parent_node.get_node_type()),
-                                                   parent_node.index, f"{parent_node.index}".zfill(6)]).fetchall()
+                    results = self.cursor.execute(
+                        query,
+                        [
+                            parent_node.uuid,
+                            parent_node.get_parent().uuid
+                            if parent_node.get_parent()
+                            else None,
+                            next(
+                                key
+                                for key, value in self.node_types.items()
+                                if value == parent_node.get_node_type()
+                            ),
+                            parent_node.index,
+                            f"{parent_node.index}".zfill(6),
+                        ],
+                    ).fetchall()
                 except StopIteration:
                     return []
             else:
@@ -183,23 +214,43 @@ class SqliteDocumentPersistence(object):
                                 """
 
                 try:
-                    results = self.cursor.execute(query,
-                                                  [parent_node.uuid,
-                                                   parent_node.get_parent().uuid if parent_node.get_parent() else None,
-                                                   next(key for key, value in self.node_types.items() if
-                                                        value == parent_node.get_node_type()),
-                                                   parent_node.index,
-                                                   f"{parent_node.index}".zfill(6),
-                                                   next(key for key, value in self.node_types.items() if
-                                                        value == node_type)]).fetchall()
+                    results = self.cursor.execute(
+                        query,
+                        [
+                            parent_node.uuid,
+                            parent_node.get_parent().uuid
+                            if parent_node.get_parent()
+                            else None,
+                            next(
+                                key
+                                for key, value in self.node_types.items()
+                                if value == parent_node.get_node_type()
+                            ),
+                            parent_node.index,
+                            f"{parent_node.index}".zfill(6),
+                            next(
+                                key
+                                for key, value in self.node_types.items()
+                                if value == node_type
+                            ),
+                        ],
+                    ).fetchall()
                 except StopIteration:
                     return []
         else:
             query = "select id, pid, nt, idx from cn where pid=? and nt=? order by idx"
             try:
-                results = self.cursor.execute(query,
-                                              [parent_node.uuid, next(key for key, value in self.node_types.items() if
-                                                                      value == node_type)]).fetchall()
+                results = self.cursor.execute(
+                    query,
+                    [
+                        parent_node.uuid,
+                        next(
+                            key
+                            for key, value in self.node_types.items()
+                            if value == node_type
+                        ),
+                    ],
+                ).fetchall()
             except StopIteration:
                 return []
 
@@ -217,7 +268,6 @@ class SqliteDocumentPersistence(object):
         else:
             self.__load_document()
 
-    
     def close(self):
         """
         Closes the connection to the database. If delete_on_close is True, the file will also be deleted.
@@ -228,7 +278,6 @@ class SqliteDocumentPersistence(object):
             self.cursor.close()
             self.connection.close()
 
-    
     def get_max_feature_id(self):
         """
         Retrieves the maximum feature id from the document.
@@ -246,14 +295,20 @@ class SqliteDocumentPersistence(object):
         """
         Builds a new database for the document.
         """
-        self.cursor.execute("CREATE TABLE metadata (id integer primary key, metadata text)")
-        self.cursor.execute("CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, idx INTEGER)")
         self.cursor.execute(
-            "CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)")
+            "CREATE TABLE metadata (id integer primary key, metadata text)"
+        )
+        self.cursor.execute(
+            "CREATE TABLE cn (id integer primary key, nt INTEGER, pid INTEGER, idx INTEGER)"
+        )
+        self.cursor.execute(
+            "CREATE TABLE cnp (id integer primary key, cn_id INTEGER, pos integer, content text, content_idx integer)"
+        )
 
         self.cursor.execute("CREATE TABLE n_type (id integer primary key, name text)")
         self.cursor.execute("CREATE TABLE f_type (id integer primary key, name text)")
-        self.cursor.execute("""CREATE TABLE ft
+        self.cursor.execute(
+            """CREATE TABLE ft
                                     (
                                         id           integer primary key,
                                         cn_id        integer,
@@ -261,7 +316,8 @@ class SqliteDocumentPersistence(object):
                                         binary_value blob,
                                         single       integer,
                                         tag_uuid     text
-                                    )""")
+                                    )"""
+        )
 
         self.cursor.execute("CREATE UNIQUE INDEX n_type_uk ON n_type(name);")
         self.cursor.execute("CREATE UNIQUE INDEX f_type_uk ON f_type(name);")
@@ -270,7 +326,8 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("CREATE INDEX cnp_perf ON cnp(cn_id, pos);")
         self.cursor.execute("CREATE INDEX f_perf ON ft(cn_id);")
         self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
-        self.cursor.execute("""CREATE TABLE content_exceptions
+        self.cursor.execute(
+            """CREATE TABLE content_exceptions
                                     (
                                         id           integer primary key,
                                         tag          text,
@@ -282,8 +339,11 @@ class SqliteDocumentPersistence(object):
                                         exception_type_id text,
                                         severity     text,
                                         node_uuid    text
-                                    )""")
-        self.cursor.execute("CREATE TABLE model_insights (id integer primary key,model_insight text);")
+                                    )"""
+        )
+        self.cursor.execute(
+            "CREATE TABLE model_insights (id integer primary key,model_insight text);"
+        )
         self.document.version = "6.0.0"
 
         self.__update_metadata()
@@ -324,9 +384,13 @@ class SqliteDocumentPersistence(object):
         if feature_type_name in self.feature_type_id_by_name:
             return self.feature_type_id_by_name[feature_type_name]
 
-        result = self.cursor.execute(FEATURE_TYPE_LOOKUP, [feature_type_name]).fetchone()
+        result = self.cursor.execute(
+            FEATURE_TYPE_LOOKUP, [feature_type_name]
+        ).fetchone()
         if result is None:
-            new_feature_type_name_id = self.cursor.execute(FEATURE_TYPE_INSERT, [feature_type_name]).lastrowid
+            new_feature_type_name_id = self.cursor.execute(
+                FEATURE_TYPE_INSERT, [feature_type_name]
+            ).lastrowid
             self.feature_type_names[new_feature_type_name_id] = feature_type_name
             self.feature_type_id_by_name[feature_type_name] = new_feature_type_name_id
             return new_feature_type_name_id
@@ -375,21 +439,33 @@ class SqliteDocumentPersistence(object):
 
         if node.uuid:
             # Delete the existing node
-            cn_values = [node._parent_uuid,
-                         self.__resolve_n_type(node.node_type), node.index, node.uuid]
+            cn_values = [
+                node._parent_uuid,
+                self.__resolve_n_type(node.node_type),
+                node.index,
+                node.uuid,
+            ]
 
             # Make sure we load the content parts if we haven't
             node.get_content_parts()
 
             if execute:
                 self.cursor.execute("DELETE FROM cn where id=?", [node.uuid])
-                self.cursor.execute("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", cn_values)
+                self.cursor.execute(
+                    "INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", cn_values
+                )
                 self.cursor.execute("DELETE FROM cnp where cn_id=?", [node.uuid])
 
             cn_parts_values = []
             for idx, part in enumerate(node.get_content_parts()):
-                cn_parts_values.append([node.uuid, idx, part if isinstance(part, str) else None,
-                                        part if not isinstance(part, str) else None])
+                cn_parts_values.append(
+                    [
+                        node.uuid,
+                        idx,
+                        part if isinstance(part, str) else None,
+                        part if not isinstance(part, str) else None,
+                    ]
+                )
 
             if execute:
                 self.cursor.executemany(CONTENT_NODE_PART_INSERT, cn_parts_values)
@@ -422,14 +498,21 @@ class SqliteDocumentPersistence(object):
         """
         Updates the metadata of the document.
         """
-        document_metadata = {'version': Document.CURRENT_VERSION,
-                             'metadata': self.document.metadata.to_dict(),
-                             'source': self.__clean_none_values(dataclasses.asdict(self.document.source)),
-                             'mixins': self.document.get_mixins(),
-                             'labels': self.document.labels,
-                             'uuid': self.document.uuid}
+        document_metadata = {
+            "version": Document.CURRENT_VERSION,
+            "metadata": self.document.metadata.to_dict(),
+            "source": self.__clean_none_values(
+                dataclasses.asdict(self.document.source)
+            ),
+            "mixins": self.document.get_mixins(),
+            "labels": self.document.labels,
+            "uuid": self.document.uuid,
+        }
         self.cursor.execute(METADATA_DELETE)
-        self.cursor.execute(METADATA_INSERT, [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))])
+        self.cursor.execute(
+            METADATA_INSERT,
+            [sqlite3.Binary(msgpack.packb(document_metadata, use_bin_type=True))],
+        )
 
     def __load_document(self):
         """
@@ -440,32 +523,43 @@ class SqliteDocumentPersistence(object):
         for f_type in self.cursor.execute("select id,name from f_type"):
             self.feature_type_names[f_type[0]] = f_type[1]
 
-        metadata = msgpack.unpackb(self.cursor.execute("select * from metadata").fetchone()[1])
-        self.document.metadata = DocumentMetadata(metadata['metadata'])
-        self.document.version = metadata['version'] if 'version' in metadata and metadata[
-            'version'] else Document.PREVIOUS_VERSION
-          # some older docs don't have a version or it's None
+        metadata = msgpack.unpackb(
+            self.cursor.execute("select * from metadata").fetchone()[1]
+        )
+        self.document.metadata = DocumentMetadata(metadata["metadata"])
+        self.document.version = (
+            metadata["version"]
+            if "version" in metadata and metadata["version"]
+            else Document.PREVIOUS_VERSION
+        )
+        # some older docs don't have a version or it's None
 
-        self.uuid = metadata['uuid'] if 'uuid' in metadata else str(
-            uuid.uuid5(uuid.NAMESPACE_DNS, 'kodexa.com'))
-        if 'source' in metadata and metadata['source']:
-            self.document.source = SourceMetadata.from_dict(metadata['source'])
-        if 'labels' in metadata and metadata['labels']:
-            self.document.labels = metadata['labels']
-        if 'mixins' in metadata and metadata['mixins']:
-            self.document._mixins = metadata['mixins']
+        self.uuid = (
+            metadata["uuid"]
+            if "uuid" in metadata
+            else str(uuid.uuid5(uuid.NAMESPACE_DNS, "kodexa.com"))
+        )
+        if "source" in metadata and metadata["source"]:
+            self.document.source = SourceMetadata.from_dict(metadata["source"])
+        if "labels" in metadata and metadata["labels"]:
+            self.document.labels = metadata["labels"]
+        if "mixins" in metadata and metadata["mixins"]:
+            self.document._mixins = metadata["mixins"]
 
-        self.uuid = metadata.get('uuid')
+        self.uuid = metadata.get("uuid")
 
         import semver
-        root_node = self.cursor.execute("select id, pid, nt, idx from cn where pid is null").fetchone()
-        if root_node:
-            self.document.content_node = self.__build_node(
-                root_node)
 
-        if semver.compare(self.document.version, '4.0.1') < 0:
+        root_node = self.cursor.execute(
+            "select id, pid, nt, idx from cn where pid is null"
+        ).fetchone()
+        if root_node:
+            self.document.content_node = self.__build_node(root_node)
+
+        if semver.compare(self.document.version, "4.0.1") < 0:
             # We need to migrate this to a 4.0.1 document
-            self.cursor.execute("""CREATE TABLE ft
+            self.cursor.execute(
+                """CREATE TABLE ft
                                     (
                                         id           integer primary key,
                                         cn_id        integer,
@@ -473,9 +567,11 @@ class SqliteDocumentPersistence(object):
                                         binary_value blob,
                                         single       integer,
                                         tag_uuid     text
-                                    )""")
+                                    )"""
+            )
             self.cursor.execute(
-                "insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.fvalue_id")
+                "insert into ft select f.id, f.cn_id, f.f_type, fv.binary_value, fv.single, null from f, f_value fv where fv.id = f.fvalue_id"
+            )
             # we will create a new feature table
             self.cursor.execute("drop table f")
             self.cursor.execute("drop table f_value")
@@ -483,7 +579,8 @@ class SqliteDocumentPersistence(object):
             self.cursor.execute("CREATE INDEX f_perf2 ON ft(tag_uuid);")
 
         # We always run this
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS content_exceptions
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS content_exceptions
                                     (
                                         id           integer primary key,
                                         tag          text,
@@ -494,17 +591,23 @@ class SqliteDocumentPersistence(object):
                                         exception_type text,
                                         severity     text,
                                         node_uuid    text
-                                    )""")
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS model_insights
+                                    )"""
+        )
+        self.cursor.execute(
+            """CREATE TABLE IF NOT EXISTS model_insights
                                     (
                                         id           integer primary key,
                                         model_insight text
-                                    )""")
+                                    )"""
+        )
 
         if semver.compare(self.document.version, "6.0.0") < 0:
             from sqlite3 import OperationalError
+
             try:
-                self.cursor.execute("ALTER TABLE content_exceptions ADD COLUMN exception_type_id text")
+                self.cursor.execute(
+                    "ALTER TABLE content_exceptions ADD COLUMN exception_type_id text"
+                )
             except OperationalError:
                 logger.info("exception_type_id column already exists")
                 pass
@@ -523,7 +626,8 @@ class SqliteDocumentPersistence(object):
         """
         content_parts = self.cursor.execute(
             "select cn_id, pos, content, content_idx from cnp where cn_id = ? order by pos",
-            [new_node.uuid]).fetchall()
+            [new_node.uuid],
+        ).fetchall()
 
         parts = []
         for content_part in content_parts:
@@ -543,7 +647,11 @@ class SqliteDocumentPersistence(object):
         Returns:
             Node: The built node.
         """
-        new_node = ContentNode(self.document, self.node_types[node_row[2]], parent=self.get_node(node_row[1]))
+        new_node = ContentNode(
+            self.document,
+            self.node_types[node_row[2]],
+            parent=self.get_node(node_row[1]),
+        )
         new_node.uuid = node_row[0]
         new_node.index = node_row[3]
         return new_node
@@ -589,8 +697,10 @@ class SqliteDocumentPersistence(object):
 
         # We need to get the child nodes
         children = []
-        for child_node in self.cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
-                                              [content_node.uuid]).fetchall():
+        for child_node in self.cursor.execute(
+            "select id, pid, nt, idx from cn where pid = ? order by idx",
+            [content_node.uuid],
+        ).fetchall():
             children.append(self.__build_node(child_node))
         return children
 
@@ -607,8 +717,10 @@ class SqliteDocumentPersistence(object):
 
         # We need to get the child nodes
         children = []
-        for child_node in self.cursor.execute("select id, pid, nt, idx from cn where pid = ? order by idx",
-                                              [content_node.uuid]).fetchall():
+        for child_node in self.cursor.execute(
+            "select id, pid, nt, idx from cn where pid = ? order by idx",
+            [content_node.uuid],
+        ).fetchall():
             children.append(child_node[0])
         return children
 
@@ -622,7 +734,9 @@ class SqliteDocumentPersistence(object):
         Returns:
             Node: The node with the given id.
         """
-        node_row = self.cursor.execute("select id, pid, nt, idx from cn where id = ?", [node_id]).fetchone()
+        node_row = self.cursor.execute(
+            "select id, pid, nt, idx from cn where id = ?", [node_id]
+        ).fetchone()
         if node_row:
             return self.__build_node(node_row)
 
@@ -639,7 +753,9 @@ class SqliteDocumentPersistence(object):
             Node: The parent of the node.
         """
 
-        parent = self.cursor.execute("select pid from cn where id = ?", [content_node.uuid]).fetchone()
+        parent = self.cursor.execute(
+            "select pid from cn where id = ?", [content_node.uuid]
+        ).fetchone()
         if parent:
             return self.get_node(parent[0])
 
@@ -663,7 +779,6 @@ class SqliteDocumentPersistence(object):
         if self.document.content_node:
             self.__insert_node(self.document.content_node, None)
 
-    
     def sync(self):
         """
         Synchronizes the database with the document.
@@ -688,7 +803,7 @@ class SqliteDocumentPersistence(object):
             bytes: The document as bytes.
         """
         self.sync()
-        with open(self.current_filename, 'rb') as f:
+        with open(self.current_filename, "rb") as f:
             return f.read()
 
     def get_features(self, node):
@@ -704,13 +819,21 @@ class SqliteDocumentPersistence(object):
         # We need to get the features back
 
         features = []
-        for feature in self.cursor.execute("select id, cn_id, f_type, binary_value, single from ft where cn_id = ?",
-                                           [node.uuid]).fetchall():
+        for feature in self.cursor.execute(
+            "select id, cn_id, f_type, binary_value, single from ft where cn_id = ?",
+            [node.uuid],
+        ).fetchall():
             feature_type_name = self.feature_type_names[feature[2]]
             single = feature[4] == 1
             value = msgpack.unpackb(feature[3])
-            features.append(ContentFeature(feature_type_name.split(':')[0], feature_type_name.split(':')[1],
-                                           value, single=single))
+            features.append(
+                ContentFeature(
+                    feature_type_name.split(":")[0],
+                    feature_type_name.split(":")[1],
+                    value,
+                    single=single,
+                )
+            )
 
         return features
 
@@ -726,8 +849,14 @@ class SqliteDocumentPersistence(object):
 
         all_parts = []
         for idx, part in enumerate(content_parts):
-            all_parts.append([node.uuid, idx, part if isinstance(part, str) else None,
-                              part if not isinstance(part, str) else None])
+            all_parts.append(
+                [
+                    node.uuid,
+                    idx,
+                    part if isinstance(part, str) else None,
+                    part if not isinstance(part, str) else None,
+                ]
+            )
         self.cursor.executemany(CONTENT_NODE_PART_INSERT, all_parts)
 
     def remove_content_node(self, node):
@@ -737,16 +866,17 @@ class SqliteDocumentPersistence(object):
         Args:
             node (Node): The node to be removed.
         """
+
         def get_all_node_ids(node):
             """
-    This function recursively traverses a node tree, collecting the ids of all non-virtual nodes.
-    
-    Args:
-        node (Node): The root node to start the traversal from.
-    
-    Returns:
-        list: A list of ids of all non-virtual nodes in the tree.
-    """
+            This function recursively traverses a node tree, collecting the ids of all non-virtual nodes.
+
+            Args:
+                node (Node): The root node to start the traversal from.
+
+            Returns:
+                list: A list of ids of all non-virtual nodes in the tree.
+            """
             all_node_ids = []
             if not node.virtual:
                 all_node_ids.append([node.uuid])
@@ -808,8 +938,7 @@ class SqliteDocumentPersistence(object):
             query = f"select cn_id from ft where f_type in (select id from f_type where name like 'tag:{tag}')"
         else:
             query = f"select cn_id from ft where f_type in (select id from f_type where name like 'tag:{tag}') and tag_uuid = '{tag_uuid}'"
-        for content_node_ids in self.cursor.execute(
-                query).fetchall():
+        for content_node_ids in self.cursor.execute(query).fetchall():
             content_nodes.append(self.get_node(content_node_ids[0]))
 
         return content_nodes
@@ -821,8 +950,7 @@ class SqliteDocumentPersistence(object):
         Args:
             model_insights (ModelInsight): The model insight to be added.
         """
-        self.cursor.execute(MODEL_INSIGHT_INSERT,
-                            [model_insights.json()])
+        self.cursor.execute(MODEL_INSIGHT_INSERT, [model_insights.json()])
 
     def get_model_insights(self) -> List[ModelInsight]:
         """
@@ -845,9 +973,20 @@ class SqliteDocumentPersistence(object):
             exception (ContentException): The exception to be added.
         """
         # Add an exception to the exception table
-        self.cursor.execute(EXCEPTION_INSERT,
-                            [exception.tag, exception.message, exception.exception_details, exception.group_uuid,
-                             exception.tag_uuid, exception.exception_type, exception.severity, exception.node_uuid, exception.exception_type_id])
+        self.cursor.execute(
+            EXCEPTION_INSERT,
+            [
+                exception.tag,
+                exception.message,
+                exception.exception_details,
+                exception.group_uuid,
+                exception.tag_uuid,
+                exception.exception_type,
+                exception.severity,
+                exception.node_uuid,
+                exception.exception_type_id,
+            ],
+        )
 
     def get_exceptions(self) -> List[ContentException]:
         """
@@ -858,10 +997,19 @@ class SqliteDocumentPersistence(object):
         """
         exceptions = []
         for exception in self.cursor.execute(EXCEPTION_SELECT).fetchall():
-            exceptions.append(ContentException(tag=exception[0], message=exception[1], exception_details=exception[2],
-                                               group_uuid=exception[3], tag_uuid=exception[4],
-                                               exception_type=exception[5],
-                                               severity=exception[6], node_uuid=exception[7], exception_type_id=exception[8]))
+            exceptions.append(
+                ContentException(
+                    tag=exception[0],
+                    message=exception[1],
+                    exception_details=exception[2],
+                    group_uuid=exception[3],
+                    tag_uuid=exception[4],
+                    exception_type=exception[5],
+                    severity=exception[6],
+                    node_uuid=exception[7],
+                    exception_type_id=exception[8],
+                )
+            )
         return exceptions
 
     def replace_exceptions(self, exceptions: List[ContentException]):
@@ -890,12 +1038,10 @@ class SqliteDocumentPersistence(object):
         """
         content_nodes = []
         query = f"select cn_id from ft where f_type in (select id from f_type where name like 'tag:%')"
-        for content_node_ids in self.cursor.execute(
-                query).fetchall():
+        for content_node_ids in self.cursor.execute(query).fetchall():
             content_nodes.append(self.get_node(content_node_ids[0]))
 
         return content_nodes
-
 
 
 class SimpleObjectCache(object):
@@ -904,6 +1050,7 @@ class SimpleObjectCache(object):
     objects, store them and also a dirty flag so that it is easy to pull all
     dirty objects and store them as needed.
     """
+
     """
     A simple cache based on ID'd objects, where we will build ID's for new
     objects, store them and also a dirty flag so that it is easy to pull all
@@ -960,8 +1107,6 @@ class SimpleObjectCache(object):
             if obj.uuid in self.dirty_objs:
                 self.dirty_objs.remove(obj.uuid)
 
-    
-    
     def get_dirty_objs(self):
         """
         Get all dirty objects in the cache.
@@ -1001,6 +1146,7 @@ class PersistenceManager(object):
         node_parent_cache (dict): Cache for node parents.
         _underlying_persistence (SqliteDocumentPersistence): The underlying persistence layer.
     """
+
     """
     The persistence manager supports holding the document and only flushing objects to the persistence layer
     as needed. This is implemented to allow us to work with large complex documents in a performance centered way.
@@ -1031,7 +1177,9 @@ class PersistenceManager(object):
         self.content_parts_cache = {}
         self.node_parent_cache = {}
 
-        self._underlying_persistence = SqliteDocumentPersistence(document, filename, delete_on_close)
+        self._underlying_persistence = SqliteDocumentPersistence(
+            document, filename, delete_on_close
+        )
 
     def add_model_insight(self, model_insight: ModelInsight):
         """
@@ -1165,36 +1313,58 @@ class PersistenceManager(object):
         for node in dirty_nodes:
             if not node.virtual:
                 all_node_ids.append([node.uuid])
-                node_obj, content_parts = self._underlying_persistence.add_content_node(node, None, execute=False)
+                node_obj, content_parts = self._underlying_persistence.add_content_node(
+                    node, None, execute=False
+                )
                 all_nodes.extend(node_obj)
                 all_content_parts.extend(content_parts)
                 if node.uuid in self.feature_cache:
-
                     if node.uuid in self.feature_cache:
                         node_id_with_features.append([node.uuid])
 
                     for feature in self.feature_cache[node.uuid]:
-                        binary_value = sqlite3.Binary(msgpack.packb(feature.value, use_bin_type=True))
+                        binary_value = sqlite3.Binary(
+                            msgpack.packb(feature.value, use_bin_type=True)
+                        )
 
                         tag_uuid = None
-                        if feature.feature_type == 'tag' and 'uuid' in feature.value[0]:
-                            tag_uuid = feature.value[0]['uuid']
+                        if feature.feature_type == "tag" and "uuid" in feature.value[0]:
+                            tag_uuid = feature.value[0]["uuid"]
 
                         all_features.append(
-                            [next_feature_id, node.uuid, self._underlying_persistence.get_feature_type_id(feature),
-                             binary_value, feature.single, tag_uuid])
+                            [
+                                next_feature_id,
+                                node.uuid,
+                                self._underlying_persistence.get_feature_type_id(
+                                    feature
+                                ),
+                                binary_value,
+                                feature.single,
+                                tag_uuid,
+                            ]
+                        )
                         next_feature_id = next_feature_id + 1
 
                 self.node_cache.undirty(node)
 
         logger.debug(f"Writing {len(all_node_ids)} nodes")
-        self._underlying_persistence.cursor.executemany("DELETE FROM cn where id=?", all_node_ids)
-        self._underlying_persistence.cursor.executemany("DELETE FROM ft where cn_id=?", node_id_with_features)
-        self._underlying_persistence.cursor.executemany("INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", all_nodes)
-        self._underlying_persistence.cursor.executemany("DELETE FROM cnp where cn_id=?", all_node_ids)
+        self._underlying_persistence.cursor.executemany(
+            "DELETE FROM cn where id=?", all_node_ids
+        )
+        self._underlying_persistence.cursor.executemany(
+            "DELETE FROM ft where cn_id=?", node_id_with_features
+        )
+        self._underlying_persistence.cursor.executemany(
+            "INSERT INTO cn (pid, nt, idx, id) VALUES (?,?,?,?)", all_nodes
+        )
+        self._underlying_persistence.cursor.executemany(
+            "DELETE FROM cnp where cn_id=?", all_node_ids
+        )
         logger.debug(f"Writing {len(all_content_parts)} content parts")
 
-        self._underlying_persistence.cursor.executemany(CONTENT_NODE_PART_INSERT, all_content_parts)
+        self._underlying_persistence.cursor.executemany(
+            CONTENT_NODE_PART_INSERT, all_content_parts
+        )
 
         logger.debug(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
@@ -1211,7 +1381,9 @@ class PersistenceManager(object):
         Returns:
             List[Node]: A list of nodes that match the specified criteria.
         """
-        return self._underlying_persistence.get_content_nodes(node_type, parent_node, include_children)
+        return self._underlying_persistence.get_content_nodes(
+            node_type, parent_node, include_children
+        )
 
     def get_bytes(self):
         """
@@ -1254,7 +1426,10 @@ class PersistenceManager(object):
             self.node_parent_cache[node.uuid] = node._parent_uuid
             update_child_cache = True
 
-        if node.uuid in self.node_parent_cache and node._parent_uuid != self.node_parent_cache[node.uuid]:
+        if (
+            node.uuid in self.node_parent_cache
+            and node._parent_uuid != self.node_parent_cache[node.uuid]
+        ):
             # Remove from the old parent
             self.child_id_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
             self.child_cache[self.node_parent_cache[node.uuid]].remove(node)
@@ -1263,7 +1438,6 @@ class PersistenceManager(object):
             update_child_cache = True
 
         if update_child_cache:
-
             if node._parent_uuid not in self.child_cache:
                 self.child_cache[node._parent_uuid] = [node]
                 self.child_id_cache[node._parent_uuid] = {node.uuid}
@@ -1271,15 +1445,17 @@ class PersistenceManager(object):
                 if node.uuid not in self.child_id_cache[node._parent_uuid]:
                     self.child_id_cache[node._parent_uuid].add(node.uuid)
                     current_children = self.child_cache[node._parent_uuid]
-                    if len(current_children) == 0 or node.index >= current_children[-1].index:
+                    if (
+                        len(current_children) == 0
+                        or node.index >= current_children[-1].index
+                    ):
                         self.child_cache[node._parent_uuid].append(node)
                     else:
                         self.child_cache[node._parent_uuid].append(node)
-                        self.child_cache[node._parent_uuid] = sorted(self.child_cache[node._parent_uuid],
-                                                                     key=lambda x: x.index)
+                        self.child_cache[node._parent_uuid] = sorted(
+                            self.child_cache[node._parent_uuid], key=lambda x: x.index
+                        )
 
-    
-    
     def get_node(self, node_id):
         """
         Retrieves a node by its ID from the cache or the underlying persistence layer.
@@ -1401,7 +1577,11 @@ class PersistenceManager(object):
         if node.uuid is None:
             return []
 
-        cps = self.content_parts_cache[node.uuid] if node.uuid in self.content_parts_cache else None
+        cps = (
+            self.content_parts_cache[node.uuid]
+            if node.uuid in self.content_parts_cache
+            else None
+        )
         if cps is None:
             cps = self._underlying_persistence.get_content_parts(node)
             if cps is not None:
@@ -1421,7 +1601,11 @@ class PersistenceManager(object):
 
         features = self.get_features(node)
         self._underlying_persistence.remove_feature(node, feature_type, name)
-        new_features = [i for i in features if not (i.feature_type == feature_type and i.name == name)]
+        new_features = [
+            i
+            for i in features
+            if not (i.feature_type == feature_type and i.name == name)
+        ]
         self.feature_cache[node.uuid] = new_features
         self.node_cache.add_obj(node)
 

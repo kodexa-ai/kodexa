@@ -9,21 +9,22 @@ from kodexa.selectors import ast
 from kodexa.selectors.lexrules import tokens
 
 precedence = (
-    ('left', 'OR_OP'),
-    ('left', 'AND_OP'),
-    ('left', 'EQUAL_OP'),
-    ('left', 'REL_OP'),
-    ('left', 'PLUS_OP', 'MINUS_OP'),
-    ('left', 'MULT_OP', 'DIV_OP', 'MOD_OP'),
-    ('right', 'UMINUS_OP'),
-    ('left', 'UNION_OP'),
-    ('left', 'INTERSECT_OP'),
+    ("left", "OR_OP"),
+    ("left", "AND_OP"),
+    ("left", "EQUAL_OP"),
+    ("left", "REL_OP"),
+    ("left", "PLUS_OP", "MINUS_OP"),
+    ("left", "MULT_OP", "DIV_OP", "MOD_OP"),
+    ("right", "UMINUS_OP"),
+    ("left", "UNION_OP"),
+    ("left", "INTERSECT_OP"),
 )
 
 
 #
 # basic expressions
 #
+
 
 def p_expr_boolean(p):
     """
@@ -60,6 +61,7 @@ def p_expr_pipeline(p):
 # path expressions
 #
 
+
 def p_path_expr_binary(p):
     """
     Expr : FilterExpr PATH_SEP RelativeLocationPath
@@ -81,6 +83,7 @@ def p_path_expr_unary(p):
 #
 # paths
 #
+
 
 def p_absolute_location_path_rootonly(p):
     """
@@ -122,6 +125,7 @@ def p_relative_location_path_binary(p):
 # path steps
 #
 
+
 def p_step_nodetest(p):
     """
     Step : NodeTest
@@ -162,6 +166,7 @@ def p_step_abbrev(p):
 # axis specifier
 #
 
+
 def p_axis_specifier_full(p):
     """
     AxisSpecifier : AXISNAME AXIS_SEP
@@ -173,12 +178,13 @@ def p_axis_specifier_abbrev(p):
     """
     AxisSpecifier : ABBREV_AXIS_AT
     """
-    p[0] = '@'
+    p[0] = "@"
 
 
 #
 # node test
 #
+
 
 def p_node_test_name_test(p):
     """
@@ -211,6 +217,7 @@ def p_node_test_type_literal(p):
 # name test
 #
 
+
 def p_name_test_star(p):
     """
     NameTest : STAR_OP
@@ -236,6 +243,7 @@ def p_name_test_qname(p):
 #
 # qname
 #
+
 
 def p_qname_prefixed(p):
     """
@@ -269,6 +277,7 @@ def p_funcqname_unprefixed(p):
 # filter expressions
 #
 
+
 def p_filter_expr_simple(p):
     """
     FilterExpr : VariableReference
@@ -292,7 +301,7 @@ def p_filter_expr_predicate(p):
     """
     FilterExpr : FilterExpr Predicate
     """
-    if not hasattr(p[1], 'append_predicate'):
+    if not hasattr(p[1], "append_predicate"):
         p[1] = ast.PredicatedExpression(p[1])
     p[1].append_predicate(p[2])
     p[0] = p[1]
@@ -301,6 +310,7 @@ def p_filter_expr_predicate(p):
 #
 # predicates
 #
+
 
 def p_predicate_list_single(p):
     """
@@ -328,6 +338,7 @@ def p_predicate(p):
 # variable
 #
 
+
 def p_variable_reference(p):
     """
     VariableReference : DOLLAR QName
@@ -338,6 +349,7 @@ def p_variable_reference(p):
 #
 # number
 #
+
 
 def p_number(p):
     """
@@ -350,6 +362,7 @@ def p_number(p):
 #
 # funcall
 #
+
 
 def p_function_call(p):
     """
@@ -393,6 +406,7 @@ def p_argument_list_recursive(p):
 #
 # error handling
 #
+
 
 def p_error(p):
     # In some cases, p could actually be None.

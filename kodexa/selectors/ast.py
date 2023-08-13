@@ -12,6 +12,7 @@ This code was derived from https://github.com/emory-libraries/eulxml
 from __future__ import unicode_literals
 
 import re
+
 # python2/3 string type logic borrowed from six
 # NOTE: not importing six here because setup.py needs to generate
 # the parser at install time, when six installation is not yet available
@@ -20,22 +21,21 @@ from typing import List
 from kodexa import ContentNode, ContentFeature, Document
 
 __all__ = [
-    'UnaryExpression',
-    'BinaryExpression',
-    'PredicatedExpression',
-    'PipelineExpression',
-    'AbsolutePath',
-    'Step',
-    'NameTest',
-    'NodeType',
-    'AbbreviatedStep',
-    'VariableReference',
-    'FunctionCall',
+    "UnaryExpression",
+    "BinaryExpression",
+    "PredicatedExpression",
+    "PipelineExpression",
+    "AbsolutePath",
+    "Step",
+    "NameTest",
+    "NodeType",
+    "AbbreviatedStep",
+    "VariableReference",
+    "FunctionCall",
 ]
 
 
 class SelectorContext:
-
     def __init__(self, document: Document):
         self.pattern_cache = {}
         self.last_op = None
@@ -49,15 +49,15 @@ class SelectorContext:
 
 
 class PipelineExpression(object):
-    '''A pipeline XPath expression'''
+    """A pipeline XPath expression"""
 
     def __init__(self, left, op, right):
         self.left = left
-        '''the left side of the pipeline expression'''
+        """the left side of the pipeline expression"""
         self.op = op
-        '''the operator of the pipeline expression'''
+        """the operator of the pipeline expression"""
         self.right = right
-        '''the right side of the pipeline expression'''
+        """the right side of the pipeline expression"""
 
     def resolve(self, content_node: ContentNode, variables, context: SelectorContext):
         left_nodes = self.left.resolve(content_node, variables, context)
@@ -70,55 +70,60 @@ class PipelineExpression(object):
 
 
 class UnaryExpression(object):
-    '''A unary XPath expression. Practially, this means -foo.'''
+    """A unary XPath expression. Practially, this means -foo."""
 
     def __init__(self, op, right):
         self.op = op
-        '''the operator used in the expression'''
+        """the operator used in the expression"""
         self.right = right
-        '''the expression the operator is applied to'''
+        """the expression the operator is applied to"""
 
 
-KEYWORDS = {'or', 'and', 'div', 'mod'}
+KEYWORDS = {"or", "and", "div", "mod"}
 
 
 class BinaryExpression(object):
-    '''Any binary XPath expression. a/b; a and b; a | b.'''
+    """Any binary XPath expression. a/b; a and b; a | b."""
 
     def __init__(self, left, op, right):
         self.left = left
-        '''the left side of the binary expression'''
+        """the left side of the binary expression"""
         self.op = op
-        '''the operator of the binary expression'''
+        """the operator of the binary expression"""
         self.right = right
-        '''the right side of the binary expression'''
+        """the right side of the binary expression"""
 
     def resolve(self, content_node: ContentNode, variables, context: SelectorContext):
-        if self.op == '|':
-            return self.left.resolve(content_node, variables, context) + self.right.resolve(content_node, variables,
-                                                                                            context)
-        if self.op == '=':
-            return self.get_value(self.left, content_node, variables, context) == self.get_value(self.right,
-                                                                                                 content_node,
-                                                                                                 variables, context)
-        if self.op == '!=':
-            return self.get_value(self.left, content_node, variables, context) != self.get_value(self.right,
-                                                                                                 content_node,
-                                                                                                 variables, context)
-        if self.op == 'intersect':
+        if self.op == "|":
+            return self.left.resolve(
+                content_node, variables, context
+            ) + self.right.resolve(content_node, variables, context)
+        if self.op == "=":
+            return self.get_value(
+                self.left, content_node, variables, context
+            ) == self.get_value(self.right, content_node, variables, context)
+        if self.op == "!=":
+            return self.get_value(
+                self.left, content_node, variables, context
+            ) != self.get_value(self.right, content_node, variables, context)
+        if self.op == "intersect":
             left_value = self.get_value(self.left, content_node, variables, context)
             right_value = self.get_value(self.right, content_node, variables, context)
             if isinstance(left_value, list) and isinstance(right_value, list):
-                intersection_list = [value for value in left_value if value in right_value]
+                intersection_list = [
+                    value for value in left_value if value in right_value
+                ]
                 return intersection_list
 
             return []
-        if self.op == 'and':
-            return bool(self.get_value(self.left, content_node, variables, context)) and bool(
-                self.get_value(self.right, content_node, variables, context))
-        if self.op == 'or':
-            return bool(self.get_value(self.left, content_node, variables, context)) or bool(
-                self.get_value(self.right, content_node, variables, context))
+        if self.op == "and":
+            return bool(
+                self.get_value(self.left, content_node, variables, context)
+            ) and bool(self.get_value(self.right, content_node, variables, context))
+        if self.op == "or":
+            return bool(
+                self.get_value(self.left, content_node, variables, context)
+            ) or bool(self.get_value(self.right, content_node, variables, context))
 
     def get_value(self, side, content_node, variables, context: SelectorContext):
         if isinstance(side, FunctionCall):
@@ -130,13 +135,13 @@ class BinaryExpression(object):
 
 
 class PredicatedExpression(object):
-    '''A filtered XPath expression. $var[1]; (a or b)[foo][@bar].'''
+    """A filtered XPath expression. $var[1]; (a or b)[foo][@bar]."""
 
     def __init__(self, base, predicates=None):
         self.base = base
-        '''the base expression to be filtered'''
+        """the base expression to be filtered"""
         self.predicates = predicates or []
-        '''a list of filter predicates'''
+        """a list of filter predicates"""
 
     def append_predicate(self, pred):
         self.predicates.append(pred)
@@ -157,20 +162,20 @@ class PredicatedExpression(object):
 
 
 class AbsolutePath(object):
-    '''An absolute XPath path. /a/b/c; //a/ancestor:b/@c.'''
+    """An absolute XPath path. /a/b/c; //a/ancestor:b/@c."""
 
-    def __init__(self, op='/', relative=None):
+    def __init__(self, op="/", relative=None):
         self.op = op
-        '''the operator used to root the expression'''
+        """the operator used to root the expression"""
         self.relative = relative
-        '''the relative path after the absolute root operator'''
+        """the relative path after the absolute root operator"""
 
     def resolve(self, content_node, variables, context: SelectorContext):
-        if self.op == '/':
-            context.last_op = '/'
+        if self.op == "/":
+            context.last_op = "/"
             return self.relative.resolve(content_node, variables, context)
-        if self.op == '//':
-            context.last_op = '//'
+        if self.op == "//":
+            context.last_op = "//"
             return self.relative.resolve(content_node, variables, context)
         raise Exception("Not implemented")
 
@@ -182,14 +187,13 @@ class Step(object):
 
     def __init__(self, axis, node_test, predicates):
         self.axis = axis
-        '''the step's axis, or @ or None if abbreviated or undefined'''
+        """the step's axis, or @ or None if abbreviated or undefined"""
         self.node_test = node_test
-        '''a NameTest or NodeType object describing the test represented'''
+        """a NameTest or NodeType object describing the test represented"""
         self.predicates = predicates
-        '''a list of predicates filtering the step'''
+        """a list of predicates filtering the step"""
 
     def resolve(self, obj, variables, context: SelectorContext):
-
         match = True
         if isinstance(obj, ContentFeature):
             match = self.node_test.test(obj)
@@ -202,7 +206,7 @@ class Step(object):
         if isinstance(obj, ContentNode):
             axis_node = obj
 
-            if self.axis == 'parent':
+            if self.axis == "parent":
                 parent = axis_node.get_parent()
                 while parent is not None:
                     if self.node_test is None:
@@ -239,13 +243,13 @@ class Step(object):
 
 
 class NameTest(object):
-    '''An element name node test for a Step.'''
+    """An element name node test for a Step."""
 
     def __init__(self, prefix, name):
         self.prefix = prefix
-        '''the namespace prefix used for the test, or None if unset'''
+        """the namespace prefix used for the test, or None if unset"""
         self.name = name
-        '''the node name used for the test, or *'''
+        """the node name used for the test, or *"""
 
     def test(self, obj, variables, context: SelectorContext):
         if isinstance(obj, ContentNode):
@@ -253,44 +257,48 @@ class NameTest(object):
                 if self.name == "*" or self.name == obj.node_type:
                     return [obj]
             else:
-                return context.document.get_persistence().get_content_nodes(self.name, obj, context.last_op != '/')
+                return context.document.get_persistence().get_content_nodes(
+                    self.name, obj, context.last_op != "/"
+                )
         if isinstance(obj, ContentFeature):
-            return self.name == '*' or (obj.feature_type == self.prefix and obj.name == self.name)
+            return self.name == "*" or (
+                obj.feature_type == self.prefix and obj.name == self.name
+            )
         return False
 
 
 class NodeType(object):
-    '''A node type node test for a Step.'''
+    """A node type node test for a Step."""
 
     def __init__(self, name, literal=None):
         self.name = name
-        '''the node type name, such as node or text'''
+        """the node type name, such as node or text"""
         self.literal = literal
-        '''the argument to the node specifier. XPath allows these only for
-        processing-instruction() node tests.'''
+        """the argument to the node specifier. XPath allows these only for
+        processing-instruction() node tests."""
 
 
 class AbbreviatedStep(object):
-    '''An abbreviated XPath step. . or ..'''
+    """An abbreviated XPath step. . or .."""
 
     def __init__(self, abbr):
         self.abbr = abbr
-        '''the abbreviated step'''
+        """the abbreviated step"""
 
     def resolve(self, content_node, variables, context: SelectorContext):
-        if self.abbr == '.':
+        if self.abbr == ".":
             return [content_node]
-        if self.abbr == '..':
+        if self.abbr == "..":
             return [content_node.get_parent()] if content_node.get_parent() else []
         raise Exception("Not implemented")
 
 
 class VariableReference(object):
-    '''An XPath variable reference. $foo; $myns:foo.'''
+    """An XPath variable reference. $foo; $myns:foo."""
 
     def __init__(self, name):
         self.name = name
-        '''a tuple (prefix, localname) containing the variable name'''
+        """a tuple (prefix, localname) containing the variable name"""
 
     def resolve(self, variables, context: SelectorContext):
         if self.name[1] in variables:
@@ -300,18 +308,17 @@ class VariableReference(object):
 
 
 class FunctionCall(object):
-    '''An XPath function call. foo(); my:foo(1); foo(1, 'a', $var).'''
+    """An XPath function call. foo(); my:foo(1); foo(1, 'a', $var)."""
 
     def __init__(self, prefix, name, args):
         self.prefix = prefix
-        '''the namespace prefix, or None if unspecified'''
+        """the namespace prefix, or None if unspecified"""
         self.name = name
-        '''the local function name'''
+        """the local function name"""
         self.args = args
-        '''a list of argument expressions'''
+        """a list of argument expressions"""
 
     def resolve(self, content_node, variables, context: SelectorContext):
-
         args = []
         for arg in self.args:
             if isinstance(arg, VariableReference):
@@ -319,13 +326,13 @@ class FunctionCall(object):
             else:
                 args.append(arg)
 
-        if self.name == 'true':
+        if self.name == "true":
             return True
 
-        if self.name == 'false':
+        if self.name == "false":
             return False
 
-        if self.name == 'contentRegex':
+        if self.name == "contentRegex":
             compiled_pattern = context.cache_pattern(args[0])
 
             content_to_test = content_node.content
@@ -339,34 +346,36 @@ class FunctionCall(object):
 
             return None
 
-        if self.name == 'typeRegex':
+        if self.name == "typeRegex":
             compiled_pattern = context.cache_pattern(args[0])
-            if content_node.node_type is not None and compiled_pattern.match(content_node.node_type):
+            if content_node.node_type is not None and compiled_pattern.match(
+                content_node.node_type
+            ):
                 return content_node.node_type
 
             return None
 
-        if self.name == 'tagRegex':
+        if self.name == "tagRegex":
             compiled_pattern = context.cache_pattern(args[0])
-            for feature in content_node.get_features_of_type('tag'):
+            for feature in content_node.get_features_of_type("tag"):
                 if feature.name is not None and compiled_pattern.match(feature.name):
                     return True
 
             return False
 
-        if self.name == 'hasTag':
+        if self.name == "hasTag":
             if len(self.args) == 0:
                 return len(content_node.get_tags()) > 0
 
-            return content_node.has_feature('tag', args[0])
+            return content_node.has_feature("tag", args[0])
 
-        if self.name == 'hasFeature':
+        if self.name == "hasFeature":
             if len(args) == 0:
                 return len(content_node.get_features()) > 0
 
             return content_node.has_feature(args[0], args[1])
 
-        if self.name == 'hasFeatureValue':
+        if self.name == "hasFeatureValue":
             values = content_node.get_feature_values(args[0], args[1])
             if values:
                 for value in values:
@@ -374,16 +383,16 @@ class FunctionCall(object):
                         return True
             return False
 
-        if self.name == 'content':
+        if self.name == "content":
             return content_node.content
 
-        if self.name == 'uuid':
+        if self.name == "uuid":
             return content_node.uuid
 
-        if self.name == 'node_type':
+        if self.name == "node_type":
             return content_node.node_type
 
-        if self.name == 'index':
+        if self.name == "index":
             return content_node.index
 
         return []

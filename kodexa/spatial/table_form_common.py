@@ -1,7 +1,11 @@
 import re
 
 from kodexa import ContentNode
-from kodexa.spatial.bbox_common import overlaps_with, width_of_overlap, percent_nodes_overlap
+from kodexa.spatial.bbox_common import (
+    overlaps_with,
+    width_of_overlap,
+    percent_nodes_overlap,
+)
 from typing import Optional, List, Dict, Tuple
 import logging
 
@@ -13,8 +17,13 @@ MIN_OVERLAP_PERCENTAGE_Y = 0.4
 COL_SPACE_MULTIPLIER = 2.0
 
 
-def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=None,
-                              use_graphical_nodes=False, graphic_slop=1.0):
+def transform_line_to_columns(
+    node,
+    col_space_multiplier=3.0,
+    col_marker_line=None,
+    use_graphical_nodes=False,
+    graphic_slop=1.0,
+):
     """
     Calculate the potential columns under this node and then transform the line to have
     a new set of nodes (type column).
@@ -33,18 +42,18 @@ def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=No
 
     """
 
-    if node.node_type != 'line':
+    if node.node_type != "line":
         return
 
-    if node.get_children()[0].node_type == 'column':
+    if node.get_children()[0].node_type == "column":
         # This line has already been transformed to columns
         return
 
     # Grab graphic elements on the page
-    page = node.select_first('parent::page')
+    page = node.select_first("parent::page")
 
     line_words = node.get_children().copy()
-    mean_width = node.get_statistics()['updated_mean_width']
+    mean_width = node.get_statistics()["updated_mean_width"]
 
     # If col_markers is not None, use it to identify the words that belong to a column.
     # We identify the spaces by checking the overlap in the spaces
@@ -58,9 +67,16 @@ def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=No
             next_cm_bbox = col_markers[cm_idx + 1].get_bbox()
 
             # Identify the spaces that overlap and that the x2 of the word is after the next column_markers x
-            gap_index_list = [i for i in range(1, len(line_words))
-                              if (line_words[i - 1].get_bbox()[2] <= next_cm_bbox[0] < line_words[i].get_bbox()[2] and
-                                  line_words[i].get_x() >= cm_bbox[2])]
+            gap_index_list = [
+                i
+                for i in range(1, len(line_words))
+                if (
+                    line_words[i - 1].get_bbox()[2]
+                    <= next_cm_bbox[0]
+                    < line_words[i].get_bbox()[2]
+                    and line_words[i].get_x() >= cm_bbox[2]
+                )
+            ]
 
             if len(gap_index_list) > 0:
                 column_words_index.append(max(gap_index_list))
@@ -68,12 +84,24 @@ def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=No
                 # Identify the words that overlap - this is true for those columns that are 'inserted'
                 # The 'overlap' should be 100% (meaning the words - with text - should be fully overlapping
                 # with the empty-text column
-                word_index_list = [i + 1 for i in range(0, len(line_words)) if
-                                   (cm.get_all_content() == '' and cm_bbox[0] <= line_words[i].get_x() <
-                                    line_words[i].get_bbox()[2] <= cm_bbox[2]) or
-                                   (len(cm.get_all_content()) > 0 and
-                                    (overlaps_with(line_words[i], cm) or
-                                     line_words[i].get_bbox()[2] < next_cm_bbox[0]))]
+                word_index_list = [
+                    i + 1
+                    for i in range(0, len(line_words))
+                    if (
+                        cm.get_all_content() == ""
+                        and cm_bbox[0]
+                        <= line_words[i].get_x()
+                        < line_words[i].get_bbox()[2]
+                        <= cm_bbox[2]
+                    )
+                    or (
+                        len(cm.get_all_content()) > 0
+                        and (
+                            overlaps_with(line_words[i], cm)
+                            or line_words[i].get_bbox()[2] < next_cm_bbox[0]
+                        )
+                    )
+                ]
 
                 if len(word_index_list) > 0:
                     column_words_index.append(max(word_index_list))
@@ -85,10 +113,15 @@ def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=No
             is_break = False
 
             if use_graphical_nodes:
-                is_break = check_graphical_nodes_break(page, graphic_slop, mean_width, line_words, i)
+                is_break = check_graphical_nodes_break(
+                    page, graphic_slop, mean_width, line_words, i
+                )
 
-            elif line_words[i].get_x() - (line_words[i - 1].get_x() + line_words[i - 1].get_width()) >= \
-                    col_space_multiplier * mean_width:
+            elif (
+                line_words[i].get_x()
+                - (line_words[i - 1].get_x() + line_words[i - 1].get_width())
+                >= col_space_multiplier * mean_width
+            ):
                 is_break = True
 
             if is_break:
@@ -109,7 +142,9 @@ def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=No
 
         # Create a new Column if there are column words
         if len(column_words) > 0:
-            column_node = create_column_node_from_words(node.document, node, column_words)
+            column_node = create_column_node_from_words(
+                node.document, node, column_words
+            )
             column_node.set_bbox_from_children()
             num_columns += 1
             new_columns.append(column_node)
@@ -119,12 +154,13 @@ def transform_line_to_columns(node, col_space_multiplier=3.0, col_marker_line=No
 
 def check_graphical_nodes_break(node, graphic_slop, mean_width, line_words, i):
     is_break = False
-    graphical_nodes = node.select('//rect | //figure-line')
+    graphical_nodes = node.select("//rect | //figure-line")
 
-    x1 = (line_words[i - 1].get_x() + line_words[i - 1].get_width()) - (graphic_slop * mean_width)
+    x1 = (line_words[i - 1].get_x() + line_words[i - 1].get_width()) - (
+        graphic_slop * mean_width
+    )
     x2 = (line_words[i].get_x()) + (graphic_slop * mean_width)
     for node in graphical_nodes:
-
         # if line_words[i].get_y() + line_words[i].get_height() - (graphic_slop * mean_width) \
         #         <= node.get_y() + node.get_height() and \
         #         line_words[i].get_y() >= node.get_y() + (graphic_slop * mean_width):
@@ -132,44 +168,70 @@ def check_graphical_nodes_break(node, graphic_slop, mean_width, line_words, i):
         if x1 < node.get_bbox()[0] < x2:
             is_break = True
             original_bbox = line_words[i].get_bbox()
-            original_bbox = [node.get_bbox()[0], original_bbox[1], original_bbox[2], original_bbox[3]]
+            original_bbox = [
+                node.get_bbox()[0],
+                original_bbox[1],
+                original_bbox[2],
+                original_bbox[3],
+            ]
             line_words[i].set_bbox(original_bbox)
 
             previous_bbox = line_words[i - 1].get_bbox()
-            previous_bbox = [previous_bbox[0], previous_bbox[1], node.get_bbox()[0] - 0.01,
-                             previous_bbox[3]]
+            previous_bbox = [
+                previous_bbox[0],
+                previous_bbox[1],
+                node.get_bbox()[0] - 0.01,
+                previous_bbox[3],
+            ]
             line_words[i - 1].set_bbox(previous_bbox)
         if x1 < node.get_bbox()[2] < x2:
             is_break = True
             original_bbox = line_words[i].get_bbox()
-            original_bbox = [node.get_bbox()[2], original_bbox[1], original_bbox[2], original_bbox[3]]
+            original_bbox = [
+                node.get_bbox()[2],
+                original_bbox[1],
+                original_bbox[2],
+                original_bbox[3],
+            ]
             line_words[i].set_bbox(original_bbox)
 
             previous_bbox = line_words[i - 1].get_bbox()
-            previous_bbox = [previous_bbox[0], previous_bbox[1], node.get_bbox()[2] - 0.01,
-                             previous_bbox[3]]
+            previous_bbox = [
+                previous_bbox[0],
+                previous_bbox[1],
+                node.get_bbox()[2] - 0.01,
+                previous_bbox[3],
+            ]
             line_words[i - 1].set_bbox(previous_bbox)
 
     return is_break
 
 
 def create_column_node_from_words(document, line, column_words):
-    column_node = document.create_node(node_type='column')
+    column_node = document.create_node(node_type="column")
 
     cw_first_bbox = column_words[0].get_bbox()
     cw_last_bbox = column_words[-1].get_bbox()
-    column_node.set_bbox([cw_first_bbox[0], cw_first_bbox[1],
-                          cw_last_bbox[2], cw_first_bbox[3]])
+    column_node.set_bbox(
+        [cw_first_bbox[0], cw_first_bbox[1], cw_last_bbox[2], cw_first_bbox[3]]
+    )
 
     column_node.adopt_children(column_words, replace=True)
 
     return column_node
 
 
-def to_table(node, tag_name,
-             col_space_multiplier=3.0, col_marker_line=None,
-             insert_col_before=False, insert_col_after=False, insert_col_index=None,
-             use_graphical_nodes=False, graphic_slop=1.0):
+def to_table(
+    node,
+    tag_name,
+    col_space_multiplier=3.0,
+    col_marker_line=None,
+    insert_col_before=False,
+    insert_col_after=False,
+    insert_col_index=None,
+    use_graphical_nodes=False,
+    graphic_slop=1.0,
+):
     """
     Uses a tag name to convert matching child nodes into tables
     If col_marker_line is given, it will be used to identify the number of columns
@@ -194,17 +256,32 @@ def to_table(node, tag_name,
     """
 
     selector_str = "//*[hasTag('" + tag_name + "')]"
-    transform_lines_to_table(node, tag_name, node.select(selector_str), col_space_multiplier=col_space_multiplier,
-                             col_marker_line=col_marker_line, insert_col_before=insert_col_before,
-                             insert_col_after=insert_col_after, insert_col_index=insert_col_index,
-                             use_graphical_nodes=use_graphical_nodes, graphic_slop=graphic_slop)
+    transform_lines_to_table(
+        node,
+        tag_name,
+        node.select(selector_str),
+        col_space_multiplier=col_space_multiplier,
+        col_marker_line=col_marker_line,
+        insert_col_before=insert_col_before,
+        insert_col_after=insert_col_after,
+        insert_col_index=insert_col_index,
+        use_graphical_nodes=use_graphical_nodes,
+        graphic_slop=graphic_slop,
+    )
 
 
-def transform_lines_to_table(node, tag_name, table_lines,
-                             col_space_multiplier=3.0, col_marker_line=None,
-                             insert_col_before=False, insert_col_after=False,
-                             insert_col_index=None,
-                             use_graphical_nodes=False, graphic_slop=10):
+def transform_lines_to_table(
+    node,
+    tag_name,
+    table_lines,
+    col_space_multiplier=3.0,
+    col_marker_line=None,
+    insert_col_before=False,
+    insert_col_after=False,
+    insert_col_index=None,
+    use_graphical_nodes=False,
+    graphic_slop=10,
+):
     """
     Transforms each line into columns first and then groups them according to their positions.
     Note that this transforms the document.
@@ -230,36 +307,55 @@ def transform_lines_to_table(node, tag_name, table_lines,
 
     # If col_marker_line is given, identify the column positions from this line
     if col_marker_line:
-        transform_line_to_columns(col_marker_line, col_space_multiplier,
-                                  use_graphical_nodes=use_graphical_nodes,
-                                  graphic_slop=graphic_slop)
+        transform_line_to_columns(
+            col_marker_line,
+            col_space_multiplier,
+            use_graphical_nodes=use_graphical_nodes,
+            graphic_slop=graphic_slop,
+        )
 
         if insert_col_before or insert_col_after or insert_col_index is not None:
             # Insert an empty column in col_marker_line
-            insert_col_before_or_after(col_marker_line, insert_col_before, insert_col_after,
-                                       insert_col_index, col_space_multiplier, use_graphical_nodes)
+            insert_col_before_or_after(
+                col_marker_line,
+                insert_col_before,
+                insert_col_after,
+                insert_col_index,
+                col_space_multiplier,
+                use_graphical_nodes,
+            )
 
     # Check first if the line is not transformed to columns yet
-    if table_lines[0].get_children()[0].node_type == 'word':
-        transform_line_to_columns(table_lines[0], col_space_multiplier, col_marker_line,
-                                  use_graphical_nodes=use_graphical_nodes,
-                                  graphic_slop=graphic_slop)
+    if table_lines[0].get_children()[0].node_type == "word":
+        transform_line_to_columns(
+            table_lines[0],
+            col_space_multiplier,
+            col_marker_line,
+            use_graphical_nodes=use_graphical_nodes,
+            graphic_slop=graphic_slop,
+        )
 
     table = [] if col_marker_line else [table_lines[0].get_children().copy()]
 
     line_start_index = 0 if col_marker_line else 1
     for line in table_lines[line_start_index:]:
         # Check first if the line is not transformed to columns yet
-        if line.get_children()[0].node_type == 'word':
-            transform_line_to_columns(line, col_space_multiplier, col_marker_line,
-                                      use_graphical_nodes=use_graphical_nodes,
-                                      graphic_slop=graphic_slop)
+        if line.get_children()[0].node_type == "word":
+            transform_line_to_columns(
+                line,
+                col_space_multiplier,
+                col_marker_line,
+                use_graphical_nodes=use_graphical_nodes,
+                graphic_slop=graphic_slop,
+            )
 
         # Align the columns of this line with the rest from the table
         if col_marker_line:
             temp_line_columns = adjust_col_marker_line_columns(line, col_marker_line)
         else:
-            temp_line_columns = adjust_table_line_columns(line, table, col_space_multiplier)
+            temp_line_columns = adjust_table_line_columns(
+                line, table, col_space_multiplier
+            )
         table.append(temp_line_columns)
 
     # Update the bbox of each column nodes based on min_x1 and max_x2 for each column
@@ -267,15 +363,31 @@ def transform_lines_to_table(node, tag_name, table_lines,
     min_x1_list = []
     max_x2_list = []
     for col_idx in range(len(table[0])):
-        x1_list = [row[col_idx].get_bbox()[0] for row in table if len(row[col_idx].get_all_content()) > 0]
-        x2_list = [row[col_idx].get_bbox()[2] for row in table if len(row[col_idx].get_all_content()) > 0]
+        x1_list = [
+            row[col_idx].get_bbox()[0]
+            for row in table
+            if len(row[col_idx].get_all_content()) > 0
+        ]
+        x2_list = [
+            row[col_idx].get_bbox()[2]
+            for row in table
+            if len(row[col_idx].get_all_content()) > 0
+        ]
 
-        min_x1_list.append(min(x1_list) if x1_list else
-                           col_marker_line.get_children()[col_idx].get_bbox()[0] if
-                           col_marker_line and len(col_marker_line.get_children()) > col_idx else None)
-        max_x2_list.append(max(x2_list) if x2_list else
-                           col_marker_line.get_children()[col_idx].get_bbox()[2] if
-                           col_marker_line and len(col_marker_line.get_children()) > col_idx else None)
+        min_x1_list.append(
+            min(x1_list)
+            if x1_list
+            else col_marker_line.get_children()[col_idx].get_bbox()[0]
+            if col_marker_line and len(col_marker_line.get_children()) > col_idx
+            else None
+        )
+        max_x2_list.append(
+            max(x2_list)
+            if x2_list
+            else col_marker_line.get_children()[col_idx].get_bbox()[2]
+            if col_marker_line and len(col_marker_line.get_children()) > col_idx
+            else None
+        )
 
         # Remove None if any
         min_x1_list = [x1 for x1 in min_x1_list if x1 is not None]
@@ -286,17 +398,31 @@ def transform_lines_to_table(node, tag_name, table_lines,
         for col_idx, col in enumerate(table_row):
             # Tag each column
             col.tag(f"{tag_name}/col{col_idx}")
-            col.set_bbox([min_x1_list[col_idx] if len(min_x1_list) > col_idx else col.get_bbox()[0],
-                          col.get_bbox()[1],
-                          max_x2_list[col_idx] if len(max_x2_list) > col_idx else col.get_bbox()[2],
-                          col.get_bbox()[3]])
+            col.set_bbox(
+                [
+                    min_x1_list[col_idx]
+                    if len(min_x1_list) > col_idx
+                    else col.get_bbox()[0],
+                    col.get_bbox()[1],
+                    max_x2_list[col_idx]
+                    if len(max_x2_list) > col_idx
+                    else col.get_bbox()[2],
+                    col.get_bbox()[3],
+                ]
+            )
 
         table_line = table_lines[row_index]
         table_line.adopt_children(table_row, replace=True)
 
 
-def insert_col_before_or_after(node, insert_col_before, insert_col_after, insert_col_index,
-                               col_space_multiplier, use_graphical_nodes):
+def insert_col_before_or_after(
+    node,
+    insert_col_before,
+    insert_col_after,
+    insert_col_index,
+    col_space_multiplier,
+    use_graphical_nodes,
+):
     # Insert (an) empty column/s in col_marker_line
     # insert_col_index is expected to be the index after column before/after is/are added
 
@@ -309,18 +435,29 @@ def insert_col_before_or_after(node, insert_col_before, insert_col_after, insert
 
         if use_graphical_nodes:
             # Adjust the column's x first
-            graphical_nodes = [gn for gn in node.select('parent::page')[0].select('//rect | //figure-line')
-                               if gn.get_bbox()[0] < node.get_x()]
+            graphical_nodes = [
+                gn
+                for gn in node.select("parent::page")[0].select(
+                    "//rect | //figure-line"
+                )
+                if gn.get_bbox()[0] < node.get_x()
+            ]
 
             # Get the line with the max x from graphical_nodes
             max_x = max([gn.get_bbox()[0] for gn in graphical_nodes])
             first_col_node = node.get_children()[0]
-            first_col_node.set_bbox([max_x, node.get_y(), first_col_node.get_bbox()[2], node.get_bbox()[3]])
+            first_col_node.set_bbox(
+                [max_x, node.get_y(), first_col_node.get_bbox()[2], node.get_bbox()[3]]
+            )
             node.set_bbox([max_x, node.get_y(), node.get_bbox()[2], node.get_bbox()[3]])
 
-        new_x2 = node.get_x() - 0.01 if use_graphical_nodes \
-            else node.get_x() - col_space_multiplier * node.get_statistics()['updated_mean_width']
-        column_node = node.document.create_node(node_type='column')
+        new_x2 = (
+            node.get_x() - 0.01
+            if use_graphical_nodes
+            else node.get_x()
+            - col_space_multiplier * node.get_statistics()["updated_mean_width"]
+        )
+        column_node = node.document.create_node(node_type="column")
         column_node.set_bbox([0.0, node.get_y(), new_x2, node.get_bbox()[3]])
         new_columns.insert(0, column_node)
 
@@ -330,21 +467,45 @@ def insert_col_before_or_after(node, insert_col_before, insert_col_after, insert
 
         if use_graphical_nodes:
             # Adjust the column's x first
-            graphical_nodes = [gn for gn in node.select('parent::page')[0].select('//rect | //figure-line')
-                               if gn.get_bbox()[0] > node.get_bbox()[2]]
+            graphical_nodes = [
+                gn
+                for gn in node.select("parent::page")[0].select(
+                    "//rect | //figure-line"
+                )
+                if gn.get_bbox()[0] > node.get_bbox()[2]
+            ]
 
             # Get the line with the max x from graphical_nodes
             min_x = min([gn.get_bbox()[0] for gn in graphical_nodes])
             last_col_node = node.get_children()[-1]
-            last_col_node.set_bbox([last_col_node.get_x(), node.get_y(), min_x, node.get_bbox()[3]])
-            node.set_bbox([node.get_x(), node.get_y(), last_col_node.get_bbox()[2], node.get_bbox()[3]])
+            last_col_node.set_bbox(
+                [last_col_node.get_x(), node.get_y(), min_x, node.get_bbox()[3]]
+            )
+            node.set_bbox(
+                [
+                    node.get_x(),
+                    node.get_y(),
+                    last_col_node.get_bbox()[2],
+                    node.get_bbox()[3],
+                ]
+            )
 
         # New bbox is from last node's x + page's width
-        new_x1 = node.get_bbox()[2] + 0.01 if use_graphical_nodes \
-            else node.get_bbox()[2] + col_space_multiplier * node.get_statistics()['updated_mean_width']
-        column_node = node.document.create_node(node_type='column')
-        column_node.set_bbox([new_x1, node.get_y(),
-                              node.select_first('parent::page').get_bbox()[2], node.get_bbox()[3]])
+        new_x1 = (
+            node.get_bbox()[2] + 0.01
+            if use_graphical_nodes
+            else node.get_bbox()[2]
+            + col_space_multiplier * node.get_statistics()["updated_mean_width"]
+        )
+        column_node = node.document.create_node(node_type="column")
+        column_node.set_bbox(
+            [
+                new_x1,
+                node.get_y(),
+                node.select_first("parent::page").get_bbox()[2],
+                node.get_bbox()[3],
+            ]
+        )
         new_columns.append(column_node)
 
     if insert_col_index is not None and 0 < insert_col_index < len(new_columns) - 1:
@@ -358,11 +519,10 @@ def insert_col_before_or_after(node, insert_col_before, insert_col_after, insert
         bbox_after = node.get_children()[insert_col_index].get_bbox()
         x1 = bbox_before[2]
         x2 = bbox_after[0]
-        new_x1 = x1 + col_space_multiplier * node.get_statistics()['updated_mean_width']
-        new_x2 = x2 - col_space_multiplier * node.get_statistics()['updated_mean_width']
-        column_node = node.document.create_node(node_type='column')
-        column_node.set_bbox([new_x1, node.get_y(),
-                              new_x2, node.get_bbox()[3]])
+        new_x1 = x1 + col_space_multiplier * node.get_statistics()["updated_mean_width"]
+        new_x2 = x2 - col_space_multiplier * node.get_statistics()["updated_mean_width"]
+        column_node = node.document.create_node(node_type="column")
+        column_node.set_bbox([new_x1, node.get_y(), new_x2, node.get_bbox()[3]])
 
         new_columns.insert(insert_col_index, column_node)
 
@@ -389,41 +549,69 @@ def adjust_col_marker_line_columns(node, col_marker_line):
         while ref_col_idx < len(ref_columns):
             ref_col = ref_columns[ref_col_idx]
 
-            if (overlaps_with(line_col, ref_col) or line_col.get_x() < ref_col.get_x()) and \
-                    ((ref_col_idx + 1 == len(ref_columns) or
-                      (ref_col_idx + 1 < len(ref_columns) and (
-                              not overlaps_with(line_col, ref_columns[ref_col_idx + 1]) or
-                              width_of_overlap(line_col, ref_col) > width_of_overlap(line_col,
-                                                                                     ref_columns[ref_col_idx + 1]))))):
+            if (
+                overlaps_with(line_col, ref_col) or line_col.get_x() < ref_col.get_x()
+            ) and (
+                (
+                    ref_col_idx + 1 == len(ref_columns)
+                    or (
+                        ref_col_idx + 1 < len(ref_columns)
+                        and (
+                            not overlaps_with(line_col, ref_columns[ref_col_idx + 1])
+                            or width_of_overlap(line_col, ref_col)
+                            > width_of_overlap(line_col, ref_columns[ref_col_idx + 1])
+                        )
+                    )
+                )
+            ):
                 # If line_col overlaps with ref_col and line_col does not overlap with the next one
                 temp_line_columns.append(line_col)
-                update_bbox_for_columns(ref_col, temp_line_columns[-1], update_col1=False)
+                update_bbox_for_columns(
+                    ref_col, temp_line_columns[-1], update_col1=False
+                )
                 ref_col_idx += 1
                 break
-            elif ref_col_idx + 1 < len(ref_columns) and \
-                    not (overlaps_with(line_col, ref_columns[ref_col_idx + 1])) and \
-                    line_col.get_x() + line_col.get_width() < ref_columns[ref_col_idx + 1].get_x():
+            elif (
+                ref_col_idx + 1 < len(ref_columns)
+                and not (overlaps_with(line_col, ref_columns[ref_col_idx + 1]))
+                and line_col.get_x() + line_col.get_width()
+                < ref_columns[ref_col_idx + 1].get_x()
+            ):
                 # If line_col does not overlap with the next ref_col but its x is less than the next ref_col's x,
                 # then line_col lines up with ref_col
                 temp_line_columns.append(line_col)
-                update_bbox_for_columns(ref_col, temp_line_columns[-1], update_col1=False)
+                update_bbox_for_columns(
+                    ref_col, temp_line_columns[-1], update_col1=False
+                )
                 ref_col_idx += 1
                 break
-            elif ref_col_idx == len(ref_columns) - 1 and \
-                    line_col.get_x() > ref_columns[ref_col_idx].get_x() + ref_columns[ref_col_idx].get_width():
+            elif (
+                ref_col_idx == len(ref_columns) - 1
+                and line_col.get_x()
+                > ref_columns[ref_col_idx].get_x()
+                + ref_columns[ref_col_idx].get_width()
+            ):
                 # If line_col is after the last ref_col, then line_col lines up with ref_col
                 temp_line_columns.append(line_col)
-                update_bbox_for_columns(ref_col, temp_line_columns[-1], update_col1=False)
+                update_bbox_for_columns(
+                    ref_col, temp_line_columns[-1], update_col1=False
+                )
                 ref_col_idx += 1
                 break
             else:
                 # Else, Insert an empty column node in temp_line_columns,
                 # then check the next ref_col
-                column_node = node.document.create_node(node_type='column')
+                column_node = node.document.create_node(node_type="column")
                 # Need to get the y values from this row
                 ref_col_bbox = ref_col.get_bbox()
-                column_node.set_bbox([ref_col_bbox[0], line_col_bbox[1],
-                                      ref_col_bbox[2], line_col_bbox[3]])
+                column_node.set_bbox(
+                    [
+                        ref_col_bbox[0],
+                        line_col_bbox[1],
+                        ref_col_bbox[2],
+                        line_col_bbox[3],
+                    ]
+                )
                 temp_line_columns.insert(ref_col_idx, column_node)
                 ref_col_idx += 1
 
@@ -431,9 +619,10 @@ def adjust_col_marker_line_columns(node, col_marker_line):
         # Need to add columns since there are more columns in col_marker_line than this line
         ref_col = ref_columns[ref_col_idx]
         ref_col_bbox = ref_col.get_bbox()
-        column_node = node.document.create_node(node_type='column')
-        column_node.set_bbox([ref_col_bbox[0], line_col_bbox[1],
-                              ref_col_bbox[2], line_col_bbox[3]])
+        column_node = node.document.create_node(node_type="column")
+        column_node.set_bbox(
+            [ref_col_bbox[0], line_col_bbox[1], ref_col_bbox[2], line_col_bbox[3]]
+        )
         temp_line_columns.insert(ref_col_idx, column_node)
         ref_col_idx += 1
 
@@ -447,15 +636,18 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
     temp_line_columns = []  # If there are ones to combine
     ref_col_idx = 0
     overlap_found = False
-    mean_width = node.get_statistics()['updated_mean_width']
+    mean_width = node.get_statistics()["updated_mean_width"]
 
     for line_col_idx, line_col in enumerate(line_columns):
         line_col_bbox = line_col.get_bbox()
         while ref_col_idx < len(ref_columns):
             ref_col = ref_columns[ref_col_idx]
 
-            if overlaps_with(line_col, ref_col) or \
-                    abs(ref_col.get_x() - line_col.get_x()) <= col_space_multiplier * mean_width:
+            if (
+                overlaps_with(line_col, ref_col)
+                or abs(ref_col.get_x() - line_col.get_x())
+                <= col_space_multiplier * mean_width
+            ):
                 # If line_col overlaps with ref_col or it is within the allowed col_space_multiplier
                 # Check if there are already columns that overlap with this index
                 if len(temp_line_columns) > ref_col_idx:
@@ -465,18 +657,31 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
                         column_node.add_child(child)
 
                     column_node_bbox = column_node.get_bbox()
-                    column_node.set_bbox([column_node_bbox[0], column_node_bbox[1],
-                                          line_col_bbox[2], line_col_bbox[3]])
+                    column_node.set_bbox(
+                        [
+                            column_node_bbox[0],
+                            column_node_bbox[1],
+                            line_col_bbox[2],
+                            line_col_bbox[3],
+                        ]
+                    )
                     temp_line_columns[ref_col_idx] = column_node
-                    if ref_col_idx < len(ref_columns) - 1 and \
-                            overlaps_with(column_node, ref_columns[ref_col_idx + 1]):
-                        update_bbox_for_columns(ref_col, temp_line_columns[ref_col_idx], update_col1=False)
+                    if ref_col_idx < len(ref_columns) - 1 and overlaps_with(
+                        column_node, ref_columns[ref_col_idx + 1]
+                    ):
+                        update_bbox_for_columns(
+                            ref_col, temp_line_columns[ref_col_idx], update_col1=False
+                        )
                     else:
-                        update_bbox_for_columns(ref_col, temp_line_columns[ref_col_idx], update_col1=True)
+                        update_bbox_for_columns(
+                            ref_col, temp_line_columns[ref_col_idx], update_col1=True
+                        )
 
                 else:
                     temp_line_columns.append(line_col)
-                    update_bbox_for_columns(ref_col, temp_line_columns[-1], update_col1=True)
+                    update_bbox_for_columns(
+                        ref_col, temp_line_columns[-1], update_col1=True
+                    )
 
                 overlap_found = True
                 break
@@ -488,10 +693,11 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
                 # then check the next line_col
                 for row in table:
                     # Need to get the y values from this row
-                    column_node = node.document.create_node(node_type='column')
+                    column_node = node.document.create_node(node_type="column")
                     row0_bbox = row[0].get_bbox()
-                    column_node.set_bbox([line_col_bbox[0], row0_bbox[1],
-                                          line_col_bbox[2], row0_bbox[3]])
+                    column_node.set_bbox(
+                        [line_col_bbox[0], row0_bbox[1], line_col_bbox[2], row0_bbox[3]]
+                    )
                     row.insert(ref_col_idx, column_node)
 
                 # Add the line_col to temp_line_columns
@@ -503,18 +709,29 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
                 break
 
             # Check if the line_col's x is after ref_col's x + width
-            elif line_col.get_x() > ref_col.get_x() + ref_col.get_width() + col_space_multiplier * mean_width:
+            elif (
+                line_col.get_x()
+                > ref_col.get_x()
+                + ref_col.get_width()
+                + col_space_multiplier * mean_width
+            ):
                 if ref_col_idx == len(ref_columns) - 1:
                     if overlap_found:
                         # These are extra columns
                         temp_line_columns.append(line_col)
                         # Append an empty column node to all the rows in the table
                         for row in table:
-                            column_node = node.document.create_node(node_type='column')
+                            column_node = node.document.create_node(node_type="column")
                             # Need to get the y values from this row
                             row0_bbox = row[0].get_bbox()
-                            column_node.set_bbox([line_col_bbox[0], row0_bbox[1],
-                                                  line_col_bbox[2], row0_bbox[3]])
+                            column_node.set_bbox(
+                                [
+                                    line_col_bbox[0],
+                                    row0_bbox[1],
+                                    line_col_bbox[2],
+                                    row0_bbox[3],
+                                ]
+                            )
                             row.append(column_node)
 
                         ref_col_idx += 1
@@ -533,11 +750,17 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
                         # This is not the last col for line columns so we will just say overlap is found
                         # since we have already seen all the ref_cols
                         # Insert an empty column in temp_line_columns
-                        column_node = node.document.create_node(node_type='column')
+                        column_node = node.document.create_node(node_type="column")
                         # Need to get the y values from this row
                         ref_col_bbox = ref_col.get_bbox()
-                        column_node.set_bbox([ref_col_bbox[0], line_col_bbox[1],
-                                              ref_col_bbox[2], line_col_bbox[3]])
+                        column_node.set_bbox(
+                            [
+                                ref_col_bbox[0],
+                                line_col_bbox[1],
+                                ref_col_bbox[2],
+                                line_col_bbox[3],
+                            ]
+                        )
                         temp_line_columns.insert(ref_col_idx, column_node)
 
                         overlap_found = True
@@ -550,11 +773,17 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
                 else:
                     # Else, Insert an empty column node in temp_line_columns,
                     # then check the next ref_col
-                    column_node = node.document.create_node(node_type='column')
+                    column_node = node.document.create_node(node_type="column")
                     # Need to get the y values from this row
                     ref_col_bbox = ref_col.get_bbox()
-                    column_node.set_bbox([ref_col_bbox[0], line_col_bbox[1],
-                                          ref_col_bbox[2], line_col_bbox[3]])
+                    column_node.set_bbox(
+                        [
+                            ref_col_bbox[0],
+                            line_col_bbox[1],
+                            ref_col_bbox[2],
+                            line_col_bbox[3],
+                        ]
+                    )
                     ref_col_idx += 1
                     temp_line_columns.insert(ref_col_idx, column_node)
                     overlap_found = False
@@ -567,11 +796,10 @@ def adjust_table_line_columns(node, table, col_space_multiplier):
 
     for idx in range(len(ref_columns) - len(temp_line_columns)):
         # If there are less columns in the given line compared to the reference
-        column_node = node.document.create_node(node_type='column')
+        column_node = node.document.create_node(node_type="column")
         # Put a high x1 so it does not get read as a min
         # Put a low x2 so it does not get read as a max
-        column_node.set_bbox([10000.00, line_col_bbox[1],
-                              0.00, line_col_bbox[3]])
+        column_node.set_bbox([10000.00, line_col_bbox[1], 0.00, line_col_bbox[3]])
         temp_line_columns.append(column_node)
 
     return temp_line_columns
@@ -597,46 +825,69 @@ def update_bbox_for_columns(col1, col2, update_col1=True):
 
 
 class DataMarker:
-    data_marker_text: Optional[str] = ''
-    data_marker_text_re: Optional[str] = ''
+    data_marker_text: Optional[str] = ""
+    data_marker_text_re: Optional[str] = ""
     data_marker_bbox: Optional[List[float]]
     data_value_bbox: Optional[List[float]]
-    data_value_direction: Optional[str] = ''
-    data_type: Optional[str] = ''
+    data_value_direction: Optional[str] = ""
+    data_type: Optional[str] = ""
 
 
-def get_data_marker_column_and_index(data_marker_line: ContentNode, data_marker: DataMarker):
+def get_data_marker_column_and_index(
+    data_marker_line: ContentNode, data_marker: DataMarker
+):
     # Get column and column index where the data marker is and the column overlaps with the marker (x-axis)
     try:
-        column_index = [col_idx for col_idx, column in enumerate(data_marker_line.select('//column'))
-                        if re.match(f'(?i){data_marker.data_marker_text_re}', column.get_all_content()) and
-                        percent_nodes_overlap(column.get_bbox(), data_marker.data_marker_bbox,
-                                              axis_overlap='x') >= MIN_OVERLAP_PERCENTAGE_X][0]
+        column_index = [
+            col_idx
+            for col_idx, column in enumerate(data_marker_line.select("//column"))
+            if re.match(
+                f"(?i){data_marker.data_marker_text_re}", column.get_all_content()
+            )
+            and percent_nodes_overlap(
+                column.get_bbox(), data_marker.data_marker_bbox, axis_overlap="x"
+            )
+            >= MIN_OVERLAP_PERCENTAGE_X
+        ][0]
 
     except IndexError:
         return None, None
 
-    return data_marker_line.select('//column')[column_index], column_index
+    return data_marker_line.select("//column")[column_index], column_index
 
 
-def data_marker_overlaps_with_target_marker(data_marker_line_bbox, data_word_bbox, target_data_marker: DataMarker,
-                                            overlap_percentage=OVERLAP_PERCENTAGE):
+def data_marker_overlaps_with_target_marker(
+    data_marker_line_bbox,
+    data_word_bbox,
+    target_data_marker: DataMarker,
+    overlap_percentage=OVERLAP_PERCENTAGE,
+):
     # Checks that data_marker_line overlaps with the bbox provided in the template
     template_data_marker_bbox = target_data_marker.data_marker_bbox
     template_data_value_bbox = target_data_marker.data_value_bbox
-    return (percent_nodes_overlap(data_marker_line_bbox, template_data_marker_bbox, 'x') >= overlap_percentage
-            and percent_nodes_overlap(data_word_bbox, template_data_value_bbox, 'x') >= overlap_percentage)
+    return (
+        percent_nodes_overlap(data_marker_line_bbox, template_data_marker_bbox, "x")
+        >= overlap_percentage
+        and percent_nodes_overlap(data_word_bbox, template_data_value_bbox, "x")
+        >= overlap_percentage
+    )
 
 
-def get_column_below_or_above_data(data_marker_line: ContentNode, data_marker: DataMarker,
-                                   target_lines: List[ContentNode],
-                                   col_space_multiplier=2.0, column_direction='column_below'):
+def get_column_below_or_above_data(
+    data_marker_line: ContentNode,
+    data_marker: DataMarker,
+    target_lines: List[ContentNode],
+    col_space_multiplier=2.0,
+    column_direction="column_below",
+):
     data_marker_line_index = target_lines.index(data_marker_line)
     logger.info("get_column_below_or_above_data: %s", data_marker)
 
     # Can't get a next line
     if len(target_lines) <= data_marker_line_index:
-        logger.info(f'No next line for data marker {data_marker.data_marker_text_re} in line {data_marker_line_index}')
+        logger.info(
+            f"No next line for data marker {data_marker.data_marker_text_re} in line {data_marker_line_index}"
+        )
         return None
 
     # Check if the next line overlaps with the y value of data_value_bbox)
@@ -645,30 +896,51 @@ def get_column_below_or_above_data(data_marker_line: ContentNode, data_marker: D
         if len(target_lines) <= data_marker_line_index + count:
             return None
         try:
-            next_line = target_lines[data_marker_line_index + count] if column_direction == 'column_below' \
+            next_line = (
+                target_lines[data_marker_line_index + count]
+                if column_direction == "column_below"
                 else target_lines[data_marker_line_index - count]
+            )
         except IndexError:
             return None
 
         # Do not set col_marker_line since the line where the marker is does not guarantee the correct column markers
-        [line.adopt_children(line.select('//word'), replace=True) for line in [data_marker_line, next_line]]
-        [transform_line_to_columns(tl, col_space_multiplier=col_space_multiplier) for tl in
-         [data_marker_line, next_line]]
+        [
+            line.adopt_children(line.select("//word"), replace=True)
+            for line in [data_marker_line, next_line]
+        ]
+        [
+            transform_line_to_columns(tl, col_space_multiplier=col_space_multiplier)
+            for tl in [data_marker_line, next_line]
+        ]
 
-        column, column_index = get_data_marker_column_and_index(data_marker_line, data_marker)
+        column, column_index = get_data_marker_column_and_index(
+            data_marker_line, data_marker
+        )
         if column_index is None:
             return None
 
         try:
-            column_below = [col for col in next_line.select('//column')
-                            if percent_nodes_overlap(column.get_bbox(), col.get_bbox(),
-                                                     axis_overlap='x') >= 0.4][0]
+            column_below = [
+                col
+                for col in next_line.select("//column")
+                if percent_nodes_overlap(
+                    column.get_bbox(), col.get_bbox(), axis_overlap="x"
+                )
+                >= 0.4
+            ][0]
         except IndexError:
             logger.info("No column below found")
             column_below = None
 
-        if column and column_below and column_below.get_all_content() and \
-                data_marker_overlaps_with_target_marker(column.get_bbox(), column_below.get_bbox(), data_marker):
+        if (
+            column
+            and column_below
+            and column_below.get_all_content()
+            and data_marker_overlaps_with_target_marker(
+                column.get_bbox(), column_below.get_bbox(), data_marker
+            )
+        ):
             # This is the data found in the data_marker_line
             return column_below
 

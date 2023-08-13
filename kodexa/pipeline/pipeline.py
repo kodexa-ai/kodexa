@@ -23,7 +23,7 @@ logger = logging.getLogger()
 def new_id():
     """
     Generates a new unique ID.
-    
+
     Returns:
         str: A new unique ID generated using the UUID version 4 algorithm.
     """
@@ -37,6 +37,7 @@ class InMemoryContentProvider:
     Attributes:
         content_objects (dict): A dictionary to store content objects.
     """
+
     """A content provider is used to support getting content (documents or native) to
     and from the pipeline
 
@@ -90,6 +91,7 @@ class PipelineContext:
         status_handler (function): Handler for status updates.
         cancellation_handler (function): Handler for cancellation requests.
     """
+
     """Pipeline context is created when you create a pipeline and it provides a way to access information about the
     pipeline that is running.  It can be made available to steps/functions so they can interact with it.
 
@@ -101,10 +103,15 @@ class PipelineContext:
 
     """
 
-    def __init__(self, content_provider=None,
-                 existing_content_objects=None,
-                 context=None, execution_id=None,
-                 status_handler=None, cancellation_handler=None):
+    def __init__(
+        self,
+        content_provider=None,
+        existing_content_objects=None,
+        context=None,
+        execution_id=None,
+        status_handler=None,
+        cancellation_handler=None,
+    ):
         if content_provider is None:
             content_provider = InMemoryContentProvider()
         if context is None:
@@ -126,7 +133,9 @@ class PipelineContext:
         self.status_handler = status_handler
         self.cancellation_handler = cancellation_handler
 
-    def update_status(self, status_message: str, status_full_message: Optional[str] = None):
+    def update_status(
+        self, status_message: str, status_full_message: Optional[str] = None
+    ):
         """Updates the status of the pipeline.
 
         Args:
@@ -136,7 +145,6 @@ class PipelineContext:
         if self.status_handler is not None:
             self.status_handler(status_message, status_full_message)
 
-    
     def is_cancelled(self) -> bool:
         """Checks if the pipeline is cancelled.
 
@@ -219,14 +227,16 @@ class PipelineStep:
         attach_source (bool, optional): Whether to attach the source to the step. Defaults to False.
         step_type (str, optional): The type of the step. Defaults to 'ACTION'.
     """
+
     """The representation of a step within a step, which captures both the step itself and
     also the details around the step's use.
 
     It is internally used by the Pipeline and is not a public API
     """
 
-    def __init__(self, step, name=None, options=None, attach_source=False,
-                 step_type='ACTION'):
+    def __init__(
+        self, step, name=None, options=None, attach_source=False, step_type="ACTION"
+    ):
         if options is None:
             options = {}
         self.step = step
@@ -243,7 +253,10 @@ class PipelineStep:
         elif isinstance(self.step, str):
             logger.info(f"Adding new remote step {step} to pipeline")
             from kodexa import RemoteStep
-            self.step = RemoteStep(step, step_type=step_type, options=options, attach_source=attach_source)
+
+            self.step = RemoteStep(
+                step, step_type=step_type, options=options, attach_source=attach_source
+            )
         else:
             logger.info(f"Adding new step {type(step)} to pipeline")
 
@@ -258,22 +271,21 @@ class PipelineStep:
         """
         try:
             if str(type(self.step)) == "<class 'type'>":
-                raise Exception("You can not yet deploy a pipeline with a class instance style step")
+                raise Exception(
+                    "You can not yet deploy a pipeline with a class instance style step"
+                )
             if isinstance(self.step, str):
-                return {
-                    'ref': self.step,
-                    'options': self.options
-                }
+                return {"ref": self.step, "options": self.options}
             if callable(self.step):
                 metadata = {
-                    'function': self.step.__name__,
-                    'script': dedent(inspect.getsource(self.step))
+                    "function": self.step.__name__,
+                    "script": dedent(inspect.getsource(self.step)),
                 }
             else:
                 metadata = self.step.to_dict()
 
-            metadata['name'] = self.name
-            metadata['stepType'] = self.step_type
+            metadata["name"] = self.name
+            metadata["stepType"] = self.step_type
             return metadata
         except AttributeError as e:
             raise Exception("All steps must implement to_dict() for deployment", e)
@@ -294,11 +306,9 @@ class PipelineStep:
 
         start = time.perf_counter()
         try:
-
             context.set_current_document(document)
             logger.info(f"Starting step")
             if str(type(self.step)) == "<class 'type'>":
-
                 logger.info(f"Starting step based on class {self.step}")
 
                 # We need to handle the parameterization
@@ -340,6 +350,7 @@ class PipelineStep:
 
 class LabelStep(object):
     """A simple step for handling the labelling for a document"""
+
     """A simple step for handling the labelling for a document"""
 
     def __init__(self, label: str, remove=False):
@@ -387,6 +398,7 @@ class Pipeline:
     Examples:
         >>> pipeline = Pipeline(FolderConnector(path='/tmp/', file_filter='example.pdf'))
     """
+
     """A pipeline represents a way to bring together parts of the kodexa framework to solve a specific problem.
 
     When you create a Pipeline you must provide the connector that will be used to source the documents.
@@ -403,8 +415,14 @@ class Pipeline:
     """
     context: PipelineContext
 
-    def __init__(self, connector=None, name: str = "Default", stop_on_exception: bool = True,
-                 logging_level=logger.info, apply_lineage: bool = True):
+    def __init__(
+        self,
+        connector=None,
+        name: str = "Default",
+        stop_on_exception: bool = True,
+        logging_level=logger.info,
+        apply_lineage: bool = True,
+    ):
         logger.info(f"Initializing a new pipeline {name}")
 
         if isinstance(connector, Document):
@@ -430,9 +448,13 @@ class Pipeline:
             Pipeline: The pipeline.
         """
         self.steps.append(
-            PipelineStep(step=LabelStep(label), name=f"Add label {label}",
-                         options=options,
-                         attach_source=attach_source))
+            PipelineStep(
+                step=LabelStep(label),
+                name=f"Add label {label}",
+                options=options,
+                attach_source=attach_source,
+            )
+        )
         return self
 
     def remove_label(self, label: str, options=None, attach_source=False):
@@ -447,13 +469,18 @@ class Pipeline:
             Pipeline: The pipeline.
         """
         self.steps.append(
-            PipelineStep(step=LabelStep(label, remove=True), name=f"Remove label {label}",
-                         options=options,
-                         attach_source=attach_source))
+            PipelineStep(
+                step=LabelStep(label, remove=True),
+                name=f"Remove label {label}",
+                options=options,
+                attach_source=attach_source,
+            )
+        )
         return self
 
-    def add_step(self, step, name=None, options=None, attach_source=False,
-                 step_type='ACTION'):
+    def add_step(
+        self, step, name=None, options=None, attach_source=False, step_type="ACTION"
+    ):
         """Add the given step to the current pipeline.
 
         Args:
@@ -468,9 +495,15 @@ class Pipeline:
         """
         if options is None:
             options = {}
-        self.steps.append(PipelineStep(step=step, name=name, options=options,
-                                       attach_source=attach_source,
-                                       step_type=step_type))
+        self.steps.append(
+            PipelineStep(
+                step=step,
+                name=name,
+                options=options,
+                attach_source=attach_source,
+                step_type=step_type,
+            )
+        )
 
         return self
 
@@ -486,7 +519,6 @@ class Pipeline:
         configuration_steps = []
 
         for step in self.steps:
-
             try:
                 configuration_steps.append(step.to_dict())
             except:
@@ -524,8 +556,8 @@ class Pipeline:
         # and the store itself - to provide richness to the action
 
         for connector_object in self.connector:
-
             from kodexa.model.model import ContentObjectReference
+
             if isinstance(connector_object, ContentObjectReference):
                 document = connector_object.document
                 self.context.document_store = connector_object.store
@@ -547,7 +579,6 @@ class Pipeline:
                 document = step.execute(self.context, document)
 
             if document:
-
                 document.source = initial_source_metadata
                 if self.apply_lineage:
                     document.source.lineage_document_uuid = lineage_document_uuid
@@ -602,8 +633,16 @@ class Pipeline:
         return Pipeline(Document.from_text(text), *args, **kwargs)
 
     @staticmethod
-    def from_folder(folder_path: str, filename_filter: str = "*", recursive: bool = False, relative: bool = False,
-                    unpack=False, caller_path: str = get_caller_dir(), *args, **kwargs) -> Pipeline:
+    def from_folder(
+        folder_path: str,
+        filename_filter: str = "*",
+        recursive: bool = False,
+        relative: bool = False,
+        unpack=False,
+        caller_path: str = get_caller_dir(),
+        *args,
+        **kwargs,
+    ) -> Pipeline:
         """Create a pipeline that will run against a set of local files from a folder.
 
         Args:
@@ -617,8 +656,18 @@ class Pipeline:
         Returns:
             Pipeline: A new pipeline.
         """
-        return Pipeline(FolderConnector(folder_path, filename_filter, recursive=recursive, relative=relative,
-                                        caller_path=caller_path, unpack=unpack), *args, **kwargs)
+        return Pipeline(
+            FolderConnector(
+                folder_path,
+                filename_filter,
+                recursive=recursive,
+                relative=relative,
+                caller_path=caller_path,
+                unpack=unpack,
+            ),
+            *args,
+            **kwargs,
+        )
 
 
 class PipelineStatistics:
@@ -628,6 +677,7 @@ class PipelineStatistics:
         documents_processed (int): The number of documents processed.
 
     """
+
     """A set of statistics for the processed document
 
     documents_processed

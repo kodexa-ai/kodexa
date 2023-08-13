@@ -20,8 +20,16 @@ from appdirs import AppDirs
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
-from kodexa.model.objects import ExecutionEvent, \
-    ContentObject, AssistantEvent, ContentEvent, ScheduledEvent, DocumentFamilyEvent, ChannelEvent, DataObjectEvent
+from kodexa.model.objects import (
+    ExecutionEvent,
+    ContentObject,
+    AssistantEvent,
+    ContentEvent,
+    ScheduledEvent,
+    DocumentFamilyEvent,
+    ChannelEvent,
+    DataObjectEvent,
+)
 from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
 from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
 
@@ -33,53 +41,59 @@ dirs = AppDirs("Kodexa", "Kodexa")
 def get_config(profile=None):
     """
     Gets the kodexa config object used for local PAT storage.
-    
+
     Args:
         profile (str, optional): The profile to get the config for. Defaults to None.
-    
+
     Returns:
         dict: The kodexa config as a dictionary. If the profile exists in the config, it returns the config for that profile.
         If the profile does not exist, it creates a new profile with default values and returns it. If no profile is provided,
         it returns the default config. If the config file does not exist, it returns a default config or a new profile with
         default values depending on whether a profile was provided or not.
     """
-    path = os.path.join(dirs.user_config_dir, '.kodexa.json')
+    path = os.path.join(dirs.user_config_dir, ".kodexa.json")
     if os.path.exists(path):
-        with open(path, 'r') as outfile:
+        with open(path, "r") as outfile:
             kodexa_config = json.load(outfile)
             if profile and profile not in kodexa_config:
-                kodexa_config[profile] = {'url': None, 'access_token': None, 'insecure': False}
+                kodexa_config[profile] = {
+                    "url": None,
+                    "access_token": None,
+                    "insecure": False,
+                }
 
-            if not profile and 'insecure' not in kodexa_config:
-                kodexa_config['insecure'] = False
-            elif profile and 'insecure' not in kodexa_config[profile]:
-                kodexa_config[profile]['insecure'] = False
+            if not profile and "insecure" not in kodexa_config:
+                kodexa_config["insecure"] = False
+            elif profile and "insecure" not in kodexa_config[profile]:
+                kodexa_config[profile]["insecure"] = False
 
             return kodexa_config
     else:
-        return {'url': None, 'access_token': None, 'insecure': False} if not profile else {
-            profile: {'url': None, 'access_token': None, 'insecure': False}}
-
+        return (
+            {"url": None, "access_token": None, "insecure": False}
+            if not profile
+            else {profile: {"url": None, "access_token": None, "insecure": False}}
+        )
 
 
 def save_config(config_obj):
     """
     Saves the configuration dictionary for the user.
-    
+
     Args:
         config_obj (dict): The configuration dictionary to be saved.
-    
+
     Raises:
         OSError: If the directory cannot be created, and the error is not that the directory already exists.
     """
-    path = os.path.join(dirs.user_config_dir, '.kodexa.json')
+    path = os.path.join(dirs.user_config_dir, ".kodexa.json")
     if not os.path.exists(os.path.dirname(path)):
         try:
             os.makedirs(os.path.dirname(path))
         except OSError as exc:  # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
-    with open(path, 'w') as outfile:
+    with open(path, "w") as outfile:
         json.dump(config_obj, outfile)
 
 
@@ -89,6 +103,7 @@ class KodexaPlatform:
     components. It can also be used to get your access token and Kodexa platform URL using a user config file if available
     or Environment variables (KODEXA_ACCESS_TOKEN and KODEXA_URL).
     """
+
     """
     The KodexaPlatform object allows you to work with an instance of the Kodexa platform, allow you to list, view and deploy
     components
@@ -109,6 +124,7 @@ class KodexaPlatform:
             KodexaClient: An instance of the Kodexa client.
         """
         from kodexa import KodexaClient
+
         return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
@@ -123,9 +139,14 @@ class KodexaPlatform:
             str: The access token if it is defined in the user config store, or as an environment variable.
         """
         kodexa_config = get_config(profile)
-        access_token = os.getenv('KODEXA_ACCESS_TOKEN')
-        return access_token if access_token is not None else \
-            kodexa_config[profile]['access_token'] if profile else kodexa_config['access_token']
+        access_token = os.getenv("KODEXA_ACCESS_TOKEN")
+        return (
+            access_token
+            if access_token is not None
+            else kodexa_config[profile]["access_token"]
+            if profile
+            else kodexa_config["access_token"]
+        )
 
     @staticmethod
     def get_url(profile=None) -> str:
@@ -139,8 +160,14 @@ class KodexaPlatform:
             str: The URL if it is defined in the user config store, or as an environment variable.
         """
         kodexa_config = get_config(profile)
-        env_url = os.getenv('KODEXA_URL', None)
-        return env_url if env_url is not None else kodexa_config[profile]['url'] if profile else kodexa_config['url']
+        env_url = os.getenv("KODEXA_URL", None)
+        return (
+            env_url
+            if env_url is not None
+            else kodexa_config[profile]["url"]
+            if profile
+            else kodexa_config["url"]
+        )
 
     @staticmethod
     def set_access_token(access_token: str):
@@ -153,7 +180,6 @@ class KodexaPlatform:
         if access_token is not None:
             os.environ["KODEXA_ACCESS_TOKEN"] = access_token
 
-    
     @staticmethod
     def set_url(url: str):
         """
@@ -165,7 +191,6 @@ class KodexaPlatform:
         if url is not None:
             os.environ["KODEXA_URL"] = url
 
-    
     @staticmethod
     def get_access_token_details() -> Dict:
         """
@@ -177,7 +202,8 @@ class KodexaPlatform:
         response = requests.get(
             f"{KodexaPlatform.get_url()}/api/account/accessToken",
             headers={"x-access-token": KodexaPlatform.get_access_token()},
-            verify=not KodexaPlatform.get_insecure())
+            verify=not KodexaPlatform.get_insecure(),
+        )
         if response.status_code == 200:
             return Dict(response.json())
 
@@ -198,13 +224,13 @@ class KodexaPlatform:
             list: A list containing the organization slug, slug, and version.
         """
 
-        org_slug = ref.split('/')[0]
-        slug = ref.split('/')[1].split(":")[0]
+        org_slug = ref.split("/")[0]
+        slug = ref.split("/")[1].split(":")[0]
 
         version = None
 
-        if len(ref.split('/')[1].split(":")) == 2:
-            version = ref.split('/')[1].split(":")[1]
+        if len(ref.split("/")[1].split(":")) == 2:
+            version = ref.split("/")[1].split(":")[1]
 
         return [org_slug, slug, version]
 
@@ -221,26 +247,28 @@ class KodexaPlatform:
             insecure (bool, optional): Whether to use insecure connection. Defaults to False.
         """
         from requests.auth import HTTPBasicAuth
-        obj_response = requests.get(f"{kodexa_url}/api/account/me/token",
-                                    auth=HTTPBasicAuth(username, password),
-                                    headers={"content-type": "application/json"},
-                                    verify=not insecure)
+
+        obj_response = requests.get(
+            f"{kodexa_url}/api/account/me/token",
+            auth=HTTPBasicAuth(username, password),
+            headers={"content-type": "application/json"},
+            verify=not insecure,
+        )
         if obj_response.status_code == 200:
             kodexa_config = get_config(profile)
             if profile and profile in kodexa_config:
-                kodexa_config[profile]['url'] = kodexa_url
-                kodexa_config[profile]['access_token'] = obj_response.text
-                kodexa_config[profile]['insecure'] = insecure
+                kodexa_config[profile]["url"] = kodexa_url
+                kodexa_config[profile]["access_token"] = obj_response.text
+                kodexa_config[profile]["insecure"] = insecure
             else:
-                kodexa_config['url'] = kodexa_url
-                kodexa_config['access_token'] = obj_response.text
-                kodexa_config['insecure'] = insecure
+                kodexa_config["url"] = kodexa_url
+                kodexa_config["access_token"] = obj_response.text
+                kodexa_config["insecure"] = insecure
             save_config(kodexa_config)
             print("Logged in")
         else:
             print(f"Check your URL and password [{obj_response.status_code}]")
 
-    
     @classmethod
     def get_server_info(cls):
         """
@@ -249,17 +277,23 @@ class KodexaPlatform:
         Returns:
             dict: The server information.
         """
-        r = requests.get(f"{KodexaPlatform.get_url()}/api",
-                         headers={"x-access-token": KodexaPlatform.get_access_token(),
-                                  "content-type": "application/json"},
-                         verify=not KodexaPlatform.get_insecure())
+        r = requests.get(
+            f"{KodexaPlatform.get_url()}/api",
+            headers={
+                "x-access-token": KodexaPlatform.get_access_token(),
+                "content-type": "application/json",
+            },
+            verify=not KodexaPlatform.get_insecure(),
+        )
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
         if r.status_code == 200:
             return r.json()
 
         logger.warning(r.text)
-        raise Exception("Unable to get server information, check your platform settings")
+        raise Exception(
+            "Unable to get server information, check your platform settings"
+        )
 
     @classmethod
     def get_tempdir(cls):
@@ -270,7 +304,8 @@ class KodexaPlatform:
             str: The path to the temporary directory.
         """
         import tempfile
-        return os.getenv('KODEXA_TMP', tempfile.gettempdir())
+
+        return os.getenv("KODEXA_TMP", tempfile.gettempdir())
 
     @classmethod
     def get_insecure(cls, profile=None):
@@ -284,13 +319,19 @@ class KodexaPlatform:
             bool: The insecure setting.
         """
         kodexa_config = get_config(profile)
-        insecure = os.getenv('KODEXA_URL_INSECURE', None)
-        return insecure if insecure is not None else kodexa_config[profile]['insecure'] if profile else kodexa_config[
-            'insecure']
+        insecure = os.getenv("KODEXA_URL_INSECURE", None)
+        return (
+            insecure
+            if insecure is not None
+            else kodexa_config[profile]["insecure"]
+            if profile
+            else kodexa_config["insecure"]
+        )
 
 
 class RemoteSession:
     """A Session on the Kodexa platform for leveraging pipelines and services"""
+
     """A Session on the Kodexa platform for leveraging pipelines and services"""
 
     def __init__(self, session_type, slug):
@@ -309,30 +350,39 @@ class RemoteSession:
             dict: The metadata of the action if the request is successful.
         """
         logger.debug(f"Downloading metadata for action {ref}")
-        r = requests.get(f"{KodexaPlatform.get_url()}/api/actions/{ref.replace(':', '/')}",
-                         headers={"x-access-token": KodexaPlatform.get_access_token()},
-                         verify=not KodexaPlatform.get_insecure())
+        r = requests.get(
+            f"{KodexaPlatform.get_url()}/api/actions/{ref.replace(':', '/')}",
+            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            verify=not KodexaPlatform.get_insecure(),
+        )
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
         if r.status_code == 200:
             return r.json()
 
         logger.warning(r.text)
-        raise Exception("Unable to get action metadata, check your reference and platform settings")
+        raise Exception(
+            "Unable to get action metadata, check your reference and platform settings"
+        )
 
     def start(self):
         """
         Start the session.
         """
         logger.info(f"Creating session {self.slug} ({KodexaPlatform.get_url()})")
-        r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions", params={self.session_type: self.slug},
-                          headers={"x-access-token": KodexaPlatform.get_access_token()},
-                          verify=not KodexaPlatform.get_insecure())
+        r = requests.post(
+            f"{KodexaPlatform.get_url()}/api/sessions",
+            params={self.session_type: self.slug},
+            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            verify=not KodexaPlatform.get_insecure(),
+        )
 
         if r.status_code != 200:
             logger.warning("Unable to create session")
             logger.warning(r.text)
-            raise Exception("Unable to create a session, check your URL and access token")
+            raise Exception(
+                "Unable to create a session, check your URL and access token"
+            )
 
         self.cloud_session = Dict(json.loads(r.text))
 
@@ -357,23 +407,44 @@ class RemoteSession:
         else:
             files["document"] = document.to_kddb()
 
-        data = {"options": json.dumps(options), "document_metadata_json": json.dumps(document.metadata),
-                "context": json.dumps(context.context)}
+        data = {
+            "options": json.dumps(options),
+            "document_metadata_json": json.dumps(document.metadata),
+            "context": json.dumps(context.context),
+        }
 
         logger.info(f"Executing session {self.cloud_session.id}")
-        r = requests.post(f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
-                          params={self.session_type: self.slug, "documentVersion": document.version},
-                          data=data,
-                          headers={"x-access-token": KodexaPlatform.get_access_token()}, files=files,
-                          verify=not KodexaPlatform.get_insecure())
+        r = requests.post(
+            f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
+            params={self.session_type: self.slug, "documentVersion": document.version},
+            data=data,
+            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            files=files,
+            verify=not KodexaPlatform.get_insecure(),
+        )
         try:
             if r.status_code == 200:
                 execution = Dict(json.loads(r.text))
             else:
-                logger.warning("Execution creation failed [" + r.text + "], response " + str(r.status_code))
-                raise Exception("Execution creation failed [" + r.text + "], response " + str(r.status_code))
+                logger.warning(
+                    "Execution creation failed ["
+                    + r.text
+                    + "], response "
+                    + str(r.status_code)
+                )
+                raise Exception(
+                    "Execution creation failed ["
+                    + r.text
+                    + "], response "
+                    + str(r.status_code)
+                )
         except JSONDecodeError:
-            logger.warning("Unable to handle response [" + r.text + "], response " + str(r.status_code))
+            logger.warning(
+                "Unable to handle response ["
+                + r.text
+                + "], response "
+                + str(r.status_code)
+            )
             raise
 
         return execution
@@ -393,7 +464,8 @@ class RemoteSession:
             r = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
-                verify=not KodexaPlatform.get_insecure())
+                verify=not KodexaPlatform.get_insecure(),
+            )
             try:
                 execution = Dict(json.loads(r.text))
             except JSONDecodeError:
@@ -409,16 +481,24 @@ class RemoteSession:
         if status == "FAILED":
             logger.warning("Execution has failed")
             for step in execution.steps:
-                if step.status == 'FAILED':
-                    logger.warning(f"Step {step.name} has failed. {step.exceptionDetails.message}.")
+                if step.status == "FAILED":
+                    logger.warning(
+                        f"Step {step.name} has failed. {step.exceptionDetails.message}."
+                    )
 
-                    if step.exceptionDetails.errorType == 'Validation':
-                        logger.warning("Additional validation information has been provided:")
+                    if step.exceptionDetails.errorType == "Validation":
+                        logger.warning(
+                            "Additional validation information has been provided:"
+                        )
                         for validation_error in step.exceptionDetails.validationErrors:
-                            logger.warning(f"- {validation_error.option} : {validation_error.message}")
+                            logger.warning(
+                                f"- {validation_error.option} : {validation_error.message}"
+                            )
 
                     if step.exceptionDetails.help:
-                        logger.warning(f"Additional help is available:\n\n{step.exceptionDetails.help}")
+                        logger.warning(
+                            f"Additional help is available:\n\n{step.exceptionDetails.help}"
+                        )
 
                     raise Exception(f"Processing has failed on step {step.name}")
 
@@ -441,7 +521,8 @@ class RemoteSession:
             doc = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
-                verify=KodexaPlatform.get_insecure())
+                verify=KodexaPlatform.get_insecure(),
+            )
             return Document.from_kddb(doc.content)
 
         logger.info("No output document")
@@ -459,9 +540,18 @@ class RemotePipeline:
         parameters (dict, optional): The parameters for the pipeline. Defaults to an empty dictionary.
         auth (list, optional): The authentication credentials. Defaults to an empty list.
     """
+
     """Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform"""
 
-    def __init__(self, slug, connector, version=None, attach_source=True, parameters=None, auth=None):
+    def __init__(
+        self,
+        slug,
+        connector,
+        version=None,
+        attach_source=True,
+        parameters=None,
+        auth=None,
+    ):
         logger.info(f"Initializing a new pipeline {slug}")
 
         if isinstance(connector, Document):
@@ -490,7 +580,9 @@ class RemotePipeline:
 
         for document in self.connector:
             logger.info(f"Processing {document}")
-            execution = cloud_session.execution_action(document, self.parameters, self.attach_source, self.context)
+            execution = cloud_session.execution_action(
+                document, self.parameters, self.attach_source, self.context
+            )
             execution = cloud_session.wait_for_execution(execution)
 
             logger.info("Capturing output")
@@ -521,7 +613,9 @@ class RemotePipeline:
         return RemotePipeline(slug, Document.from_url(url, headers), *args, **kwargs)
 
     @staticmethod
-    def from_file(slug: str, file_path: str, unpack: bool = False, *args, **kwargs) -> RemotePipeline:
+    def from_file(
+        slug: str, file_path: str, unpack: bool = False, *args, **kwargs
+    ) -> RemotePipeline:
         """Creates a new pipeline using a file path as a source.
 
         Args:
@@ -534,7 +628,9 @@ class RemotePipeline:
         Returns:
             RemotePipeline: A new instance of a remote pipeline.
         """
-        return RemotePipeline(slug, Document.from_file(file_path, unpack), *args, **kwargs)
+        return RemotePipeline(
+            slug, Document.from_file(file_path, unpack), *args, **kwargs
+        )
 
     @staticmethod
     def from_text(slug: str, text: str, *args, **kwargs) -> RemotePipeline:
@@ -551,14 +647,19 @@ class RemotePipeline:
         """
 
         # need to update kwargs for attach_source
-        kwargs.setdefault('attach_source', False)
+        kwargs.setdefault("attach_source", False)
         return RemotePipeline(slug, Document.from_text(text), *args, **kwargs)
 
     @staticmethod
-    def from_folder(slug: str, folder_path: str, filename_filter: str = "*", recursive: bool = False,
-                    unpack: bool = False,
-                    relative: bool = False,
-                    caller_path: str = get_caller_dir()) -> RemotePipeline:
+    def from_folder(
+        slug: str,
+        folder_path: str,
+        filename_filter: str = "*",
+        recursive: bool = False,
+        unpack: bool = False,
+        relative: bool = False,
+        caller_path: str = get_caller_dir(),
+    ) -> RemotePipeline:
         """Creates a pipeline that will run against a set of local files from a folder.
 
         Args:
@@ -573,15 +674,25 @@ class RemotePipeline:
         Returns:
             RemotePipeline: A new instance of a remote pipeline.
         """
-        return RemotePipeline(slug, FolderConnector(folder_path, filename_filter, recursive, relative, caller_path,
-                                                    unpack=unpack))
+        return RemotePipeline(
+            slug,
+            FolderConnector(
+                folder_path,
+                filename_filter,
+                recursive,
+                relative,
+                caller_path,
+                unpack=unpack,
+            ),
+        )
 
 
 class RemoteStep:
     """Allows you to interact with a step that has been deployed in the Kodexa platform"""
+
     """Allows you to interact with a step that has been deployed in the Kodexa platform"""
 
-    def __init__(self, ref, step_type='ACTION', attach_source=False, options=None):
+    def __init__(self, ref, step_type="ACTION", attach_source=False, options=None):
         if options is None:
             options = {}
         self.ref = ref
@@ -595,11 +706,7 @@ class RemoteStep:
         Returns:
             dict: Dictionary representation of the RemoteStep object.
         """
-        return {
-            'ref': self.ref,
-            'step_type': self.step_type,
-            'options': self.options
-        }
+        return {"ref": self.ref, "step_type": self.step_type, "options": self.options}
 
     def get_name(self):
         """Generates a name for the RemoteStep object.
@@ -626,12 +733,15 @@ class RemoteStep:
         action_metadata = cloud_session.get_action_metadata(self.ref)
 
         requires_source = False
-        if 'requiresSource' in action_metadata['metadata']:
-            requires_source = action_metadata['metadata']['requiresSource']
+        if "requiresSource" in action_metadata["metadata"]:
+            requires_source = action_metadata["metadata"]["requiresSource"]
 
-        execution = cloud_session.execution_action(document, self.options,
-                                                   self.attach_source if self.attach_source else requires_source,
-                                                   context)
+        execution = cloud_session.execution_action(
+            document,
+            self.options,
+            self.attach_source if self.attach_source else requires_source,
+            context,
+        )
 
         logger.debug("Waiting for remote execution")
         execution = cloud_session.wait_for_execution(execution)
@@ -650,10 +760,7 @@ class RemoteStep:
         Returns:
             dict: Dictionary representing the configuration of the step.
         """
-        return {
-            "ref": self.ref,
-            "options": self.options
-        }
+        return {"ref": self.ref, "options": self.options}
 
 
 class EventHelper:
@@ -676,17 +783,17 @@ class EventHelper:
         Raises:
             Exception: If the event type is unknown.
         """
-        if event_dict['type'] == 'assistant':
+        if event_dict["type"] == "assistant":
             return AssistantEvent(**event_dict)
-        if event_dict['type'] == 'content':
+        if event_dict["type"] == "content":
             return ContentEvent(**event_dict)
-        if event_dict['type'] == 'scheduled':
+        if event_dict["type"] == "scheduled":
             return ScheduledEvent(**event_dict)
-        if event_dict['type'] == 'channel':
+        if event_dict["type"] == "channel":
             return ChannelEvent(**event_dict)
-        if event_dict['type'] == 'documentFamily':
+        if event_dict["type"] == "documentFamily":
             return DocumentFamilyEvent(**event_dict)
-        if event_dict['type'] == 'dataObject':
+        if event_dict["type"] == "dataObject":
             return DataObjectEvent(**event_dict)
 
         raise f"Unknown event type {event_dict}"
@@ -699,15 +806,14 @@ class EventHelper:
         """
         response = requests.post(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/logs",
-            json=[
-                {'entry': message}
-            ],
-            headers={'x-access-token': KodexaPlatform.get_access_token()}, timeout=300,
-            verify=not KodexaPlatform.get_insecure())
+            json=[{"entry": message}],
+            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            timeout=300,
+            verify=not KodexaPlatform.get_insecure(),
+        )
         if response.status_code != 200:
             print(f"Logging failed {response.status_code}", flush=True)
 
-    
     def get_content_object(self, content_object_id: str):
         """Gets a content object from the Kodexa platform.
 
@@ -721,18 +827,25 @@ class EventHelper:
             io.BytesIO: The content object.
         """
         logger.info(
-            f"Getting content object {content_object_id} in event {self.event.id} in execution {self.event.execution.id}")
+            f"Getting content object {content_object_id} in event {self.event.id} in execution {self.event.execution.id}"
+        )
 
         co_response = requests.get(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/objects/{content_object_id}",
-            headers={'x-access-token': KodexaPlatform.get_access_token()}, timeout=300,
-            verify=not KodexaPlatform.get_insecure())
+            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            timeout=300,
+            verify=not KodexaPlatform.get_insecure(),
+        )
         if co_response.status_code != 200:
             logger.error(f"Response {co_response.status_code} {co_response.text}")
-            raise Exception(f"Unable to find content object {content_object_id} in execution {self.event.execution.id}")
+            raise Exception(
+                f"Unable to find content object {content_object_id} in execution {self.event.execution.id}"
+            )
         return io.BytesIO(co_response.content)
 
-    def put_content_object(self, content_object: ContentObject, content) -> ContentObject:
+    def put_content_object(
+        self, content_object: ContentObject, content
+    ) -> ContentObject:
         """Puts a content object to the Kodexa platform.
 
         Args:
@@ -745,19 +858,17 @@ class EventHelper:
         Returns:
             ContentObject: The posted content object.
         """
-        files = {
-            "content": content
-        }
-        data = {
-            "contentObjectJson": json.dumps(content_object.dict(by_alias=True))
-        }
+        files = {"content": content}
+        data = {"contentObjectJson": json.dumps(content_object.dict(by_alias=True))}
         logger.info("Posting back content object to execution object")
         co_response = requests.post(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/objects",
             data=data,
-            headers={'x-access-token': KodexaPlatform.get_access_token()},
-            files=files, timeout=300,
-            verify=not KodexaPlatform.get_insecure())
+            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            files=files,
+            timeout=300,
+            verify=not KodexaPlatform.get_insecure(),
+        )
 
         if co_response.status_code != 200:
             logger.info("Unable to post back object")
@@ -774,11 +885,15 @@ class EventHelper:
         Returns:
             PipelineContext: The pipeline context.
         """
-        context = PipelineContext(context={}, content_provider=self, execution_id=self.event.execution.id)
+        context = PipelineContext(
+            context={}, content_provider=self, execution_id=self.event.execution.id
+        )
 
         if self.event.store_ref and self.event.document_family_id:
             logger.info("We have storeRef and document family")
-            rds: DocumentStoreEndpoint = KodexaClient().get_object_by_ref('store', self.event.store_ref)
+            rds: DocumentStoreEndpoint = KodexaClient().get_object_by_ref(
+                "store", self.event.store_ref
+            )
             document_family = rds.get_family(self.event.document_family_id)
 
             context.document_family = document_family
@@ -796,7 +911,6 @@ class EventHelper:
             Document: The input document.
         """
         for content_object in self.event.execution.content_objects:
-
             if content_object.id == self.event.input_id:
                 input_document_bytes = self.get_content_object(self.event.input_id)
                 logger.info("Loading KDDB document")
@@ -806,7 +920,9 @@ class EventHelper:
                 input_document.uuid = context.content_object.id
 
                 if content_object.store_ref is not None:
-                    context.document_store = KodexaClient().get_object_by_ref('store', content_object.store_ref)
+                    context.document_store = KodexaClient().get_object_by_ref(
+                        "store", content_object.store_ref
+                    )
 
                 return input_document
 
@@ -830,6 +946,7 @@ class SessionConnector:
     get_source(document):
         Returns the content object of the document source.
     """
+
     event_helper = None
 
     @classmethod

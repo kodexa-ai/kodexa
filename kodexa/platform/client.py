@@ -35,6 +35,7 @@ class Notifier:
 
     This class provides methods to log messages and handle exit events.
     """
+
     def __init__(self):
         pass
 
@@ -56,6 +57,7 @@ class Notifier:
 #
 # These wrap the objects from the model and provide a simple interface to the platform that is easier to use
 
+
 class OrganizationOwned(BaseModel):
     """
     A base class for objects that are owned by an organization.
@@ -63,6 +65,7 @@ class OrganizationOwned(BaseModel):
     Attributes:
         organization (Optional[OrganizationEndpoint]): The organization that owns the object.
     """
+
     organization: Optional["OrganizationEndpoint"] = None
 
     def set_organization(self, organization):
@@ -83,6 +86,7 @@ class ClientEndpoint(BaseModel):
     """
     Represents a client endpoint.
     """
+
     """
     Represents a client endpoint
     """
@@ -91,11 +95,12 @@ class ClientEndpoint(BaseModel):
 
     class Config:
         """
-    This class is used to manage the configuration settings of the application.
+        This class is used to manage the configuration settings of the application.
 
-    Attributes:
-        arbitrary_types_allowed (bool): A flag to allow arbitrary types. Default is True.
-    """
+        Attributes:
+            arbitrary_types_allowed (bool): A flag to allow arbitrary types. Default is True.
+        """
+
         arbitrary_types_allowed = True
 
     def set_client(self, client):
@@ -120,8 +125,8 @@ class ClientEndpoint(BaseModel):
         Returns:
             A yaml string representation of the endpoint.
         """
-        kwargs['exclude_unset'] = True
-        kwargs['exclude_none'] = True
+        kwargs["exclude_unset"] = True
+        kwargs["exclude_none"] = True
 
         return to_yaml_str(self, **kwargs)
 
@@ -139,6 +144,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
     """
     Represents a project resource endpoint.
     """
+
     """
     Represents a project resource endpoint
     """
@@ -178,7 +184,9 @@ class ProjectResourceEndpoint(ClientEndpoint):
         """
         pass
 
-    def to_df(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+    def to_df(
+        self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+    ):
         """
         Convert resources to data frame.
 
@@ -193,10 +201,15 @@ class ProjectResourceEndpoint(ClientEndpoint):
             DataFrame: The DataFrame of the resources.
         """
         import pandas as pd
-        df = pd.DataFrame(seq(self.list(query, page, page_size, sort, filters)).map(lambda x: x.dict()).to_list())
 
-        if 'client' in df:
-            df.drop(columns='client', axis=1)
+        df = pd.DataFrame(
+            seq(self.list(query, page, page_size, sort, filters))
+            .map(lambda x: x.dict())
+            .to_list()
+        )
+
+        if "client" in df:
+            df.drop(columns="client", axis=1)
         return df
 
     def stream_list(self, query="*", sort=None, filters: List[str] = None):
@@ -218,14 +231,18 @@ class ProjectResourceEndpoint(ClientEndpoint):
             sort = "id"
 
         while True:
-            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            page_response = self.list(
+                query=query, page=page, page_size=page_size, sort=sort, filters=filters
+            )
             if not page_response.content:
                 break
             for resource in page_response.content:
                 yield resource
             page += 1
 
-    def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+    def list(
+        self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+    ):
         """
         List the resources.
 
@@ -242,9 +259,11 @@ class ProjectResourceEndpoint(ClientEndpoint):
 
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
 
-        params = {"query": requests.utils.quote(query),
-                  "page": page,
-                  "pageSize": page_size}
+        params = {
+            "query": requests.utils.quote(query),
+            "page": page,
+            "pageSize": page_size,
+        }
 
         if sort is not None:
             params["sort"] = sort
@@ -253,7 +272,10 @@ class ProjectResourceEndpoint(ClientEndpoint):
             params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
-        return [self.get_instance_class().model_validate(item).set_client(self.client) for item in list_response.json()]
+        return [
+            self.get_instance_class().model_validate(item).set_client(self.client)
+            for item in list_response.json()
+        ]
 
     def replace(self, components):
         """
@@ -266,9 +288,13 @@ class ProjectResourceEndpoint(ClientEndpoint):
             list: The list of replaced components.
         """
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
-        replace_response = self.client.put(url, [component.to_dict() for component in components])
-        return [self.get_instance_class().model_validate(item).set_client(self.client) for item in
-                replace_response.json()]
+        replace_response = self.client.put(
+            url, [component.to_dict() for component in components]
+        )
+        return [
+            self.get_instance_class().model_validate(item).set_client(self.client)
+            for item in replace_response.json()
+        ]
 
     def find_by_name(self, name) -> Optional[Any]:
         """
@@ -295,6 +321,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
     by its slug, streaming a list of components, listing components, creating a new
     component, and getting a component by its slug.
     """
+
     """
     Represents a component endpoint
     """
@@ -358,7 +385,9 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             return None
         return component_page.content[0]
 
-    def stream_list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+    def stream_list(
+        self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+    ):
         """
         Stream a list of components.
 
@@ -374,9 +403,11 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         """
         url = f"/api/{self.get_type()}/{self.organization.slug}"
 
-        params = {"query": requests.utils.quote(query),
-                  "page": page,
-                  "pageSize": page_size}
+        params = {
+            "query": requests.utils.quote(query),
+            "page": page,
+            "pageSize": page_size,
+        }
 
         if sort is not None:
             params["sort"] = sort
@@ -392,14 +423,20 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
                 break
 
             # Yield each endpoint in the current page
-            for endpoint in self.get_page_class(list_response.json()).model_validate(list_response.json()).set_client(
-                    self.client).to_endpoints():
+            for endpoint in (
+                self.get_page_class(list_response.json())
+                .model_validate(list_response.json())
+                .set_client(self.client)
+                .to_endpoints()
+            ):
                 yield endpoint
 
             # Move to the next page
             params["page"] += 1
 
-    def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+    def list(
+        self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+    ):
         """
         List the components.
 
@@ -415,9 +452,11 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         """
         url = f"/api/{self.get_type()}/{self.organization.slug}"
 
-        params = {"query": requests.utils.quote(query),
-                  "page": page,
-                  "pageSize": page_size}
+        params = {
+            "query": requests.utils.quote(query),
+            "page": page,
+            "pageSize": page_size,
+        }
 
         if sort is not None:
             params["sort"] = sort
@@ -426,8 +465,12 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["filter"] = filters
 
         list_response = self.client.get(url, params=params)
-        return self.get_page_class(list_response.json()).model_validate(list_response.json()).set_client(
-            self.client).to_endpoints()
+        return (
+            self.get_page_class(list_response.json())
+            .model_validate(list_response.json())
+            .set_client(self.client)
+            .to_endpoints()
+        )
 
     def create(self, component):
         """
@@ -441,7 +484,11 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         """
         url = f"/api/{self.get_type()}/{self.organization.slug}/"
         get_response = self.client.post(url, component.to_dict())
-        return self.get_instance_class(get_response.json()).model_validate(get_response.json()).set_client(self.client)
+        return (
+            self.get_instance_class(get_response.json())
+            .model_validate(get_response.json())
+            .set_client(self.client)
+        )
 
     def get_by_slug(self, slug, version=None):
         """
@@ -459,13 +506,16 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             url += f"/{version}"
 
         get_response = self.client.get(url)
-        return self.get_instance_class(get_response.json()).model_validate(get_response.json())
+        return self.get_instance_class(get_response.json()).model_validate(
+            get_response.json()
+        )
 
 
 class EntityEndpoint(BaseEntity, ClientEndpoint):
     """
     Represents an entity endpoint.
     """
+
     """
     Represents an entity endpoint
     """
@@ -532,6 +582,7 @@ class EntityEndpoint(BaseEntity, ClientEndpoint):
 
 class EntitiesEndpoint:
     """Represents an entities endpoint"""
+
     """Represents an entities endpoint"""
 
     def get_type(self) -> str:
@@ -564,7 +615,9 @@ class EntitiesEndpoint:
         """
         raise NotImplementedError()
 
-    def __init__(self, client: "KodexaClient", organization: "OrganizationEndpoint" = None):
+    def __init__(
+        self, client: "KodexaClient", organization: "OrganizationEndpoint" = None
+    ):
         """Initialize the entities endpoint by client and organization"""
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
@@ -586,14 +639,18 @@ class EntitiesEndpoint:
             sort = "id"
 
         while True:
-            page_response = self.list(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            page_response = self.list(
+                query=query, page=page, page_size=page_size, sort=sort, filters=filters
+            )
             if not page_response.content:
                 break
             for resource in page_response.content:
                 yield resource
             page += 1
 
-    def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+    def list(
+        self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+    ):
         """List the resources.
 
         Args:
@@ -608,9 +665,7 @@ class EntitiesEndpoint:
         """
         url = f"/api/{self.get_type()}"
 
-        params = {"query": query,
-                  "page": page,
-                  "pageSize": page_size}
+        params = {"query": query, "page": page, "pageSize": page_size}
 
         if sort is not None:
             params["sort"] = sort
@@ -619,13 +674,17 @@ class EntitiesEndpoint:
             params["filter"] = filters
 
         if self.organization is not None:
-            if 'filter' not in params:
-                params['filter'] = [f"organization.id: '{self.organization.id}'"]
+            if "filter" not in params:
+                params["filter"] = [f"organization.id: '{self.organization.id}'"]
             else:
-                params['filter'].append(f"organization.id: '{self.organization.id}'")
+                params["filter"].append(f"organization.id: '{self.organization.id}'")
 
         list_response = self.client.get(url, params=params)
-        return self.get_page_class().model_validate(list_response.json()).set_client(self.client)
+        return (
+            self.get_page_class()
+            .model_validate(list_response.json())
+            .set_client(self.client)
+        )
 
     def find_by_organization(self, organization: Organization) -> PageProject:
         """Find projects by organization.
@@ -637,8 +696,14 @@ class EntitiesEndpoint:
             PageProject: The page of projects belonging to the organization.
         """
         url = f"/api/{self.get_type()}/"
-        get_response = self.client.get(url, params={'filter': f"organization.id: '{organization.id}'"})
-        return self.get_page_class().model_validate(get_response.json()).set_client(self.client)
+        get_response = self.client.get(
+            url, params={"filter": f"organization.id: '{organization.id}'"}
+        )
+        return (
+            self.get_page_class()
+            .model_validate(get_response.json())
+            .set_client(self.client)
+        )
 
     def get(self, entity_id: str) -> "EntityEndpoint":
         """Get an entity by id.
@@ -651,7 +716,11 @@ class EntitiesEndpoint:
         """
         url = f"/api/{self.get_type()}/{entity_id}"
         get_response = self.client.get(url)
-        return self.get_instance_class().model_validate(get_response.json()).set_client(self.client)
+        return (
+            self.get_instance_class()
+            .model_validate(get_response.json())
+            .set_client(self.client)
+        )
 
     def create(self, new_entity: EntityEndpoint) -> EntityEndpoint:
         """Create an entity.
@@ -664,8 +733,14 @@ class EntitiesEndpoint:
         """
         url = f"/api/{self.get_type()}"
 
-        create_response = self.client.post(url, body=json.loads(new_entity.model_dump_json(by_alias=True)))
-        return self.get_instance_class().model_validate(create_response.json()).set_client(self.client)
+        create_response = self.client.post(
+            url, body=json.loads(new_entity.model_dump_json(by_alias=True))
+        )
+        return (
+            self.get_instance_class()
+            .model_validate(create_response.json())
+            .set_client(self.client)
+        )
 
     def delete(self, self_id: str) -> None:
         """Delete an entity by id.
@@ -681,6 +756,7 @@ class OrganizationsEndpoint(EntitiesEndpoint):
     """
     Represents the organization endpoint
     """
+
     """
     Represents the organization endpoint
     """
@@ -716,7 +792,7 @@ class OrganizationsEndpoint(EntitiesEndpoint):
         Returns:
             str: The type of the endpoint, 'organizations'.
         """
-        return 'organizations'
+        return "organizations"
 
     def find_by_slug(self, slug) -> Optional["OrganizationEndpoint"]:
         """
@@ -738,6 +814,7 @@ class PageEndpoint(ClientEndpoint):
     """
     Represents a page endpoint.
     """
+
     """
     Represents a page endpoint
     """
@@ -759,10 +836,11 @@ class PageEndpoint(ClientEndpoint):
             DataFrame: The page converted to a dataframe.
         """
         import pandas as pd
+
         df = pd.DataFrame(seq(self.content).map(lambda x: x.dict()).to_list())
 
-        if 'client' in df:
-            df.drop(columns='client', axis=1)
+        if "client" in df:
+            df.drop(columns="client", axis=1)
         return df
 
     def get(self, index: int) -> "ComponentInstanceEndpoint":
@@ -802,9 +880,15 @@ class PageEndpoint(ClientEndpoint):
         Returns:
             The page converted to endpoints.
         """
-        self.content = seq(self.content).map(
-            lambda x: self.client.deserialize(x.dict(by_alias=True),
-                                              component_type=self.get_type())).to_list()
+        self.content = (
+            seq(self.content)
+            .map(
+                lambda x: self.client.deserialize(
+                    x.dict(by_alias=True), component_type=self.get_type()
+                )
+            )
+            .to_list()
+        )
         return self
 
 
@@ -819,6 +903,7 @@ class PageTaxonomyEndpoint(PageTaxonomy, PageEndpoint):
         It's a placeholder for future methods and attributes related to
         the endpoint requests of the page taxonomy.
     """
+
     pass
 
 
@@ -833,6 +918,7 @@ class PageStoreEndpoint(PageStore, PageEndpoint):
     Methods:
         None
     """
+
     pass
 
 
@@ -847,6 +933,7 @@ class PageModelRuntimeEndpoint(PageStore, PageEndpoint):
     Methods:
         None
     """
+
     pass
 
 
@@ -860,6 +947,7 @@ class PageExtensionPackEndpoint(PageExtensionPack, PageEndpoint):
         This class is currently a placeholder and may have additional methods and attributes
         added in the future.
     """
+
     pass
 
 
@@ -873,6 +961,7 @@ class PageAssistantDefinitionEndpoint(PageAssistantDefinition, PageEndpoint):
         This class does not have any methods or attributes. It is used only for inheritance purposes.
 
     """
+
     pass
 
 
@@ -887,6 +976,7 @@ class PageCredentialDefinitionEndpoint(PageCredentialDefinition, PageEndpoint):
     Methods:
         None
     """
+
     pass
 
 
@@ -894,6 +984,7 @@ class PageUserEndpoint(PageUser, PageEndpoint):
     """
     This class represents a page user endpoint. It inherits from both PageUser and PageEndpoint classes.
     """
+
     """
     Represents a page user endpoint
     """
@@ -918,6 +1009,7 @@ class PageMembershipEndpoint(PageMembership, PageEndpoint):
     Methods:
         get_type: Get the type of the endpoint.
     """
+
     """Represents a page membership endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -942,6 +1034,7 @@ class PageExecutionEndpoint(PageExecution, PageEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a page execution endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -962,6 +1055,7 @@ class PageActionEndpoint(PageAction, PageEndpoint):
     This class is used to represent a page action endpoint which is a combination of
     PageAction and PageEndpoint. It provides a method to get the type of the endpoint.
     """
+
     """Represents a page action endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -983,6 +1077,7 @@ class PagePipelineEndpoint(PagePipeline, PageEndpoint):
     This class is used to represent a page pipeline endpoint. It inherits from both
     the PagePipeline and PageEndpoint classes.
     """
+
     """Represents a page pipeline endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -1007,6 +1102,7 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
     Attributes:
         None
     """
+
     """Represents a page project endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -1028,6 +1124,7 @@ class PageAssistantEndpoint(PageAssistant, PageEndpoint):
     This class is used to represent a page assistant endpoint which is a
     combination of a page assistant and a page endpoint.
     """
+
     """Represents a page assistant endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -1055,6 +1152,7 @@ class PageWorkspaceEndpoint(PageWorkspace, PageEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a page workspace endpoints"""
 
     def get_type(self) -> Optional[str]:
@@ -1081,6 +1179,7 @@ class PageChannelEndpoint(PageChannel, PageEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a page channel endpoints"""
 
     def get_type(self) -> Optional[str]:
@@ -1105,6 +1204,7 @@ class PageMessageEndpoint(PageMessage, PageEndpoint):
     Methods:
         get_type: Get the type of the endpoint.
     """
+
     """Represents a page message endpoints"""
 
     def get_type(self) -> Optional[str]:
@@ -1128,6 +1228,7 @@ class PageProjectTemplateEndpoint(PageProjectTemplate, PageEndpoint):
     Methods:
         None
     """
+
     pass
 
 
@@ -1143,6 +1244,7 @@ class PageOrganizationEndpoint(PageOrganization, PageEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a page organization endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -1172,6 +1274,7 @@ class PageDataFormEndpoint(PageDataForm, PageEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a page data form endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -1198,6 +1301,7 @@ class PageDashboardEndpoint(PageDashboard, PageEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a page data form endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -1224,6 +1328,7 @@ class PageDataExceptionEndpoint(PageDataException, PageEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a page of data exceptions endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -1253,6 +1358,7 @@ class PageDocumentFamilyEndpoint(PageDocumentFamily, PageEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a page document family endpoint"""
 
     def get_type(self) -> Optional[str]:
@@ -1273,6 +1379,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
 
     This class inherits from the Organization and EntityEndpoint classes.
     """
+
     """
     Represents an organization endpoint
     """
@@ -1287,7 +1394,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         return "organizations"
 
     @property
-    def projects(self) -> 'ProjectsEndpoint':
+    def projects(self) -> "ProjectsEndpoint":
         """
         Get the projects endpoint of the organization.
 
@@ -1356,7 +1463,11 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         Returns:
             AssistantDefinitionsEndpoint: The assistant definitions endpoint of the organization.
         """
-        return AssistantDefinitionsEndpoint().set_organization(self).set_client(self.client)
+        return (
+            AssistantDefinitionsEndpoint()
+            .set_organization(self)
+            .set_client(self.client)
+        )
 
     @property
     def credentials(self):
@@ -1366,7 +1477,11 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         Returns:
             CredentialDefinitionsEndpoint: The credentials endpoint of the organization.
         """
-        return CredentialDefinitionsEndpoint().set_organization(self).set_client(self.client)
+        return (
+            CredentialDefinitionsEndpoint()
+            .set_organization(self)
+            .set_client(self.client)
+        )
 
     @property
     def data_forms(self):
@@ -1376,7 +1491,11 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         Returns:
             CredentialDefinitionsEndpoint: The data forms endpoint of the organization.
         """
-        return CredentialDefinitionsEndpoint().set_organization(self).set_client(self.client)
+        return (
+            CredentialDefinitionsEndpoint()
+            .set_organization(self)
+            .set_client(self.client)
+        )
 
     @property
     def stores(self):
@@ -1406,6 +1525,7 @@ class ComponentsEndpoint(ClientEndpoint):
     Attributes:
         organization (OrganizationEndpoint): The organization endpoint that the components endpoint belongs to.
     """
+
     """
     Represents a components endpoint
     """
@@ -1419,6 +1539,7 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
     """
     Represents a component instance endpoint.
     """
+
     """
     Represents a component instance endpoint
     """
@@ -1507,9 +1628,13 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             List[str]: A list of strings representing the post-deployment actions.
         """
         if self.org_slug is None:
-            raise Exception("We can not deploy this component since it does not have an organization")
+            raise Exception(
+                "We can not deploy this component since it does not have an organization"
+            )
         if self.slug is None:
-            raise Exception("We can not deploy this component since it does not have a slug")
+            raise Exception(
+                "We can not deploy this component since it does not have a slug"
+            )
 
         self.ref = f"{self.org_slug}/{self.slug}{f':{self.version}' if self.version is not None else ''}"
 
@@ -1533,6 +1658,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
     activating, deactivating, scheduling, setting stores, getting stores, getting executions,
     getting event types, getting event type options, and sending events.
     """
+
     """Represents an assistant endpoint"""
 
     def update(self) -> "AssistantEndpoint":
@@ -1586,7 +1712,10 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         """
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/stores"
         response = self.client.get(url)
-        return [DocumentStoreEndpoint.model_validate(store).set_client(self.client) for store in response.json()]
+        return [
+            DocumentStoreEndpoint.model_validate(store).set_client(self.client)
+            for store in response.json()
+        ]
 
     def executions(self) -> List["Execution"]:
         """Get the executions of the assistant.
@@ -1613,7 +1742,9 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
 
         return None
 
-    def get_event_type_options(self, event_type: str, training: bool = False) -> Dict[str, Any]:
+    def get_event_type_options(
+        self, event_type: str, training: bool = False
+    ) -> Dict[str, Any]:
         """Get the event type options of the assistant.
 
         Args:
@@ -1653,10 +1784,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
             ExecutionEndpoint: The execution endpoint of the event.
         """
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
-        event_object = {
-            "eventType": event_type,
-            "options": json.dumps(options)
-        }
+        event_object = {"eventType": event_type, "options": json.dumps(options)}
         response = self.client.post(url, data=event_object, files={})
         process_response(response)
         return ExecutionEndpoint.model_validate(response.json()).set_client(self.client)
@@ -1667,6 +1795,7 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
 
     This class is used to interact with the project assistants endpoint of the API.
     """
+
     """Represents a project assistants endpoint"""
 
     def get_type(self) -> str:
@@ -1729,6 +1858,7 @@ class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
 
     This class is used to represent a project document stores endpoint in the system.
     """
+
     """Represents a project document stores endpoint"""
 
     def get_type(self) -> str:
@@ -1760,6 +1890,7 @@ class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
 
     This class is used to represent a project taxonomies endpoint in the system.
     """
+
     """Represents a project taxonomies endpoint"""
 
     def get_type(self) -> str:
@@ -1788,6 +1919,7 @@ class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
 
 class ProjectStoresEndpoint(ProjectResourceEndpoint):
     """Represents a project stores endpoint"""
+
     """Represents a project stores endpoint"""
 
     def get_type(self) -> str:
@@ -1812,15 +1944,14 @@ class ProjectStoresEndpoint(ProjectResourceEndpoint):
         Raises:
             ValueError: If the store type is unknown.
         """
-        if object_dict['storeType'] == "DOCUMENT":
+        if object_dict["storeType"] == "DOCUMENT":
             return DocumentStoreEndpoint
-        elif object_dict['storeType'] == "MODEL":
+        elif object_dict["storeType"] == "MODEL":
             return ModelStoreEndpoint
-        elif object_dict['storeType'] == "TABLE":
+        elif object_dict["storeType"] == "TABLE":
             return DataStoreEndpoint
         else:
             raise ValueError(f"Unknown store type {object_dict['storeType']}")
-
 
 
 class ProjectDataStoresEndpoint(ProjectResourceEndpoint):
@@ -1828,6 +1959,7 @@ class ProjectDataStoresEndpoint(ProjectResourceEndpoint):
 
     This class is used to represent a project data stores endpoint in the system.
     """
+
     """Represents a project data stores endpoint"""
 
     def get_type(self) -> str:
@@ -1862,6 +1994,7 @@ class ProjectModelStoresEndpoint(ProjectResourceEndpoint):
     Attributes:
         None
     """
+
     """Represents a project model stores endpoint"""
 
     def get_type(self) -> str:
@@ -1896,6 +2029,7 @@ class MessageEndpoint(EntityEndpoint, Message):
 
     This class is used to represent a message endpoint which is a combination of EntityEndpoint and Message.
     """
+
     """Represents a message endpoint"""
 
     def get_type(self) -> str:
@@ -1915,6 +2049,7 @@ class ChannelEndpoint(EntityEndpoint, Channel):
     This class is used to represent a channel endpoint in a communication system.
     It provides methods to get the type of the endpoint and to send a text message.
     """
+
     """Represents a channel endpoint"""
 
     def get_type(self) -> str:
@@ -1948,6 +2083,7 @@ class ChannelEndpoint(EntityEndpoint, Channel):
 
 class WorkspaceEndpoint(EntityEndpoint, Workspace):
     """Represents a workspace endpoint"""
+
     """Represents a workspace endpoint"""
 
     def get_type(self) -> str:
@@ -1981,7 +2117,9 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
         response = self.client.delete(url)
         process_response(response)
 
-    def list_document_families(self, page_size=10, page=1) -> PageDocumentFamilyEndpoint:
+    def list_document_families(
+        self, page_size=10, page=1
+    ) -> PageDocumentFamilyEndpoint:
         """
         List all document families in the workspace.
 
@@ -1995,7 +2133,9 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
         url = f"/api/workspaces/{self.id}/documentFamilies"
         response = self.client.get(url, {"pageSize": page_size, "page": page})
         process_response(response)
-        return PageDocumentFamilyEndpoint.model_validate(response.json()).set_client(self.client)
+        return PageDocumentFamilyEndpoint.model_validate(response.json()).set_client(
+            self.client
+        )
 
     def get_channel(self):
         """
@@ -2013,12 +2153,12 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
             raise ValueError("Workspace has no channel")
 
 
-
 class ProjectEndpoint(EntityEndpoint, Project):
     """Represents a project endpoint.
 
     This class is used to interact with the project endpoint of the API.
     """
+
     """Represents a project endpoint"""
 
     def get_type(self) -> str:
@@ -2029,8 +2169,11 @@ class ProjectEndpoint(EntityEndpoint, Project):
         """
         return "projects"
 
-    def update_resources(self, stores: List["StoreEndpoint"] = None,
-                         taxonomies: List["TaxonomyEndpoint"] = None) -> "ProjectEndpoint":
+    def update_resources(
+        self,
+        stores: List["StoreEndpoint"] = None,
+        taxonomies: List["TaxonomyEndpoint"] = None,
+    ) -> "ProjectEndpoint":
         """Update the resources of the project.
 
         Args:
@@ -2049,10 +2192,14 @@ class ProjectEndpoint(EntityEndpoint, Project):
             project_resources_update.store_refs = [store.ref for store in stores]
 
         if taxonomies:
-            project_resources_update.taxonomy_refs = [taxonomy.ref for taxonomy in taxonomies]
+            project_resources_update.taxonomy_refs = [
+                taxonomy.ref for taxonomy in taxonomies
+            ]
 
-        self.client.put(f"/api/projects/{self.id}/resources",
-                        body=json.loads(project_resources_update.json(by_alias=True)))
+        self.client.put(
+            f"/api/projects/{self.id}/resources",
+            body=json.loads(project_resources_update.json(by_alias=True)),
+        )
 
     @property
     def document_stores(self) -> ProjectDocumentStoresEndpoint:
@@ -2117,13 +2264,16 @@ class ProjectEndpoint(EntityEndpoint, Project):
         Returns:
             List[ProjectTag]: A list of updated tags associated with the project.
         """
-        response = self.client.put(f"/api/projects/{self.id}/tags",
-                                   body=[tag.to_dict(by_alias=True) for tag in tags])
+        response = self.client.put(
+            f"/api/projects/{self.id}/tags",
+            body=[tag.to_dict(by_alias=True) for tag in tags],
+        )
         return [ProjectTag.model_validate(tag) for tag in response.json()]
 
 
 class ChannelsEndpoint(EntitiesEndpoint):
     """Represents a channels endpoint"""
+
     """Represents a channels endpoint"""
 
     def get_type(self) -> str:
@@ -2168,6 +2318,7 @@ class WorkspacesEndpoint(EntitiesEndpoint):
     Attributes:
         object_dict: A dictionary containing the details of the object.
     """
+
     """Represents a workspaces endpoint"""
 
     def get_type(self) -> str:
@@ -2215,6 +2366,7 @@ class AssistantsEndpoint(EntitiesEndpoint):
     Attributes:
         object_dict: A dictionary containing the object data.
     """
+
     """Represents a assistants endpoint"""
 
     def get_type(self) -> str:
@@ -2256,6 +2408,7 @@ class AssistantsEndpoint(EntitiesEndpoint):
 
 class ProjectsEndpoint(EntitiesEndpoint):
     """Represents a projects endpoint"""
+
     """Represents a projects endpoint"""
 
     def get_type(self) -> str:
@@ -2297,12 +2450,14 @@ class ProjectsEndpoint(EntitiesEndpoint):
         """
 
         url = f"/api/{self.get_type()}"
-        filters = {'filter': [f"name: '{project_name}'"]}
+        filters = {"filter": [f"name: '{project_name}'"]}
         if self.organization is not None:
-            filters['filter'].append(f"organization.id: '{self.organization.id}'")
+            filters["filter"].append(f"organization.id: '{self.organization.id}'")
         get_response = self.client.get(url, params=filters)
-        if len(get_response.json()['content']) > 0:
-            return ProjectEndpoint.model_validate(get_response.json()['content'][0]).set_client(self.client)
+        if len(get_response.json()["content"]) > 0:
+            return ProjectEndpoint.model_validate(
+                get_response.json()["content"][0]
+            ).set_client(self.client)
         return None
 
     def stream_query(self, query: str = "*", sort=None):
@@ -2323,14 +2478,18 @@ class ProjectsEndpoint(EntitiesEndpoint):
             sort = "id"
 
         while True:
-            page_response = self.query(query=query, page=page, page_size=page_size, sort=sort)
+            page_response = self.query(
+                query=query, page=page, page_size=page_size, sort=sort
+            )
             if not page_response.content:
                 break
             for project_endpoint in page_response.content:
                 yield project_endpoint
             page += 1
 
-    def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> Optional[PageProjectEndpoint]:
+    def query(
+        self, query: str = "*", page: int = 1, page_size: int = 100, sort=None
+    ) -> Optional[PageProjectEndpoint]:
         """
         Query the project endpoints.
 
@@ -2344,21 +2503,23 @@ class ProjectsEndpoint(EntitiesEndpoint):
             Optional[PageProjectEndpoint]: The page project endpoint if found, None otherwise.
         """
         params = {
-            'page': page,
-            'pageSize': page_size,
-            'query': requests.utils.quote(query),
-            'filter': []
+            "page": page,
+            "pageSize": page_size,
+            "query": requests.utils.quote(query),
+            "filter": [],
         }
 
         if sort is not None:
-            params['sort'] = sort
+            params["sort"] = sort
 
         if self.organization is not None:
-            params['filter'].append(f"organization.id: '{self.organization.id}'")
+            params["filter"].append(f"organization.id: '{self.organization.id}'")
 
         get_response = self.client.get(f"/api/{self.get_type()}/", params=params)
 
-        return PageProjectEndpoint.model_validate(get_response.json()).set_client(self.client)
+        return PageProjectEndpoint.model_validate(get_response.json()).set_client(
+            self.client
+        )
 
     def create(self, project: Project, template_ref: str = None) -> Project:
         """
@@ -2384,9 +2545,12 @@ class ProjectsEndpoint(EntitiesEndpoint):
         else:
             params = None
 
-        create_response = self.client.post(url, body=json.loads(project.model_dump_json(by_alias=True)),
-                                           params=params)
-        return ProjectEndpoint.model_validate(create_response.json()).set_client(self.client)
+        create_response = self.client.post(
+            url, body=json.loads(project.model_dump_json(by_alias=True)), params=params
+        )
+        return ProjectEndpoint.model_validate(create_response.json()).set_client(
+            self.client
+        )
 
 
 class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -2398,6 +2562,7 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     Attributes:
         None
     """
+
     """Represents a stores endpoint"""
 
     def get_type(self) -> str:
@@ -2439,15 +2604,14 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         Raises:
             ValueError: If the 'storeType' key in the object_dict is not "DOCUMENT", "MODEL", or "TABLE".
         """
-        if object_dict['storeType'] == "DOCUMENT":
+        if object_dict["storeType"] == "DOCUMENT":
             return DocumentStoreEndpoint
-        elif object_dict['storeType'] == "MODEL":
+        elif object_dict["storeType"] == "MODEL":
             return ModelStoreEndpoint
-        elif object_dict['storeType'] == "TABLE":
+        elif object_dict["storeType"] == "TABLE":
             return DataStoreEndpoint
         else:
             raise ValueError(f"Unknown store type {object_dict['storeType']}")
-
 
 
 class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -2458,6 +2622,7 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
     It provides methods to get the type, page class, and instance class of the endpoint,
     as well as to deploy an extension pack from a URL.
     """
+
     """Represents an extension packs endpoint"""
 
     def get_type(self) -> str:
@@ -2493,8 +2658,9 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
         """
         return ExtensionPackEndpoint
 
-    def deploy_from_url(self, extension_pack_url: str,
-                        deployment_options: DeploymentOptions) -> "ExtensionPackEndpoint":
+    def deploy_from_url(
+        self, extension_pack_url: str, deployment_options: DeploymentOptions
+    ) -> "ExtensionPackEndpoint":
         """
         Deploy an extension pack from a url.
 
@@ -2506,9 +2672,14 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
             ExtensionPackEndpoint: The deployed extension pack endpoint.
         """
         url = f"/api/extensionPacks/{self.organization.slug}"
-        create_response = self.client.post(url, body=json.loads(deployment_options.json(by_alias=True)),
-                                           params={"uri": extension_pack_url})
-        return ExtensionPackEndpoint.model_validate(create_response.json()).set_client(self.client)
+        create_response = self.client.post(
+            url,
+            body=json.loads(deployment_options.json(by_alias=True)),
+            params={"uri": extension_pack_url},
+        )
+        return ExtensionPackEndpoint.model_validate(create_response.json()).set_client(
+            self.client
+        )
 
 
 class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -2520,6 +2691,7 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
     Attributes:
         None
     """
+
     """Represents a project templates endpoint"""
 
     def get_type(self) -> str:
@@ -2559,7 +2731,9 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
         return ProjectTemplateEndpoint
 
 
-class CredentialDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+class CredentialDefinitionsEndpoint(
+    ComponentEndpoint, ClientEndpoint, OrganizationOwned
+):
     """Represents a credentials endpoint.
 
     This class is used to represent a credentials endpoint. It inherits from
@@ -2568,6 +2742,7 @@ class CredentialDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, Organizat
     Attributes:
         None
     """
+
     """Represents a credentials endpoint"""
 
     def get_type(self) -> str:
@@ -2613,6 +2788,7 @@ class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
 
     This class inherits from the ComponentEndpoint, ClientEndpoint, and OrganizationOwned classes.
     """
+
     def get_type(self) -> str:
         """
         Get the type of the endpoint.
@@ -2651,6 +2827,7 @@ class DashboardsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
     A class used to represent DashboardsEndpoint which inherits from ComponentEndpoint, ClientEndpoint, and OrganizationOwned.
     """
+
     def get_type(self) -> str:
         """
         Method to get the type of the dashboard.
@@ -2685,7 +2862,9 @@ class DashboardsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         return DashboardEndpoint
 
 
-class AssistantDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+class AssistantDefinitionsEndpoint(
+    ComponentEndpoint, ClientEndpoint, OrganizationOwned
+):
     """Represents a model runtimes endpoint
 
     This class is used to represent a model runtimes endpoint. It inherits from
@@ -2694,6 +2873,7 @@ class AssistantDefinitionsEndpoint(ComponentEndpoint, ClientEndpoint, Organizati
     Attributes:
         None
     """
+
     """Represents a model runtimes endpoint"""
 
     def get_type(self) -> str:
@@ -2742,6 +2922,7 @@ class PipelinesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     Attributes:
         None
     """
+
     """Represents a model runtimes endpoint"""
 
     def get_type(self) -> str:
@@ -2788,6 +2969,7 @@ class ActionsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     ComponentEndpoint, ClientEndpoint, and OrganizationOwned classes.
 
     """
+
     """Represents a model runtimes endpoint"""
 
     def get_type(self) -> str:
@@ -2836,6 +3018,7 @@ class ModelRuntimesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned
     Attributes:
         None
     """
+
     """Represents a model runtimes endpoint"""
 
     def get_type(self) -> str:
@@ -2887,6 +3070,7 @@ class ProjectTemplateEndpoint(ComponentInstanceEndpoint, ProjectTemplate):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a project template endpoint"""
 
     def get_type(self) -> str:
@@ -2908,6 +3092,7 @@ class PipelineEndpoint(ComponentInstanceEndpoint, Pipeline):
     This class is used to represent a pipeline endpoint. It inherits from both
     ComponentInstanceEndpoint and Pipeline classes.
     """
+
     """Represents a pipeline endpoint"""
 
     def get_type(self) -> str:
@@ -2935,6 +3120,7 @@ class AssistantDefinitionEndpoint(ComponentInstanceEndpoint, AssistantDefinition
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a assistant definition endpoint"""
 
     def get_type(self) -> str:
@@ -2958,6 +3144,7 @@ class ActionEndpoint(ComponentInstanceEndpoint, Action):
     Attributes:
         None
     """
+
     """Represents a pipeline endpoint"""
 
     def get_type(self) -> str:
@@ -2981,6 +3168,7 @@ class CredentialDefinitionEndpoint(ComponentInstanceEndpoint, CredentialDefiniti
     Attributes:
         None
     """
+
     """Represents a credential endpoint"""
 
     def get_type(self) -> str:
@@ -3044,6 +3232,7 @@ class ModelRuntimeEndpoint(ComponentInstanceEndpoint, ModelRuntime):
     This class is used to represent a model runtime endpoint. It inherits from
     ComponentInstanceEndpoint and ModelRuntime classes.
     """
+
     """Represents a model runtime endpoint"""
 
     def get_type(self) -> str:
@@ -3071,6 +3260,7 @@ class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents an extension pack endpoint"""
 
     def get_type(self) -> str:
@@ -3090,6 +3280,7 @@ class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
 
 class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
     """Represents a taxonomy endpoint"""
+
     """Represents a taxonomy endpoint"""
 
     def get_type(self) -> str:
@@ -3111,20 +3302,20 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
         def find_groups(taxons) -> List[Taxon]:
             """
-    Finds and returns the group taxons from the given list of taxons.
+            Finds and returns the group taxons from the given list of taxons.
 
-    Args:
-        taxons (List[Taxon]): A list of taxon objects.
+            Args:
+                taxons (List[Taxon]): A list of taxon objects.
 
-    Returns:
-        List[Taxon]: A list of group taxons.
+            Returns:
+                List[Taxon]: A list of group taxons.
 
-    Raises:
-        None
+            Raises:
+                None
 
-    Note:
-        This function uses recursion to find group taxons in child taxons.
-    """
+            Note:
+                This function uses recursion to find group taxons in child taxons.
+            """
             group_taxons = []
             for taxon in taxons:
                 if taxon.is_group:
@@ -3137,15 +3328,15 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
     def find_taxon(self, taxons, parts, use_label=False):
         """
-            Finds a taxon in a list of taxons that matches a given path.
+        Finds a taxon in a list of taxons that matches a given path.
 
-            Args:
-                taxons (list): A list of taxon objects to search through.
-                path (str): The path of the taxon to find.
+        Args:
+            taxons (list): A list of taxon objects to search through.
+            path (str): The path of the taxon to find.
 
-            Returns:
-                Taxon: The taxon object if found, None otherwise.
-            """
+        Returns:
+            Taxon: The taxon object if found, None otherwise.
+        """
         for taxon in taxons:
             match_value = taxon.label if use_label else taxon.name
             if parts[0] == match_value:
@@ -3187,7 +3378,10 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
         Returns:
             str: The XSD representation of the taxonomy.
         """
-        return self.client.get(f'/api/taxonomies/{self.ref.replace(":", "/")}/export', params={'format': 'xsd'}).text
+        return self.client.get(
+            f'/api/taxonomies/{self.ref.replace(":", "/")}/export',
+            params={"format": "xsd"},
+        ).text
 
     def get_taxon_by_path(self, path) -> Optional[Taxon]:
         """
@@ -3199,22 +3393,23 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
         Returns:
             Taxon: The taxon object if found, None otherwise.
         """
+
         def find_taxon(taxons, path):
             """
-    Finds a taxon in a list of taxons that matches a given path.
+            Finds a taxon in a list of taxons that matches a given path.
 
-    This function iterates over a list of taxons, checking if each taxon's path matches the given path.
-    If a match is found, the taxon is returned. If no match is found in the top level of the list,
-    the function recursively searches through the children of each taxon. If no taxon is found after
-    searching through all taxons and their children, the function returns None.
+            This function iterates over a list of taxons, checking if each taxon's path matches the given path.
+            If a match is found, the taxon is returned. If no match is found in the top level of the list,
+            the function recursively searches through the children of each taxon. If no taxon is found after
+            searching through all taxons and their children, the function returns None.
 
-    Args:
-        taxons (list): A list of taxon objects to search through.
-        path (str): The path of the taxon to find.
+            Args:
+                taxons (list): A list of taxon objects to search through.
+                path (str): The path of the taxon to find.
 
-    Returns:
-        Taxon object if found, None otherwise.
-    """
+            Returns:
+                Taxon object if found, None otherwise.
+            """
             for taxon in taxons:
                 if taxon.path == path:
                     return taxon
@@ -3239,6 +3434,7 @@ class MembershipEndpoint(Membership, EntityEndpoint):
     Methods:
         get_type: Returns the type of the endpoint.
     """
+
     """Represents a membership endpoint"""
 
     def get_type(self) -> str:
@@ -3255,6 +3451,7 @@ class MembershipEndpoint(Membership, EntityEndpoint):
 
 class ExecutionEndpoint(Execution, EntityEndpoint):
     """Represents a execution endpoint"""
+
     """Represents a execution endpoint"""
 
     def get_type(self) -> str:
@@ -3272,7 +3469,7 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
 
         Sends a PUT request to the server to cancel the execution.
         """
-        self.client.put(f'/api/executions/{self.id}/cancel')
+        self.client.put(f"/api/executions/{self.id}/cancel")
 
     def logs(self):
         """
@@ -3283,10 +3480,15 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
         Returns:
             Response: The response from the server containing the logs.
         """
-        return self.client.get(f'/api/executions/{self.id}/logs')
+        return self.client.get(f"/api/executions/{self.id}/logs")
 
-    def wait_for(self, status: str = 'SUCCEEDED', fail_on_statuses=None,
-                 timeout: int = 300, follow_child_executions: bool = True) -> List["ExecutionEndpoint"]:
+    def wait_for(
+        self,
+        status: str = "SUCCEEDED",
+        fail_on_statuses=None,
+        timeout: int = 300,
+        follow_child_executions: bool = True,
+    ) -> List["ExecutionEndpoint"]:
         """
         Wait for a specific status.
 
@@ -3304,7 +3506,7 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
             List[ExecutionEndpoint]: A list of executions that have reached the desired status.
         """
         if fail_on_statuses is None:
-            fail_on_statuses = ['FAILED']
+            fail_on_statuses = ["FAILED"]
 
         logger.info("Waiting for status %s", status)
         start = time.time()
@@ -3315,17 +3517,27 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
                 if follow_child_executions:
                     all_executions = [execution]
                     for child_execution in [
-                        ExecutionEndpoint.model_validate(child_execution.dict()).set_client(self.client)
-                        for child_execution in
-                        execution.child_executions]:
+                        ExecutionEndpoint.model_validate(
+                            child_execution.dict()
+                        ).set_client(self.client)
+                        for child_execution in execution.child_executions
+                    ]:
                         all_executions.extend(
-                            child_execution.wait_for(status, fail_on_statuses, timeout, follow_child_executions))
+                            child_execution.wait_for(
+                                status,
+                                fail_on_statuses,
+                                timeout,
+                                follow_child_executions,
+                            )
+                        )
                     return all_executions
                 else:
                     return [execution]
 
             if execution.status in fail_on_statuses:
-                raise Exception(f"Execution {execution.id} failed with status {execution.status}")
+                raise Exception(
+                    f"Execution {execution.id} failed with status {execution.status}"
+                )
 
             time.sleep(5)
 
@@ -3338,6 +3550,7 @@ class UserEndpoint(User, EntityEndpoint):
     This class is used to interact with the user endpoints of the API.
     It inherits from the User and EntityEndpoint classes.
     """
+
     """Represents a user endpoint"""
 
     def get_type(self) -> str:
@@ -3385,7 +3598,9 @@ class UserEndpoint(User, EntityEndpoint):
             UserEndpoint: The user endpoint with the updated password.
         """
         url = f"/api/users/{self.id}/password"
-        response = self.client.put(url, body={"password": password, "resetToken": reset_token})
+        response = self.client.put(
+            url, body={"password": password, "resetToken": reset_token}
+        )
         return UserEndpoint.model_validate(response.json()).set_client(self.client)
 
     def get_memberships(self) -> List[MembershipEndpoint]:
@@ -3398,7 +3613,10 @@ class UserEndpoint(User, EntityEndpoint):
         """
         url = f"/api/users/{self.id}/memberships"
         response = self.client.get(url)
-        return [MembershipEndpoint.model_validate(membership) for membership in response.json()]
+        return [
+            MembershipEndpoint.model_validate(membership)
+            for membership in response.json()
+        ]
 
 
 class ExecutionsEndpoint(EntitiesEndpoint):
@@ -3409,6 +3627,7 @@ class ExecutionsEndpoint(EntitiesEndpoint):
     Attributes:
         None
     """
+
     """Represents a executions endpoint"""
 
     def get_type(self) -> str:
@@ -3456,6 +3675,7 @@ class MembershipsEndpoint(EntitiesEndpoint):
     Attributes:
         None
     """
+
     """Represents a memberships endpoint"""
 
     def get_type(self) -> str:
@@ -3503,6 +3723,7 @@ class UsersEndpoint(EntitiesEndpoint):
     Attributes:
         None
     """
+
     """Represents a users endpoint"""
 
     def get_type(self) -> str:
@@ -3549,6 +3770,7 @@ class DataAttributeEndpoint(DataAttribute, ClientEndpoint):
     Attributes:
         data_object (DataObject): The data object of the data attribute.
     """
+
     """Represents a data attribute endpoint"""
     data_object: DataObject = None
 
@@ -3585,6 +3807,7 @@ class DataObjectEndpoint(DataObject, ClientEndpoint):
         id (str): Unique identifier of the data object.
         client (Client): Client to interact with the API.
     """
+
     """Represents a data object endpoint"""
 
     def update(self):
@@ -3620,11 +3843,15 @@ class DataObjectEndpoint(DataObject, ClientEndpoint):
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/dataObjects/{self.id}/attributes"
         response = self.client.get(url)
-        return [DataAttributeEndpoint.model_validate(attribute) for attribute in response.json()]
+        return [
+            DataAttributeEndpoint.model_validate(attribute)
+            for attribute in response.json()
+        ]
 
 
 class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
     """Represents a document family endpoint"""
+
     """Represents a document family endpoint"""
 
     def update(self):
@@ -3641,11 +3868,15 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Returns:
             bytes: The exported document family.
         """
-        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
+        url = (
+            f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
+        )
         get_response = self.client.get(url)
         return get_response.content
 
-    def update_document(self, document: Document, content_object: Optional[ContentObject] = None):
+    def update_document(
+        self, document: Document, content_object: Optional[ContentObject] = None
+    ):
         """
         Update a document in the document family.
 
@@ -3656,10 +3887,14 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         if content_object is None:
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content"
-        self.client.post(url, files={'document': document.to_kddb()})
+        self.client.post(url, files={"document": document.to_kddb()})
 
-    def wait_for(self, mixin: Optional[str] = None, label: Optional[str] = None,
-                 timeout: int = 60) -> "DocumentFamilyEndpoint":
+    def wait_for(
+        self,
+        mixin: Optional[str] = None,
+        label: Optional[str] = None,
+        timeout: int = 60,
+    ) -> "DocumentFamilyEndpoint":
         """
         Wait for the document family to be ready.
 
@@ -3671,12 +3906,16 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Returns:
             DocumentFamilyEndpoint: The updated document family endpoint.
         """
-        logger.info("Waiting for mixin and/or label to be available on document family %s", self.id)
+        logger.info(
+            "Waiting for mixin and/or label to be available on document family %s",
+            self.id,
+        )
         start = time.time()
         while time.time() - start < timeout:
             url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
-            updated_document_family = DocumentFamilyEndpoint.model_validate(self.client.get(url).json()).set_client(
-                self.client)
+            updated_document_family = DocumentFamilyEndpoint.model_validate(
+                self.client.get(url).json()
+            ).set_client(self.client)
             if mixin and mixin in updated_document_family.mixins:
                 return updated_document_family
             if label and any(l.name == label for l in updated_document_family.labels):
@@ -3697,7 +3936,6 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         else:
             raise Exception(f"Document family {self.id} does not exist")
 
-
     def get_native(self) -> bytes:
         """
         Get the native content object of the document family.
@@ -3708,12 +3946,20 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Raises:
             Exception: If no native content object is found.
         """
-        hits = list(filter(lambda content_object: content_object.content_type == 'NATIVE', self.content_objects))
+        hits = list(
+            filter(
+                lambda content_object: content_object.content_type == "NATIVE",
+                self.content_objects,
+            )
+        )
         if len(hits) == 0:
-            raise Exception(f"No native content object found on document family {self.id}")
+            raise Exception(
+                f"No native content object found on document family {self.id}"
+            )
 
         get_response = self.client.get(
-            f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{hits[0].id}/content")
+            f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{hits[0].id}/content"
+        )
 
         return get_response.content
 
@@ -3725,7 +3971,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             label (str): The label to add.
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/addLabel"
-        return self.client.put(url, params={'label': label})
+        return self.client.put(url, params={"label": label})
 
     def remove_label(self, label: str):
         """
@@ -3735,7 +3981,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             label (str): The label to remove.
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/removeLabel"
-        return self.client.put(url, params={'label': label})
+        return self.client.put(url, params={"label": label})
 
     def get_document(self, content_object: Optional[ContentObject] = None) -> Document:
         """
@@ -3750,7 +3996,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         if content_object is None:
             content_object = self.content_objects[-1]
         get_response = self.client.get(
-            f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content")
+            f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content"
+        )
         return Document.from_kddb(get_response.content)
 
     def reprocess(self, assistant: Assistant):
@@ -3761,7 +4008,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             assistant (Assistant): The assistant to use for reprocessing.
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/reprocess"
-        self.client.put(url, params={'assistantId': assistant.id})
+        self.client.put(url, params={"assistantId": assistant.id})
 
     def set_document_status(self, document_status: DocumentStatus):
         """
@@ -3770,10 +4017,14 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Args:
             document_status (DocumentStatus): The document status to set.
         """
-        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/status"
+        url = (
+            f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/status"
+        )
         self.client.put(url, body=document_status.dict(by_alias=True))
 
-    def add_document(self, document: Document, content_object: Optional[ContentObject] = None):
+    def add_document(
+        self, document: Document, content_object: Optional[ContentObject] = None
+    ):
         """
         Add a document to the document family.
 
@@ -3781,12 +4032,20 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             document (Document): The document to add.
             content_object (Optional[ContentObject]): The content object. Defaults to None.
         """
-        url = f'/api/stores/{self.store_ref.replace(":", "/")}/families/{self.id}/objects'
+        url = (
+            f'/api/stores/{self.store_ref.replace(":", "/")}/families/{self.id}/objects'
+        )
         if content_object is None:
             content_object = self.content_objects[-1]
-        self.client.post(url, params={'sourceContentObjectId': content_object.id, 'transitionType': 'DERIVED',
-                                      'documentVersion': document.version},
-                         files={'file': document.to_kddb()})
+        self.client.post(
+            url,
+            params={
+                "sourceContentObjectId": content_object.id,
+                "transitionType": "DERIVED",
+                "documentVersion": document.version,
+            },
+            files={"file": document.to_kddb()},
+        )
 
     def export_as_zip(self) -> bytes:
         """
@@ -3795,11 +4054,18 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Returns:
             bytes: The exported document family.
         """
-        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
+        url = (
+            f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
+        )
         get_response = self.client.get(url)
         return get_response.content
 
-    def replace_tags(self, document: Document, content_object: Optional[ContentObject] = None, owner_uri:Optional[str]=None):
+    def replace_tags(
+        self,
+        document: Document,
+        content_object: Optional[ContentObject] = None,
+        owner_uri: Optional[str] = None,
+    ):
         """
         Replace the tags of the document family.
 
@@ -3811,7 +4077,9 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         if content_object is None:
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
-        self.client.put(url, body=document.get_feature_set(owner_uri).dict(by_alias=True))
+        self.client.put(
+            url, body=document.get_feature_set(owner_uri).dict(by_alias=True)
+        )
 
 
 class StoreEndpoint(ComponentInstanceEndpoint, Store):
@@ -3823,6 +4091,7 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
     Attributes:
         metadata: The metadata of the store.
     """
+
     """Represents a store endpoint"""
 
     def get_type(self) -> str:
@@ -3871,8 +4140,10 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
 
         This method sends a PUT request to the store's metadata API endpoint with the store's metadata.
         """
-        self.client.put(f"/api/stores/{self.ref.replace(':', '/')}/metadata",
-                        body=json.loads(self.metadata.json(by_alias=True)))
+        self.client.put(
+            f"/api/stores/{self.ref.replace(':', '/')}/metadata",
+            body=json.loads(self.metadata.json(by_alias=True)),
+        )
 
     def get_metadata(self):
         """Get the metadata of the store.
@@ -3882,8 +4153,14 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
         Returns:
             The validated metadata if the metadata class is defined, otherwise None.
         """
-        metadata_response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/metadata")
-        return self.get_metadata_class().model_validate(metadata_response.json()) if self.get_metadata_class() else None
+        metadata_response = self.client.get(
+            f"/api/stores/{self.ref.replace(':', '/')}/metadata"
+        )
+        return (
+            self.get_metadata_class().model_validate(metadata_response.json())
+            if self.get_metadata_class()
+            else None
+        )
 
     def post_deploy(self) -> List[str]:
         """Post deploy the store.
@@ -3994,7 +4271,9 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         self.data_store = data_store
         super().__init__(client)
 
-    def list(self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None):
+    def list(
+        self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+    ):
         """
         Lists the data exceptions.
 
@@ -4023,13 +4302,18 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         filters.append(f"dataObject.store.slug={self.data_store.slug}")
 
         page = super().list(query, page, page_size, sort, filters)
-        page.content = [DataExceptionEndpoint.model_validate(data_exception.to_dict()).set_client(self.client) for
-                        data_exception in page.content]
+        page.content = [
+            DataExceptionEndpoint.model_validate(data_exception.to_dict()).set_client(
+                self.client
+            )
+            for data_exception in page.content
+        ]
         return page
 
 
 class DataStoreEndpoint(StoreEndpoint):
     """Represents a data store endpoint"""
+
     """Represents a data store endpoint"""
 
     @property
@@ -4041,9 +4325,14 @@ class DataStoreEndpoint(StoreEndpoint):
         """
         return DataStoreExceptionsEndpoint(self, self.client)
 
-    def get_data_objects_export(self, document_family: Optional[DocumentFamily] = None,
-                                output_format: str = "json", path: Optional[str] = None, root_name: str = "",
-                                friendly_names=True) -> str:
+    def get_data_objects_export(
+        self,
+        document_family: Optional[DocumentFamily] = None,
+        output_format: str = "json",
+        path: Optional[str] = None,
+        root_name: str = "",
+        friendly_names=True,
+    ) -> str:
         """Get the data objects export of the store
 
         Args:
@@ -4057,14 +4346,18 @@ class DataStoreEndpoint(StoreEndpoint):
             str: The data objects export of the store
         """
         url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
-        params = {"format": output_format, "friendlyNames": friendly_names, "rootName": root_name}
+        params = {
+            "format": output_format,
+            "friendlyNames": friendly_names,
+            "rootName": root_name,
+        }
         if document_family:
             params["documentFamilyId"] = document_family.id
 
         if path:
             params["path"] = path
 
-        if output_format == 'csv' and not path:
+        if output_format == "csv" and not path:
             raise ValueError("CSV output requires a path")
 
         response = self.client.get(url, params=params)
@@ -4078,10 +4371,19 @@ class DataStoreEndpoint(StoreEndpoint):
         """
         url = f"/api/stores/{self.ref.replace(':', '/')}/taxonomies"
         taxonomy_response = self.client.get(url)
-        return [TaxonomyEndpoint.model_validate(taxonomy_response) for taxonomy_response in taxonomy_response.json()]
+        return [
+            TaxonomyEndpoint.model_validate(taxonomy_response)
+            for taxonomy_response in taxonomy_response.json()
+        ]
 
-    def get_data_objects_df(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
-                            include_id: bool = False, parent_id: Optional[str] = None):
+    def get_data_objects_df(
+        self,
+        path: str,
+        query: str = "*",
+        document_family: Optional[DocumentFamily] = None,
+        include_id: bool = False,
+        parent_id: Optional[str] = None,
+    ):
         """
         Get the data objects as a pandas dataframe
 
@@ -4102,46 +4404,51 @@ class DataStoreEndpoint(StoreEndpoint):
         if len(data_objects) == 0:
             return pd.DataFrame()
 
-        taxonomy: TaxonomyEndpoint = self.client.get_object_by_ref('taxonomies', data_objects[0].taxonomy_ref)
+        taxonomy: TaxonomyEndpoint = self.client.get_object_by_ref(
+            "taxonomies", data_objects[0].taxonomy_ref
+        )
 
-        table_result = {
-            'rows': [],
-            'columns': [],
-            'column_headers': []
-        }
+        table_result = {"rows": [], "columns": [], "column_headers": []}
 
         for data_object in data_objects:
-            if len(table_result['columns']) == 0:
+            if len(table_result["columns"]) == 0:
                 if include_id:
-                    table_result['column_headers'].append('Data Object ID')
-                    table_result['columns'].append('data_object_id')
-                    table_result['column_headers'].append('Parent Data Object ID')
-                    table_result['columns'].append('parent_id')
+                    table_result["column_headers"].append("Data Object ID")
+                    table_result["columns"].append("data_object_id")
+                    table_result["column_headers"].append("Parent Data Object ID")
+                    table_result["columns"].append("parent_id")
 
                 for taxon in taxonomy.get_taxon_by_path(data_object.path).children:
                     if not taxon.group:
-                        table_result['column_headers'].append(taxon.label)
-                        table_result['columns'].append(taxon.name)
+                        table_result["column_headers"].append(taxon.label)
+                        table_result["columns"].append(taxon.name)
 
             new_row = []
-            for column in table_result['columns']:
+            for column in table_result["columns"]:
                 column_value = None
                 if include_id:
-                    if column == 'data_object_id':
+                    if column == "data_object_id":
                         column_value = data_object.id
-                    if column == 'parent_id':
+                    if column == "parent_id":
                         column_value = data_object.parent_id
                 for attribute in data_object.attributes:
                     if attribute.tag == column:
                         column_value = attribute.string_value
                 new_row.append(column_value)
 
-            table_result['rows'].append(new_row)
+            table_result["rows"].append(new_row)
 
-        return pd.DataFrame(table_result['rows'], columns=table_result['column_headers'])
+        return pd.DataFrame(
+            table_result["rows"], columns=table_result["column_headers"]
+        )
 
-    def get_data_objects(self, path: str, query: str = "*", document_family: Optional[DocumentFamily] = None,
-                         parent_id: Optional[str] = None) -> List[DataObjectEndpoint]:
+    def get_data_objects(
+        self,
+        path: str,
+        query: str = "*",
+        document_family: Optional[DocumentFamily] = None,
+        parent_id: Optional[str] = None,
+    ) -> List[DataObjectEndpoint]:
         """
         Get the data objects of the store
 
@@ -4157,15 +4464,22 @@ class DataStoreEndpoint(StoreEndpoint):
 
         # We need to get the first set of rows,
         rows: List = []
-        row_response = self.get_data_objects_page_request(path, 1, document_family=document_family, parent_id=parent_id)
+        row_response = self.get_data_objects_page_request(
+            path, 1, document_family=document_family, parent_id=parent_id
+        )
 
         # lets work out the last page
         rows = rows + row_response.content
         total_pages = row_response.total_pages
 
         for page in range(2, total_pages + 1):
-            row_response = self.get_data_objects_page_request(path, page, query=query, document_family=document_family,
-                                                              parent_id=parent_id)
+            row_response = self.get_data_objects_page_request(
+                path,
+                page,
+                query=query,
+                document_family=document_family,
+                parent_id=parent_id,
+            )
             rows = rows + row_response.content
 
         return rows
@@ -4186,9 +4500,15 @@ class DataStoreEndpoint(StoreEndpoint):
         data_object_response = self.client.get(url)
         return DataObjectEndpoint.model_validate(data_object_response.json())
 
-    def get_data_objects_page_request(self, path: str, page_number: int = 1, page_size=20, query="*",
-                                      document_family: Optional[DocumentFamily] = None,
-                                      parent_id: Optional[str] = None) -> PageDataObject:
+    def get_data_objects_page_request(
+        self,
+        path: str,
+        page_number: int = 1,
+        page_size=20,
+        query="*",
+        document_family: Optional[DocumentFamily] = None,
+        parent_id: Optional[str] = None,
+    ) -> PageDataObject:
         """
         Get a page of data objects
 
@@ -4210,20 +4530,32 @@ class DataStoreEndpoint(StoreEndpoint):
         logger.debug(f"Downloading a specific table from {url}")
 
         # We need to go through and pull all the pages
-        params = {"path": path, "page": page_number, "pageSize": page_size, "query": query}
+        params = {
+            "path": path,
+            "page": page_number,
+            "pageSize": page_size,
+            "query": query,
+        }
 
         if document_family:
-            params['documentFamilyId'] = document_family.id
-            params['storeRef'] = document_family.store_ref
+            params["documentFamilyId"] = document_family.id
+            params["storeRef"] = document_family.store_ref
 
         data_objects_response = self.client.get(url, params=params)
         data_object_page = PageDataObject.model_validate(data_objects_response.json())
-        data_object_page.content = [DataObjectEndpoint.model_validate(data_object) for data_object in
-                                    data_object_page.content]
+        data_object_page.content = [
+            DataObjectEndpoint.model_validate(data_object)
+            for data_object in data_object_page.content
+        ]
         return data_object_page
 
-    def stream_data_objects(self, path: str, query="*", document_family: Optional[DocumentFamily] = None,
-                                        parent_id: Optional[str] = None):
+    def stream_data_objects(
+        self,
+        path: str,
+        query="*",
+        document_family: Optional[DocumentFamily] = None,
+        parent_id: Optional[str] = None,
+    ):
         """
         Stream page request
 
@@ -4237,8 +4569,9 @@ class DataStoreEndpoint(StoreEndpoint):
         page = 1
 
         while True:
-            data_object_response = self.get_data_objects_page_request(path, page, page_size, query,
-                                                                      document_family, parent_id)
+            data_object_response = self.get_data_objects_page_request(
+                path, page, page_size, query, document_family, parent_id
+            )
             if not data_object_response.content:
                 break
             for data_object in data_object_response.content:
@@ -4246,7 +4579,9 @@ class DataStoreEndpoint(StoreEndpoint):
 
             page += 1
 
-    def create_data_objects(self, data_objects: List[DataObject]) -> List[DataObjectEndpoint]:
+    def create_data_objects(
+        self, data_objects: List[DataObject]
+    ) -> List[DataObjectEndpoint]:
         """
         Create data objects in the store
 
@@ -4259,12 +4594,18 @@ class DataStoreEndpoint(StoreEndpoint):
         url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         logger.debug(f"Creating data objects in store {url}")
 
-        create_response = requests.post(url, json=[data_object.dict(by_alias=True) for data_object in data_objects])
-        return [DataObjectEndpoint.model_validate(data_object) for data_object in create_response.json()]
+        create_response = requests.post(
+            url, json=[data_object.dict(by_alias=True) for data_object in data_objects]
+        )
+        return [
+            DataObjectEndpoint.model_validate(data_object)
+            for data_object in create_response.json()
+        ]
 
 
 class DocumentStoreEndpoint(StoreEndpoint):
     """Represents a document store that can be used to store files and their related document representations."""
+
     """Represents a document store that can be used to store files and then their related document representations"""
 
     def delete_by_path(self, object_path: str):
@@ -4275,8 +4616,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
             object_path (str): The path to the document family (ie. Invoice.pdf).
         """
         self.client.delete(
-            f"/api/stores/{self.ref.replace(':', '/')}/fs",
-            params={"path": object_path})
+            f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": object_path}
+        )
 
     def import_family(self, file_path: str):
         """
@@ -4287,20 +4628,27 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
-            with open(file_path, 'rb') as dfm_content:
+            with open(file_path, "rb") as dfm_content:
                 files = {"familyZip": dfm_content}
                 content_object_response = self.client.post(
                     f"/api/stores/{self.ref.replace(':', '/')}/families",
-                    params={'import': 'true'},
-                    files=files)
+                    params={"import": "true"},
+                    files=files,
+                )
                 logger.info(f"Uploaded ({content_object_response.status_code})")
-                return DocumentFamilyEndpoint.model_validate(content_object_response.json()).set_client(self.client)
+                return DocumentFamilyEndpoint.model_validate(
+                    content_object_response.json()
+                ).set_client(self.client)
         else:
             raise Exception(f"{file_path} is not a file")
 
-
-    def upload_file(self, file_path: str, object_path: Optional[str] = None, replace=False,
-                    additional_metadata: Optional[dict] = None):
+    def upload_file(
+        self,
+        file_path: str,
+        object_path: Optional[str] = None,
+        replace=False,
+        additional_metadata: Optional[dict] = None,
+    ):
         """
         Upload a file to the store.
 
@@ -4312,16 +4660,23 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
-            with open(file_path, 'rb') as path_content:
-                return self.upload_bytes(path=object_path if object_path is not None else file_path,
-                                         content=path_content,
-                                         replace=replace, additional_metadata=additional_metadata)
+            with open(file_path, "rb") as path_content:
+                return self.upload_bytes(
+                    path=object_path if object_path is not None else file_path,
+                    content=path_content,
+                    replace=replace,
+                    additional_metadata=additional_metadata,
+                )
         else:
             raise Exception(f"{file_path} is not a file")
 
-
-    def upload_bytes(self, path: str, content, replace=False,
-                     additional_metadata: Optional[dict] = None) -> DocumentFamilyEndpoint:
+    def upload_bytes(
+        self,
+        path: str,
+        content,
+        replace=False,
+        additional_metadata: Optional[dict] = None,
+    ) -> DocumentFamilyEndpoint:
         """
         Put the content into the store at the given path.
 
@@ -4339,19 +4694,24 @@ class DocumentStoreEndpoint(StoreEndpoint):
         if additional_metadata is None:
             additional_metadata = {}
 
-        if replace and self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}):
+        if replace and self.client.exists(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
+        ):
             self.client.delete(
-                f"/api/stores/{self.ref.replace(':', '/')}/fs",
-                params={"path": path})
+                f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
+            )
             logger.info(f"Deleting {path}")
 
         content_object_response = self.client.post(
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": path},
             data=additional_metadata,
-            files=files)
+            files=files,
+        )
         logger.info(f"Uploaded {path} ({content_object_response.status_code})")
-        return DocumentFamilyEndpoint.model_validate(content_object_response.json()).set_client(self.client)
+        return DocumentFamilyEndpoint.model_validate(
+            content_object_response.json()
+        ).set_client(self.client)
 
     def get_bytes(self, object_path: str):
         """
@@ -4364,8 +4724,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
             bytes: The bytes or None is nothing is at the path.
         """
         return self.client.get(
-            f"/api/stores/{self.ref.replace(':', '/')}/fs",
-            params={"path": object_path}).content
+            f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": object_path}
+        ).content
 
     def list_contents(self) -> List[str]:
         """
@@ -4376,16 +4736,13 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
 
         # TODO We need to remove this
-        params = {
-            'page': 1,
-            'pageSize': 90,
-            'query': '*'
-        }
-        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
-                                       params=params)
+        params = {"page": 1, "pageSize": 90, "query": "*"}
+        get_response = self.client.get(
+            f"api/stores/{self.ref.replace(':', '/')}/families", params=params
+        )
         paths = []
-        for fam_dict in get_response.json()['content']:
-            paths.append(fam_dict['path'])
+        for fam_dict in get_response.json()["content"]:
+            paths.append(fam_dict["path"])
         return paths
 
     def download_document_families(self, output_dir: str):
@@ -4398,10 +4755,12 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         for document_family in self.stream_query():
             export_bytes = document_family.export()
-            with open(os.path.join(output_dir, document_family.id + ".dfm"), 'wb') as f:
+            with open(os.path.join(output_dir, document_family.id + ".dfm"), "wb") as f:
                 f.write(export_bytes)
 
-    def reprocess_document_families(self, document_family_ids: List[str], assistant: AssistantEndpoint):
+    def reprocess_document_families(
+        self, document_family_ids: List[str], assistant: AssistantEndpoint
+    ):
         """
         Reprocess the document families with the given ids through the assistant in a bulk fashion.
 
@@ -4419,7 +4778,9 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         request.family_ids = document_family_ids
 
-        self.client.put(f"api/stores/{self.ref.replace(':', '/')}/reprocess", body=request.to_dict())
+        self.client.put(
+            f"api/stores/{self.ref.replace(':', '/')}/reprocess", body=request.to_dict()
+        )
 
     def get_metadata_class(self):
         """
@@ -4442,8 +4803,11 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
         logger.info(f"Getting document family id {document_family_id}")
         document_family_response = self.client.get(
-            f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}")
-        return DocumentFamilyEndpoint.model_validate(document_family_response.json()).set_client(self.client)
+            f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}"
+        )
+        return DocumentFamilyEndpoint.model_validate(
+            document_family_response.json()
+        ).set_client(self.client)
 
     def stream_query(self, query: str = "*", sort=None):
         """
@@ -4463,14 +4827,18 @@ class DocumentStoreEndpoint(StoreEndpoint):
             sort = "id"
 
         while True:
-            page_response = self.query(query=query, page=page, page_size=page_size, sort=sort)
+            page_response = self.query(
+                query=query, page=page, page_size=page_size, sort=sort
+            )
             if not page_response.content:
                 break
             for document_family in page_response.content:
                 yield document_family
             page += 1
 
-    def query(self, query: str = "*", page: int = 1, page_size: int = 100, sort=None) -> PageDocumentFamilyEndpoint:
+    def query(
+        self, query: str = "*", page: int = 1, page_size: int = 100, sort=None
+    ) -> PageDocumentFamilyEndpoint:
         """
         Query the document family.
 
@@ -4484,18 +4852,21 @@ class DocumentStoreEndpoint(StoreEndpoint):
             PageDocumentFamilyEndpoint: The page of document families.
         """
         params = {
-            'page': page,
-            'pageSize': page_size,
-            'query': requests.utils.quote(query)
+            "page": page,
+            "pageSize": page_size,
+            "query": requests.utils.quote(query),
         }
 
         if sort is not None:
-            params['sort'] = sort
+            params["sort"] = sort
 
-        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
-                                       params=params)
+        get_response = self.client.get(
+            f"api/stores/{self.ref.replace(':', '/')}/families", params=params
+        )
 
-        return PageDocumentFamilyEndpoint.model_validate(get_response.json()).set_client(self.client)
+        return PageDocumentFamilyEndpoint.model_validate(
+            get_response.json()
+        ).set_client(self.client)
 
     def stream_filter(self, filter_string: str = "", sort=None, limit=None):
         """
@@ -4516,15 +4887,18 @@ class DocumentStoreEndpoint(StoreEndpoint):
             sort = "id"
 
         while True:
-            page_response = self.filter(filter_string=filter_string, page=page, page_size=page_size, sort=sort)
+            page_response = self.filter(
+                filter_string=filter_string, page=page, page_size=page_size, sort=sort
+            )
             if not page_response.content:
                 break
             for document_family in page_response.content:
                 yield document_family
             page += 1
 
-    def filter(self, filter_string: str = "", page: int = 1, page_size: int = 100,
-               sort=None) -> PageDocumentFamilyEndpoint:
+    def filter(
+        self, filter_string: str = "", page: int = 1, page_size: int = 100, sort=None
+    ) -> PageDocumentFamilyEndpoint:
         """
         Filter the document family.
 
@@ -4537,21 +4911,22 @@ class DocumentStoreEndpoint(StoreEndpoint):
         Returns:
             PageDocumentFamilyEndpoint: The page of document families.
         """
-        params = {
-            'page': page,
-            'pageSize': page_size,
-            'filter': filter_string
-        }
+        params = {"page": page, "pageSize": page_size, "filter": filter_string}
 
         if sort is not None:
-            params['sort'] = sort
+            params["sort"] = sort
 
-        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/families",
-                                       params=params)
+        get_response = self.client.get(
+            f"api/stores/{self.ref.replace(':', '/')}/families", params=params
+        )
 
-        return PageDocumentFamilyEndpoint.model_validate(get_response.json()).set_client(self.client)
+        return PageDocumentFamilyEndpoint.model_validate(
+            get_response.json()
+        ).set_client(self.client)
 
-    def upload_document(self, path: str, document: "Document") -> DocumentFamilyEndpoint:
+    def upload_document(
+        self, path: str, document: "Document"
+    ) -> DocumentFamilyEndpoint:
         """
         Upload a document to the store at the given path.
 
@@ -4569,9 +4944,13 @@ class DocumentStoreEndpoint(StoreEndpoint):
         document_family_response = self.client.post(
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": path},
-            files=files, data=data)
+            files=files,
+            data=data,
+        )
 
-        return DocumentFamilyEndpoint.model_validate(document_family_response.json()).set_client(self.client)
+        return DocumentFamilyEndpoint.model_validate(
+            document_family_response.json()
+        ).set_client(self.client)
 
     def exists_by_path(self, path: str) -> bool:
         """
@@ -4583,7 +4962,9 @@ class DocumentStoreEndpoint(StoreEndpoint):
         Returns:
             bool: True if a document family exists at the given path, False otherwise.
         """
-        return self.client.exists(f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path})
+        return self.client.exists(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
+        )
 
     def get_by_path(self, path: str) -> DocumentFamilyEndpoint:
         """
@@ -4595,15 +4976,21 @@ class DocumentStoreEndpoint(StoreEndpoint):
         Returns:
             DocumentFamilyEndpoint: The document family at the given path.
         """
-        get_response = self.client.get(f"api/stores/{self.ref.replace(':', '/')}/fs",
-                                       params={"path": path, "meta": True})
-        return DocumentFamilyEndpoint.model_validate(get_response.json()).set_client(self.client)
+        get_response = self.client.get(
+            f"api/stores/{self.ref.replace(':', '/')}/fs",
+            params={"path": path, "meta": True},
+        )
+        return DocumentFamilyEndpoint.model_validate(get_response.json()).set_client(
+            self.client
+        )
 
     def delete_families(self):
         """
         Delete all the families in the store.
         """
-        delete_response = self.client.delete(f"api/stores/{self.ref.replace(':', '/')}/families")
+        delete_response = self.client.delete(
+            f"api/stores/{self.ref.replace(':', '/')}/families"
+        )
 
 
 class ModelStoreEndpoint(DocumentStoreEndpoint):
@@ -4613,6 +5000,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         IMPLEMENTATION_PREFIX (ClassVar[str]): Prefix for the model implementation.
         TRAINED_MODELS_PREFIX (ClassVar[str]): Prefix for the trained models.
     """
+
     """Represents a model store"""
     IMPLEMENTATION_PREFIX: ClassVar[str] = "model_implementation/"
     TRAINED_MODELS_PREFIX: ClassVar[str] = "trained_models/"
@@ -4625,7 +5013,9 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         """
         return ModelContentMetadata
 
-    def upload_trained_model(self, training_run_id: str, base_path: Optional[str] = None):
+    def upload_trained_model(
+        self, training_run_id: str, base_path: Optional[str] = None
+    ):
         """Upload a trained model to the store
 
         Args:
@@ -4640,10 +5030,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         num_hits = 0
         import zipfile
 
-        with zipfile.ZipFile('training.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-
+        with zipfile.ZipFile("training.zip", "w", zipfile.ZIP_DEFLATED) as zipf:
             for path_hit in glob.glob(final_wildcard, recursive=True):
-                relative_path = path_hit.replace(base_path + '/', '') if base_path else path_hit
+                relative_path = (
+                    path_hit.replace(base_path + "/", "") if base_path else path_hit
+                )
 
                 if Path(path_hit).is_file():
                     zipf.write(path_hit, relative_path)
@@ -4651,15 +5042,21 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
 
         if num_hits > 0:
             logger.info(f"Uploading {num_hits} files to store (training.zip)")
-            self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_run_id}/content",
-                             files={"training": open('training.zip', 'rb')})
+            self.client.post(
+                f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_run_id}/content",
+                files={"training": open("training.zip", "rb")},
+            )
             results.append(f"{num_hits} files uploaded for {final_wildcard}")
 
-        logger.info(f"Uploading training run {training_run_id} to store, deleting local")
-        Path('training.zip').unlink()
+        logger.info(
+            f"Uploading training run {training_run_id} to store, deleting local"
+        )
+        Path("training.zip").unlink()
         return results
 
-    def download_trained_model(self, training_id: str, download_path: Optional[str] = ""):
+    def download_trained_model(
+        self, training_id: str, download_path: Optional[str] = ""
+    ):
         """Download the content for the given training id
 
         Args:
@@ -4670,9 +5067,12 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             download_path = ""
         if download_path != "":
             os.makedirs(download_path, exist_ok=True)
-        response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}/content")
+        response = self.client.get(
+            f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}/content"
+        )
         from zipfile import ZipFile
         from io import BytesIO
+
         zipped_contents = ZipFile(BytesIO(response.content))
         zipped_contents.extractall(download_path)
 
@@ -4686,10 +5086,15 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             download_path = ""
         if download_path != "":
             os.makedirs(download_path, exist_ok=True)
-        response = self.client.get(f"/api/stores/{self.ref.replace(':', '/')}/implementation")
+        response = self.client.get(
+            f"/api/stores/{self.ref.replace(':', '/')}/implementation"
+        )
         from zipfile import ZipFile
         from io import BytesIO
-        logger.info(f"Downloading implementation package to {download_path}, and extracting")
+
+        logger.info(
+            f"Downloading implementation package to {download_path}, and extracting"
+        )
         zipped_contents = ZipFile(BytesIO(response.content))
         zipped_contents.extractall(download_path)
 
@@ -4704,8 +5109,12 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         """
         return self.upload_contents(metadata)
 
-    def create_training(self, name: Optional[str] = None,
-                        training_parameters: Optional[Dict[str, Any]] = None, user_test=False) -> ModelTraining:
+    def create_training(
+        self,
+        name: Optional[str] = None,
+        training_parameters: Optional[Dict[str, Any]] = None,
+        user_test=False,
+    ) -> ModelTraining:
         """Create a new model training
 
         Args:
@@ -4722,7 +5131,9 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         if training_parameters is not None:
             new_training.training_parameters = training_parameters
 
-        response = self.client.post(url, body=json.loads(new_training.json(by_alias=True)))
+        response = self.client.post(
+            url, body=json.loads(new_training.json(by_alias=True))
+        )
         return ModelTraining.model_validate(response.json())
 
     def update_training(self, training: ModelTraining) -> ModelTraining:
@@ -4735,7 +5146,9 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             ModelTraining: The updated model training.
         """
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training.id}"
-        response = self.client.put(url, body=json.loads(training.model_dump_json(by_alias=True)))
+        response = self.client.put(
+            url, body=json.loads(training.model_dump_json(by_alias=True))
+        )
         return ModelTraining.model_validate(response.json())
 
     def delete_training(self, training_id: str):
@@ -4760,8 +5173,9 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(url)
         return ModelTraining.model_validate(response.json())
 
-    def list_trainings(self, query="*", page=1, page_size=10, sort=None,
-                       filters: List[str] = None) -> PageModelTraining:
+    def list_trainings(
+        self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+    ) -> PageModelTraining:
         """List all model trainings
 
         Args:
@@ -4775,9 +5189,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             PageModelTraining: The page of model trainings.
         """
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings"
-        params = {"query": requests.utils.quote(query),
-                  "page": page,
-                  "pageSize": page_size}
+        params = {
+            "query": requests.utils.quote(query),
+            "page": page,
+            "pageSize": page_size,
+        }
 
         if sort is not None:
             params["sort"] = sort
@@ -4799,27 +5215,36 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             int: The number of files in the zip.
         """
         import zipfile
+
         num_hits = 0
 
-        with zipfile.ZipFile('implementation.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-
+        with zipfile.ZipFile("implementation.zip", "w", zipfile.ZIP_DEFLATED) as zipf:
             ignore_files = []
             if metadata.ignored_contents:
                 for ignore_path in metadata.ignored_contents:
-                    final_wildcard = os.path.join(metadata.base_dir,
-                                                  ignore_path) if metadata.base_dir else ignore_path
+                    final_wildcard = (
+                        os.path.join(metadata.base_dir, ignore_path)
+                        if metadata.base_dir
+                        else ignore_path
+                    )
                     for path_hit in glob.glob(final_wildcard, recursive=True):
                         ignore_files.append(path_hit)
 
             for content_path in metadata.contents:
-                final_wildcard = os.path.join(metadata.base_dir,
-                                              content_path) if metadata.base_dir else content_path
+                final_wildcard = (
+                    os.path.join(metadata.base_dir, content_path)
+                    if metadata.base_dir
+                    else content_path
+                )
 
                 for path_hit in glob.glob(final_wildcard, recursive=True):
                     if path_hit in ignore_files:
                         continue
-                    relative_path = path_hit.replace(metadata.base_dir + '/',
-                                                     '') if metadata.base_dir else path_hit
+                    relative_path = (
+                        path_hit.replace(metadata.base_dir + "/", "")
+                        if metadata.base_dir
+                        else path_hit
+                    )
 
                     # We will put the implementation in one place
                     if Path(path_hit).is_file():
@@ -4842,12 +5267,14 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         if metadata.contents:
             num_hits = self.build_implementation_zip(metadata)
             if num_hits > 0 and not dry_run:
-                with open('implementation.zip', 'rb') as zip_content:
-                    self.client.post(f"/api/stores/{self.ref.replace(':', '/')}/implementation",
-                                     files={"implementation": zip_content})
+                with open("implementation.zip", "rb") as zip_content:
+                    self.client.post(
+                        f"/api/stores/{self.ref.replace(':', '/')}/implementation",
+                        files={"implementation": zip_content},
+                    )
                 results.append(f"{num_hits} files packaged and deployed to {self.ref}")
         if not metadata.keep_zip:
-            Path('implementation.zip').unlink()
+            Path("implementation.zip").unlink()
         return results
 
 
@@ -4860,6 +5287,7 @@ class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     Attributes:
         None
     """
+
     """Represents a taxonomies endpoint"""
 
     def get_type(self) -> str:
@@ -4925,7 +5353,7 @@ def process_response(response) -> requests.Response:
             messages = []
             for key, value in response.json()["errors"].items():
                 messages.append(f"{key}: {value}")
-            raise Exception(', '.join(messages))
+            raise Exception(", ".join(messages))
 
         raise Exception("Bad request " + response.text)
 
@@ -4934,112 +5362,108 @@ def process_response(response) -> requests.Response:
 
     return response
 
-
     #
     #  The Kodexa Client is the way that brings everything together
     #
     #
+
 
 OBJECT_TYPES = {
     "extensionPacks": {
         "name": "extensionPack",
         "plural": "extensionPacks",
         "type": ExtensionPackEndpoint,
-        "endpoint": ExtensionPacksEndpoint
+        "endpoint": ExtensionPacksEndpoint,
     },
     "dashboards": {
         "name": "dashboard",
         "plural": "dashboards",
         "type": DashboardEndpoint,
-        "endpoint": DashboardsEndpoint
+        "endpoint": DashboardsEndpoint,
     },
     "dataForms": {
         "name": "dataForm",
         "plural": "dataForms",
         "type": DataFormEndpoint,
-        "endpoint": DataFormsEndpoint
+        "endpoint": DataFormsEndpoint,
     },
     "pipelines": {
         "name": "pipeline",
         "plural": "pipelines",
         "type": PipelineEndpoint,
-        "endpoint": PipelinesEndpoint
+        "endpoint": PipelinesEndpoint,
     },
     "assistants": {
         "name": "assistant",
         "plural": "assistants",
         "type": AssistantEndpoint,
         "endpoint": AssistantsEndpoint,
-        "global": True
+        "global": True,
     },
     "assistantDefinitions": {
         "name": "assistant",
         "plural": "assistants",
         "type": AssistantDefinitionEndpoint,
-        "endpoint": AssistantDefinitionsEndpoint
+        "endpoint": AssistantDefinitionsEndpoint,
     },
     "actions": {
         "name": "action",
         "plural": "actions",
         "type": ActionEndpoint,
-        "endpoint": ActionsEndpoint
+        "endpoint": ActionsEndpoint,
     },
     "modelRuntimes": {
         "name": "modelRuntime",
         "plural": "modelRuntimes",
         "type": ModelRuntimeEndpoint,
-        "endpoint": ModelRuntimesEndpoint
+        "endpoint": ModelRuntimesEndpoint,
     },
     "credentialDefinitions": {
         "name": "credentialDefinition",
         "plural": "credentialDefinitions",
         "type": CredentialDefinitionEndpoint,
-        "endpoint": CredentialDefinitionsEndpoint
+        "endpoint": CredentialDefinitionsEndpoint,
     },
     "taxonomies": {
         "name": "taxonomy",
         "plural": "taxonomies",
         "type": TaxonomyEndpoint,
-        "endpoint": TaxonomiesEndpoint
+        "endpoint": TaxonomiesEndpoint,
     },
-    "stores": {
-        "name": "store",
-        "plural": "stores",
-        "endpoint": StoresEndpoint
-    },
+    "stores": {"name": "store", "plural": "stores", "endpoint": StoresEndpoint},
     "projects": {
         "name": "project",
         "plural": "projects",
         "type": ProjectEndpoint,
         "endpoint": ProjectsEndpoint,
-        "global": True
+        "global": True,
     },
     "workspaces": {
         "name": "workspace",
         "plural": "workspaces",
         "type": WorkspaceEndpoint,
         "endpoint": WorkspacesEndpoint,
-        "global": True
+        "global": True,
     },
     "organizations": {
         "name": "organization",
         "plural": "organizations",
         "type": OrganizationEndpoint,
         "endpoint": OrganizationsEndpoint,
-        "global": True
+        "global": True,
     },
     "channels": {
         "name": "channel",
         "plural": "channels",
         "type": ChannelEndpoint,
         "endpoint": ChannelsEndpoint,
-        "global": True
+        "global": True,
     },
     "projectTemplates": {
         "name": "projectTemplate",
         "plural": "projectTemplates",
         "type": ProjectTemplateEndpoint,
-        "endpoint": ProjectTemplatesEndpoint
+        "endpoint": ProjectTemplatesEndpoint,
     },
     "executions": {
         "name": "execution",
@@ -5047,15 +5471,15 @@ OBJECT_TYPES = {
         "type": Execution,
         "global": True,
         "sort": "startDate:desc",
-        "endpoint": ExecutionsEndpoint
+        "endpoint": ExecutionsEndpoint,
     },
     "memberships": {
         "name": "membership",
         "plural": "memberships",
         "type": MembershipEndpoint,
         "global": True,
-        "endpoint": MembershipsEndpoint
-    }
+        "endpoint": MembershipsEndpoint,
+    },
 }
 
 
@@ -5101,6 +5525,7 @@ class ExtractionEngineEndpoint:
     Attributes:
         client (KodexaClient): The client to interact with the extraction engine.
     """
+
     """
     Provides endpoint access to the extraction engine
     """
@@ -5108,7 +5533,9 @@ class ExtractionEngineEndpoint:
     def __init__(self, client: "KodexaClient"):
         self.client = client
 
-    def extract_data_objects(self, taxonomy: Taxonomy, document: Document) -> List[DataObject]:
+    def extract_data_objects(
+        self, taxonomy: Taxonomy, document: Document
+    ) -> List[DataObject]:
         """
         Extracts data objects from the given document using the given taxonomy.
 
@@ -5119,12 +5546,18 @@ class ExtractionEngineEndpoint:
         Returns:
             List[DataObject]: The extracted data objects.
         """
-        response = self.client.post(f"/api/extractionEngine/extract",
-                                    data={'taxonomyJson': taxonomy.model_dump_json()},
-                                    files={'document': document.to_kddb()})
-        return [DataObject.model_validate(data_object) for data_object in response.json()]
+        response = self.client.post(
+            f"/api/extractionEngine/extract",
+            data={"taxonomyJson": taxonomy.model_dump_json()},
+            files={"document": document.to_kddb()},
+        )
+        return [
+            DataObject.model_validate(data_object) for data_object in response.json()
+        ]
 
-    def extract_data_objects_with_exceptions(self, taxonomy: Taxonomy, document: Document) -> Dict:
+    def extract_data_objects_with_exceptions(
+        self, taxonomy: Taxonomy, document: Document
+    ) -> Dict:
         """
         Extracts data objects from the given document using the given taxonomy and returns any exceptions.
 
@@ -5135,16 +5568,26 @@ class ExtractionEngineEndpoint:
         Returns:
             Dict: A dictionary containing the extracted data objects and any exceptions.
         """
-        response = self.client.post(f"/api/extractionEngine/extract", params="full",
-                                    data={'taxonomyJson': taxonomy.model_dump_json()},
-                                    files={'document': document.to_kddb()})
+        response = self.client.post(
+            f"/api/extractionEngine/extract",
+            params="full",
+            data={"taxonomyJson": taxonomy.model_dump_json()},
+            files={"document": document.to_kddb()},
+        )
         return {
-            'dataObjects': [DataObject.model_validate(data_object) for data_object in response.json()['dataObjects']],
-            'exceptions': [ContentException.model_validate(exception) for exception in
-                           response.json()['contentExceptions']]
+            "dataObjects": [
+                DataObject.model_validate(data_object)
+                for data_object in response.json()["dataObjects"]
+            ],
+            "exceptions": [
+                ContentException.model_validate(exception)
+                for exception in response.json()["contentExceptions"]
+            ],
         }
 
-    def extract_to_format(self, taxonomy: Taxonomy, document: Document, format: str) -> str:
+    def extract_to_format(
+        self, taxonomy: Taxonomy, document: Document, format: str
+    ) -> str:
         """
         Extracts data from the given document using the given taxonomy and returns it in the given format.
 
@@ -5156,10 +5599,12 @@ class ExtractionEngineEndpoint:
         Returns:
             str: The extracted data in the given format.
         """
-        response = self.client.post(f"/api/extractionEngine/extract",
-                                    params={'format': format},
-                                    data={'taxonomyJson': taxonomy.model_dump_json()},
-                                    files={'document': document.to_kddb()})
+        response = self.client.post(
+            f"/api/extractionEngine/extract",
+            params={"format": format},
+            data={"taxonomyJson": taxonomy.model_dump_json()},
+            files={"document": document.to_kddb()},
+        )
         return response.text
 
 
@@ -5182,9 +5627,16 @@ class KodexaClient:
 
     def __init__(self, url=None, access_token=None, profile=None, insecure=None):
         from kodexa import KodexaPlatform
+
         self.base_url = url if url is not None else KodexaPlatform.get_url(profile)
-        self.access_token = access_token if access_token is not None else KodexaPlatform.get_access_token(profile)
-        self.insecure = insecure if insecure is not None else KodexaPlatform.get_insecure(profile)
+        self.access_token = (
+            access_token
+            if access_token is not None
+            else KodexaPlatform.get_access_token(profile)
+        )
+        self.insecure = (
+            insecure if insecure is not None else KodexaPlatform.get_insecure(profile)
+        )
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
         self.workspaces = WorkspacesEndpoint(self)
@@ -5211,10 +5663,13 @@ class KodexaClient:
             Exception: If the status code is not 200.
         """
         from requests.auth import HTTPBasicAuth
-        obj_response = requests.get(f"{url}/api/account/me/token",
-                                    auth=HTTPBasicAuth(email, password),
-                                    headers={"content-type": "application/json"},
-                                    verify=not insecure)
+
+        obj_response = requests.get(
+            f"{url}/api/account/me/token",
+            auth=HTTPBasicAuth(email, password),
+            headers={"content-type": "application/json"},
+            verify=not insecure,
+        )
         if obj_response.status_code == 200:
             return KodexaClient(url, obj_response.text, insecure=insecure)
 
@@ -5228,7 +5683,9 @@ class KodexaClient:
         Returns:
             UserEndpoint: The UserEndpoint instance for the current user.
         """
-        return UserEndpoint.model_validate(self.get("/api/account/me").json()).set_client(self)
+        return UserEndpoint.model_validate(
+            self.get("/api/account/me").json()
+        ).set_client(self)
 
     @property
     def extraction_engine(self):
@@ -5248,7 +5705,7 @@ class KodexaClient:
         Returns:
             PlatformOverview: The PlatformOverview instance.
         """
-        return PlatformOverview.model_validate(self.get('/api').json())
+        return PlatformOverview.model_validate(self.get("/api").json())
 
     def change_password(self, old_password: str, new_password: str):
         """
@@ -5261,7 +5718,10 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        return self.post("/api/account/passwordChange", body={"oldPassword": old_password, "newPassword": new_password})
+        return self.post(
+            "/api/account/passwordChange",
+            body={"oldPassword": old_password, "newPassword": new_password},
+        )
 
     def __build_object(self, ref, object_type_metadata):
         """
@@ -5280,9 +5740,9 @@ class KodexaClient:
         # We need to merge the use of the object type metadata
         # and the deserialize method better
 
-        if 'type' not in object_type_metadata:
+        if "type" not in object_type_metadata:
             return self.deserialize(response.json())
-        instance = object_type_metadata['type'](**response.json())
+        instance = object_type_metadata["type"](**response.json())
         if isinstance(instance, ClientEndpoint):
             instance.set_client(self)
 
@@ -5335,8 +5795,14 @@ class KodexaClient:
         Returns:
             bool: True if the URL exists, False otherwise.
         """
-        response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
-                                                                           "content-type": "application/json"})
+        response = requests.get(
+            self.get_url(url),
+            params=params,
+            headers={
+                "x-access-token": self.access_token,
+                "content-type": "application/json",
+            },
+        )
         if response.status_code == 200 or response.status_code == 404:
             return True
 
@@ -5353,13 +5819,21 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        response = requests.get(self.get_url(url), params=params, headers={"x-access-token": self.access_token,
-                                                                           "content-type": "application/json"},
-                                verify=not self.insecure)
+        response = requests.get(
+            self.get_url(url),
+            params=params,
+            headers={
+                "x-access-token": self.access_token,
+                "content-type": "application/json",
+            },
+            verify=not self.insecure,
+        )
 
         return process_response(response)
 
-    def post(self, url, body=None, data=None, files=None, params=None) -> requests.Response:
+    def post(
+        self, url, body=None, data=None, files=None, params=None
+    ) -> requests.Response:
         """
         A method to send a POST request.
 
@@ -5377,12 +5851,20 @@ class KodexaClient:
         if files is None:
             headers["content-type"] = "application/json"
 
-        response = requests.post(self.get_url(url), json=body, data=data, files=files, params=params,
-                                 headers=headers,
-                                 verify=not self.insecure)
+        response = requests.post(
+            self.get_url(url),
+            json=body,
+            data=data,
+            files=files,
+            params=params,
+            headers=headers,
+            verify=not self.insecure,
+        )
         return process_response(response)
 
-    def put(self, url, body=None, data=None, files=None, params=None) -> requests.Response:
+    def put(
+        self, url, body=None, data=None, files=None, params=None
+    ) -> requests.Response:
         """
         A method to send a PUT request.
 
@@ -5400,9 +5882,15 @@ class KodexaClient:
         if files is None:
             headers["content-type"] = "application/json"
 
-        response = requests.put(self.get_url(url), json=body, data=data, files=files, params=params,
-                                headers=headers,
-                                verify=not self.insecure)
+        response = requests.put(
+            self.get_url(url),
+            json=body,
+            data=data,
+            files=files,
+            params=params,
+            headers=headers,
+            verify=not self.insecure,
+        )
         return process_response(response)
 
     def delete(self, url, params=None) -> requests.Response:
@@ -5416,8 +5904,12 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        response = requests.delete(self.get_url(url), params=params, headers={"x-access-token": self.access_token},
-                                   verify=not self.insecure)
+        response = requests.delete(
+            self.get_url(url),
+            params=params,
+            headers={"x-access-token": self.access_token},
+            verify=not self.insecure,
+        )
         return process_response(response)
 
     def get_url(self, url):
@@ -5434,7 +5926,6 @@ class KodexaClient:
             return self.base_url + url
         else:
             return self.base_url + "/" + url
-
 
     def export_project(self, project: ProjectEndpoint, export_path: str):
         """
@@ -5453,46 +5944,61 @@ class KodexaClient:
         project_export_dir = os.path.join(export_path, project.name)
         Path(project_export_dir).mkdir(parents=True, exist_ok=False)
 
-        project_metadata_file = os.path.join(project_export_dir, "project_metadata.json")
+        project_metadata_file = os.path.join(
+            project_export_dir, "project_metadata.json"
+        )
         with open(project_metadata_file, "w") as f:
             f.write(json.dumps(project.to_dict(), indent=4))
 
         for assistant in project.assistants.list():
-            assistant_file = os.path.join(project_export_dir, f"assistant-{assistant.id}.json")
+            assistant_file = os.path.join(
+                project_export_dir, f"assistant-{assistant.id}.json"
+            )
             with open(assistant_file, "w") as f:
                 f.write(json.dumps(assistant.to_dict(), indent=4))
 
         for data_store in project.data_stores.list():
-            data_store_file = os.path.join(project_export_dir,
-                                           f"data-store-{data_store.slug}-{data_store.version}.json")
+            data_store_file = os.path.join(
+                project_export_dir,
+                f"data-store-{data_store.slug}-{data_store.version}.json",
+            )
             with open(data_store_file, "w") as f:
                 f.write(json.dumps(data_store.to_dict(), indent=4))
 
         for document_store in project.document_stores.list():
-            document_store_file = os.path.join(project_export_dir,
-                                               f"document-store-{document_store.slug}-{document_store.version}.json")
+            document_store_file = os.path.join(
+                project_export_dir,
+                f"document-store-{document_store.slug}-{document_store.version}.json",
+            )
             with open(document_store_file, "w") as f:
                 f.write(json.dumps(document_store.to_dict(), indent=4))
 
-            store_folder = os.path.join(project_export_dir,
-                                        f"document-store-{document_store.slug}-{document_store.version}")
+            store_folder = os.path.join(
+                project_export_dir,
+                f"document-store-{document_store.slug}-{document_store.version}",
+            )
             Path(store_folder).mkdir(parents=True, exist_ok=False)
             document_store.download_document_families(store_folder)
 
         for model_store in project.model_stores.list():
-            model_store_file = os.path.join(project_export_dir,
-                                            f"model-store-{model_store.slug}-{model_store.version}.json")
+            model_store_file = os.path.join(
+                project_export_dir,
+                f"model-store-{model_store.slug}-{model_store.version}.json",
+            )
             with open(model_store_file, "w") as f:
                 f.write(json.dumps(model_store.to_dict(), indent=4))
 
-            store_folder = os.path.join(project_export_dir,
-                                        f"document-store-{model_store.slug}-{model_store.version}")
+            store_folder = os.path.join(
+                project_export_dir,
+                f"document-store-{model_store.slug}-{model_store.version}",
+            )
             Path(store_folder).mkdir(parents=True, exist_ok=False)
             model_store.download_document_families(store_folder)
 
         for taxonomy in project.taxonomies.list():
-            taxonomy_file = os.path.join(project_export_dir,
-                                         f"taxonomy-{taxonomy.slug}-{taxonomy.version}.json")
+            taxonomy_file = os.path.join(
+                project_export_dir, f"taxonomy-{taxonomy.slug}-{taxonomy.version}.json"
+            )
             with open(taxonomy_file, "w") as f:
                 f.write(json.dumps(taxonomy.to_dict(), indent=4))
 
@@ -5523,39 +6029,63 @@ class KodexaClient:
 
         for assistant_file in glob.glob(os.path.join(import_path, "assistant-*.json")):
             with open(assistant_file, "r") as f:
-                assistant: AssistantEndpoint = AssistantEndpoint.model_validate(json.load(f))
+                assistant: AssistantEndpoint = AssistantEndpoint.model_validate(
+                    json.load(f)
+                )
 
-                assistant.assistant_definition_ref = assistant.definition.ref.split(':')[0]
+                assistant.assistant_definition_ref = assistant.definition.ref.split(
+                    ":"
+                )[0]
                 new_project.assistants.create(assistant)
 
-        for document_store_file in glob.glob(os.path.join(import_path, "document-store-*.json")):
+        for document_store_file in glob.glob(
+            os.path.join(import_path, "document-store-*.json")
+        ):
             with open(document_store_file, "r") as f:
-                document_store = DocumentStoreEndpoint.model_validate(json.load(f)).set_client(self)
+                document_store = DocumentStoreEndpoint.model_validate(
+                    json.load(f)
+                ).set_client(self)
                 document_store.org_slug = None
                 document_store.ref = None
                 document_store = organization.stores.create(document_store)
                 stores.append(document_store)
 
-                for doc_fam in glob.glob(os.path.join(import_path, document_store_file.replace('.json', '/*.dfm'))):
+                for doc_fam in glob.glob(
+                    os.path.join(
+                        import_path, document_store_file.replace(".json", "/*.dfm")
+                    )
+                ):
                     document_store.import_family(doc_fam)
 
-        for data_store_file in glob.glob(os.path.join(import_path, "data-store-*.json")):
+        for data_store_file in glob.glob(
+            os.path.join(import_path, "data-store-*.json")
+        ):
             with open(data_store_file, "r") as f:
-                data_store = DataStoreEndpoint.model_validate(json.load(f)).set_client(self)
+                data_store = DataStoreEndpoint.model_validate(json.load(f)).set_client(
+                    self
+                )
                 data_store.org_slug = None
                 data_store.ref = None
                 data_store = organization.stores.create(data_store)
                 stores.append(data_store)
 
-        for model_store_file in glob.glob(os.path.join(import_path, "model-store-*.json")):
+        for model_store_file in glob.glob(
+            os.path.join(import_path, "model-store-*.json")
+        ):
             with open(model_store_file, "r") as f:
-                model_store = ModelStoreEndpoint.model_validate(json.load(f)).set_client(self)
+                model_store = ModelStoreEndpoint.model_validate(
+                    json.load(f)
+                ).set_client(self)
                 model_store.org_slug = None
                 model_store.ref = None
                 model_store = organization.stores.create(model_store)
                 stores.append(model_store)
 
-                for doc_fam in glob.glob(os.path.join(import_path, model_store_file.replace('.json', '/*.dfm'))):
+                for doc_fam in glob.glob(
+                    os.path.join(
+                        import_path, model_store_file.replace(".json", "/*.dfm")
+                    )
+                ):
                     model_store.import_family(doc_fam)
 
         for taxonomy_file in glob.glob(os.path.join(import_path, "taxonomy-*.json")):
@@ -5566,11 +6096,14 @@ class KodexaClient:
                 taxonomies.append(organization.taxonomies.create(taxonomy))
 
         import time
+
         time.sleep(4)
 
         new_project.update_resources(stores=stores, taxonomies=taxonomies)
 
-    def deserialize(self, component_dict: dict, component_type: Optional[str] = None) -> ComponentInstanceEndpoint:
+    def deserialize(
+        self, component_dict: dict, component_type: Optional[str] = None
+    ) -> ComponentInstanceEndpoint:
         """
         A method to deserialize a component.
 
@@ -5585,18 +6118,28 @@ class KodexaClient:
             Exception: If the type is not found in the dictionary.
         """
         if "type" in component_dict or component_type is not None:
-            component_type = component_type if component_type is not None else component_dict["type"]
-            if component_type == 'store':
+            component_type = (
+                component_type if component_type is not None else component_dict["type"]
+            )
+            if component_type == "store":
                 if "storeType" in component_dict:
                     store_type = component_dict["storeType"]
                     if store_type.lower() == "document":
-                        document_store = DocumentStoreEndpoint.model_validate(component_dict)
+                        document_store = DocumentStoreEndpoint.model_validate(
+                            component_dict
+                        )
                         document_store.set_client(self)
 
                         # We need special handling of the metadata
-                        if "metadata" in component_dict and component_dict["metadata"] is not None:
-                            document_store.metadata = DocumentContentMetadata.model_validate(
-                                component_dict["metadata"])
+                        if (
+                            "metadata" in component_dict
+                            and component_dict["metadata"] is not None
+                        ):
+                            document_store.metadata = (
+                                DocumentContentMetadata.model_validate(
+                                    component_dict["metadata"]
+                                )
+                            )
 
                         return document_store
                     elif store_type.lower() == "model":
@@ -5604,13 +6147,19 @@ class KodexaClient:
                         model_store.set_client(self)
 
                         # We need special handling of the metadata
-                        if "metadata" in component_dict and component_dict["metadata"] is not None:
+                        if (
+                            "metadata" in component_dict
+                            and component_dict["metadata"] is not None
+                        ):
                             model_store.metadata = ModelContentMetadata.model_validate(
-                                component_dict["metadata"])
+                                component_dict["metadata"]
+                            )
 
                         return model_store
                     if store_type.lower() == "data" or store_type.lower() == "table":
-                        return DataStoreEndpoint.model_validate(component_dict).set_client(self)
+                        return DataStoreEndpoint.model_validate(
+                            component_dict
+                        ).set_client(self)
 
                     raise Exception("Unknown store type: " + store_type)
 
@@ -5638,10 +6187,16 @@ class KodexaClient:
             }
 
             if component_type in known_components:
-                return known_components[component_type].model_validate(component_dict).set_client(self)
+                return (
+                    known_components[component_type]
+                    .model_validate(component_dict)
+                    .set_client(self)
+                )
             raise Exception("Unknown component type: " + component_type)
 
-        raise Exception(f"Type not found in the dictionary, unable to deserialize ({component_type})")
+        raise Exception(
+            f"Type not found in the dictionary, unable to deserialize ({component_type})"
+        )
 
     def get_project(self, project_id) -> ProjectEndpoint:
         """
@@ -5656,7 +6211,9 @@ class KodexaClient:
         project = self.get(f"/api/projects/{project_id}")
         return ProjectEndpoint.model_validate(project.json()).set_client(self)
 
-    def get_object_type(self, object_type, organization: Optional[OrganizationEndpoint] = None) -> ClientEndpoint:
+    def get_object_type(
+        self, object_type, organization: Optional[OrganizationEndpoint] = None
+    ) -> ClientEndpoint:
         """
         A method to get an object type.
 
@@ -5672,12 +6229,15 @@ class KodexaClient:
         """
         obj_type, obj_metadata = resolve_object_type(object_type)
 
-        if 'endpoint' in obj_metadata:
-
-            if 'global' in obj_metadata and obj_metadata['global']:
-                obj_inst = obj_metadata['endpoint'](self, organization)
+        if "endpoint" in obj_metadata:
+            if "global" in obj_metadata and obj_metadata["global"]:
+                obj_inst = obj_metadata["endpoint"](self, organization)
             else:
-                obj_inst = obj_metadata['endpoint']().set_client(self).set_organization(organization)
+                obj_inst = (
+                    obj_metadata["endpoint"]()
+                    .set_client(self)
+                    .set_organization(organization)
+                )
 
             return obj_inst
 
