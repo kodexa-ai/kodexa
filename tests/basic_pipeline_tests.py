@@ -30,6 +30,7 @@ def test_simplified_remote_action_reference():
     assert isinstance(pipeline.steps[0].step, RemoteStep)
     assert "option" in pipeline.steps[0].step.options
 
+
 def test_co():
     # Just confirm the Pydantic Constructor
     new_content_object = ContentObject(**{'contentType': 'DOCUMENT'})

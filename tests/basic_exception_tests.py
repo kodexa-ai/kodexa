@@ -1,7 +1,6 @@
 import os
-from pathlib import Path
 
-from kodexa import *
+from kodexa import Document
 from kodexa.model import ContentException
 
 
@@ -35,4 +34,3 @@ def test_update_exception():
     assert len(document.get_exceptions()) == 1
 
     assert document.get_exceptions()[0].exception_type_id == "123123"
-

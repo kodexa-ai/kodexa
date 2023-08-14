@@ -43,6 +43,7 @@ mypy = "^0.991"
 flake8 = "^6.0.0"
 pandas = "1.4.3"
 setuptools = "^65.5.1"
+black = "^23.7.0"
 
 [build-system]
 requires = ["poetry-core"]

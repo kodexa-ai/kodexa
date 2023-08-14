@@ -22,11 +22,22 @@ logger = logging.getLogger()
 
 
 def get_caller_dir():
-    """ """
+    """Returns the absolute path of the directory containing the file that called this function.
+
+    This function uses the `inspect` module to retrieve the stack frame of the caller and extract its file path. The file path is then converted to an absolute path using the `os.path` module.
+
+    Returns:
+        str: The absolute path of the caller's directory.
+
+    Example:
+        >>> get_caller_dir()
+        '/path/to/caller/directory'
+    """
     # get the caller's stack frame and extract its file path
     frame_info = inspect.stack()[3]
     filepath = frame_info.filename
-    del frame_info  # drop the reference to the stack frame to avoid reference cycles
+    del frame_info
+    # drop the reference to the stack frame to avoid reference cycles
 
     # make the path absolute (optional)
     filepath = os.path.dirname(os.path.abspath(filepath))
@@ -41,8 +52,15 @@ class FolderConnector:
         """ """
         return "folder"
 
-    def __init__(self, path, file_filter="*", recursive=False, relative=False, caller_path=get_caller_dir(),
-                 unpack=False):
+    def __init__(
+        self,
+        path,
+        file_filter="*",
+        recursive=False,
+        relative=False,
+        caller_path=get_caller_dir(),
+        unpack=False,
+    ):
         self.path = path
         self.file_filter = file_filter
         self.recursive = recursive
@@ -51,7 +69,7 @@ class FolderConnector:
         self.unpack = unpack
 
         if not self.path:
-            raise ValueError('You must provide a path')
+            raise ValueError("You must provide a path")
 
         self.files = self.__get_files__()
         self.index = 0
@@ -66,7 +84,9 @@ class FolderConnector:
         Returns:
 
         """
-        return open(join(document.source.original_path, document.source.original_filename), 'rb')
+        return open(
+            join(document.source.original_path, document.source.original_filename), "rb"
+        )
 
     def __iter__(self):
         return self
@@ -79,10 +99,19 @@ class FolderConnector:
         if self.unpack:
             return Document.from_kdxa(self.files[self.index - 1])
 
-        document = Document(DocumentMetadata(
-            {"source_path": self.files[self.index - 1], "connector": self.get_name(),
-                "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
-                "connector_options": {"path": self.path, "file_filter": self.file_filter}}))
+        document = Document(
+            DocumentMetadata(
+                {
+                    "source_path": self.files[self.index - 1],
+                    "connector": self.get_name(),
+                    "mime_type": mimetypes.guess_type(self.files[self.index - 1]),
+                    "connector_options": {
+                        "path": self.path,
+                        "file_filter": self.file_filter,
+                    },
+                }
+            )
+        )
         document.source.original_filename = os.path.basename(self.files[self.index - 1])
         document.source.original_path = self.path
         document.source.connector = self.get_name()
@@ -109,20 +138,22 @@ class FolderConnector:
 
 
 class FileHandleConnector:
-    """ """
+    """
+    A File Handle Connector can be used to create a document from a file path (e.g. a file like object)
+    """
 
     @staticmethod
     def get_name():
         """ """
-        return 'file-handle'
+        return "file-handle"
 
-    def __init__(self, original_path):
+    def __init__(self, original_path: str):
         self.file = original_path
         self.index = 0
         self.completed = False
 
     @staticmethod
-    def get_source(document):
+    def get_source(document: Document):
         """
 
         Args:
@@ -131,7 +162,7 @@ class FileHandleConnector:
         Returns:
 
         """
-        return open(document.source.original_path, 'rb')
+        return open(document.source.original_path, "rb")
 
     def __iter__(self):
         return self
@@ -140,15 +171,19 @@ class FileHandleConnector:
         if self.completed:
             raise StopIteration
 
-        document = Document(DocumentMetadata(
-            {"source_path": self.file, "connector": self.get_name(),
-                "mime_type": mimetypes.guess_type(self.file),
-                "connector_options": {"file": self.file}}))
+        document = Document(
+            DocumentMetadata(
+                {
+                    "source_path": self.file,
+                    "connector": self.get_name(),
+                    "mime_type": mimetypes.guess_type(self.file),
+                    "connector_options": {"file": self.file},
+                }
+            )
+        )
         document.source.original_filename = self.file
         document.source.original_path = os.path.basename(self.file)
         document.source.connector = self.get_name()
-
-        # TODO we need to get the checksum and last_updated and created times
         return document
 
 
@@ -181,9 +216,10 @@ class UrlConnector:
 
         # If we have an http URL then we should use requests, it is much
         # cleaner
-        if document.source.original_path.startswith('http'):
-            response = requests.get(document.source.original_path,
-                                    headers=document.source.headers)
+        if document.source.original_path.startswith("http"):
+            response = requests.get(
+                document.source.original_path, headers=document.source.headers
+            )
             return io.BytesIO(response.content)
 
         if document.source.headers:
@@ -192,10 +228,13 @@ class UrlConnector:
                 opener.addheaders = [(header, document.source.headers[header])]
             urllib.request.install_opener(opener)
         from kodexa import KodexaPlatform
-        with tempfile.NamedTemporaryFile(delete=True, dir=KodexaPlatform.get_tempdir()) as tmp_file:
+
+        with tempfile.NamedTemporaryFile(
+            delete=True, dir=KodexaPlatform.get_tempdir()
+        ) as tmp_file:
             urllib.request.urlretrieve(document.source.original_path, tmp_file.name)
 
-            return open(tmp_file.name, 'rb')
+            return open(tmp_file.name, "rb")
 
     def __iter__(self):
         return self
@@ -205,9 +244,14 @@ class UrlConnector:
             raise StopIteration
 
         self.completed = True
-        document = Document(DocumentMetadata(
-            {"connector": self.get_name(),
-                "connector_options": {"url": self.url, "headers": self.headers}}))
+        document = Document(
+            DocumentMetadata(
+                {
+                    "connector": self.get_name(),
+                    "connector_options": {"url": self.url, "headers": self.headers},
+                }
+            )
+        )
         document.source.connector = self.get_name()
         document.source.original_path = self.url
         document.source.headers = self.headers
@@ -220,17 +264,31 @@ registered_connectors: Dict[str, Type] = {}
 
 def get_connectors():
     """
-
-    Args:
+    Returns the keys of the registered connectors.
 
     Returns:
-      :return:
-
+        A list of keys representing the registered connectors.
     """
     return registered_connectors.keys()
 
 
 def get_connector(connector: str, source: SourceMetadata):
+    """Get a connector based on the provided connector name and source metadata.
+
+    Args:
+        connector (str): The name of the connector.
+        source (SourceMetadata): The metadata of the source.
+
+    Returns:
+        The registered connector with the given name.
+
+    Raises:
+        Exception: If the connector is not found.
+
+    Example:
+        >>> get_connector('mysql', source_metadata)
+        <mysql_connector>
+    """
     if connector in registered_connectors:
         logger.info(f"Getting registered connector {connector}")
         return registered_connectors[connector]
@@ -240,16 +298,51 @@ def get_connector(connector: str, source: SourceMetadata):
 
 
 def add_connector(connector):
+    """Adds a connector to the list of registered connectors.
+
+    Args:
+        connector: The connector object to be added.
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
     registered_connectors[connector.get_name()] = connector
 
 
 def get_source(document):
-    connector = get_connector(document.source.connector,
-                              document.source)
+    """
+    Returns the source of a document using the specified connector.
+
+    Args:
+        document (Document): The document object for which to retrieve the source.
+
+    Returns:
+        str: The source of the document.
+
+    Raises:
+        ValueError: If the document source connector is invalid.
+
+    Example:
+        >>> document = Document(...)
+        >>> source = get_source(document)
+        >>> print(source)
+        This is the source of the document.
+    """
+    connector = get_connector(document.source.connector, document.source)
     return connector.get_source(document)
 
 
 class DocumentStoreConnector:
+    """
+    A class for connecting to a document store.
+
+    Methods:
+    - get_name: Get the name of the document store.
+    - get_source: Get the source of a document from the document store.
+    """
 
     @staticmethod
     def get_name():
@@ -258,17 +351,39 @@ class DocumentStoreConnector:
 
     @staticmethod
     def get_source(document):
+        """
+        Get the source of a document from the document store.
+
+        Args:
+        document (object): The document object.
+
+        Returns:
+        io.BytesIO: The source of the document as a BytesIO object.
+
+        Raises:
+        Exception: If the source of the document cannot be retrieved.
+        """
         from kodexa import KodexaClient
+
         client = KodexaClient()
         from kodexa.platform.client import DocumentStoreEndpoint
-        document_store: DocumentStoreEndpoint = client.get_object_by_ref('store', document.source.headers['ref'])
+
+        document_store: DocumentStoreEndpoint = client.get_object_by_ref(
+            "store", document.source.headers["ref"]
+        )
         from kodexa.platform.client import DocumentFamilyEndpoint
-        family: DocumentFamilyEndpoint = document_store.get_family(document.source.headers['family'])
+
+        family: DocumentFamilyEndpoint = document_store.get_family(
+            document.source.headers["family"]
+        )
         document_bytes = family.get_native()
         if document_bytes is None:
-            raise Exception(f"Unable to get source, document with id {document.source.headers['id']} is missing?")
+            raise Exception(
+                f"Unable to get source, document with id {document.source.headers['id']} is missing?"
+            )
 
         import io
+
         return io.BytesIO(document_bytes)
 
 

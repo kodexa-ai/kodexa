@@ -19,19 +19,26 @@ class KodexaProcessingException(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f'{self.message}  {self.description}'
+        return f"{self.message}  {self.description}"
 
 
 class NodeTagger:
     """A node tagger allows you to provide a type and content regular expression and then
     tag content in all matching nodes.
-    
+
     It allows for multiple matching groups to be defined, also the ability to use all content
     and also just tag the node (ignoring the matching groups)
     """
 
-    def __init__(self, selector, tag_to_apply, content_re=".*", use_all_content=True, node_only=False,
-                 node_tag_uuid=None):
+    def __init__(
+        self,
+        selector,
+        tag_to_apply,
+        content_re=".*",
+        use_all_content=True,
+        node_only=False,
+        node_tag_uuid=None,
+    ):
         self.selector = selector
         """The selector to use to find the node(s) to tag"""
         self.content_re = content_re
@@ -46,11 +53,15 @@ class NodeTagger:
         """The UUID to use on the tag"""
 
     def process(self, document):
-        """
-        """
-        document.content_node.tag(selector=self.selector, tag_to_apply=self.tag_to_apply, content_re=self.content_re,
-                                  use_all_content=self.use_all_content,
-                                  node_only=self.node_only, tag_uuid=self.node_tag_uuid)
+        """ """
+        document.content_node.tag(
+            selector=self.selector,
+            tag_to_apply=self.tag_to_apply,
+            content_re=self.content_re,
+            use_all_content=self.use_all_content,
+            node_only=self.node_only,
+            tag_uuid=self.node_tag_uuid,
+        )
 
         return document
 
@@ -69,16 +80,17 @@ class NodeTagCopy:
         """The new tag name that will be the destination"""
 
     def process(self, document):
-        """
-        """
-        document.content_node.copy_tag(selector=self.selector, existing_tag_name=self.existing_tag_name,
-                                       new_tag_name=self.new_tag_name)
+        """ """
+        document.content_node.copy_tag(
+            selector=self.selector,
+            existing_tag_name=self.existing_tag_name,
+            new_tag_name=self.new_tag_name,
+        )
         return document
 
 
 class TextParser:
-    """Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes).
-    """
+    """Parser to load a source file as a text document.  The text from the document may be placed on the root ContentNode or on the root's child nodes (controlled by lines_as_child_nodes)."""
 
     def __init__(self, encoding="utf-8", lines_as_child_nodes=False):
         self.encoding = encoding
@@ -87,8 +99,7 @@ class TextParser:
         """If True, the lines of the file will be set as children of the root ContentNode; otherwise, the entire file content is set on the root ContentNode.  (default False)"""
 
     def decode_text(self, data):
-        """
-        """
+        """ """
         try:
             data = data.decode(self.encoding)
         except (UnicodeDecodeError, AttributeError):
@@ -96,23 +107,25 @@ class TextParser:
         return data
 
     def process(self, document):
-        """
-        """
+        """ """
         with get_source(document) as fh:
-
             if self.lines_as_child_nodes:
                 lines = fh.readlines()
-                document.content_node = document.create_node(node_type='text')
+                document.content_node = document.create_node(node_type="text")
 
                 for data in lines:
-                    text_node = document.create_node(node_type='text', content=self.decode_text(data).strip())
+                    text_node = document.create_node(
+                        node_type="text", content=self.decode_text(data).strip()
+                    )
                     document.content_node.add_child(text_node)
             else:
                 data = fh.read()
-                text_node = document.create_node(node_type='text', content=self.decode_text(data))
+                text_node = document.create_node(
+                    node_type="text", content=self.decode_text(data)
+                )
                 document.content_node = text_node
 
-            document.add_mixin('text')
+            document.add_mixin("text")
 
         return document
 
@@ -122,14 +135,20 @@ class RollupTransformer:
     while maintaining content and features as needed
     """
 
-    def __init__(self, collapse_type_res=None, reindex: bool = True, selector: str = ".",
-                 separator_character: str = None, get_all_content: bool = False):
+    def __init__(
+        self,
+        collapse_type_res=None,
+        reindex: bool = True,
+        selector: str = ".",
+        separator_character: str = None,
+        get_all_content: bool = False,
+    ):
         if collapse_type_res is None:
             collapse_type_res = []
         self.collapse_type_res = collapse_type_res
         self.reindex = reindex
         self.selector = selector
-        self.separator_character = separator_character if separator_character else ''
+        self.separator_character = separator_character if separator_character else ""
         self.get_all_content = get_all_content
 
     def process(self, document):
@@ -137,7 +156,6 @@ class RollupTransformer:
             # Select those nodes that we want to do the 'rollup' in
             selected_nodes = document.select(self.selector)
             for selected_node in selected_nodes:
-
                 for node_type_re in self.collapse_type_res:
                     nodes = selected_node.select(f'//*[typeRegex("{node_type_re}")]')
 
@@ -151,17 +169,25 @@ class RollupTransformer:
                     for node in final_nodes:
                         if node.get_parent():
                             if node.get_parent().get_content_parts():
-
                                 # We need to insert into the content part that represents the child - then remove the child
-                                content_part_index = node.get_parent().get_content_parts().index(node.index)
+                                content_part_index = (
+                                    node.get_parent()
+                                    .get_content_parts()
+                                    .index(node.index)
+                                )
                                 parts = node.get_parent().get_content_parts()
 
                                 parts.remove(node.index)
-                                parts[content_part_index:content_part_index] = node.get_content_parts()
+                                parts[
+                                    content_part_index:content_part_index
+                                ] = node.get_content_parts()
                                 node.get_parent().set_content_parts(parts)
-                                child_node_index = node.get_parent().get_children().index(node)
+                                child_node_index = (
+                                    node.get_parent().get_children().index(node)
+                                )
                                 node.get_parent().get_children()[
-                                child_node_index:child_node_index] = node.get_children()
+                                    child_node_index:child_node_index
+                                ] = node.get_children()
                                 node.get_parent().remove_child(node)
 
                             else:
@@ -171,14 +197,23 @@ class RollupTransformer:
                                 node.get_parent().get_children().remove(node)
 
                                 if self.get_all_content:
-                                    node.get_parent().content = node.get_parent().content + self.separator_character + \
-                                                                node.get_all_content() if node.get_parent().content else node.get_all_content()
+                                    node.get_parent().content = (
+                                        node.get_parent().content
+                                        + self.separator_character
+                                        + node.get_all_content()
+                                        if node.get_parent().content
+                                        else node.get_all_content()
+                                    )
                                 else:
-                                    node.get_parent().content = node.get_parent().content + self.separator_character + node.content \
-                                        if node.get_parent().content else node.content
+                                    node.get_parent().content = (
+                                        node.get_parent().content
+                                        + self.separator_character
+                                        + node.content
+                                        if node.get_parent().content
+                                        else node.content
+                                    )
 
                             if self.reindex:
-
                                 # Reindex all the children
                                 idx = 0
                                 for child in node.get_parent().get_children():
@@ -202,8 +237,8 @@ class RollupTransformer:
         """
 
         Args:
-          node: 
-          node_ids: 
+          node:
+          node_ids:
 
         Returns:
 

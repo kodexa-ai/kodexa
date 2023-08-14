@@ -1,0 +1,12 @@
+[flake8]
+max-line-length = 250
+extend-ignore = E203
+max-complexity = 60
+per-file-ignores =
+    ./kodexa/selectors/parsetab.py: E231,E501,E713
+    ./kodexa/selectors/parserules.py: F401,
+    ./kodexa/selectors/lextab.py: E501,
+    ./kodexa/selectors/lexrules.py: E722,
+    ./kodexa/model/persistence.py: W291
+    __init__.py:F401
+exclude = ./kodexa/model/objects.py, ./kodexa/selectors/parse
