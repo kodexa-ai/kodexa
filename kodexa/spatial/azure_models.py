@@ -104,7 +104,13 @@ def create_kddb_from_azure(azure_data, keep_azure_lines=True, overlap_percentage
 
 def create_page_node_line_up_kodexa(document, page_node, azure_page):
     """
-    This function creates a page node line up for a Kodexa document using Azure's OCR words. It groups Azure's OCR words into lines to match how Kodexa sees lines. It also sets the bounding box for the content area node and line node. It creates a word node for each word in the Azure line words and sets the bounding box for each word node. It also adds a feature for the word node if the word has a confidence key. It sets the content parts for the word node and calculates the total width of the characters and the count of characters. It sets the statistics for the line node based on the calculated total width and count of characters.
+    This function creates a page node line up for a Kodexa document using Azure's OCR words.
+    It groups Azure's OCR words into lines to match how Kodexa sees lines.
+    It also sets the bounding box for the content area node and line node.
+    It creates a word node for each word in the Azure line words and sets the bounding box for each word node.
+    It also adds a feature for the word node if the word has a confidence key.
+    It sets the content parts for the word node and calculates the total width of the characters and the count of characters.
+    It sets the statistics for the line node based on the calculated total width and count of characters.
 
     Args:
         document (Document): The Kodexa document.
@@ -172,7 +178,8 @@ def get_azure_line_words(
     azure_line, azure_page, azure_page_words, already_added_azure_words
 ):
     """
-    This function is used to get the words from a line in Azure. It checks if the words overlap with the Azure line and page, and if they have not been added before.
+    This function is used to get the words from a line in Azure. It checks if the words overlap with the Azure line and
+    page, and if they have not been added before.
 
     Args:
         azure_line (dict): The Azure line to get words from.
@@ -212,7 +219,9 @@ def get_azure_line_words(
 
 def get_azure_page_words(azure_page):
     """
-    This function extracts the words from a given Azure page. If the page already contains a 'words' key, it directly assigns the value to 'page_words'. If not, it iterates over the 'lines' key, extends the 'page_words' list with the words in each line, and assigns the 'text' value to the 'content' key for each word.
+    This function extracts the words from a given Azure page. If the page already contains a 'words' key,
+    it directly assigns the value to 'page_words'. If not, it iterates over the 'lines' key, extends the 'page_words'
+    list with the words in each line, and assigns the 'text' value to the 'content' key for each word.
 
     Args:
         azure_page (dict): A dictionary representing an Azure page. It should contain either a 'words' key with a list of words as its value, or a 'lines' key with a list of lines, each containing a 'words' key with a list of words as its value.
@@ -449,7 +458,8 @@ def get_bbox_of_line_group(line_group):
     This function calculates and returns the bounding box of a given line group. If the line group is empty, the function returns None.
 
     Args:
-        line_group (list): A list of lines where each line is a dictionary containing the key 'KDXA_BBOX_KEY' which maps to a list of four integers representing the bounding box of the line.
+        line_group (list): A list of lines where each line is a dictionary containing the key 'KDXA_BBOX_KEY' which
+        maps to a list of four integers representing the bounding box of the line.
 
     Returns:
         list or None: A list of four values representing the bounding box of the line group. If the line group is empty, returns None.
@@ -530,7 +540,11 @@ def page_line_overlaps_with_line_group(
 
 def node_heights_are_valid(new_bbox, line_group):
     """
-    This function checks if the font size/height of the nodes are within 60% of each other. It calculates the minimum and maximum height of each line and compares it with the new height. If the ratio of the minimum of new height and min_height to the maximum of new height and min_height is greater than or equal to 0.55, or the ratio of the minimum of new height and max_height to the maximum of new height and max_height is greater than or equal to 0.55, the function returns True.
+    This function checks if the font size/height of the nodes are within 60% of each other. It calculates the minimum
+    and maximum height of each line and compares it with the new height.
+    If the ratio of the minimum of new height and min_height to the maximum of new height and
+    min_height is greater than or equal to 0.55, or the ratio of the minimum of new height and
+    max_height to the maximum of new height and max_height is greater than or equal to 0.55, the function returns True.
 
     Args:
         new_bbox (list): A list representing the new bounding box.
@@ -556,7 +570,8 @@ def node_heights_are_valid(new_bbox, line_group):
 
 def check_azure_line_group(original_line_group):
     """
-    This function checks if the azure lines in a given group overlap on the x-axis. If they do, the function breaks down the group into multiple groups.
+    This function checks if the azure lines in a given group overlap on the x-axis. If they do, the function breaks down
+    the group into multiple groups.
 
     Args:
         original_line_group (list): A list of azure lines to be checked for overlap.
@@ -612,7 +627,8 @@ def convert_azure_bbox(azure_obj, azure_page):
     This function converts the bounding box coordinates from an Azure object to a standard format.
 
     Args:
-        azure_obj (dict): The Azure object containing the bounding box information. This can be in the form of 'boundingBox', 'bounding_box', or 'polygon'.
+        azure_obj (dict): The Azure object containing the bounding box information. This can be in the form of 'boundingBox',
+                          'bounding_box', or 'polygon'.
         azure_page (dict): The Azure page object containing the page information such as 'angle' and 'height'.
 
     Raises:
@@ -735,7 +751,8 @@ def rotate(point, origin, degrees):
     """
     Rotates a point around a given origin.
 
-    This function takes a point and an origin (both as tuples of x, y coordinates), and a number of degrees. It rotates the point around the origin by the given number of degrees, using the rotation matrix formula.
+    This function takes a point and an origin (both as tuples of x, y coordinates), and a number of degrees.
+    It rotates the point around the origin by the given number of degrees, using the rotation matrix formula.
 
     Args:
         point (tuple): The x, y coordinates of the point to rotate.

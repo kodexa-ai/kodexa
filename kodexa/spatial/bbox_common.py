@@ -2,7 +2,9 @@ def overlaps_with(node, other_node):
     """
     Checks if the given node overlaps with another node.
 
-    This function works with nodes on the same line. It checks if the x-coordinate of the first node is less than or equal to the sum of the x-coordinate and width of the second node, and if the sum of the x-coordinate and width of the first node is greater than or equal to the x-coordinate of the second node.
+    This function works with nodes on the same line. It checks if the x-coordinate of the first node
+     is less than or equal to the sum of the x-coordinate and width of the second node, and if
+     the sum of the x-coordinate and width of the first node is greater than or equal to the x-coordinate of the second node.
 
     Args:
         node (Node): The reference node.
@@ -22,7 +24,10 @@ def width_of_overlap(node, other_node):
     """
     Calculates and returns the width of overlap between two nodes.
 
-    This function checks if the two nodes overlap. If they do, it calculates the width of the overlap by finding the maximum x-coordinate of the two nodes and the minimum x-coordinate plus width of the two nodes. The width of the overlap is then calculated as the difference between these two values. If the nodes do not overlap, the function returns 0.0.
+    This function checks if the two nodes overlap. If they do, it calculates the width
+    of the overlap by finding the maximum x-coordinate of the two nodes and the minimum
+    x-coordinate plus width of the two nodes. The width of the overlap is then calculated
+    as the difference between these two values. If the nodes do not overlap, the function returns 0.0.
 
     Args:
         node (Node): The first node to check for overlap.
@@ -69,7 +74,9 @@ def percent_nodes_overlap(node1_bbox, node2_bbox, axis_overlap="y"):
     """
     Calculates the percentage of overlap between two nodes along a specified axis.
 
-    This function takes in the bounding boxes of two nodes in the Kodexa world and calculates the percentage of overlap between them along a specified axis. The axis can be either 'x' or 'y'. If 'y' is given as the axis_overlap, the function calculates how much of the y2s and y1s overlap.
+    This function takes in the bounding boxes of two nodes in the Kodexa world and calculates the percentage of overlap
+    between them along a specified axis. The axis can be either 'x' or 'y'. If 'y' is given as the axis_overlap,
+    the function calculates how much of the y2s and y1s overlap.
 
     Args:
         node1_bbox (list): The bounding box of the first node. It is a list of four numbers representing the coordinates of the bounding box.

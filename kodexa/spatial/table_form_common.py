@@ -64,7 +64,6 @@ def transform_line_to_columns(
 
     # If col_markers is not None, use it to identify the words that belong to a column.
     # We identify the spaces by checking the overlap in the spaces
-    insert_empty_col = False
     if col_marker_line:
         col_markers = col_marker_line.get_children().copy()
         column_words_index = []
