@@ -1,3 +1,6 @@
+from kodexa import ContentNode
+
+
 def overlaps_with(node, other_node):
     """
     Checks if the given node overlaps with another node.
@@ -47,13 +50,13 @@ def width_of_overlap(node, other_node):
         return 0.0
 
 
-def kdxa_nodes_overlap(kdxa_node1, kdxa_node2, overlap_percentage):
+def kdxa_nodes_overlap(kdxa_node1: ContentNode, kdxa_node2: ContentNode, overlap_percentage: float):
     """
     Calculates whether the overlap between two nodes is greater than or equal to a specified percentage.
 
     Args:
-        kdxa_node1 (object): The first node object, which should have a method get_bbox() that returns its bounding box.
-        kdxa_node2 (object): The second node object, which should also have a method get_bbox() that returns its bounding box.
+        kdxa_node1 (ContentNode): The first node object, which should have a method get_bbox() that returns its bounding box.
+        kdxa_node2 (ContentNode): The second node object, which should also have a method get_bbox() that returns its bounding box.
         overlap_percentage (float): The percentage of overlap to check for. This should be a float between 0 and 1, where 1 means 100% overlap.
 
     Returns:
