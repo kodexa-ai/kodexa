@@ -50,7 +50,9 @@ def width_of_overlap(node, other_node):
         return 0.0
 
 
-def kdxa_nodes_overlap(kdxa_node1: ContentNode, kdxa_node2: ContentNode, overlap_percentage: float):
+def kdxa_nodes_overlap(
+    kdxa_node1: ContentNode, kdxa_node2: ContentNode, overlap_percentage: float
+):
     """
     Calculates whether the overlap between two nodes is greater than or equal to a specified percentage.
 

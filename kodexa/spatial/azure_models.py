@@ -268,7 +268,7 @@ def get_azure_next_line(
 
     ref_bbox = ref_line.get_bbox()
     possible_lines = document_lines[
-        max(document_lines.index(ref_line) - 25, 0) : min(
+        max(document_lines.index(ref_line) - 25, 0): min(
             document_lines.index(ref_line) + 25, len(document_lines)
         )
     ]
@@ -413,9 +413,6 @@ def group_azure_lines_to_kodexa_lines(page):
         return []
 
     # Convert Azure lines into Kodexa lines
-    line_heights = []
-    char_widths = []
-
     for page_line in page_lines:
         page_line[KDXA_BBOX_KEY] = convert_azure_bbox(page_line, page)
         page_line["content"] = (

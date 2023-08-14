@@ -2,11 +2,9 @@
 max-line-length = 250
 max-complexity = 60
 per-file-ignores =
-    # line too long
-    ./kodexa/selectors/parsetab.py: E231,
-    ./kodexa/selectors/parsetab.py: E501,
-    ./kodexa/selectors/parsetab.py: E713,
+    ./kodexa/selectors/parsetab.py: E231,E501,E713
     ./kodexa/selectors/parserules.py: F401,
     ./kodexa/selectors/lextab.py: E501,
+    ./kodexa/selectors/lexrules.py: E722,
     __init__.py:F401
 exclude = ./kodexa/model/objects.py, ./kodexa/selectors/parse
