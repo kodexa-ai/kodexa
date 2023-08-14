@@ -74,7 +74,7 @@ def replace_option(option_type, option_value, event_helper, cache, kodexa_client
                         document = document_family.get_document()
                         document.ref = full_url
                         cache[cache_key] = document
-                        logger.info(f"Downloaded document")
+                        logger.info("Downloaded document")
 
                     # We keep the ref of the document so we can use it later
                     return cache[cache_key]
@@ -83,7 +83,7 @@ def replace_option(option_type, option_value, event_helper, cache, kodexa_client
                     logger.warning(f"Unable to access the document ({e})")
                     return None
             else:
-                logger.info(f"Document reference not available")
+                logger.info("Document reference not available")
                 return None
 
         elif len(full_url) > 0:
@@ -151,7 +151,7 @@ def replace_options(step, event_helper, cache, kodexa_client):
     Example:
         replace_options(step, event_helper, cache, kodexa_client)
     """
-    logger.info(f"Determine is we have any options that need replacement")
+    logger.info("Determine is we have any options that need replacement")
     # We need to document any documents that are part of the options
     for key in step.option_types.keys():
         logger.info(f"Check option type for key {key}")
