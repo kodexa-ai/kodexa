@@ -30,7 +30,7 @@ from kodexa.model.objects import (
     ChannelEvent,
     DataObjectEvent,
 )
-from kodexa.pipeline import PipelineContext, Pipeline, PipelineStatistics
+from kodexa.pipeline import PipelineContext, PipelineStatistics
 from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
 
 logger = logging.getLogger()

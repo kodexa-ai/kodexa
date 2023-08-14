@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyUrl, Field, constr, RootModel
+from pydantic import AnyUrl, Field, RootModel
 
 from kodexa.model.base import KodexaBaseModel, StandardDateTime
 
@@ -104,7 +104,7 @@ class Organization(KodexaBaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     name: str
-    slug: constr(pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
+    slug: str = Field(pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
     public_access: Optional[bool] = Field(None, alias="publicAccess")
     description: Optional[str] = None
     has_image: Optional[bool] = Field(None, alias="hasImage")
@@ -431,16 +431,18 @@ class SlugBasedMetadata1(KodexaBaseModel):
         alias="orgSlug",
         description="The slug of the organization that owns this metadata object",
     )
-    slug: constr(pattern=r"^[a-zA-Z0-9\-_]{0,255}$") = Field(
-        ..., description="The slug used when referencing this metadata object"
+    slug: str = Field(
+        ..., description="The slug used when referencing this metadata object",
+        pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
     )
     type: str = Field(..., description="The type of metadata object")
     name: str = Field(..., description="The name of the object")
     description: Optional[str] = Field(
         None, description="The description of the object"
     )
-    version: Optional[constr(pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$")] = Field(
-        None, description="The version of the object"
+    version: Optional[str] = Field(
+        None, description="The version of the object",
+        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$"
     )
     deployed: Optional[StandardDateTime] = Field(
         None,
@@ -1267,16 +1269,18 @@ class ExtensionPackProvided(KodexaBaseModel):
         alias="orgSlug",
         description="The slug of the organization that owns this metadata object",
     )
-    slug: constr(pattern=r"^[a-zA-Z0-9\-_]{0,255}$") = Field(
-        ..., description="The slug used when referencing this metadata object"
+    slug: str = Field(
+        ..., description="The slug used when referencing this metadata object",
+        pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
     )
     type: str = Field(..., description="The type of metadata object")
     name: str = Field(..., description="The name of the object")
     description: Optional[str] = Field(
         None, description="The description of the object"
     )
-    version: Optional[constr(pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$")] = Field(
-        None, description="The version of the object"
+    version: Optional[str] = Field(
+        None, description="The version of the object",
+        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$"
     )
     deployed: Optional[StandardDateTime] = Field(
         None,
@@ -1400,8 +1404,9 @@ class Taxon(KodexaBaseModel):
         None,
         description="Is this taxon a group, and therefore can't have a value, can only have children",
     )
-    name: constr(pattern=r"^[a-zA-Z0-9\-_]{0,255}$") = Field(
-        ..., description="The name to be used"
+    name: str = Field(
+        ..., description="The name to be used",
+        pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
     )
     external_name: Optional[str] = Field(
         None,
@@ -2010,8 +2015,9 @@ class CustomEvent(KodexaBaseModel):
     A Custom Event allows you to define an subtype of assistant event with options
     """
 
-    name: Optional[constr(pattern=r"^[a-zA-Z0-9\-_]{0,40}$")] = Field(
-        None, description="The name of the event"
+    name: Optional[str] = Field(
+        None, description="The name of the event",
+        pattern=r"^[a-zA-Z0-9\-_]{0,40}$"
     )
     icon: Optional[str] = Field(
         None, description="The name of a Material Design Icon to use for the event"
@@ -3001,10 +3007,11 @@ class ExtensionPack(ExtensionPackProvided):
     Extension packs provide new components to the platform
     """
 
-    org_slug: Optional[constr(pattern=r"^[a-zA-Z0-9\-_]{0,100}$")] = Field(
-        None, alias="orgSlug"
+    org_slug: Optional[str] = Field(
+        None, alias="orgSlug",
+        pattern=r"^[a-zA-Z0-9\-_]{0,100}$"
     )
-    slug: Optional[constr(pattern=r"^[a-zA-Z0-9\-_]{0,100}$")] = None
+    slug: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
     name: Optional[str] = None
     description: Optional[str] = None
     public_access: Optional[bool] = Field(None, alias="publicAccess")
@@ -3187,16 +3194,18 @@ class RuleSet(ExtensionPackProvided):
         alias="orgSlug",
         description="The slug of the organization that owns this metadata object",
     )
-    slug: Optional[constr(pattern=r"^[a-zA-Z0-9\-_]{0,255}$")] = Field(
-        None, description="The slug used when referencing this metadata object"
+    slug: Optional[str] = Field(
+        None, description="The slug used when referencing this metadata object",
+        pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
     )
     type: Optional[str] = Field(None, description="The type of metadata object")
     name: Optional[str] = Field(None, description="The name of the object")
     description: Optional[str] = Field(
         None, description="The description of the object"
     )
-    version: Optional[constr(pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$")] = Field(
-        None, description="The version of the object"
+    version: Optional[str] = Field(
+        None, description="The version of the object",
+        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$"
     )
 
     public_access: Optional[bool] = Field(

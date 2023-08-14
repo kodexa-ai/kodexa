@@ -1,4 +1,3 @@
-import io
 import os
 
 from kodexa import get_source
@@ -146,9 +145,9 @@ def test_add_feature():
 
     # Setting a feature with single=False
     # This allows me to set a string as if it was a collection...and later I can't add to it with append.  Not sure that's the desiered behavior
-    new_again = document.content_node.get_children()[0].add_feature('test_2', 'test_2_name', 'sesame_seeds',
-                                                                    single=False,
-                                                                    serialized=False)
+    document.content_node.get_children()[0].add_feature('test_2', 'test_2_name', 'sesame_seeds',
+                                                        single=False,
+                                                        serialized=False)
 
     # This would fail, as the original value 'seasme_seeds' is not a collection, even though it was stated to be one
     # new_again_2 = document.content_node.get_children()[0].add_feature('test_2', 'test_2_name', 'special_sauce')
@@ -244,5 +243,6 @@ def test_get_source():
 
 
 def test_kddb_conversion():
-    document = Document.from_kddb(Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read()).to_kddb())
+    document = Document.from_kddb(
+        Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read()).to_kddb())
     compare_document(document, "news-kdxa-original.json")

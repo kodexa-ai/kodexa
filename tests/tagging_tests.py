@@ -2,7 +2,6 @@ import os
 import uuid
 
 from kodexa import Document, Pipeline, NodeTagger, NodeTagCopy
-from kodexa.model.model import TagInstance, ContentNode
 
 
 def get_test_directory():
@@ -69,7 +68,7 @@ def test_tag_multiple_regex_matches():
 
     # we expect 4 tags to be applied, one for each instance of the word 'little'
     feature_values = context.output_document.get_root().get_feature_values('tag', 'SIZE')
-    assert type(feature_values) == list and len(feature_values) == 4
+    assert type(feature_values) is list and len(feature_values) == 4
     assert feature_values[2]['start'] == 37
     assert feature_values[2]['end'] == 43
 
@@ -133,10 +132,10 @@ def test_tag_copy():
 
     # we should now have 4 feature values for 'LAMB_INFO' and 4 feature values for 'SIZE' - all with different UUIDs
     size_feature_values = context.output_document.get_root().get_feature_values('tag', 'SIZE')
-    assert type(size_feature_values) == list and len(size_feature_values) == 4
+    assert type(size_feature_values) is list and len(size_feature_values) == 4
 
     lamb_info_feature_values = context.output_document.get_root().get_feature_values('tag', 'LAMB_INFO')
-    assert type(lamb_info_feature_values) == list and len(lamb_info_feature_values) == 4
+    assert type(lamb_info_feature_values) is list and len(lamb_info_feature_values) == 4
     lamb_info_features_uuids = set(dic['uuid'] for dic in lamb_info_feature_values)
     assert len(list(lamb_info_features_uuids)) == 4
 
@@ -152,9 +151,9 @@ def test_tag_copy():
 
     # we should now have 1 feature values for 'LAMB_INFO_2' and 1 feature values for 'SIZE_2'
     size_2_feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE_2')
-    assert type(size_2_feature_values) != list
+    assert type(size_2_feature_values) is not list
     lamb_info_2_feature_values = context.output_document.get_root().get_feature_value('tag', 'LAMB_INFO_2')
-    assert type(lamb_info_2_feature_values) != list
+    assert type(lamb_info_2_feature_values) is not list
 
     # now we need to test that when features are related (indicated by the same tag_uuid), they remain related when copying
     document = Document.from_text(doc_string)  # starting with a clean document
@@ -172,12 +171,12 @@ def test_tag_copy():
 
     # The feature values should have the same UUID - for both WOOL_INFO and FLEECE_INFO
     wool_values = context.output_document.get_root().get_feature_values('tag', 'WOOL_INFO')
-    assert type(wool_values) == list and len(wool_values) == 2
+    assert type(wool_values) is list and len(wool_values) == 2
     wool_uuids = set(dic['uuid'] for dic in wool_values)
     assert len(list(wool_uuids)) == 1
 
     fleece_info_values = context.output_document.get_root().get_feature_values('tag', 'FLEECE_INFO')
-    assert type(fleece_info_values) == list and len(fleece_info_values) == 2
+    assert type(fleece_info_values) is list and len(fleece_info_values) == 2
 
 
 def test_tagging_issue_with_html():
@@ -208,7 +207,6 @@ def test_tag_instances():
     doc = Document.open_kddb(f"{get_test_directory()}tag_test.kddb")
     # Get all nodes that have a tag of service address
     for tag in doc.get_tag_instances('Bill/BillService/ServiceAddress'):
-        tag_uuid = tag.tag_uuid
         node_content_list = []
         for node in tag.nodes:
             node_content_list.append(node.get_all_content)
@@ -226,4 +224,4 @@ def test_tag_instance():
     # Add the first two node
     service_address_nodes = doc.content_node.select('//text')[1:]
     doc.add_tag_instance(tag_to_apply='ServiceAddress', node_list=service_address_nodes)
-    tag_instance = doc.get_tag_instance(tag='ServiceAddress')
+    doc.get_tag_instance(tag='ServiceAddress')

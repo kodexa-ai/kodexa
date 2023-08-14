@@ -102,19 +102,19 @@ class ContentException(Dict):
     """A content exception represents an issue identified during labeling or validation at the document level"""
 
     def __init__(
-        self,
-        exception_type: str,
-        message: str,
-        severity: str = "ERROR",
-        tag: Optional[str] = None,
-        group_uuid: Optional[str] = None,
-        tag_uuid: Optional[str] = None,
-        exception_type_id: Optional[str] = None,
-        exception_details: Optional[str] = None,
-        node_uuid: Optional[str] = None,
-        value: Optional[str] = None,
-        *args,
-        **kwargs,
+            self,
+            exception_type: str,
+            message: str,
+            severity: str = "ERROR",
+            tag: Optional[str] = None,
+            group_uuid: Optional[str] = None,
+            tag_uuid: Optional[str] = None,
+            exception_type_id: Optional[str] = None,
+            exception_details: Optional[str] = None,
+            node_uuid: Optional[str] = None,
+            value: Optional[str] = None,
+            *args,
+            **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.tag = tag
@@ -152,24 +152,24 @@ class Tag(Dict):
     """A tag represents the metadata for a label that is applies as a feature on a content node"""
 
     def __init__(
-        self,
-        start: Optional[int] = None,
-        end: Optional[int] = None,
-        value: Optional[str] = None,
-        uuid: Optional[str] = None,
-        data: Any = None,
-        *args,
-        confidence: Optional[float] = None,
-        group_uuid: Optional[str] = None,
-        parent_group_uuid: Optional[str] = None,
-        cell_index: Optional[int] = None,
-        index: Optional[int] = None,
-        bbox: Optional[List[int]] = None,
-        note: Optional[str] = None,
-        status: Optional[str] = None,
-        owner_uri: Optional[str] = None,
-        is_dirty: Optional[bool] = None,
-        **kwargs,
+            self,
+            start: Optional[int] = None,
+            end: Optional[int] = None,
+            value: Optional[str] = None,
+            uuid: Optional[str] = None,
+            data: Any = None,
+            *args,
+            confidence: Optional[float] = None,
+            group_uuid: Optional[str] = None,
+            parent_group_uuid: Optional[str] = None,
+            cell_index: Optional[int] = None,
+            index: Optional[int] = None,
+            bbox: Optional[List[int]] = None,
+            note: Optional[str] = None,
+            status: Optional[str] = None,
+            owner_uri: Optional[str] = None,
+            is_dirty: Optional[bool] = None,
+            **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.start: Optional[int] = start
@@ -260,14 +260,14 @@ class ContentNode(object):
     """
 
     def __init__(
-        self,
-        document,
-        node_type: str,
-        content: Optional[str] = None,
-        content_parts: Optional[List[Any]] = None,
-        parent=None,
-        index: Optional[int] = None,
-        virtual: bool = False,
+            self,
+            document,
+            node_type: str,
+            content: Optional[str] = None,
+            content_parts: Optional[List[Any]] = None,
+            parent=None,
+            index: Optional[int] = None,
+            virtual: bool = False,
     ):
         self.node_type: str = node_type
         """The node type (ie. line, page, cell etc)"""
@@ -330,9 +330,9 @@ class ContentNode(object):
 
     def __eq__(self, other):
         return (
-            other is not None
-            and self.uuid == other.uuid
-            and (self.uuid is not None and other.uuid is not None)
+                other is not None
+                and self.uuid == other.uuid
+                and (self.uuid is not None and other.uuid is not None)
         )
 
     def __hash__(self):
@@ -343,9 +343,9 @@ class ContentNode(object):
 
     def __str__(self):
         return (
-            f"ContentNode {self.uuid} [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) ["
-            + str(self.content)
-            + "]"
+                f"ContentNode {self.uuid} [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) ["
+                + str(self.content)
+                + "]"
         )
 
     def to_json(self):
@@ -416,8 +416,8 @@ class ContentNode(object):
         )
 
         if (
-            "content_parts" in content_node_dict
-            and len(content_node_dict["content_parts"]) > 0
+                "content_parts" in content_node_dict
+                and len(content_node_dict["content_parts"]) > 0
         ):
             new_content_node.set_content_parts(content_node_dict["content_parts"])
 
@@ -446,7 +446,7 @@ class ContentNode(object):
         return new_content_node
 
     def add_child_content(
-        self, node_type: str, content: str, index: Optional[int] = None
+            self, node_type: str, content: str, index: Optional[int] = None
     ) -> "ContentNode":
         """Convenience method to allow you to quick add a child node with a type and content
 
@@ -570,7 +570,7 @@ class ContentNode(object):
         return new_feature
 
     def delete_children(
-        self, nodes: Optional[List] = None, exclude_nodes: Optional[List] = None
+            self, nodes: Optional[List] = None, exclude_nodes: Optional[List] = None
     ):
         """Delete the children of this node, you can either supply a list of the nodes to delete
            or the nodes to exclude from the delete, if neither are supplied then we delete all the children.
@@ -657,14 +657,14 @@ class ContentNode(object):
            True
         """
         return (
-            len(
-                [
-                    i
-                    for i in self.get_features()
-                    if i.feature_type == feature_type and i.name == name
-                ]
-            )
-            > 0
+                len(
+                    [
+                        i
+                        for i in self.get_features()
+                        if i.feature_type == feature_type and i.name == name
+                    ]
+                )
+                > 0
         )
 
     def get_features(self):
@@ -677,7 +677,7 @@ class ContentNode(object):
         return self.document.get_persistence().get_features(self)
 
     def remove_feature(
-        self, feature_type: str, name: str, include_children: bool = False
+            self, feature_type: str, name: str, include_children: bool = False
     ):
         """Removes the feature with the given name and type from this node.
 
@@ -1088,9 +1088,9 @@ class ContentNode(object):
         >>> document.get_root().copy_tag('foo', 'bar')
         """
         if (
-            existing_tag_name is None
-            or new_tag_name is None
-            or existing_tag_name == new_tag_name
+                existing_tag_name is None
+                or new_tag_name is None
+                or existing_tag_name == new_tag_name
         ):
             return  # do nothing, just exit function
 
@@ -1145,12 +1145,12 @@ class ContentNode(object):
         ]
 
     def tag_range(
-        self,
-        start_content_re,
-        end_content_re,
-        tag_to_apply,
-        node_type_re=".*",
-        use_all_content=False,
+            self,
+            start_content_re,
+            end_content_re,
+            tag_to_apply,
+            node_type_re=".*",
+            use_all_content=False,
     ):
         """This will tag all the child nodes between the start and end content regular expressions
 
@@ -1206,27 +1206,27 @@ class ContentNode(object):
             [node.tag(tag_to_apply) for node in all_nodes[start_index:end_index]]
 
     def tag(
-        self,
-        tag_to_apply,
-        selector=".",
-        content_re=None,
-        use_all_content=False,
-        node_only=None,
-        fixed_position=None,
-        data=None,
-        separator=" ",
-        tag_uuid: str = None,
-        confidence=None,
-        value=None,
-        use_match=True,
-        index=None,
-        cell_index=None,
-        group_uuid=None,
-        parent_group_uuid=None,
-        note=None,
-        status=None,
-        owner_uri=None,
-        is_dirty=None,
+            self,
+            tag_to_apply,
+            selector=".",
+            content_re=None,
+            use_all_content=False,
+            node_only=None,
+            fixed_position=None,
+            data=None,
+            separator=" ",
+            tag_uuid: str = None,
+            confidence=None,
+            value=None,
+            use_match=True,
+            index=None,
+            cell_index=None,
+            group_uuid=None,
+            parent_group_uuid=None,
+            note=None,
+            status=None,
+            owner_uri=None,
+            is_dirty=None,
     ):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
@@ -1288,7 +1288,7 @@ class ContentNode(object):
             return str(uuid.uuid4())
 
         def tag_node_position(
-            node_to_check, start, end, node_data, tag_uuid, offset=0, value=None
+                node_to_check, start, end, node_data, tag_uuid, offset=0, value=None
         ):
             """
             This function tags a node position in a given data structure. It iterates over the content parts of the node to check,
@@ -1455,7 +1455,7 @@ class ContentNode(object):
 
         if content_re:
             pattern = re.compile(
-                content_re.replace(" ", "\s+")
+                content_re.replace(" ", r"\s+")
                 if use_all_content and not node_only
                 else content_re
             )
@@ -1609,11 +1609,11 @@ class ContentNode(object):
         return values
 
     def get_related_tag_values(
-        self,
-        tag_name: str,
-        include_children: bool = False,
-        value_separator: str = " ",
-        tag_uuid=None,
+            self,
+            tag_name: str,
+            include_children: bool = False,
+            value_separator: str = " ",
+            tag_uuid=None,
     ):
         """Get the values for a specific tag name, grouped by uuid
 
@@ -1677,16 +1677,16 @@ class ContentNode(object):
         value_strings = []
         for k in value_groups.keys():
             if (
-                value_groups[k]
-                and len(value_groups[k]) > 0
-                and value_groups[k][0] is not None
+                    value_groups[k]
+                    and len(value_groups[k]) > 0
+                    and value_groups[k][0] is not None
             ):
                 value_strings.append(value_separator.join(value_groups[k]))
 
         return value_strings
 
     def get_related_tag_nodes(
-        self, tag_name: str, everywhere: bool = False, tag_uuid=None
+            self, tag_name: str, everywhere: bool = False, tag_uuid=None
     ):
         """Get the nodes for a specific tag name, grouped by uuid
 
@@ -1924,16 +1924,16 @@ class ContentNode(object):
 
         """
         return (
-            self.previous_node(node_type_re=node_type_re, skip_virtual=skip_virtual)
-            is not None
+                self.previous_node(node_type_re=node_type_re, skip_virtual=skip_virtual)
+                is not None
         )
 
     def next_node(
-        self,
-        node_type_re=".*",
-        skip_virtual=False,
-        has_no_content=True,
-        traverse=Traverse.SIBLING,
+            self,
+            node_type_re=".*",
+            skip_virtual=False,
+            has_no_content=True,
+            traverse=Traverse.SIBLING,
     ):
         """Returns the next sibling content node.
 
@@ -1962,8 +1962,9 @@ class ContentNode(object):
 
             if not node:
                 if (
-                    traverse == traverse.ALL or traverse == traverse.PARENT
+                        traverse == traverse.ALL or traverse == traverse.PARENT
                 ) and self.get_parent().get_parent():
+                    # noinspection PyBroadException
                     try:
                         potential_next_node = (
                             self.get_parent()
@@ -1973,7 +1974,8 @@ class ContentNode(object):
                         )
                         if potential_next_node:
                             return potential_next_node
-                    except:
+                    except Exception:
+
                         # traverse additional layer
                         potential_next_node = (
                             self.get_parent()
@@ -1988,7 +1990,7 @@ class ContentNode(object):
                 return node
 
             if compiled_node_type_re.match(node.node_type) and (
-                not skip_virtual or not node.virtual
+                    not skip_virtual or not node.virtual
             ):
                 if (not has_no_content and node.content) or has_no_content:
                     return node
@@ -1996,11 +1998,11 @@ class ContentNode(object):
             search_index += 1
 
     def previous_node(
-        self,
-        node_type_re=".*",
-        skip_virtual=False,
-        has_no_content=False,
-        traverse=Traverse.SIBLING,
+            self,
+            node_type_re=".*",
+            skip_virtual=False,
+            has_no_content=False,
+            traverse=Traverse.SIBLING,
     ):
         """Returns the previous sibling content node.
 
@@ -2022,9 +2024,9 @@ class ContentNode(object):
         # TODO: implement/differentiate traverse logic for CHILDREN and SIBLING
         if self.index == 0:
             if (
-                traverse == traverse.ALL
-                or traverse == traverse.PARENT
-                and self.get_parent()
+                    traverse == traverse.ALL
+                    or traverse == traverse.PARENT
+                    and self.get_parent()
             ):
                 # Lets look for a previous node on the parent
                 return self.get_parent().previous_node(
@@ -2043,7 +2045,7 @@ class ContentNode(object):
                 return node
 
             if compiled_node_type_re.match(node.node_type) and (
-                not skip_virtual or not node.virtual
+                    not skip_virtual or not node.virtual
             ):
                 if (not has_no_content) or (has_no_content and not node.content):
                     return node
@@ -2197,7 +2199,6 @@ class FeatureSetDiff:
             self.second_feature_map,
             exclude_obj_callback=self.exclude_callback,
         ).to_dict()
-        self._changed_nodes = self.get_changed_nodes()
 
     def get_differences(self):
         """
@@ -2210,15 +2211,6 @@ class FeatureSetDiff:
             self._differences.pop("type_changes")
 
         return self._differences
-
-    def get_changed_nodes(self):
-        """
-        Gets the nodes that were changed.
-
-        Returns:
-            dict: A dictionary containing the nodes that were changed.
-        """
-        return self._changed_nodes
 
     def get_exclude_paths(self):
         """
@@ -2378,13 +2370,13 @@ class Document(object):
         self._persistence_layer.replace_exceptions(exceptions)
 
     def __init__(
-        self,
-        metadata=None,
-        content_node: ContentNode = None,
-        source=None,
-        ref: str = None,
-        kddb_path: str = None,
-        delete_on_close=False,
+            self,
+            metadata=None,
+            content_node: ContentNode = None,
+            source=None,
+            ref: str = None,
+            kddb_path: str = None,
+            delete_on_close=False,
     ):
         if metadata is None:
             metadata = DocumentMetadata()
@@ -2833,12 +2825,12 @@ class Document(object):
         self.get_persistence().update_metadata()
 
     def create_node(
-        self,
-        node_type: str,
-        content: Optional[str] = None,
-        virtual: bool = False,
-        parent: ContentNode = None,
-        index: Optional[int] = None,
+            self,
+            node_type: str,
+            content: Optional[str] = None,
+            virtual: bool = False,
+            parent: ContentNode = None,
+            index: Optional[int] = None,
     ):
         """
         Creates a new node for the document.  The new node is not added to the document, but any mixins that have been
@@ -2986,7 +2978,7 @@ class Document(object):
         return result[0] if len(result) > 0 else None
 
     def select(
-        self, selector: str, variables: Optional[dict] = None
+            self, selector: str, variables: Optional[dict] = None
     ) -> List[ContentNode]:
         """Execute a selector on the root node and then return a list of the matching nodes.
 
@@ -3036,8 +3028,8 @@ class Document(object):
                 if feature.feature_type == "tag":
                     if owner_uri is not None:
                         if (
-                            "owner_uri" in feature.value[0]
-                            and feature.value[0]["owner_uri"] != owner_uri
+                                "owner_uri" in feature.value[0]
+                                and feature.value[0]["owner_uri"] != owner_uri
                         ):
                             continue
 
@@ -3106,7 +3098,7 @@ class ContentObjectReference:
     """ """
 
     def __init__(
-        self, content_object: ContentObject, store, document: Document, document_family
+            self, content_object: ContentObject, store, document: Document, document_family
     ):
         self.content_object = content_object
         self.store = store

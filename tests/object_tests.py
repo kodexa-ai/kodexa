@@ -1,4 +1,3 @@
-from kodexa.model.objects import Store
 from kodexa.platform.client import StoreEndpoint
 
 

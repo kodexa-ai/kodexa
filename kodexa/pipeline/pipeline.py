@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-import sys
 import time
-import traceback
 import uuid
 from inspect import signature
 from textwrap import dedent
@@ -305,9 +303,10 @@ class PipelineStep:
         """
 
         start = time.perf_counter()
+        # noinspection PyBroadException
         try:
             context.set_current_document(document)
-            logger.info(f"Starting step")
+            logger.info("Starting step")
             if str(type(self.step)) == "<class 'type'>":
                 logger.info(f"Starting step based on class {self.step}")
 
@@ -340,8 +339,8 @@ class PipelineStep:
             logger.info(f"Step completed (f{end - start:0.4f}s)")
 
             return result_document
-        except:
-            logger.warning("Step failed")
+        except Exception as e:
+            logger.warning(f"Step failed [{e}]")
             if context.stop_on_exception:
                 raise
 
@@ -519,9 +518,10 @@ class Pipeline:
         configuration_steps = []
 
         for step in self.steps:
+            # noinspection PyBroadException
             try:
                 configuration_steps.append(step.to_dict())
-            except:
+            except Exception:
                 pass
 
         return yaml.dump(configuration_steps)
