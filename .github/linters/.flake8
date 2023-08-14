@@ -1,5 +1,6 @@
 [flake8]
 max-line-length = 250
+extend-ignore = E203
 max-complexity = 60
 per-file-ignores =
     ./kodexa/selectors/parsetab.py: E231,E501,E713
