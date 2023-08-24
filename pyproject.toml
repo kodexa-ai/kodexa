@@ -44,6 +44,8 @@ flake8 = "^6.0.0"
 pandas = "1.4.3"
 setuptools = "^65.5.1"
 black = "^23.7.0"
+mkdocstrings = "^0.22.0"
+mkdocstrings-python = "^1.5.1"
 
 [build-system]
 requires = ["poetry-core"]

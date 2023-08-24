@@ -1,0 +1,2 @@
+::: kodexa.platform.client.DocumentStoreEndpoint
+    
