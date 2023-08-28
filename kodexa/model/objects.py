@@ -1522,6 +1522,20 @@ class Taxon(KodexaBaseModel):
         alias="defaultAttributeStatusId",
         description="Default attribute status ID",
     )
+    semantic_definition: Optional[str] = Field(
+        None,
+        alias="semanticDefinition",
+        description="The semantic definition of the taxon",
+    )
+    examples: Optional[List[str]] = Field(
+        None,
+        description="A list of examples of the taxon values, used to understand the taxon",
+    )
+
+    synonyms: Optional[List[str]] = Field(
+        None,
+        description="A list of synonyms of the taxon values, used to understand the taxon",
+    )
 
 
 class ContentObject(KodexaBaseModel):
