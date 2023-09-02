@@ -101,6 +101,7 @@ class CompletePasswordReset(KodexaBaseModel):
 class Organization(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     name: str
@@ -113,6 +114,7 @@ class Organization(KodexaBaseModel):
 class Team(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     name: Optional[str] = None
@@ -670,6 +672,7 @@ class StatusType2(Enum):
 class DocumentStatus(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     color: Optional[str] = None
@@ -693,6 +696,7 @@ class DocumentTransition(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     unknown_fields: Optional[Dict[str, str]] = Field(None, alias="unknownFields")
@@ -782,6 +786,7 @@ class Label(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     name: str
@@ -824,6 +829,7 @@ class State1(Enum):
 class Session(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     token: Optional[str] = None
@@ -893,6 +899,7 @@ class DataException(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     message: str
@@ -969,6 +976,7 @@ class DataFormProviderExchange(KodexaBaseModel):
 class PlatformConfiguration(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     welcome_markdown: Optional[str] = Field(None, alias="welcomeMarkdown")
@@ -1064,6 +1072,7 @@ class Status6(Enum):
 class ExecutionLogEntry(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     log_date: Optional[StandardDateTime] = Field(None, alias="logDate")
@@ -1146,22 +1155,6 @@ class SortObject(KodexaBaseModel):
     sorted: Optional[bool] = None
 
 
-class StoreStatistics(KodexaBaseModel):
-    """
-    Statistics for the contents of the store instance
-    """
-
-    id: Optional[str] = Field(None, description="The ID of the object")
-    uuid: Optional[str] = None
-    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
-    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
-    statistic_name: Optional[str] = Field(None, alias="statisticName")
-    label: Optional[str] = None
-    count: Optional[int] = None
-    size: Optional[int] = None
-    point_in_time: Optional[StandardDateTime] = Field(None, alias="pointInTime")
-
-
 class SearchEntity(KodexaBaseModel):
     """
     Entities identified in search content
@@ -1207,6 +1200,7 @@ class User(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     email: str
@@ -1541,6 +1535,7 @@ class Taxon(KodexaBaseModel):
 class ContentObject(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     content_type: ContentType = Field(
@@ -1565,6 +1560,7 @@ class DocumentAssignment(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     user: User
@@ -1612,6 +1608,7 @@ class ExecutionStep(KodexaBaseModel):
 class ProjectStatus(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     status: Optional[str] = Field(None, description="The status of the project")
@@ -1623,6 +1620,7 @@ class ProjectStatus(KodexaBaseModel):
 class Project(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     organization: Optional[Organization] = None
@@ -1694,6 +1692,7 @@ class WorkspaceStorage(KodexaBaseModel):
 class Workspace(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the workspace")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     project: Optional[Project] = None
@@ -1716,6 +1715,7 @@ class ProjectWorkspace(KodexaBaseModel):
 class Channel(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the channel")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     workspace: Optional[Workspace] = None
@@ -1737,6 +1737,7 @@ class MessageFeedback(KodexaBaseModel):
 class Message(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the message")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     channel: Optional[Channel] = None
@@ -1751,6 +1752,7 @@ class Message(KodexaBaseModel):
 class DataAttribute(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     value: Optional[str] = None
@@ -1786,6 +1788,7 @@ class DataAttribute(KodexaBaseModel):
 class Note(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     user: Optional[User] = None
@@ -1799,6 +1802,7 @@ class Role(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     name: str
@@ -1809,6 +1813,7 @@ class Role(KodexaBaseModel):
 class Membership(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     role: Optional[Role1] = None
@@ -1847,19 +1852,6 @@ class PageModelTraining(KodexaBaseModel):
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
     content: Optional[List[ModelTraining]] = None
-    number: Optional[int] = None
-
-    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
-    first: Optional[bool] = None
-    last: Optional[bool] = None
-    empty: Optional[bool] = None
-
-
-class PageStoreStatistics(KodexaBaseModel):
-    total_pages: Optional[int] = Field(None, alias="totalPages")
-    total_elements: Optional[int] = Field(None, alias="totalElements")
-    size: Optional[int] = None
-    content: Optional[List[StoreStatistics]] = None
     number: Optional[int] = None
 
     number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
@@ -2094,6 +2086,7 @@ class ContentException(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     tag: Optional[str] = None
@@ -2136,6 +2129,7 @@ class PageUser(KodexaBaseModel):
 class Execution(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     description: Optional[str] = None
@@ -2161,6 +2155,7 @@ class Execution(KodexaBaseModel):
 class ExecutionSnapshot(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     description: Optional[str] = None
@@ -2237,6 +2232,7 @@ class DocumentFamily(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     document_status: Optional[DocumentStatus] = Field(None, alias="documentStatus")
@@ -2315,6 +2311,7 @@ class DocumentFamilyStatistics(KodexaBaseModel):
 class ExecutionAssistant(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     subscription: Optional[str] = None
@@ -2343,6 +2340,7 @@ class ExecutionOverview(KodexaBaseModel):
 class DataObject(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
@@ -2365,6 +2363,7 @@ class DataObject(KodexaBaseModel):
 class Assistant(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     subscription: Optional[str] = None
@@ -2457,6 +2456,7 @@ class ChannelEvent(KodexaBaseModel):
 class ExecutionEvent(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     type: Type1
@@ -2525,6 +2525,7 @@ class SearchContent(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     store: Optional[StoreMetadata] = None
@@ -2590,6 +2591,7 @@ class StoreMetadata(KodexaBaseModel):
 class PlatformEvent(KodexaBaseModel):
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     date_time: Optional[StandardDateTime] = Field(None, alias="dateTime")
@@ -2626,6 +2628,7 @@ class AuditEvent(KodexaBaseModel):
 
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     platform_user: Optional[User] = Field(None, alias="platformUser")

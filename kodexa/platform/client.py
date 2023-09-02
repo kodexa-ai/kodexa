@@ -4066,7 +4066,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = (
             f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/status"
         )
-        self.client.put(url, body=document_status.dict(by_alias=True))
+        self.client.put(url, body=document_status.model_dump(by_alias=True))
 
     def add_document(
             self, document: Document, content_object: Optional[ContentObject] = None
