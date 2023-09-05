@@ -4754,10 +4754,13 @@ class DocumentStoreEndpoint(StoreEndpoint):
         if replace and self.client.exists(
                 f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
         ):
-            self.client.delete(
-                f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
-            )
-            logger.info(f"Deleting {path}")
+            try:
+                self.client.delete(
+                    f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
+                )
+                logger.info(f"Deleting {path}")
+            except Exception as e:
+                logger.info(f"No file to replace. Continuing upload. Error: {e}")
 
         content_object_response = self.client.post(
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
