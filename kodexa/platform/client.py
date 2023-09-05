@@ -21,6 +21,7 @@ import requests
 from functional import seq
 from pydantic import BaseModel, Field
 from pydantic_yaml import to_yaml_str
+from typing_extensions import deprecated
 
 from kodexa.model import Document
 from kodexa.model.base import BaseEntity
@@ -275,7 +276,11 @@ class ProjectResourceEndpoint(ClientEndpoint):
             df.drop(columns="client", axis=1)
         return df
 
+    @deprecated
     def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        return self.stream(query, sort=sort, filters=filters)
+
+    def stream(self, query="*", sort=None, filters: List[str] = None):
         """
         Stream the list of resources.
 
@@ -446,16 +451,20 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             return None
         return component_page.content[0]
 
+    @deprecated
     def stream_list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query="*", sort=None, filters: List[str] = None
+    ):
+        return self.stream(query, sort, filters)
+
+    def stream(
+            self, query="*", sort=None, filters: List[str] = None
     ):
         """
-        Stream a list of components.
+        Stream components matching query, sort and filters.
 
         Args:
             query (str, optional): The query string.
-            page (int, optional): The page number.
-            page_size (int, optional): The size of the page.
             sort (str, optional): The sort order.
             filters (List[str], optional): The list of filters.
 
@@ -466,8 +475,6 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
 
         params = {
             "query": requests.utils.quote(query),
-            "page": page,
-            "pageSize": page_size,
         }
 
         if sort is not None:
@@ -486,9 +493,9 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             # Yield each endpoint in the current page
             for endpoint in (
                     self.get_page_class(list_response.json())
-                        .model_validate(list_response.json())
-                        .set_client(self.client)
-                        .to_endpoints()
+                            .model_validate(list_response.json())
+                            .set_client(self.client)
+                            .to_endpoints()
             ):
                 yield endpoint
 
@@ -683,7 +690,11 @@ class EntitiesEndpoint:
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
 
+    @deprecated
     def stream_list(self, query="*", sort=None, filters: List[str] = None):
+        return self.stream(query, sort=sort, filters=filters)
+
+    def stream(self, query="*", sort=None, filters: List[str] = None):
         """Stream the list of resources.
 
         Args:
@@ -4561,7 +4572,7 @@ class DataStoreEndpoint(StoreEndpoint):
         Args:
             path (str): The parent taxon ("/" is root)
             page_number (int): The page number to get. Defaults to 1
-            page_size (int): The size of the page. Defaults to 5000
+            page_size (int): The size of the page. Defaults to 20
             query (str): The query to limit results. Defaults to "*"
             document_family (Optional[DocumentFamily): The document family to limit results to
             parent_id (Optional[str]): The parent ID to limit results to
