@@ -5872,8 +5872,10 @@ class KodexaClient:
                 "content-type": "application/json",
             },
         )
-        if response.status_code == 200 or response.status_code == 404:
+        if response.status_code == 200:
             return True
+        if response.status_code == 404:
+            return False
 
         process_response(response)
 
