@@ -3,12 +3,24 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyUrl, Field, RootModel
+from pydantic import AnyUrl, Field, RootModel, BaseModel, ConfigDict
 
-from kodexa.model.base import KodexaBaseModel, StandardDateTime
+from kodexa.model.base import StandardDateTime
 
 
-class ExceptionResponse(KodexaBaseModel):
+class ExceptionResponse(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     date_time: Optional[StandardDateTime] = Field(None, alias="dateTime")
     message: Optional[str] = None
     incident_id: Optional[str] = Field(None, alias="incidentId")
@@ -20,12 +32,30 @@ class ExceptionResponse(KodexaBaseModel):
     )
 
 
-class StatusType(KodexaBaseModel):
+class StatusType(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     reason_phrase: Optional[str] = Field(None, alias="reasonPhrase")
     status_code: Optional[int] = Field(None, alias="statusCode")
 
 
-class StackTraceItem(KodexaBaseModel):
+class StackTraceItem(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     class_loader_name: Optional[str] = Field(None, alias="classLoaderName")
     module_name: Optional[str] = Field(None, alias="moduleName")
     module_version: Optional[str] = Field(None, alias="moduleVersion")
@@ -36,7 +66,13 @@ class StackTraceItem(KodexaBaseModel):
     class_name: Optional[str] = Field(None, alias="className")
 
 
-class StackTraceItem1(KodexaBaseModel):
+class StackTraceItem1(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     class_loader_name: Optional[str] = Field(None, alias="classLoaderName")
     module_name: Optional[str] = Field(None, alias="moduleName")
     module_version: Optional[str] = Field(None, alias="moduleVersion")
@@ -47,13 +83,25 @@ class StackTraceItem1(KodexaBaseModel):
     class_name: Optional[str] = Field(None, alias="className")
 
 
-class Cause(KodexaBaseModel):
+class Cause(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     stack_trace: Optional[List[StackTraceItem1]] = Field(None, alias="stackTrace")
     message: Optional[str] = None
     localized_message: Optional[str] = Field(None, alias="localizedMessage")
 
 
-class StackTraceItem2(KodexaBaseModel):
+class StackTraceItem2(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     class_loader_name: Optional[str] = Field(None, alias="classLoaderName")
     module_name: Optional[str] = Field(None, alias="moduleName")
     module_version: Optional[str] = Field(None, alias="moduleVersion")
@@ -64,14 +112,26 @@ class StackTraceItem2(KodexaBaseModel):
     class_name: Optional[str] = Field(None, alias="className")
 
 
-class SuppressedItem(KodexaBaseModel):
+class SuppressedItem(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     cause: Optional[Cause] = None
     stack_trace: Optional[List[StackTraceItem2]] = Field(None, alias="stackTrace")
     message: Optional[str] = None
     localized_message: Optional[str] = Field(None, alias="localizedMessage")
 
 
-class ThrowableProblem(KodexaBaseModel):
+class ThrowableProblem(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     cause: Optional[ThrowableProblem] = None
     stack_trace: Optional[List[StackTraceItem]] = Field(None, alias="stackTrace")
     message: Optional[str] = None
@@ -85,20 +145,44 @@ class ThrowableProblem(KodexaBaseModel):
     localized_message: Optional[str] = Field(None, alias="localizedMessage")
 
 
-class FavoriteLink(KodexaBaseModel):
+class FavoriteLink(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     link: Optional[str] = None
 
 
-class UserStorage(KodexaBaseModel):
+class UserStorage(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     favorite_links: Optional[List[FavoriteLink]] = Field(None, alias="favoriteLinks")
 
 
-class CompletePasswordReset(KodexaBaseModel):
+class CompletePasswordReset(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     reset_token: str = Field(..., alias="resetToken")
     password: str
 
 
-class Organization(KodexaBaseModel):
+class Organization(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -111,7 +195,13 @@ class Organization(KodexaBaseModel):
     has_image: Optional[bool] = Field(None, alias="hasImage")
 
 
-class Team(KodexaBaseModel):
+class Team(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -122,7 +212,13 @@ class Team(KodexaBaseModel):
     organization: Optional[Organization] = None
 
 
-class AssistantImplementation(KodexaBaseModel):
+class AssistantImplementation(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The implementation of the assistant
     """
@@ -131,7 +227,13 @@ class AssistantImplementation(KodexaBaseModel):
     class_: Optional[str] = Field(None, alias="class")
 
 
-class AssistantTaxonomy(KodexaBaseModel):
+class AssistantTaxonomy(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Taxonomies that the assistant uses
     """
@@ -139,19 +241,37 @@ class AssistantTaxonomy(KodexaBaseModel):
     ref: Optional[str] = None
 
 
-class Avatar(KodexaBaseModel):
+class Avatar(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     icon: Optional[str] = None
     icon_group: Optional[str] = Field(None, alias="iconGroup")
 
 
-class Card(KodexaBaseModel):
+class Card(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = None
     type: Optional[str] = Field(None, description="The type of the card")
     properties: Optional[Dict[str, Any]] = None
     children: Optional[List[Card]] = None
 
 
-class ColumnState(KodexaBaseModel):
+class ColumnState(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     field: Optional[str] = None
     title: Optional[str] = None
     cell: Optional[str] = None
@@ -161,12 +281,24 @@ class ColumnState(KodexaBaseModel):
     resizeable: Optional[bool] = None
 
 
-class ContainerResources(KodexaBaseModel):
+class ContainerResources(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     memory: Optional[str] = None
     cpu: Optional[str] = None
 
 
-class ContentMetadata(KodexaBaseModel):
+class ContentMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The metadata for this store
     """
@@ -174,7 +306,13 @@ class ContentMetadata(KodexaBaseModel):
     type: Optional[str] = None
 
 
-class DashboardWidget(KodexaBaseModel):
+class DashboardWidget(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = None
     name: Optional[str] = None
     type: Optional[str] = None
@@ -182,14 +320,26 @@ class DashboardWidget(KodexaBaseModel):
     children: Optional[List[DashboardWidget]] = None
 
 
-class DataFormSource(KodexaBaseModel):
+class DataFormSource(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = None
     name: Optional[str] = None
     type: Optional[str] = None
     properties: Optional[Dict[str, Any]] = None
 
 
-class DataFormView(KodexaBaseModel):
+class DataFormView(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = None
     data_object_subscription: Optional[str] = Field(
         None, alias="dataObjectSubscription"
@@ -207,14 +357,26 @@ class DeploymentType(Enum):
     none = "NONE"
 
 
-class DocumentColumn(KodexaBaseModel):
+class DocumentColumn(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     label: Optional[str] = Field(
         None, description="The label to use for the column heading"
     )
     path: Optional[str] = Field(None, description="The path to the data")
 
 
-class DocumentMetadataProperty(KodexaBaseModel):
+class DocumentMetadataProperty(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     name: Optional[str] = None
     values: Optional[List[Dict[str, Any]]] = None
     query_available: Optional[bool] = Field(None, alias="queryAvailable")
@@ -232,16 +394,34 @@ class Status(Enum):
     deployment_failed = "DEPLOYMENT_FAILED"
 
 
-class ExtensionPackSource(KodexaBaseModel):
+class ExtensionPackSource(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = None
 
 
-class MatchLabel(KodexaBaseModel):
+class MatchLabel(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     label: Optional[str] = None
     value: Optional[str] = None
 
 
-class MetadataTag(KodexaBaseModel):
+class MetadataTag(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A list of associated tags
     """
@@ -274,7 +454,13 @@ class DeploymentType1(Enum):
     container = "CONTAINER"
 
 
-class OverlayCondition(KodexaBaseModel):
+class OverlayCondition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     pass
 
 
@@ -287,7 +473,13 @@ class StepType(Enum):
     model = "MODEL"
 
 
-class PipelineStepMetadata(KodexaBaseModel):
+class PipelineStepMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The metadata for the steps in this pipeline
     """
@@ -302,13 +494,25 @@ class PipelineStepMetadata(KodexaBaseModel):
     )
 
 
-class PossibleValue(KodexaBaseModel):
+class PossibleValue(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     label: Optional[str] = None
     value: Optional[Any] = None
     description: Optional[str] = None
 
 
-class ProjectDashboard(KodexaBaseModel):
+class ProjectDashboard(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The dashboards that will be created with the project template
     """
@@ -334,7 +538,13 @@ class StorePurpose(Enum):
     training = "TRAINING"
 
 
-class ProjectStore(KodexaBaseModel):
+class ProjectStore(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The stores that will be created with the project template
     """
@@ -388,7 +598,13 @@ class Purpose(Enum):
     source = "SOURCE"
 
 
-class RelatedTaxon(KodexaBaseModel):
+class RelatedTaxon(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A list of relationships to other taxons and the purpose of the relationship
     """
@@ -398,7 +614,13 @@ class RelatedTaxon(KodexaBaseModel):
     priority: Optional[int] = None
 
 
-class ScheduleDefinition(KodexaBaseModel):
+class ScheduleDefinition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The default schedules that the assistant has
     """
@@ -409,7 +631,13 @@ class ScheduleDefinition(KodexaBaseModel):
     next_event: Optional[StandardDateTime] = Field(None, alias="nextEvent")
 
 
-class SelectionOption(KodexaBaseModel):
+class SelectionOption(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     If data type is SELECTION, this is the list of available options
     """
@@ -419,7 +647,13 @@ class SelectionOption(KodexaBaseModel):
     description: Optional[str] = None
 
 
-class SlugBasedMetadata1(KodexaBaseModel):
+class SlugBasedMetadata1(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     ref: Optional[str] = Field(None, description="The reference to the metadata object")
     template: Optional[bool] = Field(
         None,
@@ -434,8 +668,9 @@ class SlugBasedMetadata1(KodexaBaseModel):
         description="The slug of the organization that owns this metadata object",
     )
     slug: str = Field(
-        ..., description="The slug used when referencing this metadata object",
-        pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
+        ...,
+        description="The slug used when referencing this metadata object",
+        pattern=r"^[a-zA-Z0-9\-_]{0,255}$",
     )
     type: str = Field(..., description="The type of metadata object")
     name: str = Field(..., description="The name of the object")
@@ -443,8 +678,9 @@ class SlugBasedMetadata1(KodexaBaseModel):
         None, description="The description of the object"
     )
     version: Optional[str] = Field(
-        None, description="The version of the object",
-        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$"
+        None,
+        description="The version of the object",
+        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$",
     )
     deployed: Optional[StandardDateTime] = Field(
         None,
@@ -478,7 +714,13 @@ class SlugBasedMetadata1(KodexaBaseModel):
     )
 
 
-class StepImplementation(KodexaBaseModel):
+class StepImplementation(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     package: Optional[str] = None
     class_: Optional[str] = Field(None, alias="class")
 
@@ -503,7 +745,13 @@ class StorePurpose1(Enum):
     training = "TRAINING"
 
 
-class StoreViewOptions(KodexaBaseModel):
+class StoreViewOptions(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Options for viewing this store
     """
@@ -525,7 +773,13 @@ class StoreViewOptions(KodexaBaseModel):
     )
 
 
-class OptionTab(KodexaBaseModel):
+class OptionTab(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     name: Optional[str] = None
     description: Optional[str] = None
     icon: Optional[str] = None
@@ -588,7 +842,13 @@ class TaxonomyType1(Enum):
     model = "MODEL"
 
 
-class ViewPreset(KodexaBaseModel):
+class ViewPreset(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     View presets that have been saved for this store
     """
@@ -599,13 +859,25 @@ class ViewPreset(KodexaBaseModel):
     enabled_taxons: Optional[Dict[str, bool]] = Field(None, alias="enabledTaxons")
 
 
-class ReprocessRequest(KodexaBaseModel):
+class ReprocessRequest(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     assistant_ids: Optional[List[str]] = Field(None, alias="assistantIds")
     family_ids: Optional[List[str]] = Field(None, alias="familyIds")
     all: Optional[bool] = None
 
 
-class AssistantSchedule(KodexaBaseModel):
+class AssistantSchedule(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = None
     cron_expression: Optional[str] = Field(None, alias="cronExpression")
     last_event: Optional[StandardDateTime] = Field(None, alias="lastEvent")
@@ -618,7 +890,13 @@ class StatusType1(Enum):
     resolved = "RESOLVED"
 
 
-class AttributeStatus(KodexaBaseModel):
+class AttributeStatus(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -649,7 +927,13 @@ class ActorType(Enum):
     api = "API"
 
 
-class DocumentActor(KodexaBaseModel):
+class DocumentActor(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Provides the definition of an actor in a transition
     """
@@ -669,7 +953,13 @@ class StatusType2(Enum):
     resolved = "RESOLVED"
 
 
-class DocumentStatus(KodexaBaseModel):
+class DocumentStatus(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -689,7 +979,13 @@ class TransitionType(Enum):
     derived = "DERIVED"
 
 
-class DocumentTransition(KodexaBaseModel):
+class DocumentTransition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Provides the definition of a transition for a document, where a change was applied by an assistant, user or external process
     """
@@ -765,7 +1061,13 @@ class Type(Enum):
     data_store = "DATA_STORE"
 
 
-class ExecutionTarget(KodexaBaseModel):
+class ExecutionTarget(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[Type] = None
     ref: Optional[str] = None
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
@@ -775,11 +1077,23 @@ class ExecutionTarget(KodexaBaseModel):
     labels_to_apply: Optional[List[str]] = Field(None, alias="labelsToApply")
 
 
-class ExecutionTargets(KodexaBaseModel):
+class ExecutionTargets(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     instances: Optional[List[ExecutionTarget]] = None
 
 
-class Label(KodexaBaseModel):
+class Label(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The labels from the latest content object in the family
     """
@@ -794,7 +1108,13 @@ class Label(KodexaBaseModel):
     label: str
 
 
-class ProjectTag(KodexaBaseModel):
+class ProjectTag(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A project tag
     """
@@ -804,7 +1124,13 @@ class ProjectTag(KodexaBaseModel):
     color: Optional[str] = None
 
 
-class PathExtractedData(KodexaBaseModel):
+class PathExtractedData(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = None
     taxonomy_id: Optional[str] = Field(None, alias="taxonomyId")
     path: Optional[str] = None
@@ -813,11 +1139,23 @@ class PathExtractedData(KodexaBaseModel):
     exception_count: Optional[int] = Field(None, alias="exceptionCount")
 
 
-class ProjectMemory(KodexaBaseModel):
+class ProjectMemory(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     recent_filters: Optional[Dict[str, List[str]]] = Field(None, alias="recentFilters")
 
 
-class ProjectMetadata(KodexaBaseModel):
+class ProjectMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     tags: Optional[List[str]] = Field(default_factory=list, set=True)
 
 
@@ -826,7 +1164,13 @@ class State1(Enum):
     closed = "CLOSED"
 
 
-class Session(KodexaBaseModel):
+class Session(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -848,7 +1192,13 @@ class Status4(Enum):
     pending_reprocessing = "PENDING_REPROCESSING"
 
 
-class StatusDetails(KodexaBaseModel):
+class StatusDetails(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     status: Optional[Status4] = None
     message: Optional[str] = None
     detail: Optional[str] = None
@@ -856,7 +1206,13 @@ class StatusDetails(KodexaBaseModel):
     progress: Optional[int] = None
 
 
-class ValidationError(KodexaBaseModel):
+class ValidationError(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -866,33 +1222,69 @@ class ValidationError(KodexaBaseModel):
     description: Optional[str] = None
 
 
-class ValidationResults(KodexaBaseModel):
+class ValidationResults(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     instances: Optional[List[ValidationError]] = None
 
 
-class BulkCopy(KodexaBaseModel):
+class BulkCopy(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     target_store_ref: Optional[str] = Field(None, alias="targetStoreRef")
     all: Optional[bool] = None
     document_family_ids: Optional[List[str]] = Field(None, alias="documentFamilyIds")
 
 
-class FamilyRename(KodexaBaseModel):
+class FamilyRename(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     path: str
 
 
-class ContentFeature(KodexaBaseModel):
+class ContentFeature(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     feature_type: Optional[str] = Field(None, alias="featureType")
     name: Optional[str] = None
     value: Optional[List[Dict[str, Any]]] = None
     single: Optional[bool] = None
 
 
-class NodeFeatures(KodexaBaseModel):
+class NodeFeatures(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     node_uuid: Optional[str] = Field(None, alias="nodeUuid")
     features: Optional[List[ContentFeature]] = None
 
 
-class DataException(KodexaBaseModel):
+class DataException(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A data exception
     """
@@ -913,19 +1305,37 @@ class DataException(KodexaBaseModel):
     data_object_id: Optional[str] = Field(None, alias="dataObjId")
 
 
-class DataLineage(KodexaBaseModel):
+class DataLineage(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     store_ref: Optional[str] = Field(None, alias="storeRef")
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
     execution_id: Optional[str] = Field(None, alias="executionId")
     content_object_id: Optional[str] = Field(None, alias="contentObjectId")
 
 
-class WorkflowDefinition(KodexaBaseModel):
+class WorkflowDefinition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     description: Optional[str] = None
     definition_xml: Optional[str] = Field(None, alias="definitionXml")
 
 
-class ProjectResourcesUpdate(KodexaBaseModel):
+class ProjectResourcesUpdate(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     taxonomy_refs: Optional[List[str]] = Field(None, alias="taxonomyRefs")
     store_refs: Optional[List[str]] = Field(None, alias="storeRefs")
     dashboard_refs: Optional[List[str]] = Field(None, alias="dashboardRefs")
@@ -945,7 +1355,13 @@ class DeploymentType2(Enum):
     none = "NONE"
 
 
-class DeploymentOptions(KodexaBaseModel):
+class DeploymentOptions(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     deployment_type: Optional[DeploymentType2] = Field(None, alias="deploymentType")
     max_replicas: Optional[int] = Field(None, alias="maxReplicas")
     min_replicas: Optional[int] = Field(None, alias="minReplicas")
@@ -962,18 +1378,36 @@ class SourceType(Enum):
     fixed = "FIXED"
 
 
-class DataFormSourceParameter(KodexaBaseModel):
+class DataFormSourceParameter(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     name: Optional[str] = None
     required: Optional[bool] = None
 
 
-class DataFormProviderExchange(KodexaBaseModel):
+class DataFormProviderExchange(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     method: Optional[str] = None
     parameters: Optional[Dict[str, Any]] = None
     payload: Optional[Dict[str, Any]] = None
 
 
-class PlatformConfiguration(KodexaBaseModel):
+class PlatformConfiguration(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1001,13 +1435,25 @@ class PlatformConfiguration(KodexaBaseModel):
     fallback_feature_flags: Optional[str] = Field(None, alias="fallbackFeatureFlags")
 
 
-class UserActivation(KodexaBaseModel):
+class UserActivation(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     first_name: Optional[str] = Field(None, alias="firstName")
     last_name: Optional[str] = Field(None, alias="lastName")
     password: Optional[str] = None
 
 
-class ModelTraining(KodexaBaseModel):
+class ModelTraining(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     name: Optional[str] = None
@@ -1041,7 +1487,13 @@ class Status5(Enum):
     pending_reprocessing = "PENDING_REPROCESSING"
 
 
-class BaseEvent1(KodexaBaseModel):
+class BaseEvent1(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = Field(None, description="The type of the event")
 
 
@@ -1069,7 +1521,13 @@ class Status6(Enum):
     pending_reprocessing = "PENDING_REPROCESSING"
 
 
-class ExecutionLogEntry(KodexaBaseModel):
+class ExecutionLogEntry(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1079,27 +1537,57 @@ class ExecutionLogEntry(KodexaBaseModel):
     entry: Optional[str] = None
 
 
-class LoginRequest(KodexaBaseModel):
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     email: str
     password: str
 
 
-class RegisterUser(KodexaBaseModel):
+class RegisterUser(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     email: str
     first_name: str = Field(..., alias="firstName")
     last_name: str = Field(..., alias="lastName")
 
 
-class PasswordReset(KodexaBaseModel):
+class PasswordReset(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     email: str
 
 
-class PasswordChange(KodexaBaseModel):
+class PasswordChange(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     old_password: str = Field(..., alias="oldPassword")
     new_password: str = Field(..., alias="newPassword")
 
 
-class PlatformOverview(KodexaBaseModel):
+class PlatformOverview(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Provides details on the version, build and environment that is currently running
     """
@@ -1137,7 +1625,13 @@ class PlatformOverview(KodexaBaseModel):
     )
 
 
-class QueryContext(KodexaBaseModel):
+class QueryContext(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     page_size: Optional[int] = Field(
         None, alias="pageSize", description="Page size (default 20)"
     )
@@ -1149,13 +1643,25 @@ class QueryContext(KodexaBaseModel):
     )
 
 
-class SortObject(KodexaBaseModel):
+class SortObject(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     empty: Optional[bool] = None
     unsorted: Optional[bool] = None
     sorted: Optional[bool] = None
 
 
-class SearchEntity(KodexaBaseModel):
+class SearchEntity(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Entities identified in search content
     """
@@ -1173,7 +1679,13 @@ class EventType(Enum):
     updated = "UPDATED"
 
 
-class DataAttributeValues(KodexaBaseModel):
+class DataAttributeValues(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     value: Optional[str] = None
     truncated: Optional[bool] = None
     tag: str
@@ -1188,12 +1700,24 @@ class DataAttributeValues(KodexaBaseModel):
     confidence: Optional[float] = None
 
 
-class BulkDelete(KodexaBaseModel):
+class BulkDelete(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     all: Optional[bool] = None
     document_family_ids: Optional[List[str]] = Field(None, alias="documentFamilyIds")
 
 
-class User(KodexaBaseModel):
+class User(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A user within the Kodexa platform
     """
@@ -1217,7 +1741,13 @@ class User(KodexaBaseModel):
     show_developer_tools: Optional[bool] = Field(None, alias="showDeveloperTools")
 
 
-class DeploymentMetadata(KodexaBaseModel):
+class DeploymentMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     deployment_type: Optional[DeploymentType] = Field(None, alias="deploymentType")
     min_replicas: Optional[int] = Field(None, alias="minReplicas")
     max_replicas: Optional[int] = Field(None, alias="maxReplicas")
@@ -1243,13 +1773,25 @@ class DockerSource(ExtensionPackSource):
     location: Optional[str] = None
 
 
-class DocumentMetadataDefaults(KodexaBaseModel):
+class DocumentMetadataDefaults(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     document_metadata_properties: Optional[List[DocumentMetadataProperty]] = Field(
         None, alias="documentMetadataProperties"
     )
 
 
-class ExtensionPackProvided(KodexaBaseModel):
+class ExtensionPackProvided(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     ref: Optional[str] = Field(None, description="The reference to the metadata object")
     template: Optional[bool] = Field(
         None,
@@ -1264,8 +1806,9 @@ class ExtensionPackProvided(KodexaBaseModel):
         description="The slug of the organization that owns this metadata object",
     )
     slug: str = Field(
-        ..., description="The slug used when referencing this metadata object",
-        pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
+        ...,
+        description="The slug used when referencing this metadata object",
+        pattern=r"^[a-zA-Z0-9\-_]{0,255}$",
     )
     type: str = Field(..., description="The type of metadata object")
     name: str = Field(..., description="The name of the object")
@@ -1273,8 +1816,9 @@ class ExtensionPackProvided(KodexaBaseModel):
         None, description="The description of the object"
     )
     version: Optional[str] = Field(
-        None, description="The version of the object",
-        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$"
+        None,
+        description="The version of the object",
+        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$",
     )
     deployed: Optional[StandardDateTime] = Field(
         None,
@@ -1316,7 +1860,13 @@ class ExtensionPackProvided(KodexaBaseModel):
     )
 
 
-class Option(KodexaBaseModel):
+class Option(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Options available for this event
     """
@@ -1343,7 +1893,13 @@ class Option(KodexaBaseModel):
     properties: Optional[Dict[str, Any]] = None
 
 
-class Overlay(KodexaBaseModel):
+class Overlay(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Overlays provide the ability to apply validation, normalization and enrichment
     """
@@ -1353,7 +1909,13 @@ class Overlay(KodexaBaseModel):
     conditions: Optional[List[OverlayCondition]] = None
 
 
-class PipelineImplementationMetadata(KodexaBaseModel):
+class PipelineImplementationMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     Metadata captured when publishing a pipeline definition
     """
@@ -1363,7 +1925,13 @@ class PipelineImplementationMetadata(KodexaBaseModel):
     )
 
 
-class ProjectAssistant(KodexaBaseModel):
+class ProjectAssistant(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The assistants that will be created with the project template
     """
@@ -1382,7 +1950,13 @@ class ProjectAssistant(KodexaBaseModel):
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
 
 
-class Taxon(KodexaBaseModel):
+class Taxon(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A taxon is an individual label within a taxonomy
     """
@@ -1399,8 +1973,7 @@ class Taxon(KodexaBaseModel):
         description="Is this taxon a group, and therefore can't have a value, can only have children",
     )
     name: str = Field(
-        ..., description="The name to be used",
-        pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
+        ..., description="The name to be used", pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
     )
     external_name: Optional[str] = Field(
         None,
@@ -1532,7 +2105,13 @@ class Taxon(KodexaBaseModel):
     )
 
 
-class ContentObject(KodexaBaseModel):
+class ContentObject(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1553,7 +2132,13 @@ class ContentObject(KodexaBaseModel):
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
 
 
-class DocumentAssignment(KodexaBaseModel):
+class DocumentAssignment(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A list of the assignments to users for this document
     """
@@ -1566,7 +2151,13 @@ class DocumentAssignment(KodexaBaseModel):
     user: User
 
 
-class ExceptionDetails(KodexaBaseModel):
+class ExceptionDetails(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     message: Optional[str] = None
     status_code: Optional[int] = Field(None, alias="statusCode")
     error_message: Optional[str] = Field(None, alias="errorMessage")
@@ -1584,7 +2175,13 @@ class ExceptionDetails(KodexaBaseModel):
     )
 
 
-class ExecutionStep(KodexaBaseModel):
+class ExecutionStep(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = None
     status: Optional[Status3] = None
     exception_details: Optional[ExceptionDetails] = Field(
@@ -1605,7 +2202,13 @@ class ExecutionStep(KodexaBaseModel):
     step_type: Optional[StepType1] = Field(None, alias="stepType")
 
 
-class ProjectStatus(KodexaBaseModel):
+class ProjectStatus(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1617,7 +2220,13 @@ class ProjectStatus(KodexaBaseModel):
     icon: Optional[str] = None
 
 
-class Project(KodexaBaseModel):
+class Project(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1653,12 +2262,24 @@ class Project(KodexaBaseModel):
     owner: Optional[User] = None
 
 
-class FeatureSet(KodexaBaseModel):
+class FeatureSet(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     owner_uri: Optional[str] = Field(None, alias="ownerUri")
     node_features: Optional[List[NodeFeatures]] = Field(None, alias="nodeFeatures")
 
 
-class DocumentViewState(KodexaBaseModel):
+class DocumentViewState(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the document view")
     index: Optional[int] = None
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
@@ -1667,7 +2288,13 @@ class DocumentViewState(KodexaBaseModel):
     selected_node_ids: Optional[List[str]] = Field(None, alias="selectedNodeIds")
 
 
-class DataFormState(KodexaBaseModel):
+class DataFormState(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the document view")
     index: Optional[int] = None
     properties: Optional[Dict[str, Any]] = None
@@ -1677,7 +2304,13 @@ class DataFormState(KodexaBaseModel):
     data_object_ids: Optional[List[str]] = Field(None, alias="dataObjectIds")
 
 
-class WorkspaceStorage(KodexaBaseModel):
+class WorkspaceStorage(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     document_view_states: Optional[List[DocumentViewState]] = Field(
         None, alias="documentViewStates"
     )
@@ -1689,7 +2322,13 @@ class WorkspaceStorage(KodexaBaseModel):
     overview: Optional[str] = None
 
 
-class Workspace(KodexaBaseModel):
+class Workspace(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the workspace")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1704,7 +2343,13 @@ class Workspace(KodexaBaseModel):
     )
 
 
-class ProjectWorkspace(KodexaBaseModel):
+class ProjectWorkspace(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     name: Optional[str] = None
     description: Optional[str] = None
     workspace_storage: Optional[WorkspaceStorage] = Field(
@@ -1712,7 +2357,13 @@ class ProjectWorkspace(KodexaBaseModel):
     )
 
 
-class Channel(KodexaBaseModel):
+class Channel(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the channel")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1721,7 +2372,13 @@ class Channel(KodexaBaseModel):
     workspace: Optional[Workspace] = None
 
 
-class MessageBlock(KodexaBaseModel):
+class MessageBlock(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the message block")
     type: Optional[str] = None
     properties: Optional[Dict[str, Any]] = None
@@ -1729,12 +2386,24 @@ class MessageBlock(KodexaBaseModel):
     children: Optional[List[MessageBlock]] = Field(None, alias="messageBlock")
 
 
-class MessageFeedback(KodexaBaseModel):
+class MessageFeedback(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     user_id: Optional[str] = Field(None, alias="userId")
     options: Optional[Dict[str, Any]] = None
 
 
-class Message(KodexaBaseModel):
+class Message(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the message")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1749,7 +2418,13 @@ class Message(KodexaBaseModel):
     user: Optional[User] = None
 
 
-class DataAttribute(KodexaBaseModel):
+class DataAttribute(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1785,7 +2460,13 @@ class DataAttribute(KodexaBaseModel):
     label: Optional[str] = None
 
 
-class Note(KodexaBaseModel):
+class Note(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1795,7 +2476,13 @@ class Note(KodexaBaseModel):
     content: Optional[str] = None
 
 
-class Role(KodexaBaseModel):
+class Role(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A role that can be used to manage rights
     """
@@ -1810,7 +2497,13 @@ class Role(KodexaBaseModel):
     teams: Optional[List[Team]] = Field(default_factory=list)
 
 
-class Membership(KodexaBaseModel):
+class Membership(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -1821,12 +2514,24 @@ class Membership(KodexaBaseModel):
     user: Optional[User] = None
 
 
-class DataFormSourceMethod(KodexaBaseModel):
+class DataFormSourceMethod(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     name: Optional[str] = None
     parameters: Optional[List[DataFormSourceParameter]] = None
 
 
-class PageableObject(KodexaBaseModel):
+class PageableObject(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     offset: Optional[int] = None
     paged: Optional[bool] = None
     unpaged: Optional[bool] = None
@@ -1834,7 +2539,13 @@ class PageableObject(KodexaBaseModel):
     page_size: Optional[int] = Field(None, alias="pageSize")
 
 
-class PageTeam(KodexaBaseModel):
+class PageTeam(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1847,7 +2558,13 @@ class PageTeam(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageModelTraining(KodexaBaseModel):
+class PageModelTraining(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1860,7 +2577,13 @@ class PageModelTraining(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageNote(KodexaBaseModel):
+class PageNote(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1873,7 +2596,13 @@ class PageNote(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageDataAttribute(KodexaBaseModel):
+class PageDataAttribute(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1886,7 +2615,13 @@ class PageDataAttribute(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageSession(KodexaBaseModel):
+class PageSession(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1899,7 +2634,13 @@ class PageSession(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageRole(KodexaBaseModel):
+class PageRole(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1912,7 +2653,13 @@ class PageRole(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageProject(KodexaBaseModel):
+class PageProject(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1925,7 +2672,13 @@ class PageProject(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageAssistant(KodexaBaseModel):
+class PageAssistant(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1938,7 +2691,13 @@ class PageAssistant(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageWorkspace(KodexaBaseModel):
+class PageWorkspace(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1951,7 +2710,13 @@ class PageWorkspace(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageMessage(KodexaBaseModel):
+class PageMessage(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1964,7 +2729,13 @@ class PageMessage(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageChannel(KodexaBaseModel):
+class PageChannel(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1977,7 +2748,13 @@ class PageChannel(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageOrganization(KodexaBaseModel):
+class PageOrganization(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -1990,7 +2767,13 @@ class PageOrganization(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageMembership(KodexaBaseModel):
+class PageMembership(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2003,7 +2786,13 @@ class PageMembership(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageExecutionLogEntry(KodexaBaseModel):
+class PageExecutionLogEntry(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2016,14 +2805,19 @@ class PageExecutionLogEntry(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class CustomEvent(KodexaBaseModel):
+class CustomEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A Custom Event allows you to define an subtype of assistant event with options
     """
 
     name: Optional[str] = Field(
-        None, description="The name of the event",
-        pattern=r"^[a-zA-Z0-9\-_]{0,40}$"
+        None, description="The name of the event", pattern=r"^[a-zA-Z0-9\-_]{0,40}$"
     )
     icon: Optional[str] = Field(
         None, description="The name of a Material Design Icon to use for the event"
@@ -2056,11 +2850,23 @@ class CustomEvent(KodexaBaseModel):
     )
 
 
-class ObjectMetadata(KodexaBaseModel):
+class ObjectMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     options: Optional[List[Option]] = None
 
 
-class ProjectTaxonomy(KodexaBaseModel):
+class ProjectTaxonomy(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The taxonomies that will be created with the project template
     """
@@ -2079,7 +2885,13 @@ class ProjectTaxonomy(KodexaBaseModel):
     ref: Optional[str] = None
 
 
-class ContentException(KodexaBaseModel):
+class ContentException(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A list of the content exceptions from the content objects
     """
@@ -2099,7 +2911,13 @@ class ContentException(KodexaBaseModel):
     content_object: Optional[ContentObject] = Field(None, alias="contentObject")
 
 
-class ExecutionPipeline(KodexaBaseModel):
+class ExecutionPipeline(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     valid: Optional[bool] = None
     ref: Optional[str] = None
     id: Optional[str] = None
@@ -2107,13 +2925,25 @@ class ExecutionPipeline(KodexaBaseModel):
     steps: Optional[List[ExecutionStep]] = None
 
 
-class DataFormSourceDefinition(KodexaBaseModel):
+class DataFormSourceDefinition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     source_type: Optional[SourceType] = Field(None, alias="sourceType")
     valid: Optional[bool] = None
     methods: Optional[List[DataFormSourceMethod]] = None
 
 
-class PageUser(KodexaBaseModel):
+class PageUser(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2126,7 +2956,13 @@ class PageUser(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class Execution(KodexaBaseModel):
+class Execution(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -2152,7 +2988,13 @@ class Execution(KodexaBaseModel):
     child_executions: Optional[List[Execution]] = Field(None, alias="childExecutions")
 
 
-class ExecutionSnapshot(KodexaBaseModel):
+class ExecutionSnapshot(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -2178,7 +3020,13 @@ class ExecutionSnapshot(KodexaBaseModel):
     content_objects: Optional[List[ContentObject]] = Field(None, alias="contentObjects")
 
 
-class PageExecution(KodexaBaseModel):
+class PageExecution(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2191,15 +3039,33 @@ class PageExecution(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class ContentMetadata1(KodexaBaseModel):
+class ContentMetadata1(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     pass
 
 
-class SlugBasedMetadata(KodexaBaseModel):
+class SlugBasedMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     pass
 
 
-class LabelStatistics(KodexaBaseModel):
+class LabelStatistics(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     label_counts: Optional[Dict[str, int]] = Field(
         None,
         alias="labelCounts",
@@ -2225,7 +3091,13 @@ class LabelStatistics(KodexaBaseModel):
     )
 
 
-class DocumentFamily(KodexaBaseModel):
+class DocumentFamily(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A document family is the representation of a single piece of external content (ie. a PDF) and all the related document representations of that file
     """
@@ -2297,7 +3169,13 @@ class DocumentFamily(KodexaBaseModel):
     )
 
 
-class DocumentFamilyStatistics(KodexaBaseModel):
+class DocumentFamilyStatistics(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A collection of statistics about the document family
     """
@@ -2308,7 +3186,13 @@ class DocumentFamilyStatistics(KodexaBaseModel):
     )
 
 
-class ExecutionAssistant(KodexaBaseModel):
+class ExecutionAssistant(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -2332,12 +3216,24 @@ class ExecutionAssistant(KodexaBaseModel):
     definition: Optional[AssistantDefinition] = None
 
 
-class ExecutionOverview(KodexaBaseModel):
+class ExecutionOverview(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     assistant: Optional[ExecutionAssistant] = None
     execution: Optional[ExecutionSnapshot] = None
 
 
-class DataObject(KodexaBaseModel):
+class DataObject(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -2360,7 +3256,13 @@ class DataObject(KodexaBaseModel):
     store_ref: Optional[str] = Field(None, alias="storeRef")
 
 
-class Assistant(KodexaBaseModel):
+class Assistant(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -2387,7 +3289,13 @@ class Assistant(KodexaBaseModel):
     color: Optional[str] = Field(None, description="The color to use for the assistant")
 
 
-class AssistantExecution(KodexaBaseModel):
+class AssistantExecution(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     assistant_id: Optional[str] = Field(None, alias="assistantId")
     project_id: Optional[str] = Field(None, alias="projectId")
     assistant_name: Optional[str] = Field(None, alias="assistantName")
@@ -2413,12 +3321,24 @@ class AssistantExecution(KodexaBaseModel):
     processing_time: Optional[int] = Field(None, alias="processingTime")
 
 
-class AssistantExecutionResponse(KodexaBaseModel):
+class AssistantExecutionResponse(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     text: Optional[str] = None
     pipelines: Optional[List[AssistantResponsePipeline]] = None
 
 
-class AssistantResponsePipeline(KodexaBaseModel):
+class AssistantResponsePipeline(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     description: Optional[str] = None
     pipeline: Optional[Pipeline] = None
     write_back_to_store: Optional[bool] = Field(None, alias="writeBackToStore")
@@ -2443,17 +3363,35 @@ class BaseEvent(
     pass
 
 
-class MessageEvent(KodexaBaseModel):
+class MessageEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     message: Optional[Message] = None
 
 
-class ChannelEvent(KodexaBaseModel):
+class ChannelEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = None
     channel: Optional[Channel] = None
     message_events: Optional[List[MessageEvent]] = Field(None, alias="messageEvents")
 
 
-class ExecutionEvent(KodexaBaseModel):
+class ExecutionEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -2479,7 +3417,13 @@ class ExecutionEvent(KodexaBaseModel):
     end_date: Optional[StandardDateTime] = Field(None, alias="endDate")
 
 
-class PageTaxonomy(KodexaBaseModel):
+class PageTaxonomy(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2492,7 +3436,13 @@ class PageTaxonomy(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageStore(KodexaBaseModel):
+class PageStore(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2505,7 +3455,13 @@ class PageStore(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageDocumentFamily(KodexaBaseModel):
+class PageDocumentFamily(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2518,7 +3474,13 @@ class PageDocumentFamily(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class SearchContent(KodexaBaseModel):
+class SearchContent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     A document family is the representation of a single peice of external content (ie. a PDF) and all the related document representations of that file
     """
@@ -2559,7 +3521,13 @@ class SearchContent(KodexaBaseModel):
     )
 
 
-class StoreMetadata(KodexaBaseModel):
+class StoreMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     The store containing the document family
     """
@@ -2588,7 +3556,13 @@ class StoreMetadata(KodexaBaseModel):
     metadata: Optional[Store] = None
 
 
-class PlatformEvent(KodexaBaseModel):
+class PlatformEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     id: Optional[str] = Field(None, description="The ID of the object")
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
@@ -2608,7 +3582,13 @@ class PlatformEvent(KodexaBaseModel):
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
 
 
-class PageDataObject(KodexaBaseModel):
+class PageDataObject(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2621,7 +3601,13 @@ class PageDataObject(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class AuditEvent(KodexaBaseModel):
+class AuditEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     """
     An audit event captures a data to a data structure or document
     """
@@ -2641,7 +3627,13 @@ class AuditEvent(KodexaBaseModel):
     new_value: Optional[DataAttributeValues] = Field(None, alias="newValue")
 
 
-class PageAuditEvent(KodexaBaseModel):
+class PageAuditEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2654,7 +3646,13 @@ class PageAuditEvent(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageRuleSet(KodexaBaseModel):
+class PageRuleSet(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2667,7 +3665,13 @@ class PageRuleSet(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageProjectTemplate(KodexaBaseModel):
+class PageProjectTemplate(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2680,7 +3684,13 @@ class PageProjectTemplate(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PagePipeline(KodexaBaseModel):
+class PagePipeline(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2693,7 +3703,13 @@ class PagePipeline(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageModelRuntime(KodexaBaseModel):
+class PageModelRuntime(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2706,7 +3722,13 @@ class PageModelRuntime(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageSlugBasedMetadata(KodexaBaseModel):
+class PageSlugBasedMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2736,7 +3758,13 @@ class PageSlugBasedMetadata(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageExtensionPack(KodexaBaseModel):
+class PageExtensionPack(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2749,7 +3777,13 @@ class PageExtensionPack(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PagePlatformEvent(KodexaBaseModel):
+class PagePlatformEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2762,7 +3796,13 @@ class PagePlatformEvent(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageDataException(KodexaBaseModel):
+class PageDataException(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2775,7 +3815,13 @@ class PageDataException(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageDataForm(KodexaBaseModel):
+class PageDataForm(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2788,7 +3834,13 @@ class PageDataForm(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageDashboard(KodexaBaseModel):
+class PageDashboard(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2801,7 +3853,13 @@ class PageDashboard(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageCredentialDefinition(KodexaBaseModel):
+class PageCredentialDefinition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2814,7 +3872,13 @@ class PageCredentialDefinition(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageAssistantDefinition(KodexaBaseModel):
+class PageAssistantDefinition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2827,7 +3891,13 @@ class PageAssistantDefinition(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class PageAction(KodexaBaseModel):
+class PageAction(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
@@ -2840,14 +3910,26 @@ class PageAction(KodexaBaseModel):
     empty: Optional[bool] = None
 
 
-class DocumentContentMetadata(KodexaBaseModel):
+class DocumentContentMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     document_metadata: Optional[DocumentMetadataDefaults] = Field(
         None, alias="documentMetadata"
     )
     type: Optional[str] = Field(None, description="The type of content metadata")
 
 
-class ModelContentMetadata(KodexaBaseModel):
+class ModelContentMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = Field(None, description="The type of content metadata")
     model_runtime_ref: Optional[str] = Field(
         None,
@@ -3009,7 +4091,13 @@ class DataForm(ExtensionPackProvided):
     filters: Optional[str] = None
 
 
-class ProjectDataForm(KodexaBaseModel):
+class ProjectDataForm(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     slug: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
@@ -3025,8 +4113,7 @@ class ExtensionPack(ExtensionPackProvided):
     """
 
     org_slug: Optional[str] = Field(
-        None, alias="orgSlug",
-        pattern=r"^[a-zA-Z0-9\-_]{0,100}$"
+        None, alias="orgSlug", pattern=r"^[a-zA-Z0-9\-_]{0,100}$"
     )
     slug: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
     name: Optional[str] = None
@@ -3212,8 +4299,9 @@ class RuleSet(ExtensionPackProvided):
         description="The slug of the organization that owns this metadata object",
     )
     slug: Optional[str] = Field(
-        None, description="The slug used when referencing this metadata object",
-        pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
+        None,
+        description="The slug used when referencing this metadata object",
+        pattern=r"^[a-zA-Z0-9\-_]{0,255}$",
     )
     type: Optional[str] = Field(None, description="The type of metadata object")
     name: Optional[str] = Field(None, description="The name of the object")
@@ -3221,8 +4309,9 @@ class RuleSet(ExtensionPackProvided):
         None, description="The description of the object"
     )
     version: Optional[str] = Field(
-        None, description="The version of the object",
-        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$"
+        None,
+        description="The version of the object",
+        pattern=r"^\d+\.\d+\.\d+(?:\-\d+)?$",
     )
 
     public_access: Optional[bool] = Field(
@@ -3258,7 +4347,13 @@ class RuleSet(ExtensionPackProvided):
     )
 
 
-class AssistantEvent(KodexaBaseModel):
+class AssistantEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = None
     content_object: Optional[ContentObject] = Field(None, alias="contentObject")
     options: Optional[Dict[str, Any]] = None
@@ -3266,24 +4361,48 @@ class AssistantEvent(KodexaBaseModel):
     assistant: Optional[Assistant] = None
 
 
-class ContentEvent(KodexaBaseModel):
+class ContentEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = None
     content_object: Optional[ContentObject] = Field(None, alias="contentObject")
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
     object_event_type: Optional[ObjectEventType] = Field(None, alias="objectEventType")
 
 
-class DataObjectEvent(KodexaBaseModel):
+class DataObjectEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = None
     data_object: Optional[DataObject] = Field(None, alias="dataObject")
 
 
-class DocumentFamilyEvent(KodexaBaseModel):
+class DocumentFamilyEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = None
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
 
 
-class ScheduledEvent(KodexaBaseModel):
+class ScheduledEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
     type: Optional[str] = None
     last_event: Optional[StandardDateTime] = Field(None, alias="lastEvent")
     next_event: Optional[StandardDateTime] = Field(None, alias="nextEvent")

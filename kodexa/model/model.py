@@ -12,8 +12,8 @@ from typing import Any, List, Optional
 
 import msgpack
 from addict import Dict
+from pydantic import BaseModel, ConfigDict
 
-from kodexa.model.base import KodexaBaseModel
 from kodexa.model.objects import ContentObject, FeatureSet
 import deepdiff
 
@@ -2099,7 +2099,8 @@ class ContentFeature(object):
         return self.value
 
 
-class ModelInsight(KodexaBaseModel):
+class ModelInsight(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, use_enum_values=True, arbitrary_types_allowed=True, protected_namespaces=("model_config",))
     """
     A class used to represent the insights of a model.
 
