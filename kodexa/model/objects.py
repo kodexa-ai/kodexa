@@ -3988,6 +3988,12 @@ class ModelContentMetadata(BaseModel):
         description="The inference options for this model",
     )
 
+    event_options: Optional[List[Option]] = Field(
+        None,
+        alias="eventOptions",
+        description="The event options for this model",
+    )
+
     taxonomy: Optional[Taxonomy] = None
     additional_taxon_options: Optional[List[Option]] = Field(
         None,
@@ -4145,6 +4151,11 @@ class ModelRuntime(ExtensionPackProvided):
         None,
         alias="trainingAction",
         description="A reference to the action that will be used for training",
+    )
+    event_action: Optional[str] = Field(
+        None,
+        alias="actionEvent",
+        description="A reference to the action that will be used for event handling",
     )
     deployment_type: Optional[DeploymentType1] = Field(
         None,
