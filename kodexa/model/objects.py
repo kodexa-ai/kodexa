@@ -4400,6 +4400,17 @@ class DocumentFamilyEvent(BaseModel):
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
 
 
+class WorkspaceEvent(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    type: Optional[str] = None
+    workspace: Optional[Workspace] = Field(None, alias="Workspace")
+
+
 class ScheduledEvent(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,

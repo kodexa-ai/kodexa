@@ -29,6 +29,7 @@ from kodexa.model.objects import (
     DocumentFamilyEvent,
     ChannelEvent,
     DataObjectEvent,
+    WorkspaceEvent,
 )
 from kodexa.pipeline import PipelineContext, PipelineStatistics
 from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
@@ -795,6 +796,8 @@ class EventHelper:
             return DocumentFamilyEvent(**event_dict)
         if event_dict["type"] == "dataObject":
             return DataObjectEvent(**event_dict)
+        if event_dict["type"] == "workspace":
+            return WorkspaceEvent(**event_dict)
 
         raise f"Unknown event type {event_dict}"
 
