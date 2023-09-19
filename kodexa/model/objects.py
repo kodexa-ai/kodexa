@@ -3952,6 +3952,10 @@ class ModelContentMetadata(BaseModel):
 
     trainable: Optional[bool] = Field(None, description="Can this model be trained")
 
+    event_aware: Optional[bool] = Field(
+        None, alias="eventAware", description="Is this model event aware"
+    )
+
     atomic: Optional[bool] = Field(
         None, description="Is the model uploaded/downloaded atomically"
     )

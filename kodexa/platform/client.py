@@ -1750,6 +1750,28 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         )
         return AssistantEndpoint.model_validate(response.json()).set_client(self.client)
 
+    def set_memory(self, key: str, data: dict):
+        """
+        Set the memory of the assistant.
+
+        :param key:
+        :param data:
+        :return:
+        """
+        url = f"/api/assistants/{self.id}/memory/{key}"
+        response = self.client.put(url, body=data)
+        return response.json()
+
+    def get_memory(self, key: str):
+        """
+        Get the memory of the assistant.
+        :param key:
+        :return:
+        """
+        url = f"/api/assistants/{self.id}/memory/{key}"
+        response = self.client.get(url)
+        return response.json()
+
     def delete(self):
         """Delete the assistant."""
         url = f"/api/projects/{self.project.id}/assistants/{self.id}"
@@ -3930,6 +3952,13 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
         self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
+
+    def update(self):
+        """
+        Update the document family.
+        """
+        url = f"/api/documentFamilies/{self.id}/touch"
+        self.client.get(url)
 
     def export(self) -> bytes:
         """
