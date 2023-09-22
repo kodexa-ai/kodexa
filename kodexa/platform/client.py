@@ -1780,12 +1780,14 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
     def activate(self):
         """Activate the assistant."""
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/activate"
-        self.client.put(url)
+        response = self.client.put(url)
+        self.change_sequence =  response.json().get("changeSequence")
 
     def deactivate(self):
         """Deactivate the assistant."""
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/deactivate"
-        self.client.put(url)
+        response = self.client.put(url)
+        self.change_sequence =  response.json().get("changeSequence")
 
     def schedule(self):
         """Schedule the assistant."""
@@ -1802,9 +1804,10 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
             AssistantEndpoint: The updated assistant endpoint.
         """
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/stores"
-        self.client.put(
+        response = self.client.put(
             url, body=[store.model_dump(mode="json", by_alias=True) for store in stores]
         )
+        self.change_sequence =  response.json().get("changeSequence")
         return self
 
     def get_stores(self) -> List["DocumentStoreEndpoint"]:
