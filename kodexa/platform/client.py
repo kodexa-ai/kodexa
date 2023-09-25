@@ -3956,7 +3956,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
         self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
 
-    def update(self):
+    def touch(self):
         """
         Update the document family.
         """
