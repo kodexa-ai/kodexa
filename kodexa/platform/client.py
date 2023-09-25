@@ -3714,6 +3714,7 @@ class UserEndpoint(User, EntityEndpoint):
         ]
 
 
+
 class ExecutionsEndpoint(EntitiesEndpoint):
     """Represents a executions endpoint
 
@@ -5763,6 +5764,7 @@ class KodexaClient:
         self.memberships = MembershipsEndpoint(self)
         self.executions = ExecutionsEndpoint(self)
         self.channels = ChannelsEndpoint(self)
+        self.assistants = AssistantsEndpoint(self)
 
     @staticmethod
     def login(url, email, password, insecure=False):
