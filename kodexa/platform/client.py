@@ -3714,7 +3714,6 @@ class UserEndpoint(User, EntityEndpoint):
         ]
 
 
-
 class ExecutionsEndpoint(EntitiesEndpoint):
     """Represents a executions endpoint
 
