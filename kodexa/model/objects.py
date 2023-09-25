@@ -4154,7 +4154,7 @@ class ModelRuntime(ExtensionPackProvided):
     )
     event_action: Optional[str] = Field(
         None,
-        alias="actionEvent",
+        alias="eventAction",
         description="A reference to the action that will be used for event handling",
     )
     deployment_type: Optional[DeploymentType1] = Field(
