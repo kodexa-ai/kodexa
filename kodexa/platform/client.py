@@ -1781,13 +1781,13 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         """Activate the assistant."""
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/activate"
         response = self.client.put(url)
-        self.change_sequence =  response.json().get("changeSequence")
+        self.change_sequence = response.json().get("changeSequence")
 
     def deactivate(self):
         """Deactivate the assistant."""
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/deactivate"
         response = self.client.put(url)
-        self.change_sequence =  response.json().get("changeSequence")
+        self.change_sequence = response.json().get("changeSequence")
 
     def schedule(self):
         """Schedule the assistant."""
