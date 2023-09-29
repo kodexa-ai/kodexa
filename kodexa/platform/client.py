@@ -1760,6 +1760,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         """
         url = f"/api/assistants/{self.id}/memory/{key}"
         response = self.client.put(url, body=data)
+        self.change_sequence = response.json().get("changeSequence")
         return response.json()
 
     def get_memory(self, key: str):
@@ -1874,7 +1875,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         Returns:
             ExecutionEndpoint: The execution endpoint of the event.
         """
-        url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/ekodexsavents"
         event_object = {"eventType": event_type, "options": json.dumps(options)}
         response = self.client.post(url, data=event_object, files={})
         process_response(response)
