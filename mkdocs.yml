@@ -78,6 +78,7 @@ nav:
       - Introduction: client/index.md
       - Organizations: client/organizations.ipynb
       - Projects: client/projects.ipynb
+      - Working with Stores: client/working-with-stores.ipynb
       - Assistants: client/assistants.ipynb
   - Reference:
       - Kodexa Document: reference/document.md
