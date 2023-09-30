@@ -1502,12 +1502,12 @@ class ObjectEventType(Enum):
     derived_object = "DERIVED_OBJECT"
 
 
-class Type1(Enum):
+class ExecutionEventType(Enum):
     start_execution = "START_EXECUTION"
     step_update = "STEP_UPDATE"
     assistant_event = "ASSISTANT_EVENT"
     assistant_response = "ASSISTANT_RESPONSE"
-
+    abend = "ABEND"
 
 class Status6(Enum):
     pending = "PENDING"
@@ -3397,7 +3397,7 @@ class ExecutionEvent(BaseModel):
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
-    type: Type1
+    type: ExecutionEventType
     status: Optional[Status6] = None
     execution: Optional[Execution] = None
     store_ref: Optional[str] = Field(None, alias="storeRef")
