@@ -1759,8 +1759,10 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         :return:
         """
         url = f"/api/assistants/{self.id}/memory/{key}"
-        response = self.client.put(url, body=data)
-        self.change_sequence = response.json().get("changeSequence")
+        response = self.client.put(url, body={
+            'key': key,
+            'data': data
+        })
         return response.json()
 
     def get_memory(self, key: str):
@@ -1771,7 +1773,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         """
         url = f"/api/assistants/{self.id}/memory/{key}"
         response = self.client.get(url)
-        return response.json()
+        return response.json()["data"]
 
     def delete(self):
         """Delete the assistant."""
