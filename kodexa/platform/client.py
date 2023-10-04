@@ -4172,6 +4172,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         document: Document,
         content_object: Optional[ContentObject] = None,
         owner_uri: Optional[str] = None,
+        replace_data: bool = False,
     ):
         """
         Replace the tags of the document family.
@@ -4180,12 +4181,14 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             document (Document): The document.
             content_object (Optional[ContentObject]): The content object. Defaults to None.
             owner_uri (Optional[str]): The owner URI. Defaults to None.
+            replace_data (bool): Whether to replace the data. Defaults to False.
         """
         if content_object is None:
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
         self.client.put(
-            url, body=document.get_feature_set(owner_uri).dict(by_alias=True)
+            url, params={'replace_data': replace_data},
+            body=document.get_feature_set(owner_uri).dict(by_alias=True),
         )
 
 
