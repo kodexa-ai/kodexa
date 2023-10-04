@@ -625,6 +625,13 @@ class ContentNode(object):
             if i.feature_type == feature_type and i.name == name
         ]
         if len(hits) > 0:
+
+            # We have a situation where the feature isn't a dict since it
+            # was added as a "Tag", lets turn it back into a dict to be
+            # consistent
+            if isinstance(hits[0].value, Tag):
+                hits[0].value = hits[0].value.to_dict()
+
             return hits[0]
 
         return None

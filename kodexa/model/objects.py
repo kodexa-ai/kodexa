@@ -4420,7 +4420,7 @@ class WorkspaceEvent(BaseModel):
     )
     type: Optional[str] = None
     workspace: Optional[Workspace] = Field(None, alias="Workspace")
-
+    workspace_update: Optional[dict] = Field(None, alias="workspaceUpdate")
 
 class ScheduledEvent(BaseModel):
     model_config = ConfigDict(
