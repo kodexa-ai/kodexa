@@ -3044,7 +3044,12 @@ class Document(object):
                     feature_dict = feature.to_dict()
                     feature_dict["featureType"] = feature.feature_type
                     feature_dict["name"] = feature.name
+
+                    if isinstance(feature_dict['value'][0], Tag):
+                        feature_dict['value'] = [feature_dict['value'][0].to_dict()]
+
                     node_feature["features"].append(feature_dict)
+
 
         return feature_set
 
