@@ -2446,6 +2446,7 @@ class DataAttribute(BaseModel):
     boolean_value: Optional[bool] = Field(None, alias="booleanValue")
     string_value: Optional[str] = Field(None, alias="stringValue")
     attribute_status: Optional[AttributeStatus] = Field(None, alias="attributeStatus")
+    owner_uri: Optional[str] = Field(None, alias="ownerUri")
     confidence: Optional[float] = None
     number_of_notes: Optional[int] = Field(
         None,
