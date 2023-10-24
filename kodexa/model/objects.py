@@ -3951,6 +3951,8 @@ class ModelContentMetadata(BaseModel):
         None, description="The state of the model in this store"
     )
 
+    inferable: Optional[bool] = Field(None, description="Can this model be used to infer")
+
     trainable: Optional[bool] = Field(None, description="Can this model be trained")
 
     event_aware: Optional[bool] = Field(
