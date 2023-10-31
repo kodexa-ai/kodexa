@@ -3957,7 +3957,25 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Update the document family.
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
-        self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
+        response = self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
+        self.change_sequence = response.json()["changeSequence"]
+
+    def lock(self):
+        """
+        Lock the document family.
+        """
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/lock"
+        response = self.client.put(url)
+        self.change_sequence = response.json()["changeSequence"]
+
+    def unlock(self):
+        """
+        Lock the document family.
+        """
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/unlock"
+        response = self.client.put(url)
+        self.change_sequence = response.json()["changeSequence"]
+
 
     def touch(self):
         """
