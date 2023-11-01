@@ -3966,6 +3966,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/lock"
         response = self.client.put(url)
+        process_response(response)
         self.change_sequence = response.json()["changeSequence"]
 
     def unlock(self):
@@ -3974,6 +3975,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/unlock"
         response = self.client.put(url)
+        process_response(response)
         self.change_sequence = response.json()["changeSequence"]
 
 
@@ -3982,7 +3984,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Update the document family.
         """
         url = f"/api/documentFamilies/{self.id}/touch"
-        self.client.get(url)
+        response = self.client.get(url)
+        process_response(response)
 
     def export(self) -> bytes:
         """
@@ -3995,6 +3998,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
         )
         get_response = self.client.get(url)
+        process_response(get_response)
         return get_response.content
 
     def update_document(
