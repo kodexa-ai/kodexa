@@ -1808,7 +1808,7 @@ class ExtensionPackProvided(BaseModel):
     slug: str = Field(
         ...,
         description="The slug used when referencing this metadata object",
-        pattern=r"^[a-zA-Z0-9\-_]{0,255}$",
+        pattern=r"^[a-zA-Z0-9\-_\.]{0,255}$",
     )
     type: str = Field(..., description="The type of metadata object")
     name: str = Field(..., description="The name of the object")
