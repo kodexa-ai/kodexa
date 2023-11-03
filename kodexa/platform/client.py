@@ -3375,6 +3375,33 @@ class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
         """
         return "extensionPacks"
 
+    def undeploy(self):
+        """
+        Undeploy the extension pack.
+
+        Returns:
+            None
+        """
+        response = self.client.put(f"/api/extensionPacks/{self.ref}/_undeploy")
+        process_response(response)
+
+    def deploy(self):
+        """
+        Deploy the extension pack.
+
+        :return: None
+        """
+        response = self.client.put(f"/api/extensionPacks/{self.ref}/_deploy")
+        process_response(response)
+        
+    def repack(self):
+        """
+        Repack the extension pack.
+
+        :return: None
+        """
+        response = self.client.put(f"/api/extensionPacks/{self.ref}/_repack")
+        process_response(response)
 
 class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
     """Represents a taxonomy endpoint"""
