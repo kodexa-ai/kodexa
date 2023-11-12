@@ -4124,11 +4124,6 @@ class ExtensionPack(ExtensionPackProvided):
     """
     Extension packs provide new components to the platform
     """
-
-    org_slug: Optional[str] = Field(
-        None, alias="orgSlug", pattern=r"^[a-zA-Z0-9\-_]{0,100}$"
-    )
-    slug: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
     name: Optional[str] = None
     description: Optional[str] = None
     public_access: Optional[bool] = Field(None, alias="publicAccess")
@@ -4138,6 +4133,7 @@ class ExtensionPack(ExtensionPackProvided):
     services: Optional[List[SlugBasedMetadata]] = None
     source: Optional[ExtensionPackSource] = None
     deployment: Optional[DeploymentMetadata] = None
+    background_task: Optional[str] = Field(None, alias="backgroundTask")
 
 
 class ModelRuntime(ExtensionPackProvided):
