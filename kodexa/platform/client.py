@@ -5573,8 +5573,8 @@ OBJECT_TYPES = {
         "global": True,
     },
     "assistantDefinitions": {
-        "name": "assistant",
-        "plural": "assistants",
+        "name": "assistantDefinition",
+        "plural": "assistantDefintions",
         "type": AssistantDefinitionEndpoint,
         "endpoint": AssistantDefinitionsEndpoint,
     },
