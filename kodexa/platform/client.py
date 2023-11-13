@@ -2558,19 +2558,21 @@ class ProjectsEndpoint(EntitiesEndpoint):
             ).set_client(self.client)
         return None
 
-    def stream_query(self, query: str = "*", sort=None):
+    def stream_query(self, query: str = "*", sort=None, limit=None):
         """
         Stream the query for the project endpoints.
 
         Args:
             query (str, optional): The query to run. Defaults to "*".
             sort (str, optional): Sorting order of the query. Defaults to None.
+            limit (int, optional): The maximum number of results to return. Defaults to None.
 
         Yields:
             ProjectEndpoint: A generator of the project endpoints.
         """
         page_size = 5
         page = 1
+        counter = 0
 
         if not sort:
             sort = "id"
@@ -2583,6 +2585,9 @@ class ProjectsEndpoint(EntitiesEndpoint):
                 break
             for project_endpoint in page_response.content:
                 yield project_endpoint
+                counter += 1
+                if limit and counter >= limit:
+                    break
             page += 1
 
     def query(
@@ -5044,7 +5049,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
         page_size = 5
         page = 1
-
+        count = 0
         if not sort:
             sort = "id"
 
@@ -5056,6 +5061,9 @@ class DocumentStoreEndpoint(StoreEndpoint):
                 break
             for document_family in page_response.content:
                 yield document_family
+                count += 1
+                if limit and count >= limit:
+                    break
             page += 1
 
     def filter(
