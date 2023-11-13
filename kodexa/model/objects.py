@@ -3288,7 +3288,7 @@ class Assistant(BaseModel):
     definition: Optional[AssistantDefinition] = None
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
     color: Optional[str] = Field(None, description="The color to use for the assistant")
-
+    priority_hint: Optional[int] = Field(None, alias="priorityHint")
 
 class AssistantExecution(BaseModel):
     model_config = ConfigDict(
