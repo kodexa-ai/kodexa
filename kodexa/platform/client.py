@@ -5537,8 +5537,7 @@ def process_response(response) -> requests.Response:
 
         raise Exception("Bad request " + response.text)
 
-    if response.status_code != 200:
-        raise Exception(f"Unexpected response ({response.status_code})")
+    process_response(response)
 
     return response
 

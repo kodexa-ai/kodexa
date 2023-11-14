@@ -356,14 +356,9 @@ class RemoteSession:
             verify=not KodexaPlatform.get_insecure(),
         )
 
-        if r.status_code != 200:
-            logger.warning("Unable to create session")
-            logger.warning(r.text)
-            raise Exception(
-                "Unable to create a session, check your URL and access token"
-            )
+        process_response(r)
 
-        self.cloud_session = Dict(json.loads(r.text))
+        self.cloud_session = json.loads(r.text)
 
     def execution_action(self, document, options, attach_source, context):
         """
@@ -847,10 +842,7 @@ class EventHelper:
             verify=not KodexaPlatform.get_insecure(),
         )
 
-        if co_response.status_code != 200:
-            logger.info("Unable to post back object")
-            logger.error(co_response.text)
-            raise Exception("Unable to post back content object")
+        process_response(co_response)
 
         logger.info("Object posted back")
 
