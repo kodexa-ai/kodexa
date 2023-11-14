@@ -1952,6 +1952,8 @@ class AssistantSubscriptionTemplate(BaseModel):
     """
     ref: Optional[str] = Field(None, description="The reference to the metadata object to subscribe to")
     type: Optional[SubscriptionType] = None
+    subscription: Optional[str] = None
+    active: Optional[bool] = True
 
 class ProjectAssistant(BaseModel):
     model_config = ConfigDict(
