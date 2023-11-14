@@ -1978,7 +1978,7 @@ class ProjectAssistant(BaseModel):
     subscriptions: Optional[List[AssistantSubscriptionTemplate]] = Field(default_factory=list)
     logging_enabled: Optional[bool] = Field(None, alias="loggingEnabled")
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
-
+    priority_hint: Optional[int] = Field(None, alias="priorityHint")
 
 class Taxon(BaseModel):
     model_config = ConfigDict(
