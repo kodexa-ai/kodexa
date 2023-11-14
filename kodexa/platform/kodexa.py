@@ -31,7 +31,7 @@ from kodexa.model.objects import (
     WorkspaceEvent,
 )
 from kodexa.pipeline import PipelineContext, PipelineStatistics
-from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
+from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient, process_response
 
 logger = logging.getLogger()
 
@@ -817,11 +817,7 @@ class EventHelper:
             timeout=300,
             verify=not KodexaPlatform.get_insecure(),
         )
-        if co_response.status_code != 200:
-            logger.error(f"Response {co_response.status_code} {co_response.text}")
-            raise Exception(
-                f"Unable to find content object {content_object_id} in execution {self.event.execution.id}"
-            )
+        process_response(co_response)
         return io.BytesIO(co_response.content)
 
     def put_content_object(
