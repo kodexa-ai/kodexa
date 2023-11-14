@@ -1924,6 +1924,34 @@ class PipelineImplementationMetadata(BaseModel):
         None, description="The metadata for the steps in this pipeline"
     )
 
+class SubscriptionType(Enum):
+    """
+    The type of assistant subscription, ie.
+        STORE,
+        DOCUMENT_FAMILY,
+        DATA_OBJECT,
+        WORKSPACE,
+        CHANNEL,
+    """
+    STORE = "STORE"
+    DOCUMENT_FAMILY = "DOCUMENT_FAMILY"
+    DATA_OBJECT = "DATA_OBJECT"
+    WORKSPACE = "WORKSPACE"
+    CHANNEL = "CHANNEL"
+
+
+class AssistantSubscriptionTemplate(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    """
+    A template for an assistant subscription
+    """
+    ref: Optional[str] = Field(None, description="The reference to the metadata object to subscribe to")
+    type: Optional[SubscriptionType] = None
 
 class ProjectAssistant(BaseModel):
     model_config = ConfigDict(
@@ -1945,7 +1973,7 @@ class ProjectAssistant(BaseModel):
     stores: Optional[List[str]] = Field(default_factory=list)
     schedules: Optional[List[ScheduleDefinition]] = Field(default_factory=list)
     subscription: Optional[str] = None
-
+    subscriptions: Optional[List[AssistantSubscriptionTemplate]] = Field(default_factory=list)
     logging_enabled: Optional[bool] = Field(None, alias="loggingEnabled")
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
 
