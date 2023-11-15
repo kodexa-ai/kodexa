@@ -1924,7 +1924,7 @@ class PipelineImplementationMetadata(BaseModel):
         None, description="The metadata for the steps in this pipeline"
     )
 
-class SubscriptionType(Enum):
+class ConnectionType(Enum):
     """
     The type of assistant subscription, ie.
         STORE,
@@ -1940,7 +1940,7 @@ class SubscriptionType(Enum):
     CHANNEL = "CHANNEL"
 
 
-class AssistantSubscriptionTemplate(BaseModel):
+class ProjectAssistantConnection(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1950,8 +1950,10 @@ class AssistantSubscriptionTemplate(BaseModel):
     """
     A template for an assistant subscription
     """
-    ref: Optional[str] = Field(None, description="The reference to the metadata object to subscribe to")
-    type: Optional[SubscriptionType] = None
+    sourceRef: Optional[str] = Field(None, description="The reference to the metadata object to source")
+    sourceType: Optional[SubscriptionType] = None
+    targetRef: Optional[str] = Field(None, description="The reference to the metadata object to target")
+    targetType: Optional[SubscriptionType] = None
     subscription: Optional[str] = None
     active: Optional[bool] = True
 
@@ -1975,7 +1977,7 @@ class ProjectAssistant(BaseModel):
     stores: Optional[List[str]] = Field(default_factory=list)
     schedules: Optional[List[ScheduleDefinition]] = Field(default_factory=list)
     subscription: Optional[str] = None
-    subscriptions: Optional[List[AssistantSubscriptionTemplate]] = Field(default_factory=list)
+    connections: Optional[List[ProjectAssistantConnection]] = Field(default_factory=list)
     logging_enabled: Optional[bool] = Field(None, alias="loggingEnabled")
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
     priority_hint: Optional[int] = Field(None, alias="priorityHint")
