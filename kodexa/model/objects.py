@@ -1951,9 +1951,9 @@ class ProjectAssistantConnection(BaseModel):
     A template for an assistant subscription
     """
     sourceRef: Optional[str] = Field(None, description="The reference to the metadata object to source")
-    sourceType: Optional[SubscriptionType] = None
+    sourceType: Optional[ConnectionType] = None
     targetRef: Optional[str] = Field(None, description="The reference to the metadata object to target")
-    targetType: Optional[SubscriptionType] = None
+    targetType: Optional[ConnectionType] = None
     subscription: Optional[str] = None
     active: Optional[bool] = True
 

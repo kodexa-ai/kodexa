@@ -80,7 +80,7 @@ def test_tag_multiple_regex_matches():
     document = Document.from_text(doc_string)
     pipeline = Pipeline(document)
     pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE', content_re=r'(little)', node_only=False,
-                                 node_tag_uuid=str(uuid.uuid4())))
+                                 node_tag_uuid=str(uuid.uuid())))
     context = pipeline.run()
 
     # Now each of the feature values should have the same UUID

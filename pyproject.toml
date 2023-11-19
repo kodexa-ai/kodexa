@@ -33,7 +33,6 @@ pyfunctional = ">=1.4.3,<1.5.0"
 pydantic = "v2.3.0"
 pydantic-yaml = "^1.0.0"
 semver = "^3.0.1"
-jupyter = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 mkdocs-material = "^9.0.3"
@@ -46,6 +45,7 @@ setuptools = "^65.5.1"
 black = "^23.7.0"
 mkdocstrings = "^0.22.0"
 mkdocstrings-python = "^1.5.1"
+jupyter = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core"]

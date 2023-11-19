@@ -30,4 +30,4 @@ def test_serialization():
 
     new_taxonomy = Taxonomy.model_validate(taxonomy.dict())
 
-    print(json.dumps(new_taxonomy.dict(), indent=4))
+    print(json.dumps(new_taxonomy.model_dump(), indent=4))

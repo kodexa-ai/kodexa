@@ -675,18 +675,6 @@ class PipelineStatistics:
 
     Attributes:
         documents_processed (int): The number of documents processed.
-
-    """
-
-    """A set of statistics for the processed document
-
-    documents_processed
-    document_exceptions
-
-    Args:
-
-    Returns:
-
     """
 
     def __init__(self):

@@ -64,7 +64,6 @@ def test_class_step_step_with_context():
     ctxt = pipeline.run()
 
     assert ctxt.statistics.documents_processed == 1
-    assert ctxt.statistics.document_exceptions == 0
     assert document_captures.documents[0].metadata.cheese == pipeline.context.execution_id
 
 
@@ -82,7 +81,6 @@ def test_function_step_with_context():
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
-    assert stats.document_exceptions == 0
     assert len(document_captures.documents) == 1
     assert document_captures.documents[0].metadata.cheese == pipeline.context.execution_id
 
@@ -101,7 +99,6 @@ def test_function_step():
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
-    assert stats.document_exceptions == 0
     assert len(test_capture.documents) == 1
     assert test_capture.documents[0].metadata.cheese == 'fishstick'
 
@@ -119,7 +116,6 @@ def test_fluent_pipeline():
         test_capture).run().statistics
 
     assert stats.documents_processed == 1
-    assert stats.document_exceptions == 0
     assert len(test_capture.documents) == 1
     assert test_capture.documents[0].metadata.cheese == 'fishstick'
 
@@ -132,7 +128,6 @@ def test_url_pipeline():
         test_capture).run().statistics
 
     assert stats.documents_processed == 1
-    assert stats.document_exceptions == 0
     assert len(test_capture.documents) == 1
 
     print(test_capture.documents[0].content_node.get_all_content())
@@ -151,10 +146,9 @@ def test_function_step_with_exception():
     stats = pipeline.run().statistics
 
     assert stats.documents_processed == 1
-    assert stats.document_exceptions == 1
     assert len(test_capture.documents) == 1
 
-    assert len(test_capture.documents[0].exceptions) == 1
+    assert len(test_capture.documents[0].get_exceptions()) == 1
 
 
 def test_basic_url_pipeline():
