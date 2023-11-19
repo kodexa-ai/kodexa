@@ -5537,8 +5537,6 @@ def process_response(response) -> requests.Response:
 
         raise Exception("Bad request " + response.text)
 
-    process_response(response)
-
     return response
 
     #
