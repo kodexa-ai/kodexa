@@ -31,7 +31,7 @@ from kodexa.model.objects import (
     WorkspaceEvent,
 )
 from kodexa.pipeline import PipelineContext, PipelineStatistics
-from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient
+from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient, process_response
 
 logger = logging.getLogger()
 
@@ -356,14 +356,9 @@ class RemoteSession:
             verify=not KodexaPlatform.get_insecure(),
         )
 
-        if r.status_code != 200:
-            logger.warning("Unable to create session")
-            logger.warning(r.text)
-            raise Exception(
-                "Unable to create a session, check your URL and access token"
-            )
+        process_response(r)
 
-        self.cloud_session = Dict(json.loads(r.text))
+        self.cloud_session = json.loads(r.text)
 
     def execution_action(self, document, options, attach_source, context):
         """
@@ -817,11 +812,7 @@ class EventHelper:
             timeout=300,
             verify=not KodexaPlatform.get_insecure(),
         )
-        if co_response.status_code != 200:
-            logger.error(f"Response {co_response.status_code} {co_response.text}")
-            raise Exception(
-                f"Unable to find content object {content_object_id} in execution {self.event.execution.id}"
-            )
+        process_response(co_response)
         return io.BytesIO(co_response.content)
 
     def put_content_object(
@@ -851,10 +842,7 @@ class EventHelper:
             verify=not KodexaPlatform.get_insecure(),
         )
 
-        if co_response.status_code != 200:
-            logger.info("Unable to post back object")
-            logger.error(co_response.text)
-            raise Exception("Unable to post back content object")
+        process_response(co_response)
 
         logger.info("Object posted back")
 

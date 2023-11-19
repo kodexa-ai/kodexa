@@ -2558,19 +2558,21 @@ class ProjectsEndpoint(EntitiesEndpoint):
             ).set_client(self.client)
         return None
 
-    def stream_query(self, query: str = "*", sort=None):
+    def stream_query(self, query: str = "*", sort=None, limit=None):
         """
         Stream the query for the project endpoints.
 
         Args:
             query (str, optional): The query to run. Defaults to "*".
             sort (str, optional): Sorting order of the query. Defaults to None.
+            limit (int, optional): The maximum number of results to return. Defaults to None.
 
         Yields:
             ProjectEndpoint: A generator of the project endpoints.
         """
         page_size = 5
         page = 1
+        counter = 0
 
         if not sort:
             sort = "id"
@@ -2583,6 +2585,9 @@ class ProjectsEndpoint(EntitiesEndpoint):
                 break
             for project_endpoint in page_response.content:
                 yield project_endpoint
+                counter += 1
+                if limit and counter >= limit:
+                    break
             page += 1
 
     def query(
@@ -3375,6 +3380,33 @@ class ExtensionPackEndpoint(ComponentInstanceEndpoint, ExtensionPack):
         """
         return "extensionPacks"
 
+    def undeploy(self):
+        """
+        Undeploy the extension pack.
+
+        Returns:
+            None
+        """
+        response = self.client.put(f"/api/extensionPacks/{self.ref}/_undeploy")
+        process_response(response)
+
+    def deploy(self):
+        """
+        Deploy the extension pack.
+
+        :return: None
+        """
+        response = self.client.put(f"/api/extensionPacks/{self.ref}/_deploy")
+        process_response(response)
+        
+    def repack(self):
+        """
+        Repack the extension pack.
+
+        :return: None
+        """
+        response = self.client.put(f"/api/extensionPacks/{self.ref}/_repack")
+        process_response(response)
 
 class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
     """Represents a taxonomy endpoint"""
@@ -3957,14 +3989,35 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Update the document family.
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
-        self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
+        response = self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
+        self.change_sequence = response.json()["changeSequence"]
+
+    def lock(self):
+        """
+        Lock the document family.
+        """
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/lock"
+        response = self.client.put(url)
+        process_response(response)
+        self.change_sequence = response.json()["changeSequence"]
+
+    def unlock(self):
+        """
+        Lock the document family.
+        """
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/unlock"
+        response = self.client.put(url)
+        process_response(response)
+        self.change_sequence = response.json()["changeSequence"]
+
 
     def touch(self):
         """
         Update the document family.
         """
         url = f"/api/documentFamilies/{self.id}/touch"
-        self.client.get(url)
+        response = self.client.get(url)
+        process_response(response)
 
     def export(self) -> bytes:
         """
@@ -3977,6 +4030,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
         )
         get_response = self.client.get(url)
+        process_response(get_response)
         return get_response.content
 
     def update_document(
@@ -4187,7 +4241,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
         self.client.put(
-            url, params={'replace_data': replace_data},
+            url, params={'replaceData': replace_data},
             body=document.get_feature_set(owner_uri).dict(by_alias=True),
         )
 
@@ -4995,7 +5049,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         """
         page_size = 5
         page = 1
-
+        count = 0
         if not sort:
             sort = "id"
 
@@ -5007,6 +5061,9 @@ class DocumentStoreEndpoint(StoreEndpoint):
                 break
             for document_family in page_response.content:
                 yield document_family
+                count += 1
+                if limit and count >= limit:
+                    break
             page += 1
 
     def filter(
@@ -5480,9 +5537,6 @@ def process_response(response) -> requests.Response:
 
         raise Exception("Bad request " + response.text)
 
-    if response.status_code != 200:
-        raise Exception(f"Unexpected response ({response.status_code})")
-
     return response
 
     #
@@ -5524,8 +5578,8 @@ OBJECT_TYPES = {
         "global": True,
     },
     "assistantDefinitions": {
-        "name": "assistant",
-        "plural": "assistants",
+        "name": "assistantDefinition",
+        "plural": "assistantDefintions",
         "type": AssistantDefinitionEndpoint,
         "endpoint": AssistantDefinitionsEndpoint,
     },

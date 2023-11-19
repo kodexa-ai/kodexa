@@ -1808,7 +1808,7 @@ class ExtensionPackProvided(BaseModel):
     slug: str = Field(
         ...,
         description="The slug used when referencing this metadata object",
-        pattern=r"^[a-zA-Z0-9\-_]{0,255}$",
+        pattern=r"^[a-zA-Z0-9\-_\.]{0,255}$",
     )
     type: str = Field(..., description="The type of metadata object")
     name: str = Field(..., description="The name of the object")
@@ -1924,6 +1924,38 @@ class PipelineImplementationMetadata(BaseModel):
         None, description="The metadata for the steps in this pipeline"
     )
 
+class ConnectionType(Enum):
+    """
+    The type of assistant subscription, ie.
+        STORE,
+        DOCUMENT_FAMILY,
+        DATA_OBJECT,
+        WORKSPACE,
+        CHANNEL,
+    """
+    STORE = "STORE"
+    DOCUMENT_FAMILY = "DOCUMENT_FAMILY"
+    DATA_OBJECT = "DATA_OBJECT"
+    WORKSPACE = "WORKSPACE"
+    CHANNEL = "CHANNEL"
+
+
+class ProjectAssistantConnection(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    """
+    A template for an assistant subscription
+    """
+    sourceRef: Optional[str] = Field(None, description="The reference to the metadata object to source")
+    sourceType: Optional[SubscriptionType] = None
+    targetRef: Optional[str] = Field(None, description="The reference to the metadata object to target")
+    targetType: Optional[SubscriptionType] = None
+    subscription: Optional[str] = None
+    active: Optional[bool] = True
 
 class ProjectAssistant(BaseModel):
     model_config = ConfigDict(
@@ -1945,10 +1977,10 @@ class ProjectAssistant(BaseModel):
     stores: Optional[List[str]] = Field(default_factory=list)
     schedules: Optional[List[ScheduleDefinition]] = Field(default_factory=list)
     subscription: Optional[str] = None
-
+    connections: Optional[List[ProjectAssistantConnection]] = Field(default_factory=list)
     logging_enabled: Optional[bool] = Field(None, alias="loggingEnabled")
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
-
+    priority_hint: Optional[int] = Field(None, alias="priorityHint")
 
 class Taxon(BaseModel):
     model_config = ConfigDict(
@@ -3288,7 +3320,7 @@ class Assistant(BaseModel):
     definition: Optional[AssistantDefinition] = None
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
     color: Optional[str] = Field(None, description="The color to use for the assistant")
-
+    priority_hint: Optional[int] = Field(None, alias="priorityHint")
 
 class AssistantExecution(BaseModel):
     model_config = ConfigDict(
@@ -3951,6 +3983,8 @@ class ModelContentMetadata(BaseModel):
         None, description="The state of the model in this store"
     )
 
+    inferable: Optional[bool] = Field(None, description="Can this model be used to infer")
+
     trainable: Optional[bool] = Field(None, description="Can this model be trained")
 
     event_aware: Optional[bool] = Field(
@@ -4122,11 +4156,6 @@ class ExtensionPack(ExtensionPackProvided):
     """
     Extension packs provide new components to the platform
     """
-
-    org_slug: Optional[str] = Field(
-        None, alias="orgSlug", pattern=r"^[a-zA-Z0-9\-_]{0,100}$"
-    )
-    slug: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
     name: Optional[str] = None
     description: Optional[str] = None
     public_access: Optional[bool] = Field(None, alias="publicAccess")
@@ -4136,6 +4165,7 @@ class ExtensionPack(ExtensionPackProvided):
     services: Optional[List[SlugBasedMetadata]] = None
     source: Optional[ExtensionPackSource] = None
     deployment: Optional[DeploymentMetadata] = None
+    background_task: Optional[str] = Field(None, alias="backgroundTask")
 
 
 class ModelRuntime(ExtensionPackProvided):
