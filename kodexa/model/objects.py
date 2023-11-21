@@ -1509,6 +1509,7 @@ class ExecutionEventType(Enum):
     assistant_response = "ASSISTANT_RESPONSE"
     abend = "ABEND"
 
+
 class Status6(Enum):
     pending = "PENDING"
     running = "RUNNING"
@@ -1924,6 +1925,7 @@ class PipelineImplementationMetadata(BaseModel):
         None, description="The metadata for the steps in this pipeline"
     )
 
+
 class ConnectionType(Enum):
     """
     The type of assistant subscription, ie.
@@ -1950,12 +1952,15 @@ class ProjectAssistantConnection(BaseModel):
     """
     A template for an assistant subscription
     """
-    sourceRef: Optional[str] = Field(None, description="The reference to the metadata object to source")
-    sourceType: Optional[ConnectionType] = None
-    targetRef: Optional[str] = Field(None, description="The reference to the metadata object to target")
-    targetType: Optional[ConnectionType] = None
+    source_ref: Optional[str] = Field(None, description="The reference to the metadata object to source",
+                                      alias="sourceRef")
+    source_type: Optional[ConnectionType] = Field(None, description="The type of the source", alias="sourceType")
+    target_ref: Optional[str] = Field(None, description="The reference to the metadata object to target",
+                                      alias="targetRef")
+    target_type: Optional[ConnectionType] = Field(None, description="The type of the target", alias="targetType")
     subscription: Optional[str] = None
     active: Optional[bool] = True
+
 
 class ProjectAssistant(BaseModel):
     model_config = ConfigDict(
@@ -1981,6 +1986,7 @@ class ProjectAssistant(BaseModel):
     logging_enabled: Optional[bool] = Field(None, alias="loggingEnabled")
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
     priority_hint: Optional[int] = Field(None, alias="priorityHint")
+
 
 class Taxon(BaseModel):
     model_config = ConfigDict(
@@ -3322,6 +3328,7 @@ class Assistant(BaseModel):
     color: Optional[str] = Field(None, description="The color to use for the assistant")
     priority_hint: Optional[int] = Field(None, alias="priorityHint")
 
+
 class AssistantExecution(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -4452,6 +4459,7 @@ class WorkspaceEvent(BaseModel):
     type: Optional[str] = None
     workspace: Optional[Workspace] = Field(None, alias="Workspace")
     workspace_update: Optional[dict] = Field(None, alias="workspaceUpdate")
+
 
 class ScheduledEvent(BaseModel):
     model_config = ConfigDict(
