@@ -64,7 +64,6 @@ from kodexa.model.objects import (
     User,
     DataAttribute,
     DataObject,
-    PageNote,
     ContentObject,
     DocumentStatus,
     Store,
