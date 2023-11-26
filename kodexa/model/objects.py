@@ -2300,6 +2300,19 @@ class Project(BaseModel):
     owner: Optional[User] = None
 
 
+class TaxonLink(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    node_uuids: Optional[List[str]] = Field(None, alias="nodeUuids")
+    content_object: Optional[ContentObject] = Field(None, alias="contentObject")
+    path: Optional[str] = None
+    owner_uri: Optional[str] = Field(None, alias="ownerUri")
+
+
 class FeatureSet(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -2486,34 +2499,12 @@ class DataAttribute(BaseModel):
     attribute_status: Optional[AttributeStatus] = Field(None, alias="attributeStatus")
     owner_uri: Optional[str] = Field(None, alias="ownerUri")
     confidence: Optional[float] = None
-    number_of_notes: Optional[int] = Field(
-        None,
-        alias="numberOfNotes",
-        description="The number of notes associated with this attribute",
-    )
     data_features: Optional[Dict[str, Any]] = Field(
         None, alias="dataFeatures", description="Additional features for the data"
     )
     path: Optional[str] = None
     data_obj_id: Optional[str] = Field(None, alias="dataObjId")
     label: Optional[str] = None
-
-
-class Note(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
-    id: Optional[str] = Field(None, description="The ID of the object")
-    uuid: Optional[str] = None
-    change_sequence: Optional[int] = Field(None, alias="changeSequence")
-    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
-    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
-    user: Optional[User] = None
-    content: Optional[str] = None
-
 
 class Role(BaseModel):
     model_config = ConfigDict(
@@ -2608,25 +2599,6 @@ class PageModelTraining(BaseModel):
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
     content: Optional[List[ModelTraining]] = None
-    number: Optional[int] = None
-
-    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
-    first: Optional[bool] = None
-    last: Optional[bool] = None
-    empty: Optional[bool] = None
-
-
-class PageNote(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
-    total_pages: Optional[int] = Field(None, alias="totalPages")
-    total_elements: Optional[int] = Field(None, alias="totalElements")
-    size: Optional[int] = None
-    content: Optional[List[Note]] = None
     number: Optional[int] = None
 
     number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
