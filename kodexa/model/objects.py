@@ -3119,6 +3119,8 @@ class DocumentFamily(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     document_status: Optional[DocumentStatus] = Field(None, alias="documentStatus")
+    summary: Optional[str] = None
+
     assignments: Optional[List[DocumentAssignment]] = Field(
         None,
         description="A list of the assignments to users for this document",
@@ -3178,7 +3180,6 @@ class DocumentFamily(BaseModel):
         alias="labelStatistics",
         description="The statistics about the labels in the document family",
     )
-
 
 class DocumentFamilyStatistics(BaseModel):
     model_config = ConfigDict(
@@ -4106,6 +4107,7 @@ class CredentialDefinition(ExtensionPackProvided):
 class Dashboard(ExtensionPackProvided):
     widgets: Optional[List[DashboardWidget]] = None
     single_widget: Optional[DashboardWidget] = Field(None, alias="singleWidget")
+    entry_points: Optional[List[str]] = Field(None, alias="entryPoints")
 
 
 class DataForm(ExtensionPackProvided):
