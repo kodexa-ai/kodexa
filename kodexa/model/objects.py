@@ -15,12 +15,7 @@ class ExceptionResponse(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
+
     date_time: Optional[StandardDateTime] = Field(None, alias="dateTime")
     message: Optional[str] = None
     incident_id: Optional[str] = Field(None, alias="incidentId")
@@ -39,12 +34,7 @@ class StatusType(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
+
     reason_phrase: Optional[str] = Field(None, alias="reasonPhrase")
     status_code: Optional[int] = Field(None, alias="statusCode")
 
