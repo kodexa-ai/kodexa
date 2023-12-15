@@ -419,6 +419,7 @@ class SelectionOption(KodexaBaseModel):
     label: Optional[str] = None
     id: Optional[str] = None
     description: Optional[str] = None
+    show_if: Optional[str] = Field(None, alias="showIf")
 
 
 class SlugBasedMetadata1(KodexaBaseModel):
