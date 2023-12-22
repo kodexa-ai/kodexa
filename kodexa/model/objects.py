@@ -3926,6 +3926,20 @@ class DocumentContentMetadata(BaseModel):
     type: Optional[str] = Field(None, description="The type of content metadata")
 
 
+class EventTemplate(BaseModel):
+    """
+    The options for an event
+    """
+    label: Optional[str] = None
+    description: Optional[str] = None
+    event_type: Optional[str] = Field(
+        None, alias="eventType", description="The type of event"
+    )
+    options: Optional[List[Option]] = Field(
+        None, description="The options for the event"
+    )
+
+
 class ModelContentMetadata(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -3987,15 +4001,19 @@ class ModelContentMetadata(BaseModel):
         None, alias="trainingOptions", description="The training options for this model"
     )
 
+    event_options: Optional[List[EventOptions]] = Field(
+        None, alias="eventOptions", description="The event options for this model"
+    )
+
     inference_options: Optional[List[Option]] = Field(
         None,
         alias="inferenceOptions",
         description="The inference options for this model",
     )
 
-    event_options: Optional[List[Option]] = Field(
+    event_templates: Optional[List[EventTemplate]] = Field(
         None,
-        alias="eventOptions",
+        alias="eventTemplates",
         description="The event options for this model",
     )
 
