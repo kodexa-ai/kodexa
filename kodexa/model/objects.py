@@ -3366,6 +3366,22 @@ class BaseEvent(
     pass
 
 
+class MessageContext(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    active_features: Optional[FeatureSet] = Field(None, alias="activeFeatures")
+    content_object_id: Optional[str] = Field(None, alias="contentObjectId")
+    store_ref: Optional[str] = Field(None, alias="storeRef")
+    document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
+    selected_node_uuids: Optional[List[str]] = Field(None, alias="selectedNodeUuids")
+
+
+
 class MessageEvent(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -3374,6 +3390,7 @@ class MessageEvent(BaseModel):
         protected_namespaces=("model_config",),
     )
     message: Optional[Message] = None
+    context: Optional[MessageContext] = None
 
 
 class ChannelEvent(BaseModel):
