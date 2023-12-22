@@ -2457,6 +2457,7 @@ class Message(BaseModel):
     message_feedback: Optional[MessageFeedback] = Field(None, alias="messageFeedback")
     assistant: Optional[Assistant] = None
     user: Optional[User] = None
+    context: Optional[MessageContext] = None
 
 
 class DataAttribute(BaseModel):
@@ -3390,7 +3391,6 @@ class MessageEvent(BaseModel):
         protected_namespaces=("model_config",),
     )
     message: Optional[Message] = None
-    context: Optional[MessageContext] = None
 
 
 class ChannelEvent(BaseModel):
