@@ -4001,20 +4001,14 @@ class ModelContentMetadata(BaseModel):
         None, alias="trainingOptions", description="The training options for this model"
     )
 
-    event_options: Optional[List[EventOptions]] = Field(
-        None, alias="eventOptions", description="The event options for this model"
+    event_templates: Optional[List[EventTemplate]] = Field(
+        None, alias="eventTemplates", description="The event templates for this model"
     )
 
     inference_options: Optional[List[Option]] = Field(
         None,
         alias="inferenceOptions",
         description="The inference options for this model",
-    )
-
-    event_templates: Optional[List[EventTemplate]] = Field(
-        None,
-        alias="eventTemplates",
-        description="The event options for this model",
     )
 
     taxonomy: Optional[Taxonomy] = None
