@@ -6454,6 +6454,7 @@ class KodexaClient:
         raise Exception(f"Unknown object type: {object_type}")
 
 
+MessageEndpoint.model_rebuild()
 ClientEndpoint.model_rebuild()
 DocumentStoreEndpoint.model_rebuild()
 ModelStoreEndpoint.model_rebuild()
