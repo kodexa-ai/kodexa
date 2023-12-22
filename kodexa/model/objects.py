@@ -3943,17 +3943,18 @@ class DocumentContentMetadata(BaseModel):
     type: Optional[str] = Field(None, description="The type of content metadata")
 
 
-class EventTemplate(BaseModel):
+class MessageTemplate(BaseModel):
     """
-    The options for an event
+    A template for a message on a channel
     """
     label: Optional[str] = None
     description: Optional[str] = None
-    event_type: Optional[str] = Field(
-        None, alias="eventType", description="The type of event"
+    content: Optional[str] = None
+    requires_context: Optional[bool] = Field(
+        None, alias="requiresContext"
     )
-    options: Optional[List[Option]] = Field(
-        None, description="The options for the event"
+    message_block: Optional[MessageBlock] = Field(
+        None, alias="messageBlock"
     )
 
 
@@ -4018,8 +4019,8 @@ class ModelContentMetadata(BaseModel):
         None, alias="trainingOptions", description="The training options for this model"
     )
 
-    event_templates: Optional[List[EventTemplate]] = Field(
-        None, alias="eventTemplates", description="The event templates for this model"
+    message_templates: Optional[List[MessageTemplate]] = Field(
+        None, alias="messageTemplates", description="The message templates"
     )
 
     inference_options: Optional[List[Option]] = Field(
