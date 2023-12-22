@@ -3379,7 +3379,7 @@ class MessageContext(BaseModel):
     store_ref: Optional[str] = Field(None, alias="storeRef")
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
     selected_node_uuids: Optional[List[str]] = Field(None, alias="selectedNodeUuids")
-
+    page: Optional[int] = None
 
 
 class MessageEvent(BaseModel):
