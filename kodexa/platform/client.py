@@ -85,7 +85,7 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, TaxonLink,
+    DocumentFamilyStatistics, TaxonLink, MessageContext,
 )
 
 logger = logging.getLogger()
@@ -6454,6 +6454,7 @@ class KodexaClient:
         raise Exception(f"Unknown object type: {object_type}")
 
 
+MessageContext.model_rebuild()
 MessageEndpoint.model_rebuild()
 ClientEndpoint.model_rebuild()
 DocumentStoreEndpoint.model_rebuild()
