@@ -2451,10 +2451,10 @@ class Message(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     channel: Optional[Channel] = None
-    message_block: Optional[MessageBlock] = Field(None, alias="messageBlock")
+    block: Optional[MessageBlock] = Field(None, alias="block")
     message_type: Optional[str] = Field(None, alias="messageType")
     content: Optional[str] = None
-    message_feedback: Optional[MessageFeedback] = Field(None, alias="messageFeedback")
+    feedback: Optional[MessageFeedback] = Field(None, alias="feedback")
     assistant: Optional[Assistant] = None
     user: Optional[User] = None
     context: Optional[MessageContext] = None
