@@ -12,7 +12,7 @@ def to_camel(string: str) -> str:
 StandardDateTime = Annotated[
     datetime,
     PlainSerializer(
-        lambda v: v.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z", return_type=str
+        lambda v: v.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z" if not isinstance(v,str) else v, return_type=str
     ),
     WithJsonSchema({"type": "datetime"}, mode="serialization"),
 ]
