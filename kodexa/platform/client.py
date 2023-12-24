@@ -619,7 +619,10 @@ class EntityEndpoint(ClientEndpoint):
             raise Exception("Can't create as it already exists")
 
         url = f"/api/{self.get_type()}"
-        self.client.post(url, self.model_dump(mode="json", by_alias=True))
+        response = self.client.post(url, self.model_dump(mode="json", by_alias=True))
+
+        # We need to update the id
+        self.id = response.json()["id"]
 
     def update(self):
         """
@@ -2174,6 +2177,25 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         new_message.content = content
         new_message.message_type = "TEXT"
         return new_message.create()
+
+    def send_message(self, message: Message):
+        """Send a message.
+
+        This method is used to send a message through the channel endpoint. It sets the client, channel,
+        and message type, and then creates the message.
+
+        Args:
+            message (Message): The message to be sent.
+        """
+
+        # We need to convert the Message into a MessageEndpoint
+        message_endpoint = MessageEndpoint().set_client(self.client)
+        message_endpoint.channel = self.detach()
+        message_endpoint.message_type = message.message_type
+        message_endpoint.content = message.content
+        message_endpoint.message_blocks = message.message_blocks
+        message_endpoint.message_feedback = message.message_feedback
+        message_endpoint.create()
 
 
 class WorkspaceEndpoint(EntityEndpoint, Workspace):
