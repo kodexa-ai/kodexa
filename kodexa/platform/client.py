@@ -2395,9 +2395,44 @@ class ProjectEndpoint(EntityEndpoint, Project):
         return [ProjectTag.model_validate(tag) for tag in response.json()]
 
 
-class ChannelsEndpoint(EntitiesEndpoint):
-    """Represents a channels endpoint"""
+class MessagesEndpoint(EntitiesEndpoint):
+    """Represents a message endpoint"""
 
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "messages".
+        """
+        return "messages"
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): An optional dictionary object. Defaults to None.
+
+        Returns:
+            MessageEndpoint: The instance class of the endpoint.
+        """
+        return MessageEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): An optional dictionary object. Defaults to None.
+
+        Returns:
+            PageMessageEndpoint: The page class of the endpoint.
+        """
+        return PageMessageEndpoint
+
+
+class ChannelsEndpoint(EntitiesEndpoint):
     """Represents a channels endpoint"""
 
     def get_type(self) -> str:
@@ -5835,6 +5870,7 @@ class KodexaClient:
         memberships (MembershipsEndpoint): An endpoint for memberships.
         executions (ExecutionsEndpoint): An endpoint for executions.
         channels (ChannelsEndpoint): An endpoint for channels.
+        messages (MessagesEndpoint): An endpoint for messages.
     """
 
     def __init__(self, url=None, access_token=None, profile=None, insecure=None):
@@ -5857,6 +5893,7 @@ class KodexaClient:
         self.executions = ExecutionsEndpoint(self)
         self.channels = ChannelsEndpoint(self)
         self.assistants = AssistantsEndpoint(self)
+        self.messages = MessagesEndpoint(self)
 
     @staticmethod
     def login(url, email, password, insecure=False):
