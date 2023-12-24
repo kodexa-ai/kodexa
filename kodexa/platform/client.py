@@ -626,8 +626,7 @@ class EntityEndpoint(ClientEndpoint):
 
         # We need to update the id
         self.id = response.json()["id"]
-        self.created_on = response.json()["createdOn"]
-        self.updated_on = response.json()["updatedOn"]
+        self.reload()
         return self
 
     def update(self):
