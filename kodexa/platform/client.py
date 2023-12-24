@@ -608,9 +608,12 @@ class EntityEndpoint(ClientEndpoint):
         """
         raise NotImplementedError()
 
-    def create(self):
+    def create(self) -> "EntityEndpoint":
         """
         Creates the entity.
+
+        Returns:
+            EntityEndpoint: The created entity (with the ID in place)
 
         Raises:
             Exception: If the entity already exists.
@@ -623,6 +626,7 @@ class EntityEndpoint(ClientEndpoint):
 
         # We need to update the id
         self.id = response.json()["id"]
+        return self
 
     def update(self):
         """
