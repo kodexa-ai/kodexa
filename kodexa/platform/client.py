@@ -2193,7 +2193,7 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         message_endpoint.channel = self.detach()
         message_endpoint.message_type = message.message_type
         message_endpoint.content = message.content
-        message_endpoint.message_blocks = message.message_blocks
+        message_endpoint.message_block = message.message_block
         message_endpoint.message_feedback = message.message_feedback
         return message_endpoint.create()
 
