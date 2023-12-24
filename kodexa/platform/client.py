@@ -2178,7 +2178,7 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         new_message.message_type = "TEXT"
         return new_message.create()
 
-    def send_message(self, message: Message):
+    def send_message(self, message: Message) -> MessageEndpoint:
         """Send a message.
 
         This method is used to send a message through the channel endpoint. It sets the client, channel,
@@ -2195,7 +2195,7 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         message_endpoint.content = message.content
         message_endpoint.message_blocks = message.message_blocks
         message_endpoint.message_feedback = message.message_feedback
-        message_endpoint.create()
+        return message_endpoint.create()
 
 
 class WorkspaceEndpoint(EntityEndpoint, Workspace):
