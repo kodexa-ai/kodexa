@@ -2466,7 +2466,7 @@ class MessageFeedback(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    options = Optional[List[MessageFeedbackOption]] = None
+    options: Optional[List[MessageFeedbackOption]] = Field(None, alias="options")
 
 
 class Message(BaseModel):
@@ -4553,3 +4553,8 @@ ScheduledEvent.model_rebuild()
 DataException.model_rebuild()
 Workspace.model_rebuild()
 AssistantResponsePipeline.model_rebuild()
+MessageTemplate.model_rebuild()
+Message.model_rebuild()
+MessageFeedback.model_rebuild()
+MessageFeedbackResponse.model_rebuild()
+MessageFeedbackOption.model_rebuild()
