@@ -2458,7 +2458,7 @@ class Message(BaseModel):
     assistant: Optional[Assistant] = None
     user: Optional[User] = None
     context: Optional[MessageContext] = None
-
+    force_to_sender: Optional[bool] = Field(None, alias="forceToSender")
 
 class DataAttribute(BaseModel):
     model_config = ConfigDict(
@@ -3381,7 +3381,7 @@ class MessageContext(BaseModel):
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
     selected_node_uuids: Optional[List[str]] = Field(None, alias="selectedNodeUuids")
     page: Optional[int] = None
-
+    message_template: Optional[MessageTemplate] = Field(None, alias="messageTemplate")
 
 class MessageEvent(BaseModel):
     model_config = ConfigDict(
