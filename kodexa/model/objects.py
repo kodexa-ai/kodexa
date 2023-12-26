@@ -2427,6 +2427,38 @@ class MessageBlock(BaseModel):
     children: Optional[List[MessageBlock]] = Field(None, alias="messageBlock")
 
 
+class MessageFeedbackResponse(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+    )
+    """
+    A response to a message feedback
+    """
+
+    id: Optional[str] = None
+    options: Optional[Dict[str, Any]] = None
+
+
+class MessageFeedbackOption(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+    )
+    """
+    A message feedback option
+    """
+
+    id: Optional[str] = None
+    label: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    color: Optional[str] = None
+    options: Optional[List[Option]] = None
+
+
 class MessageFeedback(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -2434,8 +2466,7 @@ class MessageFeedback(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    user_id: Optional[str] = Field(None, alias="userId")
-    options: Optional[Dict[str, Any]] = None
+    options = Optional[List[MessageFeedbackOption]] = None
 
 
 class Message(BaseModel):
@@ -2458,7 +2489,7 @@ class Message(BaseModel):
     assistant: Optional[Assistant] = None
     user: Optional[User] = None
     context: Optional[MessageContext] = None
-    force_to_sender: Optional[bool] = Field(None, alias="forceToSender")
+    force_to_sender: Optional[bool] = Field(False, alias="forceToSender")
 
 class DataAttribute(BaseModel):
     model_config = ConfigDict(
@@ -3382,6 +3413,8 @@ class MessageContext(BaseModel):
     selected_node_uuids: Optional[List[str]] = Field(None, alias="selectedNodeUuids")
     page: Optional[int] = None
     message_template: Optional[MessageTemplate] = Field(None, alias="messageTemplate")
+    message_feedback_response: Optional[MessageFeedbackResponse] = Field(None, alias="messageFeedbackResponse")
+
 
 class MessageEvent(BaseModel):
     model_config = ConfigDict(
