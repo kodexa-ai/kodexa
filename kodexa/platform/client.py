@@ -626,8 +626,7 @@ class EntityEndpoint(ClientEndpoint):
 
         # We need to update the id
         self.id = response.json()["id"]
-        self.reload()
-        return self
+        return self.reload()
 
     def update(self):
         """
@@ -641,6 +640,7 @@ class EntityEndpoint(ClientEndpoint):
         if not exists:
             raise Exception("Can't update as it doesn't exist?")
         self.client.put(url, self.model_dump(mode="json", by_alias=True))
+        return self.reload()
 
     def delete(self):
         """
