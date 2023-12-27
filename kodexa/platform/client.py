@@ -6459,6 +6459,7 @@ class KodexaClient:
                 "assistant": AssistantDefinitionEndpoint,
                 "exception": DataExceptionEndpoint,
                 "workspace": WorkspaceEndpoint,
+                "message":  MessageEndpoint,
             }
 
             if component_type in known_components:
