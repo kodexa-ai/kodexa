@@ -3413,7 +3413,7 @@ class MessageContext(BaseModel):
     selected_node_uuids: Optional[List[str]] = Field(None, alias="selectedNodeUuids")
     page: Optional[int] = None
     message_template: Optional[MessageTemplate] = Field(None, alias="messageTemplate")
-    message_feedback_response: Optional[MessageFeedbackResponse] = Field(None, alias="messageFeedbackResponse")
+    message_feedback_response: Optional[MessageFeedbackResponse] = Field(None, alias="feedbackOption")
 
 
 class MessageEvent(BaseModel):
