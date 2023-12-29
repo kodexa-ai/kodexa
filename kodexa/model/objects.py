@@ -3407,6 +3407,7 @@ class MessageContext(BaseModel):
     )
 
     active_features: Optional[FeatureSet] = Field(None, alias="activeFeatures")
+    active_data: Optional[List[dict[str,Any]]] = Field(None, alias="activeData")
     content_object_id: Optional[str] = Field(None, alias="contentObjectId")
     store_ref: Optional[str] = Field(None, alias="storeRef")
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
