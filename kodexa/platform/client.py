@@ -85,7 +85,7 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, TaxonLink, MessageContext,
+    DocumentFamilyStatistics, MessageContext,
 )
 
 logger = logging.getLogger()
@@ -3613,25 +3613,6 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
             return None
 
         return find_taxon(self.taxons, path)
-
-    def get_taxon_links(self):
-        response = self.client.put(f"/api/taxonomies/{self.ref}/taxonLinks")
-        process_response(response)
-        return [TaxonLink.model_validate(taxon_link) for taxon_link in response.json()]
-
-    def add_taxon_link(self, taxon_link: TaxonLink):
-        response = self.client.post(
-            f"/api/taxonomies/{self.ref}/taxonLinks",
-            body=taxon_link.model_dump(by_alias=True),
-        )
-        process_response(response)
-        return TaxonLink.model_validate(response.json())
-
-    def delete_taxon_link(self, taxon_link: TaxonLink):
-        response = self.client.delete(
-            f"/api/taxonomies/{self.ref}/taxonLinks/{taxon_link.id}"
-        )
-        process_response(response)
 
 
 class MembershipEndpoint(Membership, EntityEndpoint):

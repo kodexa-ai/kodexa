@@ -2290,19 +2290,6 @@ class Project(BaseModel):
     owner: Optional[User] = None
 
 
-class TaxonLink(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
-    node_uuids: Optional[List[str]] = Field(None, alias="nodeUuids")
-    content_object: Optional[ContentObject] = Field(None, alias="contentObject")
-    path: Optional[str] = None
-    owner_uri: Optional[str] = Field(None, alias="ownerUri")
-
-
 class FeatureSet(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -3407,7 +3394,7 @@ class MessageContext(BaseModel):
     )
 
     active_features: Optional[FeatureSet] = Field(None, alias="activeFeatures")
-    active_data: Optional[List[dict[str,Any]]] = Field(None, alias="activeData")
+    active_data: Optional[List[dict[str, Any]]] = Field(None, alias="activeData")
     content_object_id: Optional[str] = Field(None, alias="contentObjectId")
     store_ref: Optional[str] = Field(None, alias="storeRef")
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
