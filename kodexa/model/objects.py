@@ -715,25 +715,6 @@ class StepImplementation(BaseModel):
     class_: Optional[str] = Field(None, alias="class")
 
 
-class StoreType1(Enum):
-    """
-    The type of object the store will contain
-    """
-
-    document = "DOCUMENT"
-    table = "TABLE"
-    dictionary = "DICTIONARY"
-    model = "MODEL"
-
-
-class StorePurpose1(Enum):
-    """
-    The purpose of the store (used by UI and assistants to understand how to interact with the store events)
-    """
-
-    operational = "OPERATIONAL"
-    training = "TRAINING"
-
 
 class StoreViewOptions(BaseModel):
     model_config = ConfigDict(
@@ -3477,6 +3458,41 @@ class PageTaxonomy(BaseModel):
     empty: Optional[bool] = None
 
 
+class TemplateType(Enum):
+    fstring = "FSTRING"
+    mustache = "MUSTACHE"
+
+
+class Prompt(ExtensionPackProvided):
+    template: Optional[str] = None
+    options: Optional[List[Option]] = Field(
+        None, description="Options for the prompt"
+    )
+    template_type: Optional[TemplateType] = Field(None, alias="templateType")
+
+
+class PagePrompt(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[Prompt]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+
+
+
 class PageStore(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -4287,13 +4303,13 @@ class Store(ExtensionPackProvided):
     """
 
     metadata: Optional[ContentMetadata1] = None
-    store_type: Optional[StoreType1] = Field(
+    store_type: Optional[StoreType] = Field(
         None, alias="storeType", description="The type of object the store will contain"
     )
     searchable: Optional[bool] = Field(
         None, description="Is the store indexed, and thus searchable"
     )
-    store_purpose: Optional[StorePurpose1] = Field(
+    store_purpose: Optional[StorePurpose] = Field(
         None,
         alias="storePurpose",
         description="The purpose of the store (used by UI and assistants to understand how to interact with the store events)",

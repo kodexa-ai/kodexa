@@ -85,7 +85,7 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, MessageContext,
+    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt,
 )
 
 logger = logging.getLogger()
@@ -1988,6 +1988,32 @@ class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
         return DocumentStoreEndpoint
 
 
+class PromptEndpoint(ComponentInstanceEndpoint, Prompt):
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, "prompts".
+        """
+        return "prompts"
+
+
+class PagePromptEndpoint(PagePrompt, PromptEndpoint):
+    """Handles the endpoint for the Page Prompt
+
+    This class inherits from both the PromptEndpoint and PagePrompt classes.
+    Currently, it doesn't add any additional functionality to its parent classes.
+
+    Note:
+        This class is currently a placeholder and may have additional methods and attributes
+        added in the future.
+    """
+
+    pass
+
+
 class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
     """Represents a project taxonomies endpoint.
 
@@ -2777,6 +2803,51 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
             return DataStoreEndpoint
         else:
             raise ValueError(f"Unknown store type {object_dict['storeType']}")
+
+
+class PromptsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    """
+    Represents a prompts endpoint.
+
+    This class is used to interact with the prompts endpoint of the API.
+    It provides methods to get the type, page class, and instance class of the endpoint,
+    as well as to deploy an extension pack from a URL.
+    """
+
+    """Represents an extension packs endpoint"""
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, "prompts".
+        """
+        return "prompts"
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): An optional dictionary of objects.
+
+        Returns:
+            PagePromptEndpoint: The page class of the endpoint.
+        """
+        return PagePromptEndpoint
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): An optional dictionary of objects.
+
+        Returns:
+            ExtensionPackEndpoint: The instance class of the endpoint.
+        """
+        return ExtensionPackEndpoint
 
 
 class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
