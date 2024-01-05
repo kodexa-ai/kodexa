@@ -3992,6 +3992,7 @@ class MessageTemplate(BaseModel):
     """
     A template for a message on a channel
     """
+    name: Optional[str] = None
     label: Optional[str] = None
     description: Optional[str] = None
     content: Optional[str] = None
