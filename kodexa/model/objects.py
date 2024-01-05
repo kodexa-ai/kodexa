@@ -3470,6 +3470,14 @@ class Prompt(ExtensionPackProvided):
     )
     template_type: Optional[TemplateType] = Field(None, alias="templateType")
 
+    def render(self, properties):
+        if self.template_type == TemplateType.fstring:
+            return self.template.format(**properties)
+        elif self.template_type == TemplateType.mustache:
+            import chevron
+            return chevron.render(self.template, properties)
+        else:
+            raise Exception("Unknown template type")
 
 class PagePrompt(BaseModel):
     model_config = ConfigDict(
