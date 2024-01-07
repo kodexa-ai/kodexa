@@ -5216,12 +5216,14 @@ class Taxonomy(ExtensionPackProvided):
             guidance_tags = {}
         for taxon in taxons:
             new_tags = []
-            for example in taxon.examples:
-                new_tags.append(GuidanceTagResult(
-                    value=example.value, line_uuids=example.line_uuid
-                ))
-            guidance_tags[taxon.path] = new_tags
-            if len(taxon.children) > 0:
+            if taxon.example is not None:
+                for example in taxon.examples:
+                    new_tags.append(GuidanceTagResult(
+                        value=example.value, line_uuids=example.line_uuid
+                    ))
+                guidance_tags[taxon.path] = new_tags
+
+            if taxon.children is not None and len(taxon.children) > 0:
                 self.build_guidance_tags(taxon.children, guidance_tags)
 
             return guidance_tags
