@@ -4191,6 +4191,7 @@ class PageGuidanceSet(BaseModel):
     last: Optional[bool] = None
     empty: Optional[bool] = None
 
+
 class TemplateType(Enum):
     """
 
@@ -4216,7 +4217,7 @@ class Prompt(ExtensionPackProvided):
             import chevron
             return chevron.render(self.template, properties)
         else:
-            raise Exception("Unknown template type")
+            raise Exception(f"Unknown template type {self.template_type}")
 
 
 class PagePrompt(BaseModel):
