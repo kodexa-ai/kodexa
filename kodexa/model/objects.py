@@ -5219,7 +5219,7 @@ class Taxonomy(ExtensionPackProvided):
             if taxon.examples is not None:
                 for example in taxon.examples:
                     new_tags.append(GuidanceTagResult(
-                        value=example.value, line_uuids=example.line_uuid
+                        value=example.value, line_uuid=example.line_uuid
                     ))
                 guidance_tags[taxon.path] = new_tags
 
