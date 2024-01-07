@@ -85,7 +85,7 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt,
+    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet,
 )
 
 logger = logging.getLogger()
@@ -1988,6 +1988,32 @@ class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
         return DocumentStoreEndpoint
 
 
+class GuidanceSetEndpoint(ComponentInstanceEndpoint, GuidanceSet):
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, "guidance".
+        """
+        return "guidance"
+
+
+class PageGuidanceSetEndpoint(PageGuidanceSet, GuidanceSetEndpoint):
+    """Handles the endpoint for the Page GuidanceSetEndpoint
+
+    This class inherits from both the GuidanceSetEndpoint and PagePrompt classes.
+    Currently, it doesn't add any additional functionality to its parent classes.
+
+    Note:
+        This class is currently a placeholder and may have additional methods and attributes
+        added in the future.
+    """
+
+    pass
+
+
 class PromptEndpoint(ComponentInstanceEndpoint, Prompt):
 
     def get_type(self) -> str:
@@ -2805,6 +2831,48 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
             raise ValueError(f"Unknown store type {object_dict['storeType']}")
 
 
+class GuidanceEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+    """
+    Represents a guidance endpoint.
+
+    This class is used to interact with the prompts endpoint of the API.
+    It provides methods to get the type, page class, and instance class of the endpoint,
+    as well as to deploy an extension pack from a URL.
+    """
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, "prompts".
+        """
+        return "guidance"
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): An optional dictionary of objects.
+
+        Returns:
+            PageGuidanceSetEndpoint: The page class of the endpoint.
+        """
+        return PageGuidanceSetEndpoint
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): An optional dictionary of objects.
+
+        Returns:
+            ExtensionPackEndpoint: The instance class of the endpoint.
+        """
+        return GuidanceSetEndpoint
+
+
 class PromptsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
     Represents a prompts endpoint.
@@ -2813,9 +2881,6 @@ class PromptsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     It provides methods to get the type, page class, and instance class of the endpoint,
     as well as to deploy an extension pack from a URL.
     """
-
-    """Represents an extension packs endpoint"""
-
     def get_type(self) -> str:
         """
         Get the type of the endpoint.
@@ -2845,9 +2910,9 @@ class PromptsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
             object_dict (dict, optional): An optional dictionary of objects.
 
         Returns:
-            ExtensionPackEndpoint: The instance class of the endpoint.
+            PromptEndpoint: The instance class of the endpoint.
         """
-        return ExtensionPackEndpoint
+        return PromptEndpoint
 
 
 class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -5710,6 +5775,18 @@ OBJECT_TYPES = {
         "type": ActionEndpoint,
         "endpoint": ActionsEndpoint,
     },
+    "prompts": {
+        "name": "prompt",
+        "plural": "prompts",
+        "type": PromptEndpoint,
+        "endpoint": PromptsEndpoint,
+    },
+    "guidance": {
+        "name": "guidance",
+        "plural": "guidance",
+        "type": GuidanceSetEndpoint,
+        "endpoint": GuidanceEndpoint,
+    },
     "modelRuntimes": {
         "name": "modelRuntime",
         "plural": "modelRuntimes",
@@ -6511,7 +6588,9 @@ class KodexaClient:
                 "assistant": AssistantDefinitionEndpoint,
                 "exception": DataExceptionEndpoint,
                 "workspace": WorkspaceEndpoint,
-                "message":  MessageEndpoint,
+                "message": MessageEndpoint,
+                "prompt": PromptEndpoint,
+                "guidance": GuidanceSetEndpoint,
             }
 
             if component_type in known_components:

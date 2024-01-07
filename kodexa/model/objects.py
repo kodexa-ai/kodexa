@@ -9,6 +9,13 @@ from kodexa.model.base import StandardDateTime
 
 
 class ExceptionResponse(BaseModel):
+    """
+    This class represents the response structure for exceptions in the application.
+
+    Attributes:
+        date_time (Optional[StandardDateTime]): The date and time when the exception occurred.
+        message (Optional[str]): The error message.
+        incident_id (Optional[str]): The ID of the incident associated with the"""
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -28,6 +35,9 @@ class ExceptionResponse(BaseModel):
 
 
 class StatusType(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -40,6 +50,9 @@ class StatusType(BaseModel):
 
 
 class StackTraceItem(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -57,6 +70,14 @@ class StackTraceItem(BaseModel):
 
 
 class StackTraceItem1(BaseModel):
+    """
+
+    :class:`StackTraceItem1` represents a stack trace item.
+
+    Attributes:
+        model_config (ConfigDict): Configuration dictionary for the model.
+        class_loader_name (str, optional): The name of the class loader used.
+        module_name (str, optional): The name of the module"""
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -74,6 +95,9 @@ class StackTraceItem1(BaseModel):
 
 
 class Cause(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -86,6 +110,9 @@ class Cause(BaseModel):
 
 
 class StackTraceItem2(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -103,6 +130,9 @@ class StackTraceItem2(BaseModel):
 
 
 class SuppressedItem(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -116,6 +146,9 @@ class SuppressedItem(BaseModel):
 
 
 class ThrowableProblem(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -136,6 +169,9 @@ class ThrowableProblem(BaseModel):
 
 
 class FavoriteLink(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -146,6 +182,9 @@ class FavoriteLink(BaseModel):
 
 
 class UserStorage(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -156,6 +195,9 @@ class UserStorage(BaseModel):
 
 
 class CompletePasswordReset(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -167,6 +209,9 @@ class CompletePasswordReset(BaseModel):
 
 
 class Organization(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -186,6 +231,9 @@ class Organization(BaseModel):
 
 
 class Team(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -203,6 +251,9 @@ class Team(BaseModel):
 
 
 class AssistantImplementation(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -218,6 +269,9 @@ class AssistantImplementation(BaseModel):
 
 
 class AssistantTaxonomy(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -232,6 +286,9 @@ class AssistantTaxonomy(BaseModel):
 
 
 class Avatar(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -243,6 +300,9 @@ class Avatar(BaseModel):
 
 
 class Card(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -256,6 +316,9 @@ class Card(BaseModel):
 
 
 class ColumnState(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -272,6 +335,9 @@ class ColumnState(BaseModel):
 
 
 class ContainerResources(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -283,6 +349,9 @@ class ContainerResources(BaseModel):
 
 
 class ContentMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -297,6 +366,9 @@ class ContentMetadata(BaseModel):
 
 
 class DashboardWidget(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -311,6 +383,9 @@ class DashboardWidget(BaseModel):
 
 
 class DataFormSource(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -324,6 +399,9 @@ class DataFormSource(BaseModel):
 
 
 class DataFormView(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -341,6 +419,15 @@ class DataFormView(BaseModel):
 
 
 class DeploymentType(Enum):
+    """
+    Represents the types of deployment options available.
+
+    Attributes:
+        kubernetes (str): Represents a Kubernetes deployment.
+        aws_lambda (str): Represents an AWS Lambda deployment.
+        azure_cloud_function (str): Represents an Azure Cloud Function deployment.
+        none (str): Represents no deployment type.
+    """
     kubernetes = "KUBERNETES"
     aws_lambda = "AWS_LAMBDA"
     azure_cloud_function = "AZURE_CLOUD_FUNCTION"
@@ -348,6 +435,9 @@ class DeploymentType(Enum):
 
 
 class DocumentColumn(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -361,6 +451,9 @@ class DocumentColumn(BaseModel):
 
 
 class DocumentMetadataProperty(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -373,6 +466,9 @@ class DocumentMetadataProperty(BaseModel):
 
 
 class Status(Enum):
+    """
+
+    """
     pending = "PENDING"
     building = "BUILDING"
     built = "BUILT"
@@ -385,6 +481,9 @@ class Status(Enum):
 
 
 class ExtensionPackSource(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -395,6 +494,9 @@ class ExtensionPackSource(BaseModel):
 
 
 class MatchLabel(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -406,6 +508,9 @@ class MatchLabel(BaseModel):
 
 
 class MetadataTag(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -422,7 +527,7 @@ class MetadataTag(BaseModel):
 
 class State(Enum):
     """
-    The state of the model in this store
+
     """
 
     pending = "PENDING"
@@ -437,7 +542,7 @@ class State(Enum):
 
 class DeploymentType1(Enum):
     """
-    The deployment to use, local means that the model runtime can be re-used across models, while container means that the model store must be deployed with the model runtime
+
     """
 
     local = "LOCAL"
@@ -445,6 +550,9 @@ class DeploymentType1(Enum):
 
 
 class OverlayCondition(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -456,7 +564,7 @@ class OverlayCondition(BaseModel):
 
 class StepType(Enum):
     """
-    The type of step (ACTION or MODEL)
+
     """
 
     action = "ACTION"
@@ -464,6 +572,9 @@ class StepType(Enum):
 
 
 class PipelineStepMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -485,6 +596,9 @@ class PipelineStepMetadata(BaseModel):
 
 
 class PossibleValue(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -497,6 +611,9 @@ class PossibleValue(BaseModel):
 
 
 class ProjectDashboard(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -517,6 +634,9 @@ class ProjectDashboard(BaseModel):
 
 
 class StoreType(Enum):
+    """
+
+    """
     document = "DOCUMENT"
     table = "TABLE"
     dictionary = "DICTIONARY"
@@ -524,11 +644,17 @@ class StoreType(Enum):
 
 
 class StorePurpose(Enum):
+    """
+
+    """
     operational = "OPERATIONAL"
     training = "TRAINING"
 
 
 class ProjectStore(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -562,7 +688,7 @@ class ProjectStore(BaseModel):
 
 class TaxonomyType(Enum):
     """
-    The type of taxonomy
+
     """
 
     content = "CONTENT"
@@ -573,7 +699,7 @@ class TaxonomyType(Enum):
 
 class Category(Enum):
     """
-    The category of project template
+
     """
 
     task = "TASK"
@@ -584,11 +710,17 @@ class Category(Enum):
 
 
 class Purpose(Enum):
+    """
+
+    """
     suggestion = "SUGGESTION"
     source = "SOURCE"
 
 
 class RelatedTaxon(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -605,6 +737,9 @@ class RelatedTaxon(BaseModel):
 
 
 class ScheduleDefinition(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -622,6 +757,9 @@ class ScheduleDefinition(BaseModel):
 
 
 class SelectionOption(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -638,6 +776,9 @@ class SelectionOption(BaseModel):
 
 
 class SlugBasedMetadata1(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -705,6 +846,9 @@ class SlugBasedMetadata1(BaseModel):
 
 
 class StepImplementation(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -715,8 +859,10 @@ class StepImplementation(BaseModel):
     class_: Optional[str] = Field(None, alias="class")
 
 
-
 class StoreViewOptions(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -745,6 +891,16 @@ class StoreViewOptions(BaseModel):
 
 
 class OptionTab(BaseModel):
+    """
+
+    Class OptionTab
+
+    This class represents an option tab that can be used in a UI for configuring models.
+
+    Attributes:
+    - `model_config` (ConfigDict): A dictionary that stores the model configuration.
+    - `name` (Optional[str]): The name of the option tab.
+    - `description` (Optional[str]): The description of the option"""
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -761,7 +917,15 @@ class OptionTab(BaseModel):
 
 class ValuePath(Enum):
     """
-    Where to get the value for this taxon when extracting
+    Enum class representing different types of value paths.
+
+    :cvar value_or_all_content: Represents a value or all content.
+    :cvar value_only: Represents a value only.
+    :cvar all_content: Represents all content.
+    :cvar data_path: Represents a data path.
+    :cvar metadata: Represents metadata.
+    :cvar expression: Represents an expression.
+    :cvar script: Represents a script.
     """
 
     value_or_all_content = "VALUE_OR_ALL_CONTENT"
@@ -774,8 +938,12 @@ class ValuePath(Enum):
 
 
 class MetadataValue(Enum):
-    """
-    If the type is metadata this will be the metadata option
+    """Enumeration representing different metadata values.
+
+    Attributes:
+        filename (str): The filename metadata value.
+        transaction_uuid (str): The transaction UUID metadata value.
+        created_datetime (str): The created datetime metadata value.
     """
 
     filename = "FILENAME"
@@ -785,8 +953,21 @@ class MetadataValue(Enum):
 
 class TaxonType(Enum):
     """
-    Expected data type to coalesce to (defaults to STRING)
-    """
+    An enumeration representing different types of taxonomic data.
+
+    The TaxonType class defines constants for various taxonomic data types, including strings, dates, numbers,
+    and more.
+
+    Usage:
+        Use the TaxonType enumeration to represent the type of taxonomic data in your code.
+
+    Example:
+        ::
+
+            taxon_type = TaxonType.string
+            if taxon_type == TaxonType.date:
+                print("This is a date type")
+            elif taxon"""
 
     string = "STRING"
     date = "DATE"
@@ -804,7 +985,13 @@ class TaxonType(Enum):
 
 class TaxonomyType1(Enum):
     """
-    The type of taxonomy
+    Represents the taxonomy types for classification.
+
+    The possible values are:
+    - content: Represents the content taxonomy type.
+    - classification: Represents the classification taxonomy type.
+    - processing: Represents the processing taxonomy type.
+    - model: Represents the model taxonomy type.
     """
 
     content = "CONTENT"
@@ -814,6 +1001,9 @@ class TaxonomyType1(Enum):
 
 
 class ViewPreset(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -831,6 +1021,9 @@ class ViewPreset(BaseModel):
 
 
 class ReprocessRequest(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -843,6 +1036,9 @@ class ReprocessRequest(BaseModel):
 
 
 class AssistantSchedule(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -857,11 +1053,24 @@ class AssistantSchedule(BaseModel):
 
 
 class StatusType1(Enum):
+    """
+    Enumeration class representing the status types.
+
+    Each status type has a string value associated with it.
+
+    :ivar unresolved: The unresolved status type.
+    :vartype unresolved: StatusType1
+    :ivar resolved: The resolved status type.
+    :vartype resolved: StatusType1
+    """
     unresolved = "UNRESOLVED"
     resolved = "RESOLVED"
 
 
 class AttributeStatus(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -879,9 +1088,7 @@ class AttributeStatus(BaseModel):
 
 
 class ContentType(Enum):
-    """
-    The type of content
-    """
+    """A class representing the content type of a document or native file."""
 
     document = "DOCUMENT"
     native = "NATIVE"
@@ -889,8 +1096,23 @@ class ContentType(Enum):
 
 class ActorType(Enum):
     """
-    The type of actor
-    """
+    The ActorType class is an enumeration that represents different types of actors in a system.
+
+    Usage:
+        Use the ActorType enum to specify the type of an actor in your system.
+
+    Attributes:
+        - user: Represents a user actor.
+        - assistant: Represents an assistant actor.
+        - access_token: Represents an access token actor.
+        - api: Represents an API actor.
+
+    Example:
+        actor = ActorType.user
+        print(actor)  # Output: ActorType.user
+
+    Notes:
+        - The values of the ActorType enum are"""
 
     user = "USER"
     assistant = "ASSISTANT"
@@ -899,6 +1121,9 @@ class ActorType(Enum):
 
 
 class DocumentActor(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -920,11 +1145,19 @@ class DocumentActor(BaseModel):
 
 
 class StatusType2(Enum):
+    """Module containing the `StatusType2` class.
+
+    This class represents the status types for a particular issue or task.
+
+    """
     unresolved = "UNRESOLVED"
     resolved = "RESOLVED"
 
 
 class DocumentStatus(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -944,13 +1177,18 @@ class DocumentStatus(BaseModel):
 
 class TransitionType(Enum):
     """
-    The type of transition
+    Defines the different types of transitions.
+
+    :cvar derived: The transition is derived from previous data.
     """
 
     derived = "DERIVED"
 
 
 class DocumentTransition(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -986,6 +1224,25 @@ class DocumentTransition(BaseModel):
 
 
 class Status1(Enum):
+    """
+
+    The Status1 Enumeration Class
+    ------------------------
+
+    This class represents a set of possible statuses.
+
+    Attributes:
+        pending (str): The pending status.
+        running (str): The running status.
+        succeeded (str): The succeeded status.
+        failed (str): The failed status.
+        requested (str): The requested status.
+        skipped (str): The skipped status.
+        cancelling (str): The cancelling status.
+        cancelled (str): The cancelled status.
+        pending_reprocessing (str): The pending reprocessing status.
+
+    """
     pending = "PENDING"
     running = "RUNNING"
     succeeded = "SUCCEEDED"
@@ -998,6 +1255,20 @@ class Status1(Enum):
 
 
 class Status2(Enum):
+    """
+
+    :class:`Status2` Enum
+
+    Enumeration class representing the status of a task. The possible values are:
+
+    - `pending`: The task is pending and has not started yet.
+    - `running`: The task is currently running.
+    - `succeeded`: The task has successfully completed.
+    - `failed`: The task has failed to complete.
+    - `requested`: The task has been requested to start but has not yet started.
+    - `skipped`: The task has been skipped.
+    - `cancelling`: The task is currently being cancelled.
+    """
     pending = "PENDING"
     running = "RUNNING"
     succeeded = "SUCCEEDED"
@@ -1010,6 +1281,9 @@ class Status2(Enum):
 
 
 class Status3(Enum):
+    """
+
+    """
     pending = "PENDING"
     running = "RUNNING"
     succeeded = "SUCCEEDED"
@@ -1022,17 +1296,47 @@ class Status3(Enum):
 
 
 class StepType1(Enum):
+    """
+    Enumerates the possible step types for a specific class.
+
+    :class: StepType1
+
+    Attributes:
+        action (str): Constant representing an action step type.
+        model (str): Constant representing a model step type.
+    """
     action = "ACTION"
     model = "MODEL"
 
 
 class Type(Enum):
+    """
+    A class representing different types.
+
+    Attributes:
+        document_store (str): Represents the type for document store.
+        taxonomy_store (str): Represents the type for taxonomy store.
+        data_store (str): Represents the type for data store.
+
+    Examples:
+        The `document_store` attribute can be accessed as follows:
+
+        >>> Type.document_store
+        <Type.document_store: 'DOCUMENT_STORE'>
+
+        The `taxonomy_store` attribute can be accessed as follows:
+
+        >>> Type.taxonomy_store
+        <Type.taxonomy_store"""
     document_store = "DOCUMENT_STORE"
     taxonomy_store = "TAXONOMY_STORE"
     data_store = "DATA_STORE"
 
 
 class ExecutionTarget(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1049,6 +1353,9 @@ class ExecutionTarget(BaseModel):
 
 
 class ExecutionTargets(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1059,6 +1366,9 @@ class ExecutionTargets(BaseModel):
 
 
 class Label(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1080,6 +1390,9 @@ class Label(BaseModel):
 
 
 class ProjectTag(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1096,6 +1409,9 @@ class ProjectTag(BaseModel):
 
 
 class PathExtractedData(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1111,6 +1427,9 @@ class PathExtractedData(BaseModel):
 
 
 class ProjectMemory(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1121,6 +1440,9 @@ class ProjectMemory(BaseModel):
 
 
 class ProjectMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1131,11 +1453,28 @@ class ProjectMetadata(BaseModel):
 
 
 class State1(Enum):
+    """
+    .. py:class:: State1(Enum)
+
+       Enumeration class representing different states.
+
+       The ``State1`` class is an enumeration that represents different states. It is implemented as an enum in Python.
+       The available states are "open" and "closed".
+
+       The states are defined with corresponding string values, allowing for easy comparison and assignment.
+
+       :cvar open: Represents the "OPEN" state.
+       :vartype open: str
+       :cvar closed: Represents the "CLOSED" state.
+       :v"""
     open = "OPEN"
     closed = "CLOSED"
 
 
 class Session(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1152,6 +1491,17 @@ class Session(BaseModel):
 
 
 class Status4(Enum):
+    """
+
+    :class:`Status4` is an enumeration class that represents different status values.
+
+    Attributes:
+        * :attr:`Status4.pending`: Represents the "PENDING" status.
+        * :attr:`Status4.running`: Represents the "RUNNING" status.
+        * :attr:`Status4.succeeded`: Represents the "SUCCEEDED" status.
+        * :attr:`Status4.failed`: Represents the "FAILED" status.
+        * :attr:`Status4.requested`: Represents the "REQUESTED" status.
+        * :"""
     pending = "PENDING"
     running = "RUNNING"
     succeeded = "SUCCEEDED"
@@ -1164,6 +1514,9 @@ class Status4(Enum):
 
 
 class StatusDetails(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1178,6 +1531,9 @@ class StatusDetails(BaseModel):
 
 
 class ValidationError(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1194,6 +1550,9 @@ class ValidationError(BaseModel):
 
 
 class ValidationResults(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1204,6 +1563,9 @@ class ValidationResults(BaseModel):
 
 
 class BulkCopy(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1216,6 +1578,9 @@ class BulkCopy(BaseModel):
 
 
 class FamilyRename(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1226,6 +1591,9 @@ class FamilyRename(BaseModel):
 
 
 class ContentFeature(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1239,6 +1607,9 @@ class ContentFeature(BaseModel):
 
 
 class NodeFeatures(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1250,6 +1621,9 @@ class NodeFeatures(BaseModel):
 
 
 class DataException(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1277,6 +1651,9 @@ class DataException(BaseModel):
 
 
 class DataLineage(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1290,6 +1667,9 @@ class DataLineage(BaseModel):
 
 
 class WorkflowDefinition(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1301,6 +1681,9 @@ class WorkflowDefinition(BaseModel):
 
 
 class ProjectResourcesUpdate(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1314,12 +1697,18 @@ class ProjectResourcesUpdate(BaseModel):
 
 
 class Role1(Enum):
+    """
+
+    """
     owner = "OWNER"
     read = "READ"
     write = "WRITE"
 
 
 class DeploymentType2(Enum):
+    """
+
+    """
     kubernetes = "KUBERNETES"
     aws_lambda = "AWS_LAMBDA"
     azure_cloud_function = "AZURE_CLOUD_FUNCTION"
@@ -1327,6 +1716,9 @@ class DeploymentType2(Enum):
 
 
 class DeploymentOptions(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1344,12 +1736,18 @@ class DeploymentOptions(BaseModel):
 
 
 class SourceType(Enum):
+    """
+
+    """
     data_object = "DATA_OBJECT"
     data_attribute = "DATA_ATTRIBUTE"
     fixed = "FIXED"
 
 
 class DataFormSourceParameter(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1361,6 +1759,9 @@ class DataFormSourceParameter(BaseModel):
 
 
 class DataFormProviderExchange(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1373,6 +1774,9 @@ class DataFormProviderExchange(BaseModel):
 
 
 class PlatformConfiguration(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1407,6 +1811,9 @@ class PlatformConfiguration(BaseModel):
 
 
 class UserActivation(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1419,6 +1826,9 @@ class UserActivation(BaseModel):
 
 
 class ModelTraining(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1447,6 +1857,9 @@ class ModelTraining(BaseModel):
 
 
 class Status5(Enum):
+    """
+
+    """
     pending = "PENDING"
     running = "RUNNING"
     succeeded = "SUCCEEDED"
@@ -1459,6 +1872,9 @@ class Status5(Enum):
 
 
 class BaseEvent1(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1469,11 +1885,17 @@ class BaseEvent1(BaseModel):
 
 
 class ObjectEventType(Enum):
+    """
+
+    """
     new_object = "NEW_OBJECT"
     derived_object = "DERIVED_OBJECT"
 
 
 class ExecutionEventType(Enum):
+    """
+
+    """
     start_execution = "START_EXECUTION"
     step_update = "STEP_UPDATE"
     assistant_event = "ASSISTANT_EVENT"
@@ -1482,6 +1904,9 @@ class ExecutionEventType(Enum):
 
 
 class Status6(Enum):
+    """
+
+    """
     pending = "PENDING"
     running = "RUNNING"
     succeeded = "SUCCEEDED"
@@ -1494,6 +1919,9 @@ class Status6(Enum):
 
 
 class ExecutionLogEntry(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1510,6 +1938,9 @@ class ExecutionLogEntry(BaseModel):
 
 
 class LoginRequest(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1521,6 +1952,9 @@ class LoginRequest(BaseModel):
 
 
 class RegisterUser(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1533,6 +1967,9 @@ class RegisterUser(BaseModel):
 
 
 class PasswordReset(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1543,6 +1980,9 @@ class PasswordReset(BaseModel):
 
 
 class PasswordChange(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1554,6 +1994,9 @@ class PasswordChange(BaseModel):
 
 
 class PlatformOverview(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1598,6 +2041,9 @@ class PlatformOverview(BaseModel):
 
 
 class QueryContext(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1616,6 +2062,9 @@ class QueryContext(BaseModel):
 
 
 class SortObject(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1628,6 +2077,9 @@ class SortObject(BaseModel):
 
 
 class SearchEntity(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1646,12 +2098,18 @@ class SearchEntity(BaseModel):
 
 
 class EventType(Enum):
+    """
+
+    """
     created = "CREATED"
     deleted = "DELETED"
     updated = "UPDATED"
 
 
 class DataAttributeValues(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1673,6 +2131,9 @@ class DataAttributeValues(BaseModel):
 
 
 class BulkDelete(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1684,6 +2145,9 @@ class BulkDelete(BaseModel):
 
 
 class User(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1714,6 +2178,9 @@ class User(BaseModel):
 
 
 class DeploymentMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1742,10 +2209,16 @@ class DeploymentMetadata(BaseModel):
 
 
 class DockerSource(ExtensionPackSource):
+    """
+
+    """
     location: Optional[str] = None
 
 
 class DocumentMetadataDefaults(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1758,6 +2231,9 @@ class DocumentMetadataDefaults(BaseModel):
 
 
 class ExtensionPackProvided(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1833,6 +2309,9 @@ class ExtensionPackProvided(BaseModel):
 
 
 class Option(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1866,6 +2345,9 @@ class Option(BaseModel):
 
 
 class Overlay(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1882,6 +2364,9 @@ class Overlay(BaseModel):
 
 
 class PipelineImplementationMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1899,12 +2384,7 @@ class PipelineImplementationMetadata(BaseModel):
 
 class ConnectionType(Enum):
     """
-    The type of assistant subscription, ie.
-        STORE,
-        DOCUMENT_FAMILY,
-        DATA_OBJECT,
-        WORKSPACE,
-        CHANNEL,
+
     """
     STORE = "STORE"
     DOCUMENT_FAMILY = "DOCUMENT_FAMILY"
@@ -1914,6 +2394,9 @@ class ConnectionType(Enum):
 
 
 class ProjectAssistantConnection(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1934,6 +2417,9 @@ class ProjectAssistantConnection(BaseModel):
 
 
 class ProjectAssistant(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -1960,6 +2446,9 @@ class ProjectAssistant(BaseModel):
 
 
 class Taxon(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2115,6 +2604,9 @@ class Taxon(BaseModel):
 
 
 class ContentObject(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2142,6 +2634,9 @@ class ContentObject(BaseModel):
 
 
 class DocumentAssignment(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2161,6 +2656,9 @@ class DocumentAssignment(BaseModel):
 
 
 class ExceptionDetails(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2185,6 +2683,9 @@ class ExceptionDetails(BaseModel):
 
 
 class ExecutionStep(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2212,6 +2713,9 @@ class ExecutionStep(BaseModel):
 
 
 class ProjectStatus(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2230,6 +2734,9 @@ class ProjectStatus(BaseModel):
 
 
 class Project(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2272,6 +2779,9 @@ class Project(BaseModel):
 
 
 class FeatureSet(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2283,6 +2793,9 @@ class FeatureSet(BaseModel):
 
 
 class DocumentViewState(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2298,6 +2811,9 @@ class DocumentViewState(BaseModel):
 
 
 class DataFormState(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2314,6 +2830,9 @@ class DataFormState(BaseModel):
 
 
 class WorkspaceStorage(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2332,6 +2851,9 @@ class WorkspaceStorage(BaseModel):
 
 
 class Workspace(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2353,6 +2875,9 @@ class Workspace(BaseModel):
 
 
 class ProjectWorkspace(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2367,6 +2892,9 @@ class ProjectWorkspace(BaseModel):
 
 
 class Channel(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2382,6 +2910,9 @@ class Channel(BaseModel):
 
 
 class MessageBlock(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2396,6 +2927,9 @@ class MessageBlock(BaseModel):
 
 
 class MessageFeedbackResponse(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2410,6 +2944,9 @@ class MessageFeedbackResponse(BaseModel):
 
 
 class MessageFeedbackOption(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2428,6 +2965,9 @@ class MessageFeedbackOption(BaseModel):
 
 
 class MessageFeedback(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2438,6 +2978,9 @@ class MessageFeedback(BaseModel):
 
 
 class Message(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2459,7 +3002,11 @@ class Message(BaseModel):
     context: Optional[MessageContext] = None
     force_to_sender: Optional[bool] = Field(False, alias="forceToSender")
 
+
 class DataAttribute(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2496,7 +3043,11 @@ class DataAttribute(BaseModel):
     data_obj_id: Optional[str] = Field(None, alias="dataObjId")
     label: Optional[str] = None
 
+
 class Role(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2518,6 +3069,9 @@ class Role(BaseModel):
 
 
 class Membership(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2535,6 +3089,9 @@ class Membership(BaseModel):
 
 
 class DataFormSourceMethod(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2546,6 +3103,9 @@ class DataFormSourceMethod(BaseModel):
 
 
 class PageableObject(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2560,6 +3120,9 @@ class PageableObject(BaseModel):
 
 
 class PageTeam(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2579,6 +3142,9 @@ class PageTeam(BaseModel):
 
 
 class PageModelTraining(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2598,6 +3164,9 @@ class PageModelTraining(BaseModel):
 
 
 class PageDataAttribute(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2617,6 +3186,9 @@ class PageDataAttribute(BaseModel):
 
 
 class PageSession(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2636,6 +3208,9 @@ class PageSession(BaseModel):
 
 
 class PageRole(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2655,6 +3230,9 @@ class PageRole(BaseModel):
 
 
 class PageProject(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2674,6 +3252,9 @@ class PageProject(BaseModel):
 
 
 class PageAssistant(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2693,6 +3274,9 @@ class PageAssistant(BaseModel):
 
 
 class PageWorkspace(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2712,6 +3296,9 @@ class PageWorkspace(BaseModel):
 
 
 class PageMessage(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2731,6 +3318,9 @@ class PageMessage(BaseModel):
 
 
 class PageChannel(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2750,6 +3340,9 @@ class PageChannel(BaseModel):
 
 
 class PageOrganization(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2769,6 +3362,9 @@ class PageOrganization(BaseModel):
 
 
 class PageMembership(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2788,6 +3384,9 @@ class PageMembership(BaseModel):
 
 
 class PageExecutionLogEntry(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2807,6 +3406,9 @@ class PageExecutionLogEntry(BaseModel):
 
 
 class CustomEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2852,6 +3454,9 @@ class CustomEvent(BaseModel):
 
 
 class ObjectMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2862,6 +3467,9 @@ class ObjectMetadata(BaseModel):
 
 
 class ProjectTaxonomy(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2887,6 +3495,9 @@ class ProjectTaxonomy(BaseModel):
 
 
 class ContentException(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2913,6 +3524,9 @@ class ContentException(BaseModel):
 
 
 class ExecutionPipeline(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2927,6 +3541,9 @@ class ExecutionPipeline(BaseModel):
 
 
 class DataFormSourceDefinition(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2939,6 +3556,9 @@ class DataFormSourceDefinition(BaseModel):
 
 
 class PageUser(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2958,6 +3578,9 @@ class PageUser(BaseModel):
 
 
 class Execution(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2990,6 +3613,9 @@ class Execution(BaseModel):
 
 
 class ExecutionSnapshot(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3022,6 +3648,9 @@ class ExecutionSnapshot(BaseModel):
 
 
 class PageExecution(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3041,6 +3670,9 @@ class PageExecution(BaseModel):
 
 
 class ContentMetadata1(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3051,6 +3683,9 @@ class ContentMetadata1(BaseModel):
 
 
 class SlugBasedMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3061,6 +3696,9 @@ class SlugBasedMetadata(BaseModel):
 
 
 class LabelStatistics(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3093,6 +3731,9 @@ class LabelStatistics(BaseModel):
 
 
 class DocumentFamily(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3171,7 +3812,11 @@ class DocumentFamily(BaseModel):
         description="The statistics about the labels in the document family",
     )
 
+
 class DocumentFamilyStatistics(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3189,6 +3834,9 @@ class DocumentFamilyStatistics(BaseModel):
 
 
 class ExecutionAssistant(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3219,6 +3867,9 @@ class ExecutionAssistant(BaseModel):
 
 
 class ExecutionOverview(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3230,6 +3881,9 @@ class ExecutionOverview(BaseModel):
 
 
 class DataObject(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3259,6 +3913,9 @@ class DataObject(BaseModel):
 
 
 class Assistant(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3293,6 +3950,9 @@ class Assistant(BaseModel):
 
 
 class AssistantExecution(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3325,6 +3985,9 @@ class AssistantExecution(BaseModel):
 
 
 class AssistantExecutionResponse(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3336,6 +3999,9 @@ class AssistantExecutionResponse(BaseModel):
 
 
 class AssistantResponsePipeline(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3363,10 +4029,16 @@ class BaseEvent(
         ]
     ]
 ):
+    """
+
+    """
     pass
 
 
 class MessageContext(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3386,6 +4058,9 @@ class MessageContext(BaseModel):
 
 
 class MessageEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3396,6 +4071,9 @@ class MessageEvent(BaseModel):
 
 
 class ChannelEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3408,6 +4086,9 @@ class ChannelEvent(BaseModel):
 
 
 class ExecutionEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3440,6 +4121,9 @@ class ExecutionEvent(BaseModel):
 
 
 class PageTaxonomy(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3458,12 +4142,67 @@ class PageTaxonomy(BaseModel):
     empty: Optional[bool] = None
 
 
+class GuidanceTagResult(BaseModel):
+    """
+
+    """
+    value: Optional[str] = None
+    line_uuid: Optional[str] = Field(None, alias="lineUuid")
+
+
+class Guidance(BaseModel):
+    """
+
+    """
+    document_name: Optional[str] = Field(None, alias="documentName")
+    document_type: Optional[str] = Field(None, alias="documentType")
+    sample_text: Optional[str] = Field(None, alias="sampleText")
+    sample_result: Optional[Dict[str, GuidanceTagResult]] = Field(None, alias="sampleResult")
+    active: Optional[bool] = None
+    applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
+    priority: Optional[int] = 1
+
+
+class GuidanceSet(ExtensionPackProvided):
+    """
+
+    """
+    guidance: List[Guidance] = Field(None, description="The guidance in the set")
+
+
+class PageGuidanceSet(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[GuidanceSet]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
 class TemplateType(Enum):
+    """
+
+    """
     fstring = "FSTRING"
     mustache = "MUSTACHE"
 
 
 class Prompt(ExtensionPackProvided):
+    """
+
+    """
     template: Optional[str] = None
     options: Optional[List[Option]] = Field(
         None, description="Options for the prompt"
@@ -3479,7 +4218,11 @@ class Prompt(ExtensionPackProvided):
         else:
             raise Exception("Unknown template type")
 
+
 class PagePrompt(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3498,10 +4241,10 @@ class PagePrompt(BaseModel):
     empty: Optional[bool] = None
 
 
-
-
-
 class PageStore(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3521,6 +4264,9 @@ class PageStore(BaseModel):
 
 
 class PageDocumentFamily(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3540,6 +4286,9 @@ class PageDocumentFamily(BaseModel):
 
 
 class SearchContent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3587,6 +4336,9 @@ class SearchContent(BaseModel):
 
 
 class StoreMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3622,6 +4374,9 @@ class StoreMetadata(BaseModel):
 
 
 class PlatformEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3648,6 +4403,9 @@ class PlatformEvent(BaseModel):
 
 
 class PageDataObject(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3667,6 +4425,9 @@ class PageDataObject(BaseModel):
 
 
 class AuditEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3693,6 +4454,9 @@ class AuditEvent(BaseModel):
 
 
 class PageAuditEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3712,6 +4476,9 @@ class PageAuditEvent(BaseModel):
 
 
 class PageRuleSet(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3731,6 +4498,9 @@ class PageRuleSet(BaseModel):
 
 
 class PageProjectTemplate(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3750,6 +4520,9 @@ class PageProjectTemplate(BaseModel):
 
 
 class PagePipeline(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3769,6 +4542,9 @@ class PagePipeline(BaseModel):
 
 
 class PageModelRuntime(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3788,6 +4564,9 @@ class PageModelRuntime(BaseModel):
 
 
 class PageSlugBasedMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3824,6 +4603,9 @@ class PageSlugBasedMetadata(BaseModel):
 
 
 class PageExtensionPack(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3843,6 +4625,9 @@ class PageExtensionPack(BaseModel):
 
 
 class PagePlatformEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3862,6 +4647,9 @@ class PagePlatformEvent(BaseModel):
 
 
 class PageDataException(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3881,6 +4669,9 @@ class PageDataException(BaseModel):
 
 
 class PageDataForm(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3900,6 +4691,9 @@ class PageDataForm(BaseModel):
 
 
 class PageDashboard(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3919,6 +4713,9 @@ class PageDashboard(BaseModel):
 
 
 class PageCredentialDefinition(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3938,6 +4735,9 @@ class PageCredentialDefinition(BaseModel):
 
 
 class PageAssistantDefinition(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3957,6 +4757,9 @@ class PageAssistantDefinition(BaseModel):
 
 
 class PageAction(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3976,6 +4779,9 @@ class PageAction(BaseModel):
 
 
 class DocumentContentMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3990,7 +4796,7 @@ class DocumentContentMetadata(BaseModel):
 
 class MessageTemplate(BaseModel):
     """
-    A template for a message on a channel
+
     """
     name: Optional[str] = None
     label: Optional[str] = None
@@ -4005,6 +4811,9 @@ class MessageTemplate(BaseModel):
 
 
 class ModelContentMetadata(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4104,7 +4913,7 @@ class ModelContentMetadata(BaseModel):
 
 class Action(ExtensionPackProvided):
     """
-    The definition of an available action
+
     """
 
     step: Optional[StepImplementation] = None
@@ -4112,6 +4921,9 @@ class Action(ExtensionPackProvided):
 
 
 class AssistantDefinition(ExtensionPackProvided):
+    """
+
+    """
     template: Optional[bool] = None
     schedulable: Optional[bool] = Field(
         None, description="The assistant can be scheduled"
@@ -4161,7 +4973,7 @@ class AssistantDefinition(ExtensionPackProvided):
 
 class CredentialDefinition(ExtensionPackProvided):
     """
-    Defines a type of credential that can be created as part of a project
+
     """
 
     credential_type: Optional[str] = Field(None, alias="credentialType")
@@ -4171,12 +4983,18 @@ class CredentialDefinition(ExtensionPackProvided):
 
 
 class Dashboard(ExtensionPackProvided):
+    """
+
+    """
     widgets: Optional[List[DashboardWidget]] = None
     single_widget: Optional[DashboardWidget] = Field(None, alias="singleWidget")
     entry_points: Optional[List[str]] = Field(None, alias="entryPoints")
 
 
 class DataForm(ExtensionPackProvided):
+    """
+
+    """
     entrypoints: Optional[List[str]] = None
     entrypoint: Optional[str] = None
     cards: Optional[List[Card]] = None
@@ -4184,6 +5002,9 @@ class DataForm(ExtensionPackProvided):
 
 
 class ProjectDataForm(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4201,7 +5022,7 @@ class ProjectDataForm(BaseModel):
 
 class ExtensionPack(ExtensionPackProvided):
     """
-    Extension packs provide new components to the platform
+
     """
     name: Optional[str] = None
     description: Optional[str] = None
@@ -4217,7 +5038,7 @@ class ExtensionPack(ExtensionPackProvided):
 
 class ModelRuntime(ExtensionPackProvided):
     """
-    The definition of an available model runtime
+
     """
 
     inference_action: Optional[str] = Field(
@@ -4251,12 +5072,15 @@ class ModelRuntime(ExtensionPackProvided):
 
 
 class Pipeline(ExtensionPackProvided):
+    """
+
+    """
     metadata: Optional[PipelineImplementationMetadata] = None
 
 
 class ProjectTemplate(ExtensionPackProvided):
     """
-    A template for new project
+
     """
 
     stores: Optional[List[ProjectStore]] = Field(
@@ -4308,7 +5132,7 @@ class ProjectTemplate(ExtensionPackProvided):
 
 class Store(ExtensionPackProvided):
     """
-    Provides the definition and metadata for a store
+
     """
 
     metadata: Optional[ContentMetadata1] = None
@@ -4349,7 +5173,7 @@ class Store(ExtensionPackProvided):
 
 class Taxonomy(ExtensionPackProvided):
     """
-    Provides the taxonomy hierarchy that is used for content and document classification and labeling
+
     """
 
     type: Optional[str] = Field(None, description="The metadata object type")
@@ -4375,7 +5199,7 @@ class Taxonomy(ExtensionPackProvided):
 
 class RuleSet(ExtensionPackProvided):
     """
-    Defines a ruleset that can be applied to data objects and attributes
+
     """
 
     ref: Optional[str] = Field(None, description="The reference to the metadata object")
@@ -4441,6 +5265,9 @@ class RuleSet(ExtensionPackProvided):
 
 
 class AssistantEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4455,6 +5282,9 @@ class AssistantEvent(BaseModel):
 
 
 class ContentEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4468,6 +5298,9 @@ class ContentEvent(BaseModel):
 
 
 class DataObjectEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4479,6 +5312,9 @@ class DataObjectEvent(BaseModel):
 
 
 class DocumentFamilyEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4490,6 +5326,9 @@ class DocumentFamilyEvent(BaseModel):
 
 
 class WorkspaceEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4502,6 +5341,9 @@ class WorkspaceEvent(BaseModel):
 
 
 class ScheduledEvent(BaseModel):
+    """
+
+    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
