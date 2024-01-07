@@ -2592,7 +2592,7 @@ class Taxon(BaseModel):
         alias="semanticDefinition",
         description="The semantic definition of the taxon",
     )
-    examples: Optional[List[str]] = Field(
+    examples: Optional[List[GuidanceTagResult]] = Field(
         None,
         description="A list of examples of the taxon values, used to understand the taxon",
     )
