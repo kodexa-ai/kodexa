@@ -5209,10 +5209,12 @@ class Taxonomy(ExtensionPackProvided):
         for taxon in self.taxons:
             taxon.update_path()
 
-    def build_guidance_tags(self, guidance_tags=None):
+    def build_guidance_tags(self, taxons=None, guidance_tags=None):
+        if taxons is None:
+            taxons = self.taxons
         if guidance_tags is None:
             guidance_tags = {}
-        for taxon in self.taxons:
+        for taxon in taxons:
             new_tags = []
             for example in taxon.examples:
                 new_tags.append(GuidanceTagResult(
