@@ -2602,6 +2602,14 @@ class Taxon(BaseModel):
         description="A list of synonyms of the taxon values, used to understand the taxon",
     )
 
+    def update_path(self, parent_path=None):
+        if parent_path is None:
+            parent_path = ""
+        self.path = parent_path + self.name
+        if self.children is not None:
+            for child in self.children:
+                child.update_path(self.path + "/")
+
 
 class ContentObject(BaseModel):
     """
@@ -5196,6 +5204,23 @@ class Taxonomy(ExtensionPackProvided):
         alias="totalTaxons",
         description="The total number of taxons in the taxonomy",
     )
+
+    def update_paths(self):
+        for taxon in self.taxons:
+            taxon.update_path()
+
+    def build_guidance_tags(self, taxons: List[Taxon], guidance_tags: dict[str, List[GuidanceTagResult]]):
+        for taxon in taxons:
+            new_tags = []
+            for example in taxon.examples:
+                new_tags.append(GuidanceTagResult(
+                    value=example.value, line_uuids=example.line_uuid
+                ))
+            guidance_tags[taxon.path] = new_tags
+            if len(taxon.children) > 0:
+                self.build_guidance_tags(taxon.children, guidance_tags)
+
+            return guidance_tags
 
 
 class RuleSet(ExtensionPackProvided):
