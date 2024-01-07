@@ -4211,9 +4211,9 @@ class Prompt(ExtensionPackProvided):
     template_type: Optional[TemplateType] = Field(None, alias="templateType")
 
     def render(self, properties):
-        if self.template_type == TemplateType.fstring:
+        if self.template_type == "FSTRING":
             return self.template.format(**properties)
-        elif self.template_type == TemplateType.mustache:
+        elif self.template_type == "MUSTACHE":
             import chevron
             return chevron.render(self.template, properties)
         else:
