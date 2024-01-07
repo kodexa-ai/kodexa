@@ -5224,9 +5224,9 @@ class Taxonomy(ExtensionPackProvided):
                 guidance_tags[taxon.path] = new_tags
 
             if taxon.children is not None and len(taxon.children) > 0:
-                self.build_guidance_tags(taxon.children, guidance_tags)
+                guidance_tags = self.build_guidance_tags(taxon.children, guidance_tags)
 
-            return guidance_tags
+        return guidance_tags
 
 
 class RuleSet(ExtensionPackProvided):
