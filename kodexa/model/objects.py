@@ -5209,8 +5209,10 @@ class Taxonomy(ExtensionPackProvided):
         for taxon in self.taxons:
             taxon.update_path()
 
-    def build_guidance_tags(self, taxons: List[Taxon], guidance_tags: dict[str, List[GuidanceTagResult]]):
-        for taxon in taxons:
+    def build_guidance_tags(self, guidance_tags=None):
+        if guidance_tags is None:
+            guidance_tags = {}
+        for taxon in self.taxons:
             new_tags = []
             for example in taxon.examples:
                 new_tags.append(GuidanceTagResult(
