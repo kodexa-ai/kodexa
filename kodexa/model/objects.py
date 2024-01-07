@@ -5216,7 +5216,7 @@ class Taxonomy(ExtensionPackProvided):
             guidance_tags = {}
         for taxon in taxons:
             new_tags = []
-            if taxon.example is not None:
+            if taxon.examples is not None:
                 for example in taxon.examples:
                     new_tags.append(GuidanceTagResult(
                         value=example.value, line_uuids=example.line_uuid
