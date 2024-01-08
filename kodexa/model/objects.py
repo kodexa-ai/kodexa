@@ -4169,6 +4169,7 @@ class Guidance(BaseModel):
     active: Optional[bool] = None
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
     priority: Optional[int] = 1
+    user_instructions: Optional[str] = Field(None, alias="userInstructions")
 
 
 class GuidanceSet(ExtensionPackProvided):
