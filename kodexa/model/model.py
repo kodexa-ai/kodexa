@@ -10,12 +10,12 @@ import uuid
 from enum import Enum
 from typing import Any, List, Optional
 
+import deepdiff
 import msgpack
 from addict import Dict
 from pydantic import BaseModel, ConfigDict
 
 from kodexa.model.objects import ContentObject, FeatureSet
-import deepdiff
 
 
 class Ref:
@@ -2428,11 +2428,20 @@ class Document(object):
         )
         self._persistence_layer.initialize()
 
-    def add_tag_instance(self, tag_to_apply, node_list: List[ContentNode]):
+    def remove_tags_by_owner(self, owner_uri: str):
+
+        for tag in self.get_all_tags():
+            for tag_instance in self.get_tag_instances(tag):
+                tag_meta: dict = tag_instance.get_data()
+                if 'owner_uri' in tag_meta and tag_meta['owner_uri'] == owner_uri:
+                    for node in tag_instance.nodes:
+                        node.remove_tag(tag)
+
+    def add_tag_instance(self, tag_to_apply:str, node_list: List[ContentNode]):
         """
             This will create a group of a tag with indexes
-        :param tag: name of the tag
-        :param node_indices: contains the list of index of a node
+        :param tag_to_apply: name of the tag
+        :param node_list: contains the list of index of a node
         :return:
         """
         # For each node in the list create/update a feature
