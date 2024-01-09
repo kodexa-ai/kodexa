@@ -3522,9 +3522,9 @@ class ContentException(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     tag: Optional[str] = None
-    message: str
-    exception_type: str = Field(..., alias="exceptionType")
-    severity: str
+    message: Optional[str] = None
+    exception_type: Optional[str] = Field(None, alias="exceptionType")
+    severity: Optional[str] = None
     exception_details: Optional[str] = Field(None, alias="exceptionDetails")
     group_uuid: Optional[str] = Field(None, alias="groupUuid")
     tag_uuid: Optional[str] = Field(None, alias="tagUuid")
