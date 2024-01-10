@@ -5765,7 +5765,7 @@ OBJECT_TYPES = {
     },
     "assistantDefinitions": {
         "name": "assistantDefinition",
-        "plural": "assistantDefintions",
+        "plural": "assistantDefinitions",
         "type": AssistantDefinitionEndpoint,
         "endpoint": AssistantDefinitionsEndpoint,
     },
