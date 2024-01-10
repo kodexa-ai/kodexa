@@ -2868,7 +2868,7 @@ class GuidanceEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
             object_dict (dict, optional): An optional dictionary of objects.
 
         Returns:
-            ExtensionPackEndpoint: The instance class of the endpoint.
+            GuidanceSetEndpoint: The instance class of the endpoint.
         """
         return GuidanceSetEndpoint
 
