@@ -610,6 +610,28 @@ class PossibleValue(BaseModel):
     description: Optional[str] = None
 
 
+class ProjectGuidance(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    """
+    The guidance that will be created with the project template
+    """
+
+    slug: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    template_ref: Optional[str] = Field(None, alias="templateRef")
+    ref: Optional[str] = None
+    guidance: Optional[List[Guidance]] = Field(None, alias="guidance")
+
+
 class ProjectDashboard(BaseModel):
     """
 
@@ -5111,6 +5133,10 @@ class ProjectTemplate(ExtensionPackProvided):
     workspaces: Optional[List[ProjectWorkspace]] = Field(
         None,
         description="The workspaces that will be created with the project template",
+    )
+    guidance: Optional[List[ProjectGuidance]] = Field(
+        None,
+        description="The guidance that will be created with the project template",
     )
     data_forms: Optional[List[ProjectDataForm]] = Field(
         None,
