@@ -3059,7 +3059,6 @@ class Document(object):
 
                     node_feature["features"].append(feature_dict)
 
-
         return feature_set
 
     def get_all_tagged_nodes(self) -> List[ContentNode]:

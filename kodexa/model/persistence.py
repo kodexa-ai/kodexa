@@ -1037,7 +1037,7 @@ class SqliteDocumentPersistence(object):
             list: A list of all nodes with tags in the document.
         """
         content_nodes = []
-        query = "select cn_id from ft where f_type in (select id from f_type where name like 'tag:%')"
+        query = "select distinct(cn_id) from ft where f_type in (select id from f_type where name like 'tag:%')"
         for content_node_ids in self.cursor.execute(query).fetchall():
             content_nodes.append(self.get_node(content_node_ids[0]))
 
