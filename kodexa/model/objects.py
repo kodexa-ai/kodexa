@@ -2953,7 +2953,7 @@ class MessageBlock(BaseModel):
     type: Optional[str] = None
     properties: Optional[Dict[str, Any]] = None
     channel: Optional[Channel] = None
-    children: Optional[List[MessageBlock]] = Field(None, alias="messageBlock")
+    children: Optional[List[MessageBlock]] = Field(None, alias="children")
 
 
 class MessageFeedbackResponse(BaseModel):
