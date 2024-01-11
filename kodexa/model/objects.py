@@ -4187,7 +4187,7 @@ class Guidance(BaseModel):
     document_name: Optional[str] = Field(None, alias="documentName")
     document_type: Optional[str] = Field(None, alias="documentType")
     sample_text: Optional[str] = Field(None, alias="sampleText")
-    sample_result: Optional[Dict[str, GuidanceTagResult]] = Field(None, alias="sampleResult")
+    sample_result: Optional[Dict[str, List[GuidanceTagResult]]] = Field(None, alias="sampleResult")
     active: Optional[bool] = None
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
     priority: Optional[int] = 1
