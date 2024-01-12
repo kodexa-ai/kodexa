@@ -2604,11 +2604,6 @@ class Taxon(BaseModel):
         alias="postExpression",
         description="An expression that is applied post extraction of the data",
     )
-    default_attribute_status_id: Optional[str] = Field(
-        None,
-        alias="defaultAttributeStatusId",
-        description="Default attribute status ID",
-    )
     semantic_definition: Optional[str] = Field(
         None,
         alias="semanticDefinition",
