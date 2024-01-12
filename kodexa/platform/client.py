@@ -2000,10 +2000,10 @@ class GuidanceSetEndpoint(ComponentInstanceEndpoint, GuidanceSet):
         return "guidance"
 
 
-class PageGuidanceSetEndpoint(PageGuidanceSet, GuidanceSetEndpoint):
+class PageGuidanceSetEndpoint(PageGuidanceSet, PageEndpoint):
     """Handles the endpoint for the Page GuidanceSetEndpoint
 
-    This class inherits from both the GuidanceSetEndpoint and PagePrompt classes.
+    This class inherits from both the GuidanceSetEndpoint and PageEndpoint classes.
     Currently, it doesn't add any additional functionality to its parent classes.
 
     Note:
@@ -2026,10 +2026,10 @@ class PromptEndpoint(ComponentInstanceEndpoint, Prompt):
         return "prompts"
 
 
-class PagePromptEndpoint(PagePrompt, PromptEndpoint):
+class PagePromptEndpoint(PagePrompt, PageEndpoint):
     """Handles the endpoint for the Page Prompt
 
-    This class inherits from both the PromptEndpoint and PagePrompt classes.
+    This class inherits from both the PromptEndpoint and PageEndpoint classes.
     Currently, it doesn't add any additional functionality to its parent classes.
 
     Note:
