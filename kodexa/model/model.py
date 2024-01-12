@@ -762,7 +762,7 @@ class ContentNode(object):
         """
         return self.node_type
 
-    def select_first(self, selector, variables=None):
+    def select_first(self, selector, variables=None) -> Optional["ContentNode"]:
         """Select and return the first child of this node that match the selector value.
 
         Args:
