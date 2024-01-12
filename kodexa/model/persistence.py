@@ -935,9 +935,9 @@ class SqliteDocumentPersistence(object):
         """
         content_nodes = []
         if tag_uuid is None:
-            query = f"select disinct(cn_id) from ft where f_type in (select id from f_type where name like 'tag:{tag}')"
+            query = f"select distinct(cn_id) from ft where f_type in (select id from f_type where name like 'tag:{tag}')"
         else:
-            query = f"select disinct(cn_id) from ft where f_type in (select id from f_type where name like 'tag:{tag}') and tag_uuid = '{tag_uuid}'"
+            query = f"select distinct(cn_id) from ft where f_type in (select id from f_type where name like 'tag:{tag}') and tag_uuid = '{tag_uuid}'"
         for content_node_ids in self.cursor.execute(query).fetchall():
             content_nodes.append(self.get_node(content_node_ids[0]))
 
