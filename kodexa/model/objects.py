@@ -4187,6 +4187,10 @@ class Guidance(BaseModel):
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
     priority: Optional[int] = 1
     user_instructions: Optional[str] = Field(None, alias="userInstructions")
+    user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
+    
+    # users selected text, text and line_uuid
+    user_selection: Optional[List[tuple[str,str]]] = Field(None, alias="userSelection")
 
 
 class GuidanceSet(ExtensionPackProvided):
