@@ -4179,6 +4179,24 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         response = self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
         self.change_sequence = response.json()["changeSequence"]
 
+    def set_active_assistant(self, assistant: Assistant):
+        """
+        Set the active assistant.
+        """
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/activeAssistant"
+        response = self.client.put(url, body=assistant.model_dump(mode="json", by_alias=True))
+        process_response(response)
+        self.change_sequence = response.json()["changeSequence"]
+
+    def clear_active_assistant(self):
+        """
+        Clear the active assistant.
+        """
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/activeAssistant"
+        response = self.client.delete(url)
+        process_response(response)
+        self.change_sequence = response.json()["changeSequence"]
+
     def lock(self):
         """
         Lock the document family.
