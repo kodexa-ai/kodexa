@@ -4179,6 +4179,8 @@ class Guidance(BaseModel):
     """
 
     """
+    guidance_type: Optional[str] = Field(None, alias="guidanceType")
+    taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
     document_name: Optional[str] = Field(None, alias="documentName")
     document_type: Optional[str] = Field(None, alias="documentType")
     sample_text: Optional[str] = Field(None, alias="sampleText")
@@ -4192,6 +4194,7 @@ class Guidance(BaseModel):
     # users selected text, text and line_uuid
     user_selection: Optional[List[tuple[str,str]]] = Field(None, alias="userSelection")
 
+    compiled_guidance: Optional[Dict[str, Any]] = Field(None, alias="compiledGuidance")
 
 class GuidanceSet(ExtensionPackProvided):
     """
