@@ -4445,8 +4445,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
         self.client.put(
-            url, params={'replaceData': replace_data},
-            body=document.get_feature_set(owner_uri).dict(by_alias=True),
+            url, params={'replaceData': replace_data, 'ownerUri': owner_uri},
+            body=document.get_feature_set(owner_uri).model_dump(by_alias=True),
         )
 
 
