@@ -4237,7 +4237,9 @@ class Prompt(ExtensionPackProvided):
     """
 
     """
-    prompt_template: Optional[str] = None
+    prompt_template: Optional[str] = Field(
+        None, description="The prompt template", alias="promptTemplate"
+    )
     options: Optional[List[Option]] = Field(
         None, description="Options for the prompt"
     )
