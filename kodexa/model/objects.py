@@ -4174,6 +4174,12 @@ class GuidanceTagResult(BaseModel):
     line_uuid: Optional[str] = Field(None, alias="lineUuid")
 
 
+class UserSelection(BaseModel):
+
+    text: Optional[str] = None
+    line_uuid: Optional[str] = Field(None, alias="lineUuid")
+
+
 class Guidance(BaseModel):
     """
 
@@ -4191,7 +4197,7 @@ class Guidance(BaseModel):
     user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
     
     # users selected text, text and line_uuid
-    user_selection: Optional[List[tuple[str,str]]] = Field(None, alias="userSelection")
+    user_selection: Optional[List[UserSelection]] = Field(None, alias="userSelection")
 
     compiled_guidance: Optional[Dict[str, Any]] = Field(None, alias="compiledGuidance")
 
