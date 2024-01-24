@@ -2893,7 +2893,6 @@ class Workspace(BaseModel):
     project: Optional[Project] = None
     name: Optional[str] = None
     description: Optional[str] = None
-    channel: Optional[Channel] = None
     workspace_storage: Optional[WorkspaceStorage] = Field(
         None, alias="workspaceStorage"
     )
@@ -4196,6 +4195,7 @@ class Guidance(BaseModel):
 
     compiled_guidance: Optional[Dict[str, Any]] = Field(None, alias="compiledGuidance")
 
+
 class GuidanceSet(ExtensionPackProvided):
     """
 
@@ -4237,7 +4237,7 @@ class Prompt(ExtensionPackProvided):
     """
 
     """
-    template: Optional[str] = None
+    prompt_template: Optional[str] = None
     options: Optional[List[Option]] = Field(
         None, description="Options for the prompt"
     )
@@ -4245,10 +4245,10 @@ class Prompt(ExtensionPackProvided):
 
     def render(self, properties):
         if self.template_type == "FSTRING":
-            return self.template.format(**properties)
+            return self.prompt_template.format(**properties)
         elif self.template_type == "MUSTACHE":
             import chevron
-            return chevron.render(self.template, properties)
+            return chevron.render(self.prompt_template, properties)
         else:
             raise Exception(f"Unknown template type {self.template_type}")
 
