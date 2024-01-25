@@ -2931,6 +2931,7 @@ class Channel(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     workspace: Optional[Workspace] = None
+    name: Optional[str] = None
 
 
 class MessageBlock(BaseModel):
