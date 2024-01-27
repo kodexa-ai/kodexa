@@ -6609,6 +6609,7 @@ class KodexaClient:
                 "message": MessageEndpoint,
                 "prompt": PromptEndpoint,
                 "guidance": GuidanceSetEndpoint,
+                "channel": ChannelEndpoint,
             }
 
             if component_type in known_components:
