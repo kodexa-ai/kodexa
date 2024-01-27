@@ -88,6 +88,7 @@ class SqliteDocumentPersistence(object):
             self.inmemory=True
             self.connection = self.create_in_memory_database(filename)
         else:
+            self.inmemory=False
             self.connection = sqlite3.connect(filename)
 
         self.cursor = self.connection.cursor()
