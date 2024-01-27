@@ -2436,6 +2436,19 @@ class Document(object):
                     for node in tag_instance.nodes:
                         node.remove_tag(tag)
 
+    def get_node_by_uuid(self, uuid: int) -> ContentNode:
+        """
+        Get a node by its uuid
+
+        Args:
+          uuid: the uuid of the node
+
+        Returns:
+          the node
+
+        """
+        return self._persistence_layer.get_node_by_uuid(uuid)
+
     def add_tag_instance(self, tag_to_apply:str, node_list: List[ContentNode]):
         """
             This will create a group of a tag with indexes

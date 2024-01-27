@@ -1225,6 +1225,21 @@ class PersistenceManager(object):
             document, filename, delete_on_close, inmemory=inmemory
         )
 
+    def get_node_by_uuid(self, uuid: int) -> ContentNode:
+        """
+        Retrieves a node by its uuid.
+
+        Args:
+            uuid (str): The uuid of the node to be retrieved.
+
+        Returns:
+            ContentNode: The node with the given uuid.
+        """
+        if self.node_cache.get_obj(uuid) is None:
+            self.node_cache.add_obj(self._underlying_persistence.get_node(uuid))
+
+        return self.node_cache.get_obj(uuid) # return the cached version
+
     def add_model_insight(self, model_insight: ModelInsight):
         """
         Adds a model insight to the underlying persistence layer.
