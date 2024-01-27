@@ -4080,7 +4080,7 @@ class MessageContext(BaseModel):
     page: Optional[int] = None
     message_template: Optional[MessageTemplate] = Field(None, alias="messageTemplate")
     message_feedback_response: Optional[MessageFeedbackResponse] = Field(None, alias="feedbackOption")
-
+    taxonomy_refs: Optional[List[str]] = Field(None, alias="taxonomyRefs")
 
 class MessageEvent(BaseModel):
     """
