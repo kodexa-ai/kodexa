@@ -56,7 +56,7 @@ class SqliteDocumentPersistence(object):
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     """
 
-    def __init__(self, document: Document, filename: str = None, delete_on_close=False):
+    def __init__(self, document: Document, filename: str = None, delete_on_close=False, inmemory=False):
         self.document = document
 
         self.node_types = {}
@@ -84,11 +84,42 @@ class SqliteDocumentPersistence(object):
 
         self.current_filename = filename
 
-        self.connection = sqlite3.connect(filename)
+        if inmemory:
+            self.inmemory=True
+            self.connection = self.create_in_memory_database(filename)
+        else:
+            self.connection = sqlite3.connect(filename)
+
         self.cursor = self.connection.cursor()
         self.cursor.execute("PRAGMA journal_mode=OFF")
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
+
+    def create_in_memory_database(self, disk_db_path: str):
+        # Connect to the in-memory database
+        mem_conn = sqlite3.connect(':memory:')
+        mem_cursor = mem_conn.cursor()
+
+        # Connect to the database on disk
+        disk_conn = sqlite3.connect(disk_db_path)
+        disk_cursor = disk_conn.cursor()
+
+        # Load the contents of the disk database into memory
+        disk_cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = disk_cursor.fetchall()
+        for table in tables:
+            table_name = table[0]
+            disk_cursor.execute(f"SELECT * FROM {table_name}")
+            rows = disk_cursor.fetchall()
+            mem_cursor.execute(f"CREATE TABLE {table_name} AS SELECT * FROM {table_name}", [])
+            for row in rows:
+                mem_cursor.execute(f"INSERT INTO {table_name} VALUES ({', '.join('?' * len(row))})", row)
+
+        # Commit changes and close disk connection
+        mem_conn.commit()
+        disk_conn.close()
+
+        return mem_conn
 
     def get_all_tags(self):
         """
@@ -787,13 +818,21 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma optimize")
         self.connection.commit()
         self.cursor.execute("VACUUM")
-        self.connection.close()
-
-        self.connection = sqlite3.connect(self.current_filename)
         self.cursor = self.connection.cursor()
         self.cursor.execute("PRAGMA journal_mode=OFF")
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
+
+    def dump_in_memory_db_to_file(self):
+        # Connect to a new or existing database file
+        disk_conn = sqlite3.connect(self.current_filename)
+    
+        # Use the backup API to copy the in-memory database to the disk file
+        with disk_conn:
+            self.connection.backup(disk_conn)
+
+        # Close the file-based database connection
+        disk_conn.close()
 
     def get_bytes(self):
         """
@@ -803,6 +842,10 @@ class SqliteDocumentPersistence(object):
             bytes: The document as bytes.
         """
         self.sync()
+        
+        if self.inmemory:
+            self.dump_in_memory_db_to_file()
+        
         with open(self.current_filename, "rb") as f:
             return f.read()
 
@@ -1168,7 +1211,7 @@ class PersistenceManager(object):
     This is implemented to allow us to work with large complex documents in a performance centered way.
     """
 
-    def __init__(self, document: Document, filename: str = None, delete_on_close=False):
+    def __init__(self, document: Document, filename: str = None, delete_on_close=False, inmemory=False):
         self.document = document
         self.node_cache = SimpleObjectCache()
         self.child_cache = {}
@@ -1178,7 +1221,7 @@ class PersistenceManager(object):
         self.node_parent_cache = {}
 
         self._underlying_persistence = SqliteDocumentPersistence(
-            document, filename, delete_on_close
+            document, filename, delete_on_close, inmemory=inmemory
         )
 
     def add_model_insight(self, model_insight: ModelInsight):

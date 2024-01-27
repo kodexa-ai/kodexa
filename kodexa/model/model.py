@@ -2383,6 +2383,7 @@ class Document(object):
             ref: str = None,
             kddb_path: str = None,
             delete_on_close=False,
+            inmemory=False,
     ):
         if metadata is None:
             metadata = DocumentMetadata()
@@ -2422,7 +2423,7 @@ class Document(object):
         from kodexa.model import PersistenceManager
 
         self._persistence_layer: Optional[PersistenceManager] = PersistenceManager(
-            document=self, filename=kddb_path, delete_on_close=delete_on_close
+            document=self, filename=kddb_path, delete_on_close=delete_on_close, inmemory=inmemory
         )
         self._persistence_layer.initialize()
 
