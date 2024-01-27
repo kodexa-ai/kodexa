@@ -4348,12 +4348,13 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/removeLabel"
         return self.client.put(url, params={"label": label})
 
-    def get_document(self, content_object: Optional[ContentObject] = None) -> Document:
+    def get_document(self, content_object: Optional[ContentObject] = None, inmemory=False) -> Document:
         """
         Get the document of the document family.
 
         Args:
             content_object (Optional[ContentObject]): The content object. Defaults to None.
+            inmemory (bool): Whether to return the document in memory. Defaults to False.
 
         Returns:
             Document: The document of the document family.
@@ -4363,7 +4364,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         get_response = self.client.get(
             f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content"
         )
-        return Document.from_kddb(get_response.content)
+        return Document.from_kddb(get_response.content, inmemory=inmemory)
 
     def reprocess(self, assistant: Assistant):
         """
