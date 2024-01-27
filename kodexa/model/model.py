@@ -2886,7 +2886,7 @@ class Document(object):
         return content_node
 
     @classmethod
-    def from_kddb(cls, source, detached: bool = False):
+    def from_kddb(cls, source, detached: bool = True, inmemory: bool = False):
         """
         Loads a document from a Kodexa Document Database (KDDB) file
 
@@ -2895,6 +2895,7 @@ class Document(object):
             input: if a string we will load the file at that path, if bytes we will create a temp file and
                     load the KDDB to it
             detached (bool): if reading from a file we will create a copy so we don't update in place
+            inmemory (bool): if true we will load the KDDB into memory
 
         :return: the document
         """
@@ -2910,9 +2911,9 @@ class Document(object):
                     )
                     fp.write(open(source, "rb").read())
                     fp.close()
-                    return Document(kddb_path=fp.name, delete_on_close=True)
+                    return Document(kddb_path=fp.name, delete_on_close=True, inmemory=inmemory)
 
-                return Document(kddb_path=source)
+                return Document(kddb_path=source, inmemory=inmemory)
 
         # We will assume the input is of byte type
         import tempfile
