@@ -2328,6 +2328,9 @@ class ExtensionPackProvided(BaseModel):
         alias="extensionPackRef",
         description="The reference to the extension pack (if the metadata object was created by an extension pack)",
     )
+    change_sequence: Optional[int] = Field(
+        None, alias="changeSequence", description="The change sequence"
+    )
 
 
 class Option(BaseModel):
@@ -2931,6 +2934,7 @@ class Channel(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     workspace: Optional[Workspace] = None
+    project: Optional[Project] = None
     name: Optional[str] = None
 
 
