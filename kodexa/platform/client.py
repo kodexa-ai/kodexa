@@ -2378,6 +2378,28 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(url)
         return ModelTraining.parse_obj(response.json())
 
+    def stream_list_trainings(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of model trainings
+        :param query: the query to run
+        :param sort: sorting order of the list
+        :param filters: in a format of list, for example: ["name=training1", "status=completed"]
+        :return:
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list_trainings(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for training in page_response.content:
+                yield training
+            page += 1
+
     def list_trainings(self, query="*", page=1, page_size=10, sort=None,
                        filters: List[str] = None) -> PageModelTraining:
         """List all model trainings"""
@@ -2392,7 +2414,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         if filters is not None:
             params["filter"] = filters
 
-        response = self.client.get(url)
+        response = self.client.get(url, params=params)
         return PageModelTraining.parse_obj(response.json())
 
     @staticmethod
