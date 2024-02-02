@@ -4126,6 +4126,7 @@ class ModelInteraction(BaseModel):
     model_id: Optional[str] = Field(None, alias="modelId")
     input_tokens: Optional[int] = Field(None, alias="inputTokens")
     output_tokens: Optional[int] = Field(None, alias="outputTokens")
+    duration: Optional[int] = None
     note: Optional[str] = None
 
 
