@@ -4086,6 +4086,7 @@ class MessageContext(BaseModel):
     message_feedback_response: Optional[MessageFeedbackResponse] = Field(None, alias="feedbackOption")
     taxonomy_refs: Optional[List[str]] = Field(None, alias="taxonomyRefs")
 
+
 class MessageEvent(BaseModel):
     """
 
@@ -4112,6 +4113,31 @@ class ChannelEvent(BaseModel):
     type: Optional[str] = None
     channel: Optional[Channel] = None
     message_events: Optional[List[MessageEvent]] = Field(None, alias="messageEvents")
+
+
+class ModelInteraction(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    model_id: Optional[str] = Field(None, alias="modelId")
+    input_tokens: Optional[int] = Field(None, alias="inputTokens")
+    output_tokens: Optional[int] = Field(None, alias="outputTokens")
+    note: Optional[str] = None
+
+
+class ModelUsage(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    interactions: Optional[List[ModelInteraction]] = None
 
 
 class ExecutionEvent(BaseModel):
@@ -4147,6 +4173,7 @@ class ExecutionEvent(BaseModel):
     created: Optional[StandardDateTime] = None
     start_date: Optional[StandardDateTime] = Field(None, alias="startDate")
     end_date: Optional[StandardDateTime] = Field(None, alias="endDate")
+    model_usage: Optional[ModelUsage] = Field(None, alias="modelUsage")
 
 
 class PageTaxonomy(BaseModel):
@@ -4180,7 +4207,6 @@ class GuidanceTagResult(BaseModel):
 
 
 class UserSelection(BaseModel):
-
     text: Optional[str] = None
     line_uuid: Optional[str] = Field(None, alias="lineUuid")
 
@@ -4200,7 +4226,7 @@ class Guidance(BaseModel):
     priority: Optional[int] = 1
     user_instructions: Optional[str] = Field(None, alias="userInstructions")
     user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
-    
+
     # users selected text, text and line_uuid
     user_selection: Optional[List[UserSelection]] = Field(None, alias="userSelection")
 
