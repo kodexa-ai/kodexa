@@ -4055,6 +4055,8 @@ class BaseEvent(
             "ContentEvent",
             "ScheduledEvent",
             "AssistantEvent",
+            "ChannelEvent",
+            "WorkspaceEvent"
         ]
     ]
 ):
