@@ -2918,6 +2918,23 @@ class ProjectWorkspace(BaseModel):
     )
 
 
+class ChannelParticipant(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+    )
+    """
+    A participant in a channel
+    """
+
+    user: Optional[User] = None
+    assistant: Optional[Assistant] = None
+
+
 class Channel(BaseModel):
     """
 
@@ -2936,6 +2953,8 @@ class Channel(BaseModel):
     workspace: Optional[Workspace] = None
     project: Optional[Project] = None
     name: Optional[str] = None
+    is_private: Optional[bool] = Field(None, alias="isPrivate")
+    participants: Optional[List[ChannelParticipant]] = Field(None, alias="participants")
 
 
 class MessageBlock(BaseModel):
