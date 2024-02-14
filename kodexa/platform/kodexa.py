@@ -214,6 +214,34 @@ class KodexaPlatform:
         return [org_slug, slug, version]
 
     @classmethod
+    def configure(cls, kodexa_url, access_token, profile=None, insecure=False):
+        """
+        Configure kodexa access to platform
+
+        Args
+            kodexa_url (str): The URL of the Kodexa platform.
+            access_token (str): The access token to use.
+            profile (str, optional): The profile to use. Defaults to None.
+            insecure (bool, optional): Whether to use insecure connection. Defaults to False.
+        """
+        kodexa_config = get_config(profile)
+        if profile and profile in kodexa_config:
+            kodexa_config = get_config(profile)
+            kodexa_config[profile] = {
+                "url": kodexa_url,
+                "access_token": access_token,
+                "insecure": insecure,
+            }
+        else:
+            kodexa_config = {
+                "url": kodexa_url,
+                "access_token": access_token,
+                "insecure": insecure
+            }
+
+        save_config(kodexa_config)
+
+    @classmethod
     def login(cls, kodexa_url, username, password, profile=None, insecure=False):
         """
         Login to the Kodexa platform.
@@ -518,13 +546,13 @@ class RemotePipeline:
     """Allow you to interact with a pipeline that has been deployed to an instance of Kodexa Platform"""
 
     def __init__(
-        self,
-        slug,
-        connector,
-        version=None,
-        attach_source=True,
-        parameters=None,
-        auth=None,
+            self,
+            slug,
+            connector,
+            version=None,
+            attach_source=True,
+            parameters=None,
+            auth=None,
     ):
         logger.info(f"Initializing a new pipeline {slug}")
 
@@ -588,7 +616,7 @@ class RemotePipeline:
 
     @staticmethod
     def from_file(
-        slug: str, file_path: str, unpack: bool = False, *args, **kwargs
+            slug: str, file_path: str, unpack: bool = False, *args, **kwargs
     ) -> RemotePipeline:
         """Creates a new pipeline using a file path as a source.
 
@@ -626,13 +654,13 @@ class RemotePipeline:
 
     @staticmethod
     def from_folder(
-        slug: str,
-        folder_path: str,
-        filename_filter: str = "*",
-        recursive: bool = False,
-        unpack: bool = False,
-        relative: bool = False,
-        caller_path: str = get_caller_dir(),
+            slug: str,
+            folder_path: str,
+            filename_filter: str = "*",
+            recursive: bool = False,
+            unpack: bool = False,
+            relative: bool = False,
+            caller_path: str = get_caller_dir(),
     ) -> RemotePipeline:
         """Creates a pipeline that will run against a set of local files from a folder.
 
@@ -816,7 +844,7 @@ class EventHelper:
         return io.BytesIO(co_response.content)
 
     def put_content_object(
-        self, content_object: ContentObject, content
+            self, content_object: ContentObject, content
     ) -> ContentObject:
         """Puts a content object to the Kodexa platform.
 
