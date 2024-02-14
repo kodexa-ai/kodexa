@@ -3045,7 +3045,6 @@ class Message(BaseModel):
     assistant: Optional[Assistant] = None
     user: Optional[User] = None
     context: Optional[MessageContext] = None
-    force_to_sender: Optional[bool] = Field(False, alias="forceToSender")
 
 
 class DataAttribute(BaseModel):
