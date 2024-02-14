@@ -55,10 +55,11 @@ def get_config(profile="default"):
     if os.path.exists(path):
         with open(path, "r") as outfile:
             kodexa_config = json.load(outfile)
-            kodexa_config[profile] = {
-                "url": None,
-                "access_token": None,
-            }
+            if profile not in kodexa_config:
+                kodexa_config[profile] = {
+                    "url": None,
+                    "access_token": None,
+                }
             return kodexa_config
     else:
         return (
