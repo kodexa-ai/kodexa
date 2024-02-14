@@ -2185,9 +2185,9 @@ class User(BaseModel):
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
-    email: str
-    first_name: str = Field(..., alias="firstName")
-    last_name: str = Field(..., alias="lastName")
+    email: Optional[str] = None
+    first_name: Optional[str] = Field(None, alias="firstName")
+    last_name: Optional[str] = Field(None, alias="lastName")
     activated: Optional[bool] = None
     platform_admin: Optional[bool] = Field(None, alias="platformAdmin")
     password_reset_date: Optional[StandardDateTime] = Field(
