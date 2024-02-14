@@ -4231,13 +4231,11 @@ class UserSelection(BaseModel):
 
 
 class Guidance(BaseModel):
-    """
-
-    """
     guidance_type: Optional[str] = Field(None, alias="guidanceType")
     taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
     document_name: Optional[str] = Field(None, alias="documentName")
     document_type: Optional[str] = Field(None, alias="documentType")
+    document_page: Optional[int] = Field(None, alias="documentPage")
     sample_text: Optional[str] = Field(None, alias="sampleText")
     sample_result: Optional[Dict[str, List[GuidanceTagResult]]] = Field(None, alias="sampleResult")
     active: Optional[bool] = None
