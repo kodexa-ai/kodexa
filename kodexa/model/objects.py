@@ -2167,9 +2167,6 @@ class BulkDelete(BaseModel):
 
 
 class User(BaseModel):
-    """
-
-    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
