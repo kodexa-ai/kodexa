@@ -6036,7 +6036,6 @@ class KodexaClient:
     Attributes:
         base_url (str): The base URL for the Kodexa platform.
         access_token (str): The access token for the Kodexa platform.
-        insecure (bool): A flag indicating whether the connection is insecure.
         organizations (OrganizationsEndpoint): An endpoint for organizations.
         projects (ProjectsEndpoint): An endpoint for projects.
         workspaces (WorkspacesEndpoint): An endpoint for workspaces.
@@ -6047,7 +6046,7 @@ class KodexaClient:
         messages (MessagesEndpoint): An endpoint for messages.
     """
 
-    def __init__(self, url=None, access_token=None, profile=None, insecure=None):
+    def __init__(self, url=None, access_token=None, profile=None):
         from kodexa import KodexaPlatform
 
         self.base_url = url if url is not None else KodexaPlatform.get_url(profile)
@@ -6055,9 +6054,6 @@ class KodexaClient:
             access_token
             if access_token is not None
             else KodexaPlatform.get_access_token(profile)
-        )
-        self.insecure = (
-            insecure if insecure is not None else KodexaPlatform.get_insecure(profile)
         )
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
@@ -6070,7 +6066,7 @@ class KodexaClient:
         self.messages = MessagesEndpoint(self)
 
     @staticmethod
-    def login(url, email, password, insecure=False):
+    def login(url, email, password):
         """
         A static method to login to the Kodexa platform.
 
@@ -6078,7 +6074,6 @@ class KodexaClient:
             url (str): The URL for the Kodexa platform.
             email (str): The email for the user.
             password (str): The password for the user.
-            insecure (bool, optional): A flag indicating whether the connection is insecure. Defaults to False.
 
         Returns:
             KodexaClient: A KodexaClient instance.
@@ -6091,11 +6086,10 @@ class KodexaClient:
         obj_response = requests.get(
             f"{url}/api/account/me/token",
             auth=HTTPBasicAuth(email, password),
-            headers={"content-type": "application/json"},
-            verify=not insecure,
+            headers={"content-type": "application/json"}
         )
         if obj_response.status_code == 200:
-            return KodexaClient(url, obj_response.text, insecure=insecure)
+            return KodexaClient(url, obj_response.text)
 
         raise Exception(f"Check your URL and password [{obj_response.status_code}]")
 
@@ -6251,8 +6245,7 @@ class KodexaClient:
             headers={
                 "x-access-token": self.access_token,
                 "content-type": "application/json",
-            },
-            verify=not self.insecure,
+            }
         )
 
         return process_response(response)
@@ -6284,7 +6277,6 @@ class KodexaClient:
             files=files,
             params=params,
             headers=headers,
-            verify=not self.insecure,
         )
         return process_response(response)
 
@@ -6315,7 +6307,6 @@ class KodexaClient:
             files=files,
             params=params,
             headers=headers,
-            verify=not self.insecure,
         )
         return process_response(response)
 
@@ -6333,8 +6324,7 @@ class KodexaClient:
         response = requests.delete(
             self.get_url(url),
             params=params,
-            headers={"x-access-token": self.access_token},
-            verify=not self.insecure,
+            headers={"x-access-token": self.access_token}
         )
         return process_response(response)
 
