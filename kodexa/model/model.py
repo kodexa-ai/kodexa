@@ -8,11 +8,10 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 import deepdiff
 import msgpack
-from addict import Dict
 from pydantic import BaseModel, ConfigDict
 
 from kodexa.model.objects import ContentObject, FeatureSet
@@ -66,7 +65,9 @@ class Ref:
         )
 
 
-class DocumentMetadata(Dict):
+import addict
+
+class DocumentMetadata(addict.Dict):
     """A flexible dict based approach to capturing metadata for the document.
 
     This class extends from Dict to provide a flexible way to store and
@@ -83,7 +84,7 @@ class DocumentMetadata(Dict):
         super().__init__(*args, **kwargs)
 
 
-class ContentException(Dict):
+class ContentException(dict):
     """A content exception represents an issue identified during labeling or validation at the document level.
 
     Attributes:
@@ -129,7 +130,7 @@ class ContentException(Dict):
         self.exception_type_id = exception_type_id
 
 
-class Tag(Dict):
+class Tag(dict):
     """A class to represent the metadata for a label that is applied as a feature on a content node.
 
     Attributes:
@@ -387,7 +388,7 @@ class ContentNode(object):
         return new_dict
 
     @staticmethod
-    def from_dict(document, content_node_dict: Dict, parent=None):
+    def from_dict(document, content_node_dict: dict, parent=None):
         """Build a new ContentNode from a dictionary represention.
 
         Args:
@@ -2105,7 +2106,8 @@ class ContentFeature(object):
 
 
 class ModelInsight(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, use_enum_values=True, arbitrary_types_allowed=True, protected_namespaces=("model_config",))
+    model_config = ConfigDict(populate_by_name=True, use_enum_values=True, arbitrary_types_allowed=True,
+                              protected_namespaces=("model_config",))
     """
     A class used to represent the insights of a model.
 
@@ -2449,7 +2451,7 @@ class Document(object):
         """
         return self._persistence_layer.get_node_by_uuid(uuid)
 
-    def add_tag_instance(self, tag_to_apply:str, node_list: List[ContentNode]):
+    def add_tag_instance(self, tag_to_apply: str, node_list: List[ContentNode]):
         """
             This will create a group of a tag with indexes
         :param tag_to_apply: name of the tag
@@ -2955,8 +2957,10 @@ class Document(object):
             Document.from_kdxa(file)
         else:
             file_document = Document()
-            file_document.metadata.connector = "file-handle"
-            file_document.metadata.connector_options.file = file
+            file_document.metadata["connector"] = "file-handle"
+            file_document.metadata["connector_options"] = {};
+            file_document.metadata["connector_options"]["file"] = file
+            file_document.source
             file_document.source.connector = "file-handle"
             file_document.source.original_filename = os.path.basename(file)
             file_document.source.original_path = file
@@ -2993,7 +2997,8 @@ class Document(object):
 
         Args:
           selector (str): The selector (ie. //*)
-          variables (dict, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
+          variables (dict, optional): A dictionary of variable name/value to use in substituion; defaults to None.
+          Dictionary keys should match a variable specified in the selector.
 
         Returns:
           Optional[ContentNode]: The first matching node or none
@@ -3014,7 +3019,8 @@ class Document(object):
 
         Args:
           selector (str): The selector (ie. //*)
-          variables (Optional[dict): A dictionary of variable name/value to use in substituion; defaults to an empty dictionary.  Dictionary keys should match a variable specified in the selector.
+          variables (Optional[dict): A dictionary of variable name/value to use in substituion; defaults to an empty
+          dictionary.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
           list[ContentNodes]: A list of the matching ContentNodes.  If no matches found, list is empty.

@@ -12,6 +12,7 @@ import logging
 import os
 import time
 from json import JSONDecodeError
+from typing import Dict
 
 import requests
 from appdirs import AppDirs
@@ -38,7 +39,7 @@ logger = logging.getLogger()
 dirs = AppDirs("Kodexa", "Kodexa")
 
 
-def get_config(profile=None):
+def get_config(profile="default"):
     """
     Gets the kodexa config object used for local PAT storage.
 
@@ -55,24 +56,15 @@ def get_config(profile=None):
     if os.path.exists(path):
         with open(path, "r") as outfile:
             kodexa_config = json.load(outfile)
-            if profile and profile not in kodexa_config:
+            if profile not in kodexa_config:
                 kodexa_config[profile] = {
                     "url": None,
                     "access_token": None,
-                    "insecure": False,
                 }
-
-            if not profile and "insecure" not in kodexa_config:
-                kodexa_config["insecure"] = False
-            elif profile and "insecure" not in kodexa_config[profile]:
-                kodexa_config[profile]["insecure"] = False
-
             return kodexa_config
     else:
         return (
-            {"url": None, "access_token": None, "insecure": False}
-            if not profile
-            else {profile: {"url": None, "access_token": None, "insecure": False}}
+            {profile: {"url": None, "access_token": None}}
         )
 
 
@@ -128,7 +120,7 @@ class KodexaPlatform:
         return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
-    def get_access_token(profile=None) -> str:
+    def get_access_token(profile="default") -> str:
         """
         Get the access token.
 
@@ -144,12 +136,10 @@ class KodexaPlatform:
             access_token
             if access_token is not None
             else kodexa_config[profile]["access_token"]
-            if profile
-            else kodexa_config["access_token"]
         )
 
     @staticmethod
-    def get_url(profile=None) -> str:
+    def get_url(profile="default") -> str:
         """
         Get the URL to use to access a Kodexa Platform.
 
@@ -165,8 +155,6 @@ class KodexaPlatform:
             env_url
             if env_url is not None
             else kodexa_config[profile]["url"]
-            if profile
-            else kodexa_config["url"]
         )
 
     @staticmethod
@@ -214,7 +202,7 @@ class KodexaPlatform:
         return [org_slug, slug, version]
 
     @classmethod
-    def configure(cls, kodexa_url, access_token, profile=None, insecure=False):
+    def configure(cls, kodexa_url, access_token, profile="default"):
         """
         Configure kodexa access to platform
 
@@ -222,27 +210,17 @@ class KodexaPlatform:
             kodexa_url (str): The URL of the Kodexa platform.
             access_token (str): The access token to use.
             profile (str, optional): The profile to use. Defaults to None.
-            insecure (bool, optional): Whether to use insecure connection. Defaults to False.
         """
         kodexa_config = get_config(profile)
-        if profile and profile in kodexa_config:
-            kodexa_config = get_config(profile)
-            kodexa_config[profile] = {
-                "url": kodexa_url,
-                "access_token": access_token,
-                "insecure": insecure,
-            }
-        else:
-            kodexa_config = {
-                "url": kodexa_url,
-                "access_token": access_token,
-                "insecure": insecure
-            }
+        kodexa_config[profile] = {
+            "url": kodexa_url,
+            "access_token": access_token,
+        }
 
         save_config(kodexa_config)
 
     @classmethod
-    def login(cls, kodexa_url, username, password, profile=None, insecure=False):
+    def login(cls, kodexa_url, username, password, profile="default"):
         """
         Login to the Kodexa platform.
 
@@ -251,26 +229,18 @@ class KodexaPlatform:
             username (str): The username to use for login.
             password (str): The password to use for login.
             profile (str, optional): The profile to use. Defaults to None.
-            insecure (bool, optional): Whether to use insecure connection. Defaults to False.
         """
         from requests.auth import HTTPBasicAuth
 
         obj_response = requests.get(
             f"{kodexa_url}/api/account/me/token",
             auth=HTTPBasicAuth(username, password),
-            headers={"content-type": "application/json"},
-            verify=not insecure,
+            headers={"content-type": "application/json"}
         )
         if obj_response.status_code == 200:
             kodexa_config = get_config(profile)
-            if profile and profile in kodexa_config:
-                kodexa_config[profile]["url"] = kodexa_url
-                kodexa_config[profile]["access_token"] = obj_response.text
-                kodexa_config[profile]["insecure"] = insecure
-            else:
-                kodexa_config["url"] = kodexa_url
-                kodexa_config["access_token"] = obj_response.text
-                kodexa_config["insecure"] = insecure
+            kodexa_config[profile]["url"] = kodexa_url
+            kodexa_config[profile]["access_token"] = obj_response.text
             save_config(kodexa_config)
             print("Logged in")
         else:
@@ -290,7 +260,6 @@ class KodexaPlatform:
                 "x-access-token": KodexaPlatform.get_access_token(),
                 "content-type": "application/json",
             },
-            verify=not KodexaPlatform.get_insecure(),
         )
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
@@ -313,27 +282,6 @@ class KodexaPlatform:
         import tempfile
 
         return os.getenv("KODEXA_TMP", tempfile.gettempdir())
-
-    @classmethod
-    def get_insecure(cls, profile=None):
-        """
-        Get the insecure setting.
-
-        Args:
-            profile (str, optional): The profile to use. Defaults to None.
-
-        Returns:
-            bool: The insecure setting.
-        """
-        kodexa_config = get_config(profile)
-        insecure = os.getenv("KODEXA_URL_INSECURE", None)
-        return (
-            insecure
-            if insecure is not None
-            else kodexa_config[profile]["insecure"]
-            if profile
-            else kodexa_config["insecure"]
-        )
 
 
 class RemoteSession:
@@ -360,7 +308,6 @@ class RemoteSession:
         r = requests.get(
             f"{KodexaPlatform.get_url()}/api/actions/{ref.replace(':', '/')}",
             headers={"x-access-token": KodexaPlatform.get_access_token()},
-            verify=not KodexaPlatform.get_insecure(),
         )
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
@@ -381,7 +328,6 @@ class RemoteSession:
             f"{KodexaPlatform.get_url()}/api/sessions",
             params={self.session_type: self.slug},
             headers={"x-access-token": KodexaPlatform.get_access_token()},
-            verify=not KodexaPlatform.get_insecure(),
         )
 
         process_response(r)
@@ -422,11 +368,10 @@ class RemoteSession:
             data=data,
             headers={"x-access-token": KodexaPlatform.get_access_token()},
             files=files,
-            verify=not KodexaPlatform.get_insecure(),
         )
         try:
             if r.status_code == 200:
-                execution = Dict(json.loads(r.text))
+                execution = json.loads(r.text)
             else:
                 logger.warning(
                     "Execution creation failed ["
@@ -466,10 +411,9 @@ class RemoteSession:
             r = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
-                verify=not KodexaPlatform.get_insecure(),
             )
             try:
-                execution = Dict(json.loads(r.text))
+                execution = json.loads(r.text)
             except JSONDecodeError:
                 logger.warning("Unable to handle response [" + r.text + "]")
                 raise
@@ -523,7 +467,6 @@ class RemoteSession:
             doc = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
-                verify=KodexaPlatform.get_insecure(),
             )
             return Document.from_kddb(doc.content)
 
@@ -813,7 +756,6 @@ class EventHelper:
             json=[{"entry": message}],
             headers={"x-access-token": KodexaPlatform.get_access_token()},
             timeout=300,
-            verify=not KodexaPlatform.get_insecure(),
         )
         if response.status_code != 200:
             print(f"Logging failed {response.status_code}", flush=True)
@@ -837,8 +779,7 @@ class EventHelper:
         co_response = requests.get(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/objects/{content_object_id}",
             headers={"x-access-token": KodexaPlatform.get_access_token()},
-            timeout=300,
-            verify=not KodexaPlatform.get_insecure(),
+            timeout=300
         )
         process_response(co_response)
         return io.BytesIO(co_response.content)
@@ -866,8 +807,7 @@ class EventHelper:
             data=data,
             headers={"x-access-token": KodexaPlatform.get_access_token()},
             files=files,
-            timeout=300,
-            verify=not KodexaPlatform.get_insecure(),
+            timeout=300
         )
 
         process_response(co_response)
