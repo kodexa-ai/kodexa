@@ -3,8 +3,6 @@ import importlib
 import logging
 from typing import List
 
-from addict import addict
-
 from kodexa import Assistant, AssistantResponse
 from kodexa import (
     ContentEvent,

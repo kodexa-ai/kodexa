@@ -19,7 +19,6 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.9, <4.0"
-addict = "2.4.0"
 requests = "^2.28.1"
 msgpack = "^1.0.6"
 urllib3 = "^2.0.0"

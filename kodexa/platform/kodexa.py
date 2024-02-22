@@ -12,6 +12,7 @@ import logging
 import os
 import time
 from json import JSONDecodeError
+from typing import Dict
 
 import requests
 from appdirs import AppDirs
@@ -370,7 +371,7 @@ class RemoteSession:
         )
         try:
             if r.status_code == 200:
-                execution = Dict(json.loads(r.text))
+                execution = json.loads(r.text)
             else:
                 logger.warning(
                     "Execution creation failed ["
@@ -412,7 +413,7 @@ class RemoteSession:
                 headers={"x-access-token": KodexaPlatform.get_access_token()},
             )
             try:
-                execution = Dict(json.loads(r.text))
+                execution = json.loads(r.text)
             except JSONDecodeError:
                 logger.warning("Unable to handle response [" + r.text + "]")
                 raise
