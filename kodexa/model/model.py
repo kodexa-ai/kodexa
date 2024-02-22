@@ -65,7 +65,9 @@ class Ref:
         )
 
 
-class DocumentMetadata(dict):
+import addict
+
+class DocumentMetadata(addict.Dict):
     """A flexible dict based approach to capturing metadata for the document.
 
     This class extends from Dict to provide a flexible way to store and
@@ -2955,8 +2957,10 @@ class Document(object):
             Document.from_kdxa(file)
         else:
             file_document = Document()
-            file_document.metadata.connector = "file-handle"
-            file_document.metadata.connector_options.file = file
+            file_document.metadata["connector"] = "file-handle"
+            file_document.metadata["connector_options"] = {};
+            file_document.metadata["connector_options"]["file"] = file
+            file_document.source
             file_document.source.connector = "file-handle"
             file_document.source.original_filename = os.path.basename(file)
             file_document.source.original_path = file

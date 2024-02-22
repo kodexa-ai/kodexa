@@ -532,7 +532,7 @@ class SqliteDocumentPersistence(object):
         """
         document_metadata = {
             "version": Document.CURRENT_VERSION,
-            "metadata": self.document.metadata.to_dict(),
+            "metadata": self.document.metadata,
             "source": self.__clean_none_values(
                 dataclasses.asdict(self.document.source)
             ),
