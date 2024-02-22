@@ -5357,6 +5357,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             f"api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": path, "meta": True},
         )
+        process_response(get_response)
         return DocumentFamilyEndpoint.model_validate(get_response.json()).set_client(
             self.client
         )
