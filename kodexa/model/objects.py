@@ -2167,9 +2167,6 @@ class BulkDelete(BaseModel):
 
 
 class User(BaseModel):
-    """
-
-    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2185,9 +2182,9 @@ class User(BaseModel):
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
-    email: str
-    first_name: str = Field(..., alias="firstName")
-    last_name: str = Field(..., alias="lastName")
+    email: Optional[str] = None
+    first_name: Optional[str] = Field(None, alias="firstName")
+    last_name: Optional[str] = Field(None, alias="lastName")
     activated: Optional[bool] = None
     platform_admin: Optional[bool] = Field(None, alias="platformAdmin")
     password_reset_date: Optional[StandardDateTime] = Field(
@@ -3048,7 +3045,6 @@ class Message(BaseModel):
     assistant: Optional[Assistant] = None
     user: Optional[User] = None
     context: Optional[MessageContext] = None
-    force_to_sender: Optional[bool] = Field(False, alias="forceToSender")
 
 
 class DataAttribute(BaseModel):
@@ -4234,15 +4230,14 @@ class UserSelection(BaseModel):
 
 
 class Guidance(BaseModel):
-    """
-
-    """
     guidance_type: Optional[str] = Field(None, alias="guidanceType")
     taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
     document_name: Optional[str] = Field(None, alias="documentName")
     document_type: Optional[str] = Field(None, alias="documentType")
+    document_page: Optional[int] = Field(None, alias="documentPage")
     sample_text: Optional[str] = Field(None, alias="sampleText")
     sample_result: Optional[Dict[str, List[GuidanceTagResult]]] = Field(None, alias="sampleResult")
+    section_markers: Optional[List[GuidanceTagResult]] = Field(None, alias="sectionMarkers")
     active: Optional[bool] = None
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
     priority: Optional[int] = 1

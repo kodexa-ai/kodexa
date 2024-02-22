@@ -2252,7 +2252,9 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         message_endpoint.content = message.content
         message_endpoint.block = message.block
         message_endpoint.feedback = message.feedback
-        message_endpoint.force_to_sender = message.force_to_sender
+        message_endpoint.assistant = message.assistant
+        message_endpoint.user = message.user
+        message_endpoint.context = message.context
         return message_endpoint.create()
 
 
