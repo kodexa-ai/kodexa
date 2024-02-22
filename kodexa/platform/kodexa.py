@@ -86,9 +86,10 @@ def get_config(profile=None):
                 }
             return kodexa_config
     else:
-        return (
-            {profile: {"url": None, "access_token": None}}
-        )
+        kodexa_config = {'default': {"url": None, "access_token": None}}
+        if profile:
+            kodexa_config[profile] = {"url": None, "access_token": None}
+        return  kodexa_config
 
 
 def save_config(config_obj):
