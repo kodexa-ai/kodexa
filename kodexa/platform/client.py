@@ -491,9 +491,9 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             # Yield each endpoint in the current page
             for endpoint in (
                     self.get_page_class(list_response.json())
-                            .model_validate(list_response.json())
-                            .set_client(self.client)
-                            .to_endpoints()
+                        .model_validate(list_response.json())
+                        .set_client(self.client)
+                        .to_endpoints()
             ):
                 yield endpoint
 
@@ -5548,7 +5548,6 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}"
         response = self.client.get(url)
         return ModelTraining.model_validate(response.json())
-
 
     def stream_list_trainings(self, query="*", sort=None, filters: List[str] = None):
         """

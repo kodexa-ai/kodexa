@@ -310,13 +310,13 @@ class ExtensionPackUtil:
             import yaml
 
             with open(file_path, "r") as stream:
-                self.kodexa_metadata = addict.Dict(yaml.safe_load(stream))
+                self.kodexa_metadata = yaml.safe_load(stream)
 
         if file_path.endswith(".json"):
             import json
 
             with open(file_path, "r") as stream:
-                self.kodexa_metadata = addict.Dict(json.load(stream))
+                self.kodexa_metadata = json.load(stream)
 
     def get_step(self, action_slug, options=None):
         """
