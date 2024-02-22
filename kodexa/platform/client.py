@@ -6046,7 +6046,7 @@ class KodexaClient:
         messages (MessagesEndpoint): An endpoint for messages.
     """
 
-    def __init__(self, url=None, access_token=None, profile="default"):
+    def __init__(self, url=None, access_token=None, profile=None):
         from kodexa import KodexaPlatform
 
         self.base_url = url if url is not None else KodexaPlatform.get_url(profile)

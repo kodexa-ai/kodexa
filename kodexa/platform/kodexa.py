@@ -39,12 +39,12 @@ logger = logging.getLogger()
 dirs = AppDirs("Kodexa", "Kodexa")
 
 
-def get_config(profile="default"):
+def get_config(profile=None):
     """
     Gets the kodexa config object used for local PAT storage.
 
     Args:
-        profile (str, optional): The profile to get the config for. Defaults to None.
+        profile (str, optional): The profile to get the config for. Defaults to current profile or "default"
 
     Returns:
         dict: The kodexa config as a dictionary. If the profile exists in the config, it returns the config for that profile.
@@ -56,6 +56,11 @@ def get_config(profile="default"):
     if os.path.exists(path):
         with open(path, "r") as outfile:
             kodexa_config = json.load(outfile)
+            if "_current_profile_" in kodexa_config:
+                profile = kodexa_config["_current_profile_"]
+            else:
+                profile = "default"
+
             if profile not in kodexa_config:
                 kodexa_config[profile] = {
                     "url": None,
@@ -139,7 +144,7 @@ class KodexaPlatform:
         )
 
     @staticmethod
-    def get_url(profile="default") -> str:
+    def get_url(profile=None) -> str:
         """
         Get the URL to use to access a Kodexa Platform.
 
@@ -202,20 +207,46 @@ class KodexaPlatform:
         return [org_slug, slug, version]
 
     @classmethod
-    def configure(cls, kodexa_url, access_token, profile="default"):
+    def configure(cls, kodexa_url, access_token, profile=None):
         """
         Configure kodexa access to platform
 
         Args
             kodexa_url (str): The URL of the Kodexa platform.
             access_token (str): The access token to use.
-            profile (str, optional): The profile to use. Defaults to None.
+            profile (str, optional): The profile to use. Defaults to current profile or "default".
         """
         kodexa_config = get_config(profile)
+
+        kodexa_config["_current_profile_"] = profile
+
         kodexa_config[profile] = {
             "url": kodexa_url,
             "access_token": access_token,
         }
+
+        save_config(kodexa_config)
+
+    @classmethod
+    def list_profiles(cls):
+        kodexa_config = get_config(profile)
+
+        # its the keys without __current_profile__
+        return [key for key in kodexa_config if key != "_current_profile_"]
+
+    @classmethod
+    def set_profile(cls, profile):
+        kodexa_config = get_config(profile)
+        kodexa_config["_current_profile_"] = profile
+        save_config(kodexa_config)
+
+    @classmethod
+    def delete_profile(cls, profile):
+        kodexa_config = get_config(profile)
+        del kodexa_config[profile]
+
+        if kodexa_config["_current_profile_"] == profile:
+            kodexa_config["_current_profile_"] = "default"
 
         save_config(kodexa_config)
 
