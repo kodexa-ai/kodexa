@@ -253,6 +253,10 @@ class KodexaPlatform:
         return [key for key in kodexa_config if key != "_current_profile_"]
 
     @classmethod
+    def get_current_profile(cls):
+        return get_profile()
+
+    @classmethod
     def set_profile(cls, profile):
         kodexa_config = get_config(profile)
         kodexa_config["_current_profile_"] = profile
