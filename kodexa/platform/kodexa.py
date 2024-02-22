@@ -57,6 +57,7 @@ def get_profile(profile=None):
             return "default"
     return profile
 
+
 def get_config(profile=None):
     """
     Gets the kodexa config object used for local PAT storage.
@@ -71,14 +72,12 @@ def get_config(profile=None):
         default values depending on whether a profile was provided or not.
     """
     path = os.path.join(dirs.user_config_dir, ".kodexa.json")
+
+    # What is the real profile, since it might be default
+    profile = get_profile(profile)
     if os.path.exists(path):
         with open(path, "r") as outfile:
             kodexa_config = json.load(outfile)
-            if "_current_profile_" in kodexa_config and profile is None:
-                profile = kodexa_config["_current_profile_"]
-            elif profile is None:
-                profile = "default"
-
             if profile not in kodexa_config:
                 kodexa_config[profile] = {
                     "url": None,
