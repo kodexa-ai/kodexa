@@ -5572,7 +5572,6 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                 yield training
             page += 1
 
-
     def list_trainings(
             self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
     ) -> PageModelTraining:
