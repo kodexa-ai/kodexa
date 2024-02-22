@@ -39,6 +39,24 @@ logger = logging.getLogger()
 dirs = AppDirs("Kodexa", "Kodexa")
 
 
+def get_profile(profile=None):
+    """
+    Gets the current profile.
+
+    Args:
+        profile (str, optional): The profile to get. Defaults to None.
+
+    Returns:
+        str: The profile if it is defined, or "default" if it is not.
+    """
+    kodexa_config = get_config()
+    if profile is None:
+        if "_current_profile_" in kodexa_config:
+            return kodexa_config["_current_profile_"]
+        else:
+            return "default"
+    return profile
+
 def get_config(profile=None):
     """
     Gets the kodexa config object used for local PAT storage.
@@ -125,7 +143,7 @@ class KodexaPlatform:
         return KodexaClient(KodexaPlatform.get_url(), KodexaPlatform.get_access_token())
 
     @staticmethod
-    def get_access_token(profile="default") -> str:
+    def get_access_token(profile=None) -> str:
         """
         Get the access token.
 
@@ -140,7 +158,7 @@ class KodexaPlatform:
         return (
             access_token
             if access_token is not None
-            else kodexa_config[profile]["access_token"]
+            else kodexa_config[get_profile(profile)]["access_token"]
         )
 
     @staticmethod
@@ -159,7 +177,7 @@ class KodexaPlatform:
         return (
             env_url
             if env_url is not None
-            else kodexa_config[profile]["url"]
+            else kodexa_config[get_profile(profile)]["url"]
         )
 
     @staticmethod
@@ -251,7 +269,7 @@ class KodexaPlatform:
         save_config(kodexa_config)
 
     @classmethod
-    def login(cls, kodexa_url, token, profile="default"):
+    def login(cls, kodexa_url, token, profile=None):
         """
         Login to the Kodexa platform.
 
