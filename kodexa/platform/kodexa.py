@@ -220,22 +220,20 @@ class KodexaPlatform:
         save_config(kodexa_config)
 
     @classmethod
-    def login(cls, kodexa_url, username, password, profile="default"):
+    def login(cls, kodexa_url, token, profile="default"):
         """
         Login to the Kodexa platform.
 
         Args:
             kodexa_url (str): The URL of the Kodexa platform.
-            username (str): The username to use for login.
-            password (str): The password to use for login.
+            token (str): The token to use for login.
             profile (str, optional): The profile to use. Defaults to None.
         """
         from requests.auth import HTTPBasicAuth
 
         obj_response = requests.get(
-            f"{kodexa_url}/api/account/me/token",
-            auth=HTTPBasicAuth(username, password),
-            headers={"content-type": "application/json"}
+            f"{kodexa_url}/api/account/me",
+            headers={"content-type": "application/json", "x-access-token": token}
         )
         if obj_response.status_code == 200:
             kodexa_config = get_config(profile)

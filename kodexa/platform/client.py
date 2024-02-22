@@ -6066,14 +6066,13 @@ class KodexaClient:
         self.messages = MessagesEndpoint(self)
 
     @staticmethod
-    def login(url, email, password):
+    def login(url, token):
         """
         A static method to login to the Kodexa platform.
 
         Args:
             url (str): The URL for the Kodexa platform.
-            email (str): The email for the user.
-            password (str): The password for the user.
+            token (str): The email for the user.
 
         Returns:
             KodexaClient: A KodexaClient instance.
@@ -6084,9 +6083,8 @@ class KodexaClient:
         from requests.auth import HTTPBasicAuth
 
         obj_response = requests.get(
-            f"{url}/api/account/me/token",
-            auth=HTTPBasicAuth(email, password),
-            headers={"content-type": "application/json"}
+            f"{url}/api/account/me",
+            headers={"content-type": "application/json", "x-access-token": token}
         )
         if obj_response.status_code == 200:
             return KodexaClient(url, obj_response.text)
