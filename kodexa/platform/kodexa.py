@@ -73,11 +73,15 @@ def get_config(profile=None):
     """
     path = os.path.join(dirs.user_config_dir, ".kodexa.json")
 
-    # What is the real profile, since it might be default
-    profile = get_profile(profile)
     if os.path.exists(path):
         with open(path, "r") as outfile:
             kodexa_config = json.load(outfile)
+
+            if "_current_profile_" in kodexa_config:
+                profile = kodexa_config["_current_profile_"]
+            else:
+                profile = "default" if profile is None else profile
+
             if profile not in kodexa_config:
                 kodexa_config[profile] = {
                     "url": None,
@@ -85,6 +89,7 @@ def get_config(profile=None):
                 }
             return kodexa_config
     else:
+        profile = "default" if profile is None else profile
         return (
             {profile: {"url": None, "access_token": None}}
         )
