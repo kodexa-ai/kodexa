@@ -247,7 +247,7 @@ class KodexaPlatform:
 
     @classmethod
     def list_profiles(cls):
-        kodexa_config = get_config(profile)
+        kodexa_config = get_config()
 
         # its the keys without __current_profile__
         return [key for key in kodexa_config if key != "_current_profile_"]
