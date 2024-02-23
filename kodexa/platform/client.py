@@ -4987,7 +4987,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         Returns:
             list[DocumentEmbedding]: a list of document embeddings
         """
-        url = "/api/documentEmbeddings/query"
+        url = "/api/embeddings/query"
         embedding_query = {"embedding": embedding, "threshold": threshold, "limit": limit, "storeRef": self.ref}
         response = self.client.post(url, body=embedding_query)
         process_response(response)
