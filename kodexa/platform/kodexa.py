@@ -72,7 +72,6 @@ def get_config(profile=None):
         default values depending on whether a profile was provided or not.
     """
     path = os.path.join(dirs.user_config_dir, ".kodexa.json")
-
     if os.path.exists(path):
         with open(path, "r") as outfile:
             kodexa_config = json.load(outfile)
