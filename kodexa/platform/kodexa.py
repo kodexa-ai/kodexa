@@ -77,8 +77,10 @@ def get_config(profile=None):
         with open(path, "r") as outfile:
             kodexa_config = json.load(outfile)
 
-            if "_current_profile_" in kodexa_config:
+            if "_current_profile_" in kodexa_config and profile is None:
                 profile = kodexa_config["_current_profile_"]
+                if profile is None:
+                    raise Exception("No profile set")
             else:
                 profile = "default" if profile is None else profile
 
