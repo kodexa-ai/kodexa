@@ -3,6 +3,8 @@ import importlib
 import logging
 from typing import List
 
+from addict import Dict
+
 from kodexa import Assistant, AssistantResponse
 from kodexa import (
     ContentEvent,
@@ -316,7 +318,7 @@ class ExtensionPackUtil:
             import json
 
             with open(file_path, "r") as stream:
-                self.kodexa_metadata = json.load(stream)
+                self.kodexa_metadata = Dict(json.load(stream))
 
     def get_step(self, action_slug, options=None):
         """
