@@ -296,7 +296,7 @@ class KodexaPlatform:
         if obj_response.status_code == 200:
             kodexa_config = get_config(profile)
             kodexa_config[profile]["url"] = kodexa_url
-            kodexa_config[profile]["access_token"] = obj_response.text
+            kodexa_config[profile]["access_token"] = token
             save_config(kodexa_config)
             print("Logged in")
         else:
