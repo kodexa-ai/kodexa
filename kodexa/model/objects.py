@@ -3774,6 +3774,21 @@ class LabelStatistics(BaseModel):
     )
 
 
+class DocumentEmbedding(BaseModel):
+    
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    embedding: Optional[List[float]] = None
+    document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
+    content_object: Optional[ContentObject] = Field(None, alias="contentObject")
+    embedding_name: Optional[str] = Field(None, alias="embeddingName")
+    node_uuid: Optional[str] = Field(None, alias="nodeUuid")
+
+
 class DocumentFamily(BaseModel):
     """
 

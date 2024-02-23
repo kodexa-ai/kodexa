@@ -85,7 +85,7 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet,
+    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
 )
 
 logger = logging.getLogger()
@@ -4973,9 +4973,27 @@ class DataStoreEndpoint(StoreEndpoint):
 
 
 class DocumentStoreEndpoint(StoreEndpoint):
-    """Represents a document store that can be used to store files and their related document representations."""
-
     """Represents a document store that can be used to store files and then their related document representations"""
+
+    def query_by_embedding(self, embedding: list[float], threshold: float, limit: int):
+        """
+        Query the document store by an embedding.
+
+        Args:
+            embedding (list[float]): The embedding to query by.
+            threshold (int): The threshold to use for the query.
+            limit (int): The limit of the query.
+
+        Returns:
+            list[DocumentEmbedding]: a list of document embeddings
+        """
+        url = "/api/documentEmbeddings/query"
+        embedding_query = {"embedding": embedding, "threshold": threshold, "limit": limit, "storeRef": self.ref}
+        response = self.client.post(url, body=embedding_query)
+        process_response(response)
+
+        # We get a list of the document embeddings
+        return [DocumentEmbedding.model_validate(embedding) for embedding in response.json()]
 
     def delete_by_path(self, object_path: str):
         """
