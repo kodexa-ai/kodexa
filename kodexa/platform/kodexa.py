@@ -291,7 +291,7 @@ class KodexaPlatform:
 
         obj_response = requests.get(
             f"{kodexa_url}/api/account/me",
-            headers={"content-type": "application/json", "x-access-token": token}
+            headers={"content-type": "application/json", "x-access-token": token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
         )
         if obj_response.status_code == 200:
             kodexa_config = get_config(profile)
@@ -314,6 +314,7 @@ class KodexaPlatform:
             f"{KodexaPlatform.get_url()}/api",
             headers={
                 "x-access-token": KodexaPlatform.get_access_token(),
+                "cf-access-token": os.environ.get("CF_TOKEN", ""),
                 "content-type": "application/json",
             },
         )
@@ -363,7 +364,8 @@ class RemoteSession:
         logger.debug(f"Downloading metadata for action {ref}")
         r = requests.get(
             f"{KodexaPlatform.get_url()}/api/actions/{ref.replace(':', '/')}",
-            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            headers={"x-access-token": KodexaPlatform.get_access_token(),
+                     "cf-access-token": os.environ.get("CF_TOKEN", "")},
         )
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
@@ -383,7 +385,8 @@ class RemoteSession:
         r = requests.post(
             f"{KodexaPlatform.get_url()}/api/sessions",
             params={self.session_type: self.slug},
-            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            headers={"x-access-token": KodexaPlatform.get_access_token(),
+                     "cf-access-token": os.environ.get("CF_TOKEN", "")},
         )
 
         process_response(r)
@@ -422,7 +425,8 @@ class RemoteSession:
             f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/execute",
             params={self.session_type: self.slug, "documentVersion": document.version},
             data=data,
-            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            headers={"x-access-token": KodexaPlatform.get_access_token(),
+                     "cf-access-token": os.environ.get("CF_TOKEN", "")},
             files=files,
         )
         try:
@@ -466,7 +470,8 @@ class RemoteSession:
         while execution.status == "PENDING" or execution.status == "RUNNING":
             r = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}",
-                headers={"x-access-token": KodexaPlatform.get_access_token()},
+                headers={"x-access-token": KodexaPlatform.get_access_token(),
+                         "cf-access-token": os.environ.get("CF_TOKEN", "")},
             )
             try:
                 execution = json.loads(r.text)
@@ -522,7 +527,8 @@ class RemoteSession:
             logger.info(f"Downloading output document [{execution.outputId}]")
             doc = requests.get(
                 f"{KodexaPlatform.get_url()}/api/sessions/{self.cloud_session.id}/executions/{execution.id}/objects/{execution.outputId}",
-                headers={"x-access-token": KodexaPlatform.get_access_token()},
+                headers={"x-access-token": KodexaPlatform.get_access_token(),
+                         "cf-access-token": os.environ.get("CF_TOKEN", "")},
             )
             return Document.from_kddb(doc.content)
 
@@ -810,7 +816,8 @@ class EventHelper:
         response = requests.post(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/logs",
             json=[{"entry": message}],
-            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            headers={"x-access-token": KodexaPlatform.get_access_token(),
+                     "cf-access-token": os.environ.get("CF_TOKEN", "")},
             timeout=300,
         )
         if response.status_code != 200:
@@ -834,7 +841,8 @@ class EventHelper:
 
         co_response = requests.get(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/objects/{content_object_id}",
-            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            headers={"x-access-token": KodexaPlatform.get_access_token(),
+                     "cf-access-token": os.environ.get("CF_TOKEN", "")},
             timeout=300
         )
         process_response(co_response)
@@ -861,7 +869,8 @@ class EventHelper:
         co_response = requests.post(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/objects",
             data=data,
-            headers={"x-access-token": KodexaPlatform.get_access_token()},
+            headers={"x-access-token": KodexaPlatform.get_access_token(),
+                     "cf-access-token": os.environ.get("CF_TOKEN", "")},
             files=files,
             timeout=300
         )

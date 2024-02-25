@@ -6103,7 +6103,9 @@ class KodexaClient:
 
         obj_response = requests.get(
             f"{url}/api/account/me",
-            headers={"content-type": "application/json", "x-access-token": token}
+            headers={"content-type": "application/json",
+                     "x-access-token": token,
+                     "cf-access-token": os.environ.get("CF_TOKEN", "")}
         )
         if obj_response.status_code == 200:
             return KodexaClient(url, obj_response.text)
@@ -6235,6 +6237,7 @@ class KodexaClient:
             params=params,
             headers={
                 "x-access-token": self.access_token,
+                "cf-access-token": os.environ.get("CF_TOKEN", ""),
                 "content-type": "application/json",
             },
         )
@@ -6261,6 +6264,7 @@ class KodexaClient:
             params=params,
             headers={
                 "x-access-token": self.access_token,
+                "cf-access-token": os.environ.get("CF_TOKEN", ""),
                 "content-type": "application/json",
             }
         )
@@ -6283,7 +6287,7 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        headers = {"x-access-token": self.access_token}
+        headers = {"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
         if files is None:
             headers["content-type"] = "application/json"
 
@@ -6313,7 +6317,7 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        headers = {"x-access-token": self.access_token}
+        headers = {"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
         if files is None:
             headers["content-type"] = "application/json"
 
@@ -6341,7 +6345,7 @@ class KodexaClient:
         response = requests.delete(
             self.get_url(url),
             params=params,
-            headers={"x-access-token": self.access_token}
+            headers={"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
         )
         return process_response(response)
 
