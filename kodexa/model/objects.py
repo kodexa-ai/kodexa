@@ -820,13 +820,13 @@ class SlugBasedMetadata1(BaseModel):
         alias="orgSlug",
         description="The slug of the organization that owns this metadata object",
     )
-    slug: str = Field(
+    slug: Optional[str] = Field(
         None,
         description="The slug used when referencing this metadata object",
         pattern=r"^[a-zA-Z0-9\-_]{0,255}$",
     )
-    type: str = Field(None, description="The type of metadata object")
-    name: str = Field(None, description="The name of the object")
+    type: Optional[str] = Field(None, description="The type of metadata object")
+    name: Optional[str] = Field(None, description="The name of the object")
     description: Optional[str] = Field(
         None, description="The description of the object"
     )
