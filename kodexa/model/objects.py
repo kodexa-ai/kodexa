@@ -2167,9 +2167,6 @@ class BulkDelete(BaseModel):
 
 
 class User(BaseModel):
-    """
-
-    """
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2185,9 +2182,9 @@ class User(BaseModel):
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
-    email: str
-    first_name: str = Field(..., alias="firstName")
-    last_name: str = Field(..., alias="lastName")
+    email: Optional[str] = None
+    first_name: Optional[str] = Field(None, alias="firstName")
+    last_name: Optional[str] = Field(None, alias="lastName")
     activated: Optional[bool] = None
     platform_admin: Optional[bool] = Field(None, alias="platformAdmin")
     password_reset_date: Optional[StandardDateTime] = Field(
@@ -2327,6 +2324,9 @@ class ExtensionPackProvided(BaseModel):
         None,
         alias="extensionPackRef",
         description="The reference to the extension pack (if the metadata object was created by an extension pack)",
+    )
+    change_sequence: Optional[int] = Field(
+        None, alias="changeSequence", description="The change sequence"
     )
 
 
@@ -2893,7 +2893,6 @@ class Workspace(BaseModel):
     project: Optional[Project] = None
     name: Optional[str] = None
     description: Optional[str] = None
-    channel: Optional[Channel] = None
     workspace_storage: Optional[WorkspaceStorage] = Field(
         None, alias="workspaceStorage"
     )
@@ -2916,6 +2915,23 @@ class ProjectWorkspace(BaseModel):
     )
 
 
+class ChannelParticipant(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+    )
+    """
+    A participant in a channel
+    """
+
+    user: Optional[User] = None
+    assistant: Optional[Assistant] = None
+
+
 class Channel(BaseModel):
     """
 
@@ -2932,6 +2948,10 @@ class Channel(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     workspace: Optional[Workspace] = None
+    project: Optional[Project] = None
+    name: Optional[str] = None
+    is_private: Optional[bool] = Field(None, alias="isPrivate")
+    participants: Optional[List[ChannelParticipant]] = Field(None, alias="participants")
 
 
 class MessageBlock(BaseModel):
@@ -3025,7 +3045,6 @@ class Message(BaseModel):
     assistant: Optional[Assistant] = None
     user: Optional[User] = None
     context: Optional[MessageContext] = None
-    force_to_sender: Optional[bool] = Field(False, alias="forceToSender")
 
 
 class DataAttribute(BaseModel):
@@ -3755,6 +3774,21 @@ class LabelStatistics(BaseModel):
     )
 
 
+class DocumentEmbedding(BaseModel):
+    
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    embedding: Optional[List[float]] = None
+    document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
+    content_object: Optional[ContentObject] = Field(None, alias="contentObject")
+    embedding_name: Optional[str] = Field(None, alias="embeddingName")
+    node_uuid: Optional[str] = Field(None, alias="nodeUuid")
+
+
 class DocumentFamily(BaseModel):
     """
 
@@ -4051,6 +4085,8 @@ class BaseEvent(
             "ContentEvent",
             "ScheduledEvent",
             "AssistantEvent",
+            "ChannelEvent",
+            "WorkspaceEvent"
         ]
     ]
 ):
@@ -4080,6 +4116,7 @@ class MessageContext(BaseModel):
     page: Optional[int] = None
     message_template: Optional[MessageTemplate] = Field(None, alias="messageTemplate")
     message_feedback_response: Optional[MessageFeedbackResponse] = Field(None, alias="feedbackOption")
+    taxonomy_refs: Optional[List[str]] = Field(None, alias="taxonomyRefs")
 
 
 class MessageEvent(BaseModel):
@@ -4108,6 +4145,32 @@ class ChannelEvent(BaseModel):
     type: Optional[str] = None
     channel: Optional[Channel] = None
     message_events: Optional[List[MessageEvent]] = Field(None, alias="messageEvents")
+
+
+class ModelInteraction(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    model_id: Optional[str] = Field(None, alias="modelId")
+    input_tokens: Optional[int] = Field(None, alias="inputTokens")
+    output_tokens: Optional[int] = Field(None, alias="outputTokens")
+    duration: Optional[int] = None
+    note: Optional[str] = None
+
+
+class ModelUsage(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    interactions: Optional[List[ModelInteraction]] = None
 
 
 class ExecutionEvent(BaseModel):
@@ -4143,6 +4206,7 @@ class ExecutionEvent(BaseModel):
     created: Optional[StandardDateTime] = None
     start_date: Optional[StandardDateTime] = Field(None, alias="startDate")
     end_date: Optional[StandardDateTime] = Field(None, alias="endDate")
+    model_usage: Optional[ModelUsage] = Field(None, alias="modelUsage")
 
 
 class PageTaxonomy(BaseModel):
@@ -4175,22 +4239,30 @@ class GuidanceTagResult(BaseModel):
     line_uuid: Optional[str] = Field(None, alias="lineUuid")
 
 
-class Guidance(BaseModel):
-    """
+class UserSelection(BaseModel):
+    text: Optional[str] = None
+    line_uuid: Optional[str] = Field(None, alias="lineUuid")
 
-    """
+
+class Guidance(BaseModel):
+    guidance_type: Optional[str] = Field(None, alias="guidanceType")
+    taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
     document_name: Optional[str] = Field(None, alias="documentName")
     document_type: Optional[str] = Field(None, alias="documentType")
+    document_page: Optional[int] = Field(None, alias="documentPage")
     sample_text: Optional[str] = Field(None, alias="sampleText")
     sample_result: Optional[Dict[str, List[GuidanceTagResult]]] = Field(None, alias="sampleResult")
+    section_markers: Optional[List[GuidanceTagResult]] = Field(None, alias="sectionMarkers")
     active: Optional[bool] = None
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
     priority: Optional[int] = 1
     user_instructions: Optional[str] = Field(None, alias="userInstructions")
     user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
-    
+
     # users selected text, text and line_uuid
-    user_selection: Optional[List[tuple[str,str]]] = Field(None, alias="userSelection")
+    user_selection: Optional[List[UserSelection]] = Field(None, alias="userSelection")
+
+    compiled_guidance: Optional[Dict[str, Any]] = Field(None, alias="compiledGuidance")
 
 
 class GuidanceSet(ExtensionPackProvided):
@@ -4234,7 +4306,9 @@ class Prompt(ExtensionPackProvided):
     """
 
     """
-    template: Optional[str] = None
+    prompt_template: Optional[str] = Field(
+        None, description="The prompt template", alias="promptTemplate"
+    )
     options: Optional[List[Option]] = Field(
         None, description="Options for the prompt"
     )
@@ -4242,10 +4316,10 @@ class Prompt(ExtensionPackProvided):
 
     def render(self, properties):
         if self.template_type == "FSTRING":
-            return self.template.format(**properties)
+            return self.prompt_template.format(**properties)
         elif self.template_type == "MUSTACHE":
             import chevron
-            return chevron.render(self.template, properties)
+            return chevron.render(self.prompt_template, properties)
         else:
             raise Exception(f"Unknown template type {self.template_type}")
 

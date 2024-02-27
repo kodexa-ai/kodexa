@@ -85,7 +85,7 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet,
+    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
 )
 
 logger = logging.getLogger()
@@ -491,9 +491,9 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             # Yield each endpoint in the current page
             for endpoint in (
                     self.get_page_class(list_response.json())
-                            .model_validate(list_response.json())
-                            .set_client(self.client)
-                            .to_endpoints()
+                        .model_validate(list_response.json())
+                        .set_client(self.client)
+                        .to_endpoints()
             ):
                 yield endpoint
 
@@ -2252,7 +2252,9 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         message_endpoint.content = message.content
         message_endpoint.block = message.block
         message_endpoint.feedback = message.feedback
-        message_endpoint.force_to_sender = message.force_to_sender
+        message_endpoint.assistant = message.assistant
+        message_endpoint.user = message.user
+        message_endpoint.context = message.context
         return message_endpoint.create()
 
 
@@ -4179,6 +4181,24 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         response = self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
         self.change_sequence = response.json()["changeSequence"]
 
+    def set_active_assistant(self, assistant: Assistant):
+        """
+        Set the active assistant.
+        """
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/activeAssistant"
+        response = self.client.put(url, body=assistant.model_dump(mode="json", by_alias=True))
+        process_response(response)
+        self.change_sequence = response.json()["changeSequence"]
+
+    def clear_active_assistant(self):
+        """
+        Clear the active assistant.
+        """
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/activeAssistant"
+        response = self.client.delete(url)
+        process_response(response)
+        self.change_sequence = response.json()["changeSequence"]
+
     def lock(self):
         """
         Lock the document family.
@@ -4330,12 +4350,13 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/removeLabel"
         return self.client.put(url, params={"label": label})
 
-    def get_document(self, content_object: Optional[ContentObject] = None) -> Document:
+    def get_document(self, content_object: Optional[ContentObject] = None, inmemory=False) -> Document:
         """
         Get the document of the document family.
 
         Args:
             content_object (Optional[ContentObject]): The content object. Defaults to None.
+            inmemory (bool): Whether to return the document in memory. Defaults to False.
 
         Returns:
             Document: The document of the document family.
@@ -4345,7 +4366,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         get_response = self.client.get(
             f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content"
         )
-        return Document.from_kddb(get_response.content)
+        return Document.from_kddb(get_response.content, inmemory=inmemory)
 
     def reprocess(self, assistant: Assistant):
         """
@@ -4427,8 +4448,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
         self.client.put(
-            url, params={'replaceData': replace_data},
-            body=document.get_feature_set(owner_uri).dict(by_alias=True),
+            url, params={'replaceData': replace_data, 'ownerUri': owner_uri},
+            body=document.get_feature_set(owner_uri).model_dump(by_alias=True),
         )
 
 
@@ -4952,9 +4973,27 @@ class DataStoreEndpoint(StoreEndpoint):
 
 
 class DocumentStoreEndpoint(StoreEndpoint):
-    """Represents a document store that can be used to store files and their related document representations."""
-
     """Represents a document store that can be used to store files and then their related document representations"""
+
+    def query_by_embedding(self, embedding: list[float], threshold: float, limit: int):
+        """
+        Query the document store by an embedding.
+
+        Args:
+            embedding (list[float]): The embedding to query by.
+            threshold (int): The threshold to use for the query.
+            limit (int): The limit of the query.
+
+        Returns:
+            list[DocumentEmbedding]: a list of document embeddings
+        """
+        url = "/api/embeddings/query"
+        embedding_query = {"embedding": embedding, "threshold": threshold, "limit": limit, "storeRef": self.ref}
+        response = self.client.post(url, body=embedding_query)
+        process_response(response)
+
+        # We get a list of the document embeddings
+        return [DocumentEmbedding.model_validate(embedding) for embedding in response.json()]
 
     def delete_by_path(self, object_path: str):
         """
@@ -5336,6 +5375,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             f"api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": path, "meta": True},
         )
+        process_response(get_response)
         return DocumentFamilyEndpoint.model_validate(get_response.json()).set_client(
             self.client
         )
@@ -5530,6 +5570,29 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(url)
         return ModelTraining.model_validate(response.json())
 
+    def stream_list_trainings(self, query="*", sort=None, filters: List[str] = None):
+        """
+            Stream the list of model trainings
+
+        Args:
+            query (str): the query to run
+            sort (str): sorting order of the list
+            filters (List[str]): in a format of list, for example: ["name=training1", "status=completed"]
+        """
+        page_size = 5
+        page = 1
+
+        if not sort:
+            sort = "id"
+
+        while True:
+            page_response = self.list_trainings(query=query, page=page, page_size=page_size, sort=sort, filters=filters)
+            if not page_response.content:
+                break
+            for training in page_response.content:
+                yield training
+            page += 1
+
     def list_trainings(
             self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
     ) -> PageModelTraining:
@@ -5558,7 +5621,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         if filters is not None:
             params["filter"] = filters
 
-        response = self.client.get(url)
+        response = self.client.get(url, params=params)
         return PageModelTraining.model_validate(response.json())
 
     @staticmethod
@@ -5992,7 +6055,6 @@ class KodexaClient:
     Attributes:
         base_url (str): The base URL for the Kodexa platform.
         access_token (str): The access token for the Kodexa platform.
-        insecure (bool): A flag indicating whether the connection is insecure.
         organizations (OrganizationsEndpoint): An endpoint for organizations.
         projects (ProjectsEndpoint): An endpoint for projects.
         workspaces (WorkspacesEndpoint): An endpoint for workspaces.
@@ -6003,7 +6065,7 @@ class KodexaClient:
         messages (MessagesEndpoint): An endpoint for messages.
     """
 
-    def __init__(self, url=None, access_token=None, profile=None, insecure=None):
+    def __init__(self, url=None, access_token=None, profile=None):
         from kodexa import KodexaPlatform
 
         self.base_url = url if url is not None else KodexaPlatform.get_url(profile)
@@ -6011,9 +6073,6 @@ class KodexaClient:
             access_token
             if access_token is not None
             else KodexaPlatform.get_access_token(profile)
-        )
-        self.insecure = (
-            insecure if insecure is not None else KodexaPlatform.get_insecure(profile)
         )
         self.organizations = OrganizationsEndpoint(self)
         self.projects = ProjectsEndpoint(self)
@@ -6026,15 +6085,13 @@ class KodexaClient:
         self.messages = MessagesEndpoint(self)
 
     @staticmethod
-    def login(url, email, password, insecure=False):
+    def login(url, token):
         """
         A static method to login to the Kodexa platform.
 
         Args:
             url (str): The URL for the Kodexa platform.
-            email (str): The email for the user.
-            password (str): The password for the user.
-            insecure (bool, optional): A flag indicating whether the connection is insecure. Defaults to False.
+            token (str): The email for the user.
 
         Returns:
             KodexaClient: A KodexaClient instance.
@@ -6045,13 +6102,13 @@ class KodexaClient:
         from requests.auth import HTTPBasicAuth
 
         obj_response = requests.get(
-            f"{url}/api/account/me/token",
-            auth=HTTPBasicAuth(email, password),
-            headers={"content-type": "application/json"},
-            verify=not insecure,
+            f"{url}/api/account/me",
+            headers={"content-type": "application/json",
+                     "x-access-token": token,
+                     "cf-access-token": os.environ.get("CF_TOKEN", "")}
         )
         if obj_response.status_code == 200:
-            return KodexaClient(url, obj_response.text, insecure=insecure)
+            return KodexaClient(url, obj_response.text)
 
         raise Exception(f"Check your URL and password [{obj_response.status_code}]")
 
@@ -6180,6 +6237,7 @@ class KodexaClient:
             params=params,
             headers={
                 "x-access-token": self.access_token,
+                "cf-access-token": os.environ.get("CF_TOKEN", ""),
                 "content-type": "application/json",
             },
         )
@@ -6206,9 +6264,9 @@ class KodexaClient:
             params=params,
             headers={
                 "x-access-token": self.access_token,
+                "cf-access-token": os.environ.get("CF_TOKEN", ""),
                 "content-type": "application/json",
-            },
-            verify=not self.insecure,
+            }
         )
 
         return process_response(response)
@@ -6229,7 +6287,7 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        headers = {"x-access-token": self.access_token}
+        headers = {"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
         if files is None:
             headers["content-type"] = "application/json"
 
@@ -6240,7 +6298,6 @@ class KodexaClient:
             files=files,
             params=params,
             headers=headers,
-            verify=not self.insecure,
         )
         return process_response(response)
 
@@ -6260,7 +6317,7 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        headers = {"x-access-token": self.access_token}
+        headers = {"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
         if files is None:
             headers["content-type"] = "application/json"
 
@@ -6271,7 +6328,6 @@ class KodexaClient:
             files=files,
             params=params,
             headers=headers,
-            verify=not self.insecure,
         )
         return process_response(response)
 
@@ -6289,8 +6345,7 @@ class KodexaClient:
         response = requests.delete(
             self.get_url(url),
             params=params,
-            headers={"x-access-token": self.access_token},
-            verify=not self.insecure,
+            headers={"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
         )
         return process_response(response)
 
@@ -6591,6 +6646,7 @@ class KodexaClient:
                 "message": MessageEndpoint,
                 "prompt": PromptEndpoint,
                 "guidance": GuidanceSetEndpoint,
+                "channel": ChannelEndpoint,
             }
 
             if component_type in known_components:

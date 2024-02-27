@@ -1,3 +1,6 @@
+import os
+
+from kodexa import KodexaClient, KodexaPlatform
 from kodexa.assistant import (
     Assistant,
     AssistantContext,
@@ -19,7 +22,7 @@ class TestAssistant(Assistant):
     """ """
 
     def process_event(
-        self, event: BaseEvent, context: AssistantContext = None
+            self, event: BaseEvent, context: AssistantContext = None
     ) -> AssistantResponse:
         """
 
