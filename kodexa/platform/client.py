@@ -1725,7 +1725,8 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             raise Exception(f"Component {self.ref} already exists")
 
         if exists:
-            self.client.put(url, self.model_dump(mode="json", by_alias=True))
+            response = self.client.put(url, self.model_dump(mode="json", by_alias=True))
+            process_response(response)
             return self.post_deploy()
 
         self.client.post(

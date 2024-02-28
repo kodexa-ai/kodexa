@@ -4035,6 +4035,8 @@ class AssistantExecution(BaseModel):
             DataObjectEvent,
             DocumentFamilyEvent,
             ScheduledEvent,
+            ChannelEvent,
+            WorkspaceEvent,
         ]
     ] = None
     response: Optional[AssistantExecutionResponse] = None
@@ -4502,6 +4504,8 @@ class PlatformEvent(BaseModel):
             DataObjectEvent,
             DocumentFamilyEvent,
             ScheduledEvent,
+            ChannelEvent,
+            WorkspaceEvent
         ]
     ] = Field(None, alias="eventDetail")
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
