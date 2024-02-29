@@ -8,8 +8,8 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, List, Optional, Dict
-
+from typing import Any, List, Optional
+from addict import Dict
 import deepdiff
 import msgpack
 from pydantic import BaseModel, ConfigDict
@@ -130,7 +130,7 @@ class ContentException(dict):
         self.exception_type_id = exception_type_id
 
 
-class Tag(dict):
+class Tag(Dict):
     """A class to represent the metadata for a label that is applied as a feature on a content node.
 
     Attributes:
