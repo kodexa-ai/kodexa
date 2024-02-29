@@ -1367,7 +1367,7 @@ class PersistenceManager(object):
         logger.debug("Merging cache to persistence")
         dirty_nodes = self.node_cache.get_dirty_objs()
 
-        print(f"Identified {len(dirty_nodes)} nodes to update")
+        logger.debug(f"Identified {len(dirty_nodes)} nodes to update")
 
         next_feature_id = self._underlying_persistence.get_max_feature_id()
         for node in dirty_nodes:
