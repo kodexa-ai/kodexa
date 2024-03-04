@@ -2758,10 +2758,20 @@ class ProjectStatus(BaseModel):
     icon: Optional[str] = None
 
 
-class Project(BaseModel):
-    """
+class ProjectOptions(BaseModel):
 
-    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    options: list[Option]
+    properties: dict[str, any]
+    
+
+class Project(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2801,6 +2811,7 @@ class Project(BaseModel):
     )
     status: Optional[ProjectStatus] = None
     owner: Optional[User] = None
+    project_options: Optional[ProjectOptions] = Field(None, alias="projectOptions")
 
 
 class FeatureSet(BaseModel):
@@ -5188,9 +5199,6 @@ class Pipeline(ExtensionPackProvided):
 
 
 class ProjectTemplate(ExtensionPackProvided):
-    """
-
-    """
 
     stores: Optional[List[ProjectStore]] = Field(
         None, description="The stores that will be created with the project template"
@@ -5238,9 +5246,8 @@ class ProjectTemplate(ExtensionPackProvided):
         alias="attributeStatuses",
         description="The attribute statuses that will be created with the project template",
     )
-    options: Optional[List[Option]] = Field(
-        None, description="Options for the project template"
-    )
+
+    project_options: Optional[ProjectOptions] = Field(None, alias="projectOptions")
 
 
 class Store(ExtensionPackProvided):
