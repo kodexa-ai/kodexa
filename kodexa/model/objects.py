@@ -2767,8 +2767,8 @@ class ProjectOptions(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    options: list[Option]
-    properties: dict[str, any]
+    options: List[Option] = Field(None, description="The options for the project")
+    properties: Dict[str, Any] = Field(None, description="The properties for the project")
     
 
 class Project(BaseModel):
