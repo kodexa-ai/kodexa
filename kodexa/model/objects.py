@@ -2328,6 +2328,9 @@ class ExtensionPackProvided(BaseModel):
     change_sequence: Optional[int] = Field(
         None, alias="changeSequence", description="The change sequence"
     )
+    delete_protection: Optional[bool] = Field(
+        None, description="Delete protection", alias="deleteProtection"
+    )
 
 
 class Option(BaseModel):
