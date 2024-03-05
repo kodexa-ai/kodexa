@@ -2814,7 +2814,7 @@ class Project(BaseModel):
     )
     status: Optional[ProjectStatus] = None
     owner: Optional[User] = None
-    project_options: Optional[ProjectOptions] = Field(None, alias="projectOptions")
+    options: Optional[ProjectOptions] = Field(None, alias="options")
 
 
 class FeatureSet(BaseModel):
