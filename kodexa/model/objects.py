@@ -5247,7 +5247,7 @@ class ProjectTemplate(ExtensionPackProvided):
         description="The attribute statuses that will be created with the project template",
     )
 
-    project_options: Optional[ProjectOptions] = Field(None, alias="projectOptions")
+    options: Optional[ProjectOptions] = Field(None, alias="options")
 
 
 class Store(ExtensionPackProvided):
