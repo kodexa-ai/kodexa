@@ -2887,6 +2887,7 @@ class WorkspaceStorage(BaseModel):
     current_view_id: Optional[str] = Field(None, alias="currentViewId")
     default_sidebar: Optional[str] = Field(None, alias="defaultSidebar")
     overview: Optional[str] = None
+    available_panels: Optional[Dict[str, bool]] = Field(None, alias="availablePanels")
 
 
 class Workspace(BaseModel):
