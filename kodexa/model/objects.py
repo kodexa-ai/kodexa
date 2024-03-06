@@ -5252,6 +5252,8 @@ class ProjectTemplate(ExtensionPackProvided):
 
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
+    tags: Optional[List[str]] = Field(None, alias="tags")
+
 
 class Store(ExtensionPackProvided):
     """
