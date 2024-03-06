@@ -5791,11 +5791,6 @@ def process_response(response) -> requests.Response:
 
     return response
 
-    #
-    #  The Kodexa Client is the way that brings everything together
-    #
-    #
-
 
 OBJECT_TYPES = {
     "extensionPacks": {
