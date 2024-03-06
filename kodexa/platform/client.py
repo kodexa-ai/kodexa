@@ -5774,6 +5774,8 @@ def process_response(response) -> requests.Response:
         raise Exception(f"Unauthorized ({response.text})")
     if response.status_code == 404:
         raise Exception(f"Not found ({response.text})")
+    if response.status_code in [301, 302]:
+        raise Exception(f"Redirected ({response.text})")
     if response.status_code == 405:
         raise Exception("Method not allowed")
     if response.status_code == 500:
