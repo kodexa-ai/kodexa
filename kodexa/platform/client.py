@@ -5527,6 +5527,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(
             f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}/content"
         )
+        process_response(response)
         from zipfile import ZipFile
         from io import BytesIO
 
@@ -5546,6 +5547,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(
             f"/api/stores/{self.ref.replace(':', '/')}/implementation"
         )
+        process_response(response)
         from zipfile import ZipFile
         from io import BytesIO
 
@@ -5748,10 +5750,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             num_hits = self.build_implementation_zip(metadata)
             if num_hits > 0 and not dry_run:
                 with open("implementation.zip", "rb") as zip_content:
-                    self.client.post(
+                    response = self.client.post(
                         f"/api/stores/{self.ref.replace(':', '/')}/implementation",
                         files={"implementation": zip_content},
                     )
+                    process_response(response)
                 results.append(f"{num_hits} files packaged and deployed to {self.ref}")
         if not metadata.keep_zip:
             Path("implementation.zip").unlink()
