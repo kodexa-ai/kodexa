@@ -1729,10 +1729,11 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             process_response(response)
             return self.post_deploy()
 
-        self.client.post(
+        response = self.client.post(
             f"/api/{self.get_type()}/{self.org_slug}",
             self.model_dump(mode="json", by_alias=True),
         )
+        process_response(response)
         return self.post_deploy()
 
 
