@@ -6327,6 +6327,7 @@ class KodexaClient:
                 "x-access-token": self.access_token,
                 "cf-access-token": os.environ.get("CF_TOKEN", ""),
                 "content-type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
             }
         )
 
@@ -6348,7 +6349,10 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        headers = {"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
+        headers = {
+            "x-access-token": self.access_token,
+            "X-Requested-With": "XMLHttpRequest",
+            "cf-access-token": os.environ.get("CF_TOKEN", "")}
         if files is None:
             headers["content-type"] = "application/json"
 
@@ -6378,7 +6382,9 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        headers = {"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
+        headers = {"x-access-token": self.access_token,
+                   "cf-access-token": os.environ.get("CF_TOKEN", ""),
+                   "X-Requested-With": "XMLHttpRequest"}
         if files is None:
             headers["content-type"] = "application/json"
 
@@ -6406,7 +6412,9 @@ class KodexaClient:
         response = requests.delete(
             self.get_url(url),
             params=params,
-            headers={"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
+            headers={"x-access-token": self.access_token,
+                     "cf-access-token": os.environ.get("CF_TOKEN", ""),
+                     "X-Requested-With": "XMLHttpRequest"}
         )
         return process_response(response)
 
