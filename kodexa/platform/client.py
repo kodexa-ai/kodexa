@@ -2475,7 +2475,6 @@ class ProjectEndpoint(EntityEndpoint, Project):
         return ProjectGuidanceEndpoint().set_client(self.client).set_project(self)
 
     @property
-    @property
     def assistants(self) -> ProjectAssistantsEndpoint:
         """Get the assistants endpoint of the project.
 
