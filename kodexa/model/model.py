@@ -114,6 +114,7 @@ class ContentException(dict):
             exception_details: Optional[str] = None,
             node_uuid: Optional[str] = None,
             value: Optional[str] = None,
+            boolean_value: Optional[bool] = None,
             *args,
             **kwargs,
     ):
@@ -128,6 +129,7 @@ class ContentException(dict):
         self.severity = severity
         self.value = value
         self.exception_type_id = exception_type_id
+        self.boolean_value = boolean_value
 
 
 class Tag(Dict):
