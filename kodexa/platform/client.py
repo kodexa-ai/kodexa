@@ -2080,7 +2080,7 @@ class ProjectGuidanceEndpoint(ProjectResourceEndpoint):
         return "guidance"
 
     def get_instance_class(self, object_dict=None):
-        return GuidanceEndpoint
+        return GuidanceSetEndpoint
 
 
 class ProjectDataFormEndpoint(ProjectResourceEndpoint):
@@ -2895,7 +2895,7 @@ class GuidanceEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
     Represents a guidance endpoint.
 
-    This class is used to interact with the prompts endpoint of the API.
+    This class is used to interact with the guidance endpoint of the API.
     It provides methods to get the type, page class, and instance class of the endpoint,
     as well as to deploy an extension pack from a URL.
     """
@@ -2905,7 +2905,7 @@ class GuidanceEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         Get the type of the endpoint.
 
         Returns:
-            str: The type of the endpoint, "prompts".
+            str: The type of the endpoint, "guidance".
         """
         return "guidance"
 
