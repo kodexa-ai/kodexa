@@ -491,9 +491,9 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             # Yield each endpoint in the current page
             for endpoint in (
                     self.get_page_class(list_response.json())
-                        .model_validate(list_response.json())
-                        .set_client(self.client)
-                        .to_endpoints()
+                            .model_validate(list_response.json())
+                            .set_client(self.client)
+                            .to_endpoints()
             ):
                 yield endpoint
 
@@ -1725,13 +1725,15 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             raise Exception(f"Component {self.ref} already exists")
 
         if exists:
-            self.client.put(url, self.model_dump(mode="json", by_alias=True))
+            response = self.client.put(url, self.model_dump(mode="json", by_alias=True))
+            process_response(response)
             return self.post_deploy()
 
-        self.client.post(
+        response = self.client.post(
             f"/api/{self.get_type()}/{self.org_slug}",
             self.model_dump(mode="json", by_alias=True),
         )
+        process_response(response)
         return self.post_deploy()
 
 
@@ -2072,6 +2074,33 @@ class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
         return TaxonomyEndpoint
 
 
+class ProjectGuidanceEndpoint(ProjectResourceEndpoint):
+
+    def get_type(self) -> str:
+        return "guidance"
+
+    def get_instance_class(self, object_dict=None):
+        return GuidanceEndpoint
+
+
+class ProjectDataFormEndpoint(ProjectResourceEndpoint):
+
+    def get_type(self) -> str:
+        return "dataForms"
+
+    def get_instance_class(self, object_dict=None):
+        return DataFormEndpoint
+
+
+class ProjectDashboardEndpoint(ProjectResourceEndpoint):
+
+    def get_type(self) -> str:
+        return "dashboards"
+
+    def get_instance_class(self, object_dict=None):
+        return DashboardEndpoint
+
+
 class ProjectStoresEndpoint(ProjectResourceEndpoint):
     """Represents a project stores endpoint"""
 
@@ -2352,12 +2381,18 @@ class ProjectEndpoint(EntityEndpoint, Project):
             self,
             stores: List["StoreEndpoint"] = None,
             taxonomies: List["TaxonomyEndpoint"] = None,
+            data_forms: List["DataFormEndpoint"] = None,
+            guidance: List["GuidanceSetEndpoint"] = None,
+            dashboards: List["DashboardEndpoint"] = None,
     ) -> "ProjectEndpoint":
         """Update the resources of the project.
 
         Args:
             stores (List["StoreEndpoint"], optional): List of store endpoints to update.
             taxonomies (List["TaxonomyEndpoint"], optional): List of taxonomy endpoints to update.
+            data_forms (List["DataFormEndpoint"], optional): List of data form endpoints to update.
+            guidance (List["GuidanceSetEndpoint"], optional): List of guidance set endpoints to update.
+            dashboards (List["DashboardEndpoint"], optional): List of dashboard endpoints to update.
 
         Returns:
             ProjectEndpoint: The updated project endpoint.
@@ -2366,6 +2401,8 @@ class ProjectEndpoint(EntityEndpoint, Project):
         project_resources_update.store_refs = []
         project_resources_update.taxonomy_refs = []
         project_resources_update.dashboard_refs = []
+        project_resources_update.data_form_refs = []
+        project_resources_update.guidance_set_refs = []
 
         if stores:
             project_resources_update.store_refs = [store.ref for store in stores]
@@ -2374,8 +2411,20 @@ class ProjectEndpoint(EntityEndpoint, Project):
             project_resources_update.taxonomy_refs = [
                 taxonomy.ref for taxonomy in taxonomies
             ]
+        if data_forms:
+            project_resources_update.data_form_refs = [
+                data_form.ref for data_form in data_forms
+            ]
+        if guidance:
+            project_resources_update.guidance_set_refs = [
+                guidance.ref for guidance in guidance
+            ]
+        if dashboards:
+            project_resources_update.dashboard_refs = [
+                dashboard.ref for dashboard in dashboards
+            ]
 
-        self.client.put(
+        response = self.client.put(
             f"/api/projects/{self.id}/resources",
             body=json.loads(project_resources_update.json(by_alias=True)),
         )
@@ -2415,6 +2464,15 @@ class ProjectEndpoint(EntityEndpoint, Project):
             ProjectTaxonomiesEndpoint: The taxonomies endpoint of the project.
         """
         return ProjectTaxonomiesEndpoint().set_client(self.client).set_project(self)
+
+    @property
+    def guidance(self) -> "GuidanceEndpoint":
+        """Get the guidance sets endpoint of the project.
+
+        Returns:
+            GuidanceSetsEndpoint: The guidance sets endpoint of the project.
+        """
+        return ProjectGuidanceEndpoint().set_client(self.client).set_project(self)
 
     @property
     def assistants(self) -> ProjectAssistantsEndpoint:
@@ -2841,6 +2899,7 @@ class GuidanceEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     It provides methods to get the type, page class, and instance class of the endpoint,
     as well as to deploy an extension pack from a URL.
     """
+
     def get_type(self) -> str:
         """
         Get the type of the endpoint.
@@ -2883,6 +2942,7 @@ class PromptsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     It provides methods to get the type, page class, and instance class of the endpoint,
     as well as to deploy an extension pack from a URL.
     """
+
     def get_type(self) -> str:
         """
         Get the type of the endpoint.
@@ -5467,6 +5527,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(
             f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}/content"
         )
+        process_response(response)
         from zipfile import ZipFile
         from io import BytesIO
 
@@ -5486,6 +5547,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         response = self.client.get(
             f"/api/stores/{self.ref.replace(':', '/')}/implementation"
         )
+        process_response(response)
         from zipfile import ZipFile
         from io import BytesIO
 
@@ -5688,10 +5750,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             num_hits = self.build_implementation_zip(metadata)
             if num_hits > 0 and not dry_run:
                 with open("implementation.zip", "rb") as zip_content:
-                    self.client.post(
+                    response = self.client.post(
                         f"/api/stores/{self.ref.replace(':', '/')}/implementation",
                         files={"implementation": zip_content},
                     )
+                    process_response(response)
                 results.append(f"{num_hits} files packaged and deployed to {self.ref}")
         if not metadata.keep_zip:
             Path("implementation.zip").unlink()
@@ -5773,6 +5836,8 @@ def process_response(response) -> requests.Response:
         raise Exception(f"Unauthorized ({response.text})")
     if response.status_code == 404:
         raise Exception(f"Not found ({response.text})")
+    if response.status_code in [301, 302]:
+        raise Exception(f"Redirected ({response.text})")
     if response.status_code == 405:
         raise Exception("Method not allowed")
     if response.status_code == 500:
@@ -5787,11 +5852,6 @@ def process_response(response) -> requests.Response:
         raise Exception("Bad request " + response.text)
 
     return response
-
-    #
-    #  The Kodexa Client is the way that brings everything together
-    #
-    #
 
 
 OBJECT_TYPES = {
@@ -6266,6 +6326,7 @@ class KodexaClient:
                 "x-access-token": self.access_token,
                 "cf-access-token": os.environ.get("CF_TOKEN", ""),
                 "content-type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
             }
         )
 
@@ -6287,7 +6348,10 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        headers = {"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
+        headers = {
+            "x-access-token": self.access_token,
+            "X-Requested-With": "XMLHttpRequest",
+            "cf-access-token": os.environ.get("CF_TOKEN", "")}
         if files is None:
             headers["content-type"] = "application/json"
 
@@ -6317,7 +6381,9 @@ class KodexaClient:
         Returns:
             requests.Response: The response from the server.
         """
-        headers = {"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
+        headers = {"x-access-token": self.access_token,
+                   "cf-access-token": os.environ.get("CF_TOKEN", ""),
+                   "X-Requested-With": "XMLHttpRequest"}
         if files is None:
             headers["content-type"] = "application/json"
 
@@ -6345,7 +6411,9 @@ class KodexaClient:
         response = requests.delete(
             self.get_url(url),
             params=params,
-            headers={"x-access-token": self.access_token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
+            headers={"x-access-token": self.access_token,
+                     "cf-access-token": os.environ.get("CF_TOKEN", ""),
+                     "X-Requested-With": "XMLHttpRequest"}
         )
         return process_response(response)
 

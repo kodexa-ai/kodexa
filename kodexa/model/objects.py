@@ -821,12 +821,12 @@ class SlugBasedMetadata1(BaseModel):
         description="The slug of the organization that owns this metadata object",
     )
     slug: str = Field(
-        ...,
+        None,
         description="The slug used when referencing this metadata object",
         pattern=r"^[a-zA-Z0-9\-_]{0,255}$",
     )
-    type: str = Field(..., description="The type of metadata object")
-    name: str = Field(..., description="The name of the object")
+    type: str = Field(None, description="The type of metadata object")
+    name: str = Field(None, description="The name of the object")
     description: Optional[str] = Field(
         None, description="The description of the object"
     )
@@ -1003,6 +1003,7 @@ class TaxonType(Enum):
     email_address = "EMAIL_ADDRESS"
     phone_number = "PHONE_NUMBER"
     selection = "SELECTION"
+    question = "QUESTION"
 
 
 class TaxonomyType1(Enum):
@@ -2328,6 +2329,9 @@ class ExtensionPackProvided(BaseModel):
     change_sequence: Optional[int] = Field(
         None, alias="changeSequence", description="The change sequence"
     )
+    delete_protection: Optional[bool] = Field(
+        None, description="Delete protection", alias="deleteProtection"
+    )
 
 
 class Option(BaseModel):
@@ -2758,10 +2762,20 @@ class ProjectStatus(BaseModel):
     icon: Optional[str] = None
 
 
-class Project(BaseModel):
-    """
+class ProjectOptions(BaseModel):
 
-    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    options: List[Option] = Field(None, description="The options for the project")
+    properties: Dict[str, Any] = Field(None, description="The properties for the project")
+    
+
+class Project(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2801,6 +2815,7 @@ class Project(BaseModel):
     )
     status: Optional[ProjectStatus] = None
     owner: Optional[User] = None
+    options: Optional[ProjectOptions] = Field(None, alias="options")
 
 
 class FeatureSet(BaseModel):
@@ -2873,6 +2888,7 @@ class WorkspaceStorage(BaseModel):
     current_view_id: Optional[str] = Field(None, alias="currentViewId")
     default_sidebar: Optional[str] = Field(None, alias="defaultSidebar")
     overview: Optional[str] = None
+    available_panels: Optional[Dict[str, bool]] = Field(None, alias="availablePanels")
 
 
 class Workspace(BaseModel):
@@ -4035,6 +4051,8 @@ class AssistantExecution(BaseModel):
             DataObjectEvent,
             DocumentFamilyEvent,
             ScheduledEvent,
+            ChannelEvent,
+            WorkspaceEvent,
         ]
     ] = None
     response: Optional[AssistantExecutionResponse] = None
@@ -4502,6 +4520,8 @@ class PlatformEvent(BaseModel):
             DataObjectEvent,
             DocumentFamilyEvent,
             ScheduledEvent,
+            ChannelEvent,
+            WorkspaceEvent
         ]
     ] = Field(None, alias="eventDetail")
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
@@ -5184,9 +5204,6 @@ class Pipeline(ExtensionPackProvided):
 
 
 class ProjectTemplate(ExtensionPackProvided):
-    """
-
-    """
 
     stores: Optional[List[ProjectStore]] = Field(
         None, description="The stores that will be created with the project template"
@@ -5234,9 +5251,10 @@ class ProjectTemplate(ExtensionPackProvided):
         alias="attributeStatuses",
         description="The attribute statuses that will be created with the project template",
     )
-    options: Optional[List[Option]] = Field(
-        None, description="Options for the project template"
-    )
+
+    options: Optional[ProjectOptions] = Field(None, alias="options")
+
+    tags: Optional[List[str]] = Field(None, alias="tags")
 
 
 class Store(ExtensionPackProvided):

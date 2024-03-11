@@ -131,7 +131,7 @@ class SqliteDocumentPersistence(object):
         """
         features = []
         for feature in self.cursor.execute(
-            "select name from f_type where name like 'tag:%'"
+                "select name from f_type where name like 'tag:%'"
         ).fetchall():
             features.append(feature[0].split(":")[1])
 
@@ -730,8 +730,8 @@ class SqliteDocumentPersistence(object):
         # We need to get the child nodes
         children = []
         for child_node in self.cursor.execute(
-            "select id, pid, nt, idx from cn where pid = ? order by idx",
-            [content_node.uuid],
+                "select id, pid, nt, idx from cn where pid = ? order by idx",
+                [content_node.uuid],
         ).fetchall():
             children.append(self.__build_node(child_node))
         return children
@@ -750,8 +750,8 @@ class SqliteDocumentPersistence(object):
         # We need to get the child nodes
         children = []
         for child_node in self.cursor.execute(
-            "select id, pid, nt, idx from cn where pid = ? order by idx",
-            [content_node.uuid],
+                "select id, pid, nt, idx from cn where pid = ? order by idx",
+                [content_node.uuid],
         ).fetchall():
             children.append(child_node[0])
         return children
@@ -827,7 +827,7 @@ class SqliteDocumentPersistence(object):
     def dump_in_memory_db_to_file(self):
         # Connect to a new or existing database file
         disk_conn = sqlite3.connect(self.current_filename)
-    
+
         # Use the backup API to copy the in-memory database to the disk file
         with disk_conn:
             self.connection.backup(disk_conn)
@@ -843,10 +843,10 @@ class SqliteDocumentPersistence(object):
             bytes: The document as bytes.
         """
         self.sync()
-        
+
         if self.inmemory:
             self.dump_in_memory_db_to_file()
-        
+
         with open(self.current_filename, "rb") as f:
             return f.read()
 
@@ -864,8 +864,8 @@ class SqliteDocumentPersistence(object):
 
         features = []
         for feature in self.cursor.execute(
-            "select id, cn_id, f_type, binary_value, single from ft where cn_id = ?",
-            [node.uuid],
+                "select id, cn_id, f_type, binary_value, single from ft where cn_id = ?",
+                [node.uuid],
         ).fetchall():
             feature_type_name = self.feature_type_names[feature[2]]
             single = feature[4] == 1
@@ -914,26 +914,27 @@ class SqliteDocumentPersistence(object):
         def get_all_node_ids(node):
             """
             This function recursively traverses a node tree, collecting the ids of all non-virtual nodes.
-
-            Args:
-                node (Node): The root node to start the traversal from.
-
-            Returns:
-                list: A list of ids of all non-virtual nodes in the tree.
             """
             all_node_ids = []
             if not node.virtual:
-                all_node_ids.append([node.uuid])
+                all_node_ids.append(node.uuid)  # Append the uuid directly, not as a list
                 for child in node.get_children():
                     all_node_ids.extend(get_all_node_ids(child))
-
             return all_node_ids
 
         all_child_ids = get_all_node_ids(node)
+        parameter_tuples = [(id,) for id in all_child_ids]  # Prepare the parameters as tuples
 
-        self.cursor.executemany("delete from cnp where cn_id=?", all_child_ids)
-        self.cursor.executemany("delete from cn where id=?", all_child_ids)
-        self.cursor.executemany("delete from ft where cn_id=?", all_child_ids)
+        # Assuming `self.cursor` is part of a larger transaction management system
+        try:
+            self.cursor.executemany("delete from cnp where cn_id=?", parameter_tuples)
+            self.cursor.executemany("delete from cn where id=?", parameter_tuples)
+            self.cursor.executemany("delete from ft where cn_id=?", parameter_tuples)
+            self.connection.commit()  # Commit the transaction if part of one
+            return all_child_ids
+        except Exception as e:
+            self.connection.rollback()  # Rollback in case of error
+            logger.error(f"An error occurred: {e}")
 
     def remove_all_features(self, node):
         """
@@ -1486,8 +1487,8 @@ class PersistenceManager(object):
             update_child_cache = True
 
         if (
-            node.uuid in self.node_parent_cache
-            and node._parent_uuid != self.node_parent_cache[node.uuid]
+                node.uuid in self.node_parent_cache
+                and node._parent_uuid != self.node_parent_cache[node.uuid]
         ):
             # Remove from the old parent
             self.child_id_cache[self.node_parent_cache[node.uuid]].remove(node.uuid)
@@ -1505,8 +1506,8 @@ class PersistenceManager(object):
                     self.child_id_cache[node._parent_uuid].add(node.uuid)
                     current_children = self.child_cache[node._parent_uuid]
                     if (
-                        len(current_children) == 0
-                        or node.index >= current_children[-1].index
+                            len(current_children) == 0
+                            or node.index >= current_children[-1].index
                     ):
                         self.child_cache[node._parent_uuid].append(node)
                     else:
@@ -1568,7 +1569,13 @@ class PersistenceManager(object):
         self.content_parts_cache.pop(node.uuid, None)
         self.feature_cache.pop(node.uuid, None)
 
-        self._underlying_persistence.remove_content_node(node)
+        all_ids = self._underlying_persistence.remove_content_node(node)
+
+        # remove all the ids from the cache
+        for id in all_ids:
+            tmp_node = self.node_cache.get_obj(id)
+            self.node_cache.remove_obj(tmp_node)
+            self.node_cache.dirty_objs.remove(id) if id in self.node_cache.dirty_objs else None
 
     def get_children(self, node):
         """

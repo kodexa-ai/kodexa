@@ -58,12 +58,13 @@ def get_profile(profile=None):
     return profile
 
 
-def get_config(profile=None):
+def get_config(profile=None, create=False):
     """
     Gets the kodexa config object used for local PAT storage.
 
     Args:
         profile (str, optional): The profile to get the config for. Defaults to current profile or "default"
+        create (bool, optional): Whether to create a new profile if it does not exist. Defaults to False.
 
     Returns:
         dict: The kodexa config as a dictionary. If the profile exists in the config, it returns the config for that profile.
@@ -84,10 +85,13 @@ def get_config(profile=None):
                 profile = "default" if profile is None else profile
 
             if profile not in kodexa_config:
-                kodexa_config[profile] = {
-                    "url": None,
-                    "access_token": None,
-                }
+                if create:
+                    kodexa_config[profile] = {
+                        "url": None,
+                        "access_token": None,
+                    }
+                else:
+                    raise Exception(f"Profile {profile} does not exist")
             return kodexa_config
     else:
         profile = "default" if profile is None else profile
