@@ -636,7 +636,7 @@ class EntityEndpoint(ClientEndpoint):
             Exception: If the entity doesn't exist.
         """
         url = f"/api/{self.get_type()}/{self.id}"
-        exists = self.client.exists(url)
+        exists = process_response(self.client.exists(url))
         if not exists:
             raise Exception("Can't update as it doesn't exist?")
         self.client.put(url, self.model_dump(mode="json", by_alias=True))
@@ -650,7 +650,7 @@ class EntityEndpoint(ClientEndpoint):
             Exception: If the entity doesn't exist.
         """
         url = f"/api/{self.get_type()}/{self.id}"
-        exists = self.client.exists(url)
+        exists = process_response(self.client.exists(url))
         if not exists:
             raise Exception("Component doesn't exist")
         self.client.delete(url)
@@ -1657,7 +1657,7 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             ComponentInstanceEndpoint: The created component instance.
         """
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
-        exists = self.client.exists(url)
+        exists = process_response(self.client.exists(url))
         if exists:
             raise Exception("Can't create as it already exists")
         url = f"/api/{self.get_type()}/{self.org_slug}"
@@ -1675,7 +1675,7 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             ComponentInstanceEndpoint: The updated component instance.
         """
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
-        exists = self.client.exists(url)
+        exists = process_response(self.client.exists(url))
         if not exists:
             raise Exception("Can't update as it doesn't exist?")
         self.client.put(url, self.model_dump(mode="json", by_alias=True))
@@ -1689,7 +1689,7 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             Exception: If the component instance does not exist.
         """
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
-        exists = self.client.exists(url)
+        exists = process_response(self.client.exists(url))
         if not exists:
             raise Exception("Component doesn't exist")
         self.client.delete(url)
@@ -1720,7 +1720,7 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
         self.ref = f"{self.org_slug}/{self.slug}{f':{self.version}' if self.version is not None else ''}"
 
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
-        exists = self.client.exists(url)
+        exists = process_response(self.client.exists(url))
         if not update and exists:
             raise Exception(f"Component {self.ref} already exists")
 
@@ -4298,7 +4298,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         """
         logger.info("Deleting document family %s", self.id)
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
-        if self.client.exists(url):
+        if process_response(self.client.exists(url)):
             self.client.delete(url)
         else:
             raise Exception(f"Document family {self.id} does not exist")
