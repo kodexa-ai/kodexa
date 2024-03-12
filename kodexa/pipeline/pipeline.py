@@ -494,7 +494,7 @@ class Pipeline:
             options (optional): Options to be passed to the step if it is a simplified remote action. Defaults to None.
             attach_source (bool, optional): If step is simplified remote action this determines if we need to add the source. Defaults to False.
             step_type (str, optional): The type of step to add, can either be an ACTION or MODEL. Defaults to 'ACTION'.
-
+            conditional (str, optional): The conditional to use for the step. Defaults to None.
         Returns:
             Pipeline: The instance of the pipeline.
         """
