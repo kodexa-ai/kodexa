@@ -2739,7 +2739,7 @@ class ExecutionStep(BaseModel):
     ref: Optional[str] = None
     extension_pack_ref: Optional[str] = Field(None, alias="extensionPackRef")
     step_type: Optional[StepType1] = Field(None, alias="stepType")
-
+    conditional: Optional[str] = None
 
 class ProjectStatus(BaseModel):
     """
