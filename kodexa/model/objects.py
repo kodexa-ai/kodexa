@@ -2741,6 +2741,7 @@ class ExecutionStep(BaseModel):
     step_type: Optional[StepType1] = Field(None, alias="stepType")
     conditional: Optional[str] = None
 
+
 class ProjectStatus(BaseModel):
     """
 
