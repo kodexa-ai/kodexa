@@ -1140,14 +1140,14 @@ class SimpleObjectCache(object):
         self.objs[obj.uuid] = obj
         self.dirty_objs.add(obj.uuid)
 
-    def remove_obj(self, obj):
+    def remove_obj(self, obj: ContentNode):
         """
         Remove an object from the cache.
 
         Args:
             obj (object): The object to remove.
         """
-        if obj.uuid in self.objs:
+        if obj and obj.uuid in self.objs:
             self.objs.pop(obj.uuid)
             if obj.uuid in self.dirty_objs:
                 self.dirty_objs.remove(obj.uuid)
@@ -1574,7 +1574,8 @@ class PersistenceManager(object):
         # remove all the ids from the cache
         for id in all_ids:
             tmp_node = self.node_cache.get_obj(id)
-            self.node_cache.remove_obj(tmp_node)
+            if tmp_node is not None:
+                self.node_cache.remove_obj(tmp_node)
             self.node_cache.dirty_objs.remove(id) if id in self.node_cache.dirty_objs else None
 
     def get_children(self, node):
