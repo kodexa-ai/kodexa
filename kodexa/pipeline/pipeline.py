@@ -481,7 +481,7 @@ class Pipeline:
         return self
 
     def add_step(
-        self, step, name=None, options=None, attach_source=False, step_type="ACTION"
+        self, step, name=None, options=None, attach_source=False, step_type="ACTION", conditional=None
     ):
         """Add the given step to the current pipeline.
 
@@ -504,6 +504,7 @@ class Pipeline:
                 options=options,
                 attach_source=attach_source,
                 step_type=step_type,
+                conditional=conditional
             )
         )
 
