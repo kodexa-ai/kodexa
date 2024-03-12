@@ -233,7 +233,7 @@ class PipelineStep:
     """
 
     def __init__(
-        self, step, name=None, options=None, attach_source=False, step_type="ACTION"
+        self, step, name=None, options=None, attach_source=False, step_type="ACTION", conditional=None
     ):
         if options is None:
             options = {}
@@ -241,6 +241,7 @@ class PipelineStep:
         self.name = name
         self.options = options
         self.step_type = step_type
+        self.conditional = conditional
 
         if str(type(self.step)) == "<class 'type'>":
             logger.info(f"Adding new step class {step.__name__} to pipeline")
@@ -284,6 +285,8 @@ class PipelineStep:
 
             metadata["name"] = self.name
             metadata["stepType"] = self.step_type
+            metadata["options"] = self.options
+            metadata["conditional"] = self.conditional
             return metadata
         except AttributeError as e:
             raise Exception("All steps must implement to_dict() for deployment", e)
