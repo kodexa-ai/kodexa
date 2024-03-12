@@ -277,7 +277,7 @@ class PipelineStep:
                     "You can not yet deploy a pipeline with a class instance style step"
                 )
             if isinstance(self.step, str):
-                return {"ref": self.step, "options": self.options}
+                return {"ref": self.step, "options": self.options, "conditional": self.conditional}
             if callable(self.step):
                 metadata = {
                     "function": self.step.__name__,
