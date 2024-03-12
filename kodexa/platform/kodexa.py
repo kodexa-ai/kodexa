@@ -703,13 +703,14 @@ class RemoteStep:
 
     """Allows you to interact with a step that has been deployed in the Kodexa platform"""
 
-    def __init__(self, ref, step_type="ACTION", attach_source=False, options=None):
+    def __init__(self, ref, step_type="ACTION", attach_source=False, options=None, conditional=None):
         if options is None:
             options = {}
         self.ref = ref
         self.step_type = step_type
         self.attach_source = attach_source
         self.options = options
+        self.conditional = conditional
 
     def to_dict(self):
         """Converts the RemoteStep object to a dictionary.
@@ -717,7 +718,7 @@ class RemoteStep:
         Returns:
             dict: Dictionary representation of the RemoteStep object.
         """
-        return {"ref": self.ref, "step_type": self.step_type, "options": self.options}
+        return {"ref": self.ref, "step_type": self.step_type, "options": self.options, "conditional": self.conditional}
 
     def get_name(self):
         """Generates a name for the RemoteStep object.

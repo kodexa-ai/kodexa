@@ -254,7 +254,10 @@ class PipelineStep:
             from kodexa import RemoteStep
 
             self.step = RemoteStep(
-                step, step_type=step_type, options=options, attach_source=attach_source
+                step, step_type=step_type,
+                options=options,
+                attach_source=attach_source,
+                conditional=conditional
             )
         else:
             logger.info(f"Adding new step {type(step)} to pipeline")
