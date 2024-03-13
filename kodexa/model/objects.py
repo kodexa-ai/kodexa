@@ -593,6 +593,7 @@ class PipelineStepMetadata(BaseModel):
     step_type: Optional[StepType] = Field(
         None, alias="stepType", description="The type of step (ACTION or MODEL)"
     )
+    conditional: Optional[str] = Field(None, description="The conditional expression for the step")
 
 
 class PossibleValue(BaseModel):

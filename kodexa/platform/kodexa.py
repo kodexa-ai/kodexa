@@ -772,7 +772,7 @@ class RemoteStep:
         Returns:
             dict: Dictionary representing the configuration of the step.
         """
-        return {"ref": self.ref, "options": self.options}
+        return {"ref": self.ref, "options": self.options, "conditional": self.conditional}
 
 
 class EventHelper:
