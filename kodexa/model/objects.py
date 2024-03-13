@@ -5001,6 +5001,8 @@ class ModelContentMetadata(BaseModel):
         None, alias="trainingOptions", description="The training options for this model"
     )
 
+    model_sidecars: Optional[List[str]] = Field(None, alias="modelSidecars")
+
     message_templates: Optional[List[MessageTemplate]] = Field(
         None, alias="messageTemplates", description="The message templates"
     )
