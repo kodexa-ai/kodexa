@@ -298,7 +298,7 @@ class KodexaPlatform:
             headers={"content-type": "application/json", "x-access-token": token, "cf-access-token": os.environ.get("CF_TOKEN", "")}
         )
         if obj_response.status_code == 200:
-            kodexa_config = get_config(profile)
+            kodexa_config = get_config(profile, create=True)
             kodexa_config[profile]["url"] = kodexa_url
             kodexa_config[profile]["access_token"] = token
             save_config(kodexa_config)
