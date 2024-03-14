@@ -236,7 +236,13 @@ class PipelineStep:
         self, step, name=None, options=None, attach_source=False, step_type="ACTION", conditional=None
     ):
         if options is None:
-            options = {}
+            try:
+                if 'options' in step:
+                    options = step['options']
+                else:
+                    options = {}
+            except:
+                options = {}
         self.step = step
         self.name = name
         self.options = options
@@ -499,7 +505,13 @@ class Pipeline:
             Pipeline: The instance of the pipeline.
         """
         if options is None:
-            options = {}
+            try:
+                if 'options' in step:
+                    options = step['options']
+                else:
+                    options = {}
+            except:
+                options = {}
         self.steps.append(
             PipelineStep(
                 step=step,
