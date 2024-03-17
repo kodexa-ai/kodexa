@@ -1088,6 +1088,26 @@ class SqliteDocumentPersistence(object):
 
         return content_nodes
 
+    def get_nodes_by_type(self, node_type):
+        """
+        Retrieves nodes of a given type from the document.
+
+        Args:
+            node_type (str): The type of the nodes to be retrieved.
+
+        Returns:
+            list: A list of nodes of the given type.
+        """
+        content_nodes = []
+
+        node_type_id = self.node_type_id_by_name.get(node_type)
+
+        query = "select id, pid, nt, idx from cn where nt = ? order by idx"
+        for content_node in self.cursor.execute(query, [node_type_id]).fetchall():
+            content_nodes.append(self.__build_node(content_node))
+
+        return content_nodes
+
 
 class SimpleObjectCache(object):
     """
@@ -1225,6 +1245,18 @@ class PersistenceManager(object):
         self._underlying_persistence = SqliteDocumentPersistence(
             document, filename, delete_on_close, inmemory=inmemory
         )
+
+    def get_nodes_by_type(self, node_type: str) -> List[ContentNode]:
+        """
+        Retrieves all nodes of a given type from the underlying persistence layer.
+
+        Args:
+            node_type (str): The type of the nodes to be retrieved.
+
+        Returns:
+            List[ContentNode]: A list of all nodes of the given type.
+        """
+        return self._underlying_persistence.get_nodes_by_type(node_type)
 
     def get_node_by_uuid(self, uuid: int) -> ContentNode:
         """

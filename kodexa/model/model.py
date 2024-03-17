@@ -800,6 +800,15 @@ class ContentNode(object):
         >>> document.get_root().select('//*[hasTag($tagName)]', {"tagName": "div"})
            [ContentNode]
         """
+
+        # We have a few 'shortcuts' that help with performance
+        if selector == ".":  # Return the current node
+            return [self]
+        # if the select is something like //line there line is a node type
+        # then skip the parser and use get_nodes_by_type
+        if re.match(r"//\w+", selector):
+            return self.document.get_persistence().get_nodes_by_type(selector[2:])
+
         if variables is None:
             variables = {}
         from kodexa.selectors import parse
@@ -2439,6 +2448,19 @@ class Document(object):
                 if 'owner_uri' in tag_meta and tag_meta['owner_uri'] == owner_uri:
                     for node in tag_instance.nodes:
                         node.remove_tag(tag)
+
+    def get_nodes_by_type(self, node_type: str) -> List[ContentNode]:
+        """
+        Get all the nodes of a specific type
+
+        Args:
+          node_type: the type of the node
+
+        Returns:
+          a list of nodes
+
+        """
+        return self._persistence_layer.get_nodes_by_type(node_type)
 
     def get_node_by_uuid(self, uuid: int) -> ContentNode:
         """
