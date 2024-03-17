@@ -181,6 +181,7 @@ def test_spatial_doc_sample_two():
 
 def test_selector_deep():
     document = Document.from_kdxa(get_test_directory() + 'before_fail.kdxa')
+
     assert len(document.select('//page')[0].select('//line')) == 63
     assert len(document.select('//line')) == 3143
 

@@ -1506,6 +1506,14 @@ class PersistenceManager(object):
         if node.index is None:
             node.index = 0
 
+        # Check if the node exists in the DB
+        if node.uuid is None:
+            node.uuid = self.node_cache.next_id
+            self.node_cache.next_id += 1
+
+        if self._underlying_persistence.get_node(node.uuid) is None:
+            self._underlying_persistence.add_content_node(node, parent)
+
         if parent:
             node._parent_uuid = parent.uuid
             self.node_cache.add_obj(parent)

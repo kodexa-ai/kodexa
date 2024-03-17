@@ -67,6 +67,7 @@ class Ref:
 
 import addict
 
+
 class DocumentMetadata(addict.Dict):
     """A flexible dict based approach to capturing metadata for the document.
 
@@ -806,7 +807,10 @@ class ContentNode(object):
             return [self]
         # if the select is something like //line there line is a node type
         # then skip the parser and use get_nodes_by_type
-        if re.match(r"//\w+", selector):
+
+        # Note we can only do this for certain types since the idx for nested types
+        # will be a problem
+        if self._parent_uuid is None and re.match(r"^//\w+$", selector) and selector[2:] in ['line', 'page', 'content-area', 'word']:
             return self.document.get_persistence().get_nodes_by_type(selector[2:])
 
         if variables is None:
