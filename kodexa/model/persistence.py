@@ -96,6 +96,14 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("pragma temp_store = memory")
         self.cursor.execute("pragma mmap_size = 30000000000")
 
+        try:
+            # We need to populate node_type_id_by_name
+            for n_type in self.cursor.execute("select id,name from n_type"):
+                self.node_types[n_type[0]] = n_type[1]
+                self.node_type_id_by_name[n_type[1]] = n_type[0]
+        except:
+            pass
+
     def create_in_memory_database(self, disk_db_path: str):
         # Connect to the in-memory database
         mem_conn = sqlite3.connect(':memory:')
