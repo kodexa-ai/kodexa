@@ -802,17 +802,6 @@ class ContentNode(object):
            [ContentNode]
         """
 
-        # We have a few 'shortcuts' that help with performance
-        if selector == ".":  # Return the current node
-            return [self]
-        # if the select is something like //line there line is a node type
-        # then skip the parser and use get_nodes_by_type
-
-        # Note we can only do this for certain types since the idx for nested types
-        # will be a problem
-        if self._parent_uuid is None and re.match(r"^//\w+$", selector) and selector[2:] in ['line', 'page', 'content-area', 'word']:
-            return self.document.get_persistence().get_nodes_by_type(selector[2:])
-
         if variables is None:
             variables = {}
         from kodexa.selectors import parse
