@@ -2470,6 +2470,8 @@ class ProjectAssistant(BaseModel):
     logging_enabled: Optional[bool] = Field(None, alias="loggingEnabled")
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
     priority_hint: Optional[int] = Field(None, alias="priorityHint")
+    chat_enabled: Optional[bool] = Field(None, alias="chatEnabled")
+    assistant_role: Optional[str] = Field(None, alias="assistantRole")
 
 
 class Taxon(BaseModel):
@@ -4024,7 +4026,8 @@ class Assistant(BaseModel):
     show_in_training: Optional[bool] = Field(None, alias="showInTraining")
     color: Optional[str] = Field(None, description="The color to use for the assistant")
     priority_hint: Optional[int] = Field(None, alias="priorityHint")
-
+    chat_enabled: Optional[bool] = Field(None, alias="chatEnabled")
+    assistant_role: Optional[str] = Field(None, alias="assistantRole")
 
 class AssistantExecution(BaseModel):
     """
