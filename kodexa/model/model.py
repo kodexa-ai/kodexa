@@ -2956,7 +2956,7 @@ class Document(object):
         )
         fp.write(source)
         fp.close()
-        return Document(kddb_path=fp.name, delete_on_close=True)
+        return Document(kddb_path=fp.name, delete_on_close=True, inmemory=inmemory)
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
