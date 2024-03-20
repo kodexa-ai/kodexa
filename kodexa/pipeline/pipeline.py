@@ -132,16 +132,17 @@ class PipelineContext:
         self.cancellation_handler = cancellation_handler
 
     def update_status(
-        self, status_message: str, status_full_message: Optional[str] = None
+        self, status_message: str, progress: Optional[int] = None, progress_max: Optional[int] = None
     ):
         """Updates the status of the pipeline.
 
         Args:
             status_message (str): The status message.
-            status_full_message (str, optional): The full status message. Defaults to None.
+            progress (int, optional): The progress of the pipeline. Defaults to None.
+            progress_max (int, optional): The maximum progress of the pipeline. Defaults to None.
         """
         if self.status_handler is not None:
-            self.status_handler(status_message, status_full_message)
+            self.status_handler(status_message, progress, progress_max)
 
     def is_cancelled(self) -> bool:
         """Checks if the pipeline is cancelled.
