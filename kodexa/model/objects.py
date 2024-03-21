@@ -1005,6 +1005,7 @@ class TaxonType(Enum):
     phone_number = "PHONE_NUMBER"
     selection = "SELECTION"
     question = "QUESTION"
+    formula = "FORMULA"
 
 
 class TaxonomyType1(Enum):
