@@ -1006,6 +1006,7 @@ class TaxonType(Enum):
     selection = "SELECTION"
     question = "QUESTION"
     formula = "FORMULA"
+    derived = "DERIVED"
 
 
 class TaxonomyType1(Enum):
