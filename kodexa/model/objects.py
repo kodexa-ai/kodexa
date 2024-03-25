@@ -1004,7 +1004,7 @@ class TaxonType(Enum):
     email_address = "EMAIL_ADDRESS"
     phone_number = "PHONE_NUMBER"
     selection = "SELECTION"
-    question = "QUESTION"
+    explanation = "EXPLANATION"
     formula = "FORMULA"
     derived = "DERIVED"
 
