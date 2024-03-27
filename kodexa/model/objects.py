@@ -2782,7 +2782,7 @@ class ProjectOptions(BaseModel):
 
     options: List[Option] = Field(None, description="The options for the project")
     properties: Dict[str, Any] = Field(None, description="The properties for the project")
-    
+
 
 class Project(BaseModel):
     model_config = ConfigDict(
@@ -3045,6 +3045,9 @@ class MessageFeedback(BaseModel):
         protected_namespaces=("model_config",),
     )
     options: Optional[List[MessageFeedbackOption]] = Field(None, alias="options")
+
+    # Thumbs down is -1 and thumbs up is 1
+    rating: Optional[int] = None
 
 
 class Message(BaseModel):
@@ -3800,7 +3803,7 @@ class LabelStatistics(BaseModel):
 
 
 class DocumentEmbedding(BaseModel):
-    
+
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
