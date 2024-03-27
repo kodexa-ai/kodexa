@@ -972,6 +972,9 @@ class MetadataValue(Enum):
     filename = "FILENAME"
     transaction_uuid = "TRANSACTION_UUID"
     created_datetime = "CREATED_DATETIME"
+    document_labels = "DOCUMENT_LABELS"
+    owner_name = "OWNER_NAME"
+    document_status = "DOCUMENT_STATUS"
 
 
 class TaxonType(Enum):

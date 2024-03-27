@@ -57,6 +57,7 @@ def get_profile(profile=None):
             return "default"
     return profile
 
+CURRENT_CONFIG = None
 
 def get_config(profile=None, create=False):
     """
@@ -72,6 +73,10 @@ def get_config(profile=None, create=False):
         it returns the default config. If the config file does not exist, it returns a default config or a new profile with
         default values depending on whether a profile was provided or not.
     """
+    global CURRENT_CONFIG
+    if CURRENT_CONFIG:
+        return CURRENT_CONFIG
+
     path = os.path.join(dirs.user_config_dir, ".kodexa.json")
     if os.path.exists(path):
         with open(path, "r") as outfile:
@@ -92,6 +97,7 @@ def get_config(profile=None, create=False):
                     }
                 else:
                     raise Exception(f"Profile {profile} does not exist")
+            CURRENT_CONFIG = kodexa_config
             return kodexa_config
     else:
         profile = "default" if profile is None else profile
@@ -119,6 +125,8 @@ def save_config(config_obj):
                 raise
     with open(path, "w") as outfile:
         json.dump(config_obj, outfile)
+        global CURRENT_CONFIG
+        CURRENT_CONFIG = config_obj
 
 
 class KodexaPlatform:
