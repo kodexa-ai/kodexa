@@ -2479,6 +2479,20 @@ class ProjectAssistant(BaseModel):
     assistant_role: Optional[str] = Field(None, alias="assistantRole")
 
 
+class TaxonConditionalFormat(BaseModel):
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    type: Optional[str] = None
+    condition: Optional[str] = None
+    properties: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
+
 class Taxon(BaseModel):
     """
 
@@ -2630,6 +2644,8 @@ class Taxon(BaseModel):
         None,
         description="A list of synonyms of the taxon values, used to understand the taxon",
     )
+
+    conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(None, alias="conditionalFormats")
 
     def update_path(self, parent_path=None):
         if parent_path is None:
