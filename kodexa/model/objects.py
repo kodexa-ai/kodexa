@@ -2518,6 +2518,10 @@ class Taxon(BaseModel):
         None,
         description="Is this taxon a group, and therefore can't have a value, can only have children",
     )
+    single_extraction: Optional[bool] = Field(
+        None,
+        description="Indicates if data group should be extracted only once",
+    )
     name: str = Field(
         ..., description="The name to be used", pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
     )
