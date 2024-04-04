@@ -333,7 +333,10 @@ class KodexaPlatform:
         if r.status_code == 401:
             raise Exception("Your access token was not authorized")
         if r.status_code == 200:
-            return r.json()
+            try:
+                return r.json()
+            except JSONDecodeError:
+                raise Exception("Unable to decode server information, check your access token")
 
         logger.warning(r.text)
         raise Exception(
