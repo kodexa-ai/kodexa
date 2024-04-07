@@ -2493,6 +2493,14 @@ class TaxonConditionalFormat(BaseModel):
     properties: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
+class TaxonCardinality(Enum):
+
+    once_per_document = "ONCE_PER_DOCUMENT"
+    multiple_per_document = "MULTIPLE_PER_DOCUMENT"
+    once_per_segment = "ONCE_PER_SEGMENT"
+    multiple_per_segment = "MULTIPLE_PER_SEGMENT"
+
+
 class Taxon(BaseModel):
     """
 
@@ -2644,6 +2652,8 @@ class Taxon(BaseModel):
         None,
         description="A list of synonyms of the taxon values, used to understand the taxon",
     )
+
+    cardinality: Optional[TaxonCardinality] = None
 
     conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(None, alias="conditionalFormats")
 
