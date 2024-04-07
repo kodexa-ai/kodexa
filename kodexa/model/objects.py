@@ -2770,6 +2770,7 @@ class ExecutionStep(BaseModel):
     content_objects: Optional[List[ContentObject]] = Field(None, alias="contentObjects")
     input_id: Optional[str] = Field(None, alias="inputId")
     output_id: Optional[str] = Field(None, alias="outputId")
+    output_ids: Optional[List[str]] = Field(None, alias="outputIds")
     ref: Optional[str] = None
     extension_pack_ref: Optional[str] = Field(None, alias="extensionPackRef")
     step_type: Optional[StepType1] = Field(None, alias="stepType")
