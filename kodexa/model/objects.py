@@ -2655,6 +2655,8 @@ class Taxon(BaseModel):
 
     cardinality: Optional[TaxonCardinality] = None
 
+    is_formula: Optional[bool] = Field(None, alias="isFormula")
+
     conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(None, alias="conditionalFormats")
 
     def update_path(self, parent_path=None):
