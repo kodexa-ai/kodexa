@@ -104,7 +104,7 @@ class SqliteDocumentPersistence(object):
         except:
             pass
 
-    def create_in_memory_database(disk_db_path: str):
+    def create_in_memory_database(self, disk_db_path: str):
         # Connect to the in-memory database
         mem_conn = sqlite3.connect(':memory:')
         mem_cursor = mem_conn.cursor()
