@@ -104,7 +104,7 @@ class SqliteDocumentPersistence(object):
         except:
             pass
 
-    def create_in_memory_database(self, disk_db_path: str):
+    def create_in_memory_database(disk_db_path: str):
         # Connect to the in-memory database
         mem_conn = sqlite3.connect(':memory:')
         mem_cursor = mem_conn.cursor()
@@ -114,15 +114,18 @@ class SqliteDocumentPersistence(object):
         disk_cursor = disk_conn.cursor()
 
         # Load the contents of the disk database into memory
-        disk_cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        disk_cursor.execute("SELECT name, sql FROM sqlite_master WHERE type='table';")
         tables = disk_cursor.fetchall()
-        for table in tables:
-            table_name = table[0]
+        for table_name, create_table_sql in tables:
+            # Create the table structure in the in-memory database
+            mem_cursor.execute(create_table_sql)
+
+            # Populate the table with data from the disk database
             disk_cursor.execute(f"SELECT * FROM {table_name}")
             rows = disk_cursor.fetchall()
-            mem_cursor.execute(f"CREATE TABLE {table_name} AS SELECT * FROM {table_name}", [])
             for row in rows:
-                mem_cursor.execute(f"INSERT INTO {table_name} VALUES ({', '.join('?' * len(row))})", row)
+                placeholders = ', '.join('?' * len(row))
+                mem_cursor.execute(f"INSERT INTO {table_name} VALUES ({placeholders})", row)
 
         # Commit changes and close disk connection
         mem_conn.commit()
