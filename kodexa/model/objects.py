@@ -949,6 +949,8 @@ class ValuePath(Enum):
     :cvar metadata: Represents metadata.
     :cvar expression: Represents an expression.
     :cvar script: Represents a script.
+    :cvar derived: Represents derived data.
+    :cvar formula: Represents a formula.
     """
 
     value_or_all_content = "VALUE_OR_ALL_CONTENT"
@@ -958,6 +960,8 @@ class ValuePath(Enum):
     metadata = "METADATA"
     expression = "EXPRESSION"
     script = "SCRIPT"
+    derived = "DERIVED"
+    formula = "FORMULA"
 
 
 class MetadataValue(Enum):
