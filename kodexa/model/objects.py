@@ -1012,8 +1012,6 @@ class TaxonType(Enum):
     phone_number = "PHONE_NUMBER"
     selection = "SELECTION"
     section = "SECTION"
-    formula = "FORMULA"
-    derived = "DERIVED"
 
 
 class TaxonomyType1(Enum):
@@ -2658,8 +2656,6 @@ class Taxon(BaseModel):
     )
 
     cardinality: Optional[TaxonCardinality] = None
-
-    is_formula: Optional[bool] = Field(None, alias="isFormula")
 
     conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(None, alias="conditionalFormats")
 
