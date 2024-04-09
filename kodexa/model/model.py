@@ -176,6 +176,8 @@ class Tag(Dict):
             **kwargs,
     ):
         super().__init__(*args, **kwargs)
+
+        import uuid as uuid_gen
         self.start: Optional[int] = start
         """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
         self.end: Optional[int] = end
@@ -184,7 +186,7 @@ class Tag(Dict):
         """A string representing the value that was labelled in the node"""
         self.data: Optional[Any] = data
         """Any data object (JSON serializable) that you wish to associate with the label"""
-        self.uuid: Optional[str] = uuid or str(uuid.uuid4())
+        self.uuid: Optional[str] = uuid or str(uuid_gen.uuid4())
         """The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID"""
         self.confidence: Optional[float] = confidence
         """The confidence of the tag in a range of 0-1"""
