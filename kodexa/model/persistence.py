@@ -117,6 +117,9 @@ class SqliteDocumentPersistence(object):
         disk_cursor.execute("SELECT name, sql FROM sqlite_master WHERE type='table';")
         tables = disk_cursor.fetchall()
         for table_name, create_table_sql in tables:
+            if "sqlite" in table_name:
+                continue
+
             # Create the table structure in the in-memory database
             mem_cursor.execute(create_table_sql)
 
