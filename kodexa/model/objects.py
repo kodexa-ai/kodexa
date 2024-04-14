@@ -4324,6 +4324,7 @@ class Guidance(BaseModel):
 
     compiled_guidance: Optional[Dict[str, Any]] = Field(None, alias="compiledGuidance")
 
+    guidance_options: Optional[List[Option]] = Field(None, alias="guidanceOptions")
 
 class GuidanceSet(ExtensionPackProvided):
     """
