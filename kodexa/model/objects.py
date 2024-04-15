@@ -4318,6 +4318,9 @@ class Guidance(BaseModel):
     priority: Optional[int] = 1
     user_instructions: Optional[str] = Field(None, alias="userInstructions")
     user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
+    created: Optional[StandardDateTime] = None
+    updated: Optional[StandardDateTime] = None
+    userId: Optional[str] = Field(None, alias="userId")
 
     # users selected text, text and line_uuid
     user_selection: Optional[List[UserSelection]] = Field(None, alias="userSelection")
