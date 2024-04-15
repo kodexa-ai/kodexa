@@ -674,6 +674,12 @@ class StorePurpose(Enum):
     training = "TRAINING"
 
 
+class ProjectStoreFile(BaseModel):
+
+    url: Optional[str] = None
+    metadata: Optional[Dict[str,str]] = None
+
+
 class ProjectStore(BaseModel):
     """
 
@@ -707,6 +713,8 @@ class ProjectStore(BaseModel):
     allowDataEditing: Optional[bool] = Field(
         None, description="Allow data editing", alias="allowDataEditing"
     )
+
+    files: Optional[List[ProjectStoreFile]] = Field(None, description="Files to load in the store")
 
 
 class TaxonomyType(Enum):
