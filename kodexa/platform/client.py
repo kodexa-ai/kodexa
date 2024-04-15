@@ -5733,6 +5733,11 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
                         zipf.write(path_hit, relative_path)
                         num_hits += 1
 
+        if num_hits == 0:
+            print(
+                f"No files found for implementation in {metadata.base_dir} with {metadata.contents}"
+            )
+
         return num_hits
 
     def upload_contents(self, metadata: ModelContentMetadata, dry_run=False):
