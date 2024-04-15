@@ -719,7 +719,7 @@ class ProjectStore(BaseModel):
 
 class TaxonomyType(Enum):
     """
-
+    The type of taxonomy
     """
 
     content = "CONTENT"
