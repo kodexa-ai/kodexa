@@ -4313,6 +4313,7 @@ class UserSelection(BaseModel):
 
 
 class Guidance(BaseModel):
+    name: Optional[str] = None
     guidance_type: Optional[str] = Field(None, alias="guidanceType")
     taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
     document_name: Optional[str] = Field(None, alias="documentName")
