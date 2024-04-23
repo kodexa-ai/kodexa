@@ -307,6 +307,10 @@ class KodexaPlatform:
         )
         if obj_response.status_code == 200:
             kodexa_config = get_config(profile, create=True)
+
+            if profile not in kodexa_config:
+                kodexa_config[profile] = {}
+
             kodexa_config[profile]["url"] = kodexa_url
             kodexa_config[profile]["access_token"] = token
             save_config(kodexa_config)
