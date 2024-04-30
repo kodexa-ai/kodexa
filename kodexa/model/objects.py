@@ -218,7 +218,7 @@ class Organization(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -240,7 +240,7 @@ class Team(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -1115,7 +1115,7 @@ class AttributeStatus(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
@@ -1202,7 +1202,7 @@ class DocumentStatus(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -1237,7 +1237,7 @@ class DocumentTransition(BaseModel):
     Provides the definition of a transition for a document, where a change was applied by an assistant, user or external process
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -1417,7 +1417,7 @@ class Label(BaseModel):
     The labels from the latest content object in the family
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -1441,7 +1441,7 @@ class ProjectTag(BaseModel):
     A project tag
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     name: str
     color: Optional[str] = None
 
@@ -1519,7 +1519,7 @@ class Session(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -1578,7 +1578,7 @@ class ValidationError(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
@@ -1672,7 +1672,7 @@ class DataException(BaseModel):
     A data exception
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -1822,7 +1822,7 @@ class PlatformConfiguration(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -1874,7 +1874,7 @@ class ModelTraining(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     name: Optional[str] = None
     state: Optional[str] = None
@@ -1967,7 +1967,7 @@ class ExecutionLogEntry(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -2194,7 +2194,7 @@ class User(BaseModel):
     A user within the Kodexa platform
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -2684,7 +2684,7 @@ class ContentObject(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -2718,7 +2718,7 @@ class DocumentAssignment(BaseModel):
     A list of the assignments to users for this document
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -2795,7 +2795,7 @@ class ProjectStatus(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -2825,7 +2825,7 @@ class Project(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -3119,7 +3119,7 @@ class DataAttribute(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -3164,7 +3164,7 @@ class Role(BaseModel):
     A role that can be used to manage rights
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -3184,7 +3184,7 @@ class Membership(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -3614,7 +3614,7 @@ class ContentException(BaseModel):
     A list of the content exceptions from the content objects
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -3693,7 +3693,7 @@ class Execution(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -3728,7 +3728,7 @@ class ExecutionSnapshot(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -3864,7 +3864,7 @@ class DocumentFamily(BaseModel):
     A document family is the representation of a single piece of external content (ie. a PDF) and all the related document representations of that file
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -3963,7 +3963,7 @@ class ExecutionAssistant(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -4010,7 +4010,7 @@ class DataObject(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -4042,7 +4042,7 @@ class Assistant(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -4248,7 +4248,7 @@ class ExecutionEvent(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -4476,7 +4476,7 @@ class SearchContent(BaseModel):
     A document family is the representation of a single peice of external content (ie. a PDF) and all the related document representations of that file
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -4560,7 +4560,7 @@ class PlatformEvent(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
@@ -4617,7 +4617,7 @@ class AuditEvent(BaseModel):
     An audit event captures a data to a data structure or document
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+    id: Optional[str] = Field(None)
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")

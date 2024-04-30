@@ -1,8 +1,6 @@
-from dataclasses import Field
 from typing import Optional, List
 
-from pydantic import BaseModel, ConfigDict
-
+from pydantic import BaseModel, ConfigDict, Field
 from kodexa.model.base import StandardDateTime
 from kodexa.platform.client import EntityEndpoint, PageEndpoint, EntitiesEndpoint
 
@@ -21,7 +19,8 @@ class Product(BaseModel):
     A product
     """
 
-    id: Optional[str] = Field(None, description="The ID of the object")
+
+    id: Optional[str] = None
     uuid: Optional[str] = None
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
