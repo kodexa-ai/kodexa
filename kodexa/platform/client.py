@@ -888,44 +888,6 @@ class OrganizationsEndpoint(EntitiesEndpoint):
             return None
         return organizations.content[0]
 
-    def get_subscriptions(self, page: int = 1, page_size: int = 10) -> "PageProductSubscriptionEndpoint":
-        """
-        Get the subscriptions of the organization.
-
-        Returns:
-            The subscriptions of the organization.
-        """
-        url = f"/api/productSubscriptions"
-        params = {
-            filter: f"organization.id: '{self.organization.id}'",
-        }
-        response = self.client.get(url, params=params)
-
-        from kodexa.model.entities.product_subscription import PageProductSubscriptionEndpoint
-        return PageProductSubscriptionEndpoint.model_validate(response.json()).set_client(self.client)
-
-    def remove_subscription(self, subscription_id: str) -> None:
-        """
-        Remove a subscription from the organization.
-
-        Args:
-            subscription_id (str): The id of the subscription to remove.
-        """
-        url = f"/api/productSubscriptions/{subscription_id}"
-        self.client.delete(url)
-
-    def add_subscription(self, product: "Product") -> None:
-        """
-        Add a subscription to the organization.
-
-        Args:
-            product (Product): The product to subscribe to.
-        """
-        url = f"/api/productSubscriptions"
-        from kodexa.model.entities.product_subscription import ProductSubscription
-        new_product_subscription = ProductSubscription(organization=self.organization, product=product)
-        self.client.post(url, body=new_product_subscription.model_dump_json(by_alias=True))
-
 
 class PageEndpoint(ClientEndpoint):
     """
@@ -1671,6 +1633,45 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         url = f"/api/organizations/{self.id}/availableAssistants"
         response = self.client.get(url, params={"page": page, "pageSize": page_size, "query": query})
         return PageAssistantDefinitionEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def get_subscriptions(self, page: int = 1, page_size: int = 10) -> "PageProductSubscriptionEndpoint":
+        """
+        Get the subscriptions of the organization.
+
+        Returns:
+            The subscriptions of the organization.
+        """
+        url = f"/api/productSubscriptions"
+        params = {
+            filter: f"organization.id: '{self.organization.id}'",
+        }
+        response = self.client.get(url, params=params)
+
+        from kodexa.model.entities.product_subscription import PageProductSubscriptionEndpoint
+        return PageProductSubscriptionEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def remove_subscription(self, subscription_id: str) -> None:
+        """
+        Remove a subscription from the organization.
+
+        Args:
+            subscription_id (str): The id of the subscription to remove.
+        """
+        url = f"/api/productSubscriptions/{subscription_id}"
+        self.client.delete(url)
+
+    def add_subscription(self, product: "Product") -> None:
+        """
+        Add a subscription to the organization.
+
+        Args:
+            product (Product): The product to subscribe to.
+        """
+        url = f"/api/productSubscriptions"
+        from kodexa.model.entities.product_subscription import ProductSubscription
+        new_product_subscription = ProductSubscription(organization=self.detach(), product=product)
+        print(new_product_subscription.model_dump_json(by_alias=True))
+        self.client.post(url, body=json.loads(new_product_subscription.model_dump_json(by_alias=True)))
 
 
 class ComponentsEndpoint(ClientEndpoint):
@@ -6127,9 +6128,10 @@ class ExtractionEngineEndpoint:
         """
         response = self.client.post(
             "/api/extractionEngine/extract",
-            data={"taxonomyJson": taxonomy.model_dump_json()},
+            data={"taxonomyJson": taxonomy.model_dump_json(by_alias=True)},
             files={"document": document.to_kddb()},
         )
+        print(response.json())
         return [
             DataObject.model_validate(data_object) for data_object in response.json()
         ]
@@ -6150,7 +6152,7 @@ class ExtractionEngineEndpoint:
         response = self.client.post(
             "/api/extractionEngine/extract",
             params="full",
-            data={"taxonomyJson": taxonomy.model_dump_json()},
+            data={"taxonomyJson": taxonomy.model_dump_json(by_alias=True)},
             files={"document": document.to_kddb()},
         )
         return {
@@ -6181,7 +6183,7 @@ class ExtractionEngineEndpoint:
         response = self.client.post(
             "/api/extractionEngine/extract",
             params={"format": format},
-            data={"taxonomyJson": taxonomy.model_dump_json()},
+            data={"taxonomyJson": taxonomy.model_dump_json(by_alias=True)},
             files={"document": document.to_kddb()},
         )
         return response.text
