@@ -46,7 +46,7 @@ class ProductSubscriptionEndpoint(ProductSubscription, EntityEndpoint):
         Returns:
             str: The type of the endpoint.
         """
-        return "product_subscriptions"
+        return "productSubscription"
 
 
 class PageProductSubscription(BaseModel):
@@ -73,7 +73,7 @@ class PageProductSubscription(BaseModel):
 
 class PageProductSubscriptionEndpoint(PageProductSubscription, PageEndpoint):
     def get_type(self) -> Optional[str]:
-        return "product_subscription"
+        return "productSubscription"
 
 
 class ProductSubscriptionsEndpoint(EntitiesEndpoint):
@@ -93,7 +93,7 @@ class ProductSubscriptionsEndpoint(EntitiesEndpoint):
         Returns:
             str: The type of the endpoint.
         """
-        return "product_subscriptions"
+        return "productSubscriptions"
 
     def get_instance_class(self, object_dict=None):
         """Get the instance class of the endpoint

@@ -1643,21 +1643,23 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         """
         url = f"/api/productSubscriptions"
         params = {
-            filter: f"organization.id: '{self.id}'",
+            "filter": f"organization.id: '{self.id}'",
+            "page": page,
+            "pageSize": page_size
         }
         response = self.client.get(url, params=params)
 
         from kodexa.model.entities.product_subscription import PageProductSubscriptionEndpoint
         return PageProductSubscriptionEndpoint.model_validate(response.json()).set_client(self.client)
 
-    def remove_subscription(self, subscription_id: str) -> None:
+    def remove_subscription(self, subscription: "ProductSubscription") -> None:
         """
         Remove a subscription from the organization.
 
         Args:
             subscription_id (str): The id of the subscription to remove.
         """
-        url = f"/api/productSubscriptions/{subscription_id}"
+        url = f"/api/productSubscriptions/{subscription.id}"
         self.client.delete(url)
 
     def add_subscription(self, product: "Product") -> None:
