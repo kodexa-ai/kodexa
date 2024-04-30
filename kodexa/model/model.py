@@ -2631,7 +2631,7 @@ class Document(object):
         return self
 
     @classmethod
-    def from_text(cls, text, separator=None):
+    def from_text(cls, text, separator=None, ump_in_memory_db_toinmemory=False):
         """Creates a new Document from the text provided.
 
         Args:
@@ -2642,7 +2642,7 @@ class Document(object):
           the document
 
         """
-        new_document = Document()
+        new_document = Document(inmemory=inmemory)
         new_document.source.original_filename = f"text-{uuid.uuid4()}"
         new_document.content_node = new_document.create_node(node_type="text", index=0)
         if text:

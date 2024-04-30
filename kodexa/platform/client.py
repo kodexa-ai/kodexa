@@ -1598,6 +1598,41 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         """
         return TaxonomiesEndpoint().set_client(self.client).set_organization(self)
 
+    @property
+    def available_templates(self, page=1, page_size=10, query="*"):
+        """
+        Get the available templates for the organization.
+
+        Returns:
+            MarketplaceEndpoint: The marketplace endpoint of the organization.
+        """
+        url = f"/api/organizations/{self.id}/availableTemplates"
+        response = self.client.get(url, params={"page": page, "pageSize": page_size, "query": query})
+        return PageProjectTemplateEndpoint.model_validate(response.json()).set_client(self.client)
+
+    @property
+    def available_models(self, page=1, page_size=10, query="*"):
+        """
+        Get the available models for the organization.
+
+        Returns:
+            MarketplaceEndpoint: The marketplace endpoint of the organization.
+        """
+        url = f"/api/organizations/{self.id}/availableModels"
+        response = self.client.get(url, params={"page": page, "pageSize": page_size, "query": query})
+        return PageStoreEndpoint.model_validate(response.json()).set_client(self.client)
+
+    @property
+    def available_assistants(self, page=1, page_size=10, query="*"):
+        """
+        Get the available assistants for the organization.
+
+        Returns:
+            MarketplaceEndpoint: The marketplace endpoint of the organization.
+        """
+        url = f"/api/organizations/{self.id}/availableAssistants"
+        response = self.client.get(url, params={"page": page, "pageSize": page_size, "query": query})
+        return PageAssistantDefinitionEndpoint.model_validate(response.json()).set_client(self.client)
 
 class ComponentsEndpoint(ClientEndpoint):
     """

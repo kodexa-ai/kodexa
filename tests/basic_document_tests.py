@@ -246,3 +246,12 @@ def test_kddb_conversion():
     document = Document.from_kddb(
         Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read()).to_kddb())
     compare_document(document, "news-kdxa-original.json")
+
+
+def test_in_memory_kddb_conversion():
+    document = Document.from_kddb(
+        Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read()).to_kddb(),
+        inmemory=True)
+    document.to_kddb('/tmp/test.kddb')
+    new_document = Document.from_kddb('/tmp/test.kddb')
+    new_document.to_kddb('/tmp/test2.kddb')
