@@ -1395,6 +1395,11 @@ class PageDashboardEndpoint(PageDashboard, PageEndpoint):
         return "dashboard"
 
 
+class PageProductEndpoint(PageProduct, PageEndpoint):
+    def get_type(self) -> Optional[str]:
+        return "product"
+
+
 class PageDataExceptionEndpoint(PageDataException, PageEndpoint):
     """Represents a page of data exceptions endpoint.
 
@@ -1633,6 +1638,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         url = f"/api/organizations/{self.id}/availableAssistants"
         response = self.client.get(url, params={"page": page, "pageSize": page_size, "query": query})
         return PageAssistantDefinitionEndpoint.model_validate(response.json()).set_client(self.client)
+
 
 class ComponentsEndpoint(ClientEndpoint):
     """
@@ -2663,6 +2669,54 @@ class WorkspacesEndpoint(EntitiesEndpoint):
             PageWorkspaceEndpoint: The page class of the endpoint.
         """
         return PageWorkspaceEndpoint
+
+
+class ProductsEndpoint(EntitiesEndpoint):
+    """Represents the products endpoint
+
+    This class is used to represent the products endpoint in the system.
+
+    Attributes:
+        object_dict: A dictionary containing the object data.
+    """
+
+    """Represents a assistants endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint
+
+        This method is used to get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "products"
+
+    def get_instance_class(self, object_dict=None):
+        """Get the instance class of the endpoint
+
+        This method is used to get the instance class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): A dictionary containing the object data.
+
+        Returns:
+            AssistantEndpoint: The instance class of the endpoint.
+        """
+        return ProductEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """Get the page class of the endpoint
+
+        This method is used to get the page class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): A dictionary containing the object data.
+
+        Returns:
+            PageAssistantEndpoint: The page class of the endpoint.
+        """
+        return PageProductEndpoint
 
 
 class AssistantsEndpoint(EntitiesEndpoint):
@@ -4663,6 +4717,27 @@ class DataExceptionEndpoint(DataException, EntityEndpoint):
             str: The type of the endpoint.
         """
         return "exceptions"
+
+
+class ProductEndpoint(Product, EntityEndpoint):
+    """Handles the endpoint for a product
+
+    This class is a combination of DataException and EntityEndpoint. It is used
+    to manage the endpoint for data exceptions.
+
+    Methods:
+        get_type: Returns the type of the endpoint.
+    """
+
+    def get_type(self) -> str:
+        """Gets the type of the endpoint.
+
+        This method returns the type of the endpoint which is "exceptions".
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "products"
 
 
 class DataStoreExceptionsEndpoint(EntitiesEndpoint):

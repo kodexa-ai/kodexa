@@ -675,9 +675,8 @@ class StorePurpose(Enum):
 
 
 class ProjectStoreFile(BaseModel):
-
     url: Optional[str] = None
-    metadata: Optional[Dict[str,str]] = None
+    metadata: Optional[Dict[str, str]] = None
 
 
 class ProjectStore(BaseModel):
@@ -1659,6 +1658,30 @@ class NodeFeatures(BaseModel):
     features: Optional[List[ContentFeature]] = None
 
 
+class Product(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    """
+    A product
+    """
+
+    id: Optional[str] = Field(None, description="The ID of the object")
+    uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    name: str
+    description: Optional[str] = None
+    overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
+
+
 class DataException(BaseModel):
     """
 
@@ -2491,7 +2514,6 @@ class ProjectAssistant(BaseModel):
 
 
 class TaxonConditionalFormat(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2505,7 +2527,6 @@ class TaxonConditionalFormat(BaseModel):
 
 
 class TaxonCardinality(Enum):
-
     once_per_document = "ONCE_PER_DOCUMENT"
     multiple_per_document = "MULTIPLE_PER_DOCUMENT"
     once_per_segment = "ONCE_PER_SEGMENT"
@@ -2810,7 +2831,6 @@ class ProjectStatus(BaseModel):
 
 
 class ProjectOptions(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3841,7 +3861,6 @@ class LabelStatistics(BaseModel):
 
 
 class DocumentEmbedding(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4074,6 +4093,7 @@ class Assistant(BaseModel):
     priority_hint: Optional[int] = Field(None, alias="priorityHint")
     chat_enabled: Optional[bool] = Field(None, alias="chatEnabled")
     assistant_role: Optional[str] = Field(None, alias="assistantRole")
+
 
 class AssistantExecution(BaseModel):
     """
@@ -4339,6 +4359,7 @@ class Guidance(BaseModel):
     compiled_guidance: Optional[Dict[str, Any]] = Field(None, alias="compiledGuidance")
 
     guidance_options: Optional[List[Option]] = Field(None, alias="guidanceOptions")
+
 
 class GuidanceSet(ExtensionPackProvided):
     """
@@ -4850,6 +4871,28 @@ class PageDataException(BaseModel):
     empty: Optional[bool] = None
 
 
+class PageProduct(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[Product]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
 class PageDataForm(BaseModel):
     """
 
@@ -5263,7 +5306,6 @@ class Pipeline(ExtensionPackProvided):
 
 
 class ProjectTemplate(ExtensionPackProvided):
-
     stores: Optional[List[ProjectStore]] = Field(
         None, description="The stores that will be created with the project template"
     )
