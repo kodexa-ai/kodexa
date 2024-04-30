@@ -1772,6 +1772,7 @@ class DeploymentOptions(BaseModel):
     cpu: Optional[str] = None
     pod_match_labels: Optional[List[MatchLabel]] = Field(None, alias="podMatchLabels")
     child_process: Optional[bool] = Field(None, alias="childProcess")
+    layers: Optional[List[str]] = None
 
 
 class SourceType(Enum):
