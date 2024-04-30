@@ -1643,7 +1643,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         """
         url = f"/api/productSubscriptions"
         params = {
-            filter: f"organization.id: '{self.organization.id}'",
+            filter: f"organization.id: '{self.id}'",
         }
         response = self.client.get(url, params=params)
 
