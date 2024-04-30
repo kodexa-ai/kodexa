@@ -2631,7 +2631,7 @@ class Document(object):
         return self
 
     @classmethod
-    def from_text(cls, text, separator=None, ump_in_memory_db_toinmemory=False):
+    def from_text(cls, text, separator=None, inmemory=False):
         """Creates a new Document from the text provided.
 
         Args:
