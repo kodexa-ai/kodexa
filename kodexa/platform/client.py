@@ -2787,12 +2787,13 @@ class ProjectsEndpoint(EntitiesEndpoint):
         """
         return PageProjectEndpoint
 
-    def find_by_name(self, project_name: str) -> Optional[ProjectEndpoint]:
+    def find_by_name(self, project_name: str, organization: Optional[Organization] = None) -> Optional[ProjectEndpoint]:
         """
         Find a project by name.
 
         Args:
             project_name (str): The name of the project to find.
+            organization (Organization, optional): The organization to search in. Defaults to None.
 
         Returns:
             Optional[ProjectEndpoint]: The project endpoint if found, None otherwise.
@@ -2800,8 +2801,8 @@ class ProjectsEndpoint(EntitiesEndpoint):
 
         url = f"/api/{self.get_type()}"
         filters = {"filter": [f"name: '{project_name}'"]}
-        if self.organization is not None:
-            filters["filter"].append(f"organization.id: '{self.organization.id}'")
+        if organization is not None:
+            filters["filter"].append(f"organization.id: '{organization.id}'")
         get_response = self.client.get(url, params=filters)
         if len(get_response.json()["content"]) > 0:
             return ProjectEndpoint.model_validate(
