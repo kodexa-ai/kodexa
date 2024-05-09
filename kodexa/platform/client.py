@@ -2461,7 +2461,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
             data_forms: List["DataFormEndpoint"] = None,
             guidance: List["GuidanceSetEndpoint"] = None,
             dashboards: List["DashboardEndpoint"] = None,
-    ) -> "ProjectEndpoint":
+    ):
         """Update the resources of the project.
 
         Args:
@@ -2470,9 +2470,6 @@ class ProjectEndpoint(EntityEndpoint, Project):
             data_forms (List["DataFormEndpoint"], optional): List of data form endpoints to update.
             guidance (List["GuidanceSetEndpoint"], optional): List of guidance set endpoints to update.
             dashboards (List["DashboardEndpoint"], optional): List of dashboard endpoints to update.
-
-        Returns:
-            ProjectEndpoint: The updated project endpoint.
         """
         project_resources_update = ProjectResourcesUpdate()
         project_resources_update.store_refs = []
@@ -2501,7 +2498,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
                 dashboard.ref for dashboard in dashboards
             ]
 
-        response = self.client.put(
+        self.client.put(
             f"/api/projects/{self.id}/resources",
             body=json.loads(project_resources_update.json(by_alias=True)),
         )
@@ -2583,6 +2580,43 @@ class ProjectEndpoint(EntityEndpoint, Project):
             body=[tag.model_dump(by_alias=True) for tag in tags],
         )
         return [ProjectTag.model_validate(tag) for tag in response.json()]
+
+
+class GuidanceSetsEndpoint(EntitiesEndpoint):
+    """Represents a message endpoint"""
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "guidance".
+        """
+        return "guidance"
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): An optional dictionary object. Defaults to None.
+
+        Returns:
+            GuidanceSetEndpoint: The instance class of the endpoint.
+        """
+        return GuidanceSetEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Args:
+            object_dict (dict, optional): An optional dictionary object. Defaults to None.
+
+        Returns:
+            PageGuidanceSetEndpoint: The page class of the endpoint.
+        """
+        return PageGuidanceSetEndpoint
 
 
 class MessagesEndpoint(EntitiesEndpoint):
@@ -6229,6 +6263,7 @@ class KodexaClient:
         self.messages = MessagesEndpoint(self)
         from kodexa.model.entities.product import ProductsEndpoint
         self.products = ProductsEndpoint(self)
+        self.guidance_sets = GuidanceSetsEndpoint(self)
 
     @staticmethod
     def login(url, token):
