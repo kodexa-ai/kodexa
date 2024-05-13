@@ -2904,7 +2904,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
         if self.organization is not None:
             params["filter"].append(f"organization.id: '{self.organization.id}'")
 
-        get_response = self.client.get(f"/api/{self.get_type()}/", params=params)
+        get_response = self.client.get(f"/api/{self.get_type()}", params=params)
 
         return PageProjectEndpoint.model_validate(get_response.json()).set_client(
             self.client
