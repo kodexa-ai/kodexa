@@ -548,7 +548,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         Returns:
             The created component.
         """
-        url = f"/api/{self.get_type()}/{self.organization.slug}/"
+        url = f"/api/{self.get_type()}/{self.organization.slug}"
         get_response = self.client.post(
             url, component.model_dump(mode="json", by_alias=True)
         )
@@ -774,7 +774,7 @@ class EntitiesEndpoint:
         Returns:
             PageProject: The page of projects belonging to the organization.
         """
-        url = f"/api/{self.get_type()}/"
+        url = f"/api/{self.get_type()}"
         get_response = self.client.get(
             url, params={"filter": f"organization.id: '{organization.id}'"}
         )
