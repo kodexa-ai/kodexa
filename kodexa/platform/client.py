@@ -5461,6 +5461,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
                 count += 1
                 if limit and count >= limit:
                     break
+            if limit and count >= limit:
+                break
             page += 1
 
     def filter(
