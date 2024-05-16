@@ -2723,7 +2723,7 @@ class DocumentAssignment(BaseModel):
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
-    user: User
+    user: Optional[User] = None
 
 
 class ExceptionDetails(BaseModel):
