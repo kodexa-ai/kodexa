@@ -2554,7 +2554,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
         return ProjectTaxonomiesEndpoint().set_client(self.client).set_project(self)
 
     @property
-    def guidance(self) -> "ProjectGuidanceEndpoint":
+    def guidance(self) -> "ProjectGuidanceSetsEndpoint":
         """Get the guidance sets endpoint of the project.
 
         Returns:
