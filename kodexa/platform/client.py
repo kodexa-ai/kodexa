@@ -2151,13 +2151,13 @@ class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
         return TaxonomyEndpoint
 
 
-class ProjectGuidanceEndpoint(ProjectResourceEndpoint):
+class ProjectGuidanceSetsEndpoint(ProjectResourceEndpoint):
 
     def get_type(self) -> str:
         return "guidance"
 
     def get_instance_class(self, object_dict=None):
-        return GuidanceSetEndpoint
+        return GuidanceSetsEndpoint
 
 
 class ProjectDataFormEndpoint(ProjectResourceEndpoint):
@@ -2459,7 +2459,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
             stores: List["StoreEndpoint"] = None,
             taxonomies: List["TaxonomyEndpoint"] = None,
             data_forms: List["DataFormEndpoint"] = None,
-            guidance: List["GuidanceSetEndpoint"] = None,
+            guidance: List["GuidanceSetsEndpoint"] = None,
             dashboards: List["DashboardEndpoint"] = None,
     ):
         """Update the resources of the project.
@@ -2546,7 +2546,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
         Returns:
             GuidanceSetsEndpoint: The guidance sets endpoint of the project.
         """
-        return ProjectGuidanceEndpoint().set_client(self.client).set_project(self)
+        return ProjectGuidanceSetEndpoint().set_client(self.client).set_project(self)
 
     @property
     def assistants(self) -> ProjectAssistantsEndpoint:
@@ -2581,42 +2581,6 @@ class ProjectEndpoint(EntityEndpoint, Project):
         )
         return [ProjectTag.model_validate(tag) for tag in response.json()]
 
-
-class GuidanceSetsEndpoint(EntitiesEndpoint):
-    """Represents a message endpoint"""
-
-    def get_type(self) -> str:
-        """
-        Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint, in this case "guidance".
-        """
-        return "guidance"
-
-    def get_instance_class(self, object_dict=None):
-        """
-        Get the instance class of the endpoint.
-
-        Args:
-            object_dict (dict, optional): An optional dictionary object. Defaults to None.
-
-        Returns:
-            GuidanceSetEndpoint: The instance class of the endpoint.
-        """
-        return GuidanceSetEndpoint
-
-    def get_page_class(self, object_dict=None):
-        """
-        Get the page class of the endpoint.
-
-        Args:
-            object_dict (dict, optional): An optional dictionary object. Defaults to None.
-
-        Returns:
-            PageGuidanceSetEndpoint: The page class of the endpoint.
-        """
-        return PageGuidanceSetEndpoint
 
 
 class MessagesEndpoint(EntitiesEndpoint):
@@ -3003,9 +2967,9 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
             raise ValueError(f"Unknown store type {object_dict['storeType']}")
 
 
-class GuidanceEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
+class GuidanceSetsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
-    Represents a guidance endpoint.
+    Represents a guidance set endpoint.
 
     This class is used to interact with the guidance endpoint of the API.
     It provides methods to get the type, page class, and instance class of the endpoint,
@@ -6027,7 +5991,7 @@ OBJECT_TYPES = {
         "name": "guidance",
         "plural": "guidance",
         "type": GuidanceSetEndpoint,
-        "endpoint": GuidanceEndpoint,
+        "endpoint": GuidanceSetsEndpoint,
     },
     "modelRuntimes": {
         "name": "modelRuntime",
