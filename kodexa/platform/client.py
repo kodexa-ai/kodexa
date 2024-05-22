@@ -2560,7 +2560,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
         Returns:
             GuidanceSetsEndpoint: The guidance sets endpoint of the project.
         """
-        return ProjectGuidanceSetEndpoint().set_client(self.client).set_project(self)
+        return ProjectGuidanceSetsEndpoint().set_client(self.client).set_project(self)
 
     @property
     def assistants(self) -> ProjectAssistantsEndpoint:
