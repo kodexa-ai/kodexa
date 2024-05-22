@@ -1551,6 +1551,20 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         )
 
     @property
+    def guidance_sets(self) -> "GuidanceSetsEndpoint":
+        """
+        Get the guidance sets endpoint of the organization.
+
+        Returns:
+            GuidanceSetsEndpoint: The guidance sets endpoint of the organization.
+        """
+        return (
+            GuidanceSetsEndpoint()
+            .set_organization(self)
+            .set_client(self.client)
+        )
+
+    @property
     def credentials(self):
         """
         Get the credentials endpoint of the organization.
@@ -6229,7 +6243,6 @@ class KodexaClient:
         self.messages = MessagesEndpoint(self)
         from kodexa.model.entities.product import ProductsEndpoint
         self.products = ProductsEndpoint(self)
-        self.guidance_sets = GuidanceSetsEndpoint(self)
 
     @staticmethod
     def login(url, token):
