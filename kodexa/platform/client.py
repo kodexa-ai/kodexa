@@ -2540,7 +2540,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
         return ProjectTaxonomiesEndpoint().set_client(self.client).set_project(self)
 
     @property
-    def guidance(self) -> "GuidanceEndpoint":
+    def guidance(self) -> "ProjectGuidanceEndpoint":
         """Get the guidance sets endpoint of the project.
 
         Returns:
@@ -6652,6 +6652,18 @@ class KodexaClient:
                     )
                 )
 
+        for guidance in project.guidance.list():
+            guidance_file = os.path.join(
+                project_export_dir, f"guidance-{guidance.slug}-{guidance.version}.json"
+            )
+            with open(guidance_file, "w") as f:
+                f.write(
+                    json.dumps(
+                        guidance.model_dump(mode="json", by_alias=True), indent=4
+                    )
+                )
+
+
     def import_project(self, organization: OrganizationEndpoint, import_path: str):
         """
         A method to import a project.
@@ -6744,6 +6756,13 @@ class KodexaClient:
                 taxonomy.org_slug = None
                 taxonomy.ref = None
                 taxonomies.append(organization.taxonomies.create(taxonomy))
+
+        for guidance_file in glob.glob(os.path.join(import_path, "guidance-*.json")):
+            with open(guidance_file, "r") as f:
+                guidance = GuidanceSetEndpoint.model_validate(json.load(f))
+                guidance.org_slug = None
+                guidance.ref = None
+                organization.guidance.create(guidance)
 
         import time
 
