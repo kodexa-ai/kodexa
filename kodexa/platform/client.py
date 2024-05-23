@@ -2165,6 +2165,38 @@ class PagePromptEndpoint(PagePrompt, PageEndpoint):
     pass
 
 
+class ProjectDataFormsEndpoint(ProjectResourceEndpoint):
+    """Represents a project data forms endpoint.
+
+    This class is used to represent a project taxonomies endpoint in the system.
+    """
+
+    """Represents a project taxonomies endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        This method is used to get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "dataForms"
+
+    def get_instance_class(self, object_dict=None):
+        """Get the instance class of the project data form endpoint.
+
+        This method is used to get the instance class of the project dataform endpoint.
+
+        Args:
+            object_dict (dict, optional): The object dictionary. Defaults to None.
+
+        Returns:
+            TaxonomyEndpoint: The instance class of the project taxonomies endpoint.
+        """
+        return DataFormEndpoint
+
+
 class ProjectTaxonomiesEndpoint(ProjectResourceEndpoint):
     """Represents a project taxonomies endpoint.
 
@@ -2602,6 +2634,15 @@ class ProjectEndpoint(EntityEndpoint, Project):
             GuidanceSetsEndpoint: The guidance sets endpoint of the project.
         """
         return ProjectGuidanceSetsEndpoint().set_client(self.client).set_project(self)
+
+    @property
+    def data_forms(self) -> "ProjectDataFormsEndpoint":
+        """Get the guidance sets endpoint of the project.
+
+        Returns:
+            GuidanceSetsEndpoint: The guidance sets endpoint of the project.
+        """
+        return ProjectDataFormsEndpoint().set_client(self.client).set_project(self)
 
     @property
     def assistants(self) -> ProjectAssistantsEndpoint:
