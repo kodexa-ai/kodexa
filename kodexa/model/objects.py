@@ -1732,7 +1732,7 @@ class ProjectResourcesUpdate(BaseModel):
     store_refs: Optional[List[str]] = Field(None, alias="storeRefs")
     dashboard_refs: Optional[List[str]] = Field(None, alias="dashboardRefs")
     data_form_refs: Optional[List[str]] = Field(None, alias="dataFormRefs")
-    guidance_set_refs: Optional[List[str]] = Field(None, alias="guidanceSetRefs")
+    guidance_set_refs: Optional[List[str]] = Field(None, alias="guidanceRefs")
 
 
 class Role1(Enum):
