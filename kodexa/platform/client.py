@@ -2081,6 +2081,38 @@ class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
         return DocumentStoreEndpoint
 
 
+class ProjectDashboardsEndpoint(ProjectResourceEndpoint):
+    """Represents a project dashboards endpoint.
+
+    This class is used to represent a project document stores endpoint in the system.
+    """
+
+    """Represents a project document stores endpoint"""
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        This method is used to get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "dashboards"
+
+    def get_instance_class(self, object_dict=None):
+        """Get the instance class of the project document stores endpoint.
+
+        This method is used to get the instance class of the project document stores endpoint.
+
+        Args:
+            object_dict (dict, optional): The object dictionary. Defaults to None.
+
+        Returns:
+            DocumentStoreEndpoint: The instance class of the project document stores endpoint.
+        """
+        return DashboardEndpoint
+
+
 class GuidanceSetEndpoint(ComponentInstanceEndpoint, GuidanceSet):
 
     def get_type(self) -> str:
@@ -2518,6 +2550,15 @@ class ProjectEndpoint(EntityEndpoint, Project):
         )
 
     @property
+    def dashboards(self) -> ProjectDashboardsEndpoint:
+        """Get the document stores endpoint of the project.
+
+        Returns:
+            ProjectDocumentStoresEndpoint: The document stores endpoint of the project.
+        """
+        return ProjectDashboardsEndpoint().set_client(self.client).set_project(self)
+
+    @property
     def document_stores(self) -> ProjectDocumentStoresEndpoint:
         """Get the document stores endpoint of the project.
 
@@ -2594,7 +2635,6 @@ class ProjectEndpoint(EntityEndpoint, Project):
             body=[tag.model_dump(by_alias=True) for tag in tags],
         )
         return [ProjectTag.model_validate(tag) for tag in response.json()]
-
 
 
 class MessagesEndpoint(EntitiesEndpoint):
