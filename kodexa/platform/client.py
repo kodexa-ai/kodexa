@@ -5432,19 +5432,21 @@ class DocumentStoreEndpoint(StoreEndpoint):
             document_family_response.json()
         ).set_client(self.client)
 
-    def stream_query(self, query: str = "*", sort=None):
+    def stream_query(self, query: str = "*", sort=None, limit=None):
         """
         Stream the query for the document family.
 
         Args:
             query (str, optional): The query to run. Defaults to "*".
             sort (str, optional): Sorting order of the query. Defaults to None.
+            limit (int, optional): The maximum number of items to return. Defaults to None.
 
         Returns:
             generator: A generator of the document families.
         """
         page_size = 5
         page = 1
+        number_of_items = 0
 
         if not sort:
             sort = "id"
@@ -5456,7 +5458,12 @@ class DocumentStoreEndpoint(StoreEndpoint):
             if not page_response.content:
                 break
             for document_family in page_response.content:
+                number_of_items += 1
+                if limit and number_of_items > limit:
+                    break
+
                 yield document_family
+
             page += 1
 
     def query(
