@@ -5102,6 +5102,28 @@ class Action(ExtensionPackProvided):
     metadata: Optional[ObjectMetadata] = None
 
 
+class TaxonFeatures(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    """
+    A Custom Event allows you to define an subtype of assistant event with options
+    """
+
+    taxonPath: Optional[str] = Field(
+        None, description="The path of the taxon to add the features to", pattern=r"^[a-zA-Z0-9\-_]{0,40}$"
+    )
+    options: Optional[List[Option]] = Field(
+        None, description="The options to add as type features to the taxon"
+    )
+
+
 class AssistantDefinition(ExtensionPackProvided):
     """
 
@@ -5136,6 +5158,11 @@ class AssistantDefinition(ExtensionPackProvided):
         None,
         alias="additionalTaxonOptions",
         description="This are additional properties that can be set on a label when the assistant is part of the project",
+    )
+    taxon_features: Optional[TaxonFeatures] = Field(
+        None,
+        alias="taxonFeatures",
+        description="This are additional properties that can be set as part of the taxon in the taxonomy (not a label but at the taxon level) they will be stored under the type_features",
     )
     event_types: Optional[List[CustomEvent]] = Field(
         None,
