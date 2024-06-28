@@ -5072,6 +5072,13 @@ class ModelContentMetadata(BaseModel):
         alias="additionalTaxonOptions",
         description="This are additional properties that can be set on a label when the model is part of the project",
     )
+
+    taxon_features: Optional[TaxonFeatures] = Field(
+        None,
+        alias="taxonFeatures",
+        description="This are additional properties that can be set as part of the taxon in the taxonomy (not a label but at the taxon level) they will be stored under the type_features",
+    )
+
     contents: Optional[List[str]] = Field(
         None,
         description="A list of the paths (with wildcards) that hold the content of this model",
