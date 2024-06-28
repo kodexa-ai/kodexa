@@ -5129,6 +5129,11 @@ class TaxonFeatures(BaseModel):
     options: Optional[List[Option]] = Field(
         None, description="The options to add as type features to the taxon"
     )
+    group_only: Optional[bool] = Field(
+        None,
+        alias="groupOnly",
+        description="If true, the features will only be added to the group taxon",
+    )
 
 
 class AssistantDefinition(ExtensionPackProvided):
