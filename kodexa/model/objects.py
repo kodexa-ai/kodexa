@@ -5073,7 +5073,7 @@ class ModelContentMetadata(BaseModel):
         description="This are additional properties that can be set on a label when the model is part of the project",
     )
 
-    taxon_features: Optional[TaxonFeatures] = Field(
+    taxon_features: Optional[List[TaxonFeatures]] = Field(
         None,
         alias="taxonFeatures",
         description="This are additional properties that can be set as part of the taxon in the taxonomy (not a label but at the taxon level) they will be stored under the type_features",
@@ -5171,7 +5171,7 @@ class AssistantDefinition(ExtensionPackProvided):
         alias="additionalTaxonOptions",
         description="This are additional properties that can be set on a label when the assistant is part of the project",
     )
-    taxon_features: Optional[TaxonFeatures] = Field(
+    taxon_features: Optional[List[TaxonFeatures]] = Field(
         None,
         alias="taxonFeatures",
         description="This are additional properties that can be set as part of the taxon in the taxonomy (not a label but at the taxon level) they will be stored under the type_features",
