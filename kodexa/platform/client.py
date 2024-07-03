@@ -2235,7 +2235,7 @@ class ProjectGuidanceSetsEndpoint(ProjectResourceEndpoint):
         return "guidance"
 
     def get_instance_class(self, object_dict=None):
-        return GuidanceSetsEndpoint
+        return GuidanceSetEndpoint
 
 
 class ProjectDataFormEndpoint(ProjectResourceEndpoint):
@@ -2537,7 +2537,7 @@ class ProjectEndpoint(EntityEndpoint, Project):
             stores: List["StoreEndpoint"] = None,
             taxonomies: List["TaxonomyEndpoint"] = None,
             data_forms: List["DataFormEndpoint"] = None,
-            guidance: List["GuidanceSetsEndpoint"] = None,
+            guidance: List["GuidanceSetEndpoint"] = None,
             dashboards: List["DashboardEndpoint"] = None,
     ):
         """Update the resources of the project.
