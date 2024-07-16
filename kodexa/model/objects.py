@@ -3851,6 +3851,18 @@ class DocumentEmbedding(BaseModel):
     node_uuid: Optional[str] = Field(None, alias="nodeUuid")
 
 
+class DocumentExternalData(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    external_data: Optional[Dict[str, Any]] = Field(None, alias="externalData")
+    document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
+
+
 class DocumentFamily(BaseModel):
     """
 

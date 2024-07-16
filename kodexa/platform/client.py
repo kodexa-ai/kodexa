@@ -86,6 +86,7 @@ from kodexa.model.objects import (
     PageExtensionPack,
     PageOrganization,
     DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
+    DocumentExternalData,
 )
 
 logger = logging.getLogger()
@@ -4454,6 +4455,28 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         """
         url = f"/api/documentFamilies/{self.id}/touch"
         response = self.client.get(url)
+        process_response(response)
+
+    def get_external_data(self) -> DocumentExternalData:
+        """
+        Get the external data of the document family.
+
+        Returns:
+            DocumentExternalData: The external data of the document family.
+        """
+        url = f"/api/documentFamilies/{self.id}/externalData"
+        response = self.client.get(url)
+        return DocumentExternalData.model_validate(response.json())
+
+    def update_external_data(self, external_data: DocumentExternalData):
+        """
+        Update the external data of the document family.
+
+        Args:
+            external_data (DocumentExternalData): The external data to update.
+        """
+        url = f"/api/documentFamilies/{self.id}/externalData"
+        response = self.client.put(url, body=external_data.model_dump(mode="json", by_alias=True))
         process_response(response)
 
     def export(self) -> bytes:
