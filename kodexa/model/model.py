@@ -559,9 +559,13 @@ class ContentNode(object):
            >>> new_page.add_feature('pagination','pageNum',1)
         """
         if self.has_feature(feature_type, name):
-            raise Exception(
-                f"Feature {feature_type}:{name} already exists on this node, use set_feature to update"
-            )
+            existing_feature = self.get_feature(feature_type, name)
+            if isinstance(existing_feature.value, list):
+                existing_feature.value.append(value)
+            else:
+                existing_feature.value = [existing_feature.value, value]
+            self.update_feature(existing_feature)
+            return existing_feature
 
         # Make sure that we treat the value as list all the time
         new_feature = ContentFeature(

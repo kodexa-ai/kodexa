@@ -3851,6 +3851,18 @@ class DocumentEmbedding(BaseModel):
     node_uuid: Optional[str] = Field(None, alias="nodeUuid")
 
 
+class DocumentExternalData(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    external_data: Optional[Dict[str, Any]] = Field(None, alias="externalData")
+    document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
+
+
 class DocumentFamily(BaseModel):
     """
 
@@ -5072,6 +5084,13 @@ class ModelContentMetadata(BaseModel):
         alias="additionalTaxonOptions",
         description="This are additional properties that can be set on a label when the model is part of the project",
     )
+
+    taxon_features: Optional[List[TaxonFeatures]] = Field(
+        None,
+        alias="taxonFeatures",
+        description="This are additional properties that can be set as part of the taxon in the taxonomy (not a label but at the taxon level) they will be stored under the type_features",
+    )
+
     contents: Optional[List[str]] = Field(
         None,
         description="A list of the paths (with wildcards) that hold the content of this model",
@@ -5100,6 +5119,33 @@ class Action(ExtensionPackProvided):
 
     step: Optional[StepImplementation] = None
     metadata: Optional[ObjectMetadata] = None
+
+
+class TaxonFeatures(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    """
+    A Custom Event allows you to define an subtype of assistant event with options
+    """
+
+    taxonPath: Optional[str] = Field(
+        None, description="The path of the taxon to add the features to", pattern=r"^[a-zA-Z0-9\-_]{0,40}$"
+    )
+    options: Optional[List[Option]] = Field(
+        None, description="The options to add as type features to the taxon"
+    )
+    group_only: Optional[bool] = Field(
+        None,
+        alias="groupOnly",
+        description="If true, the features will only be added to the group taxon",
+    )
 
 
 class AssistantDefinition(ExtensionPackProvided):
@@ -5136,6 +5182,11 @@ class AssistantDefinition(ExtensionPackProvided):
         None,
         alias="additionalTaxonOptions",
         description="This are additional properties that can be set on a label when the assistant is part of the project",
+    )
+    taxon_features: Optional[List[TaxonFeatures]] = Field(
+        None,
+        alias="taxonFeatures",
+        description="This are additional properties that can be set as part of the taxon in the taxonomy (not a label but at the taxon level) they will be stored under the type_features",
     )
     event_types: Optional[List[CustomEvent]] = Field(
         None,
