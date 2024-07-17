@@ -766,6 +766,21 @@ class RelatedTaxon(BaseModel):
     priority: Optional[int] = None
 
 
+class ChecklistDefinition(BaseModel):
+    """
+        Checklist Definiton
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    title: Optional[str] = None
+    description: Optional[str] = None
+
+
 class ScheduleDefinition(BaseModel):
     """
 
@@ -2665,6 +2680,8 @@ class Taxon(BaseModel):
     cardinality: Optional[TaxonCardinality] = None
 
     conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(None, alias="conditionalFormats")
+
+    checklist_definitions: Optional[List[ChecklistDefinition]] = Field(None, alias="checklistDefinitions")
 
     def update_path(self, parent_path=None):
         if parent_path is None:
