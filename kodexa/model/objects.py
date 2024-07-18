@@ -779,6 +779,8 @@ class ChecklistDefinition(BaseModel):
 
     title: Optional[str] = None
     description: Optional[str] = None
+    definition: Optional[str] = None
+    type: Optional[str] = None
 
 
 class ScheduleDefinition(BaseModel):

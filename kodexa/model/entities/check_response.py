@@ -36,7 +36,6 @@ class CheckResponse(BaseModel):
     status: Optional[CheckStatus] = None
     confidence: Optional[float] = None
     approver: Optional[User] = None
-    data_object_id: Optional[str] = Field(None, alias="dataObjectId")
 
 
 class PageCheckResponse(BaseModel):
