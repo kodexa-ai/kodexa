@@ -2402,6 +2402,7 @@ class Option(BaseModel):
     show_on_popup: Optional[bool] = Field(None, alias="showOnPopup")
     possible_values: Optional[List[PossibleValue]] = Field(None, alias="possibleValues")
     properties: Optional[Dict[str, Any]] = None
+    label_on_error: Optional[str] = None
 
 
 class Overlay(BaseModel):
