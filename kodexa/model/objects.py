@@ -1019,6 +1019,7 @@ class TaxonType(Enum):
     phone_number = "PHONE_NUMBER"
     selection = "SELECTION"
     section = "SECTION"
+    review = "REVIEW"
 
 
 class TaxonomyType1(Enum):
