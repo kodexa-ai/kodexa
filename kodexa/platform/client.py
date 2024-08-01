@@ -6924,6 +6924,7 @@ class KodexaClient:
 
             from kodexa.model.entities.product import ProductEndpoint
             from kodexa.model.entities.product_subscription import ProductSubscriptionEndpoint
+            from kodexa.model.entities.check_response import CheckResponseEndpoint
             known_components = {
                 "taxonomy": TaxonomyEndpoint,
                 "pipeline": PipelineEndpoint,
@@ -6949,6 +6950,7 @@ class KodexaClient:
                 "channel": ChannelEndpoint,
                 "product": ProductEndpoint,
                 "productSubscription": ProductSubscriptionEndpoint,
+                "checkResponse": CheckResponseEndpoint
             }
 
             if component_type in known_components:
