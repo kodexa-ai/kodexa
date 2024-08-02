@@ -987,6 +987,7 @@ class ValuePath(Enum):
     derived = "DERIVED"
     formula = "FORMULA"
     review = "REVIEW"
+    external = "EXTERNAL"
 
 
 
