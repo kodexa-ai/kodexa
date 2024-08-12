@@ -13,7 +13,7 @@ from kodexa.model.model import (
     DocumentMetadata,
     ContentFeature,
     ContentException,
-    ModelInsight,
+    ModelInsight, ProcessingStep,
 )
 
 logger = logging.getLogger()
@@ -1122,6 +1122,90 @@ class SqliteDocumentPersistence(object):
 
         return content_nodes
 
+    def __ensure_ed_table_exists(self):
+        """
+        Ensure the 'ed' table exists in the database.
+        Creates the table if it does not exist.
+        """
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ed (
+                obj BLOB
+            )
+        """)
+
+        # Check if the table has any rows, if not, insert an initial empty row
+        result = self.cursor.execute("SELECT COUNT(*) FROM ed").fetchone()
+        if result[0] == 0:
+            self.cursor.execute("INSERT INTO ed (obj) VALUES (?)", [sqlite3.Binary(msgpack.packb({}))])
+
+    def set_external_data(self, external_data: dict):
+        """
+        Sets the external data for the document.
+
+        Args:
+            external_data (dict): The external data to store, must be JSON serializable.
+        """
+        self.__ensure_ed_table_exists()
+        serialized_data = sqlite3.Binary(msgpack.packb(external_data))
+        self.cursor.execute("UPDATE ed SET obj = ? WHERE rowid = 1", [serialized_data])
+        self.connection.commit()
+
+    def get_external_data(self) -> dict:
+        """
+        Gets the external data associated with this document.
+
+        Returns:
+            dict: The external data stored in the ed table.
+        """
+        self.__ensure_ed_table_exists()
+        result = self.cursor.execute("SELECT obj FROM ed WHERE rowid = 1").fetchone()
+        if result and result[0]:
+            return msgpack.unpackb(result[0])
+        return {}
+
+    def __ensure_steps_table_exists(self):
+        """
+        Ensure the 'steps' table exists in the database.
+        Creates the table if it does not exist.
+        """
+        self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS steps (
+                    obj BLOB
+                )
+            """)
+
+        # Check if the table has any rows, if not, insert an initial empty row
+        result = self.cursor.execute("SELECT COUNT(*) FROM steps").fetchone()
+        if result[0] == 0:
+            self.cursor.execute("INSERT INTO steps (obj) VALUES (?)", [sqlite3.Binary(msgpack.packb([]))])
+
+    def set_steps(self, steps: List[ProcessingStep]):
+        """
+        Sets the processing steps for the document.
+
+        Args:
+            steps (List[ProcessingStep]): A list of ProcessingStep objects to store.
+        """
+        self.__ensure_steps_table_exists()
+        serialized_steps = [step.to_dict() for step in steps]
+        packed_data = sqlite3.Binary(msgpack.packb(serialized_steps))
+        self.cursor.execute("UPDATE steps SET obj = ? WHERE rowid = 1", [packed_data])
+        self.connection.commit()
+
+    def get_steps(self) -> List[ProcessingStep]:
+        """
+        Gets the processing steps associated with this document.
+
+        Returns:
+            List[ProcessingStep]: A list of ProcessingStep objects.
+        """
+        self.__ensure_steps_table_exists()
+        result = self.cursor.execute("SELECT obj FROM steps WHERE rowid = 1").fetchone()
+        if result and result[0]:
+            unpacked_data = msgpack.unpackb(result[0])
+            return [ProcessingStep(**step) for step in unpacked_data]
+        return []
+
 
 class SimpleObjectCache(object):
     """
@@ -1259,6 +1343,34 @@ class PersistenceManager(object):
         self._underlying_persistence = SqliteDocumentPersistence(
             document, filename, delete_on_close, inmemory=inmemory
         )
+
+    def get_steps(self) -> list[ProcessingStep]:
+        """
+        Gets the processing steps for this document
+
+        :return:
+        """
+        return self._underlying_persistence.get_steps()
+
+    def set_steps(self, steps: list[ProcessingStep]):
+        self._underlying_persistence.set_steps(steps)
+
+    def get_external_data(self) -> dict:
+        """
+        Gets the external data object associated with this document
+
+        :return: dict of the external data
+        """
+        return self._underlying_persistence.get_external_data()
+
+    def set_external_data(self, external_data:dict):
+        """
+        Sets the external data for this document
+
+        :param external_data: dict representing the external data, must be JSON serializable
+        :return:
+        """
+        self._underlying_persistence.set_external_data(external_data)
 
     def get_nodes_by_type(self, node_type: str) -> List[ContentNode]:
         """

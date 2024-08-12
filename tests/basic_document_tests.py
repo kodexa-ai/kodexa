@@ -2,6 +2,7 @@ import os
 
 from kodexa import get_source
 from kodexa.model import DocumentMetadata, Document
+from kodexa.model.model import ProcessingStep
 from kodexa.testing.test_utils import compare_document
 
 
@@ -38,8 +39,48 @@ def test_get_nodes_between():
     nodes = document.content_node.get_children()[0].collect_nodes_to(document.content_node.get_children()[2])
     assert len(nodes) == 2
 
+def test_external_data():
 
-def test_persistance_cache():
+    document = Document()
+
+    document.set_external_data({"cheese":"bar"})
+    assert document.get_external_data()["cheese"] == "bar"
+
+def test_document_steps():
+    # Create a new document instance
+    document = Document()
+
+    # Create some processing steps
+    step1 = ProcessingStep(name="Step 1")
+    step2 = ProcessingStep(name="Step 2")
+    step3 = ProcessingStep(name="Step 3")
+
+    # Add children to the steps
+    step1.add_child(step2)
+    step2.add_child(step3)
+
+    # Set the steps to the document
+    document.set_steps([step1, step2, step3])
+
+    # Retrieve the steps from the document
+    retrieved_steps = document.get_steps()
+
+    # Validate the retrieved steps
+    assert len(retrieved_steps) == 3
+    assert retrieved_steps[0].name == "Step 1"
+    assert retrieved_steps[1].name == "Step 2"
+    assert retrieved_steps[2].name == "Step 3"
+
+    # Validate the parent-child relationships
+    assert retrieved_steps[0].children[0].name == "Step 2"
+    assert retrieved_steps[1].children[0].name == "Step 3"
+    assert retrieved_steps[2].parents[0].name == "Step 2"
+    assert retrieved_steps[1].parents[0].name == "Step 1"
+
+
+
+
+def test_persistence_cache():
     document = Document.from_text('The sun is very bright today.')
     document.to_kddb()
     document.get_root().tag('cheese')

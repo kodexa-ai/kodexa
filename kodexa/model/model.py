@@ -12,7 +12,7 @@ from typing import Any, List, Optional
 from addict import Dict
 import deepdiff
 import msgpack
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from kodexa.model.objects import ContentObject, FeatureSet
 
@@ -2369,6 +2369,55 @@ class FeatureSetDiff:
         return node
 
 
+class ProcessingStep(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    metadata: dict = Field(default_factory=lambda: {})
+    children: List['ProcessingStep'] = Field(default_factory=list)
+    parents: List['ProcessingStep'] = Field(default_factory=list)
+
+    def add_child(self, child_step: 'ProcessingStep'):
+        self.children.append(child_step)
+        child_step.parents.append(self)
+
+    @staticmethod
+    def merge_with(*other_steps: 'ProcessingStep') -> 'ProcessingStep':
+        merged_step = ProcessingStep(name=f"Merged({', '.join(step.name for step in other_steps)})")
+        for step in other_steps:
+            step.children.append(merged_step)
+            merged_step.parents.append(step)
+        return merged_step
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            'ProcessingStep': lambda step: step.to_dict()
+        }
+
+    def to_dict(self, seen=None):
+        if seen is None:
+            seen = set()
+
+        # Avoid circular references by skipping already seen objects
+        if self.id in seen:
+            return {'id': self.id, 'name': self.name}
+
+        seen.add(self.id)
+
+        return {
+            'id': self.id,
+            'name': self.name,
+            'children': [child.to_dict(seen) for child in self.children],
+            'parents': [{'id': parent.id, 'name': parent.name} for parent in self.parents],  # or parent.to_dict(seen) if full structure is needed
+        }
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
+
+    def __repr__(self):
+        return f"Step(id={self.id}, name={self.name})"
+
+
 class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
 
@@ -2383,6 +2432,18 @@ class Document(object):
 
     def get_exceptions(self) -> List[ContentException]:
         return self._persistence_layer.get_exceptions()
+
+    def get_external_data(self) -> dict:
+        return self._persistence_layer.get_external_data()
+
+    def set_external_data(self, external_data:dict):
+        return self._persistence_layer.set_external_data(external_data)
+
+    def get_steps(self) -> list[ProcessingStep]:
+        return self._persistence_layer.get_steps()
+
+    def set_steps(self, steps: list[ProcessingStep]):
+        self._persistence_layer.set_steps(steps)
 
     def replace_exceptions(self, exceptions: List[ContentException]):
         self._persistence_layer.replace_exceptions(exceptions)
