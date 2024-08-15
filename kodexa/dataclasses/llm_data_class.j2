@@ -1,0 +1,21 @@
+from typing import Optional, List
+from kodexa_langchain.data_class import LLMDataAttribute, LLMDataObject
+from kodexa_langchain.llm import deserialize_llm_data
+from kodexa_langchain.document import KodexaDocumentLLMWrapper
+
+{%- for taxon in taxons %}
+
+class {{ taxon_to_class_name(taxon) }}(LLMDataObject):
+
+    {%- for child_taxon in taxon.children %}{%- if child_taxon.group %}
+    {{ taxon_to_property_name(child_taxon) }}: Optional[List[{{ taxon_to_class_name(child_taxon) }}]] = None
+    {%- else %}
+    {{ taxon_to_property_name(child_taxon) }}: Optional[LLMDataAttribute] = LLMDataAttribute(taxon_path='{{ child_taxon.path }}', data_type='{{ child_taxon.taxon_type.title() }}', value_path='{{ child_taxon.value_path.title() }}')
+    {%- endif %}
+    {%- endfor %}
+
+    def __init__(self, data: dict, document: Optional[KodexaDocumentLLMWrapper] = None, group_uuid=None, cell_index: int = 0, taxon=None, extraction_context=None):
+        super().__init__(group_uuid, cell_index)
+        deserialize_llm_data(self, data, document, f'{{ taxon_to_group_path(taxon) }}', group_uuid, taxon, extraction_context)
+
+{%- endfor %}
