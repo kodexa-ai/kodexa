@@ -4,7 +4,7 @@ import pathlib
 import sqlite3
 import tempfile
 import uuid
-from typing import List
+from typing import List, Optional
 
 import msgpack
 
@@ -1230,7 +1230,7 @@ class SimpleObjectCache(object):
         self.next_id = 1
         self.dirty_objs = set()
 
-    def get_obj(self, obj_id):
+    def get_obj(self, obj_id) -> Optional[ContentNode]:
         """
         Get the object with the given ID.
 
@@ -1245,7 +1245,7 @@ class SimpleObjectCache(object):
 
         return None
 
-    def add_obj(self, obj):
+    def add_obj(self, obj: ContentNode):
         """
         Add an object to the cache.
 
@@ -1270,7 +1270,7 @@ class SimpleObjectCache(object):
             if obj.uuid in self.dirty_objs:
                 self.dirty_objs.remove(obj.uuid)
 
-    def get_dirty_objs(self):
+    def get_dirty_objs(self) -> list[ContentNode]:
         """
         Get all dirty objects in the cache.
 
@@ -1395,7 +1395,10 @@ class PersistenceManager(object):
             ContentNode: The node with the given uuid.
         """
         if self.node_cache.get_obj(uuid) is None:
-            self.node_cache.add_obj(self._underlying_persistence.get_node(uuid))
+            node = self._underlying_persistence.get_node(uuid)
+            if node:
+                self.node_cache.add_obj(node)
+                return node
 
         return self.node_cache.get_obj(uuid) # return the cached version
 
