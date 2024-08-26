@@ -133,6 +133,85 @@ class ContentException(dict):
         self.boolean_value = boolean_value
 
 
+class Tag(Dict):
+    """A class to represent the metadata for a label that is applied as a feature on a content node.
+
+    Attributes:
+        start (Optional[int]): The start position (zero indexed) of the content within the node. If None, label is applied to the whole node.
+        end (Optional[int]): The end position (zero indexed) of the content within the node. If None, label is applied to the whole node.
+        value (Optional[str]): A string representing the value that was labelled in the node.
+        data (Optional[Any]): Any data object (JSON serializable) that you wish to associate with the label.
+        uuid (Optional[str]): The UUID for this tag instance. This allows tags that are on different content nodes to be related through the same UUID.
+        confidence (Optional[float]): The confidence of the tag in a range of 0-1.
+        index (Optional[int]): The tag index. This is used to allow us to order tags, and understand the ordering of parent child tag relationships.
+        bbox (Optional[List[int]]): The optional bounding box that can be used if the label is spatial (based on the node as the container).
+        group_uuid (Optional[str]): The UUID of the group that this tag belongs to. This is used to allow us to group tags together.
+        parent_group_uuid (Optional[str]): The UUID of the parent group that this tag belongs to. This is used to allow us to group tags together.
+        cell_index (Optional[int]): The cell index of the cell that this tag belongs to. This is used to allow us to group tags together.
+        note (Optional[str]): A note that can be associated with the tag.
+        status (Optional[str]): The status of the tag. This can be passed to an attribute status during extraction.
+        owner_uri (Optional[str]): The URI of the owner (ie. model://kodexa/narrative:1.0.0 or user://pdodds).
+    """
+
+    """A tag represents the metadata for a label that is applies as a feature on a content node"""
+
+    def __init__(
+            self,
+            start: Optional[int] = None,
+            end: Optional[int] = None,
+            value: Optional[str] = None,
+            uuid: Optional[str] = None,
+            data: Any = None,
+            *args,
+            confidence: Optional[float] = None,
+            group_uuid: Optional[str] = None,
+            parent_group_uuid: Optional[str] = None,
+            cell_index: Optional[int] = None,
+            index: Optional[int] = None,
+            bbox: Optional[List[int]] = None,
+            note: Optional[str] = None,
+            status: Optional[str] = None,
+            owner_uri: Optional[str] = None,
+            is_dirty: Optional[bool] = None,
+            **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        import uuid as uuid_gen
+        self.start: Optional[int] = start
+        """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
+        self.end: Optional[int] = end
+        """The end position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
+        self.value: Optional[str] = value
+        """A string representing the value that was labelled in the node"""
+        self.data: Optional[Any] = data
+        """Any data object (JSON serializable) that you wish to associate with the label"""
+        self.uuid: Optional[str] = uuid or str(uuid_gen.uuid4())
+        """The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID"""
+        self.confidence: Optional[float] = confidence
+        """The confidence of the tag in a range of 0-1"""
+        self.index: Optional[int] = index
+        """The tag index, this is used to allow us to order tags, and understand the ordering of parent child tag relationships"""
+        self.bbox: Optional[List[int]] = bbox
+        """The optional bounding box that can be used if the label is spatial (based on the node as the container)"""
+        self.group_uuid: Optional[str] = group_uuid
+        """The UUID of the group that this tag belongs to, this is used to allow us to group tags together"""
+        self.parent_group_uuid: Optional[str] = parent_group_uuid
+        """The UUID of the parent group that this tag belongs to, this is used to allow us to group tags together"""
+        self.cell_index: Optional[int] = cell_index
+        """The cell index of the cell that this tag belongs to, this is used to allow us to group tags together"""
+        self.note: Optional[str] = note
+        """A note that can be associated with the tag"""
+        self.status: Optional[str] = status
+        """The status of the tag, this can be passed to an attribute status during extraction"""
+        self.owner_uri: Optional[str] = owner_uri
+        """The URI of the owner (ie. model://kodexa/narrative:1.0.0 or user://pdodds)"""
+        self.is_dirty: Optional[bool] = is_dirty
+        """Whether or not the """
+        # Pull the cell index from the data to the tag if we have it in the data
+        if self.cell_index is None:
+            if data and "cell_index" in data:
+                self.cell_index = data["cell_index"]
 
 
 class FindDirection(Enum):
