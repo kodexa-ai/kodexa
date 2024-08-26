@@ -327,7 +327,7 @@ class KodexaPlatform:
             dict: The server information.
         """
         r = requests.get(
-            f"{KodexaPlatform.get_url()}/api",
+            f"{KodexaPlatform.get_url()}/api/overview",
             headers={
                 "x-access-token": KodexaPlatform.get_access_token(),
                 "cf-access-token": os.environ.get("CF_TOKEN", ""),
