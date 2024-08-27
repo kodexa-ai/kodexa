@@ -5451,6 +5451,11 @@ class Taxonomy(ExtensionPackProvided):
         alias="totalTaxons",
         description="The total number of taxons in the taxonomy",
     )
+    external_data_taxonomy_refs: Optional[list[str]] = Field(
+        None,
+        alias="externalDataTaxonomyRefs",
+        description="A list of references to an external data taxonomy",
+    )
 
     def update_paths(self):
         for taxon in self.taxons:
