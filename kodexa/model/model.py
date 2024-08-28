@@ -2373,6 +2373,7 @@ class ProcessingStep(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     metadata: dict = Field(default_factory=lambda: {})
+    presentation_metadata: dict = Field(default_factory=lambda: {}, alias='presentationMetadata')
     children: List['ProcessingStep'] = Field(default_factory=list)
     parents: List['ProcessingStep'] = Field(default_factory=list)
 
@@ -2408,6 +2409,7 @@ class ProcessingStep(BaseModel):
             'id': self.id,
             'name': self.name,
             'metadata': self.metadata,
+            'presentationMetadata': self.presentation_metadata,
             'children': [child.to_dict(seen) for child in self.children],
             'parents': [{'id': parent.id, 'name': parent.name} for parent in self.parents],  # or parent.to_dict(seen) if full structure is needed
         }
