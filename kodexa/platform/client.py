@@ -5340,7 +5340,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
         if additional_metadata is None:
             additional_metadata = {}
 
-        if external_data is None:
+        if external_data is not None:
             additional_metadata["externalData"] = json.dumps(external_data)
 
         if replace and self.client.exists(
