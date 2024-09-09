@@ -5289,6 +5289,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             object_path: Optional[str] = None,
             replace=False,
             additional_metadata: Optional[dict] = None,
+            external_data: Optional[dict] = None,
     ):
         """
         Upload a file to the store.
@@ -5298,6 +5299,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             object_path (Optional[str]): The path to the object (Default is the same the file path).
             replace (bool): Replace the file if it already exists (Default False).
             additional_metadata (Optional[dict]): Additional metadata to add to the file (Default None).
+            external_data (Optional[dict]): External data to add to the file (Default None).
         """
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
@@ -5307,6 +5309,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
                     content=path_content,
                     replace=replace,
                     additional_metadata=additional_metadata,
+                    external_data=external_data
                 )
         else:
             raise Exception(f"{file_path} is not a file")
@@ -5317,6 +5320,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             content,
             replace=False,
             additional_metadata: Optional[dict] = None,
+            external_data: Optional[dict] = None,
     ) -> DocumentFamilyEndpoint:
         """
         Put the content into the store at the given path.
@@ -5326,6 +5330,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             content: The content for that object.
             replace (bool): Replace the content if it exists.
             additional_metadata (Optional[dict]): Additional metadata to store with the document (not it can't include 'path').
+            external_data (Optional[dict]): External data to store with the document.
 
         Returns:
             DocumentFamilyEndpoint: The document family that was created.
@@ -5334,6 +5339,9 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         if additional_metadata is None:
             additional_metadata = {}
+
+        if external_data is None:
+            additional_metadata["externalData"] = json.dumps(external_data)
 
         if replace and self.client.exists(
                 f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
