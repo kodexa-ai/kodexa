@@ -4466,7 +4466,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         """
         url = f"/api/documentFamilies/{self.id}/externalData"
         response = self.client.get(url)
-        return DocumentExternalData.model_validate(response.json())
+        return response.json()
 
     def update_external_data(self, external_data: DocumentExternalData):
         """
