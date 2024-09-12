@@ -1,7 +1,6 @@
 import logging
 import os
 import uuid
-from importlib.machinery import SourceFileLoader
 from typing import Optional, List
 
 import jinja2
@@ -77,17 +76,6 @@ class LLMDataObject(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-
-    def __init__(self, group_uuid: str = None, cell_index: int = 0):
-        """
-        Initializes the LLMDataObject
-        """
-        super().__init__()
-        self.cell_index = cell_index
-        if group_uuid is None:
-            self.group_uuid = str(uuid.uuid4())
-        else:
-            self.group_uuid = group_uuid
 
     def get_all_review_pages(self):
         """
