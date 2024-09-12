@@ -4,13 +4,12 @@ import uuid
 from typing import Optional, List
 
 import jinja2
+from kodexa import ContentNode
+from kodexa.model.model import Tag, Document
+from kodexa.model.objects import ContentException, Taxon, Taxonomy, Assistant
 from pydantic import BaseModel
 
-from kodexa import ContentNode
-from kodexa.model.model import Tag
-from kodexa.model.objects import ContentException, Taxon, Taxonomy, Assistant
-from kodexa.utils import taxon_to_property_name, taxon_to_class_name, taxon_to_group_path, snake_to_camel, \
-    to_snake
+from kodexa.utils import snake_to_camel, to_snake, taxon_to_property_name, taxon_to_class_name, taxon_to_group_path
 
 logger = logging.getLogger()
 
@@ -30,6 +29,7 @@ class LLMDataAttribute(BaseModel):
     normalized_text: Optional[str] = None
     node_uuid_list: Optional[List[int]] = None
     tag_uuid: Optional[str] = None
+    page_number: Optional[int] = None
     exceptions: Optional[list[ContentException]] = None
 
     def create_exception(
@@ -77,16 +77,99 @@ class LLMDataObject(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, group_uuid: str = None, cell_index: int = 0):
+    def get_all_review_pages(self):
         """
-        Initializes the LLMDataObject
+        Returns a list of unique page numbers that would be included in the review.
+
+        :return: list of unique page numbers
         """
-        super().__init__()
-        self.cell_index = cell_index
-        if group_uuid is None:
-            self.group_uuid = str(uuid.uuid4())
-        else:
-            self.group_uuid = group_uuid
+        pages = set()
+        for field in self.__fields__:
+            pages.update(self._get_field_pages(field))
+        return sorted(list(pages))
+
+    def _get_field_pages(self, field):
+        if isinstance(getattr(self, field), list):
+            pages = set()
+            for item in getattr(self, field):
+
+                if isinstance(item, LLMDataObject):
+                    pages.update(item.get_all_review_pages())
+            return pages
+        elif isinstance(getattr(self, field), LLMDataAttribute):
+            if getattr(self, field).value != getattr(self, field).normalized_text:
+                return {getattr(self, field).page_number}
+        elif isinstance(getattr(self, field), LLMDataObject):
+            return getattr(self, field).get_all_review_pages()
+        return set()
+
+    def update_from_review(self, review_dict):
+        """
+        Update the node UUIDs and value based on the provided review dictionary.
+
+        :param review_dict: A dictionary containing the updated review information
+        """
+        for field, field_data in review_dict.items():
+            self._update_field_review(field, field_data)
+
+    def _update_field_review(self, field, field_data):
+        if isinstance(field_data, list):
+            for i, item_data in enumerate(field_data):
+                if i < len(getattr(self, field)):
+                    getattr(self, field)[i].update_from_review(item_data)
+        elif isinstance(field_data, dict):
+            if isinstance(getattr(self, field), LLMDataAttribute):
+                self._update_data_attribute(field, field_data)
+            elif isinstance(getattr(self, field), LLMDataObject):
+                getattr(self, field).update_from_review(field_data)
+
+    def _update_data_attribute(self, field, field_data):
+        attr = getattr(self, field)
+        if 'value' in field_data:
+            attr.value = field_data['value']
+        if 'node_uuids' in field_data:
+            attr.node_uuid_list = field_data['node_uuids']
+        if 'normalized_text' in field_data:
+            attr.normalized_text = field_data['normalized_text']
+
+    def to_review(self, page_number=None):
+        """
+        Build a representation of the data object and its data attributes that is a dict that includes the
+        value, normalized text and node UUIDs so we can use this to review mismatched value/normalized
+        with the LLM for a specific page number.
+
+        :param page_number: Optional page number to filter the review items
+        :return: dict of this data object and children for the specified page
+        """
+        review = {}
+        for field in self.__fields__:
+            review_field = self._build_review(field, page_number)
+            if review_field:
+                review[field] = review_field
+        return review
+
+    def _build_review(self, field, page_number=None):
+        if isinstance(getattr(self, field), list):
+            review_field = []
+            for item in getattr(self, field):
+                if isinstance(item, LLMDataObject):
+                    new_review = item.to_review(page_number)
+                    if new_review:
+                        review_field.append(new_review)
+            return review_field if review_field else None
+        elif isinstance(getattr(self, field), LLMDataAttribute):
+            if getattr(self, field).value != getattr(self, field).normalized_text:
+                if page_number is None or getattr(self, field).page_number == page_number:
+                    return {
+                        "value": getattr(self, field).value,
+                        "normalized_text": getattr(self, field).normalized_text,
+                        "node_uuids": getattr(self, field).node_uuid_list,
+                        "page_number": getattr(self, field).page_number,
+                    }
+        elif isinstance(getattr(self, field), LLMDataObject):
+            return getattr(self, field).to_review(page_number)
+
+        return None
 
     def create_exception(
             self,
@@ -215,6 +298,25 @@ class LLMDataObject(BaseModel):
                         current_value.append(new_tag)
                         node.remove_feature("tag", tag)
                         node.add_feature("tag", tag, current_value, single=False)
+                        # try:
+                        #     if value.data_type == 'Derived':
+                        #         logger.info(f"Node already has tag {tag} - Tagging something nearby {node.get_all_content()}")
+                        #         nearby_node = find_nearby_word_to_tag(node, tag)
+                        #         nearby_node.tag(
+                        #             tag_to_apply=tag,
+                        #             value=value.normalized_text,
+                        #             tag_uuid=tag_uuid,
+                        #             cell_index=self.cell_index,
+                        #             selector="//word",
+                        #             confidence=-1,
+                        #             group_uuid=self.group_uuid,
+                        #             parent_group_uuid=parent_group_uuid,
+                        #             owner_uri=f"assistant://{assistant.id}" if assistant else f"model://taxonomy-llm",
+                        #         )
+                        #     else:
+                        #         logger.info(f"Node already has tag {tag} - Skipping.")
+                        # except:
+                        #     logger.error(f"Error tagging nearby node with tag {tag}")
 
             logger.info(f"Applied label {tag} to {len(nodes_to_label)} nodes")
         if isinstance(value, LLMDataObject):
@@ -249,7 +351,8 @@ def get_template_env():
     Returns:
 
     """
-    package_location = os.path.dirname(os.path.abspath(__file__))
+    cli_path = os.path.dirname(os.path.abspath(__file__))
+    package_location = os.path.join(cli_path, "templates")
     template_loader = jinja2.FileSystemLoader([os.getcwd(), package_location])
     env = jinja2.Environment(loader=template_loader, autoescape=True)
     env.globals["snake_to_camel"] = snake_to_camel
