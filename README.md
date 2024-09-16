@@ -32,7 +32,7 @@ working with a Kodexa platform instance.
 
 ## Documentation & Examples
 
-Documentation is available at the [Kodexa Documentation Portal](https://docs.kodexa.com)
+Documentation is available at the [Kodexa Support Portal](https://support.kodexa.ai)
 
 ## Set-up
 
