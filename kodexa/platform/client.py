@@ -3946,6 +3946,18 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
             params={"format": "xsd"},
         ).text
 
+    def to_json_schema(self) -> dict:
+        """
+        Convert the taxonomy to an XSD.
+
+        Returns:
+            str: The XSD representation of the taxonomy.
+        """
+        return self.client.get(
+            f'/api/taxonomies/{self.ref.replace(":", "/")}/export',
+            params={"format": "json-schema"},
+        ).json()
+
     def get_taxon_by_path(self, path) -> Optional[Taxon]:
         """
         Get a taxon by its path.
