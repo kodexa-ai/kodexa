@@ -1507,7 +1507,7 @@ class ProjectMetadata(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    tags: Optional[List[str]] = Field(default_factory=list, set=True)
+    tags: Optional[List[str]] = Field(default_factory=list)
 
 
 class State1(Enum):
@@ -2540,6 +2540,17 @@ class TaxonGuideProperties(BaseModel):
     guidance_key: Optional[bool] = Field(None, alias="guidanceKey")
 
 
+
+class TaxonRule(BaseModel):
+
+    name: Optional[str] = None
+    description: Optional[str] = None
+    rule_formula: Optional[str] = None
+    message_formula: Optional[str] = None
+    detail_formula: Optional[str] = None
+    exception_id: Optional[str] = None
+
+
 class Taxon(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -2645,7 +2656,7 @@ class Taxon(BaseModel):
         description="A list of the node types that this taxon applies to (empty means everything), used in the UI",
     )
     taxon_type: Optional[TaxonType] = Field(
-        TaxonType.STRING,
+        TaxonType.string,
         alias="taxonType",
         description="Expected data type to coalesce to (defaults to STRING)",
     )
