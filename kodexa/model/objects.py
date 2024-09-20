@@ -2530,19 +2530,23 @@ class TaxonCardinality(Enum):
     multiple_per_segment = "MULTIPLE_PER_SEGMENT"
 
 
-class Taxon(BaseModel):
-    """
+class TaxonAdditionContext(BaseModel):
+    context: Optional[str] = None
+    weight: Optional[float] = None
+    negative: Optional[bool] = None
 
-    """
+
+class TaxonGuideProperties(BaseModel):
+    guidance_key: Optional[bool] = Field(None, alias="guidanceKey")
+
+
+class Taxon(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    """
-    A taxon is an individual label within a taxonomy
-    """
 
     id: Optional[str] = Field(None, description="The ID of the taxon")
     label: Optional[str] = Field(None, description="The text to display for this taxon")
@@ -2557,6 +2561,11 @@ class Taxon(BaseModel):
     )
     name: str = Field(
         ..., description="The name to be used", pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
+    )
+    select_weight: Optional[int] = Field(
+        1,
+        alias="selectWeight",
+        description="The weight of this taxon, used to order the taxon for the user labeling (default is 1)",
     )
     external_name: Optional[str] = Field(
         None,
@@ -2600,101 +2609,140 @@ class Taxon(BaseModel):
         alias="nullValue",
         description="Allows the setting of a value to replace null if the taxon is nullable",
     )
+    denormalize_to_children: Optional[bool] = Field(
+        False,
+        alias="denormalizeToChildren",
+        description="Denormalize the value of the taxon into child data groups when we are looking to 'flatten' the data",
+    )
+    not_user_labelled: Optional[bool] = Field(
+        False,
+        alias="notUserLabelled",
+        description="If set to true this taxon will not be shown to the user for labeling",
+    )
     description: Optional[str] = Field(None, description="The description of the taxon")
-    overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
+    overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown", description="Overview for the taxon (supports markdown)")
+    semantic_definition: Optional[str] = Field(None, alias="semanticDefinition", description="Semantic Definition")
+    examples: Optional[List[GuidanceTagResult]] = Field(None, description="Example values")
+    synonyms: Optional[List[str]] = Field(None, description="Synonyms")
+    addition_contexts: Optional[List[TaxonAdditionContext]] = Field([], alias="additionContexts", description="Additional Context")
+    guide_properties: Optional[TaxonGuideProperties] = Field(None, alias="guideProperties", description="Guidance Properties")
     enabled: Optional[bool] = Field(
-        None, description="Is the taxon enabled (used in the UI)"
+        True, description="Is the taxon enabled (used in the UI)"
     )
     color: Optional[str] = Field(
         None, description="Hex encoding of the color to use for the taxon"
     )
-    children: Optional[List[Taxon]] = Field(
-        None, description="The children under this taxon"
+    children: Optional[List['Taxon']] = Field(
+        [], description="The children under this taxon"
     )
     options: Optional[List[Option]] = Field(
-        None,
+        [],
         description="Options that can be shown for the taxon (usually used in assistant taxonomies)",
     )
-    related_taxons: Optional[List[RelatedTaxon]] = Field(
-        None,
-        alias="relatedTaxons",
-        description="A list of relationships to other taxons and the purpose of the relationship",
-    )
     node_types: Optional[List[str]] = Field(
-        None,
+        [],
         alias="nodeTypes",
         description="A list of the node types that this taxon applies to (empty means everything), used in the UI",
     )
     taxon_type: Optional[TaxonType] = Field(
-        None,
+        TaxonType.STRING,
         alias="taxonType",
         description="Expected data type to coalesce to (defaults to STRING)",
     )
     selection_options: Optional[List[SelectionOption]] = Field(
-        None,
+        [],
         alias="selectionOptions",
         description="If data type is SELECTION, this is the list of available options",
     )
     type_features: Optional[Dict[str, Any]] = Field(
-        None,
+        {},
         alias="typeFeatures",
         description="Additional features for the type handling",
     )
+    properties: Optional[Dict[str, Any]] = Field(
+        {},
+        description="Additional properties that can be set and used by models or assistants based on the additional taxon options",
+    )
+    conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(
+        [],
+        alias="conditionalFormats",
+        description="The conditional formats for the taxon",
+    )
+    rules: Optional[List[TaxonRule]] = Field(
+        [],
+        description="The conditional formats for the taxon",
+    )
+    cardinality: Optional[TaxonCardinality] = Field(
+        None,
+        description="The cardinality of the taxon, applies to a group taxon",
+    )
     path: Optional[str] = Field(None, description="The path to the node")
     multi_value: Optional[bool] = Field(
-        None, alias="multiValue", description="Does this taxon allow multiple values"
+        True, alias="multiValue", description="Does this taxon allow multiple values (for none-group)"
     )
     user_editable: Optional[bool] = Field(
-        None,
+        True,
         alias="userEditable",
         description="Can the value of this taxon be edited by a user",
     )
-    denormalize_to_children: Optional[bool] = Field(
-        None,
-        alias="denormalizeToChildren",
-        description="Should the value of this taxon be denormalized to the children",
-    )
-    not_user_labelled: Optional[bool] = Field(
-        None,
-        alias="notUserLabelled",
-        description="The taxon is not user labelled",
-    )
     use_post_expression: Optional[bool] = Field(
-        None, alias="usePostExpression", description="Use a post extraction expression"
+        False, alias="usePostExpression", description="Use a post extraction expression"
     )
     post_expression: Optional[str] = Field(
         None,
         alias="postExpression",
         description="An expression that is applied post extraction of the data",
     )
-    semantic_definition: Optional[str] = Field(
-        None,
-        alias="semanticDefinition",
-        description="The semantic definition of the taxon",
-    )
-    examples: Optional[List[GuidanceTagResult]] = Field(
-        None,
-        description="A list of examples of the taxon values, used to understand the taxon",
-    )
 
-    synonyms: Optional[List[str]] = Field(
-        None,
-        description="A list of synonyms of the taxon values, used to understand the taxon",
-    )
-
-    cardinality: Optional[TaxonCardinality] = None
-
-    conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(None, alias="conditionalFormats")
-
-    checklist_definitions: Optional[List[ChecklistDefinition]] = Field(None, alias="checklistDefinitions")
-
-    def update_path(self, parent_path=None):
-        if parent_path is None:
-            parent_path = ""
-        self.path = parent_path + self.name
-        if self.children is not None:
+    def update_path(self, parent_path=""):
+        self.path = parent_path + "/" + self.name if parent_path else self.name
+        if self.children:
             for child in self.children:
-                child.update_path(self.path + "/")
+                child.update_path(self.path)
+
+    def find_taxon(self, *path_parts):
+        if not path_parts:
+            return None
+        if self.name == path_parts[0] and len(path_parts) == 1:
+            return self
+        else:
+            remaining_parts = path_parts[1:]
+            for child in self.children:
+                hit = child.find_taxon(*remaining_parts)
+                if hit:
+                    return hit
+        return None
+
+    def groups(self):
+        groups = []
+        if self.group:
+            groups.append(self)
+        for child in self.children:
+            groups.extend(child.groups())
+        return groups
+
+    def all_groups(self):
+        groups = []
+        if self.group:
+            groups.append(self)
+        for child in self.children:
+            groups.extend(child.all_groups())
+        return groups
+
+    def get_simplified_structure(self):
+        structure = {
+            "label": self.label,
+            "description": self.description,
+        }
+        if self.group:
+            structure["group"] = True
+            structure["path"] = self.path
+            structure["children"] = [child.get_simplified_structure() for child in self.children]
+        else:
+            structure["group"] = False
+            structure["tag"] = self.name
+            structure["taxonType"] = self.taxon_type
+        return structure
 
 
 class ContentObject(BaseModel):
