@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from typing import Union
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
-
+from typing import Optional, List, Dict, Any
 from pydantic import AnyUrl, Field, RootModel, BaseModel, ConfigDict
 
 from kodexa.model.base import StandardDateTime
@@ -988,7 +988,6 @@ class ValuePath(Enum):
     formula = "FORMULA"
     review = "REVIEW"
     external = "EXTERNAL"
-
 
 
 class MetadataValue(Enum):
@@ -2510,24 +2509,43 @@ class ProjectAssistant(BaseModel):
     assistant_role: Optional[str] = Field(None, alias="assistantRole")
 
 
-class TaxonConditionalFormat(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
+class LexicalRelationType(Enum):
+    SYNONYM = "SYNONYM"
+    ANTONYM = "ANTONYM"
+    HYPERNYM = "HYPERNYM"
+    HYPONYM = "HYPONYM"
+    MERONYM = "MERONYM"
+    HOLONYM = "HOLONYM"
+    ENTAILMENT = "ENTAILMENT"
+    SIMILAR_TO = "SIMILAR_TO"
+    OTHER = "OTHER"
 
-    type: Optional[str] = None
-    condition: Optional[str] = None
-    properties: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
+class LexicalRelation(BaseModel):
+    type: Optional[LexicalRelationType] = None
+    words: Optional[str] = None
+    weight: Optional[float] = None
+
+
+class TaxonValuePath(Enum):
+    VALUE_OR_ALL_CONTENT = "VALUE_OR_ALL_CONTENT"
+    VALUE_ONLY = "VALUE_ONLY"
+    ALL_CONTENT = "ALL_CONTENT"
+    DATA_PATH = "DATA_PATH"
+    METADATA = "METADATA"
+    EXPRESSION = "EXPRESSION"
+    SCRIPT = "SCRIPT"
+    FORMULA = "FORMULA"
+    DERIVED = "DERIVED"
+    REVIEW = "REVIEW"
+    EXTERNAL = "EXTERNAL"
 
 
 class TaxonCardinality(Enum):
-    once_per_document = "ONCE_PER_DOCUMENT"
-    multiple_per_document = "MULTIPLE_PER_DOCUMENT"
-    once_per_segment = "ONCE_PER_SEGMENT"
-    multiple_per_segment = "MULTIPLE_PER_SEGMENT"
+    ONCE_PER_DOCUMENT = "ONCE_PER_DOCUMENT"
+    MULTIPLE_PER_DOCUMENT = "MULTIPLE_PER_DOCUMENT"
+    ONCE_PER_SEGMENT = "ONCE_PER_SEGMENT"
+    MULTIPLE_PER_SEGMENT = "MULTIPLE_PER_SEGMENT"
 
 
 class TaxonAdditionContext(BaseModel):
@@ -2540,9 +2558,13 @@ class TaxonGuideProperties(BaseModel):
     guidance_key: Optional[bool] = Field(None, alias="guidanceKey")
 
 
+class TaxonConditionalFormat(BaseModel):
+    type: Optional[str] = None
+    condition: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
 
 class TaxonRule(BaseModel):
-
     name: Optional[str] = None
     description: Optional[str] = None
     rule_formula: Optional[str] = None
@@ -2559,151 +2581,48 @@ class Taxon(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    id: Optional[str] = Field(None, description="The ID of the taxon")
-    label: Optional[str] = Field(None, description="The text to display for this taxon")
-    generate_name: Optional[bool] = Field(
-        None,
-        alias="generateName",
-        description="Is the name generated, this allows that you can change displays without impacted existing content",
-    )
-    group: Optional[bool] = Field(
-        None,
-        description="Is this taxon a group, and therefore can't have a value, can only have children",
-    )
-    name: str = Field(
-        ..., description="The name to be used", pattern=r"^[a-zA-Z0-9\-_]{0,255}$"
-    )
-    select_weight: Optional[int] = Field(
-        1,
-        alias="selectWeight",
-        description="The weight of this taxon, used to order the taxon for the user labeling (default is 1)",
-    )
-    external_name: Optional[str] = Field(
-        None,
-        alias="externalName",
-        description="The name to be used when we are publishing this taxon to external systems",
-    )
-    value_path: Optional[ValuePath] = Field(
-        None,
-        alias="valuePath",
-        description="Where to get the value for this taxon when extracting",
-    )
-    metadata_value: Optional[MetadataValue] = Field(
-        None,
-        alias="metadataValue",
-        description="If the type is metadata this will be the metadata option",
-    )
-    data_path: Optional[str] = Field(
-        None,
-        alias="dataPath",
-        description="The path to the data, based on the data inside the label (tag) within the document",
-    )
-    expression: Optional[str] = Field(
-        None,
-        description="If the taxon is based on expression, this is the expression based on the available objects",
-    )
-    enable_fallback_expression: Optional[bool] = Field(
-        None,
-        alias="enableFallbackExpression",
-        description="Allow for the use of a fallback expression if the taxon wasn't found",
-    )
-    fallback_expression: Optional[str] = Field(
-        None,
-        alias="fallbackExpression",
-        description="Fallback expression if enabled, this is the expression based on the available objects",
-    )
-    nullable: Optional[bool] = Field(
-        None, description="Determine if the value of the taxon can be null (unknown)"
-    )
-    null_value: Optional[str] = Field(
-        None,
-        alias="nullValue",
-        description="Allows the setting of a value to replace null if the taxon is nullable",
-    )
-    denormalize_to_children: Optional[bool] = Field(
-        False,
-        alias="denormalizeToChildren",
-        description="Denormalize the value of the taxon into child data groups when we are looking to 'flatten' the data",
-    )
-    not_user_labelled: Optional[bool] = Field(
-        False,
-        alias="notUserLabelled",
-        description="If set to true this taxon will not be shown to the user for labeling",
-    )
-    description: Optional[str] = Field(None, description="The description of the taxon")
-    overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown", description="Overview for the taxon (supports markdown)")
-    semantic_definition: Optional[str] = Field(None, alias="semanticDefinition", description="Semantic Definition")
-    examples: Optional[List[GuidanceTagResult]] = Field(None, description="Example values")
-    synonyms: Optional[List[str]] = Field(None, description="Synonyms")
-    addition_contexts: Optional[List[TaxonAdditionContext]] = Field([], alias="additionContexts", description="Additional Context")
-    guide_properties: Optional[TaxonGuideProperties] = Field(None, alias="guideProperties", description="Guidance Properties")
-    enabled: Optional[bool] = Field(
-        True, description="Is the taxon enabled (used in the UI)"
-    )
-    color: Optional[str] = Field(
-        None, description="Hex encoding of the color to use for the taxon"
-    )
-    children: Optional[List['Taxon']] = Field(
-        [], description="The children under this taxon"
-    )
-    options: Optional[List[Option]] = Field(
-        [],
-        description="Options that can be shown for the taxon (usually used in assistant taxonomies)",
-    )
-    node_types: Optional[List[str]] = Field(
-        [],
-        alias="nodeTypes",
-        description="A list of the node types that this taxon applies to (empty means everything), used in the UI",
-    )
-    taxon_type: Optional[TaxonType] = Field(
-        TaxonType.string,
-        alias="taxonType",
-        description="Expected data type to coalesce to (defaults to STRING)",
-    )
-    selection_options: Optional[List[SelectionOption]] = Field(
-        [],
-        alias="selectionOptions",
-        description="If data type is SELECTION, this is the list of available options",
-    )
-    type_features: Optional[Dict[str, Any]] = Field(
-        {},
-        alias="typeFeatures",
-        description="Additional features for the type handling",
-    )
-    properties: Optional[Dict[str, Any]] = Field(
-        {},
-        description="Additional properties that can be set and used by models or assistants based on the additional taxon options",
-    )
-    conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(
-        [],
-        alias="conditionalFormats",
-        description="The conditional formats for the taxon",
-    )
-    rules: Optional[List[TaxonRule]] = Field(
-        [],
-        description="The conditional formats for the taxon",
-    )
-    cardinality: Optional[TaxonCardinality] = Field(
-        None,
-        description="The cardinality of the taxon, applies to a group taxon",
-    )
-    path: Optional[str] = Field(None, description="The path to the node")
-    multi_value: Optional[bool] = Field(
-        True, alias="multiValue", description="Does this taxon allow multiple values (for none-group)"
-    )
-    user_editable: Optional[bool] = Field(
-        True,
-        alias="userEditable",
-        description="Can the value of this taxon be edited by a user",
-    )
-    use_post_expression: Optional[bool] = Field(
-        False, alias="usePostExpression", description="Use a post extraction expression"
-    )
-    post_expression: Optional[str] = Field(
-        None,
-        alias="postExpression",
-        description="An expression that is applied post extraction of the data",
-    )
+    id: Optional[str] = None
+    label: Optional[str] = None
+    generate_name: Optional[bool] = Field(None, alias="generateName")
+    group: Optional[bool] = None
+    name: str = Field(..., pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
+    select_weight: Optional[int] = Field(1, alias="selectWeight")
+    external_name: Optional[str] = Field(None, alias="externalName")
+    value_path: Optional[TaxonValuePath] = Field(None, alias="valuePath")
+    metadata_value: Optional[MetadataValue] = Field(None, alias="metadataValue")
+    data_path: Optional[str] = Field(None, alias="dataPath")
+    expression: Optional[str] = None
+    enable_fallback_expression: Optional[bool] = Field(None, alias="enableFallbackExpression")
+    fallback_expression: Optional[str] = Field(None, alias="fallbackExpression")
+    nullable: Optional[bool] = None
+    null_value: Optional[str] = Field(None, alias="nullValue")
+    denormalize_to_children: Optional[bool] = Field(False, alias="denormalizeToChildren")
+    not_user_labelled: Optional[bool] = Field(False, alias="notUserLabelled")
+    description: Optional[str] = None
+    overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
+    semantic_definition: Optional[str] = Field(None, alias="semanticDefinition")
+    synonyms: Optional[List[str]] = None
+    lexical_relations: Optional[List[LexicalRelation]] = None
+    addition_contexts: Optional[List[TaxonAdditionContext]] = Field([], alias="additionContexts")
+    guide_properties: Optional[TaxonGuideProperties] = Field(None, alias="guideProperties")
+    enabled: Optional[bool] = True
+    color: Optional[str] = None
+    children: Optional[List['Taxon']] = Field(default_factory=list)
+    options: Optional[List[Any]] = Field(default_factory=list)
+    node_types: Optional[List[str]] = Field(default_factory=list, alias="nodeTypes")
+    taxon_type: Optional[TaxonType] = Field(TaxonType.STRING, alias="taxonType")
+    selection_options: Optional[List[SelectionOption]] = Field(default_factory=list, alias="selectionOptions")
+    type_features: Optional[Dict[str, Any]] = Field(default_factory=dict, alias="typeFeatures")
+    properties: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(default_factory=list,
+                                                                        alias="conditionalFormats")
+    rules: Optional[List[TaxonRule]] = Field(default_factory=list)
+    cardinality: Optional[TaxonCardinality] = None
+    path: Optional[str] = None
+    multi_value: Optional[bool] = Field(True, alias="multiValue")
+    user_editable: Optional[bool] = Field(True, alias="userEditable")
+    use_post_expression: Optional[bool] = Field(False, alias="usePostExpression")
+    post_expression: Optional[str] = Field(None, alias="postExpression")
 
     def update_path(self, parent_path=""):
         self.path = parent_path + "/" + self.name if parent_path else self.name
