@@ -4409,11 +4409,11 @@ class Guidance(BaseModel):
     guidance_type: Optional[str] = Field(None, alias="guidanceType")
     taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
     document_name: Optional[str] = Field(None, alias="documentName")
+    document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
     document_type: Optional[str] = Field(None, alias="documentType")
     document_page: Optional[int] = Field(None, alias="documentPage")
-    sample_text: Optional[str] = Field(None, alias="sampleText")
-    sample_result: Optional[Dict[str, List[GuidanceTagResult]]] = Field(None, alias="sampleResult")
-    section_markers: Optional[List[GuidanceTagResult]] = Field(None, alias="sectionMarkers")
+    guidance_text: Optional[str] = Field(None, alias="guidanceText")
+    guidance_response: Optional[dict] = Field(None, alias="guidanceResponse")
     active: Optional[bool] = None
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
     priority: Optional[int] = 1
