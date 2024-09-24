@@ -4469,7 +4469,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         response = self.client.get(url)
         process_response(response)
 
-    def get_external_data(self) -> DocumentExternalData:
+    def get_external_data(self) -> dict:
         """
         Get the external data of the document family.
 
