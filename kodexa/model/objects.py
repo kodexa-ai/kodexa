@@ -2610,7 +2610,7 @@ class Taxon(BaseModel):
     children: Optional[List['Taxon']] = Field(default_factory=list)
     options: Optional[List[Any]] = Field(default_factory=list)
     node_types: Optional[List[str]] = Field(default_factory=list, alias="nodeTypes")
-    taxon_type: Optional[TaxonType] = Field(TaxonType.STRING, alias="taxonType")
+    taxon_type: Optional[TaxonType] = Field("STRING", alias="taxonType")
     selection_options: Optional[List[SelectionOption]] = Field(default_factory=list, alias="selectionOptions")
     type_features: Optional[Dict[str, Any]] = Field(default_factory=dict, alias="typeFeatures")
     properties: Optional[Dict[str, Any]] = Field(default_factory=dict)
