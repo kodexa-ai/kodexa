@@ -2523,7 +2523,7 @@ class LexicalRelationType(Enum):
 
 class LexicalRelation(BaseModel):
     type: Optional[LexicalRelationType] = None
-    words: Optional[str] = None
+    value: Optional[str] = None
     weight: Optional[float] = None
 
 
