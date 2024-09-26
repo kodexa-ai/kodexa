@@ -820,6 +820,7 @@ class SelectionOption(BaseModel):
     label: Optional[str] = None
     id: Optional[str] = None
     description: Optional[str] = None
+    lexical_relations: Optional[List[LexicalRelation]] = Field([], alias="lexicalRelations")
 
 
 class SlugBasedMetadata1(BaseModel):
@@ -2602,7 +2603,7 @@ class Taxon(BaseModel):
     overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
     semantic_definition: Optional[str] = Field(None, alias="semanticDefinition")
     synonyms: Optional[List[str]] = None
-    lexical_relations: Optional[List[LexicalRelation]] = None
+    lexical_relations: Optional[List[LexicalRelation]] = Field([], alias="lexicalRelations")
     addition_contexts: Optional[List[TaxonAdditionContext]] = Field([], alias="additionContexts")
     guide_properties: Optional[TaxonGuideProperties] = Field(None, alias="guideProperties")
     enabled: Optional[bool] = True
