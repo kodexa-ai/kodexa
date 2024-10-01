@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, Set
 from enum import Enum
 from typing import Optional, List, Dict, Any
 from pydantic import AnyUrl, Field, RootModel, BaseModel, ConfigDict
@@ -2548,9 +2548,16 @@ class TaxonCardinality(Enum):
     ONCE_PER_SEGMENT = "ONCE_PER_SEGMENT"
     MULTIPLE_PER_SEGMENT = "MULTIPLE_PER_SEGMENT"
 
+class TaxonAdditionContextType(str, Enum):
+    RECORD_DEFINITION = "RECORD_DEFINITION"
+    RECORD_SECTION_STARTER_MARKER = "RECORD_SECTION_STARTER_MARKER"
+    RECORD_SECTION_END_MARKER = "RECORD_SECTION_END_MARKER"
+    RECORD_START_MARKER = "RECORD_START_MARKER"
+    RECORD_END_MARKER = "RECORD_END_MARKER"
 
 class TaxonAdditionContext(BaseModel):
-    context: Optional[str] = None
+    type: TaxonAdditionContextType
+    context: str
     weight: Optional[float] = None
     negative: Optional[bool] = None
 
@@ -2861,6 +2868,62 @@ class Project(BaseModel):
     status: Optional[ProjectStatus] = None
     owner: Optional[User] = None
     options: Optional[ProjectOptions] = Field(None, alias="options")
+
+
+class TaskStatus(str, Enum):
+    TODO = "TODO"
+    IN_PROGRESS = "IN_PROGRESS"
+    DONE = "DONE"
+
+
+class TaskCheckItem(BaseModel):
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    name: str
+    description: Optional[str] = None
+    taxon_path: Optional[str] = Field(None, alias="taxonPath")
+    taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
+
+
+class TaskMetadata(BaseModel):
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    field_values: Dict[str, Any] = Field(default_factory=dict)
+    fields: List[Option] = Field(default_factory=list)
+    check_items: List[TaskCheckItem] = Field(default_factory=list)
+    document_store_ref: Optional[str] = None
+
+
+class Task(BaseModel):
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    project: Optional['Project'] = Field(None)
+    title: Optional[str] = Field(None)
+    template: Optional[bool] = Field(None)
+    description: Optional[str] = Field(None)
+    metadata: Optional['TaskMetadata'] = Field(None)
+    due_date: Optional[StandardDateTime] = Field(None, alias="dueDate")
+    completed_date: Optional[StandardDateTime] = Field(None, alias="completedDate")
+    status: Optional['TaskStatus'] = Field(None)
+    assignee: Optional['User'] = Field(None)
 
 
 class FeatureSet(BaseModel):
