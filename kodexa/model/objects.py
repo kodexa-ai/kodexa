@@ -2564,6 +2564,8 @@ class TaxonAdditionContext(BaseModel):
 
 class TaxonGuideProperties(BaseModel):
     guidance_key: Optional[bool] = Field(None, alias="guidanceKey")
+    guidance_key_expression: Optional[str] = Field(None, alias="guidanceKeyExpression")
+    use_guidance_for_classification: Optional[bool] = Field(None, alias="useGuidanceForClassification")
 
 
 class TaxonConditionalFormat(BaseModel):
