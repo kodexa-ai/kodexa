@@ -86,7 +86,7 @@ from kodexa.model.objects import (
     PageExtensionPack,
     PageOrganization,
     DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
-    DocumentExternalData,
+    DocumentExternalData, Task, PageTask,
 )
 
 logger = logging.getLogger()
@@ -1171,6 +1171,11 @@ class PagePipelineEndpoint(PagePipeline, PageEndpoint):
             Optional[str]: The type of the endpoint. Returns "pipeline" for this class.
         """
         return "pipeline"
+
+
+class PageTaskEndpoint(PageTask, PageEndpoint):
+    def get_type(self) -> Optional[str]:
+        return "task"
 
 
 class PageProjectEndpoint(PageProject, PageEndpoint):
@@ -2516,15 +2521,25 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
         else:
             raise ValueError("Workspace has no channel")
 
+class TaskEndpoint(EntityEndpoint, Task):
+    """Represents a task endpoint.
+
+    This class is used to interact with the task endpoint of the API.
+    """
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "projects".
+        """
+        return "tasks"
+
 
 class ProjectEndpoint(EntityEndpoint, Project):
     """Represents a project endpoint.
 
     This class is used to interact with the project endpoint of the API.
     """
-
-    """Represents a project endpoint"""
-
     def get_type(self) -> str:
         """Get the type of the endpoint.
 
@@ -2847,6 +2862,39 @@ class AssistantsEndpoint(EntitiesEndpoint):
             PageAssistantEndpoint: The page class of the endpoint.
         """
         return PageAssistantEndpoint
+
+
+class TasksEndpoint(EntitiesEndpoint):
+    """Represents a projects endpoint"""
+
+    """Represents a projects endpoint"""
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "tasks"
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Returns:
+            ProjectEndpoint: The instance class of the endpoint.
+        """
+        return TaskEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Returns:
+            PageProjectEndpoint: The page class of the endpoint.
+        """
+        return PageTaskEndpoint
 
 
 class ProjectsEndpoint(EntitiesEndpoint):
@@ -6374,6 +6422,7 @@ class KodexaClient:
         self.messages = MessagesEndpoint(self)
         from kodexa.model.entities.product import ProductsEndpoint
         self.products = ProductsEndpoint(self)
+        self.tasks = TasksEndpoint(self)
 
     @staticmethod
     def login(url, token):
@@ -6969,6 +7018,7 @@ class KodexaClient:
                 "guidance": GuidanceSetEndpoint,
                 "channel": ChannelEndpoint,
                 "product": ProductEndpoint,
+                "task": TaskEndpoint,
                 "productSubscription": ProductSubscriptionEndpoint,
                 "checkResponse": CheckResponseEndpoint
             }
