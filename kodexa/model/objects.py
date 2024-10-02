@@ -4414,27 +4414,27 @@ class Guidance(BaseModel):
     id: Optional[str] = Field(None, description="The ID of the guidance")
     name: Optional[str] = None
     guidance_type: Optional[str] = Field(None, alias="guidanceType")
+    guidance_key: Optional[str] = Field(None, alias="guidanceKey")
     taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
-    document_name: Optional[str] = Field(None, alias="documentName")
+    taxon_path: Optional[str] = Field(None, alias="taxonPath")
     document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
-    document_type: Optional[str] = Field(None, alias="documentType")
+    document_name: Optional[str] = Field(None, alias="documentName")
     document_page: Optional[int] = Field(None, alias="documentPage")
     guidance_text: Optional[str] = Field(None, alias="guidanceText")
-    guidance_response: Optional[dict] = Field(None, alias="guidanceResponse")
-    active: Optional[bool] = None
+    lexical_relations: Optional[List[LexicalRelation]] = Field([], alias="lexicalRelations")
+    summary: Optional[str] = None
+    guidance_response: Optional[Dict[str, Any]] = Field(None, alias="guidanceResponse")
+    active: Optional[bool] = True
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
+    required_tags: Optional[List[str]] = Field(None, alias="requiredTags")
     priority: Optional[int] = 1
     user_instructions: Optional[str] = Field(None, alias="userInstructions")
     user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
+    userId: Optional[str] = Field(None, alias="userId")
     created: Optional[StandardDateTime] = None
     updated: Optional[StandardDateTime] = None
-    userId: Optional[str] = Field(None, alias="userId")
-
-    # users selected text, text and line_uuid
     user_selection: Optional[List[UserSelection]] = Field(None, alias="userSelection")
-
     compiled_guidance: Optional[Dict[str, Any]] = Field(None, alias="compiledGuidance")
-
     guidance_options: Optional[List[Option]] = Field(None, alias="guidanceOptions")
 
 
