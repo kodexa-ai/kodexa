@@ -4410,6 +4410,12 @@ class UserSelection(BaseModel):
     line_uuid: Optional[str] = Field(None, alias="lineUuid")
 
 
+class GuidanceRelationEmbedding(BaseModel):
+    relation: Optional[str] = None
+    model_id: Optional[str] = Field(None, alias="modelId")
+    embedding: Optional[List[float]] = None
+
+
 class Guidance(BaseModel):
     id: Optional[str] = Field(None, description="The ID of the guidance")
     name: Optional[str] = None
@@ -4421,7 +4427,7 @@ class Guidance(BaseModel):
     document_name: Optional[str] = Field(None, alias="documentName")
     document_page: Optional[int] = Field(None, alias="documentPage")
     guidance_text: Optional[str] = Field(None, alias="guidanceText")
-    lexical_relations: Optional[List[LexicalRelation]] = Field([], alias="lexicalRelations")
+    relation_embeddings: Optional[List[GuidanceRelationEmbedding]] = Field([], alias="relationEmbeddings")
     summary: Optional[str] = None
     guidance_response: Optional[Dict[str, Any]] = Field(None, alias="guidanceResponse")
     active: Optional[bool] = True
@@ -4430,7 +4436,7 @@ class Guidance(BaseModel):
     priority: Optional[int] = 1
     user_instructions: Optional[str] = Field(None, alias="userInstructions")
     user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
-    userId: Optional[str] = Field(None, alias="userId")
+    user_id: Optional[str] = Field(None, alias="userId")
     created: Optional[StandardDateTime] = None
     updated: Optional[StandardDateTime] = None
     user_selection: Optional[List[UserSelection]] = Field(None, alias="userSelection")
