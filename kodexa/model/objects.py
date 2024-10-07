@@ -4451,8 +4451,7 @@ class Guidance(BaseModel):
 
 class GuidanceEmbeddingType(Enum):
     SUMMARY = "SUMMARY"
-    PAGE = "PAGE"
-    CONTENT_NODE = "CONTENT_NODE"
+    CONTENT = "CONTENT"
     TFIDF = "TFIDF"
 
 class GuidanceSetStorage(BaseModel):
