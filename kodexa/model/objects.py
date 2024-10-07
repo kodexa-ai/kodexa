@@ -4444,11 +4444,40 @@ class Guidance(BaseModel):
     guidance_options: Optional[List[Option]] = Field(None, alias="guidanceOptions")
 
 
+class GuidanceEmbeddingType(Enum):
+    SUMMARY = "SUMMARY"
+    PAGE = "PAGE"
+    CONTENT_NODE = "CONTENT_NODE"
+    TFIDF = "TFIDF"
+
+class GuidanceSetStorage(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    embedding_model_id: Optional[str] = Field(None, alias="embeddingModelId")
+    embedding_types: List[GuidanceEmbeddingType] = Field(default_factory=list, alias="embeddingTypes")
+
 class GuidanceSet(ExtensionPackProvided):
     """
-
+    A guidance set is a list of guidance objects that can be applied to a taxonomy
     """
-    guidance: List[Guidance] = Field(None, description="The guidance in the set")
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    active_store: bool = Field(False, alias="activeStore", description="If true, allows guidance to be stored through the API")
+    storage: GuidanceSetStorage = Field(default_factory=GuidanceSetStorage)
+    guidance: List[Guidance] = Field(default_factory=list, description="The guidance in the set")
+
+    def get_type(self) -> str:
+        return "guidance"
 
 
 class PageGuidanceSet(BaseModel):
