@@ -628,9 +628,11 @@ class ProjectGuidance(BaseModel):
     slug: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    guidance: Optional[List[Guidance]] = Field(None)
+    active_store: bool = Field(False, alias="activeStore")
+    storage: GuidanceSetStorage = Field(None, description="The storage for the guidance set")
     template_ref: Optional[str] = Field(None, alias="templateRef")
     ref: Optional[str] = None
-    guidance: Optional[List[Guidance]] = Field(None, alias="guidance")
 
 
 class ProjectDashboard(BaseModel):
