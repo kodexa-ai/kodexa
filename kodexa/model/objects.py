@@ -3952,7 +3952,6 @@ class DocumentExternalData(BaseModel):
     external_data: Optional[Dict[str, Any]] = Field(None, alias="externalData")
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
 
-
 class DocumentFamily(BaseModel):
     """
 
@@ -4035,6 +4034,10 @@ class DocumentFamily(BaseModel):
         description="The statistics about the labels in the document family",
     )
 
+    guidance: Optional[bool] = Field(
+        None,
+        description="Indicates whether guidance is available for this document family",
+    )
 
 class DocumentFamilyStatistics(BaseModel):
     """
