@@ -4458,6 +4458,7 @@ class GuidanceSetStorage(BaseModel):
         protected_namespaces=("model_config",),
     )
 
+    summarize_model_id: Optional[str] = Field(None, alias="summarizeModelId")
     embedding_model_id: Optional[str] = Field(None, alias="embeddingModelId")
     embedding_types: List[GuidanceEmbeddingType] = Field(default_factory=list, alias="embeddingTypes")
 
