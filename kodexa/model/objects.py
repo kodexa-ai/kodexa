@@ -4459,6 +4459,7 @@ class GuidanceSetStorage(BaseModel):
     )
 
     summarize_model_id: Optional[str] = Field(None, alias="summarizeModelId")
+    summarize_prompt: Optional[str] = Field(None, alias="summarizePrompt")
     embedding_model_id: Optional[str] = Field(None, alias="embeddingModelId")
     embedding_types: List[GuidanceEmbeddingType] = Field(default_factory=list, alias="embeddingTypes")
 
