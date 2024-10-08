@@ -86,7 +86,7 @@ from kodexa.model.objects import (
     PageExtensionPack,
     PageOrganization,
     DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
-    DocumentExternalData, Task, PageTask,
+    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance,
 )
 
 logger = logging.getLogger()
@@ -1176,6 +1176,30 @@ class PagePipelineEndpoint(PagePipeline, PageEndpoint):
 class PageTaskEndpoint(PageTask, PageEndpoint):
     def get_type(self) -> Optional[str]:
         return "task"
+
+
+class PageRetainedGuidanceEndpoint(PageRetainedGuidance, PageEndpoint):
+    """Represents a page retained guidance endpoint.
+
+    This class is used to represent a page retained guidance endpoint which is a
+    combination of a page retained guidance and a page endpoint.
+
+    Attributes:
+        None
+    """
+
+    """Represents a page retained guidance endpoint"""
+
+    def get_type(self) -> Optional[str]:
+        """Get the type of the endpoint.
+
+        This method is used to get the type of the endpoint. In this case,
+        it will always return "retainedGuidance".
+
+        Returns:
+            str: The type of the endpoint, which is "retainedGuidance".
+        """
+        return "retainedGuidance"
 
 
 class PageProjectEndpoint(PageProject, PageEndpoint):
@@ -2521,11 +2545,13 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
         else:
             raise ValueError("Workspace has no channel")
 
+
 class TaskEndpoint(EntityEndpoint, Task):
     """Represents a task endpoint.
 
     This class is used to interact with the task endpoint of the API.
     """
+
     def get_type(self) -> str:
         """Get the type of the endpoint.
 
@@ -2535,11 +2561,27 @@ class TaskEndpoint(EntityEndpoint, Task):
         return "tasks"
 
 
+class RetainedGuidanceEndpoint(EntityEndpoint, RetainedGuidance):
+    """Represents a retained guidance endpoint.
+
+    This class is used to interact with the retained guidance endpoint of the API.
+    """
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "retainedGuidance".
+        """
+        return "retainedGuidance"
+
+
 class ProjectEndpoint(EntityEndpoint, Project):
     """Represents a project endpoint.
 
     This class is used to interact with the project endpoint of the API.
     """
+
     def get_type(self) -> str:
         """Get the type of the endpoint.
 
@@ -2895,6 +2937,39 @@ class TasksEndpoint(EntitiesEndpoint):
             PageProjectEndpoint: The page class of the endpoint.
         """
         return PageTaskEndpoint
+
+
+class RetainedGuidancesEndpoint(EntitiesEndpoint):
+    """Represents a projects endpoint"""
+
+    """Represents a projects endpoint"""
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "retainedGuidance"
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Returns:
+            ProjectEndpoint: The instance class of the endpoint.
+        """
+        return RetainedGuidanceEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Returns:
+            PageProjectEndpoint: The page class of the endpoint.
+        """
+        return PageRetainedGuidanceEndpoint
 
 
 class ProjectsEndpoint(EntitiesEndpoint):
@@ -6400,6 +6475,10 @@ class KodexaClient:
         executions (ExecutionsEndpoint): An endpoint for executions.
         channels (ChannelsEndpoint): An endpoint for channels.
         messages (MessagesEndpoint): An endpoint for messages.
+        assistants (AssistantsEndpoint): An endpoint for assistants.
+        products (ProductsEndpoint): An endpoint for products.
+        tasks (TasksEndpoint): An endpoint for tasks.
+        retained_guidances (RetainedGuidancesEndpoint): An endpoint for retained guidances.
     """
 
     def __init__(self, url=None, access_token=None, profile=None):
@@ -6423,6 +6502,7 @@ class KodexaClient:
         from kodexa.model.entities.product import ProductsEndpoint
         self.products = ProductsEndpoint(self)
         self.tasks = TasksEndpoint(self)
+        self.retained_guidances = RetainedGuidancesEndpoint(self)
 
     @staticmethod
     def login(url, token):
@@ -6439,7 +6519,6 @@ class KodexaClient:
         Raises:
             Exception: If the status code is not 200.
         """
-        from requests.auth import HTTPBasicAuth
 
         obj_response = requests.get(
             f"{url}/api/account/me",
@@ -6819,7 +6898,6 @@ class KodexaClient:
                         guidance.model_dump(mode="json", by_alias=True), indent=4
                     )
                 )
-
 
     def import_project(self, organization: OrganizationEndpoint, import_path: str):
         """

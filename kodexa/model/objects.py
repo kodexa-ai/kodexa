@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Union, Set
 from enum import Enum
 from typing import Optional, List, Dict, Any
+from typing import Union
+
 from pydantic import AnyUrl, Field, RootModel, BaseModel, ConfigDict
 
 from kodexa.model.base import StandardDateTime
@@ -2550,12 +2551,14 @@ class TaxonCardinality(Enum):
     ONCE_PER_SEGMENT = "ONCE_PER_SEGMENT"
     MULTIPLE_PER_SEGMENT = "MULTIPLE_PER_SEGMENT"
 
+
 class TaxonAdditionContextType(str, Enum):
     RECORD_DEFINITION = "RECORD_DEFINITION"
     RECORD_SECTION_STARTER_MARKER = "RECORD_SECTION_STARTER_MARKER"
     RECORD_SECTION_END_MARKER = "RECORD_SECTION_END_MARKER"
     RECORD_START_MARKER = "RECORD_START_MARKER"
     RECORD_END_MARKER = "RECORD_END_MARKER"
+
 
 class TaxonAdditionContext(BaseModel):
     type: TaxonAdditionContextType
@@ -2881,7 +2884,6 @@ class TaskStatus(str, Enum):
 
 
 class TaskCheckItem(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2896,7 +2898,6 @@ class TaskCheckItem(BaseModel):
 
 
 class TaskMetadata(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2911,7 +2912,6 @@ class TaskMetadata(BaseModel):
 
 
 class Task(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -3418,6 +3418,28 @@ class PageProject(BaseModel):
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
     content: Optional[List[Project]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class PageRetainedGuidance(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[RetainedGuidance]] = None
     number: Optional[int] = None
 
     number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
@@ -3952,6 +3974,42 @@ class DocumentExternalData(BaseModel):
     external_data: Optional[Dict[str, Any]] = Field(None, alias="externalData")
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
 
+
+class RetainedGuidance(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    guidance_embeddings: List["GuidanceEmbedding"] = Field(default_factory=list, alias="guidanceEmbeddings")
+    guidance_set_ref: str = Field(..., alias="guidanceSetRef")
+    guidance_type: Optional[str] = Field(None, alias="guidanceType")
+    guidance_key: Optional[str] = Field(None, alias="guidanceKey")
+    taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
+    taxon_path: Optional[str] = Field(None, alias="taxonPath")
+    document_family_id: Optional[str] = Field(None, alias="documentFamilyId")
+    guidance_text: Optional[str] = Field(None, alias="guidanceText")
+    summary: Optional[str] = None
+    guidance_response: Dict[str, Any] = Field(default_factory=dict, alias="guidanceResponse")
+    legacy_guidance: Optional[Guidance] = Field(None, alias="legacyGuidance")
+    active: bool = True
+    taxon_snapshots: List[Taxon] = Field(default_factory=list, alias="taxonSnapshots")
+
+
+class GuidanceEmbedding(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    retained_guidance: Optional[RetainedGuidance] = Field(None, alias="retainedGuidance")
+    # Add other fields as needed
+
+
 class DocumentFamily(BaseModel):
     """
 
@@ -4038,6 +4096,7 @@ class DocumentFamily(BaseModel):
         None,
         description="Indicates whether guidance is available for this document family",
     )
+
 
 class DocumentFamilyStatistics(BaseModel):
     """
@@ -4454,6 +4513,7 @@ class GuidanceEmbeddingType(Enum):
     CONTENT = "CONTENT"
     TFIDF = "TFIDF"
 
+
 class GuidanceSetStorage(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -4467,6 +4527,7 @@ class GuidanceSetStorage(BaseModel):
     embedding_model_id: Optional[str] = Field(None, alias="embeddingModelId")
     embedding_types: List[GuidanceEmbeddingType] = Field(default_factory=list, alias="embeddingTypes")
 
+
 class GuidanceSet(ExtensionPackProvided):
     """
     A guidance set is a list of guidance objects that can be applied to a taxonomy
@@ -4478,7 +4539,8 @@ class GuidanceSet(ExtensionPackProvided):
         protected_namespaces=("model_config",),
     )
 
-    active_store: bool = Field(False, alias="activeStore", description="If true, allows guidance to be stored through the API")
+    active_store: bool = Field(False, alias="activeStore",
+                               description="If true, allows guidance to be stored through the API")
     storage: GuidanceSetStorage = Field(default_factory=GuidanceSetStorage)
     guidance: List[Guidance] = Field(default_factory=list, description="The guidance in the set")
 
