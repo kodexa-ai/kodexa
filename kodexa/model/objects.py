@@ -3982,7 +3982,11 @@ class RetainedGuidance(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-
+    id: Optional[str] = Field(None)
+    uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     guidance_embeddings: List["GuidanceEmbedding"] = Field(default_factory=list, alias="guidanceEmbeddings")
     guidance_set_ref: str = Field(..., alias="guidanceSetRef")
     guidance_type: Optional[str] = Field(None, alias="guidanceType")
