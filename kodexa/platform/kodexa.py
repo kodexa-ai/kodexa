@@ -16,6 +16,7 @@ from typing import Dict
 
 import requests
 from appdirs import AppDirs
+from mistune.plugins.formatting import insert
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
@@ -884,7 +885,7 @@ class EventHelper:
             ContentObject: The posted content object.
         """
         files = {"content": content}
-        data = {"contentObjectJson": json.dumps(content_object.dict(by_alias=True))}
+        data = {"contentObjectJson": json.dumps(content_object.model_dump(by_alias=True))}
         logger.info("Posting back content object to execution object")
         co_response = requests.post(
             f"{KodexaPlatform.get_url()}/api/sessions/{self.event.session_id}/executions/{self.event.execution.id}/objects",
@@ -901,7 +902,7 @@ class EventHelper:
 
         return ContentObject.model_validate(co_response.json())
 
-    def build_pipeline_context(self) -> PipelineContext:
+    def build_pipeline_context(self, event) -> PipelineContext:
         """Builds a pipeline context.
 
         Returns:
@@ -911,7 +912,10 @@ class EventHelper:
             context={}, content_provider=self, execution_id=self.event.execution.id
         )
 
-        if isinstance(self.event, DocumentFamilyEvent):
+        if isinstance(event, dict):
+            event = self.get_base_event(event)
+
+        if isinstance(event, DocumentFamilyEvent):
             # Can we get the document family
             dfe:DocumentFamilyEvent = self.event
             if dfe.document_family:
@@ -919,7 +923,7 @@ class EventHelper:
                 context.document_family = dfe.document_family
                 logger.info(f"Getting document store for family: {context.document_family.store_ref}")
                 context.document_store = KodexaClient().get_object_by_ref("store", context.document_family.store_ref)
-        if isinstance(self.event, ContentEvent):
+        if isinstance(event, ContentEvent):
             ce:ContentEvent = self.event
             if ce.content_object:
                 logger.info(f"Setting content object for context: {ce.content_object}")
