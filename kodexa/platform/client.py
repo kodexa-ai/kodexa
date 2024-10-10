@@ -7094,6 +7094,7 @@ class KodexaClient:
                 "message": MessageEndpoint,
                 "prompt": PromptEndpoint,
                 "guidance": GuidanceSetEndpoint,
+                "retainedGuidance": RetainedGuidanceEndpoint,
                 "channel": ChannelEndpoint,
                 "product": ProductEndpoint,
                 "task": TaskEndpoint,
