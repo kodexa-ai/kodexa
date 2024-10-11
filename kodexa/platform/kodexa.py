@@ -16,7 +16,6 @@ from typing import Dict
 
 import requests
 from appdirs import AppDirs
-from mistune.plugins.formatting import insert
 
 from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
