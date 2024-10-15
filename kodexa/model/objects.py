@@ -4491,6 +4491,14 @@ class UserSelection(BaseModel):
 
 
 class GuidanceRelationEmbedding(BaseModel):
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
     relation: Optional[str] = None
     model_id: Optional[str] = Field(None, alias="modelId")
     embedding: Optional[List[float]] = None
