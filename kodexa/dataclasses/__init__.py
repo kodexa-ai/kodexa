@@ -14,6 +14,19 @@ from kodexa.utils import snake_to_camel, to_snake, taxon_to_property_name, taxon
 logger = logging.getLogger()
 
 
+class KodexaDocumentLLMWrapper:
+
+    doc = None
+    entities = None
+
+    def __init__(self, doc: Document):
+        self.doc = doc
+
+
+    def get_doc(self):
+        return self.doc
+
+
 class LLMDataAttribute(BaseModel):
     """
     This is the data structure that is used take the results from the LLM so
