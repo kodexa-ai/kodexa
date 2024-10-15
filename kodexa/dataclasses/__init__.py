@@ -45,6 +45,15 @@ class LLMDataAttribute(BaseModel):
     page_number: Optional[int] = None
     exceptions: Optional[list[ContentException]] = None
 
+    def copy_from(self, source: "LLMDataAttribute"):
+        self.tag_uuid = source.tag_uuid
+        self.value = source.value
+        self.normalized_text = source.normalized_text
+        self.line_ids = source.line_ids
+        self.exceptions = source.exceptions
+        self.node_uuid_list = source.node_uuid_list
+        self.page_number = source.page_number
+
     def create_exception(
             self,
             exception_type_id: str,
