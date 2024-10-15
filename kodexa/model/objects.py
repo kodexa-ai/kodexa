@@ -708,9 +708,8 @@ class ProjectStore(BaseModel):
         None, description="Show thumbnails in dtore", alias="showThumbnails"
     )
 
-    showSearch: Optional[bool] = Field(
-        None, description="Show search in store", alias="showSearch"
-    )
+    document_properties: Optional[List[Option]] = Field(None, alias="documentProperties")
+    label_expressions: Optional[List[LabelExpression]] = Field(None, alias="labelExpressions")
 
     allowDataEditing: Optional[bool] = Field(
         None, description="Allow data editing", alias="allowDataEditing"
