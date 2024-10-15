@@ -2275,6 +2275,20 @@ class DockerSource(ExtensionPackSource):
     location: Optional[str] = None
 
 
+class LabelExpression(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    expression: Optional[str] = None
+    label: Optional[str] = None
+
+
 class DocumentMetadataDefaults(BaseModel):
     """
 
@@ -2285,9 +2299,8 @@ class DocumentMetadataDefaults(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    document_metadata_properties: Optional[List[DocumentMetadataProperty]] = Field(
-        None, alias="documentMetadataProperties"
-    )
+    document_properties: Optional[list[Option]] = Field(None, alias="documentProperties")
+    label_expressions = Optional[list[LabelExpression]] = Field(None, alias="labelExpressions")
 
 
 class ExtensionPackProvided(BaseModel):
