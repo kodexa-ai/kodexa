@@ -2299,8 +2299,8 @@ class DocumentMetadataDefaults(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    document_properties: Optional[list[Option]] = Field(None, alias="documentProperties")
-    label_expressions = Optional[list[LabelExpression]] = Field(None, alias="labelExpressions")
+    document_properties: Optional[List[Option]] = Field(None, alias="documentProperties")
+    label_expressions: Optional[List[LabelExpression]] = Field(None, alias="labelExpressions")
 
 
 class ExtensionPackProvided(BaseModel):
