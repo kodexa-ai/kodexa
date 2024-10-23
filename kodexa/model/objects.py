@@ -2661,7 +2661,9 @@ class Taxon(BaseModel):
     validation_rules: List[TaxonValidation] = Field(
         default_factory=list,
         description="The validation rules for the taxon"
-    )    cardinality: Optional[TaxonCardinality] = None
+    )
+
+    cardinality: Optional[TaxonCardinality] = None
     path: Optional[str] = None
     multi_value: Optional[bool] = Field(True, alias="multiValue")
     user_editable: Optional[bool] = Field(True, alias="userEditable")
