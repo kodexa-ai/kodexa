@@ -14,7 +14,7 @@ import deepdiff
 import msgpack
 from pydantic import BaseModel, ConfigDict, Field
 
-from kodexa.model.objects import ContentObject, FeatureSet
+from kodexa.model.objects import ContentObject, FeatureSet, DocumentTaxonValidation
 
 
 class Ref:
@@ -298,6 +298,12 @@ class ContentNode(object):
 
     def set_content_parts(self, content_parts):
         self.document.get_persistence().update_content_parts(self, content_parts)
+
+    def get_validations(self) -> list[DocumentTaxonValidation]:
+        return self.document.get_persistence().get_validations()
+
+    def set_validations(self, validations: list[DocumentTaxonValidation]):
+        self.document.get_persistence().set_validations(validations)
 
     def update(self):
         """

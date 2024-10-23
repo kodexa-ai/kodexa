@@ -2591,13 +2591,28 @@ class TaxonConditionalFormat(BaseModel):
     properties: Dict[str, Any] = Field(default_factory=dict)
 
 
-class TaxonRule(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    rule_formula: Optional[str] = None
-    message_formula: Optional[str] = None
-    detail_formula: Optional[str] = None
-    exception_id: Optional[str] = None
+
+class TaxonValidation(BaseModel):
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    name: Optional[str] = Field(None)
+    description: Optional[str] = Field(None)
+    rule_formula: Optional[str] = Field(None, alias="ruleFormula")
+    message_formula: Optional[str] = Field(None, alias="messageFormula")
+    detail_formula: Optional[str] = Field(None, alias="detailFormula")
+    exception_id: Optional[str] = Field(None, alias="exceptionId")
+
+
+class DocumentTaxonValidation:
+    taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
+    taxon_path: Optional[str] = Field(None, alias="taxonPath")
+    rule: Optional[TaxonValidation] = None
 
 
 class Taxon(BaseModel):
@@ -2643,8 +2658,10 @@ class Taxon(BaseModel):
     properties: Optional[Dict[str, Any]] = Field(default_factory=dict)
     conditional_formats: Optional[List[TaxonConditionalFormat]] = Field(default_factory=list,
                                                                         alias="conditionalFormats")
-    rules: Optional[List[TaxonRule]] = Field(default_factory=list)
-    cardinality: Optional[TaxonCardinality] = None
+    validation_rules: List[TaxonValidation] = Field(
+        default_factory=list,
+        description="The validation rules for the taxon"
+    )    cardinality: Optional[TaxonCardinality] = None
     path: Optional[str] = None
     multi_value: Optional[bool] = Field(True, alias="multiValue")
     user_editable: Optional[bool] = Field(True, alias="userEditable")

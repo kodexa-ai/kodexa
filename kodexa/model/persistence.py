@@ -15,6 +15,7 @@ from kodexa.model.model import (
     ContentException,
     ModelInsight, ProcessingStep,
 )
+from kodexa.model.objects import DocumentTaxonValidation
 
 logger = logging.getLogger()
 
@@ -1138,6 +1139,47 @@ class SqliteDocumentPersistence(object):
         if result[0] == 0:
             self.cursor.execute("INSERT INTO ed (obj) VALUES (?)", [sqlite3.Binary(msgpack.packb({}))])
 
+    def __ensure_validations_table_exists(self):
+        """
+        Ensure the 'validations' table exists in the database.
+        Creates the table if it does not exist and initializes it with an empty list.
+        """
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS validations (
+                obj BLOB
+            )
+        """)
+
+        # Check if the table has any rows, if not, insert an initial empty row
+        result = self.cursor.execute("SELECT COUNT(*) FROM validations").fetchone()
+        if result[0] == 0:
+            self.cursor.execute("INSERT INTO validations (obj) VALUES (?)", [sqlite3.Binary(msgpack.packb([]))])
+
+    def set_validations(self, validations: List[DocumentTaxonValidation]):
+        """
+        Sets the validations for the document.
+
+        Args:
+            validations (List[DocumentTaxonValidation]): The validations to store.
+        """
+        self.__ensure_validations_table_exists()
+        serialized_data = sqlite3.Binary(msgpack.packb([v.to_dict() for v in validations]))
+        self.cursor.execute("UPDATE validations SET obj = ? WHERE rowid = 1", [serialized_data])
+        self.connection.commit()
+
+    def get_validations(self) -> List[DocumentTaxonValidation]:
+        """
+        Gets the validations associated with this document.
+
+        Returns:
+            List[DocumentTaxonValidation]: The list of validations stored in the validations table.
+        """
+        self.__ensure_validations_table_exists()
+        result = self.cursor.execute("SELECT obj FROM validations WHERE rowid = 1").fetchone()
+        if result and result[0]:
+            return [DocumentTaxonValidation(**v) for v in msgpack.unpackb(result[0])]
+        return []
+
     def set_external_data(self, external_data: dict):
         """
         Sets the external data for the document.
@@ -1354,6 +1396,12 @@ class PersistenceManager(object):
 
     def set_steps(self, steps: list[ProcessingStep]):
         self._underlying_persistence.set_steps(steps)
+
+    def set_validations(self, validations: list[DocumentTaxonValidation]):
+        self._underlying_persistence.set_validations(validations)
+
+    def get_validations(self) -> list[DocumentTaxonValidation]:
+        return self._underlying_persistence.get_validations()
 
     def get_external_data(self) -> dict:
         """
