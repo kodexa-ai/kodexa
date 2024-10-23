@@ -2591,7 +2591,6 @@ class TaxonConditionalFormat(BaseModel):
     properties: Dict[str, Any] = Field(default_factory=dict)
 
 
-
 class TaxonValidation(BaseModel):
 
     model_config = ConfigDict(
@@ -2607,12 +2606,14 @@ class TaxonValidation(BaseModel):
     message_formula: Optional[str] = Field(None, alias="messageFormula")
     detail_formula: Optional[str] = Field(None, alias="detailFormula")
     exception_id: Optional[str] = Field(None, alias="exceptionId")
+    support_article_id: Optional[str] = Field(None, alias="supportArticleId")
+    overridable: Optional[bool] = None
 
 
 class DocumentTaxonValidation:
     taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
     taxon_path: Optional[str] = Field(None, alias="taxonPath")
-    rule: Optional[TaxonValidation] = None
+    validation: Optional[TaxonValidation] = None
 
 
 class Taxon(BaseModel):
