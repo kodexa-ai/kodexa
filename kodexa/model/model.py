@@ -299,12 +299,6 @@ class ContentNode(object):
     def set_content_parts(self, content_parts):
         self.document.get_persistence().update_content_parts(self, content_parts)
 
-    def get_validations(self) -> list[DocumentTaxonValidation]:
-        return self.document.get_persistence().get_validations()
-
-    def set_validations(self, validations: list[DocumentTaxonValidation]):
-        self.document.get_persistence().set_validations(validations)
-
     def update(self):
         """
         Update this node in the document persistence
@@ -2435,6 +2429,12 @@ class Document(object):
 
     def __str__(self):
         return f"kodexa://{self.uuid}"
+
+    def get_validations(self) -> list[DocumentTaxonValidation]:
+        return self.get_persistence().get_validations()
+
+    def set_validations(self, validations: list[DocumentTaxonValidation]):
+        self.get_persistence().set_validations(validations)
 
     def add_exception(self, exception: ContentException):
         self._persistence_layer.add_exception(exception)

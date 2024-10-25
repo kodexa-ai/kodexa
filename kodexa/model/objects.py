@@ -2610,7 +2610,15 @@ class TaxonValidation(BaseModel):
     overridable: Optional[bool] = None
 
 
-class DocumentTaxonValidation:
+class DocumentTaxonValidation(BaseModel):
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
     taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
     taxon_path: Optional[str] = Field(None, alias="taxonPath")
     validation: Optional[TaxonValidation] = None

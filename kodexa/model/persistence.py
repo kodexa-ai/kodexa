@@ -1163,7 +1163,7 @@ class SqliteDocumentPersistence(object):
             validations (List[DocumentTaxonValidation]): The validations to store.
         """
         self.__ensure_validations_table_exists()
-        serialized_data = sqlite3.Binary(msgpack.packb([v.to_dict() for v in validations]))
+        serialized_data = sqlite3.Binary(msgpack.packb([v.model_dump(by_alias=True) for v in validations]))
         self.cursor.execute("UPDATE validations SET obj = ? WHERE rowid = 1", [serialized_data])
         self.connection.commit()
 
@@ -1177,7 +1177,7 @@ class SqliteDocumentPersistence(object):
         self.__ensure_validations_table_exists()
         result = self.cursor.execute("SELECT obj FROM validations WHERE rowid = 1").fetchone()
         if result and result[0]:
-            return [DocumentTaxonValidation(**v) for v in msgpack.unpackb(result[0])]
+            return [DocumentTaxonValidation.model_validate(v) for v in msgpack.unpackb(result[0])]
         return []
 
     def set_external_data(self, external_data: dict):
