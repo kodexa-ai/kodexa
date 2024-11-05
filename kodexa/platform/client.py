@@ -494,7 +494,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
                     self.get_page_class(list_response.json())
                             .model_validate(list_response.json())
                             .set_client(self.client)
-                            .to_endpoints()
+                            .to_endpoints().content
             ):
                 yield endpoint
 
