@@ -5283,10 +5283,6 @@ class ModelContentMetadata(BaseModel):
         None, alias="eventAware", description="Is this model event aware"
     )
 
-    atomic: Optional[bool] = Field(
-        None, description="Is the model uploaded/downloaded atomically"
-    )
-
     use_implementation_from_template: Optional[bool] = Field(
         None,
         alias="useImplementationFromTemplate",
