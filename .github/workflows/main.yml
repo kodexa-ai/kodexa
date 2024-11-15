@@ -7,8 +7,6 @@ on:
       - develop
     paths:
       - '**'
-      - '!docs/**'
-      - '!.github/**'
 
 jobs:
   build-and-publish-python-package:
