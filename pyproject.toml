@@ -34,7 +34,7 @@ pydantic-yaml = "^1.0.0"
 semver = "^3.0.1"
 chevron = "^0.14.0"
 addict = "^2.4.0"
-simpleeval = "^0.9.13"
+simpleeval = "^1.0.0"
 certifi = "^2024.7.4"
 
 [tool.poetry.group.dev.dependencies]
