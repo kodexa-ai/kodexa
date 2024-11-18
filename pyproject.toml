@@ -38,7 +38,6 @@ simpleeval = "^1.0.0"
 certifi = "^2024.7.4"
 
 [tool.poetry.group.dev.dependencies]
-mkdocs-material = "^9.0.3"
 pytest = "^8.3.3"
 pytest-runner = "^6.0.0"
 mypy = "^1.10.0"
@@ -46,9 +45,6 @@ flake8 = "^7.0.0"
 pandas = "^2.2.3"
 setuptools = "^75.1.0"
 black = ">=23.7,<25.0"
-mkdocstrings = "^0.26.1"
-mkdocstrings-python = "^1.11.1"
-jupyter = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core"]
