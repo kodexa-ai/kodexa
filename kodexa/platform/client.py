@@ -4617,17 +4617,6 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         response = self.client.put(url, data=external_data)
         return response.json()
 
-    def update_external_data(self, external_data: DocumentExternalData):
-        """
-        Update the external data of the document family.
-
-        Args:
-            external_data (DocumentExternalData): The external data to update.
-        """
-        url = f"/api/documentFamilies/{self.id}/externalData"
-        response = self.client.put(url, body=external_data.model_dump(mode="json", by_alias=True))
-        process_response(response)
-
     def export(self) -> bytes:
         """
         Export the document family as bytes.
