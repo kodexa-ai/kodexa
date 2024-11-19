@@ -4614,7 +4614,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             dict: The updated external data of the document family.
         """
         url = f"/api/documentFamilies/{self.id}/externalData"
-        response = self.client.put(url, json=external_data)
+        response = self.client.put(url, data=external_data)
         return response.json()
 
     def update_external_data(self, external_data: DocumentExternalData):
