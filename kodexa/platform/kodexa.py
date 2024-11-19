@@ -927,6 +927,7 @@ class EventHelper:
             if ce.content_object:
                 logger.info(f"Setting content object for context: {ce.content_object}")
                 context.content_object = ce.content_object
+                context.document_family = ce.document_family
                 logger.info(f"Getting document store for content object: {context.content_object.store_ref}")
                 context.document_store = KodexaClient().get_object_by_ref("store", context.content_object.store_ref)
         logger.info("Returning context")
