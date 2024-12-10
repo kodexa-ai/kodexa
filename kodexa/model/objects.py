@@ -5468,7 +5468,6 @@ class DataForm(ExtensionPackProvided):
 
     """
     entrypoints: Optional[List[str]] = None
-    entrypoint: Optional[str] = None
     cards: Optional[List[Card]] = None
     filters: Optional[str] = None
 
@@ -5488,6 +5487,7 @@ class ProjectDataForm(BaseModel):
     description: Optional[str] = None
 
     cards: Optional[List[Card]] = None
+    entrypoints: Optional[List[str]] = None
 
     ref: Optional[str] = None
 
