@@ -24,4 +24,4 @@ def test_taxon_validations():
     assert validations[0].taxon_path == "person"
     assert validations[0].validation.name == "NameRequired"
     assert validations[0].validation.description == "Name is required"
-    assert validations[0].validation.rule == "name is not None"
+    assert validations[0].validation.rule_formula == "ifnull(name, '') != ''"

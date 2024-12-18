@@ -3,6 +3,7 @@ import logging
 import pathlib
 import sqlite3
 import tempfile
+import time
 import uuid
 from typing import List, Optional
 
@@ -42,6 +43,22 @@ FEATURE_TYPE_LOOKUP = "select id from f_type where name = ?"
 METADATA_INSERT = "insert into metadata(id,metadata) values (1,?)"
 METADATA_DELETE = "delete from metadata where id=1"
 
+# Configuration constants
+CACHE_SIZE = 10000  # Number of nodes to cache
+BATCH_SIZE = 1000   # Size of batches for bulk operations
+SLOW_QUERY_THRESHOLD = 1.0  # Seconds
+MAX_CONNECTIONS = 5  # Maximum number of database connections
+
+def monitor_performance(func):
+    """Performance monitoring decorator"""
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        duration = time.time() - start_time
+        if duration > SLOW_QUERY_THRESHOLD:
+            logger.warning(f"Slow operation detected: {func.__name__}, duration: {duration}s")
+        return result
+    return wrapper
 
 class SqliteDocumentPersistence(object):
     """
@@ -57,7 +74,7 @@ class SqliteDocumentPersistence(object):
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     """
 
-    def __init__(self, document: Document, filename: str = None, delete_on_close=False, inmemory=False):
+    def __init__(self, document: Document, filename: str = None, delete_on_close=False, inmemory=False, persistence_manager=None):
         self.document = document
 
         self.node_types = {}
@@ -138,6 +155,7 @@ class SqliteDocumentPersistence(object):
 
         return mem_conn
 
+    @monitor_performance
     def get_all_tags(self):
         """
         Retrieves all tags from the document.
@@ -153,6 +171,7 @@ class SqliteDocumentPersistence(object):
 
         return features
 
+    @monitor_performance
     def update_features(self, node):
         """
         Updates the features of a given node in the document.
@@ -188,6 +207,7 @@ class SqliteDocumentPersistence(object):
         self.cursor.execute("DELETE FROM ft where cn_id=?", [node.uuid])
         self.cursor.executemany(FEATURE_INSERT, all_features)
 
+    @monitor_performance
     def update_node(self, node):
         """
         Updates a given node in the document.
@@ -200,6 +220,7 @@ class SqliteDocumentPersistence(object):
             [node.index, node._parent_uuid, node.uuid],
         )
 
+    @monitor_performance
     def get_content_nodes(self, node_type, parent_node: ContentNode, include_children):
         """
         Retrieves content nodes from the document based on the given parameters.
@@ -213,8 +234,8 @@ class SqliteDocumentPersistence(object):
             list: A list of content nodes that match the given parameters.
         """
         nodes = []
-
-        results = []
+        if not self.connection.in_transaction:
+            self.cursor.execute("BEGIN TRANSACTION")
         if include_children:
             if node_type == "*":
                 query = """
@@ -284,6 +305,7 @@ class SqliteDocumentPersistence(object):
                         ],
                     ).fetchall()
                 except StopIteration:
+                    self.connection.commit()
                     return []
         else:
             query = "select id, pid, nt, idx from cn where pid=? and nt=? order by idx"
@@ -300,10 +322,13 @@ class SqliteDocumentPersistence(object):
                     ],
                 ).fetchall()
             except StopIteration:
+                self.connection.commit()
                 return []
 
         for raw_node in list(results):
             nodes.append(self.__build_node(raw_node))
+
+        self.connection.commit()
 
         return nodes
 
@@ -326,6 +351,7 @@ class SqliteDocumentPersistence(object):
             self.cursor.close()
             self.connection.close()
 
+    @monitor_performance
     def get_max_feature_id(self):
         """
         Retrieves the maximum feature id from the document.
@@ -396,6 +422,7 @@ class SqliteDocumentPersistence(object):
 
         self.__update_metadata()
 
+    @monitor_performance
     def content_node_count(self):
         """
         Counts the number of content nodes in the document.
@@ -405,6 +432,7 @@ class SqliteDocumentPersistence(object):
         """
         self.cursor.execute("select * from cn").fetchall()
 
+    @monitor_performance
     def get_feature_type_id(self, feature):
         """
         Retrieves the id of a given feature.
@@ -466,6 +494,7 @@ class SqliteDocumentPersistence(object):
 
         return result[0]
 
+    @monitor_performance
     def __insert_node(self, node: ContentNode, parent, execute=True):
         """
         Inserts a node into the document.
@@ -1385,7 +1414,7 @@ class PersistenceManager(object):
         self.node_parent_cache = {}
 
         self._underlying_persistence = SqliteDocumentPersistence(
-            document, filename, delete_on_close, inmemory=inmemory
+            document, filename, delete_on_close, inmemory=inmemory, persistence_manager=self
         )
 
     def get_steps(self) -> list[ProcessingStep]:
@@ -1523,7 +1552,6 @@ class PersistenceManager(object):
         Returns:
             List[Node]: A list of nodes tagged with the specified tag.
         """
-        self.flush_cache()
         return self._underlying_persistence.get_tagged_nodes(tag, tag_uuid)
 
     def get_all_tagged_nodes(self):
@@ -1533,7 +1561,6 @@ class PersistenceManager(object):
         Returns:
             List[Node]: A list of all tagged nodes.
         """
-        self.flush_cache()
         return self._underlying_persistence.get_all_tagged_nodes()
 
     def initialize(self):
@@ -1565,6 +1592,7 @@ class PersistenceManager(object):
         """
         self._underlying_persistence.close()
 
+    @monitor_performance
     def flush_cache(self):
         """
         Flushes the cache by merging it with the underlying persistence layer.
@@ -1574,11 +1602,14 @@ class PersistenceManager(object):
         all_content_parts = []
         all_features = []
         node_id_with_features = []
-
-        logger.debug("Merging cache to persistence")
         dirty_nodes = self.node_cache.get_dirty_objs()
 
+        if len(dirty_nodes) == 0:
+            return
+
         logger.debug(f"Identified {len(dirty_nodes)} nodes to update")
+        if not self._underlying_persistence.connection.in_transaction:
+            self._underlying_persistence.connection.execute("BEGIN TRANSACTION")
 
         next_feature_id = self._underlying_persistence.get_max_feature_id()
         for node in dirty_nodes:
@@ -1618,7 +1649,6 @@ class PersistenceManager(object):
 
                 self.node_cache.undirty(node)
 
-        logger.debug(f"Writing {len(all_node_ids)} nodes")
         self._underlying_persistence.cursor.executemany(
             "DELETE FROM cn where id=?", all_node_ids
         )
@@ -1631,14 +1661,11 @@ class PersistenceManager(object):
         self._underlying_persistence.cursor.executemany(
             "DELETE FROM cnp where cn_id=?", all_node_ids
         )
-        logger.debug(f"Writing {len(all_content_parts)} content parts")
-
         self._underlying_persistence.cursor.executemany(
             CONTENT_NODE_PART_INSERT, all_content_parts
         )
-
-        logger.debug(f"Writing {len(all_features)} features")
         self._underlying_persistence.cursor.executemany(FEATURE_INSERT, all_features)
+        self._underlying_persistence.connection.commit()
 
     def get_content_nodes(self, node_type, parent_node, include_children):
         """

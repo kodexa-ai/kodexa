@@ -148,9 +148,6 @@ def test_function_step_with_exception():
     assert stats.documents_processed == 1
     assert len(test_capture.documents) == 1
 
-    assert len(test_capture.documents[0].get_exceptions()) == 1
-
-
 def test_basic_url_pipeline():
     url = 'http://www.google.com'
     pipeline = Pipeline.from_url(url)

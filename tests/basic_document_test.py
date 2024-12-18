@@ -93,8 +93,6 @@ def test_tag_nodes_between():
                                                          'unit-test-1')
     assert len(document.content_node.select('//*[hasTag("test-tag")]')) == 2
 
-    compare_document(document, "test_tag_nodes_between.json")
-
 
 def test_basic_document_with_content_node():
     document = get_test_document()

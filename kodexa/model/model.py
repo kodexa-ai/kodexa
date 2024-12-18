@@ -815,8 +815,8 @@ class ContentNode(object):
         from kodexa.selectors.ast import SelectorContext
 
         context = SelectorContext(self.document, first_only=first_only)
-        parsed_selector = parse(selector)
         self.document.get_persistence().flush_cache()
+        parsed_selector = parse(selector)
         return parsed_selector.resolve(self, variables, context)
 
     def get_all_content(self, separator=" ", strip=True):

@@ -333,27 +333,27 @@ class ExtensionPackUtil:
         if options is None:
             options = {}
 
-        for service in self.kodexa_metadata.services:
-            if service.type == "action" and service.slug == action_slug:
+        for service in self.kodexa_metadata["services"]:
+            if service["type"] == "action" and service["slug"] == action_slug:
                 # TODO We need to validate all the options
 
-                if len(service.metadata.options) > 0:
+                if len(service["metadata"]["options"]) > 0:
                     option_names = []
-                    for option in service.metadata.options:
-                        option_names.append(option.name)
-                        if option.name not in options and option.default is not None:
-                            options[option.name] = option.default
-                        if option.required and option.name not in options:
+                    for option in service["metadata"]["options"]:
+                        option_names.append(option["name"])
+                        if option["name"] not in options and "default" in option and option["default"] is not None:
+                            options[option["name"]] = option["default"]
+                        if option["required"] and option["name"] not in options:
                             raise OptionException(
-                                f"Missing required option {option.name}"
+                                f"Missing required option {option['name']}"
                             )
 
                     for option_name in options.keys():
                         if option_name not in option_names:
                             # We need to determine if this is actually a group
                             is_group = False
-                            for check_option in service.metadata.options:
-                                if check_option["group"] is not None:
+                            for check_option in service["metadata"]["options"]:
+                                if "group" in check_option and check_option["group"] is not None:
                                     if check_option["group"]["name"] == option_name:
                                         is_group = True
 
@@ -363,8 +363,8 @@ class ExtensionPackUtil:
                                 )
 
                 # We need to create and return our action
-                module = importlib.import_module(service.step.package)
-                klass = getattr(module, service.step["class"])
+                module = importlib.import_module(service["step"]["package"])
+                klass = getattr(module, service["step"]["class"])
                 new_instance = klass(**options)
 
                 # Since we will be using to access metadata we will need to
@@ -421,15 +421,15 @@ class ExtensionPackUtil:
         if options is None:
             options = {}
 
-        for service in self.kodexa_metadata.services:
-            if service.type == "assistant" and service.slug == assistant_slug:
+        for service in self.kodexa_metadata["services"]:
+            if service["type"] == "assistant" and service["slug"] == assistant_slug:
                 # TODO We need to validate all the options
 
                 # We need to create and return our action
 
-                logger.info(f"Creating new assistant {service.assistant}")
-                module = importlib.import_module(service.assistant.package)
-                klass = getattr(module, service.assistant["class"])
+                logger.info(f"Creating new assistant {service['assistant']}")
+                module = importlib.import_module(service["assistant"]["package"])
+                klass = getattr(module, service["assistant"]["class"])
                 return klass(**options)
 
         raise Exception("Unable to find the assistant " + assistant_slug)

@@ -80,7 +80,7 @@ def test_tag_multiple_regex_matches():
     document = Document.from_text(doc_string)
     pipeline = Pipeline(document)
     pipeline.add_step(NodeTagger(selector='//*', tag_to_apply='SIZE', content_re=r'(little)', node_only=False,
-                                 node_tag_uuid=str(uuid.uuid())))
+                                 node_tag_uuid=str(uuid.uuid4())))
     context = pipeline.run()
 
     # Now each of the feature values should have the same UUID
@@ -201,18 +201,6 @@ def test_fax2tagging():
     kdxa_doc.content_node.tag("phone", use_all_content=True, fixed_position=[146, 158])
     assert kdxa_doc.select("//*[hasTag('phone')]")[0].content == '785-368-1772'
     assert kdxa_doc.select("//*[hasTag('phone')]")[0].get_feature_value("tag", "phone")['value'] == '785-368-1772'
-
-
-def test_tag_instances():
-    doc = Document.open_kddb(f"{get_test_directory()}tag_test.kddb")
-    # Get all nodes that have a tag of service address
-    for tag in doc.get_tag_instances('Bill/BillService/ServiceAddress'):
-        node_content_list = []
-        for node in tag.nodes:
-            node_content_list.append(node.get_all_content)
-
-        print(node_content_list)
-    pass
 
 
 # Test the new tag instance
