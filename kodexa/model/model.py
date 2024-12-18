@@ -293,6 +293,8 @@ class ContentNode(object):
         if content is not None and len(self.get_content_parts()) == 0:
             self.set_content_parts([content])
 
+        self.cached_all_content = None
+
     def get_content_parts(self):
         return self.document.get_persistence().get_content_parts(self)
 
@@ -818,12 +820,13 @@ class ContentNode(object):
         self.document.get_persistence().flush_cache()
         return parsed_selector.resolve(self, variables, context)
 
-    def get_all_content(self, separator=" ", strip=True):
+    def get_all_content(self, separator=" ", strip=True, use_cache=False):
         """Get this node's content, concatenated with all of its children's content.
 
         Args:
           separator(str, optional): The separator to use in joining content together; defaults to " ".
           strip(boolean, optional): Strip the result
+          use_cache(boolean, optional): Use the cache
 
         Returns:
           str: The complete content for this node concatenated with the content of all child nodes.
@@ -833,6 +836,9 @@ class ContentNode(object):
             "This string is made up of multiple nodes"
         """
         s = ""
+        if self.cached_all_content is not None and use_cache:
+            return self.cached_all_content
+
         children = self.get_content_parts()
         for part in children:
             if isinstance(part, str):
@@ -855,7 +861,8 @@ class ContentNode(object):
                     s += separator
                 s += child.get_all_content(separator, strip=strip)
 
-        return s.strip() if strip else s
+        self.cached_all_content = s.strip() if strip else s
+        return self.cached_all_content
 
     def adopt_children(self, nodes_to_adopt, replace=False):
         """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
