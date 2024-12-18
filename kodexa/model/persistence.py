@@ -111,9 +111,10 @@ class SqliteDocumentPersistence(object):
 
         self.cursor = self.connection.cursor()
         self.cursor.execute("PRAGMA journal_mode=OFF")
-        self.cursor.execute("pragma temp_store = memory")
-        self.cursor.execute("pragma mmap_size = 30000000000")
-        self.cursor.execute("pragma cache_size = 10000")  # Set the cache size to 10,000 pages
+        self.cursor.execute("PRAGMA temp_store=MEMORY")
+        self.cursor.execute("PRAGMA mmap_size=30000000000")
+        self.cursor.execute("PRAGMA cache_size=10000")
+        self.cursor.execute("PRAGMA page_size=4096")
 
         try:
             # We need to populate node_type_id_by_name
@@ -865,10 +866,11 @@ class SqliteDocumentPersistence(object):
         self.connection.commit()
         self.cursor.execute("VACUUM")
         self.cursor = self.connection.cursor()
-        self.cursor.execute("pragma journal_mode=OFF")
-        self.cursor.execute("pragma temp_store = memory")
-        self.cursor.execute("pragma mmap_size = 30000000000")
-        self.cursor.execute("pragma cache_size = 10000")  # Set the cache size to 10,000 pages
+        self.cursor.execute("PRAGMA journal_mode=OFF")
+        self.cursor.execute("PRAGMA temp_store=MEMORY")
+        self.cursor.execute("PRAGMA mmap_size=30000000000")
+        self.cursor.execute("PRAGMA cache_size=10000")
+        self.cursor.execute("PRAGMA page_size=4096")
 
     def dump_in_memory_db_to_file(self):
         # Connect to a new or existing database file
