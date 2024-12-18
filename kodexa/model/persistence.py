@@ -1607,7 +1607,6 @@ class PersistenceManager(object):
         if len(dirty_nodes) == 0:
             return
 
-        logger.debug(f"Identified {len(dirty_nodes)} nodes to update")
         if not self._underlying_persistence.connection.in_transaction:
             self._underlying_persistence.connection.execute("BEGIN TRANSACTION")
 
