@@ -293,8 +293,6 @@ class ContentNode(object):
         if content is not None and len(self.get_content_parts()) == 0:
             self.set_content_parts([content])
 
-        self.cached_all_content = None
-
     def get_content_parts(self):
         return self.document.get_persistence().get_content_parts(self)
 
@@ -793,12 +791,13 @@ class ContentNode(object):
         result = self.select(selector, variables)
         return result[0] if len(result) > 0 else None
 
-    def select(self, selector, variables=None):
+    def select(self, selector, variables=None, first_only=False):
         """Select and return the child nodes of this node that match the selector value.
 
         Args:
           selector (str): The selector (ie. //*)
           variables (dict, optional): A dictionary of variable name/value to use in substituion; defaults to None.  Dictionary keys should match a variable specified in the selector.
+          first_only (bool, optional): If True, only the first matching node will be returned; defaults to False.
 
         Returns:
           list[ContentNode]: A list of the matching content nodes.  If no matches are found, the list will be empty.
@@ -815,18 +814,17 @@ class ContentNode(object):
         from kodexa.selectors import parse
         from kodexa.selectors.ast import SelectorContext
 
-        context = SelectorContext(self.document)
+        context = SelectorContext(self.document, first_only=first_only)
         parsed_selector = parse(selector)
         self.document.get_persistence().flush_cache()
         return parsed_selector.resolve(self, variables, context)
 
-    def get_all_content(self, separator=" ", strip=True, use_cache=False):
+    def get_all_content(self, separator=" ", strip=True):
         """Get this node's content, concatenated with all of its children's content.
 
         Args:
           separator(str, optional): The separator to use in joining content together; defaults to " ".
           strip(boolean, optional): Strip the result
-          use_cache(boolean, optional): Use the cache
 
         Returns:
           str: The complete content for this node concatenated with the content of all child nodes.
@@ -836,9 +834,6 @@ class ContentNode(object):
             "This string is made up of multiple nodes"
         """
         s = ""
-        if self.cached_all_content is not None and use_cache:
-            return self.cached_all_content
-
         children = self.get_content_parts()
         for part in children:
             if isinstance(part, str):
@@ -861,14 +856,13 @@ class ContentNode(object):
                     s += separator
                 s += child.get_all_content(separator, strip=strip)
 
-        self.cached_all_content = s.strip() if strip else s
-        return self.cached_all_content
+        return s.strip() if strip else s
 
     def adopt_children(self, nodes_to_adopt, replace=False):
         """This will take a list of content nodes and adopt them under this node, ensuring they are re-parented.
 
         Args:
-          children (List[ContentNode]): A list of ContentNodes that will be added to the end of this node's children collection
+          nodes_to_adopt (List[ContentNode]): A list of ContentNodes that will be added to the end of this node's children collection
           replace (bool): If True, will remove all current children and replace them with the new list; defaults to True
 
         >>> # select all nodes of type 'line', then the root node 'adopts' them
@@ -3109,17 +3103,18 @@ class Document(object):
         >>> document.get_root().select_first('//*[hasTag($tagName)]', {"tagName": "div"})
            ContentNode
         """
-        result = self.select(selector, variables)
+        result = self.select(selector, variables, first_only=True)
         return result[0] if len(result) > 0 else None
 
     def select(
-            self, selector: str, variables: Optional[dict] = None
+            self, selector: str, variables: Optional[dict] = None, first_only=False
     ) -> List[ContentNode]:
         """Execute a selector on the root node and then return a list of the matching nodes.
 
         Args:
           selector (str): The selector (ie. //*)
           variables (Optional[dict): A dictionary of variable name/value to use in substituion; defaults to an empty
+          first_only (bool): If True, only the first matching node is returned; defaults to False.
           dictionary.  Dictionary keys should match a variable specified in the selector.
 
         Returns:
@@ -3131,7 +3126,7 @@ class Document(object):
         if variables is None:
             variables = {}
         if self.content_node:
-            result = self.content_node.select(selector, variables)
+            result = self.content_node.select(selector, variables, first_only)
             if isinstance(result, list):
                 return result
 

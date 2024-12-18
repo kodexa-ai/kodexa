@@ -36,11 +36,12 @@ __all__ = [
 
 
 class SelectorContext:
-    def __init__(self, document: Document):
+    def __init__(self, document: Document, first_only=False):
         self.pattern_cache = {}
         self.last_op = None
         self.document: Document = document
         self.stream = 0
+        self.first_only = first_only
 
     def cache_pattern(self, pattern):
         if pattern not in self.pattern_cache:
@@ -53,20 +54,26 @@ class PipelineExpression(object):
 
     def __init__(self, left, op, right):
         self.left = left
-        """the left side of the pipeline expression"""
         self.op = op
-        """the operator of the pipeline expression"""
         self.right = right
-        """the right side of the pipeline expression"""
 
     def resolve(self, content_node: ContentNode, variables, context: SelectorContext):
         left_nodes = self.left.resolve(content_node, variables, context)
         result_nodes: List[ContentNode] = []
         context.stream = context.stream + 1
-        for node in left_nodes:
-            result_nodes.extend(self.right.resolve(node, variables, context))
+
+        # If first_only is True and we already have left nodes, only process the first one
+        nodes_to_process = left_nodes[:1] if context.first_only and left_nodes else left_nodes
+
+        for node in nodes_to_process:
+            right_results = self.right.resolve(node, variables, context)
+            result_nodes.extend(right_results)
+            # If first_only is True and we found a match, return immediately
+            if context.first_only and result_nodes:
+                break
+
         context.stream = context.stream - 1
-        return result_nodes
+        return result_nodes[:1] if context.first_only else result_nodes
 
 
 class UnaryExpression(object):
@@ -181,17 +188,12 @@ class AbsolutePath(object):
 
 
 class Step(object):
-    """
-    A single step in a relative path. a; @b; text(); parent::foo:bar[5].
-    """
+    """A single step in a relative path."""
 
     def __init__(self, axis, node_test, predicates):
         self.axis = axis
-        """the step's axis, or @ or None if abbreviated or undefined"""
         self.node_test = node_test
-        """a NameTest or NodeType object describing the test represented"""
         self.predicates = predicates
-        """a list of predicates filtering the step"""
 
     def resolve(self, obj, variables, context: SelectorContext):
         match = True
@@ -217,8 +219,9 @@ class Step(object):
                 return []
 
             nodes = self.node_test.test(axis_node, variables, context)
-
             final_nodes = []
+
+            # If first_only is True, only process until we find the first match
             for node in nodes:
                 match = True
                 for predicate in self.predicates:
@@ -230,6 +233,8 @@ class Step(object):
 
                 if match:
                     final_nodes.append(node)
+                    if context.first_only:
+                        break
 
             return final_nodes
 
@@ -247,9 +252,7 @@ class NameTest(object):
 
     def __init__(self, prefix, name):
         self.prefix = prefix
-        """the namespace prefix used for the test, or None if unset"""
         self.name = name
-        """the node name used for the test, or *"""
 
     def test(self, obj, variables, context: SelectorContext):
         if isinstance(obj, ContentNode):
@@ -257,12 +260,15 @@ class NameTest(object):
                 if self.name == "*" or self.name == obj.node_type:
                     return [obj]
             else:
-                return context.document.get_persistence().get_content_nodes(
+                nodes = context.document.get_persistence().get_content_nodes(
                     self.name, obj, context.last_op != "/"
                 )
+                # If first_only is True, return only the first matching node
+                return nodes[:1] if context.first_only else nodes
+
         if isinstance(obj, ContentFeature):
             return self.name == "*" or (
-                obj.feature_type == self.prefix and obj.name == self.name
+                    obj.feature_type == self.prefix and obj.name == self.name
             )
         return False
 

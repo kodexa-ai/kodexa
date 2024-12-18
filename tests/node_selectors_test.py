@@ -150,6 +150,11 @@ def test_parent_axis():
     link = document.select('//a')[0]
     assert link.select('parent::div')[0].node_type == 'div'
 
+def test_select_first():
+    document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
+    first_paragraph = document.select_first('//p')
+    assert first_paragraph.select('parent::div')[0].node_type == 'div'
+
 
 def test_instance_indexes():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
