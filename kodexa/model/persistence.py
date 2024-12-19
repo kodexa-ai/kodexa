@@ -1156,22 +1156,6 @@ class SqliteDocumentPersistence(object):
 
         return content_nodes
 
-    def __ensure_ed_table_exists(self):
-        """
-        Ensure the 'ed' table exists in the database.
-        Creates the table if it does not exist.
-        """
-        self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS ed (
-                obj BLOB
-            )
-        """)
-
-        # Check if the table has any rows, if not, insert an initial empty row
-        result = self.cursor.execute("SELECT COUNT(*) FROM ed").fetchone()
-        if result[0] == 0:
-            self.cursor.execute("INSERT INTO ed (obj) VALUES (?)", [sqlite3.Binary(msgpack.packb({}))])
-
     def __ensure_validations_table_exists(self):
         """
         Ensure the 'validations' table exists in the database.
@@ -1213,30 +1197,97 @@ class SqliteDocumentPersistence(object):
             return [DocumentTaxonValidation.model_validate(v) for v in msgpack.unpackb(result[0])]
         return []
 
-    def set_external_data(self, external_data: dict):
+    def set_external_data(self, external_data: dict, key: str = "default"):
         """
-        Sets the external data for the document.
+        Sets the external data for the document for a specific key.
 
         Args:
             external_data (dict): The external data to store, must be JSON serializable.
+            key (str): The key to store the data under, defaults to "default"
         """
         self.__ensure_ed_table_exists()
         serialized_data = sqlite3.Binary(msgpack.packb(external_data))
-        self.cursor.execute("UPDATE ed SET obj = ? WHERE rowid = 1", [serialized_data])
+        self.cursor.execute("DELETE FROM ed WHERE key = ?", [key])
+        self.cursor.execute("INSERT INTO ed (key, obj) VALUES (?, ?)", [key, serialized_data])
         self.connection.commit()
 
-    def get_external_data(self) -> dict:
+    def get_external_data(self, key: str = "default") -> dict:
         """
-        Gets the external data associated with this document.
+        Gets the external data associated with this document for a specific key.
+
+        Args:
+            key (str): The key to retrieve data for, defaults to "default"
 
         Returns:
-            dict: The external data stored in the ed table.
+            dict: The external data stored in the ed table for the given key.
         """
         self.__ensure_ed_table_exists()
-        result = self.cursor.execute("SELECT obj FROM ed WHERE rowid = 1").fetchone()
+        result = self.cursor.execute("SELECT obj FROM ed WHERE key = ?", [key]).fetchone()
         if result and result[0]:
             return msgpack.unpackb(result[0])
         return {}
+
+    def get_external_data_keys(self) -> List[str]:
+        """
+        Gets all keys under which external data is stored.
+
+        Returns:
+            List[str]: A list of all keys that have external data stored.
+        """
+        self.__ensure_ed_table_exists()
+        results = self.cursor.execute("SELECT key FROM ed").fetchall()
+        return [row[0] for row in results]
+
+    def __ensure_ed_table_exists(self):
+        """
+        Ensure the 'ed' table exists in the database.
+        Creates the table if it does not exist.
+        """
+        # First check if the old table exists and has id column
+        old_table = self.cursor.execute("""
+            SELECT name FROM sqlite_master 
+            WHERE type='table' AND name='ed'
+        """).fetchone()
+
+        if old_table:
+            # Check if table has id column
+            table_info = self.cursor.execute("PRAGMA table_info(ed)").fetchall()
+            has_id_column = any(col[1] == 'id' for col in table_info)
+
+            if has_id_column:
+                # Get the old data and drop the table
+                data = self.cursor.execute("SELECT obj FROM ed").fetchone()
+                self.cursor.execute("DROP TABLE ed")
+
+                # Create new table with key column
+                self.cursor.execute("""
+                    CREATE TABLE ed (
+                        key TEXT PRIMARY KEY,
+                        obj BLOB
+                    )
+                """)
+
+                # If there was data in the old table, insert it with default key
+                if data:
+                    self.cursor.execute("INSERT INTO ed (key, obj) VALUES (?, ?)",
+                                      ["default", data[0]])
+            else:
+                # Table exists but doesn't need migration - do nothing
+                return
+        else:
+            # Create new table if it doesn't exist
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS ed (
+                    key TEXT PRIMARY KEY,
+                    obj BLOB
+                )
+            """)
+
+            # Check if default key exists, if not insert empty data
+            result = self.cursor.execute("SELECT COUNT(*) FROM ed WHERE key = 'default'").fetchone()
+            if result[0] == 0:
+                self.cursor.execute("INSERT INTO ed (key, obj) VALUES (?, ?)",
+                                  ["default", sqlite3.Binary(msgpack.packb({}))])
 
     def __ensure_steps_table_exists(self):
         """
@@ -1436,22 +1487,31 @@ class PersistenceManager(object):
     def get_validations(self) -> list[DocumentTaxonValidation]:
         return self._underlying_persistence.get_validations()
 
-    def get_external_data(self) -> dict:
+    def get_external_data(self, key="default") -> dict:
         """
         Gets the external data object associated with this document
 
         :return: dict of the external data
         """
-        return self._underlying_persistence.get_external_data()
+        return self._underlying_persistence.get_external_data(key)
 
-    def set_external_data(self, external_data:dict):
+    def get_external_data_keys(self) -> List[str]:
+        """
+        Gets all keys under which external data is stored.
+
+        Returns:
+            List[str]: A list of all keys that have external data stored.
+        """
+        return self._underlying_persistence.get_external_data_keys()
+
+    def set_external_data(self, external_data:dict, key="default"):
         """
         Sets the external data for this document
 
         :param external_data: dict representing the external data, must be JSON serializable
         :return:
         """
-        self._underlying_persistence.set_external_data(external_data)
+        self._underlying_persistence.set_external_data(external_data, key)
 
     def get_nodes_by_type(self, node_type: str) -> List[ContentNode]:
         """

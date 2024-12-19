@@ -2443,11 +2443,14 @@ class Document(object):
     def get_exceptions(self) -> List[ContentException]:
         return self._persistence_layer.get_exceptions()
 
-    def get_external_data(self) -> dict:
-        return self._persistence_layer.get_external_data()
+    def get_external_data(self, key="default") -> dict:
+        return self._persistence_layer.get_external_data(key)
 
-    def set_external_data(self, external_data:dict):
-        return self._persistence_layer.set_external_data(external_data)
+    def get_external_data_keys(self) -> list[str]:
+        return self._persistence_layer.get_external_data_keys()
+
+    def set_external_data(self, external_data:dict, key="default"):
+        return self._persistence_layer.set_external_data(external_data, key)
 
     def get_steps(self) -> list[ProcessingStep]:
         return self._persistence_layer.get_steps()
