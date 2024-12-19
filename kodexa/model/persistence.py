@@ -1243,18 +1243,18 @@ class SqliteDocumentPersistence(object):
         Ensure the 'ed' table exists in the database.
         Creates the table if it does not exist.
         """
-        # First check if the old table exists and has id column
+        # First check if the old table exists and has key column
         old_table = self.cursor.execute("""
             SELECT name FROM sqlite_master 
             WHERE type='table' AND name='ed'
         """).fetchone()
 
         if old_table:
-            # Check if table has id column
+            # Check if table has key column
             table_info = self.cursor.execute("PRAGMA table_info(ed)").fetchall()
-            has_id_column = any(col[1] == 'id' for col in table_info)
+            has_key_column = any(col[1] == 'key' for col in table_info)
 
-            if has_id_column:
+            if not has_key_column:
                 # Get the old data and drop the table
                 data = self.cursor.execute("SELECT obj FROM ed").fetchone()
                 self.cursor.execute("DROP TABLE ed")
@@ -1272,7 +1272,7 @@ class SqliteDocumentPersistence(object):
                     self.cursor.execute("INSERT INTO ed (key, obj) VALUES (?, ?)",
                                       ["default", data[0]])
             else:
-                # Table exists but doesn't need migration - do nothing
+                # Table exists and has key column - do nothing
                 return
         else:
             # Create new table if it doesn't exist
