@@ -2,9 +2,6 @@ name: Build and Package with Poetry (Feature)
 
 on:
   push:
-    branches-ignore:
-      - 'releases/*'
-      - develop
     paths:
       - '**'
 
