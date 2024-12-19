@@ -5428,6 +5428,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             replace=False,
             additional_metadata: Optional[dict] = None,
             external_data: Optional[dict] = None,
+            document: Optional[Document] = None,
     ):
         """
         Upload a file to the store.
@@ -5438,6 +5439,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             replace (bool): Replace the file if it already exists (Default False).
             additional_metadata (Optional[dict]): Additional metadata to add to the file (Default None).
             external_data (Optional[dict]): External data to add to the file (Default None).
+            document (Optional[Document]): The document to add to the file (Default None).
         """
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
@@ -5447,7 +5449,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
                     content=path_content,
                     replace=replace,
                     additional_metadata=additional_metadata,
-                    external_data=external_data
+                    external_data=external_data,
+                    document=document,
                 )
         else:
             raise Exception(f"{file_path} is not a file")
@@ -5459,6 +5462,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             replace=False,
             additional_metadata: Optional[dict] = None,
             external_data: Optional[dict] = None,
+            document: Optional[Document] = None,
     ) -> DocumentFamilyEndpoint:
         """
         Put the content into the store at the given path.
@@ -5469,11 +5473,12 @@ class DocumentStoreEndpoint(StoreEndpoint):
             replace (bool): Replace the content if it exists.
             additional_metadata (Optional[dict]): Additional metadata to store with the document (not it can't include 'path').
             external_data (Optional[dict]): External data to store with the document.
+            document (Optional[Document]): The document to store with the content.
 
         Returns:
             DocumentFamilyEndpoint: The document family that was created.
         """
-        files = {"file": content}
+        files = {"file": content, "document": document.to_kddb()} if document else {"file": content}
 
         if additional_metadata is None:
             additional_metadata = {}
