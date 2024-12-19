@@ -32,7 +32,7 @@ jobs:
             NEW_LATEST_PATCH_PART=$((PATCH_PART+1))a${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "test"* ]]; then
             NEW_LATEST_PATCH_PART=$((PATCH_PART+1))rc${GITHUB_RUN_ID}
-          elif [[ $BRANCH_NAME == "main"* ]]; then
+          elif [[ $BRANCH_NAME == "main"* || $BRANCH_NAME == "releases"* ]]; then
             poetry version patch
             VERSION=$(poetry version --short)
             MINOR_PATCH_PART=${VERSION#*.}
