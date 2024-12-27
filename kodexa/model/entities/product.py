@@ -1,13 +1,16 @@
-from typing import Optional, List
+from decimal import Decimal
+from typing import Optional, List, Set
 
 from pydantic import BaseModel, ConfigDict, Field
+
 from kodexa.model.base import StandardDateTime
 from kodexa.platform.client import EntityEndpoint, PageEndpoint, EntitiesEndpoint
 from .product_group import ProductGroup
 
-class Product(BaseModel):
-    """
 
+class ProjectTemplateMetadata(BaseModel):
+    """
+    A project template metadata entity
     """
     model_config = ConfigDict(
         populate_by_name=True,
@@ -15,10 +18,40 @@ class Product(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    """
-    A product
-    """
 
+    id: str
+
+
+class ProductProjectTemplate(BaseModel):
+    """
+    A product project template entity representing the relationship between products and project templates
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    id: Optional[str] = None
+    uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    display_order: Optional[int] = Field(None, alias="displayOrder")
+    project_template_metadata: Optional[ProjectTemplateMetadata] = Field(None, alias="projectTemplateMetadata")
+
+
+class Product(BaseModel):
+    """
+    A product entity representing a product in the Kodexa platform
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
 
     id: Optional[str] = None
     uuid: Optional[str] = None
@@ -29,6 +62,25 @@ class Product(BaseModel):
     description: Optional[str] = None
     overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
     product_group: ProductGroup = Field(..., alias="productGroup")
+    parent: Optional['Product'] = None
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    price_id: Optional[str] = Field(None, alias="priceId")
+    price: Optional[Decimal] = None
+    number_of_credits: Optional[int] = Field(None, alias="numberOfCredits")
+    price_suffix: Optional[str] = Field(None, alias="priceSuffix")
+    has_quantity: bool = Field(False, alias="hasQuantity")
+    active: bool = True
+    order: Optional[int] = None
+    promoted: Optional[bool] = None
+    product_project_templates: Optional[Set[ProductProjectTemplate]] = Field(None, alias="productProjectTemplates")
+    search_text: Optional[str] = None
+
+    def update_search_text(self):
+        """Updates the search text for the product"""
+        if self.product_group:
+            self.search_text = f"{self.name.lower()} {self.product_group.name.lower()}"
+        else:
+            self.search_text = self.name.lower()
 
 
 class ProductEndpoint(Product, EntityEndpoint):
@@ -54,7 +106,7 @@ class ProductEndpoint(Product, EntityEndpoint):
 
 class PageProduct(BaseModel):
     """
-
+    Represents a paginated list of products
     """
     model_config = ConfigDict(
         populate_by_name=True,
@@ -67,7 +119,6 @@ class PageProduct(BaseModel):
     size: Optional[int] = None
     content: Optional[List[Product]] = None
     number: Optional[int] = None
-
     number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
     first: Optional[bool] = None
     last: Optional[bool] = None
