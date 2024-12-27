@@ -4504,11 +4504,7 @@ class PageTaxonomy(BaseModel):
     last: Optional[bool] = None
     empty: Optional[bool] = None
 
-
 class GuidanceTagResult(BaseModel):
-    """
-
-    """
     value: Optional[str] = None
     line_uuid: Optional[str] = Field(None, alias="lineUuid")
 
@@ -4519,7 +4515,6 @@ class UserSelection(BaseModel):
 
 
 class GuidanceRelationEmbedding(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4533,7 +4528,10 @@ class GuidanceRelationEmbedding(BaseModel):
 
 
 class Guidance(BaseModel):
-    id: Optional[str] = Field(None, description="The ID of the guidance")
+    """
+    A guidance is a set of instructions and examples to guide taxonomies and extraction
+    """
+    id: Optional[str] = Field(None)
     name: Optional[str] = None
     guidance_type: Optional[str] = Field(None, alias="guidanceType")
     guidance_key: Optional[str] = Field(None, alias="guidanceKey")
@@ -4543,13 +4541,13 @@ class Guidance(BaseModel):
     document_name: Optional[str] = Field(None, alias="documentName")
     document_page: Optional[int] = Field(None, alias="documentPage")
     guidance_text: Optional[str] = Field(None, alias="guidanceText")
-    relation_embeddings: Optional[List[GuidanceRelationEmbedding]] = Field([], alias="relationEmbeddings")
+    relation_embeddings: Optional[List[GuidanceRelationEmbedding]] = Field(None, alias="relationEmbeddings")
     summary: Optional[str] = None
     guidance_response: Optional[Dict[str, Any]] = Field(None, alias="guidanceResponse")
-    active: Optional[bool] = True
+    active: bool = True
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
     required_tags: Optional[List[str]] = Field(None, alias="requiredTags")
-    priority: Optional[int] = 1
+    priority: int = 1
     user_instructions: Optional[str] = Field(None, alias="userInstructions")
     user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
     user_id: Optional[str] = Field(None, alias="userId")
@@ -4560,23 +4558,17 @@ class Guidance(BaseModel):
     guidance_options: Optional[List[Option]] = Field(None, alias="guidanceOptions")
 
 
-class GuidanceEmbeddingType(Enum):
+class GuidanceEmbeddingType(str, Enum):
     SUMMARY = "SUMMARY"
     CONTENT = "CONTENT"
     TFIDF = "TFIDF"
 
 
 class GuidanceSetStorage(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
-
-    summarize_model_id: Optional[str] = Field(None, alias="summarizeModelId")
-    summarize_prompt: Optional[str] = Field(None, alias="summarizePrompt")
     embedding_model_id: Optional[str] = Field(None, alias="embeddingModelId")
+    summarize_model_id: Optional[str] = Field(None, alias="summarizeModelId")
+    use_custom_summarize_prompt: Optional[bool] = Field(None, alias="useCustomSummarizePrompt")
+    summarize_prompt: Optional[str] = Field(None, alias="summarizePrompt")
     embedding_types: Optional[List[GuidanceEmbeddingType]] = Field(None, alias="embeddingTypes")
 
 
@@ -4591,10 +4583,9 @@ class GuidanceSet(ExtensionPackProvided):
         protected_namespaces=("model_config",),
     )
 
-    active_store: bool = Field(False, alias="activeStore",
-                               description="If true, allows guidance to be stored through the API")
+    active_store: bool = False
     storage: GuidanceSetStorage = Field(default_factory=GuidanceSetStorage)
-    guidance: List[Guidance] = Field(default_factory=list, description="The guidance in the set")
+    guidance: Optional[List[Guidance]] = None
 
     def get_type(self) -> str:
         return "guidance"
