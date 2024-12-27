@@ -28,7 +28,7 @@ class Product(BaseModel):
     name: str
     description: Optional[str] = None
     overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
-    product_group: ProductGroup
+    product_group: ProductGroup = Field(..., alias="productGroup")
 
 
 class ProductEndpoint(Product, EntityEndpoint):
