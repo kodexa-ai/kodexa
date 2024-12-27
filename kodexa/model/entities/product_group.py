@@ -3,9 +3,9 @@ from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, Field
 from kodexa.model.base import StandardDateTime
 from kodexa.platform.client import EntityEndpoint, PageEndpoint, EntitiesEndpoint
-from product_group import ProductGroup
 
-class Product(BaseModel):
+
+class ProductGroup(BaseModel):
     """
 
     """
@@ -16,7 +16,7 @@ class Product(BaseModel):
         protected_namespaces=("model_config",),
     )
     """
-    A product
+    A product group
     """
 
 
@@ -28,11 +28,10 @@ class Product(BaseModel):
     name: str
     description: Optional[str] = None
     overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
-    product_group: ProductGroup
 
 
-class ProductEndpoint(Product, EntityEndpoint):
-    """Handles the endpoint for a product
+class ProductGroupEndpoint(ProductGroup, EntityEndpoint):
+    """Handles the endpoint for a product group
 
     This class is a combination of DataException and EntityEndpoint. It is used
     to manage the endpoint for data exceptions.
@@ -49,10 +48,10 @@ class ProductEndpoint(Product, EntityEndpoint):
         Returns:
             str: The type of the endpoint.
         """
-        return "products"
+        return "product-groups"
 
 
-class PageProduct(BaseModel):
+class PageProductGroup(BaseModel):
     """
 
     """
@@ -65,7 +64,7 @@ class PageProduct(BaseModel):
     total_pages: Optional[int] = Field(None, alias="totalPages")
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
-    content: Optional[List[Product]] = None
+    content: Optional[List[ProductGroup]] = None
     number: Optional[int] = None
 
     number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
@@ -74,15 +73,15 @@ class PageProduct(BaseModel):
     empty: Optional[bool] = None
 
 
-class PageProductEndpoint(PageProduct, PageEndpoint):
+class PageProductGroupEndpoint(PageProductGroup, PageEndpoint):
     def get_type(self) -> Optional[str]:
-        return "product"
+        return "product-group"
 
 
-class ProductsEndpoint(EntitiesEndpoint):
-    """Represents the products endpoint
+class ProductGroupsEndpoint(EntitiesEndpoint):
+    """Represents the product groups endpoint
 
-    This class is used to represent the products endpoint in the system.
+    This class is used to represent the product groups endpoint in the system.
 
     Attributes:
         object_dict: A dictionary containing the object data.
@@ -98,7 +97,7 @@ class ProductsEndpoint(EntitiesEndpoint):
         Returns:
             str: The type of the endpoint.
         """
-        return "products"
+        return "product-groups"
 
     def get_instance_class(self, object_dict=None):
         """Get the instance class of the endpoint
@@ -111,7 +110,7 @@ class ProductsEndpoint(EntitiesEndpoint):
         Returns:
             AssistantEndpoint: The instance class of the endpoint.
         """
-        return ProductEndpoint
+        return ProductGroupEndpoint
 
     def get_page_class(self, object_dict=None):
         """Get the page class of the endpoint
@@ -124,4 +123,4 @@ class ProductsEndpoint(EntitiesEndpoint):
         Returns:
             PageAssistantEndpoint: The page class of the endpoint.
         """
-        return PageProductEndpoint
+        return PageProductGroupEndpoint
