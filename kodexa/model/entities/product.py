@@ -3,7 +3,7 @@ from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, Field
 from kodexa.model.base import StandardDateTime
 from kodexa.platform.client import EntityEndpoint, PageEndpoint, EntitiesEndpoint
-from product_group import ProductGroup
+from .product_group import ProductGroup
 
 class Product(BaseModel):
     """
