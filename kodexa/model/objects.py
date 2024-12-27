@@ -4558,7 +4558,7 @@ class Guidance(BaseModel):
     guidance_options: Optional[List[Option]] = Field(None, alias="guidanceOptions")
 
 
-class GuidanceEmbeddingType(str, Enum):
+class GuidanceEmbeddingType(Enum):
     SUMMARY = "SUMMARY"
     CONTENT = "CONTENT"
     TFIDF = "TFIDF"
