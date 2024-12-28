@@ -4584,7 +4584,7 @@ class GuidanceSet(ExtensionPackProvided):
     )
 
     active_store: bool = False
-    storage: GuidanceSetStorage = Field(default_factory=GuidanceSetStorage)
+    storage: Optional[GuidanceSetStorage] = None
     guidance: Optional[List[Guidance]] = None
 
     def get_type(self) -> str:
