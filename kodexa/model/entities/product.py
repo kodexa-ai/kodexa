@@ -73,7 +73,7 @@ class Product(BaseModel):
     active: bool = True
     order: Optional[int] = None
     promoted: Optional[bool] = None
-    projectTemplates: Optional[Set[ProjectTemplate]] = Field(None, alias="projectTemplates")
+    project_templates: Optional[Set[ProjectTemplate]] = Field(None, alias="projectTemplates")
     search_text: Optional[str] = None
 
     def update_search_text(self):
