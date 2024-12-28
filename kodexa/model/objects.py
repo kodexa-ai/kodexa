@@ -631,7 +631,7 @@ class ProjectGuidance(BaseModel):
     description: Optional[str] = None
     guidance: Optional[List[Guidance]] = Field(None)
     active_store: bool = Field(False, alias="activeStore")
-    storage: GuidanceSetStorage = Field(None, description="The storage for the guidance set")
+    storage: Optional[GuidanceSetStorage]= Field(None, description="The storage for the guidance set")
     template_ref: Optional[str] = Field(None, alias="templateRef")
     ref: Optional[str] = None
 
