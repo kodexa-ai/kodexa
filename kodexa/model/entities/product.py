@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from kodexa.model.base import StandardDateTime
 from kodexa.platform.client import EntityEndpoint, PageEndpoint, EntitiesEndpoint
 from .product_group import ProductGroup
+from ..objects import ProjectTemplate
 
 
 class ProjectTemplateMetadata(BaseModel):
@@ -72,7 +73,7 @@ class Product(BaseModel):
     active: bool = True
     order: Optional[int] = None
     promoted: Optional[bool] = None
-    product_project_templates: Optional[Set[ProductProjectTemplate]] = Field(None, alias="productProjectTemplates")
+    projectTemplates: Optional[Set[ProjectTemplate]] = Field(None, alias="projectTemplates")
     search_text: Optional[str] = None
 
     def update_search_text(self):
