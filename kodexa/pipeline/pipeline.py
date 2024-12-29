@@ -124,10 +124,12 @@ class PipelineContext:
         self.content_provider = content_provider
         self.context: Dict = context
         self.stop_on_exception = True
-        self.current_document = None
-        self.document_family = None
-        self.content_object = None
-        self.document_store = None
+        self.current_document: Optional[Document] = None
+        from kodexa.platform.client import DocumentFamilyEndpoint
+        self.document_family:Optional[DocumentFamilyEndpoint] = None
+        self.content_object:Optional[ContentObject] = None
+        from kodexa.platform.client import DocumentStoreEndpoint
+        self.document_store:Optional[DocumentStoreEndpoint] = None
         self.status_handler = status_handler
         self.cancellation_handler = cancellation_handler
 
