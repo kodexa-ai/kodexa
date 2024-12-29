@@ -4783,7 +4783,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         self.client.put(url, body=document_status.model_dump(by_alias=True))
 
     def add_document(
-            self, document: Document, content_object: Optional[ContentObject] = None
+            self, document: Document, content_object: Optional[ContentObject] = None,
+            taxonomies: Optional[List[Taxonomy]] = None, data_store: Optional[Store] = None
     ):
         """
         Add a document to the document family.
@@ -4791,22 +4792,36 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Args:
             document (Document): The document to add.
             content_object (Optional[ContentObject]): The content object. Defaults to None.
+            taxonomies (Optional[List[Taxonomy]]): List of taxonomies to use. Defaults to None.
+            data_store (Optional[Store]): Data store to add document to. Defaults to None.
         """
         url = (
             f'/api/stores/{self.store_ref.replace(":", "/")}/families/{self.id}/objects'
         )
         if content_object is None:
             content_object = self.content_objects[-1]
+
+        params = {
+            "sourceContentObjectId": content_object.id,
+            "transitionType": "DERIVED",
+            "documentVersion": document.version
+        }
+
+        # If we have a store but no taxonomies or the other way around then we need to throw an error
+        if (data_store and not taxonomies) or (taxonomies and not data_store):
+            raise Exception("If you provide a data store you must also provide taxonomies and vice-versa")
+
+        if taxonomies:
+            params["taxonomyRefs"] = ",".join([taxonomy.ref for taxonomy in taxonomies])
+
+        if data_store:
+            params["dataStoreRef"] = data_store.ref
+
         self.client.post(
             url,
-            params={
-                "sourceContentObjectId": content_object.id,
-                "transitionType": "DERIVED",
-                "documentVersion": document.version,
-            },
+            params=params,
             files={"file": document.to_kddb()},
         )
-
     def export_as_zip(self) -> bytes:
         """
         Export the document family as bytes.
