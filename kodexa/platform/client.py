@@ -5108,6 +5108,7 @@ class DataStoreEndpoint(StoreEndpoint):
             path: Optional[str] = None,
             root_name: str = "",
             friendly_names=True,
+            project_id: Optional[str] = None,
     ) -> str:
         """Get the data objects export of the store
 
@@ -5117,6 +5118,7 @@ class DataStoreEndpoint(StoreEndpoint):
             path (Optional[str]): The path to the data object
             root_name (str): The root name of the data objects export
             friendly_names (bool): Whether to use friendly names. Defaults to True
+            project_id (Optional[str]): The project ID
 
         Returns:
             str: The data objects export of the store
@@ -5132,6 +5134,9 @@ class DataStoreEndpoint(StoreEndpoint):
 
         if path:
             params["path"] = path
+            
+        if project_id:
+            params["projectId"] = project_id
 
         if output_format == "csv" and not path:
             raise ValueError("CSV output requires a path")
