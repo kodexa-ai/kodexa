@@ -4616,6 +4616,35 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = f"/api/documentFamilies/{self.id}/externalData"
         response = self.client.put(url, body=external_data)
         return response.json()
+        
+    def get_json(
+            self,
+            project_id: str,
+            friendly_names=False,            
+    ) -> str:
+        """Get the JSON export for the document family
+
+        Args:
+            project_id str: The project ID
+            friendly_names (bool): Whether to use friendly names. Defaults to False
+
+        Returns:
+            str: The JSON
+        """
+        if project_id is None:
+            raise Exception(
+                f"Project ID is required"
+            )
+        
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/dataObjects"
+        params = {
+            "format": "json",
+            "friendlyNames": friendly_names,
+            "projectId": project_id,
+        }
+
+        response = self.client.get(url, params=params)
+        return response.text
 
     def export(self) -> bytes:
         """
@@ -5108,7 +5137,6 @@ class DataStoreEndpoint(StoreEndpoint):
             path: Optional[str] = None,
             root_name: str = "",
             friendly_names=True,
-            project_id: Optional[str] = None,
     ) -> str:
         """Get the data objects export of the store
 
@@ -5118,7 +5146,6 @@ class DataStoreEndpoint(StoreEndpoint):
             path (Optional[str]): The path to the data object
             root_name (str): The root name of the data objects export
             friendly_names (bool): Whether to use friendly names. Defaults to True
-            project_id (Optional[str]): The project ID
 
         Returns:
             str: The data objects export of the store
@@ -5134,16 +5161,13 @@ class DataStoreEndpoint(StoreEndpoint):
 
         if path:
             params["path"] = path
-            
-        if project_id:
-            params["projectId"] = project_id
 
         if output_format == "csv" and not path:
             raise ValueError("CSV output requires a path")
 
         response = self.client.get(url, params=params)
         return response.text
-
+    
     def get_taxonomies(self) -> List[Taxonomy]:
         """Get the taxonomies of the store
 
