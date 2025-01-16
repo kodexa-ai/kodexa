@@ -4577,7 +4577,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     def unlock(self):
         """
-        Lock the document family.
+        Unlock the document family.
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/unlock"
         response = self.client.put(url)
@@ -4680,6 +4680,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             mixin: Optional[str] = None,
             label: Optional[str] = None,
             timeout: int = 60,
+            polling_delay_in_seconds: int = 5,
     ) -> "DocumentFamilyEndpoint":
         """
         Wait for the document family to be ready.
@@ -4688,6 +4689,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             mixin (Optional[str]): The mixin. Defaults to None.
             label (Optional[str]): The label. Defaults to None.
             timeout (int): The timeout. Defaults to 60.
+            polling_delay_in_seconds (int): The polling delay in seconds. Defaults to 5. 5 is the minimum value.
 
         Returns:
             DocumentFamilyEndpoint: The updated document family endpoint.
@@ -4696,6 +4698,9 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             "Waiting for mixin and/or label to be available on document family %s",
             self.id,
         )
+        if polling_delay_in_seconds < 5:        
+            polling_delay_in_seconds = 5
+            
         start = time.time()
         while time.time() - start < timeout:
             url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
@@ -4709,7 +4714,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             ):
                 return updated_document_family
 
-            time.sleep(5)
+            time.sleep(polling_delay_in_seconds)
 
         raise Exception(f"Not available on document family {self.id}")
 
