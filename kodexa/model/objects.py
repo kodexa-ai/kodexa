@@ -822,7 +822,7 @@ class SelectionOption(BaseModel):
     label: Optional[str] = None
     id: Optional[str] = None
     description: Optional[str] = None
-    lexical_relations: Optional[List[LexicalRelation]] = Field([], alias="lexicalRelations")
+    lexical_relations: Optional[List[LexicalRelation]] = Field(default_factory=list, alias="lexicalRelations")
 
 
 class SlugBasedMetadata1(BaseModel):
@@ -2645,6 +2645,8 @@ class Taxon(BaseModel):
     expression: Optional[str] = None
     enable_fallback_expression: Optional[bool] = Field(None, alias="enableFallbackExpression")
     fallback_expression: Optional[str] = Field(None, alias="fallbackExpression")
+    enable_serialization_expression: Optional[bool] = Field(None, alias="enableSerializationExpression")
+    serialization_expression: Optional[str] = Field(None, alias="serializationExpression")
     nullable: Optional[bool] = None
     null_value: Optional[str] = Field(None, alias="nullValue")
     denormalize_to_children: Optional[bool] = Field(False, alias="denormalizeToChildren")

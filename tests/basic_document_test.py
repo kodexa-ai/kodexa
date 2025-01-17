@@ -43,6 +43,7 @@ def test_external_data_for_existing_document():
 
     document = Document.from_kddb("test_documents/bank-statement.kddb")
 
+    document.set_external_data({"cheese":"foo"}, "new")
     document.set_external_data({"cheese":"bar"}, "new")
     assert document.get_external_data("new")["cheese"] == "bar"
     assert document.get_external_data() is not None
