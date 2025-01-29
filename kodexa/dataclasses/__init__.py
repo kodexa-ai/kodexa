@@ -73,7 +73,11 @@ class LLMDataAttribute(BaseModel):
     def to_dict(self, taxonomy: Taxonomy) -> dict:
         """Convert attribute to JSON with normalized value"""
 
-        taxon_external_name = taxonomy.get_taxon_by_path(self.taxon_path).external_name
+        target_taxon = taxonomy.get_taxon_by_path(self.taxon_path)
+        if target_taxon is None:
+            return {}
+
+        taxon_external_name = target_taxon.external_name
         return {
             taxon_external_name: self.normalized_text if self.normalized_text else self.value
         }
