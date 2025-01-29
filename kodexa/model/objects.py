@@ -2731,6 +2731,16 @@ class Taxon(BaseModel):
             structure["taxonType"] = self.taxon_type
         return structure
 
+    def get_taxon_by_path(self, path):
+        if self.path == path:
+            return self
+
+        if self.children:
+            for child in self.children:
+                result = child.get_taxon_by_path(path)
+                if result:
+                    return result
+
 
 class ContentObject(BaseModel):
     """
@@ -5666,6 +5676,16 @@ class Taxonomy(ExtensionPackProvided):
         alias="externalDataTaxonomyRefs",
         description="A list of references to an external data taxonomy",
     )
+
+    def get_taxon_by_path(self, path):
+        for taxon in self.taxons:
+            if taxon.path == path:
+                return taxon
+            if taxon.children is not None:
+                child_taxon = taxon.get_taxon_by_path(path)
+                if child_taxon is not None:
+                    return child_taxon
+        return None
 
     def update_paths(self):
         for taxon in self.taxons:

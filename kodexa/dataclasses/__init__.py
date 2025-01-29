@@ -70,6 +70,14 @@ class LLMDataAttribute(BaseModel):
         )
         self.exceptions.append(content_exception)
 
+    def to_dict(self, taxonomy: Taxonomy) -> dict:
+        """Convert attribute to JSON with normalized value"""
+
+        taxon_external_name = taxonomy.get_taxon_by_path(self.taxon_path).external_name
+        return {
+            taxon_external_name: self.normalized_text if self.normalized_text else self.value
+        }
+
 
 class LLMDataObject(BaseModel):
     """
@@ -153,6 +161,19 @@ class LLMDataObject(BaseModel):
             attr.node_uuid_list = field_data['node_uuids']
         if 'normalized_text' in field_data:
             attr.normalized_text = field_data['normalized_text']
+
+    def to_dict(self, taxonomy: Taxonomy) -> dict:
+        """Convert data object to JSON using normalized values and taxon paths"""
+        result = {}
+        for field in self.__fields__:
+            value = getattr(self, field)
+            if isinstance(value, list):
+                result[field] = [item.to_dict(taxonomy) for item in value if isinstance(item, (LLMDataObject, LLMDataAttribute))]
+            elif isinstance(value, LLMDataAttribute):
+                result.update(value.to_dict(taxonomy))
+            elif isinstance(value, LLMDataObject):
+                result[field] = value.to_dict(taxonomy)
+        return result
 
     def to_review(self, page_number=None):
         """
