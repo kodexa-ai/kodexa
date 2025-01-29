@@ -171,12 +171,18 @@ class LLMDataObject(BaseModel):
         result = {}
         for field in self.__fields__:
             value = getattr(self, field)
-            if isinstance(value, list):
-                result[field] = [item.to_dict(taxonomy) for item in value if isinstance(item, (LLMDataObject, LLMDataAttribute))]
+
+            if isinstance(value, list) and len(value) > 0:
+
+                target_taxon = taxonomy.get_taxon_by_path(value[0].taxon_path)
+                if target_taxon is not None:
+                    result[target_taxon.external_name] = [item.to_dict(taxonomy) for item in value if isinstance(item, (LLMDataObject, LLMDataAttribute))]
             elif isinstance(value, LLMDataAttribute):
                 result.update(value.to_dict(taxonomy))
             elif isinstance(value, LLMDataObject):
-                result[field] = value.to_dict(taxonomy)
+                target_taxon = taxonomy.get_taxon_by_path(value.taxon_path)
+                if target_taxon is not None:
+                    result[target_taxon.external_name] = value.to_dict(taxonomy)
         return result
 
     def to_review(self, page_number=None):
