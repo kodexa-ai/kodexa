@@ -173,10 +173,16 @@ class LLMDataObject(BaseModel):
             value = getattr(self, field)
 
             if isinstance(value, list) and len(value) > 0:
-
-                target_taxon = taxonomy.get_taxon_by_path(value[0].taxon_path)
-                if target_taxon is not None:
-                    result[target_taxon.external_name] = [item.to_dict(taxonomy) for item in value if isinstance(item, (LLMDataObject, LLMDataAttribute))]
+                if isinstance(value[0], LLMDataObject):
+                    # We need to find the first field of the object that is a LLMDataAttribute
+                    # and use that to derive the taxon path of the LLMDataObject
+                    value[0].__fields__.sort(key=lambda x: isinstance(getattr(value[0], x), LLMDataAttribute))
+                    if isinstance(getattr(value[0], value[0].__fields__[0]), LLMDataAttribute):
+                        # Get the basename of the taxon path (ie. if the taxon path is "a/b/c", get "a/b")
+                        taxon_path = getattr(value[0], value[0].__fields__[0]).taxon_path.rsplit('/', 1)[0]
+                        target_taxon = taxonomy.get_taxon_by_path(taxon_path)
+                        if target_taxon is not None:
+                            result[target_taxon.external_name] = [item.to_dict(taxonomy) for item in value if isinstance(item, (LLMDataObject, LLMDataAttribute))]
             elif isinstance(value, LLMDataAttribute):
                 result.update(value.to_dict(taxonomy))
             elif isinstance(value, LLMDataObject):
