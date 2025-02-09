@@ -1179,7 +1179,7 @@ class PageTaskEndpoint(PageTask, PageEndpoint):
     Represents a page of tasks.
     """
     def get_type(self) -> Optional[str]:
-        return "tasks"
+        return "task"
 
 class PageTaskActivityEndpoint(PageEndpoint):
     """
@@ -4228,7 +4228,8 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
         Args:
             taxons (list): A list of taxon objects to search through.
-            path (str): The path of the taxon to find.
+            parts (list): A list of strings representing the path to the taxon.
+            use_label (bool, optional): Whether to use the label or name of the taxon. Defaults to False.
 
         Returns:
             Taxon: The taxon object if found, None otherwise.
@@ -6648,7 +6649,7 @@ def resolve_object_type(obj_type):
     if len(hits) == 0:
         raise Exception(f"Unable to find object type {obj_type}")
 
-    raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
+    raise Exception(f"Too many potential matches for object type ({','.join(keys)})")
 
 
 class ExtractionEngineEndpoint:
@@ -7381,7 +7382,8 @@ class KodexaClient:
                 "product": ProductEndpoint,
                 "task": TaskEndpoint,
                 "productSubscription": ProductSubscriptionEndpoint,
-                "checkResponse": CheckResponseEndpoint
+                "checkResponse": CheckResponseEndpoint,
+                "taskTemplate": TaskTemplateEndpoint,
             }
 
             if component_type in known_components:
