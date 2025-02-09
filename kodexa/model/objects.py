@@ -2930,14 +2930,35 @@ class Project(BaseModel):
     owner: Optional[User] = None
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
-
 class TaskStatus(str, Enum):
     TODO = "TODO"
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
 
 
-class TaskCheckItem(BaseModel):
+class TaskActivityType(str, Enum):
+    TASK_CREATED = "TASK_CREATED"
+    TITLE_CHANGED = "TITLE_CHANGED"
+    DESCRIPTION_UPDATED = "DESCRIPTION_UPDATED"
+    STATUS_CHANGED = "STATUS_CHANGED"
+    ASSIGNEE_CHANGED = "ASSIGNEE_CHANGED"
+    DUE_DATE_CHANGED = "DUE_DATE_CHANGED"
+    PROJECT_CHANGED = "PROJECT_CHANGED"
+    COMMENT = "COMMENT"
+
+
+class TaskActivityDetail(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    type: TaskActivityType
+    interpolated_values: Dict[str, Any] = Field(default_factory=dict, alias="interpolatedValues")
+
+
+class TaskActivity(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2945,10 +2966,77 @@ class TaskCheckItem(BaseModel):
         protected_namespaces=("model_config",),
     )
 
+    task: Optional['Task'] = None
+    content: Optional[str] = None
+    detail: Optional[TaskActivityDetail] = None
+    user: Optional['User'] = None
+    search_text: Optional[str] = Field(None, alias="searchText")
+    transient_values: Dict[str, Any] = Field(default_factory=dict, alias="transientValues")
+
+
+class TaskTag(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    project: Optional['Project'] = None
     name: str
+    color: Optional[str] = None
+
+
+class DataFormAction(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    type: Optional[str] = None
+    label: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class TemplateDataForm(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    data_form_ref: Optional[str] = Field(None, alias="dataFormRef")
+    actions: List[DataFormAction] = Field(default_factory=list)
+
+
+class TaskTemplateMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    options: List[Option] = Field(default_factory=list)
+    forms: List[TemplateDataForm] = Field(default_factory=list)
+    workspace_id: Optional[str] = Field(None, alias="workspaceId")
+
+
+class TaskTemplate(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    project: Optional['Project'] = None
+    name: Optional[str] = None
     description: Optional[str] = None
-    taxon_path: Optional[str] = Field(None, alias="taxonPath")
-    taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
+    metadata: Optional[TaskTemplateMetadata] = None
 
 
 class TaskMetadata(BaseModel):
@@ -2959,10 +3047,19 @@ class TaskMetadata(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    field_values: Dict[str, Any] = Field(default_factory=dict)
-    fields: List[Option] = Field(default_factory=list)
-    check_items: List[TaskCheckItem] = Field(default_factory=list)
-    document_store_ref: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class TaskDocumentFamily(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    task: Optional['Task'] = None
+    document_family: Optional['DocumentFamily'] = Field(None, alias="documentFamily")
 
 
 class Task(BaseModel):
@@ -2973,16 +3070,19 @@ class Task(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    project: Optional['Project'] = Field(None)
-    title: Optional[str] = Field(None)
-    template: Optional[bool] = Field(None)
-    description: Optional[str] = Field(None)
-    metadata: Optional['TaskMetadata'] = Field(None)
+    project: Optional['Project'] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    metadata: Optional[TaskMetadata] = None
+    template: Optional[TaskTemplate] = None
     due_date: Optional[StandardDateTime] = Field(None, alias="dueDate")
     completed_date: Optional[StandardDateTime] = Field(None, alias="completedDate")
-    status: Optional['TaskStatus'] = Field(None)
-    assignee: Optional['User'] = Field(None)
-
+    status: Optional[TaskStatus] = None
+    assignee: Optional['User'] = None
+    task_activity: List[TaskActivity] = Field(default_factory=list, alias="taskActivity")
+    task_document_families: List[TaskDocumentFamily] = Field(default_factory=list, alias="taskDocumentFamilies")
+    search_text: Optional[str] = Field(None, alias="searchText")
+    tags: List[TaskTag] = Field(default_factory=list)
 
 class FeatureSet(BaseModel):
     """
