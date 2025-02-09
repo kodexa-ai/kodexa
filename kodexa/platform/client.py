@@ -1178,6 +1178,11 @@ class PageTaskEndpoint(PageTask, PageEndpoint):
         return "task"
 
 
+class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
+    def get_type(self) -> Optional[str]:
+        return "taskTemplate"
+
+
 class PageRetainedGuidanceEndpoint(PageRetainedGuidance, PageEndpoint):
     """Represents a page retained guidance endpoint.
 
@@ -2546,6 +2551,21 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
             raise ValueError("Workspace has no channel")
 
 
+class TaskTemplateEndpoint(EntityEndpoint, Task):
+    """Represents a task endpoint.
+
+    This class is used to interact with the task endpoint of the API.
+    """
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "projects".
+        """
+        return "taskTemplates"
+
+
 class TaskEndpoint(EntityEndpoint, Task):
     """Represents a task endpoint.
 
@@ -2904,6 +2924,37 @@ class AssistantsEndpoint(EntitiesEndpoint):
             PageAssistantEndpoint: The page class of the endpoint.
         """
         return PageAssistantEndpoint
+
+
+class TaskTemplatesEndpoint(EntitiesEndpoint):
+    """Represents a projects endpoint"""
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "taskTemplates"
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Returns:
+            ProjectEndpoint: The instance class of the endpoint.
+        """
+        return TaskTemplateEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Returns:
+            PageProjectEndpoint: The page class of the endpoint.
+        """
+        return PageTaskTemplateEndpoint
 
 
 class TasksEndpoint(EntitiesEndpoint):
@@ -4616,11 +4667,11 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         url = f"/api/documentFamilies/{self.id}/externalData"
         response = self.client.put(url, body=external_data)
         return response.json()
-        
+
     def get_json(
             self,
             project_id: str,
-            friendly_names=False,            
+            friendly_names=False,
     ) -> str:
         """Get the JSON export for the document family
 
@@ -4635,7 +4686,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             raise Exception(
                 f"Project ID is required"
             )
-        
+
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/dataObjects"
         params = {
             "format": "json",
@@ -4698,9 +4749,9 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             "Waiting for mixin and/or label to be available on document family %s",
             self.id,
         )
-        if polling_delay_in_seconds < 5:        
+        if polling_delay_in_seconds < 5:
             polling_delay_in_seconds = 5
-            
+
         start = time.time()
         while time.time() - start < timeout:
             url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
@@ -4856,6 +4907,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             params=params,
             files={"file": document.to_kddb()},
         )
+
     def export_as_zip(self) -> bytes:
         """
         Export the document family as bytes.
@@ -5172,7 +5224,7 @@ class DataStoreEndpoint(StoreEndpoint):
 
         response = self.client.get(url, params=params)
         return response.text
-    
+
     def get_taxonomies(self) -> List[Taxonomy]:
         """Get the taxonomies of the store
 
@@ -6386,6 +6438,20 @@ OBJECT_TYPES = {
         "global": True,
         "endpoint": MembershipsEndpoint,
     },
+    "tasks": {
+        "name": "task",
+        "plural": "tasks",
+        "type": TaskEndpoint,
+        "global": True,
+        "endpoint": TasksEndpoint,
+    },
+    "taskTemplates": {
+        "name": "taskTemplate",
+        "plural": "taskTemplates",
+        "type": TaskTemplateEndpoint,
+        "global": True,
+        "endpoint": TaskTemplatesEndpoint,
+    }
 }
 
 
