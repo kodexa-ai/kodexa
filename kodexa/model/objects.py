@@ -2932,8 +2932,9 @@ class Project(BaseModel):
 
 class TaskStatusType(str, Enum):
     """Enum for task status types"""
-    UNRESOLVED = "UNRESOLVED"
-    RESOLVED = "RESOLVED"
+    TODO = "TODO"
+    IN_PROGRESS = "IN_PROGRESS"
+    DONE = "DONE"
 
 
 class TaskStatus(BaseModel):
