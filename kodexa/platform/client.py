@@ -86,7 +86,8 @@ from kodexa.model.objects import (
     PageExtensionPack,
     PageOrganization,
     DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
-    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance,
+    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
+    TaskActivity, TaskDocumentFamily, TaskTag,
 )
 
 logger = logging.getLogger()
@@ -1174,8 +1175,166 @@ class PagePipelineEndpoint(PagePipeline, PageEndpoint):
 
 
 class PageTaskEndpoint(PageTask, PageEndpoint):
+    """
+    Represents a page of tasks.
+    """
     def get_type(self) -> Optional[str]:
-        return "task"
+        return "tasks"
+
+class PageTaskActivityEndpoint(PageEndpoint):
+    """
+    Represents a page of task activities.
+    """
+    def get_type(self) -> Optional[str]:
+        return "taskActivities"
+
+class PageTaskDocumentFamilyEndpoint(PageEndpoint):
+    """
+    Represents a page of task document families.
+    """
+    def get_type(self) -> Optional[str]:
+        return "taskDocumentFamilies"
+
+class PageTaskTagEndpoint(PageEndpoint):
+    """
+    Represents a page of task tags.
+    """
+    def get_type(self) -> Optional[str]:
+        return "taskTags"
+
+class TaskEndpoint(EntityEndpoint, Task):
+    """
+    Represents a task endpoint.
+    """
+    def get_type(self) -> str:
+        return "tasks"
+
+    def create_with_request(self, task: Task, task_template: Optional[TaskTemplate] = None, document_families: Optional[List[DocumentFamily]] = None):
+        """Create a task with the given request."""
+        url = "/api/tasks/createTaskWithRequest"
+        response = self.client.post(url, body={
+            "task": task.model_dump(mode="json", by_alias=True),
+            "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
+            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in document_families] if document_families else None
+        })
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def update_status(self, status: TaskStatus):
+        """Update the status of the task."""
+        url = f"/api/tasks/{self.id}/status"
+        response = self.client.put(url, body=status)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def remove_status(self):
+        """Remove the task status."""
+        url = f"/api/tasks/{self.id}/status"
+        response = self.client.delete(url)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def update_assignee(self, assignee: User):
+        """Update the assignee of the task."""
+        url = f"/api/tasks/{self.id}/assignee"
+        response = self.client.put(url, body=assignee.model_dump(mode="json", by_alias=True))
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def remove_assignee(self):
+        """Remove the task assignee."""
+        url = f"/api/tasks/{self.id}/assignee"
+        response = self.client.delete(url)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+class TasksEndpoint(EntitiesEndpoint):
+    """
+    Represents tasks endpoints.
+    """
+    def get_type(self) -> str:
+        return "tasks"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskEndpoint
+
+class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
+    """
+    Represents a task template endpoint.
+    """
+    def get_type(self) -> str:
+        return "taskTemplates"
+
+class TaskTemplatesEndpoint(EntitiesEndpoint):
+    """
+    Represents task templates endpoints.
+    """
+    def get_type(self) -> str:
+        return "taskTemplates"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskTemplateEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskTemplateEndpoint
+
+class TaskActivityEndpoint(EntityEndpoint, TaskActivity):
+    """
+    Represents a task activity endpoint.
+    """
+    def get_type(self) -> str:
+        return "taskActivities"
+
+class TaskActivitiesEndpoint(EntitiesEndpoint):
+    """
+    Represents task activities endpoints.
+    """
+    def get_type(self) -> str:
+        return "taskActivities"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskActivityEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskActivityEndpoint
+
+class TaskDocumentFamilyEndpoint(EntityEndpoint, TaskDocumentFamily):
+    """
+    Represents a task document family endpoint.
+    """
+    def get_type(self) -> str:
+        return "taskDocumentFamilies"
+
+class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
+    """
+    Represents task document families endpoints.
+    """
+    def get_type(self) -> str:
+        return "taskDocumentFamilies"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskDocumentFamilyEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskDocumentFamilyEndpoint
+
+class TaskTagEndpoint(EntityEndpoint, TaskTag):
+    """
+    Represents a task tag endpoint.
+    """
+    def get_type(self) -> str:
+        return "taskTags"
+
+class TaskTagsEndpoint(EntitiesEndpoint):
+    """
+    Represents task tags endpoints.
+    """
+    def get_type(self) -> str:
+        return "taskTags"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskTagEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskTagEndpoint
 
 
 class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
