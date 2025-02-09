@@ -87,6 +87,7 @@ from kodexa.model.objects import (
     PageOrganization,
     DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
     DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
+    TaskActivity, TaskDocumentFamily, TaskTag,
 )
 
 logger = logging.getLogger()
