@@ -631,7 +631,7 @@ class ProjectGuidance(BaseModel):
     description: Optional[str] = None
     guidance: Optional[List[Guidance]] = Field(None)
     active_store: bool = Field(False, alias="activeStore")
-    storage: Optional[GuidanceSetStorage]= Field(None, description="The storage for the guidance set")
+    storage: Optional[GuidanceSetStorage] = Field(None, description="The storage for the guidance set")
     template_ref: Optional[str] = Field(None, alias="templateRef")
     ref: Optional[str] = None
 
@@ -2587,6 +2587,7 @@ class TaxonGuideProperties(BaseModel):
     use_guidance_for_classification: Optional[bool] = Field(None, alias="useGuidanceForClassification")
     if_present_required: Optional[bool] = Field(None, alias="ifPresentRequired")
 
+
 class TaxonConditionalFormat(BaseModel):
     type: Optional[str] = None
     condition: Optional[str] = None
@@ -2594,7 +2595,6 @@ class TaxonConditionalFormat(BaseModel):
 
 
 class TaxonValidation(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2613,7 +2613,6 @@ class TaxonValidation(BaseModel):
 
 
 class DocumentTaxonValidation(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2930,10 +2929,28 @@ class Project(BaseModel):
     owner: Optional[User] = None
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
-class TaskStatus(str, Enum):
-    TODO = "TODO"
-    IN_PROGRESS = "IN_PROGRESS"
-    DONE = "DONE"
+
+class TaskStatusType(str, Enum):
+    """Enum for task status types"""
+    UNRESOLVED = "UNRESOLVED"
+    RESOLVED = "RESOLVED"
+
+
+class TaskStatus(BaseModel):
+    """Model representing a task status entity"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    id: Optional[str] = Field(None)
+    uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
+    color: Optional[str] = Field(None, max_length=25)
+    icon: Optional[str] = Field(None, max_length=25)
+    label: str = Field(..., max_length=255)
+    status_type: Optional[TaskStatusType] = Field(None, alias="statusType")
 
 
 class TaskActivityType(str, Enum):
@@ -3083,6 +3100,7 @@ class Task(BaseModel):
     task_document_families: List[TaskDocumentFamily] = Field(default_factory=list, alias="taskDocumentFamilies")
     search_text: Optional[str] = Field(None, alias="searchText")
     tags: List[TaskTag] = Field(default_factory=list)
+
 
 class FeatureSet(BaseModel):
     """
@@ -4617,6 +4635,7 @@ class PageTaxonomy(BaseModel):
     first: Optional[bool] = None
     last: Optional[bool] = None
     empty: Optional[bool] = None
+
 
 class GuidanceTagResult(BaseModel):
     value: Optional[str] = None
