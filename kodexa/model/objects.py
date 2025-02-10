@@ -3060,7 +3060,8 @@ class Workspace(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     project: Optional[Project] = None
-    name: Optional[str] = None
+    name: str
+    slug: str = Field(pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
     description: Optional[str] = None
     workspace_storage: Optional[WorkspaceStorage] = Field(
         None, alias="workspaceStorage"
