@@ -19,7 +19,7 @@ from typing import Optional, List, ClassVar, Dict, Any
 
 import requests
 from functional import seq
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, computed_field
 from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Document
@@ -1482,16 +1482,19 @@ class PageDocumentFamilyEndpoint(PageDocumentFamily, PageEndpoint):
         return "documentFamily"
 
 
-class OrganizationEndpoint(Organization, EntityEndpoint):
+class OrganizationEndpoint(EntityEndpoint, Organization):
     """
     Represents an organization endpoint.
 
-    This class inherits from the Organization and EntityEndpoint classes.
+    This class inherits from EntityEndpoint and Organization classes.
     """
 
-    """
-    Represents an organization endpoint
-    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
 
     def get_type(self) -> str:
         """
@@ -1632,15 +1635,15 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         """
         return StoresEndpoint().set_client(self.client).set_organization(self)
 
-    @property
-    def workspaces(self):
+    @computed_field(return_type=WorkspacesEndpoint)
+    def workspaces(self) -> WorkspacesEndpoint:
         """
         Get the workspaces endpoint of the organization.
 
         Returns:
             WorkspacesEndpoint: The workspaces endpoint of the organization.
         """
-        return WorkspacesEndpoint().set_client(self.client).set_organization(self)
+        return WorkspacesEndpoint(self.client, self)
 
     @property
     def taxonomies(self):
