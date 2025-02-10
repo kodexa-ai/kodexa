@@ -1640,7 +1640,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         Returns:
             WorkspacesEndpoint: The workspaces endpoint of the organization.
         """
-        return WorkspacesEndpoint(self.client).set_organization(self)
+        return WorkspacesEndpoint().set_client(self.client).set_organization(self)
 
     @property
     def taxonomies(self):

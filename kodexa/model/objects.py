@@ -229,6 +229,7 @@ class Organization(BaseModel):
     public_access: Optional[bool] = Field(None, alias="publicAccess")
     description: Optional[str] = None
     has_image: Optional[bool] = Field(None, alias="hasImage")
+    workspaces: Optional[List[Workspace]] = Field(default_factory=list)
 
 
 class Team(BaseModel):
