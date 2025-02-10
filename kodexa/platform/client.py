@@ -2482,6 +2482,40 @@ class ChannelEndpoint(EntityEndpoint, Channel):
         return message_endpoint.create()
 
 
+class WorkspacesEndpoint(EntitiesEndpoint):
+    """Represents workspaces endpoint.
+
+    This class is used to interact with the workspaces endpoint of the API.
+    """
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "workspaces".
+        """
+        return "workspaces"
+
+    def get_instance_class(self, object_dict=None):
+        """Get the instance class of the workspaces endpoint.
+
+        Args:
+            object_dict (dict, optional): Dictionary representation of the object. Defaults to None.
+
+        Returns:
+            WorkspaceEndpoint: The instance class of the workspaces endpoint.
+        """
+        return WorkspaceEndpoint
+
+    def get_page_class(self):
+        """Get the page class of the workspaces endpoint.
+
+        Returns:
+            PageWorkspaceEndpoint: The page class of the workspaces endpoint.
+        """
+        return PageWorkspaceEndpoint
+
+
 class WorkspaceEndpoint(EntityEndpoint, Workspace):
     """Represents a workspace endpoint"""
 
