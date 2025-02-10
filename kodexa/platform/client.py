@@ -1633,6 +1633,16 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         return StoresEndpoint().set_client(self.client).set_organization(self)
 
     @property
+    def workspaces(self):
+        """
+        Get the workspaces endpoint of the organization.
+
+        Returns:
+            WorkspacesEndpoint: The workspaces endpoint of the organization.
+        """
+        return WorkspacesEndpoint(self.client).set_organization(self)
+
+    @property
     def taxonomies(self):
         """
         Get the taxonomies endpoint of the organization.
