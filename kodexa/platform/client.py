@@ -53,7 +53,6 @@ from kodexa.model.objects import (
     ProjectTag,
     ProjectTemplate,
     Pipeline,
-    CredentialDefinition,
     DataForm,
     Dashboard,
     ModelRuntime,
@@ -78,7 +77,6 @@ from kodexa.model.objects import (
     PageStore,
     PageTaxonomy,
     PageAssistantDefinition,
-    PageCredentialDefinition,
     DeploymentOptions,
     AssistantDefinition,
     DataException,
@@ -1046,21 +1044,6 @@ class PageAssistantDefinitionEndpoint(PageAssistantDefinition, PageEndpoint):
     pass
 
 
-class PageCredentialDefinitionEndpoint(PageCredentialDefinition, PageEndpoint):
-    """Handles the endpoint for the Page Credential Definition.
-
-    This class inherits from the PageCredentialDefinition and PageEndpoint classes.
-
-    Attributes:
-        None
-
-    Methods:
-        None
-    """
-
-    pass
-
-
 class PageUserEndpoint(PageUser, PageEndpoint):
     """
     This class represents a page user endpoint. It inherits from both PageUser and PageEndpoint classes.
@@ -1759,29 +1742,15 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         )
 
     @property
-    def credentials(self):
-        """
-        Get the credentials endpoint of the organization.
-
-        Returns:
-            CredentialDefinitionsEndpoint: The credentials endpoint of the organization.
-        """
-        return (
-            CredentialDefinitionsEndpoint()
-            .set_organization(self)
-            .set_client(self.client)
-        )
-
-    @property
     def data_forms(self):
         """
         Get the data forms endpoint of the organization.
 
         Returns:
-            CredentialDefinitionsEndpoint: The data forms endpoint of the organization.
+            DataFormsEndpoint: The data forms endpoint of the organization.
         """
         return (
-            CredentialDefinitionsEndpoint()
+            DataFormsEndpoint()
             .set_organization(self)
             .set_client(self.client)
         )
@@ -3598,58 +3567,6 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
         """
         return ProjectTemplateEndpoint
 
-
-class CredentialDefinitionsEndpoint(
-    ComponentEndpoint, ClientEndpoint, OrganizationOwned
-):
-    """Represents a credentials endpoint.
-
-    This class is used to represent a credentials endpoint. It inherits from
-    ComponentEndpoint, ClientEndpoint, and OrganizationOwned classes.
-
-    Attributes:
-        None
-    """
-
-    """Represents a credentials endpoint"""
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint.
-
-        This method is used to get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint.
-        """
-        return "credentialDefinitions"
-
-    def get_page_class(self, object_dict=None):
-        """Get the page class of the endpoint.
-
-        This method is used to get the page class of the endpoint.
-
-        Args:
-            object_dict (dict, optional): The object dictionary. Defaults to None.
-
-        Returns:
-            PageCredentialDefinitionEndpoint: The page class of the endpoint.
-        """
-        return PageCredentialDefinitionEndpoint
-
-    def get_instance_class(self, object_dict=None):
-        """Get the instance class of the endpoint.
-
-        This method is used to get the instance class of the endpoint.
-
-        Args:
-            object_dict (dict, optional): The object dictionary. Defaults to None.
-
-        Returns:
-            CredentialDefinitionEndpoint: The instance class of the endpoint.
-        """
-        return CredentialDefinitionEndpoint
-
-
 class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
     A class used to represent the DataFormsEndpoint.
@@ -4025,29 +3942,6 @@ class ActionEndpoint(ComponentInstanceEndpoint, Action):
             str: The type of the endpoint, always "actions" in this case.
         """
         return "actions"
-
-
-class CredentialDefinitionEndpoint(ComponentInstanceEndpoint, CredentialDefinition):
-    """Represents a credential endpoint.
-
-    This class is a combination of ComponentInstanceEndpoint and CredentialDefinition.
-    It is used to represent a credential endpoint.
-
-    Attributes:
-        None
-    """
-
-    """Represents a credential endpoint"""
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint.
-
-        This method returns the type of the endpoint which is "credentialDefinitions".
-
-        Returns:
-            str: The type of the endpoint.
-        """
-        return "credentialDefinitions"
 
 
 class DataFormEndpoint(ComponentInstanceEndpoint, DataForm):
@@ -6536,12 +6430,6 @@ OBJECT_TYPES = {
         "type": ModelRuntimeEndpoint,
         "endpoint": ModelRuntimesEndpoint,
     },
-    "credentialDefinitions": {
-        "name": "credentialDefinition",
-        "plural": "credentialDefinitions",
-        "type": CredentialDefinitionEndpoint,
-        "endpoint": CredentialDefinitionsEndpoint,
-    },
     "taxonomies": {
         "name": "taxonomy",
         "plural": "taxonomies",
@@ -7359,7 +7247,6 @@ class KodexaClient:
                 "taxonomy": TaxonomyEndpoint,
                 "pipeline": PipelineEndpoint,
                 "action": ActionEndpoint,
-                "credential": CredentialDefinitionEndpoint,
                 "projectTemplate": ProjectTemplateEndpoint,
                 "modelRuntime": ModelRuntimeEndpoint,
                 "extensionPack": ExtensionPackEndpoint,
@@ -7453,7 +7340,6 @@ DataStoreEndpoint.model_rebuild()
 TaxonomyEndpoint.model_rebuild()
 PipelineEndpoint.model_rebuild()
 ActionEndpoint.model_rebuild()
-CredentialDefinitionEndpoint.model_rebuild()
 ProjectTemplateEndpoint.model_rebuild()
 ModelRuntimeEndpoint.model_rebuild()
 ExtensionPackEndpoint.model_rebuild()

@@ -5142,7 +5142,6 @@ class PageSlugBasedMetadata(BaseModel):
                 SlugBasedMetadata,
                 Action,
                 AssistantDefinition,
-                CredentialDefinition,
                 Dashboard,
                 DataForm,
                 ExtensionPack,
@@ -5264,28 +5263,6 @@ class PageDashboard(BaseModel):
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
     content: Optional[List[Dashboard]] = None
-    number: Optional[int] = None
-
-    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
-    first: Optional[bool] = None
-    last: Optional[bool] = None
-    empty: Optional[bool] = None
-
-
-class PageCredentialDefinition(BaseModel):
-    """
-
-    """
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
-    total_pages: Optional[int] = Field(None, alias="totalPages")
-    total_elements: Optional[int] = Field(None, alias="totalElements")
-    size: Optional[int] = None
-    content: Optional[List[CredentialDefinition]] = None
     number: Optional[int] = None
 
     number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
@@ -5565,17 +5542,6 @@ class AssistantDefinition(ExtensionPackProvided):
     subscription: Optional[str] = Field(
         None,
         description="The subscription that the assistant has, this can not be overridden by the subscription in the instance",
-    )
-
-
-class CredentialDefinition(ExtensionPackProvided):
-    """
-
-    """
-
-    credential_type: Optional[str] = Field(None, alias="credentialType")
-    options: Optional[List[Option]] = Field(
-        None, description="Options for the credential type"
     )
 
 
@@ -6017,14 +5983,12 @@ PageSlugBasedMetadata.model_rebuild()
 PageExtensionPack.model_rebuild()
 PageDataForm.model_rebuild()
 PageDashboard.model_rebuild()
-PageCredentialDefinition.model_rebuild()
 PageAssistantDefinition.model_rebuild()
 PageAction.model_rebuild()
 DocumentContentMetadata.model_rebuild()
 ModelContentMetadata.model_rebuild()
 Action.model_rebuild()
 AssistantDefinition.model_rebuild()
-CredentialDefinition.model_rebuild()
 Dashboard.model_rebuild()
 DataForm.model_rebuild()
 ExtensionPack.model_rebuild()
