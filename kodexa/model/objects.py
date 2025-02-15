@@ -5693,6 +5693,18 @@ class ProjectTemplate(ExtensionPackProvided):
 
     tags: Optional[List[str]] = Field(None, alias="tags")
 
+    group_taxon_type_features: Dict[str, Any] = Field(
+        default_factory=dict,
+        alias="groupTaxonTypeFeatures",
+        description="Group Taxon Type Feature Defaults"
+    )
+
+    taxon_type_features: Dict[str, Any] = Field(
+        default_factory=dict,
+        alias="taxonTypeFeatures",
+        description="Taxon Type Feature Defaults"
+    )
+
 
 class Store(ExtensionPackProvided):
     """
