@@ -2886,6 +2886,19 @@ class ProjectOptions(BaseModel):
     options: List[Option] = Field(None, description="The options for the project")
     properties: Dict[str, Any] = Field(None, description="The properties for the project")
 
+    group_taxon_type_features: Dict[str, Any] = Field(
+        default_factory=dict,
+        alias="groupTaxonTypeFeatures",
+        description="Group Taxon Type Feature Defaults"
+    )
+
+    taxon_type_features: Dict[str, Any] = Field(
+        default_factory=dict,
+        alias="taxonTypeFeatures",
+        description="Taxon Type Feature Defaults"
+    )
+
+
 
 class Project(BaseModel):
     model_config = ConfigDict(
@@ -5692,18 +5705,6 @@ class ProjectTemplate(ExtensionPackProvided):
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
     tags: Optional[List[str]] = Field(None, alias="tags")
-
-    group_taxon_type_features: Dict[str, Any] = Field(
-        default_factory=dict,
-        alias="groupTaxonTypeFeatures",
-        description="Group Taxon Type Feature Defaults"
-    )
-
-    taxon_type_features: Dict[str, Any] = Field(
-        default_factory=dict,
-        alias="taxonTypeFeatures",
-        description="Taxon Type Feature Defaults"
-    )
 
 
 class Store(ExtensionPackProvided):
