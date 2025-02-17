@@ -244,7 +244,7 @@ class PipelineStep:
                     options = step['options']
                 else:
                     options = {}
-            except:
+            except Exception:
                 options = {}
         self.step = step
         self.name = name
@@ -513,7 +513,7 @@ class Pipeline:
                     options = step['options']
                 else:
                     options = {}
-            except:
+            except Exception:
                 options = {}
         self.steps.append(
             PipelineStep(
@@ -567,7 +567,7 @@ class Pipeline:
         self.context.stop_on_exception = self.stop_on_exception
 
         self.context.statistics = PipelineStatistics()
-        self.context.parameters = parameters
+        self.context.context.update(parameters)
 
         logger.info(f"Starting pipeline {self.name}")
 

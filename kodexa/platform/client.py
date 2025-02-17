@@ -1827,9 +1827,9 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         Get the subscriptions of the organization.
 
         Returns:
-            The subscriptions of the organization.
+            PageProductSubscriptionEndpoint: The subscriptions of the organization.
         """
-        url = f"/api/productSubscriptions"
+        url = "/api/productSubscriptions"
         params = {
             "filter": f"organization.id: '{self.id}'",
             "page": page,
@@ -2151,7 +2151,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         Returns:
             ExecutionEndpoint: The execution endpoint of the event.
         """
-        url = f"/api/projects/{self.project.id}/assistants/{self.id}/ekodexsavents"
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
         event_object = {"eventType": event_type, "options": json.dumps(options)}
         response = self.client.post(url, data=event_object, files={})
         process_response(response)
