@@ -6,6 +6,12 @@
 #################################
 name: Lint Code Base
 
+permissions:
+  actions: read
+  checks: read
+  # To report GitHub Actions status checks
+  statuses: write
+
 #
 # Documentation:
 # https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions
