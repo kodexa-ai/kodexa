@@ -39,12 +39,31 @@ def test_get_nodes_between():
     nodes = document.content_node.get_children()[0].collect_nodes_to(document.content_node.get_children()[2])
     assert len(nodes) == 2
 
-def test_external_data():
 
+
+def test_external_data_for_existing_document():
+    document = Document.from_kddb("test_documents/bank-statement.kddb")
+
+    document.set_external_data({"cheese": "foo"}, "new")
+    document.set_external_data({"cheese": "bar"}, "new")
+    assert document.get_external_data("new")["cheese"] == "bar"
+    assert document.get_external_data() is not None
+    assert document.get_external_data() == {}
+    assert document.get_external_data_keys() == ["default", "new"]
+    print(document.get_external_data())
+
+
+
+def test_external_data():
     document = Document()
 
-    document.set_external_data({"cheese":"bar"})
+    document.set_external_data({"cheese": "bar"})
     assert document.get_external_data()["cheese"] == "bar"
+
+    assert document.get_external_data() is not None
+    assert document.get_external_data_keys() == ["default"]
+
+    print(document.get_external_data())
 
 def test_document_steps():
     # Create a new document instance
@@ -79,12 +98,12 @@ def test_document_steps():
 
 
 
-
 def test_persistence_cache():
     document = Document.from_text('The sun is very bright today.')
     document.to_kddb()
     document.get_root().tag('cheese')
     assert document.from_kddb(document.to_kddb()).get_root().has_tags() is True
+
 
 
 def test_tag_nodes_between():

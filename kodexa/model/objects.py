@@ -631,7 +631,7 @@ class ProjectGuidance(BaseModel):
     description: Optional[str] = None
     guidance: Optional[List[Guidance]] = Field(None)
     active_store: bool = Field(False, alias="activeStore")
-    storage: GuidanceSetStorage = Field(None, description="The storage for the guidance set")
+    storage: Optional[GuidanceSetStorage] = Field(None, description="The storage for the guidance set")
     template_ref: Optional[str] = Field(None, alias="templateRef")
     ref: Optional[str] = None
 
@@ -822,7 +822,9 @@ class SelectionOption(BaseModel):
     label: Optional[str] = None
     id: Optional[str] = None
     description: Optional[str] = None
-    lexical_relations: Optional[List[LexicalRelation]] = Field([], alias="lexicalRelations")
+    lexical_relations: Optional[List[LexicalRelation]] = Field(default_factory=list, alias="lexicalRelations")
+    is_conditional: Optional[bool] = Field(None, alias="isConditional")
+    conditional_formula: Optional[str] = Field(None, alias="conditionalFormula")
 
 
 class SlugBasedMetadata1(BaseModel):
@@ -2585,6 +2587,7 @@ class TaxonGuideProperties(BaseModel):
     use_guidance_for_classification: Optional[bool] = Field(None, alias="useGuidanceForClassification")
     if_present_required: Optional[bool] = Field(None, alias="ifPresentRequired")
 
+
 class TaxonConditionalFormat(BaseModel):
     type: Optional[str] = None
     condition: Optional[str] = None
@@ -2592,7 +2595,6 @@ class TaxonConditionalFormat(BaseModel):
 
 
 class TaxonValidation(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2611,7 +2613,6 @@ class TaxonValidation(BaseModel):
 
 
 class DocumentTaxonValidation(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2645,6 +2646,8 @@ class Taxon(BaseModel):
     expression: Optional[str] = None
     enable_fallback_expression: Optional[bool] = Field(None, alias="enableFallbackExpression")
     fallback_expression: Optional[str] = Field(None, alias="fallbackExpression")
+    enable_serialization_expression: Optional[bool] = Field(None, alias="enableSerializationExpression")
+    serialization_expression: Optional[str] = Field(None, alias="serializationExpression")
     nullable: Optional[bool] = None
     null_value: Optional[str] = Field(None, alias="nullValue")
     denormalize_to_children: Optional[bool] = Field(False, alias="denormalizeToChildren")
@@ -2728,6 +2731,16 @@ class Taxon(BaseModel):
             structure["tag"] = self.name
             structure["taxonType"] = self.taxon_type
         return structure
+
+    def get_taxon_by_path(self, path):
+        if self.path == path:
+            return self
+
+        if self.children:
+            for child in self.children:
+                result = child.get_taxon_by_path(path)
+                if result:
+                    return result
 
 
 class ContentObject(BaseModel):
@@ -2873,6 +2886,19 @@ class ProjectOptions(BaseModel):
     options: List[Option] = Field(None, description="The options for the project")
     properties: Dict[str, Any] = Field(None, description="The properties for the project")
 
+    group_taxon_type_features: Dict[str, Any] = Field(
+        default_factory=dict,
+        alias="groupTaxonTypeFeatures",
+        description="Group Taxon Type Feature Defaults"
+    )
+
+    taxon_type_features: Dict[str, Any] = Field(
+        default_factory=dict,
+        alias="taxonTypeFeatures",
+        description="Taxon Type Feature Defaults"
+    )
+
+
 
 class Project(BaseModel):
     model_config = ConfigDict(
@@ -2917,13 +2943,53 @@ class Project(BaseModel):
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
 
-class TaskStatus(str, Enum):
+class TaskStatusType(str, Enum):
+    """Enum for task status types"""
     TODO = "TODO"
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
 
 
-class TaskCheckItem(BaseModel):
+class TaskStatus(BaseModel):
+    """Model representing a task status entity"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    id: Optional[str] = Field(None)
+    uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
+    color: Optional[str] = Field(None, max_length=25)
+    icon: Optional[str] = Field(None, max_length=25)
+    label: str = Field(..., max_length=255)
+    status_type: Optional[TaskStatusType] = Field(None, alias="statusType")
+
+
+class TaskActivityType(str, Enum):
+    TASK_CREATED = "TASK_CREATED"
+    TITLE_CHANGED = "TITLE_CHANGED"
+    DESCRIPTION_UPDATED = "DESCRIPTION_UPDATED"
+    STATUS_CHANGED = "STATUS_CHANGED"
+    ASSIGNEE_CHANGED = "ASSIGNEE_CHANGED"
+    DUE_DATE_CHANGED = "DUE_DATE_CHANGED"
+    PROJECT_CHANGED = "PROJECT_CHANGED"
+    COMMENT = "COMMENT"
+
+
+class TaskActivityDetail(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    type: TaskActivityType
+    interpolated_values: Dict[str, Any] = Field(default_factory=dict, alias="interpolatedValues")
+
+
+class TaskActivity(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -2931,10 +2997,77 @@ class TaskCheckItem(BaseModel):
         protected_namespaces=("model_config",),
     )
 
+    task: Optional['Task'] = None
+    content: Optional[str] = None
+    detail: Optional[TaskActivityDetail] = None
+    user: Optional['User'] = None
+    search_text: Optional[str] = Field(None, alias="searchText")
+    transient_values: Dict[str, Any] = Field(default_factory=dict, alias="transientValues")
+
+
+class TaskTag(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    project: Optional['Project'] = None
     name: str
+    color: Optional[str] = None
+
+
+class DataFormAction(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    type: Optional[str] = None
+    label: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class TemplateDataForm(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    data_form_ref: Optional[str] = Field(None, alias="dataFormRef")
+    actions: List[DataFormAction] = Field(default_factory=list)
+
+
+class TaskTemplateMetadata(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    options: List[Option] = Field(default_factory=list)
+    forms: List[TemplateDataForm] = Field(default_factory=list)
+    workspace_id: Optional[str] = Field(None, alias="workspaceId")
+
+
+class TaskTemplate(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    project: Optional['Project'] = None
+    name: Optional[str] = None
     description: Optional[str] = None
-    taxon_path: Optional[str] = Field(None, alias="taxonPath")
-    taxonomy_ref: Optional[str] = Field(None, alias="taxonomyRef")
+    metadata: Optional[TaskTemplateMetadata] = None
 
 
 class TaskMetadata(BaseModel):
@@ -2945,10 +3078,19 @@ class TaskMetadata(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    field_values: Dict[str, Any] = Field(default_factory=dict)
-    fields: List[Option] = Field(default_factory=list)
-    check_items: List[TaskCheckItem] = Field(default_factory=list)
-    document_store_ref: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class TaskDocumentFamily(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    task: Optional['Task'] = None
+    document_family: Optional['DocumentFamily'] = Field(None, alias="documentFamily")
 
 
 class Task(BaseModel):
@@ -2959,15 +3101,19 @@ class Task(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    project: Optional['Project'] = Field(None)
-    title: Optional[str] = Field(None)
-    template: Optional[bool] = Field(None)
-    description: Optional[str] = Field(None)
-    metadata: Optional['TaskMetadata'] = Field(None)
+    project: Optional['Project'] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    metadata: Optional[TaskMetadata] = None
+    template: Optional[TaskTemplate] = None
     due_date: Optional[StandardDateTime] = Field(None, alias="dueDate")
     completed_date: Optional[StandardDateTime] = Field(None, alias="completedDate")
-    status: Optional['TaskStatus'] = Field(None)
-    assignee: Optional['User'] = Field(None)
+    status: Optional[TaskStatus] = None
+    assignee: Optional['User'] = None
+    task_activity: List[TaskActivity] = Field(default_factory=list, alias="taskActivity")
+    task_document_families: List[TaskDocumentFamily] = Field(default_factory=list, alias="taskDocumentFamilies")
+    search_text: Optional[str] = Field(None, alias="searchText")
+    tags: List[TaskTag] = Field(default_factory=list)
 
 
 class FeatureSet(BaseModel):
@@ -4506,9 +4652,6 @@ class PageTaxonomy(BaseModel):
 
 
 class GuidanceTagResult(BaseModel):
-    """
-
-    """
     value: Optional[str] = None
     line_uuid: Optional[str] = Field(None, alias="lineUuid")
 
@@ -4519,7 +4662,6 @@ class UserSelection(BaseModel):
 
 
 class GuidanceRelationEmbedding(BaseModel):
-
     model_config = ConfigDict(
         populate_by_name=True,
         use_enum_values=True,
@@ -4533,7 +4675,10 @@ class GuidanceRelationEmbedding(BaseModel):
 
 
 class Guidance(BaseModel):
-    id: Optional[str] = Field(None, description="The ID of the guidance")
+    """
+    A guidance is a set of instructions and examples to guide taxonomies and extraction
+    """
+    id: Optional[str] = Field(None)
     name: Optional[str] = None
     guidance_type: Optional[str] = Field(None, alias="guidanceType")
     guidance_key: Optional[str] = Field(None, alias="guidanceKey")
@@ -4543,13 +4688,13 @@ class Guidance(BaseModel):
     document_name: Optional[str] = Field(None, alias="documentName")
     document_page: Optional[int] = Field(None, alias="documentPage")
     guidance_text: Optional[str] = Field(None, alias="guidanceText")
-    relation_embeddings: Optional[List[GuidanceRelationEmbedding]] = Field([], alias="relationEmbeddings")
+    relation_embeddings: Optional[List[GuidanceRelationEmbedding]] = Field(None, alias="relationEmbeddings")
     summary: Optional[str] = None
     guidance_response: Optional[Dict[str, Any]] = Field(None, alias="guidanceResponse")
-    active: Optional[bool] = True
+    active: bool = True
     applicable_tags: Optional[List[str]] = Field(None, alias="applicableTags")
     required_tags: Optional[List[str]] = Field(None, alias="requiredTags")
-    priority: Optional[int] = 1
+    priority: int = 1
     user_instructions: Optional[str] = Field(None, alias="userInstructions")
     user_instructions_properties: Optional[Dict[str, Any]] = Field(None, alias="userInstructionsProperties")
     user_id: Optional[str] = Field(None, alias="userId")
@@ -4567,17 +4712,11 @@ class GuidanceEmbeddingType(Enum):
 
 
 class GuidanceSetStorage(BaseModel):
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
-
-    summarize_model_id: Optional[str] = Field(None, alias="summarizeModelId")
-    summarize_prompt: Optional[str] = Field(None, alias="summarizePrompt")
     embedding_model_id: Optional[str] = Field(None, alias="embeddingModelId")
-    embedding_types: List[GuidanceEmbeddingType] = Field(default_factory=list, alias="embeddingTypes")
+    summarize_model_id: Optional[str] = Field(None, alias="summarizeModelId")
+    use_custom_summarize_prompt: Optional[bool] = Field(None, alias="useCustomSummarizePrompt")
+    summarize_prompt: Optional[str] = Field(None, alias="summarizePrompt")
+    embedding_types: Optional[List[GuidanceEmbeddingType]] = Field(None, alias="embeddingTypes")
 
 
 class GuidanceSet(ExtensionPackProvided):
@@ -4591,10 +4730,9 @@ class GuidanceSet(ExtensionPackProvided):
         protected_namespaces=("model_config",),
     )
 
-    active_store: bool = Field(False, alias="activeStore",
-                               description="If true, allows guidance to be stored through the API")
-    storage: GuidanceSetStorage = Field(default_factory=GuidanceSetStorage)
-    guidance: List[Guidance] = Field(default_factory=list, description="The guidance in the set")
+    active_store: bool = False
+    storage: Optional[GuidanceSetStorage] = None
+    guidance: Optional[List[Guidance]] = None
 
     def get_type(self) -> str:
         return "guidance"
@@ -5017,7 +5155,6 @@ class PageSlugBasedMetadata(BaseModel):
                 SlugBasedMetadata,
                 Action,
                 AssistantDefinition,
-                CredentialDefinition,
                 Dashboard,
                 DataForm,
                 ExtensionPack,
@@ -5139,28 +5276,6 @@ class PageDashboard(BaseModel):
     total_elements: Optional[int] = Field(None, alias="totalElements")
     size: Optional[int] = None
     content: Optional[List[Dashboard]] = None
-    number: Optional[int] = None
-
-    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
-    first: Optional[bool] = None
-    last: Optional[bool] = None
-    empty: Optional[bool] = None
-
-
-class PageCredentialDefinition(BaseModel):
-    """
-
-    """
-    model_config = ConfigDict(
-        populate_by_name=True,
-        use_enum_values=True,
-        arbitrary_types_allowed=True,
-        protected_namespaces=("model_config",),
-    )
-    total_pages: Optional[int] = Field(None, alias="totalPages")
-    total_elements: Optional[int] = Field(None, alias="totalElements")
-    size: Optional[int] = None
-    content: Optional[List[CredentialDefinition]] = None
     number: Optional[int] = None
 
     number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
@@ -5443,17 +5558,6 @@ class AssistantDefinition(ExtensionPackProvided):
     )
 
 
-class CredentialDefinition(ExtensionPackProvided):
-    """
-
-    """
-
-    credential_type: Optional[str] = Field(None, alias="credentialType")
-    options: Optional[List[Option]] = Field(
-        None, description="Options for the credential type"
-    )
-
-
 class Dashboard(ExtensionPackProvided):
     """
 
@@ -5674,6 +5778,16 @@ class Taxonomy(ExtensionPackProvided):
         description="A list of references to an external data taxonomy",
     )
 
+    def get_taxon_by_path(self, path):
+        for taxon in self.taxons:
+            if taxon.path == path:
+                return taxon
+            if taxon.children is not None:
+                child_taxon = taxon.get_taxon_by_path(path)
+                if child_taxon is not None:
+                    return child_taxon
+        return None
+
     def update_paths(self):
         for taxon in self.taxons:
             taxon.update_path()
@@ -5882,14 +5996,12 @@ PageSlugBasedMetadata.model_rebuild()
 PageExtensionPack.model_rebuild()
 PageDataForm.model_rebuild()
 PageDashboard.model_rebuild()
-PageCredentialDefinition.model_rebuild()
 PageAssistantDefinition.model_rebuild()
 PageAction.model_rebuild()
 DocumentContentMetadata.model_rebuild()
 ModelContentMetadata.model_rebuild()
 Action.model_rebuild()
 AssistantDefinition.model_rebuild()
-CredentialDefinition.model_rebuild()
 Dashboard.model_rebuild()
 DataForm.model_rebuild()
 ExtensionPack.model_rebuild()

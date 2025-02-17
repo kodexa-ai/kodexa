@@ -124,10 +124,12 @@ class PipelineContext:
         self.content_provider = content_provider
         self.context: Dict = context
         self.stop_on_exception = True
-        self.current_document = None
-        self.document_family = None
-        self.content_object = None
-        self.document_store = None
+        self.current_document: Optional[Document] = None
+        from kodexa.platform.client import DocumentFamilyEndpoint
+        self.document_family:Optional[DocumentFamilyEndpoint] = None
+        self.content_object:Optional[ContentObject] = None
+        from kodexa.platform.client import DocumentStoreEndpoint
+        self.document_store:Optional[DocumentStoreEndpoint] = None
         self.status_handler = status_handler
         self.cancellation_handler = cancellation_handler
 
@@ -196,11 +198,11 @@ class PipelineContext:
         """
         self.current_document = current_document
 
-    def get_current_document(self) -> Document:
+    def get_current_document(self) -> Optional[Document]:
         """Gets the current document being processed in the pipeline.
 
         Returns:
-            Document: The current document being processed in the pipeline.
+            Optional[Document]: The current document being processed in the pipeline.
         """
         return self.current_document
 
@@ -242,7 +244,7 @@ class PipelineStep:
                     options = step['options']
                 else:
                     options = {}
-            except:
+            except Exception:
                 options = {}
         self.step = step
         self.name = name
@@ -327,11 +329,13 @@ class PipelineStep:
                 import copy
 
                 option_copy = copy.deepcopy(self.options)
-                step_instance = self.step(**option_copy)
-                if len(signature(step_instance.process).parameters) == 1:
-                    result_document = step_instance.process(document)
+                if hasattr(self.step, 'process'):
+                    if hasattr(self.step.process, '__call__'):
+                        result_document = self.step.process(document, context)
+                    else:
+                        result_document = document
                 else:
-                    result_document = step_instance.process(document, context)
+                    result_document = document
 
             elif not callable(self.step):
                 logger.info(f"Starting step {type(self.step)}")
@@ -511,7 +515,7 @@ class Pipeline:
                     options = step['options']
                 else:
                     options = {}
-            except:
+            except Exception:
                 options = {}
         self.steps.append(
             PipelineStep(
@@ -565,7 +569,7 @@ class Pipeline:
         self.context.stop_on_exception = self.stop_on_exception
 
         self.context.statistics = PipelineStatistics()
-        self.context.parameters = parameters
+        self.context.context.update(parameters)
 
         logger.info(f"Starting pipeline {self.name}")
 

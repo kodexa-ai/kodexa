@@ -54,21 +54,35 @@ class LLMDataAttribute(BaseModel):
         self.node_uuid_list = source.node_uuid_list
         self.page_number = source.page_number
 
-    def create_exception(
-            self,
-            exception_type_id: str,
-            exception_type: str,
-            normalized_text: str,
-            message: str,
-            exception_detail: str,
-    ):
-        content_exception = ContentException(
-            exception_type=exception_type,
-            exception_detail=exception_detail,
-            message=message,
-            tag_uuid=self.tag_uuid,
-        )
-        self.exceptions.append(content_exception)
+    def process_exceptions(self, document: "KodexaDocumentLLMWrapper"):
+        # Lets make sure we add all the content exceptions
+        if self.exceptions is not None:
+            for exception in self.exceptions:
+                # We have two types of exception, one in the API and one in the
+                # document
+                from kodexa.model import ContentException as KodexaContentException
+                internal_exception = KodexaContentException(
+                    tag=exception.tag,
+                    exception_type=exception.exception_type,
+                    message=exception.message,
+                    exception_details=exception.exception_details,
+                    severity=exception.severity,
+                    group_uuid=self.group_uuid,
+                    tag_uuid=self.tag_uuid,
+                )
+                document.doc.add_exception(internal_exception)
+
+    def to_dict(self, taxonomy: Taxonomy) -> dict:
+        """Convert attribute to JSON with normalized value"""
+
+        target_taxon = taxonomy.get_taxon_by_path(self.taxon_path)
+        if target_taxon is None:
+            return {}
+
+        taxon_external_name = target_taxon.external_name
+        return {
+            taxon_external_name: self.normalized_text if self.normalized_text else self.value
+        }
 
 
 class LLMDataObject(BaseModel):
@@ -99,6 +113,24 @@ class LLMDataObject(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+    def process_exceptions(self, document: "KodexaDocumentLLMWrapper"):
+        # Lets make sure we add all the content exceptions
+        if self.exceptions is not None:
+            for exception in self.exceptions:
+                # We have two types of exception, one in the API and one in the
+                # document
+                from kodexa.model import ContentException as KodexaContentException
+                internal_exception = KodexaContentException(
+                    tag=exception.tag,
+                    exception_type=exception.exception_type,
+                    message=exception.message,
+                    exception_details=exception.exception_details,
+                    severity=exception.severity,
+                    group_uuid=self.group_uuid,
+                    tag_uuid=self.tag_uuid,
+                )
+                document.doc.add_exception(internal_exception)
+
     def get_all_review_pages(self):
         """
         Returns a list of unique page numbers that would be included in the review.
@@ -106,7 +138,7 @@ class LLMDataObject(BaseModel):
         :return: list of unique page numbers
         """
         pages = set()
-        for field in self.__fields__:
+        for field in self.model_fields:
             pages.update(self._get_field_pages(field))
         return sorted(list(pages))
 
@@ -154,6 +186,35 @@ class LLMDataObject(BaseModel):
         if 'normalized_text' in field_data:
             attr.normalized_text = field_data['normalized_text']
 
+    def to_dict(self, taxonomy: Taxonomy) -> dict:
+        """Convert data object to JSON using normalized values and taxon paths"""
+        result = {}
+        for field in self.model_fields:
+            value = getattr(self, field)
+
+            if isinstance(value, list) and len(value) > 0:
+                if isinstance(value[0], LLMDataObject):
+                    # We need to find the first field of the object that is a LLMDataAttribute
+                    # and use that to derive the taxon path of the LLMDataObject
+                    data_attribute = None
+                    for child_field in value[0].model_fields:
+                        child_attr = getattr(value[0], child_field)
+                        if isinstance(child_attr, LLMDataAttribute):
+                            data_attribute = child_attr
+                            break
+                    if data_attribute is not None:
+                        taxon_path = data_attribute.taxon_path.rsplit('/', 1)[0]
+                        target_taxon = taxonomy.get_taxon_by_path(taxon_path)
+                        if target_taxon is not None:
+                            result[target_taxon.external_name] = [item.to_dict(taxonomy) for item in value if isinstance(item, (LLMDataObject, LLMDataAttribute))]
+            elif isinstance(value, LLMDataAttribute):
+                result.update(value.to_dict(taxonomy))
+            elif isinstance(value, LLMDataObject):
+                target_taxon = taxonomy.get_taxon_by_path(value.taxon_path)
+                if target_taxon is not None:
+                    result[target_taxon.external_name] = value.to_dict(taxonomy)
+        return result
+
     def to_review(self, page_number=None):
         """
         Build a representation of the data object and its data attributes that is a dict that includes the
@@ -164,7 +225,7 @@ class LLMDataObject(BaseModel):
         :return: dict of this data object and children for the specified page
         """
         review = {}
-        for field in self.__fields__:
+        for field in self.model_fields:
             review_field = self._build_review(field, page_number)
             if review_field:
                 review[field] = review_field
@@ -193,26 +254,6 @@ class LLMDataObject(BaseModel):
 
         return None
 
-    def create_exception(
-            self,
-            exception_type_id: str,
-            exception_type: str,
-            message: str,
-            exception_detail: str,
-            severity: str = "ERROR",
-    ):
-        content_exception = ContentException(
-            exception_type=exception_type,
-            exception_details=exception_detail,
-            message=message,
-            group_uuid=self.group_uuid,
-            severity=severity,
-        )
-        if self.exceptions is None:
-            self.exceptions = []
-
-        self.exceptions.append(content_exception)
-
     def apply_labels(
             self, document: "KodexaDocumentLLMWrapper", parent_group_uuid: str = None,
             assistant: Optional["Assistant"] = None
@@ -234,24 +275,11 @@ class LLMDataObject(BaseModel):
         """
 
         # Lets make sure we add all the content exceptions
-        if self.exceptions is not None:
-            for exception in self.exceptions:
-                # We have two types of exception, one in the API and one in the
-                # document
-                from kodexa.model import ContentException as KodexaContentException
-                internal_exception = KodexaContentException(
-                    exception_type=exception.exception_type,
-                    message=exception.message,
-                    exception_details=exception.exception_details,
-                    severity=exception.severity,
-                    group_uuid=exception.group_uuid,
-                    tag_uuid=exception.tag_uuid,
-                )
-                document.doc.add_exception(internal_exception)
+        self.process_exceptions(document)
 
         # Let's go through this data object and find all the attributes that have a value
         # then we will apply the labels to the document
-        for field in self.__fields__:
+        for field in self.model_fields:
             logger.info(f"Processing field {field}")
             value = getattr(self, field)
 
@@ -270,8 +298,6 @@ class LLMDataObject(BaseModel):
             # We need to add the label to the document for this attribute
 
             tag = value.taxon_path
-
-            # TODO need to work out why we are missing them?
             logger.info(f"Value: {value.normalized_text}, node_uuid_list: {value.node_uuid_list}")
             if value.node_uuid_list is None:
                 value.node_uuid_list = value.line_ids
@@ -320,31 +346,16 @@ class LLMDataObject(BaseModel):
                         current_value.append(new_tag)
                         node.remove_feature("tag", tag)
                         node.add_feature("tag", tag, current_value, single=False)
-                        # try:
-                        #     if value.data_type == 'Derived':
-                        #         logger.info(f"Node already has tag {tag} - Tagging something nearby {node.get_all_content()}")
-                        #         nearby_node = find_nearby_word_to_tag(node, tag)
-                        #         nearby_node.tag(
-                        #             tag_to_apply=tag,
-                        #             value=value.normalized_text,
-                        #             tag_uuid=tag_uuid,
-                        #             cell_index=self.cell_index,
-                        #             selector="//word",
-                        #             confidence=-1,
-                        #             group_uuid=self.group_uuid,
-                        #             parent_group_uuid=parent_group_uuid,
-                        #             owner_uri=f"assistant://{assistant.id}" if assistant else f"model://taxonomy-llm",
-                        #         )
-                        #     else:
-                        #         logger.info(f"Node already has tag {tag} - Skipping.")
-                        # except:
-                        #     logger.error(f"Error tagging nearby node with tag {tag}")
 
             logger.info(f"Applied label {tag} to {len(nodes_to_label)} nodes")
+
+            # Lets make sure we add all the content exceptions
+            self.process_exceptions(document)
+
         if isinstance(value, LLMDataObject):
             # We need to apply the labels to the document for this object
             value.apply_labels(document, parent_group_uuid=self.group_uuid)
-            # logger.info(f"Applied labels to data object {value.group_uuid}")
+            logger.info(f"Applied labels to data object {value.group_uuid}")
 
 
 def find_nearby_word_to_tag(node, tag):

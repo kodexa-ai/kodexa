@@ -53,7 +53,6 @@ from kodexa.model.objects import (
     ProjectTag,
     ProjectTemplate,
     Pipeline,
-    CredentialDefinition,
     DataForm,
     Dashboard,
     ModelRuntime,
@@ -78,7 +77,6 @@ from kodexa.model.objects import (
     PageStore,
     PageTaxonomy,
     PageAssistantDefinition,
-    PageCredentialDefinition,
     DeploymentOptions,
     AssistantDefinition,
     DataException,
@@ -86,7 +84,8 @@ from kodexa.model.objects import (
     PageExtensionPack,
     PageOrganization,
     DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
-    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance,
+    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
+    TaskActivity, TaskDocumentFamily, TaskTag,
 )
 
 logger = logging.getLogger()
@@ -235,7 +234,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
         Returns:
             str: The type of the endpoint.
         """
-        pass
+        return "resources"
 
     def get_instance_class(self, object_dict=None):
         """
@@ -277,10 +276,10 @@ class ProjectResourceEndpoint(ClientEndpoint):
             df.drop(columns="client", axis=1)
         return df
 
-    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+    def stream_list(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         return self.stream(query, sort=sort, filters=filters)
 
-    def stream(self, query="*", sort=None, filters: List[str] = None):
+    def stream(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         """
         Stream the list of resources.
 
@@ -307,7 +306,8 @@ class ProjectResourceEndpoint(ClientEndpoint):
             page += 1
 
     def list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            filters: Optional[List[str]] = None
     ):
         """
         List the resources.
@@ -455,10 +455,10 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             return None
         return component_page.content[0]
 
-    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+    def stream_list(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         return self.stream(query, sort, filters)
 
-    def stream(self, query="*", sort=None, filters: List[str] = None):
+    def stream(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         """
         Stream components matching query, sort and filters.
 
@@ -502,7 +502,8 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["page"] += 1
 
     def list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            filters: Optional[List[str]] = None
     ):
         """
         List the components.
@@ -699,10 +700,10 @@ class EntitiesEndpoint:
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
 
-    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+    def stream_list(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         return self.stream(query, sort=sort, filters=filters)
 
-    def stream(self, query="*", sort=None, filters: List[str] = None):
+    def stream(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         """Stream the list of resources.
 
         Args:
@@ -729,7 +730,8 @@ class EntitiesEndpoint:
             page += 1
 
     def list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            filters: Optional[List[str]] = None
     ):
         """List the resources.
 
@@ -1045,21 +1047,6 @@ class PageAssistantDefinitionEndpoint(PageAssistantDefinition, PageEndpoint):
     pass
 
 
-class PageCredentialDefinitionEndpoint(PageCredentialDefinition, PageEndpoint):
-    """Handles the endpoint for the Page Credential Definition.
-
-    This class inherits from the PageCredentialDefinition and PageEndpoint classes.
-
-    Attributes:
-        None
-
-    Methods:
-        None
-    """
-
-    pass
-
-
 class PageUserEndpoint(PageUser, PageEndpoint):
     """
     This class represents a page user endpoint. It inherits from both PageUser and PageEndpoint classes.
@@ -1174,8 +1161,182 @@ class PagePipelineEndpoint(PagePipeline, PageEndpoint):
 
 
 class PageTaskEndpoint(PageTask, PageEndpoint):
+    """
+    Represents a page of tasks.
+    """
     def get_type(self) -> Optional[str]:
         return "task"
+
+class PageTaskActivityEndpoint(PageEndpoint):
+    """
+    Represents a page of task activities.
+    """
+    def get_type(self) -> Optional[str]:
+        return "taskActivities"
+
+class PageTaskDocumentFamilyEndpoint(PageEndpoint):
+    """
+    Represents a page of task document families.
+    """
+    def get_type(self) -> Optional[str]:
+        return "taskDocumentFamilies"
+
+class PageTaskTagEndpoint(PageEndpoint):
+    """
+    Represents a page of task tags.
+    """
+    def get_type(self) -> Optional[str]:
+        return "taskTags"
+
+class TaskEndpoint(EntityEndpoint, Task):
+    """
+    Represents a task endpoint.
+    """
+    def get_type(self) -> str:
+        return "tasks"
+
+    def create_with_request(self, task: Task, task_template: Optional[TaskTemplate] = None, document_families: Optional[List[DocumentFamily]] = None):
+        """Create a task with the given request."""
+        url = "/api/tasks/createTaskWithRequest"
+        response = self.client.post(url, body={
+            "task": task.model_dump(mode="json", by_alias=True),
+            "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
+            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in document_families] if document_families else None
+        })
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def update_status(self, status: TaskStatus):
+        """Update the status of the task."""
+        url = f"/api/tasks/{self.id}/status"
+        response = self.client.put(url, body=status)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def remove_status(self):
+        """Remove the task status."""
+        url = f"/api/tasks/{self.id}/status"
+        response = self.client.delete(url)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def update_assignee(self, assignee: User):
+        """Update the assignee of the task."""
+        url = f"/api/tasks/{self.id}/assignee"
+        response = self.client.put(url, body=assignee.model_dump(mode="json", by_alias=True))
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def remove_assignee(self):
+        """Remove the task assignee."""
+        url = f"/api/tasks/{self.id}/assignee"
+        response = self.client.delete(url)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+class TasksEndpoint(EntitiesEndpoint):
+    """
+    Represents tasks endpoints.
+    """
+    def get_type(self) -> str:
+        return "tasks"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskEndpoint
+
+    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None, document_families: Optional[List[DocumentFamily]] = None) -> TaskEndpoint:
+        """Create a task with the given template."""
+        url = "/api/tasks/createTaskWithRequest"
+        create_body = {
+            "task": task.model_dump(mode="json", by_alias=True),
+            "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
+            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in document_families] if document_families else None
+        }
+        response = self.client.post(url, create_body)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
+    """
+    Represents a task template endpoint.
+    """
+    def get_type(self) -> str:
+        return "taskTemplates"
+
+class TaskTemplatesEndpoint(EntitiesEndpoint):
+    """
+    Represents task templates endpoints.
+    """
+    def get_type(self) -> str:
+        return "taskTemplates"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskTemplateEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskTemplateEndpoint
+
+class TaskActivityEndpoint(EntityEndpoint, TaskActivity):
+    """
+    Represents a task activity endpoint.
+    """
+    def get_type(self) -> str:
+        return "taskActivities"
+
+class TaskActivitiesEndpoint(EntitiesEndpoint):
+    """
+    Represents task activities endpoints.
+    """
+    def get_type(self) -> str:
+        return "taskActivities"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskActivityEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskActivityEndpoint
+
+class TaskDocumentFamilyEndpoint(EntityEndpoint, TaskDocumentFamily):
+    """
+    Represents a task document family endpoint.
+    """
+    def get_type(self) -> str:
+        return "taskDocumentFamilies"
+
+class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
+    """
+    Represents task document families endpoints.
+    """
+    def get_type(self) -> str:
+        return "taskDocumentFamilies"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskDocumentFamilyEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskDocumentFamilyEndpoint
+
+class TaskTagEndpoint(EntityEndpoint, TaskTag):
+    """
+    Represents a task tag endpoint.
+    """
+    def get_type(self) -> str:
+        return "taskTags"
+
+class TaskTagsEndpoint(EntitiesEndpoint):
+    """
+    Represents task tags endpoints.
+    """
+    def get_type(self) -> str:
+        return "taskTags"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskTagEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskTagEndpoint
+
+
+class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
+    def get_type(self) -> Optional[str]:
+        return "taskTemplate"
 
 
 class PageRetainedGuidanceEndpoint(PageRetainedGuidance, PageEndpoint):
@@ -1595,29 +1756,15 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         )
 
     @property
-    def credentials(self):
-        """
-        Get the credentials endpoint of the organization.
-
-        Returns:
-            CredentialDefinitionsEndpoint: The credentials endpoint of the organization.
-        """
-        return (
-            CredentialDefinitionsEndpoint()
-            .set_organization(self)
-            .set_client(self.client)
-        )
-
-    @property
     def data_forms(self):
         """
         Get the data forms endpoint of the organization.
 
         Returns:
-            CredentialDefinitionsEndpoint: The data forms endpoint of the organization.
+            DataFormsEndpoint: The data forms endpoint of the organization.
         """
         return (
-            CredentialDefinitionsEndpoint()
+            DataFormsEndpoint()
             .set_organization(self)
             .set_client(self.client)
         )
@@ -1683,9 +1830,9 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         Get the subscriptions of the organization.
 
         Returns:
-            The subscriptions of the organization.
+            PageProductSubscriptionEndpoint: The subscriptions of the organization.
         """
-        url = f"/api/productSubscriptions"
+        url = "/api/productSubscriptions"
         params = {
             "filter": f"organization.id: '{self.id}'",
             "page": page,
@@ -2007,7 +2154,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         Returns:
             ExecutionEndpoint: The execution endpoint of the event.
         """
-        url = f"/api/projects/{self.project.id}/assistants/{self.id}/ekodexsavents"
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
         event_object = {"eventType": event_type, "options": json.dumps(options)}
         response = self.client.post(url, data=event_object, files={})
         process_response(response)
@@ -2546,6 +2693,21 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
             raise ValueError("Workspace has no channel")
 
 
+class TaskTemplateEndpoint(EntityEndpoint, Task):
+    """Represents a task endpoint.
+
+    This class is used to interact with the task endpoint of the API.
+    """
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "projects".
+        """
+        return "taskTemplates"
+
+
 class TaskEndpoint(EntityEndpoint, Task):
     """Represents a task endpoint.
 
@@ -2904,6 +3066,37 @@ class AssistantsEndpoint(EntitiesEndpoint):
             PageAssistantEndpoint: The page class of the endpoint.
         """
         return PageAssistantEndpoint
+
+
+class TaskTemplatesEndpoint(EntitiesEndpoint):
+    """Represents a projects endpoint"""
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "taskTemplates"
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Returns:
+            ProjectEndpoint: The instance class of the endpoint.
+        """
+        return TaskTemplateEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Returns:
+            PageProjectEndpoint: The page class of the endpoint.
+        """
+        return PageTaskTemplateEndpoint
 
 
 class TasksEndpoint(EntitiesEndpoint):
@@ -3388,58 +3581,6 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
         """
         return ProjectTemplateEndpoint
 
-
-class CredentialDefinitionsEndpoint(
-    ComponentEndpoint, ClientEndpoint, OrganizationOwned
-):
-    """Represents a credentials endpoint.
-
-    This class is used to represent a credentials endpoint. It inherits from
-    ComponentEndpoint, ClientEndpoint, and OrganizationOwned classes.
-
-    Attributes:
-        None
-    """
-
-    """Represents a credentials endpoint"""
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint.
-
-        This method is used to get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint.
-        """
-        return "credentialDefinitions"
-
-    def get_page_class(self, object_dict=None):
-        """Get the page class of the endpoint.
-
-        This method is used to get the page class of the endpoint.
-
-        Args:
-            object_dict (dict, optional): The object dictionary. Defaults to None.
-
-        Returns:
-            PageCredentialDefinitionEndpoint: The page class of the endpoint.
-        """
-        return PageCredentialDefinitionEndpoint
-
-    def get_instance_class(self, object_dict=None):
-        """Get the instance class of the endpoint.
-
-        This method is used to get the instance class of the endpoint.
-
-        Args:
-            object_dict (dict, optional): The object dictionary. Defaults to None.
-
-        Returns:
-            CredentialDefinitionEndpoint: The instance class of the endpoint.
-        """
-        return CredentialDefinitionEndpoint
-
-
 class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
     A class used to represent the DataFormsEndpoint.
@@ -3817,29 +3958,6 @@ class ActionEndpoint(ComponentInstanceEndpoint, Action):
         return "actions"
 
 
-class CredentialDefinitionEndpoint(ComponentInstanceEndpoint, CredentialDefinition):
-    """Represents a credential endpoint.
-
-    This class is a combination of ComponentInstanceEndpoint and CredentialDefinition.
-    It is used to represent a credential endpoint.
-
-    Attributes:
-        None
-    """
-
-    """Represents a credential endpoint"""
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint.
-
-        This method returns the type of the endpoint which is "credentialDefinitions".
-
-        Returns:
-            str: The type of the endpoint.
-        """
-        return "credentialDefinitions"
-
-
 class DataFormEndpoint(ComponentInstanceEndpoint, DataForm):
     """A class used to represent the endpoint of a data form component instance.
 
@@ -4018,7 +4136,8 @@ class TaxonomyEndpoint(ComponentInstanceEndpoint, Taxonomy):
 
         Args:
             taxons (list): A list of taxon objects to search through.
-            path (str): The path of the taxon to find.
+            parts (list): A list of strings representing the path to the taxon.
+            use_label (bool, optional): Whether to use the label or name of the taxon. Defaults to False.
 
         Returns:
             Taxon: The taxon object if found, None otherwise.
@@ -4577,7 +4696,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     def unlock(self):
         """
-        Lock the document family.
+        Unlock the document family.
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/unlock"
         response = self.client.put(url)
@@ -4617,6 +4736,35 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         response = self.client.put(url, body=external_data)
         return response.json()
 
+    def get_json(
+            self,
+            project_id: str,
+            friendly_names=False,
+    ) -> str:
+        """Get the JSON export for the document family
+
+        Args:
+            project_id str: The project ID
+            friendly_names (bool): Whether to use friendly names. Defaults to False
+
+        Returns:
+            str: The JSON
+        """
+        if project_id is None:
+            raise Exception(
+                f"Project ID is required"
+            )
+
+        url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/dataObjects"
+        params = {
+            "format": "json",
+            "friendlyNames": friendly_names,
+            "projectId": project_id,
+        }
+
+        response = self.client.get(url, params=params)
+        return response.text
+
     def export(self) -> bytes:
         """
         Export the document family as bytes.
@@ -4651,6 +4799,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             mixin: Optional[str] = None,
             label: Optional[str] = None,
             timeout: int = 60,
+            polling_delay_in_seconds: int = 5,
     ) -> "DocumentFamilyEndpoint":
         """
         Wait for the document family to be ready.
@@ -4659,6 +4808,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             mixin (Optional[str]): The mixin. Defaults to None.
             label (Optional[str]): The label. Defaults to None.
             timeout (int): The timeout. Defaults to 60.
+            polling_delay_in_seconds (int): The polling delay in seconds. Defaults to 5. 5 is the minimum value.
 
         Returns:
             DocumentFamilyEndpoint: The updated document family endpoint.
@@ -4667,6 +4817,9 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             "Waiting for mixin and/or label to be available on document family %s",
             self.id,
         )
+        if polling_delay_in_seconds < 5:
+            polling_delay_in_seconds = 5
+
         start = time.time()
         while time.time() - start < timeout:
             url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
@@ -4680,7 +4833,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             ):
                 return updated_document_family
 
-            time.sleep(5)
+            time.sleep(polling_delay_in_seconds)
 
         raise Exception(f"Not available on document family {self.id}")
 
@@ -4783,7 +4936,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         self.client.put(url, body=document_status.model_dump(by_alias=True))
 
     def add_document(
-            self, document: Document, content_object: Optional[ContentObject] = None
+            self, document: Document, content_object: Optional[ContentObject] = None,
+            taxonomies: Optional[List[Taxonomy]] = None, data_store: Optional[Store] = None
     ):
         """
         Add a document to the document family.
@@ -4791,19 +4945,34 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Args:
             document (Document): The document to add.
             content_object (Optional[ContentObject]): The content object. Defaults to None.
+            taxonomies (Optional[List[Taxonomy]]): List of taxonomies to use. Defaults to None.
+            data_store (Optional[Store]): Data store to add document to. Defaults to None.
         """
         url = (
             f'/api/stores/{self.store_ref.replace(":", "/")}/families/{self.id}/objects'
         )
         if content_object is None:
             content_object = self.content_objects[-1]
+
+        params = {
+            "sourceContentObjectId": content_object.id,
+            "transitionType": "DERIVED",
+            "documentVersion": document.version
+        }
+
+        # If we have a store but no taxonomies or the other way around then we need to throw an error
+        if (data_store and not taxonomies) or (taxonomies and not data_store):
+            raise Exception("If you provide a data store you must also provide taxonomies and vice-versa")
+
+        if taxonomies:
+            params["taxonomyRefs"] = ",".join([taxonomy.ref for taxonomy in taxonomies])
+
+        if data_store:
+            params["dataStoreRef"] = data_store.ref
+
         self.client.post(
             url,
-            params={
-                "sourceContentObjectId": content_object.id,
-                "transitionType": "DERIVED",
-                "documentVersion": document.version,
-            },
+            params=params,
             files={"file": document.to_kddb()},
         )
 
@@ -5035,7 +5204,8 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         super().__init__(client)
 
     def list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            filters: Optional[List[str]] = None
     ):
         """
         Lists the data exceptions.
@@ -5428,6 +5598,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             replace=False,
             additional_metadata: Optional[dict] = None,
             external_data: Optional[dict] = None,
+            document: Optional[Document] = None,
     ):
         """
         Upload a file to the store.
@@ -5438,6 +5609,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             replace (bool): Replace the file if it already exists (Default False).
             additional_metadata (Optional[dict]): Additional metadata to add to the file (Default None).
             external_data (Optional[dict]): External data to add to the file (Default None).
+            document (Optional[Document]): The document to add to the file (Default None).
         """
         if Path(file_path).is_file():
             logger.info(f"Uploading {file_path}")
@@ -5447,7 +5619,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
                     content=path_content,
                     replace=replace,
                     additional_metadata=additional_metadata,
-                    external_data=external_data
+                    external_data=external_data,
+                    document=document,
                 )
         else:
             raise Exception(f"{file_path} is not a file")
@@ -5459,6 +5632,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             replace=False,
             additional_metadata: Optional[dict] = None,
             external_data: Optional[dict] = None,
+            document: Optional[Document] = None,
     ) -> DocumentFamilyEndpoint:
         """
         Put the content into the store at the given path.
@@ -5469,11 +5643,12 @@ class DocumentStoreEndpoint(StoreEndpoint):
             replace (bool): Replace the content if it exists.
             additional_metadata (Optional[dict]): Additional metadata to store with the document (not it can't include 'path').
             external_data (Optional[dict]): External data to store with the document.
+            document (Optional[Document]): The document to store with the content.
 
         Returns:
             DocumentFamilyEndpoint: The document family that was created.
         """
-        files = {"file": content}
+        files = {"file": content, "document": document.to_kddb()} if document else {"file": content}
 
         if additional_metadata is None:
             additional_metadata = {}
@@ -6270,12 +6445,6 @@ OBJECT_TYPES = {
         "type": ModelRuntimeEndpoint,
         "endpoint": ModelRuntimesEndpoint,
     },
-    "credentialDefinitions": {
-        "name": "credentialDefinition",
-        "plural": "credentialDefinitions",
-        "type": CredentialDefinitionEndpoint,
-        "endpoint": CredentialDefinitionsEndpoint,
-    },
     "taxonomies": {
         "name": "taxonomy",
         "plural": "taxonomies",
@@ -6332,6 +6501,20 @@ OBJECT_TYPES = {
         "global": True,
         "endpoint": MembershipsEndpoint,
     },
+    "tasks": {
+        "name": "task",
+        "plural": "tasks",
+        "type": TaskEndpoint,
+        "global": True,
+        "endpoint": TasksEndpoint,
+    },
+    "taskTemplates": {
+        "name": "taskTemplate",
+        "plural": "taskTemplates",
+        "type": TaskTemplateEndpoint,
+        "global": True,
+        "endpoint": TaskTemplatesEndpoint,
+    }
 }
 
 
@@ -6369,7 +6552,7 @@ def resolve_object_type(obj_type):
     if len(hits) == 0:
         raise Exception(f"Unable to find object type {obj_type}")
 
-    raise Exception(f"Too many potential matches for object type ({','.join(keys)}")
+    raise Exception(f"Too many potential matches for object type ({','.join(keys)})")
 
 
 class ExtractionEngineEndpoint:
@@ -7079,7 +7262,6 @@ class KodexaClient:
                 "taxonomy": TaxonomyEndpoint,
                 "pipeline": PipelineEndpoint,
                 "action": ActionEndpoint,
-                "credential": CredentialDefinitionEndpoint,
                 "projectTemplate": ProjectTemplateEndpoint,
                 "modelRuntime": ModelRuntimeEndpoint,
                 "extensionPack": ExtensionPackEndpoint,
@@ -7102,7 +7284,8 @@ class KodexaClient:
                 "product": ProductEndpoint,
                 "task": TaskEndpoint,
                 "productSubscription": ProductSubscriptionEndpoint,
-                "checkResponse": CheckResponseEndpoint
+                "checkResponse": CheckResponseEndpoint,
+                "taskTemplate": TaskTemplateEndpoint,
             }
 
             if component_type in known_components:
@@ -7172,7 +7355,6 @@ DataStoreEndpoint.model_rebuild()
 TaxonomyEndpoint.model_rebuild()
 PipelineEndpoint.model_rebuild()
 ActionEndpoint.model_rebuild()
-CredentialDefinitionEndpoint.model_rebuild()
 ProjectTemplateEndpoint.model_rebuild()
 ModelRuntimeEndpoint.model_rebuild()
 ExtensionPackEndpoint.model_rebuild()
