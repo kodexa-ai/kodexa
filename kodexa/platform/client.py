@@ -234,7 +234,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
         Returns:
             str: The type of the endpoint.
         """
-        pass
+        return "resources"
 
     def get_instance_class(self, object_dict=None):
         """
@@ -276,10 +276,10 @@ class ProjectResourceEndpoint(ClientEndpoint):
             df.drop(columns="client", axis=1)
         return df
 
-    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+    def stream_list(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         return self.stream(query, sort=sort, filters=filters)
 
-    def stream(self, query="*", sort=None, filters: List[str] = None):
+    def stream(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         """
         Stream the list of resources.
 
@@ -306,7 +306,8 @@ class ProjectResourceEndpoint(ClientEndpoint):
             page += 1
 
     def list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            filters: Optional[List[str]] = None
     ):
         """
         List the resources.
@@ -454,10 +455,10 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             return None
         return component_page.content[0]
 
-    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+    def stream_list(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         return self.stream(query, sort, filters)
 
-    def stream(self, query="*", sort=None, filters: List[str] = None):
+    def stream(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         """
         Stream components matching query, sort and filters.
 
@@ -501,7 +502,8 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["page"] += 1
 
     def list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            filters: Optional[List[str]] = None
     ):
         """
         List the components.
@@ -698,10 +700,10 @@ class EntitiesEndpoint:
         self.client: "KodexaClient" = client
         self.organization: Optional["OrganizationEndpoint"] = organization
 
-    def stream_list(self, query="*", sort=None, filters: List[str] = None):
+    def stream_list(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         return self.stream(query, sort=sort, filters=filters)
 
-    def stream(self, query="*", sort=None, filters: List[str] = None):
+    def stream(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         """Stream the list of resources.
 
         Args:
@@ -728,7 +730,8 @@ class EntitiesEndpoint:
             page += 1
 
     def list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            filters: Optional[List[str]] = None
     ):
         """List the resources.
 
@@ -5201,7 +5204,8 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         super().__init__(client)
 
     def list(
-            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            filters: Optional[List[str]] = None
     ):
         """
         Lists the data exceptions.

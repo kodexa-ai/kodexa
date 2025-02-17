@@ -198,11 +198,11 @@ class PipelineContext:
         """
         self.current_document = current_document
 
-    def get_current_document(self) -> Document:
+    def get_current_document(self) -> Optional[Document]:
         """Gets the current document being processed in the pipeline.
 
         Returns:
-            Document: The current document being processed in the pipeline.
+            Optional[Document]: The current document being processed in the pipeline.
         """
         return self.current_document
 
@@ -329,11 +329,13 @@ class PipelineStep:
                 import copy
 
                 option_copy = copy.deepcopy(self.options)
-                step_instance = self.step(**option_copy)
-                if len(signature(step_instance.process).parameters) == 1:
-                    result_document = step_instance.process(document)
+                if hasattr(self.step, 'process'):
+                    if hasattr(self.step.process, '__call__'):
+                        result_document = self.step.process(document, context)
+                    else:
+                        result_document = document
                 else:
-                    result_document = step_instance.process(document, context)
+                    result_document = document
 
             elif not callable(self.step):
                 logger.info(f"Starting step {type(self.step)}")
