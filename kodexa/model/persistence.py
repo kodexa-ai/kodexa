@@ -5,7 +5,7 @@ import sqlite3
 import tempfile
 import time
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Any, Dict, Union
 
 import msgpack
 
@@ -74,7 +74,7 @@ class SqliteDocumentPersistence(object):
     The Sqlite persistence engine to support large scale documents (part of the V4 Kodexa Document Architecture)
     """
 
-    def __init__(self, document: Document, filename: str = None, delete_on_close=False, inmemory=False, persistence_manager=None):
+    def __init__(self, document: Document, filename: Optional[str] = None, delete_on_close: bool = False, inmemory: bool = False, persistence_manager: Optional[Any] = None):
         self.document = document
 
         self.node_types = {}
@@ -244,9 +244,9 @@ class SqliteDocumentPersistence(object):
                             parent_node(id, pid, nt, idx, path) AS (
                                 VALUES (?,?,?,?,?)
                                 UNION ALL
-                                SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path || substr('0000000' || cns.idx, -6, 6) 
+                                SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path || substr('0000000' || cns.idx, -6, 6)
                                 FROM cn cns, parent_node
-                                WHERE parent_node.id = cns.pid  
+                                WHERE parent_node.id = cns.pid
                             )
                             SELECT id, pid, nt, idx, path from parent_node order by path
                             """
@@ -276,9 +276,9 @@ class SqliteDocumentPersistence(object):
                                 parent_node(id, pid, nt, idx, path) AS (
                                     VALUES (?,?,?,?,?)
                                     UNION ALL
-                                    SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path || substr('000000' || cns.idx, -6, 6) 
+                                    SELECT cns.id, cns.pid, cns.nt, cns.idx, parent_node.path || substr('000000' || cns.idx, -6, 6)
                                     FROM cn cns, parent_node
-                                    WHERE parent_node.id = cns.pid  
+                                    WHERE parent_node.id = cns.pid
                                 )
                                 SELECT id, pid, nt, idx, path from parent_node where nt=? order by path
                                 """
@@ -1245,7 +1245,7 @@ class SqliteDocumentPersistence(object):
         """
         # First check if the old table exists and has key column
         old_table = self.cursor.execute("""
-            SELECT name FROM sqlite_master 
+            SELECT name FROM sqlite_master
             WHERE type='table' AND name='ed'
         """).fetchone()
 
@@ -1457,10 +1457,10 @@ class PersistenceManager(object):
     This is implemented to allow us to work with large complex documents in a performance centered way.
     """
 
-    def __init__(self, document: Document, filename: str = None, delete_on_close=False, inmemory=False):
+    def __init__(self, document: Document, filename: Optional[str] = None, delete_on_close: bool = False, inmemory: bool = False):
         self.document = document
         self.node_cache = SimpleObjectCache()
-        self.child_cache = {}
+        self.child_cache: Dict[str, List[str]] = {}
         self.child_id_cache = {}
         self.feature_cache = {}
         self.content_parts_cache = {}
@@ -1541,7 +1541,10 @@ class PersistenceManager(object):
                 self.node_cache.add_obj(node)
                 return node
 
-        return self.node_cache.get_obj(uuid) # return the cached version
+        node = self.node_cache.get_obj(uuid)
+        if node is None:
+            raise ValueError(f"Node with UUID {uuid} not found in cache")
+        return node
 
     def add_model_insight(self, model_insight: ModelInsight):
         """
@@ -1879,10 +1882,11 @@ class PersistenceManager(object):
         all_ids = self._underlying_persistence.remove_content_node(node)
 
         # remove all the ids from the cache
-        for id in all_ids:
-            tmp_node = self.node_cache.get_obj(id)
-            if tmp_node is not None:
-                self.node_cache.remove_obj(tmp_node)
+        if all_ids is not None:
+            for id in all_ids:
+                tmp_node = self.node_cache.get_obj(id)
+                if tmp_node is not None:
+                    self.node_cache.remove_obj(tmp_node)
             self.node_cache.dirty_objs.remove(id) if id in self.node_cache.dirty_objs else None
 
     def get_children(self, node):
