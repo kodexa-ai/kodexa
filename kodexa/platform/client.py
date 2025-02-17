@@ -1239,6 +1239,17 @@ class TasksEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskEndpoint
 
+    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None, document_families: Optional[List[DocumentFamily]] = None) -> TaskEndpoint:
+        """Create a task with the given template."""
+        url = "/api/tasks/createTaskWithRequest"
+        create_body = {
+            "task": task.model_dump(mode="json", by_alias=True),
+            "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
+            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in document_families] if document_families else None
+        }
+        response = self.client.post(url, create_body)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
 class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
     """
     Represents a task template endpoint.
