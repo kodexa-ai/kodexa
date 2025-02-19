@@ -3062,16 +3062,16 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
 
 
 class TaskTemplateEndpoint(EntityEndpoint, Task):  # noqa: F811
-    """Represents a task endpoint.
+    """Represents a task template endpoint.
 
-    This class is used to interact with the task endpoint of the API.
+    This class is used to interact with the task template endpoint of the API.
     """
 
     def get_type(self) -> str:
         """Get the type of the endpoint.
 
         Returns:
-            str: The type of the endpoint, in this case "projects".
+            str: The type of the endpoint, in this case "taskTemplates".
         """
         return "taskTemplates"
 
@@ -3086,7 +3086,7 @@ class TaskEndpoint(EntityEndpoint, Task):
         """Get the type of the endpoint.
 
         Returns:
-            str: The type of the endpoint, in this case "projects".
+            str: The type of the endpoint, in this case "tasks".
         """
         return "tasks"
 
