@@ -90,8 +90,8 @@ from kodexa.model.objects import (
     Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
     TaskActivity, TaskDocumentFamily, TaskTag
 )
-from kodexa.model.entities.product import Product
-from kodexa.model.entities.product_subscription import ProductSubscription, PageProductSubscriptionEndpoint
+# from kodexa.model.entities.product import Product
+# from kodexa.model.entities.product_subscription import ProductSubscription, PageProductSubscriptionEndpoint
 
 logger = logging.getLogger()
 

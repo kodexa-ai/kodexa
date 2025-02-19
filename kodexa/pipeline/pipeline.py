@@ -340,11 +340,21 @@ class PipelineStep:
             elif not callable(self.step):
                 logger.info(f"Starting step {type(self.step)}")
 
-                result_document = self.step.process(document, context)
+                if len(signature(self.step.process).parameters) == 1:
+                    result_document = self.step.process(document)
+                else:
+                    result_document = self.step.process(document, context)
+
+                # result_document = self.step.process(document, context)
             else:
                 logger.info(f"Starting step function {self.step.__name__}")
 
-                result_document = self.step(document, context)
+                if len(signature(self.step).parameters) == 1:
+                    result_document = self.step(document)
+                else:
+                    result_document = self.step(document, context)
+
+                # result_document = self.step(document, context)
 
             end = time.perf_counter()
             logger.info(f"Step completed (f{end - start:0.4f}s)")
