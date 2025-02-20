@@ -2899,7 +2899,6 @@ class ProjectOptions(BaseModel):
     )
 
 
-
 class Project(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -2934,6 +2933,9 @@ class Project(BaseModel):
     memory: Optional[ProjectMemory] = None
     document_statuses: Optional[List[DocumentStatus]] = Field(
         None, alias="documentStatuses"
+    )
+    task_statuses: Optional[List[TaskStatus]] = Field(
+        None, alias="taskStatuses"
     )
     attribute_statuses: Optional[List[AttributeStatus]] = Field(
         None, alias="attributeStatuses"
