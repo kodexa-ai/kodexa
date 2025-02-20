@@ -49,7 +49,7 @@ def test_folder_connector_unpack_wildcard():
 def test_lines_of_text():
     # first test with all content being placed on root ContentNode
     pipeline = Pipeline.from_file(get_test_directory() + 'multiline_text.txt')
-    pipeline.add_step(TextParser)
+    pipeline.add_step(TextParser())
     context = pipeline.run()
 
     doc = context.output_document

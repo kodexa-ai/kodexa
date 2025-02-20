@@ -1195,16 +1195,6 @@ class TaskEndpoint(EntityEndpoint, Task):
     def get_type(self) -> str:
         return "tasks"
 
-    def create_with_request(self, task: Task, task_template: Optional[TaskTemplate] = None, document_families: Optional[List[DocumentFamily]] = None):
-        """Create a task with the given request."""
-        url = "/api/tasks/createTaskWithRequest"
-        response = self.client.post(url, body={
-            "task": task.model_dump(mode="json", by_alias=True),
-            "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
-            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in document_families] if document_families else None
-        })
-        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
-
     def update_status(self, status: TaskStatus):
         """Update the status of the task."""
         url = f"/api/tasks/{self.id}/status"
