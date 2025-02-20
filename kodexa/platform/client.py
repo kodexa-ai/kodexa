@@ -2683,21 +2683,6 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
             raise ValueError("Workspace has no channel")
 
 
-class TaskTemplateEndpoint(EntityEndpoint, Task):
-    """Represents a task endpoint.
-
-    This class is used to interact with the task endpoint of the API.
-    """
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint, in this case "projects".
-        """
-        return "taskTemplates"
-
-
 class RetainedGuidanceEndpoint(EntityEndpoint, RetainedGuidance):
     """Represents a retained guidance endpoint.
 
@@ -3041,70 +3026,6 @@ class AssistantsEndpoint(EntitiesEndpoint):
             PageAssistantEndpoint: The page class of the endpoint.
         """
         return PageAssistantEndpoint
-
-
-class TaskTemplatesEndpoint(EntitiesEndpoint):
-    """Represents a projects endpoint"""
-
-    def get_type(self) -> str:
-        """
-        Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint.
-        """
-        return "taskTemplates"
-
-    def get_instance_class(self, object_dict=None):
-        """
-        Get the instance class of the endpoint.
-
-        Returns:
-            ProjectEndpoint: The instance class of the endpoint.
-        """
-        return TaskTemplateEndpoint
-
-    def get_page_class(self, object_dict=None):
-        """
-        Get the page class of the endpoint.
-
-        Returns:
-            PageProjectEndpoint: The page class of the endpoint.
-        """
-        return PageTaskTemplateEndpoint
-
-
-class TasksEndpoint(EntitiesEndpoint):
-    """Represents a projects endpoint"""
-
-    """Represents a projects endpoint"""
-
-    def get_type(self) -> str:
-        """
-        Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint.
-        """
-        return "tasks"
-
-    def get_instance_class(self, object_dict=None):
-        """
-        Get the instance class of the endpoint.
-
-        Returns:
-            ProjectEndpoint: The instance class of the endpoint.
-        """
-        return TaskEndpoint
-
-    def get_page_class(self, object_dict=None):
-        """
-        Get the page class of the endpoint.
-
-        Returns:
-            PageProjectEndpoint: The page class of the endpoint.
-        """
-        return PageTaskEndpoint
 
 
 class RetainedGuidancesEndpoint(EntitiesEndpoint):
