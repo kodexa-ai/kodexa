@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - 'releases/**'
-    paths:
-      - '**'
 
 jobs:
   build-and-publish-python-package:

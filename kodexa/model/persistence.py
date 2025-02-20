@@ -1054,7 +1054,7 @@ class SqliteDocumentPersistence(object):
         """
         model_insights = []
         for model_insight in self.cursor.execute(MODEL_INSIGHT_SELECT).fetchall():
-            model_insights.append(ModelInsight.parse_raw(model_insight[0]))
+            model_insights.append(ModelInsight.model_validate_json(model_insight[0]))
 
         return model_insights
 

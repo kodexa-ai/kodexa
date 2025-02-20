@@ -2708,21 +2708,6 @@ class TaskTemplateEndpoint(EntityEndpoint, Task):
         return "taskTemplates"
 
 
-class TaskEndpoint(EntityEndpoint, Task):
-    """Represents a task endpoint.
-
-    This class is used to interact with the task endpoint of the API.
-    """
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint, in this case "projects".
-        """
-        return "tasks"
-
-
 class RetainedGuidanceEndpoint(EntityEndpoint, RetainedGuidance):
     """Represents a retained guidance endpoint.
 
