@@ -15,14 +15,11 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Optional, List, ClassVar, Dict, Any, Type, Iterator, TYPE_CHECKING
-import urllib.parse
+from typing import Optional, List, ClassVar, Dict, Any
+
 import requests
 from functional import seq
 from pydantic import BaseModel, Field, ConfigDict
-
-if TYPE_CHECKING:
-    from pandas import DataFrame  # noqa: F401
 from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Document
@@ -87,11 +84,9 @@ from kodexa.model.objects import (
     PageExtensionPack,
     PageOrganization,
     DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
-    Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
-    TaskActivity, TaskDocumentFamily, TaskTag
+    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
+    TaskActivity, TaskDocumentFamily, TaskTag,
 )
-# from kodexa.model.entities.product import Product
-# from kodexa.model.entities.product_subscription import ProductSubscription, PageProductSubscriptionEndpoint
 
 logger = logging.getLogger()
 
@@ -165,6 +160,10 @@ class ClientEndpoint(BaseModel):
     """
     Represents a client endpoint.
     """
+
+    """
+    Represents a client endpoint
+    """
     client: Optional[Any] = Field(None, exclude=True)
     ref: Optional[str] = Field(None, exclude=False)
 
@@ -209,8 +208,11 @@ class ProjectResourceEndpoint(ClientEndpoint):
     """
     Represents a project resource endpoint.
     """
+
+    """
+    Represents a project resource endpoint
+    """
     project: Optional["ProjectEndpoint"] = Field(None)
-    client: Optional["KodexaClient"] = Field(None)
 
     def set_project(self, project: "ProjectEndpoint"):
         """
@@ -234,7 +236,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
         """
         return "resources"
 
-    def get_instance_class(self, object_dict: Optional[Dict[str, Any]] = None) -> Type[ClientEndpoint]:
+    def get_instance_class(self, object_dict=None):
         """
         Get the instance class of the endpoint.
 
@@ -242,13 +244,12 @@ class ProjectResourceEndpoint(ClientEndpoint):
             object_dict (dict, optional): The dictionary of the object. Defaults to None.
 
         Returns:
-            Type[ClientEndpoint]: The instance class of the endpoint.
+            The instance class of the endpoint.
         """
-        raise NotImplementedError("Subclasses must implement get_instance_class")
+        pass
 
     def to_df(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
-            filters: Optional[List[str]] = None
+            self, query="*", page=1, page_size=10, sort=None, filters: List[str] = None
     ):
         """
         Convert resources to data frame.
@@ -263,9 +264,9 @@ class ProjectResourceEndpoint(ClientEndpoint):
         Returns:
             DataFrame: The DataFrame of the resources.
         """
-        if TYPE_CHECKING:
-            from pandas import DataFrame  # noqa: F811
-        df = DataFrame(
+        import pandas as pd
+
+        df = pd.DataFrame(
             seq(self.list(query, page, page_size, sort, filters))
             .map(lambda x: x.dict())
             .to_list()
@@ -305,7 +306,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
             page += 1
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
             filters: Optional[List[str]] = None
     ):
         """
@@ -322,12 +323,10 @@ class ProjectResourceEndpoint(ClientEndpoint):
             list: The list of resources.
         """
 
-        if self.project is None:
-            raise ValueError("Project is not set")
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
 
         params = {
-            "query": urllib.parse.quote(query),
+            "query": requests.utils.quote(query),
             "page": page,
             "pageSize": page_size,
         }
@@ -336,16 +335,11 @@ class ProjectResourceEndpoint(ClientEndpoint):
             params["sort"] = sort
 
         if filters is not None:
-            params["filter"] = ";".join(filters) if isinstance(filters, list) else str(filters)
+            params["filter"] = filters
 
-        if self.client is None:
-            raise ValueError("Client is not set")
         list_response = self.client.get(url, params=params)
-        instance_class = self.get_instance_class()
-        if instance_class is None:
-            raise ValueError("Instance class is not set")
         return [
-            instance_class.model_validate(item).set_client(self.client)
+            self.get_instance_class().model_validate(item).set_client(self.client)
             for item in list_response.json()
         ]
 
@@ -359,11 +353,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
         Returns:
             list: The list of replaced components.
         """
-        if self.project is None:
-            raise ValueError("Project is not set")
         url = f"/api/projects/{self.project.id}/{self.get_type()}"
-        if self.client is None:
-            raise ValueError("Client is not set")
         replace_response = self.client.put(
             url,
             [
@@ -413,7 +403,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         Returns:
             str: The type of the component.
         """
-        return "components"
+        pass
 
     def get_instance_class(self, obj_dict=None):
         """
@@ -444,10 +434,6 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
         Reindex the component.
         """
         url = f"/api/{self.get_type()}/_reindex"
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.client is None:
-            raise ValueError("Client is not set")
         self.client.post(url)
 
     def find_by_slug(self, slug, version=None):
@@ -472,12 +458,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
     def stream_list(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         return self.stream(query, sort, filters)
 
-    def stream(
-            self,
-            query: str = "*",
-            sort: Optional[str] = None,
-            filters: Optional[List[str]] = None
-    ) -> Iterator[Any]:
+    def stream(self, query: str = "*", sort: Optional[str] = None, filters: Optional[List[str]] = None):
         """
         Stream components matching query, sort and filters.
 
@@ -487,67 +468,43 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             filters (List[str], optional): The list of filters.
 
         Yields:
-            Iterator[Any]: The components in the current page.
-
-        Raises:
-            ValueError: If client is not set, organization is not set, or response validation fails.
+            The components in the current page.
         """
-        if self.organization is None:
-            raise ValueError("Organization is not set")
-        if self.client is None:
-            raise ValueError("Client is not set")
-
         url = f"/api/{self.get_type()}/{self.organization.slug}"
+
         params = {
-            "query": urllib.parse.quote(query),
-            "page": "1",
+            "query": requests.utils.quote(query),
         }
 
         if sort is not None:
             params["sort"] = sort
 
         if filters is not None:
-            params["filter"] = ";".join(filters) if isinstance(filters, list) else str(filters)
+            params["filter"] = filters
 
         while True:
-            response = self.client.get(url, params=params)
-            if response is None:
-                raise ValueError("Failed to get components")
+            list_response = self.client.get(url, params=params)
 
-            response_data = response.json()
-            if not response_data.get("content"):
+            # If there are no more results, exit the loop
+            if not list_response.json()["content"]:
                 break
 
-            page_class = self.get_page_class(response_data)
-            if page_class is None:
-                raise ValueError("Page class is not set")
-
-            validated_page = page_class.model_validate(response_data)
-            if validated_page is None:
-                raise ValueError("Failed to validate page")
-
-            page_with_client = validated_page.set_client(self.client)
-            if page_with_client is None:
-                raise ValueError("Failed to set client on page")
-
-            endpoints = page_with_client.to_endpoints()
-            if endpoints is None or not endpoints.content:
-                break
-
-            for endpoint in endpoints.content:
+            # Yield each endpoint in the current page
+            for endpoint in (
+                    self.get_page_class(list_response.json())
+                            .model_validate(list_response.json())
+                            .set_client(self.client)
+                            .to_endpoints().content
+            ):
                 yield endpoint
 
             # Move to the next page
-            params["page"] = str(int(params.get("page", "1")) + 1)
+            params["page"] += 1
 
     def list(
-            self,
-            query: str = "*",
-            page: int = 1,
-            page_size: int = 10,
-            sort: Optional[str] = None,
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
             filters: Optional[List[str]] = None
-    ) -> Any:
+    ):
         """
         List the components.
 
@@ -559,53 +516,31 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             filters (List[str], optional): The list of filters.
 
         Returns:
-            Any: The list of components.
-
-        Raises:
-            ValueError: If client is not set, organization is not set, or response validation fails.
+            The list of components.
         """
-        if self.organization is None:
-            raise ValueError("Organization is not set")
-        if self.client is None:
-            raise ValueError("Client is not set")
-
         url = f"/api/{self.get_type()}/{self.organization.slug}"
+
         params = {
-            "query": urllib.parse.quote(query),
-            "page": str(page),
-            "pageSize": str(page_size),
+            "query": requests.utils.quote(query),
+            "page": page,
+            "pageSize": page_size,
         }
 
         if sort is not None:
             params["sort"] = sort
 
         if filters is not None:
-            params["filter"] = ";".join(filters) if isinstance(filters, list) else str(filters)
+            params["filter"] = filters
 
-        response = self.client.get(url, params=params)
-        if response is None:
-            raise ValueError("Failed to get components")
+        list_response = self.client.get(url, params=params)
+        return (
+            self.get_page_class(list_response.json())
+            .model_validate(list_response.json())
+            .set_client(self.client)
+            .to_endpoints()
+        )
 
-        response_data = response.json()
-        page_class = self.get_page_class(response_data)
-        if page_class is None:
-            raise ValueError("Page class is not set")
-
-        validated_page = page_class.model_validate(response_data)
-        if validated_page is None:
-            raise ValueError("Failed to validate page")
-
-        page_with_client = validated_page.set_client(self.client)
-        if page_with_client is None:
-            raise ValueError("Failed to set client on page")
-
-        endpoints = page_with_client.to_endpoints()
-        if endpoints is None:
-            raise ValueError("Failed to convert page to endpoints")
-
-        return endpoints
-
-    def create(self, component: Any) -> Any:
+    def create(self, component):
         """
         Create a new component.
 
@@ -613,39 +548,19 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             component: The component to be created.
 
         Returns:
-            Any: The created component.
-
-        Raises:
-            ValueError: If client is not set, organization is not set, or response validation fails.
+            The created component.
         """
-        if self.organization is None:
-            raise ValueError("Organization is not set")
-        if self.client is None:
-            raise ValueError("Client is not set")
-
         url = f"/api/{self.get_type()}/{self.organization.slug}"
-        response = self.client.post(
+        get_response = self.client.post(
             url, component.model_dump(mode="json", by_alias=True)
         )
-        if response is None:
-            raise ValueError("Failed to create component")
+        return (
+            self.get_instance_class(get_response.json())
+            .model_validate(get_response.json())
+            .set_client(self.client)
+        )
 
-        response_data = response.json()
-        instance_class = self.get_instance_class(response_data)
-        if instance_class is None:
-            raise ValueError("Instance class is not set")
-
-        validated = instance_class.model_validate(response_data)
-        if validated is None:
-            raise ValueError("Failed to validate component")
-
-        component_with_client = validated.set_client(self.client)
-        if component_with_client is None:
-            raise ValueError("Failed to set client on component")
-
-        return component_with_client
-
-    def get_by_slug(self, slug: str, version: Optional[str] = None) -> Any:
+    def get_by_slug(self, slug, version=None):
         """
         Get a component by its slug.
 
@@ -654,38 +569,16 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             version (str, optional): The version of the component.
 
         Returns:
-            Any: The component with the given slug and version.
-
-        Raises:
-            ValueError: If client is not set, organization is not set, or response validation fails.
+            The component with the given slug and version.
         """
-        if self.organization is None:
-            raise ValueError("Organization is not set")
-        if self.client is None:
-            raise ValueError("Client is not set")
-
         url = f"/api/{self.get_type()}/{self.organization.slug}/{slug}"
         if version is not None:
             url += f"/{version}"
 
-        response = self.client.get(url)
-        if response is None:
-            raise ValueError(f"Failed to get component with slug: {slug}")
-
-        response_data = response.json()
-        instance_class = self.get_instance_class(response_data)
-        if instance_class is None:
-            raise ValueError("Instance class is not set")
-
-        validated = instance_class.model_validate(response_data)
-        if validated is None:
-            raise ValueError("Failed to validate component")
-
-        component_with_client = validated.set_client(self.client)
-        if component_with_client is None:
-            raise ValueError("Failed to set client on component")
-
-        return component_with_client
+        get_response = self.client.get(url)
+        return self.get_instance_class(get_response.json()).model_validate(
+            get_response.json()
+        )
 
 
 class EntityEndpoint(ClientEndpoint):
@@ -697,42 +590,20 @@ class EntityEndpoint(ClientEndpoint):
     Represents an entity endpoint
     """
 
-    def reload(self) -> "EntityEndpoint":
+    def reload(self):
         """
         Reloads the entity.
 
         Returns:
-            EntityEndpoint: The reloaded entity.
-
-        Raises:
-            ValueError: If client is not set, id is not set, or validation fails.
+            The reloaded entity.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.id is None:
-            raise ValueError("Entity ID is not set")
-
         url = f"/api/{self.get_type()}/{self.id}"
         response = self.client.get(url)
-        if response is None:
-            raise ValueError(f"Failed to reload entity: {self.id}")
-
-        validated = self.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate entity response")
-
-        entity_with_client = validated.set_client(self.client)
-        if entity_with_client is None:
-            raise ValueError("Failed to set client on entity")
-
-        return entity_with_client
+        return self.model_validate(response.json()).set_client(self.client)
 
     def get_type(self) -> str:
         """
         Gets the type of the entity.
-
-        Returns:
-            str: The type of the entity.
 
         Raises:
             NotImplementedError: If the method is not implemented.
@@ -744,77 +615,47 @@ class EntityEndpoint(ClientEndpoint):
         Creates the entity.
 
         Returns:
-            EntityEndpoint: The created entity (with the ID in place).
+            EntityEndpoint: The created entity (with the ID in place)
 
         Raises:
-            ValueError: If client is not set or response validation fails.
             Exception: If the entity already exists.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         if self.id is not None:
-            raise Exception("Cannot create entity that already exists")
+            raise Exception("Can't create as it already exists")
 
         url = f"/api/{self.get_type()}"
         response = self.client.post(url, self.model_dump(mode="json", by_alias=True))
-        if response is None:
-            raise ValueError("Failed to create entity")
 
-        response_data = response.json()
-        if "id" not in response_data:
-            raise ValueError("Response missing entity ID")
-
-        self.id = response_data["id"]
+        # We need to update the id
+        self.id = response.json()["id"]
         return self.reload()
 
-    def update(self) -> "EntityEndpoint":
+    def update(self):
         """
         Updates the entity.
 
-        Returns:
-            EntityEndpoint: The updated entity.
-
         Raises:
-            ValueError: If client is not set or id is not set.
             Exception: If the entity doesn't exist.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.id is None:
-            raise ValueError("Entity ID is not set")
-
         url = f"/api/{self.get_type()}/{self.id}"
         exists = self.client.exists(url)
         if not exists:
-            raise Exception(f"Entity does not exist: {self.id}")
-
-        response = self.client.put(url, self.model_dump(mode="json", by_alias=True))
-        if response is None:
-            raise ValueError(f"Failed to update entity: {self.id}")
-
+            raise Exception("Can't update as it doesn't exist?")
+        self.client.put(url, self.model_dump(mode="json", by_alias=True))
         return self.reload()
 
-    def delete(self) -> None:
+    def delete(self):
         """
         Deletes the entity.
 
         Raises:
-            ValueError: If client is not set or id is not set.
             Exception: If the entity doesn't exist.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.id is None:
-            raise ValueError("Entity ID is not set")
-
         url = f"/api/{self.get_type()}/{self.id}"
         exists = self.client.exists(url)
         if not exists:
-            raise Exception(f"Entity does not exist: {self.id}")
-
-        response = self.client.delete(url)
-        if response is None:
-            raise ValueError(f"Failed to delete entity: {self.id}")
+            raise Exception("Component doesn't exist")
+        self.client.delete(url)
 
 
 class EntitiesEndpoint:
@@ -853,7 +694,7 @@ class EntitiesEndpoint:
         raise NotImplementedError()
 
     def __init__(
-            self, client: "KodexaClient", organization: Optional["OrganizationEndpoint"] = None
+            self, client: "KodexaClient", organization: "OrganizationEndpoint" = None
     ):
         """Initialize the entities endpoint by client and organization"""
         self.client: "KodexaClient" = client
@@ -889,7 +730,7 @@ class EntitiesEndpoint:
             page += 1
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
             filters: Optional[List[str]] = None
     ):
         """List the resources.
@@ -912,19 +753,13 @@ class EntitiesEndpoint:
             params["sort"] = sort
 
         if filters is not None:
-            params["filter"] = ";".join(filters) if isinstance(filters, list) else str(filters)
+            params["filter"] = filters
 
         if self.organization is not None:
-            org_filter = f"organization.id: '{self.organization.id}'"
             if "filter" not in params:
-                params["filter"] = org_filter
+                params["filter"] = [f"organization.id: '{self.organization.id}'"]
             else:
-                current_filter = params["filter"]
-                if isinstance(current_filter, list):
-                    current_filter.append(org_filter)
-                    params["filter"] = ";".join(current_filter)
-                else:
-                    params["filter"] = f"{current_filter};{org_filter}"
+                params["filter"].append(f"organization.id: '{self.organization.id}'")
 
         list_response = self.client.get(url, params=params)
         return (
@@ -996,8 +831,6 @@ class EntitiesEndpoint:
             self_id (str): The id of the entity to delete.
         """
         url = f"/api/{self.get_type()}/{self_id}"
-        if self.client is None:
-            raise ValueError("Client is not set")
         self.client.delete(url)
 
 
@@ -1128,14 +961,7 @@ class PageEndpoint(ClientEndpoint):
 
         Returns:
             The page converted to endpoints.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.content is None:
-            return self
         self.content = (
             seq(self.content)
             .map(
@@ -1341,14 +1167,12 @@ class PageTaskEndpoint(PageTask, PageEndpoint):
     def get_type(self) -> Optional[str]:
         return "task"
 
-
 class PageTaskActivityEndpoint(PageEndpoint):
     """
     Represents a page of task activities.
     """
     def get_type(self) -> Optional[str]:
         return "taskActivities"
-
 
 class PageTaskDocumentFamilyEndpoint(PageEndpoint):
     """
@@ -1357,14 +1181,12 @@ class PageTaskDocumentFamilyEndpoint(PageEndpoint):
     def get_type(self) -> Optional[str]:
         return "taskDocumentFamilies"
 
-
 class PageTaskTagEndpoint(PageEndpoint):
     """
     Represents a page of task tags.
     """
     def get_type(self) -> Optional[str]:
         return "taskTags"
-
 
 class TaskEndpoint(EntityEndpoint, Task):
     """
@@ -1374,14 +1196,7 @@ class TaskEndpoint(EntityEndpoint, Task):
         return "tasks"
 
     def create_with_request(self, task: Task, task_template: Optional[TaskTemplate] = None, document_families: Optional[List[DocumentFamily]] = None):
-        """
-        Create a task with the given request.
-
-        Raises:
-            ValueError: If client is not set.
-        """
-        if self.client is None:
-            raise ValueError("Client is not set")
+        """Create a task with the given request."""
         url = "/api/tasks/createTaskWithRequest"
         response = self.client.post(url, body={
             "task": task.model_dump(mode="json", by_alias=True),
@@ -1391,69 +1206,28 @@ class TaskEndpoint(EntityEndpoint, Task):
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
     def update_status(self, status: TaskStatus):
-        """
-        Update the status of the task.
-
-        Raises:
-            ValueError: If client is not set or validation fails.
-        """
-        if self.client is None:
-            raise ValueError("Client is not set")
+        """Update the status of the task."""
         url = f"/api/tasks/{self.id}/status"
         response = self.client.put(url, body=status)
-        validated = TaskEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
     def remove_status(self):
-        """
-        Remove the task status.
-
-        Raises:
-            ValueError: If client is not set or validation fails.
-        """
-        if self.client is None:
-            raise ValueError("Client is not set")
+        """Remove the task status."""
         url = f"/api/tasks/{self.id}/status"
         response = self.client.delete(url)
-        validated = TaskEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
     def update_assignee(self, assignee: User):
-        """
-        Update the assignee of the task.
-
-        Raises:
-            ValueError: If client is not set or validation fails.
-        """
-        if self.client is None:
-            raise ValueError("Client is not set")
+        """Update the assignee of the task."""
         url = f"/api/tasks/{self.id}/assignee"
         response = self.client.put(url, body=assignee.model_dump(mode="json", by_alias=True))
-        validated = TaskEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
     def remove_assignee(self):
-        """
-        Remove the task assignee.
-
-        Raises:
-            ValueError: If client is not set or validation fails.
-        """
-        if self.client is None:
-            raise ValueError("Client is not set")
+        """Remove the task assignee."""
         url = f"/api/tasks/{self.id}/assignee"
         response = self.client.delete(url)
-        validated = TaskEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
-
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
 class TasksEndpoint(EntitiesEndpoint):
     """
@@ -1468,29 +1242,16 @@ class TasksEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskEndpoint
 
-    def create_with_template(
-            self,
-            task: Task,
-            task_template: Optional[TaskTemplate] = None,
-            document_families: Optional[List[DocumentFamily]] = None
-    ) -> TaskEndpoint:
+    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None, document_families: Optional[List[DocumentFamily]] = None) -> TaskEndpoint:
         """Create a task with the given template."""
         url = "/api/tasks/createTaskWithRequest"
         create_body = {
             "task": task.model_dump(mode="json", by_alias=True),
-            "taskTemplate": (
-                task_template.model_dump(mode="json", by_alias=True)
-                if task_template else None
-            ),
-            "documentFamilies": (
-                [df.model_dump(mode="json", by_alias=True)
-                 for df in document_families]
-                if document_families else None
-            )
+            "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
+            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in document_families] if document_families else None
         }
         response = self.client.post(url, create_body)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
-
 
 class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
     """
@@ -1498,7 +1259,6 @@ class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
     """
     def get_type(self) -> str:
         return "taskTemplates"
-
 
 class TaskTemplatesEndpoint(EntitiesEndpoint):
     """
@@ -1513,14 +1273,12 @@ class TaskTemplatesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskTemplateEndpoint
 
-
 class TaskActivityEndpoint(EntityEndpoint, TaskActivity):
     """
     Represents a task activity endpoint.
     """
     def get_type(self) -> str:
         return "taskActivities"
-
 
 class TaskActivitiesEndpoint(EntitiesEndpoint):
     """
@@ -1535,14 +1293,12 @@ class TaskActivitiesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskActivityEndpoint
 
-
 class TaskDocumentFamilyEndpoint(EntityEndpoint, TaskDocumentFamily):
     """
     Represents a task document family endpoint.
     """
     def get_type(self) -> str:
         return "taskDocumentFamilies"
-
 
 class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
     """
@@ -1557,14 +1313,12 @@ class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskDocumentFamilyEndpoint
 
-
 class TaskTagEndpoint(EntityEndpoint, TaskTag):
     """
     Represents a task tag endpoint.
     """
     def get_type(self) -> str:
         return "taskTags"
-
 
 class TaskTagsEndpoint(EntitiesEndpoint):
     """
@@ -1595,6 +1349,8 @@ class PageRetainedGuidanceEndpoint(PageRetainedGuidance, PageEndpoint):
         None
     """
 
+    """Represents a page retained guidance endpoint"""
+
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint.
 
@@ -1617,6 +1373,8 @@ class PageProjectEndpoint(PageProject, PageEndpoint):
         None
     """
 
+    """Represents a page project endpoint"""
+
     def get_type(self) -> Optional[str]:
         """Get the type of the endpoint.
 
@@ -1636,6 +1394,8 @@ class PageAssistantEndpoint(PageAssistant, PageEndpoint):
     This class is used to represent a page assistant endpoint which is a
     combination of a page assistant and a page endpoint.
     """
+
+    """Represents a page assistant endpoint"""
 
     def get_type(self) -> Optional[str]:
         """
@@ -1918,12 +1678,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         Suspend the organization.
 
         This method sends a PUT request to the organization's suspend endpoint.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         self.client.put(f"/api/organizations/{self.id}/suspend")
 
     def deploy(self, component: ComponentEndpoint) -> "ComponentInstanceEndpoint":
@@ -2034,77 +1789,41 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         """
         return TaxonomiesEndpoint().set_client(self.client).set_organization(self)
 
-    def get_available_templates(self, page: int = 1, page_size: int = 10, query: str = "*") -> "PageProjectTemplateEndpoint":
+    @property
+    def available_templates(self, page=1, page_size=10, query="*"):
         """
         Get the available templates for the organization.
 
-        Args:
-            page (int, optional): The page number. Defaults to 1.
-            page_size (int, optional): The page size. Defaults to 10.
-            query (str, optional): The query string. Defaults to "*".
-
         Returns:
-            PageProjectTemplateEndpoint: The page of available templates.
-
-        Raises:
-            ValueError: If client is not set or validation fails.
+            MarketplaceEndpoint: The marketplace endpoint of the organization.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/organizations/{self.id}/availableTemplates"
         response = self.client.get(url, params={"page": page, "pageSize": page_size, "query": query})
-        validated = PageProjectTemplateEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
+        return PageProjectTemplateEndpoint.model_validate(response.json()).set_client(self.client)
 
-    def get_available_models(self, page: int = 1, page_size: int = 10, query: str = "*") -> "PageStoreEndpoint":
+    @property
+    def available_models(self, page=1, page_size=10, query="*"):
         """
         Get the available models for the organization.
 
-        Args:
-            page (int, optional): The page number. Defaults to 1.
-            page_size (int, optional): The page size. Defaults to 10.
-            query (str, optional): The query string. Defaults to "*".
-
         Returns:
-            PageStoreEndpoint: The page of available models.
-
-        Raises:
-            ValueError: If client is not set or validation fails.
+            MarketplaceEndpoint: The marketplace endpoint of the organization.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/organizations/{self.id}/availableModels"
         response = self.client.get(url, params={"page": page, "pageSize": page_size, "query": query})
-        validated = PageStoreEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
+        return PageStoreEndpoint.model_validate(response.json()).set_client(self.client)
 
-    def get_available_assistants(self, page: int = 1, page_size: int = 10, query: str = "*") -> "PageAssistantDefinitionEndpoint":
+    @property
+    def available_assistants(self, page=1, page_size=10, query="*"):
         """
         Get the available assistants for the organization.
 
-        Args:
-            page (int, optional): The page number. Defaults to 1.
-            page_size (int, optional): The page size. Defaults to 10.
-            query (str, optional): The query string. Defaults to "*".
-
         Returns:
-            PageAssistantDefinitionEndpoint: The page of available assistants.
-
-        Raises:
-            ValueError: If client is not set or validation fails.
+            MarketplaceEndpoint: The marketplace endpoint of the organization.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/organizations/{self.id}/availableAssistants"
         response = self.client.get(url, params={"page": page, "pageSize": page_size, "query": query})
-        validated = PageAssistantDefinitionEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
+        return PageAssistantDefinitionEndpoint.model_validate(response.json()).set_client(self.client)
 
     def get_subscriptions(self, page: int = 1, page_size: int = 10) -> "PageProductSubscriptionEndpoint":
         """
@@ -2115,7 +1834,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         """
         url = "/api/productSubscriptions"
         params = {
-            "filter": "organization.id: '{}'".format(self.id),
+            "filter": f"organization.id: '{self.id}'",
             "page": page,
             "pageSize": page_size
         }
@@ -2132,8 +1851,6 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
             subscription_id (str): The id of the subscription to remove.
         """
         url = f"/api/productSubscriptions/{subscription.id}"
-        if self.client is None:
-            raise ValueError("Client is not set")
         self.client.delete(url)
 
     def add_subscription(self, product: "Product") -> None:
@@ -2143,7 +1860,7 @@ class OrganizationEndpoint(Organization, EntityEndpoint):
         Args:
             product (Product): The product to subscribe to.
         """
-        url = "/api/productSubscriptions"
+        url = f"/api/productSubscriptions"
         from kodexa.model.entities.product_subscription import ProductSubscription
         new_product_subscription = ProductSubscription(organization=self.detach(), product=product)
         print(new_product_subscription.model_dump_json(by_alias=True))
@@ -2158,6 +1875,10 @@ class ComponentsEndpoint(ClientEndpoint):
         organization (OrganizationEndpoint): The organization endpoint that the components endpoint belongs to.
     """
 
+    """
+    Represents a components endpoint
+    """
+
     def __init__(self, organization: OrganizationEndpoint):
         """Initialize the components endpoint by setting the organization"""
         self.organization = organization
@@ -2166,6 +1887,10 @@ class ComponentsEndpoint(ClientEndpoint):
 class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
     """
     Represents a component instance endpoint.
+    """
+
+    """
+    Represents a component instance endpoint
     """
 
     def get_type(self) -> str:
@@ -2195,22 +1920,15 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
 
         Raises:
             Exception: If the component instance already exists.
-            ValueError: If client is not set or ref is None.
 
         Returns:
             ComponentInstanceEndpoint: The created component instance.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Ref is not set")
-        url = "/api/{}/{}".format(self.get_type(), self.ref.replace(':', '/'))
+        url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
         exists = self.client.exists(url)
         if exists:
             raise Exception("Can't create as it already exists")
-        if self.org_slug is None:
-            raise ValueError("Organization slug is not set")
-        url = "/api/{}/{}".format(self.get_type(), self.org_slug)
+        url = f"/api/{self.get_type()}/{self.org_slug}"
         self.client.post(url, self.model_dump(mode="json", by_alias=True))
         return self
 
@@ -2220,15 +1938,10 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
 
         Raises:
             Exception: If the component instance does not exist.
-            ValueError: If client is not set or ref is None.
 
         Returns:
             ComponentInstanceEndpoint: The updated component instance.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Ref is not set")
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
         exists = self.client.exists(url)
         if not exists:
@@ -2242,19 +1955,14 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
 
         Raises:
             Exception: If the component instance does not exist.
-            ValueError: If client is not set or ref is None.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Ref is not set")
         url = f"/api/{self.get_type()}/{self.ref.replace(':', '/')}"
         exists = self.client.exists(url)
         if not exists:
             raise Exception("Component doesn't exist")
         self.client.delete(url)
 
-    def deploy(self, update: bool = False) -> List[str]:
+    def deploy(self, update=False):
         """
         Deploy the component instance.
 
@@ -2262,18 +1970,20 @@ class ComponentInstanceEndpoint(ClientEndpoint, SlugBasedMetadata):
             update (bool, optional): Whether to update the component instance if it already exists. Defaults to False.
 
         Raises:
-            ValueError: If client is not set, organization slug is not set, or slug is not set.
-            Exception: If the component instance already exists and update is False.
+            Exception: If the component instance does not have an organization or a slug, or if the component instance
+            already exists and update is False.
 
         Returns:
             List[str]: A list of strings representing the post-deployment actions.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         if self.org_slug is None:
-            raise ValueError("Organization slug is not set")
+            raise Exception(
+                "We can not deploy this component since it does not have an organization"
+            )
         if self.slug is None:
-            raise ValueError("Slug is not set")
+            raise Exception(
+                "We can not deploy this component since it does not have a slug"
+            )
 
         self.ref = f"{self.org_slug}/{self.slug}{f':{self.version}' if self.version is not None else ''}"
 
@@ -2303,105 +2013,65 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
     getting event types, getting event type options, and sending events.
     """
 
+    """Represents an assistant endpoint"""
+
     def update(self) -> "AssistantEndpoint":
         """Update the assistant.
 
         Returns:
             AssistantEndpoint: The updated assistant endpoint.
         """
-        if self.project is None:
-            raise ValueError("Project is not set")
-        url = "/api/projects/{}/assistants/{}".format(self.project.id, self.id)
-        if self.client is None:
-            raise ValueError("Client is not set")
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}"
         response = self.client.put(
             url, body=self.model_dump(mode="json", by_alias=True)
         )
         return AssistantEndpoint.model_validate(response.json()).set_client(self.client)
 
-    def set_memory(self, key: str, data: dict) -> dict:
+    def set_memory(self, key: str, data: dict):
         """
         Set the memory of the assistant.
 
-        Args:
-            key (str): The key to store the data under.
-            data (dict): The data to store.
-
-        Returns:
-            dict: The response from the server.
-
-        Raises:
-            ValueError: If client is not set.
+        :param key:
+        :param data:
+        :return:
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        url = "/api/assistants/{}/memory/{}".format(self.id, key)
+        url = f"/api/assistants/{self.id}/memory/{key}"
         response = self.client.put(url, body={
             'key': key,
             'data': data
         })
         return response.json()
 
-    def get_memory(self, key: str) -> dict:
+    def get_memory(self, key: str):
         """
         Get the memory of the assistant.
-
-        Args:
-            key (str): The key to retrieve data for.
-
-        Returns:
-            dict: The data stored under the key.
-
-        Raises:
-            ValueError: If client is not set.
+        :param key:
+        :return:
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        url = "/api/assistants/{}/memory/{}".format(self.id, key)
+        url = f"/api/assistants/{self.id}/memory/{key}"
         response = self.client.get(url)
         return response.json()["data"]
 
     def delete(self):
-        """
-        Delete the assistant.
-
-        Raises:
-            ValueError: If client is not set or project is not set.
-        """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.project is None:
-            raise ValueError("Project is not set")
+        """Delete the assistant."""
         url = f"/api/projects/{self.project.id}/assistants/{self.id}"
         self.client.delete(url)
 
     def activate(self):
         """Activate the assistant."""
-        if self.project is None:
-            raise ValueError("Project is not set")
-        url = "/api/projects/{}/assistants/{}/activate".format(self.project.id, self.id)
-        if self.client is None:
-            raise ValueError("Client is not set")
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/activate"
         response = self.client.put(url)
         self.change_sequence = response.json().get("changeSequence")
 
     def deactivate(self):
         """Deactivate the assistant."""
-        if self.project is None:
-            raise ValueError("Project is not set")
-        url = "/api/projects/{}/assistants/{}/deactivate".format(self.project.id, self.id)
-        if self.client is None:
-            raise ValueError("Client is not set")
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/deactivate"
         response = self.client.put(url)
         self.change_sequence = response.json().get("changeSequence")
 
     def schedule(self):
         """Schedule the assistant."""
-        if self.project is None:
-            raise ValueError("Project is not set")
-        url = "/api/projects/{}/assistants/{}/schedule".format(self.project.id, self.id)
-        if self.client is None:
-            raise ValueError("Client is not set")
+        url = f"/api/projects/{self.project.id}/assistants/{self.id}/schedule"
         self.client.put(url)
 
     def set_stores(self, stores: List["DocumentStoreEndpoint"]):
@@ -2413,11 +2083,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         Returns:
             AssistantEndpoint: The updated assistant endpoint.
         """
-        if self.project is None:
-            raise ValueError("Project is not set")
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/stores"
-        if self.client is None:
-            raise ValueError("Client is not set")
         response = self.client.put(
             url, body=[store.model_dump(mode="json", by_alias=True) for store in stores]
         )
@@ -2430,11 +2096,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         Returns:
             List[DocumentStoreEndpoint]: The list of stores of the assistant.
         """
-        if self.project is None:
-            raise ValueError("Project is not set")
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/stores"
-        if self.client is None:
-            raise ValueError("Client is not set")
         response = self.client.get(url)
         return [
             DocumentStoreEndpoint.model_validate(store).set_client(self.client)
@@ -2447,31 +2109,23 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         Returns:
             List[Execution]: The list of executions of the assistant.
         """
-        if self.project is None:
-            raise ValueError("Project is not set")
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/executions"
-        if self.client is None:
-            raise ValueError("Client is not set")
         response = self.client.get(url)
         return [Execution.model_validate(execution) for execution in response.json()]
 
-    def get_event_type(self, event_type_name: str) -> Optional["CustomEvent"]:
+    def get_event_type(self, event_type: str) -> Optional["CustomEvent"]:
         """Get the event type of the assistant.
 
         Args:
-            event_type_name (str): The name of the event type.
+            event_type (str): The name of the event type.
 
         Returns:
             Optional[CustomEvent]: The custom event if found, None otherwise.
-
-        Raises:
-            ValueError: If definition is not set.
         """
-        if self.definition is None:
-            raise ValueError("Definition is not set")
         for event_type in self.definition.event_types:
-            if event_type.name == event_type_name:
+            if event_type.name == event_type:
                 return event_type
+
         return None
 
     def get_event_type_options(
@@ -2486,11 +2140,7 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
         Returns:
             Dict[str, Any]: The event type options.
         """
-        if self.project is None:
-            raise ValueError("Project is not set")
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events/{event_type}/options"
-        if self.client is None:
-            raise ValueError("Client is not set")
         event_type_options = self.client.get(url, params={"training": training})
         return event_type_options.json()
 
@@ -2503,22 +2153,12 @@ class AssistantEndpoint(Assistant, ClientEndpoint):
 
         Returns:
             ExecutionEndpoint: The execution endpoint of the event.
-
-        Raises:
-            ValueError: If client is not set, project is not set, or validation fails.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.project is None:
-            raise ValueError("Project is not set")
         url = f"/api/projects/{self.project.id}/assistants/{self.id}/events"
         event_object = {"eventType": event_type, "options": json.dumps(options)}
         response = self.client.post(url, data=event_object, files={})
         process_response(response)
-        validated = ExecutionEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
+        return ExecutionEndpoint.model_validate(response.json()).set_client(self.client)
 
 
 class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
@@ -2526,6 +2166,8 @@ class ProjectAssistantsEndpoint(ProjectResourceEndpoint):
 
     This class is used to interact with the project assistants endpoint of the API.
     """
+
+    """Represents a project assistants endpoint"""
 
     def get_type(self) -> str:
         """Get the type of the endpoint.
@@ -2590,6 +2232,8 @@ class ProjectDocumentStoresEndpoint(ProjectResourceEndpoint):
     This class is used to represent a project document stores endpoint in the system.
     """
 
+    """Represents a project document stores endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint.
 
@@ -2619,6 +2263,8 @@ class ProjectDashboardsEndpoint(ProjectResourceEndpoint):
 
     This class is used to represent a project document stores endpoint in the system.
     """
+
+    """Represents a project document stores endpoint"""
 
     def get_type(self) -> str:
         """Get the type of the endpoint.
@@ -2701,6 +2347,8 @@ class ProjectDataFormsEndpoint(ProjectResourceEndpoint):
 
     This class is used to represent a project taxonomies endpoint in the system.
     """
+
+    """Represents a project taxonomies endpoint"""
 
     def get_type(self) -> str:
         """Get the type of the endpoint.
@@ -2985,42 +2633,32 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
         """
         return "workspaces"
 
-    def add_document_family(self, document_family: DocumentFamily) -> None:
+    def add_document_family(self, document_family: DocumentFamily):
         """
         Add a document family to the workspace.
 
         Args:
             document_family (DocumentFamily): The document family to be added.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/workspaces/{self.id}/documentFamilies"
         response = self.client.post(
             url, body=document_family.model_dump(mode="json", by_alias=True)
         )
         process_response(response)
 
-    def remove_document_family(self, document_family: DocumentFamily) -> None:
+    def remove_document_family(self, document_family: DocumentFamily):
         """
         Remove a document family from the workspace.
 
         Args:
             document_family (DocumentFamily): The document family to be removed.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/workspaces/{self.id}/documentFamilies/{document_family.id}"
         response = self.client.delete(url)
         process_response(response)
 
     def list_document_families(
-            self, page_size: int = 10, page: int = 1
+            self, page_size=10, page=1
     ) -> PageDocumentFamilyEndpoint:
         """
         List all document families in the workspace.
@@ -3031,19 +2669,13 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
 
         Returns:
             PageDocumentFamilyEndpoint: The endpoint for the page of document families.
-
-        Raises:
-            ValueError: If client is not set or validation fails.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/workspaces/{self.id}/documentFamilies"
         response = self.client.get(url, {"pageSize": page_size, "page": page})
         process_response(response)
-        validated = PageDocumentFamilyEndpoint.model_validate(response.json())
-        if validated is None:
-            raise ValueError("Failed to validate response")
-        return validated.set_client(self.client)
+        return PageDocumentFamilyEndpoint.model_validate(response.json()).set_client(
+            self.client
+        )
 
     def get_channel(self):
         """
@@ -3059,6 +2691,36 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
             return ChannelEndpoint.model_validate(self.channel).set_client(self.client)
         else:
             raise ValueError("Workspace has no channel")
+
+
+class TaskTemplateEndpoint(EntityEndpoint, Task):
+    """Represents a task endpoint.
+
+    This class is used to interact with the task endpoint of the API.
+    """
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "projects".
+        """
+        return "taskTemplates"
+
+
+class TaskEndpoint(EntityEndpoint, Task):
+    """Represents a task endpoint.
+
+    This class is used to interact with the task endpoint of the API.
+    """
+
+    def get_type(self) -> str:
+        """Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint, in this case "projects".
+        """
+        return "tasks"
 
 
 class RetainedGuidanceEndpoint(EntityEndpoint, RetainedGuidance):
@@ -3092,34 +2754,27 @@ class ProjectEndpoint(EntityEndpoint, Project):
 
     def update_resources(
             self,
-            stores: Optional[List["StoreEndpoint"]] = None,
-            taxonomies: Optional[List["TaxonomyEndpoint"]] = None,
-            data_forms: Optional[List["DataFormEndpoint"]] = None,
-            guidance: Optional[List["GuidanceSetEndpoint"]] = None,
-            dashboards: Optional[List["DashboardEndpoint"]] = None,
-    ) -> None:
+            stores: List["StoreEndpoint"] = None,
+            taxonomies: List["TaxonomyEndpoint"] = None,
+            data_forms: List["DataFormEndpoint"] = None,
+            guidance: List["GuidanceSetEndpoint"] = None,
+            dashboards: List["DashboardEndpoint"] = None,
+    ):
         """Update the resources of the project.
 
         Args:
-            stores (List[StoreEndpoint], optional): List of store endpoints to update.
-            taxonomies (List[TaxonomyEndpoint], optional): List of taxonomy endpoints to update.
-            data_forms (List[DataFormEndpoint], optional): List of data form endpoints to update.
-            guidance (List[GuidanceSetEndpoint], optional): List of guidance set endpoints to update.
-            dashboards (List[DashboardEndpoint], optional): List of dashboard endpoints to update.
-
-        Raises:
-            ValueError: If client is not set.
+            stores (List["StoreEndpoint"], optional): List of store endpoints to update.
+            taxonomies (List["TaxonomyEndpoint"], optional): List of taxonomy endpoints to update.
+            data_forms (List["DataFormEndpoint"], optional): List of data form endpoints to update.
+            guidance (List["GuidanceSetEndpoint"], optional): List of guidance set endpoints to update.
+            dashboards (List["DashboardEndpoint"], optional): List of dashboard endpoints to update.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-
-        project_resources_update = ProjectResourcesUpdate(
-            store_refs=[],
-            taxonomy_refs=[],
-            dashboard_refs=[],
-            data_form_refs=[],
-            guidance_set_refs=[]
-        )
+        project_resources_update = ProjectResourcesUpdate()
+        project_resources_update.store_refs = []
+        project_resources_update.taxonomy_refs = []
+        project_resources_update.dashboard_refs = []
+        project_resources_update.data_form_refs = []
+        project_resources_update.guidance_set_refs = []
 
         if stores:
             project_resources_update.store_refs = [store.ref for store in stores]
@@ -3243,8 +2898,8 @@ class ProjectEndpoint(EntityEndpoint, Project):
         return [ProjectTag.model_validate(tag) for tag in response.json()]
 
 
-class MessagesEndpoint(EntitiesEndpoint):  # noqa: F811
-    """Represents a messages endpoint"""
+class MessagesEndpoint(EntitiesEndpoint):
+    """Represents a message endpoint"""
 
     def get_type(self) -> str:
         """
@@ -3413,7 +3068,73 @@ class AssistantsEndpoint(EntitiesEndpoint):
         return PageAssistantEndpoint
 
 
+class TaskTemplatesEndpoint(EntitiesEndpoint):
+    """Represents a projects endpoint"""
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "taskTemplates"
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Returns:
+            ProjectEndpoint: The instance class of the endpoint.
+        """
+        return TaskTemplateEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Returns:
+            PageProjectEndpoint: The page class of the endpoint.
+        """
+        return PageTaskTemplateEndpoint
+
+
+class TasksEndpoint(EntitiesEndpoint):
+    """Represents a projects endpoint"""
+
+    """Represents a projects endpoint"""
+
+    def get_type(self) -> str:
+        """
+        Get the type of the endpoint.
+
+        Returns:
+            str: The type of the endpoint.
+        """
+        return "tasks"
+
+    def get_instance_class(self, object_dict=None):
+        """
+        Get the instance class of the endpoint.
+
+        Returns:
+            ProjectEndpoint: The instance class of the endpoint.
+        """
+        return TaskEndpoint
+
+    def get_page_class(self, object_dict=None):
+        """
+        Get the page class of the endpoint.
+
+        Returns:
+            PageProjectEndpoint: The page class of the endpoint.
+        """
+        return PageTaskEndpoint
+
+
 class RetainedGuidancesEndpoint(EntitiesEndpoint):
+    """Represents a projects endpoint"""
+
     """Represents a projects endpoint"""
 
     def get_type(self) -> str:
@@ -3445,6 +3166,8 @@ class RetainedGuidancesEndpoint(EntitiesEndpoint):
 
 
 class ProjectsEndpoint(EntitiesEndpoint):
+    """Represents a projects endpoint"""
+
     """Represents a projects endpoint"""
 
     def get_type(self) -> str:
@@ -3547,7 +3270,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
         params = {
             "page": page,
             "pageSize": page_size,
-            "query": urllib.parse.quote(query),
+            "query": requests.utils.quote(query),
             "filter": [],
         }
 
@@ -3605,6 +3328,8 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         None
     """
 
+    """Represents a stores endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint
 
@@ -3628,7 +3353,7 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
         """
         return PageStoreEndpoint
 
-    def get_instance_class(self, object_dict: Optional[Dict[str, Any]] = None) -> Type["StoreEndpoint"]:
+    def get_instance_class(self, object_dict=None):
         """Get the instance class of the endpoint
 
         This method is used to get the instance class of the endpoint based on the 'storeType'
@@ -3639,24 +3364,19 @@ class StoresEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
             Defaults to None.
 
         Returns:
-            Type[StoreEndpoint]: The instance class of the endpoint.
+            DocumentStoreEndpoint/ModelStoreEndpoint/DataStoreEndpoint: The instance class of the endpoint.
 
         Raises:
-            ValueError: If object_dict is None or store type is unknown.
+            ValueError: If the 'storeType' key in the object_dict is not "DOCUMENT", "MODEL", or "TABLE".
         """
-        if object_dict is None:
-            raise ValueError("object_dict is required")
-        store_type = object_dict.get("storeType")
-        if store_type is None:
-            raise ValueError("storeType is required in object_dict")
-        if store_type == "DOCUMENT":
+        if object_dict["storeType"] == "DOCUMENT":
             return DocumentStoreEndpoint
-        elif store_type == "MODEL":
+        elif object_dict["storeType"] == "MODEL":
             return ModelStoreEndpoint
-        elif store_type == "TABLE":
+        elif object_dict["storeType"] == "TABLE":
             return DataStoreEndpoint
         else:
-            raise ValueError(f"Unknown store type {store_type}")
+            raise ValueError(f"Unknown store type {object_dict['storeType']}")
 
 
 class GuidanceSetsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
@@ -3754,6 +3474,8 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
     as well as to deploy an extension pack from a URL.
     """
 
+    """Represents an extension packs endpoint"""
+
     def get_type(self) -> str:
         """
         Get the type of the endpoint.
@@ -3800,10 +3522,6 @@ class ExtensionPacksEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwne
         Returns:
             ExtensionPackEndpoint: The deployed extension pack endpoint.
         """
-        if self.organization is None:
-            raise ValueError("Organization is not set")
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/extensionPacks/{self.organization.slug}"
         create_response = self.client.post(
             url,
@@ -3862,7 +3580,6 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
             ProjectTemplateEndpoint: The instance class of the endpoint.
         """
         return ProjectTemplateEndpoint
-
 
 class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
@@ -3956,6 +3673,8 @@ class AssistantDefinitionsEndpoint(
         None
     """
 
+    """Represents a model runtimes endpoint"""
+
     def get_type(self) -> str:
         """Get the type of the endpoint
 
@@ -4002,6 +3721,8 @@ class PipelinesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     Attributes:
         None
     """
+
+    """Represents a model runtimes endpoint"""
 
     def get_type(self) -> str:
         """Get the type of the endpoint
@@ -4559,39 +4280,29 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
         """
         return "executions"
 
-    def cancel(self) -> None:
+    def cancel(self):
         """
         Cancel the execution.
 
         Sends a PUT request to the server to cancel the execution.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         self.client.put(f"/api/executions/{self.id}/cancel")
 
-    def logs(self) -> dict:
+    def logs(self):
         """
         Get the logs of the execution.
 
         Sends a GET request to the server to retrieve the logs.
 
         Returns:
-            dict: The logs from the server.
-
-        Raises:
-            ValueError: If client is not set.
+            Response: The response from the server containing the logs.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        return self.client.get(f"/api/executions/{self.id}/logs").json()
+        return self.client.get(f"/api/executions/{self.id}/logs")
 
     def wait_for(
             self,
             status: str = "SUCCEEDED",
-            fail_on_statuses: Optional[List[str]] = None,
+            fail_on_statuses=None,
             timeout: int = 300,
             follow_child_executions: bool = True,
     ) -> List["ExecutionEndpoint"]:
@@ -4600,21 +4311,17 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
 
         Args:
             status (str, optional): The status to wait for. Defaults to 'SUCCEEDED'.
-            fail_on_statuses (List[str], optional): The statuses that should cause the function to fail. Defaults to ['FAILED'].
+            fail_on_statuses (list, optional): The statuses that should cause the function to fail. Defaults to ['FAILED'].
             timeout (int, optional): The maximum time to wait in seconds. Defaults to 300.
             follow_child_executions (bool, optional): Whether to follow child executions. Defaults to True.
 
         Raises:
-            ValueError: If client is not set.
             Exception: If the execution fails with a status in fail_on_statuses.
             Exception: If the function times out.
 
         Returns:
             List[ExecutionEndpoint]: A list of executions that have reached the desired status.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-
         if fail_on_statuses is None:
             fail_on_statuses = ["FAILED"]
 
@@ -4624,7 +4331,7 @@ class ExecutionEndpoint(Execution, EntityEndpoint):
         while time.time() - start < timeout:
             execution = execution.reload()
             if execution.status == status:
-                if follow_child_executions and execution.child_executions:
+                if follow_child_executions:
                     all_executions = [execution]
                     for child_execution in [
                         ExecutionEndpoint.model_validate(
@@ -4678,12 +4385,7 @@ class UserEndpoint(User, EntityEndpoint):
 
         Returns:
             UserEndpoint: The activated user endpoint.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/users/{self.id}/activate"
         response = self.client.put(url)
         return UserEndpoint.model_validate(response.json()).set_client(self.client)
@@ -4695,33 +4397,23 @@ class UserEndpoint(User, EntityEndpoint):
 
         Returns:
             UserEndpoint: The deactivated user endpoint.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/users/{self.id}/activate"
         response = self.client.put(url)
         return UserEndpoint.model_validate(response.json()).set_client(self.client)
 
-    def set_password(self, password: str, reset_token: str) -> "UserEndpoint":
+    def set_password(self, password: str, reset_token) -> "UserEndpoint":
         """Set the password of the user.
 
         This method sends a PUT request to the API to set the password of the user.
 
         Args:
             password (str): The new password.
-            reset_token (str): The reset token.
+            reset_token: The reset token.
 
         Returns:
             UserEndpoint: The user endpoint with the updated password.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/users/{self.id}/password"
         response = self.client.put(
             url, body={"password": password, "resetToken": reset_token}
@@ -4735,16 +4427,11 @@ class UserEndpoint(User, EntityEndpoint):
 
         Returns:
             List[MembershipEndpoint]: A list of the user's memberships.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/users/{self.id}/memberships"
         response = self.client.get(url)
         return [
-            MembershipEndpoint.model_validate(membership).set_client(self.client)
+            MembershipEndpoint.model_validate(membership)
             for membership in response.json()
         ]
 
@@ -4928,33 +4615,25 @@ class DataObjectEndpoint(DataObject, ClientEndpoint):
 
     """Represents a data object endpoint"""
 
-    def update(self) -> None:
+    def update(self):
         """Update the data object.
 
         This method updates the data object by making a PUT request to the API.
 
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
+        Returns:
+            None
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/dataObjects/{self.id}"
         self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
 
-    def delete(self) -> None:
+    def delete(self):
         """Delete the data object.
 
         This method deletes the data object by making a DELETE request to the API.
 
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
+        Returns:
+            None
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/dataObjects/{self.id}"
         self.client.delete(url)
 
@@ -4966,18 +4645,11 @@ class DataObjectEndpoint(DataObject, ClientEndpoint):
 
         Returns:
             List[DataAttributeEndpoint]: List of data attribute endpoints.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/dataObjects/{self.id}/attributes"
         response = self.client.get(url)
         return [
-            DataAttributeEndpoint.model_validate(attribute).set_client(self.client)
+            DataAttributeEndpoint.model_validate(attribute)
             for attribute in response.json()
         ]
 
@@ -4987,97 +4659,54 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     """Represents a document family endpoint"""
 
-    def update(self) -> None:
+    def update(self):
         """
         Update the document family.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
         response = self.client.put(url, body=self.model_dump(mode="json", by_alias=True))
         self.change_sequence = response.json()["changeSequence"]
 
-    def set_active_assistant(self, assistant: Assistant) -> None:
+    def set_active_assistant(self, assistant: Assistant):
         """
         Set the active assistant.
-
-        Args:
-            assistant (Assistant): The assistant to set as active.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/activeAssistant"
         response = self.client.put(url, body=assistant.model_dump(mode="json", by_alias=True))
         process_response(response)
         self.change_sequence = response.json()["changeSequence"]
 
-    def clear_active_assistant(self) -> None:
+    def clear_active_assistant(self):
         """
         Clear the active assistant.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/activeAssistant"
         response = self.client.delete(url)
         process_response(response)
         self.change_sequence = response.json()["changeSequence"]
 
-    def lock(self) -> None:
+    def lock(self):
         """
         Lock the document family.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/lock"
         response = self.client.put(url)
         process_response(response)
         self.change_sequence = response.json()["changeSequence"]
 
-    def unlock(self) -> None:
+    def unlock(self):
         """
         Unlock the document family.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/unlock"
         response = self.client.put(url)
         process_response(response)
         self.change_sequence = response.json()["changeSequence"]
 
-    def touch(self) -> None:
+    def touch(self):
         """
         Update the document family.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/documentFamilies/{self.id}/touch"
         response = self.client.get(url)
         process_response(response)
@@ -5087,13 +4716,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         Get the external data of the document family.
 
         Returns:
-            dict: The external data of the document family.
-
-        Raises:
-            ValueError: If client is not set.
+            DocumentExternalData: The external data of the document family.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/documentFamilies/{self.id}/externalData"
         response = self.client.get(url)
         return response.json()
@@ -5107,12 +4731,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
         Returns:
             dict: The updated external data of the document family.
-
-        Raises:
-            ValueError: If client is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
         url = f"/api/documentFamilies/{self.id}/externalData"
         response = self.client.put(url, body=external_data)
         return response.json()
@@ -5120,26 +4739,21 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
     def get_json(
             self,
             project_id: str,
-            friendly_names: bool = False,
+            friendly_names=False,
     ) -> str:
         """Get the JSON export for the document family
 
         Args:
-            project_id (str): The project ID
+            project_id str: The project ID
             friendly_names (bool): Whether to use friendly names. Defaults to False
 
         Returns:
             str: The JSON
-
-        Raises:
-            ValueError: If client is not set, store_ref is not set, or project_id is None.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         if project_id is None:
-            raise ValueError("Project ID is required")
+            raise Exception(
+                f"Project ID is required"
+            )
 
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/dataObjects"
         params = {
@@ -5157,14 +4771,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
         Returns:
             bytes: The exported document family.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = (
             f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
         )
@@ -5174,24 +4781,15 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     def update_document(
             self, document: Document, content_object: Optional[ContentObject] = None
-    ) -> None:
+    ):
         """
         Update a document in the document family.
 
         Args:
             document (Document): The document to update.
             content_object (Optional[ContentObject]): The content object. Defaults to None.
-
-        Raises:
-            ValueError: If client is not set, store_ref is not set, or content_objects is empty.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         if content_object is None:
-            if not self.content_objects:
-                raise ValueError("No content objects available")
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content"
         self.client.post(url, files={"document": document.to_kddb()})
@@ -5245,8 +4843,6 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         """
         logger.info("Deleting document family %s", self.id)
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}"
-        if self.client is None:
-            raise ValueError("Client is not set")
         if self.client.exists(url):
             self.client.delete(url)
         else:
@@ -5279,41 +4875,27 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
         return get_response.content
 
-    def add_label(self, label: str) -> None:
+    def add_label(self, label: str):
         """
         Add a label to the document family.
 
         Args:
             label (str): The label to add.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/addLabel"
-        self.client.put(url, params={"label": label})
+        return self.client.put(url, params={"label": label})
 
-    def remove_label(self, label: str) -> None:
+    def remove_label(self, label: str):
         """
         Remove a label from the document family.
 
         Args:
             label (str): The label to remove.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/removeLabel"
-        self.client.put(url, params={"label": label})
+        return self.client.put(url, params={"label": label})
 
-    def get_document(self, content_object: Optional[ContentObject] = None, inmemory: bool = False) -> Document:
+    def get_document(self, content_object: Optional[ContentObject] = None, inmemory=False) -> Document:
         """
         Get the document of the document family.
 
@@ -5323,66 +4905,40 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
         Returns:
             Document: The document of the document family.
-
-        Raises:
-            ValueError: If client is not set, store_ref is not set, or no content objects available.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         if content_object is None:
-            if not self.content_objects:
-                raise ValueError("No content objects available")
             content_object = self.content_objects[-1]
         get_response = self.client.get(
             f"api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/content"
         )
         return Document.from_kddb(get_response.content, inmemory=inmemory)
 
-    def reprocess(self, assistant: Assistant) -> None:
+    def reprocess(self, assistant: Assistant):
         """
         Reprocess the document family.
 
         Args:
             assistant (Assistant): The assistant to use for reprocessing.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/reprocess"
         self.client.put(url, params={"assistantId": assistant.id})
 
-    def set_document_status(self, document_status: DocumentStatus) -> None:
+    def set_document_status(self, document_status: DocumentStatus):
         """
         Set the document status of the document family.
 
         Args:
             document_status (DocumentStatus): The document status to set.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = (
             f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/status"
         )
         self.client.put(url, body=document_status.model_dump(by_alias=True))
 
     def add_document(
-            self,
-            document: Document,
-            content_object: Optional[ContentObject] = None,
-            taxonomies: Optional[List[Taxonomy]] = None,
-            data_store: Optional[Store] = None
-    ) -> None:
+            self, document: Document, content_object: Optional[ContentObject] = None,
+            taxonomies: Optional[List[Taxonomy]] = None, data_store: Optional[Store] = None
+    ):
         """
         Add a document to the document family.
 
@@ -5391,23 +4947,11 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             content_object (Optional[ContentObject]): The content object. Defaults to None.
             taxonomies (Optional[List[Taxonomy]]): List of taxonomies to use. Defaults to None.
             data_store (Optional[Store]): Data store to add document to. Defaults to None.
-
-        Raises:
-            ValueError: If client is not set, store_ref is not set, or no content objects available.
-            Exception: If data_store is provided without taxonomies or vice versa.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
-
         url = (
             f'/api/stores/{self.store_ref.replace(":", "/")}/families/{self.id}/objects'
         )
-
         if content_object is None:
-            if not self.content_objects:
-                raise ValueError("No content objects available")
             content_object = self.content_objects[-1]
 
         params = {
@@ -5416,16 +4960,14 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             "documentVersion": document.version
         }
 
+        # If we have a store but no taxonomies or the other way around then we need to throw an error
         if (data_store and not taxonomies) or (taxonomies and not data_store):
-            raise ValueError("If you provide a data store you must also provide taxonomies and vice versa")
+            raise Exception("If you provide a data store you must also provide taxonomies and vice-versa")
 
         if taxonomies:
-            taxonomy_refs = [t.ref for t in taxonomies if t.ref is not None]
-            if not taxonomy_refs:
-                raise ValueError("No valid taxonomy references found")
-            params["taxonomyRefs"] = ",".join(taxonomy_refs)
+            params["taxonomyRefs"] = ",".join([taxonomy.ref for taxonomy in taxonomies])
 
-        if data_store and data_store.ref is not None:
+        if data_store:
             params["dataStoreRef"] = data_store.ref
 
         self.client.post(
@@ -5440,14 +4982,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
         Returns:
             bytes: The exported document family.
-
-        Raises:
-            ValueError: If client is not set or store_ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         url = (
             f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/export"
         )
@@ -5460,7 +4995,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             content_object: Optional[ContentObject] = None,
             owner_uri: Optional[str] = None,
             replace_data: bool = False,
-    ) -> None:
+    ):
         """
         Replace the tags of the document family.
 
@@ -5469,17 +5004,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             content_object (Optional[ContentObject]): The content object. Defaults to None.
             owner_uri (Optional[str]): The owner URI. Defaults to None.
             replace_data (bool): Whether to replace the data. Defaults to False.
-
-        Raises:
-            ValueError: If client is not set, store_ref is not set, or no content objects available.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.store_ref is None:
-            raise ValueError("Store reference is not set")
         if content_object is None:
-            if not self.content_objects:
-                raise ValueError("No content objects available")
             content_object = self.content_objects[-1]
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/objects/{content_object.id}/_replaceTags"
         self.client.put(
@@ -5541,47 +5067,32 @@ class StoreEndpoint(ComponentInstanceEndpoint, Store):
         """
         return []
 
-    def update_metadata(self) -> None:
+    def update_metadata(self):
         """Update the metadata of the store.
 
         This method sends a PUT request to the store's metadata API endpoint with the store's metadata.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or metadata is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-        if self.metadata is None:
-            raise ValueError("Metadata is not set")
-        url = f"/api/stores/{self.ref.replace(':', '/')}/metadata"
         self.client.put(
-            url,
+            f"/api/stores/{self.ref.replace(':', '/')}/metadata",
             body=json.loads(self.metadata.json(by_alias=True)),
         )
 
-    def get_metadata(self) -> Optional[Any]:
+    def get_metadata(self):
         """Get the metadata of the store.
 
         This method sends a GET request to the store's metadata API endpoint and validates the response.
 
         Returns:
             The validated metadata if the metadata class is defined, otherwise None.
-
-        Raises:
-            ValueError: If client is not set or ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-        url = f"/api/stores/{self.ref.replace(':', '/')}/metadata"
-        metadata_response = self.client.get(url)
-        metadata_class = self.get_metadata_class()
-        if metadata_class is None:
-            return None
-        return metadata_class.model_validate(metadata_response.json())
+        metadata_response = self.client.get(
+            f"/api/stores/{self.ref.replace(':', '/')}/metadata"
+        )
+        return (
+            self.get_metadata_class().model_validate(metadata_response.json())
+            if self.get_metadata_class()
+            else None
+        )
 
     def post_deploy(self) -> List[str]:
         """Post deploy the store.
@@ -5693,7 +5204,7 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         super().__init__(client)
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
             filters: Optional[List[str]] = None
     ):
         """
@@ -5751,7 +5262,7 @@ class DataStoreEndpoint(StoreEndpoint):
             output_format: str = "json",
             path: Optional[str] = None,
             root_name: str = "",
-            friendly_names: bool = True,
+            friendly_names=True,
     ) -> str:
         """Get the data objects export of the store
 
@@ -5764,17 +5275,7 @@ class DataStoreEndpoint(StoreEndpoint):
 
         Returns:
             str: The data objects export of the store
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or CSV output is requested without a path
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-        if output_format == "csv" and not path:
-            raise ValueError("CSV output requires a path")
-
         url = f"/api/stores/{self.ref.replace(':', '/')}/dataObjects"
         params = {
             "format": output_format,
@@ -5787,6 +5288,9 @@ class DataStoreEndpoint(StoreEndpoint):
         if path:
             params["path"] = path
 
+        if output_format == "csv" and not path:
+            raise ValueError("CSV output requires a path")
+
         response = self.client.get(url, params=params)
         return response.text
 
@@ -5795,24 +5299,12 @@ class DataStoreEndpoint(StoreEndpoint):
 
         Returns:
             List[Taxonomy]: The taxonomies of the store
-
-        Raises:
-            ValueError: If client is not set or ref is not set
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-
         url = f"/api/stores/{self.ref.replace(':', '/')}/taxonomies"
         taxonomy_response = self.client.get(url)
-        taxonomy_data = taxonomy_response.json()
-        if not isinstance(taxonomy_data, list):
-            raise ValueError("Invalid taxonomy response format")
-
         return [
-            TaxonomyEndpoint.model_validate(taxonomy)
-            for taxonomy in taxonomy_data
+            TaxonomyEndpoint.model_validate(taxonomy_response)
+            for taxonomy_response in taxonomy_response.json()
         ]
 
     def get_data_objects_df(
@@ -5822,60 +5314,45 @@ class DataStoreEndpoint(StoreEndpoint):
             document_family: Optional[DocumentFamily] = None,
             include_id: bool = False,
             parent_id: Optional[str] = None,
-    ) -> Any:
+    ):
         """
         Get the data objects as a pandas dataframe
 
         Args:
             path (str): The path to the data object
             query (str): A query to limit the results. Defaults to "*"
-            document_family (Optional[DocumentFamily]): The document family to limit results to
+            document_family (Optional[DocumentFamily): The document family to limit results to
             include_id (bool): Whether to include the data object ID as a column. Defaults to False
             parent_id (Optional[str]): The parent ID to limit results to
 
         Returns:
             DataFrame: The data objects as a pandas dataframe
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or taxonomy data is invalid
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-
         import pandas as pd
 
         data_objects = self.get_data_objects(path, query, document_family, parent_id)
-        if not data_objects:
-            return pd.DataFrame()
 
-        if not data_objects[0].taxonomy_ref:
-            raise ValueError("No taxonomy reference found in data object")
+        if len(data_objects) == 0:
+            return pd.DataFrame()
 
         taxonomy: TaxonomyEndpoint = self.client.get_object_by_ref(
             "taxonomies", data_objects[0].taxonomy_ref
         )
-        if taxonomy is None:
-            raise ValueError("Failed to retrieve taxonomy")
 
         table_result = {"rows": [], "columns": [], "column_headers": []}
 
         for data_object in data_objects:
-            if not table_result["columns"]:
+            if len(table_result["columns"]) == 0:
                 if include_id:
-                    table_result["column_headers"].extend(["Data Object ID", "Parent Data Object ID"])
-                    table_result["columns"].extend(["data_object_id", "parent_id"])
+                    table_result["column_headers"].append("Data Object ID")
+                    table_result["columns"].append("data_object_id")
+                    table_result["column_headers"].append("Parent Data Object ID")
+                    table_result["columns"].append("parent_id")
 
-                taxon_path = taxonomy.get_taxon_by_path(data_object.path)
-                if taxon_path is None:
-                    raise ValueError(f"Invalid taxon path: {data_object.path}")
-
-                if taxon_path.children:
-                    for taxon in taxon_path.children:
-                        if not taxon.group:
-                            table_result["column_headers"].append(taxon.label)
-                            table_result["columns"].append(taxon.name)
+                for taxon in taxonomy.get_taxon_by_path(data_object.path).children:
+                    if not taxon.group:
+                        table_result["column_headers"].append(taxon.label)
+                        table_result["columns"].append(taxon.name)
 
             new_row = []
             for column in table_result["columns"]:
@@ -5883,12 +5360,11 @@ class DataStoreEndpoint(StoreEndpoint):
                 if include_id:
                     if column == "data_object_id":
                         column_value = data_object.id
-                    elif column == "parent_id":
+                    if column == "parent_id":
                         column_value = data_object.parent_id
-                if data_object.attributes:
-                    for attribute in data_object.attributes:
-                        if attribute.tag == column:
-                            column_value = attribute.string_value
+                for attribute in data_object.attributes:
+                    if attribute.tag == column:
+                        column_value = attribute.string_value
                 new_row.append(column_value)
 
             table_result["rows"].append(new_row)
@@ -6061,115 +5537,59 @@ class DataStoreEndpoint(StoreEndpoint):
 class DocumentStoreEndpoint(StoreEndpoint):
     """Represents a document store that can be used to store files and then their related document representations"""
 
-    def query_by_embedding(
-            self,
-            embedding: List[float],
-            threshold: float,
-            limit: int
-    ) -> List["DocumentEmbedding"]:
+    def query_by_embedding(self, embedding: list[float], threshold: float, limit: int):
         """
         Query the document store by an embedding.
 
         Args:
-            embedding (List[float]): The embedding to query by.
-            threshold (float): The threshold to use for the query.
+            embedding (list[float]): The embedding to query by.
+            threshold (int): The threshold to use for the query.
             limit (int): The limit of the query.
 
         Returns:
-            List[DocumentEmbedding]: A list of document embeddings.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, embedding is empty,
-                      threshold is invalid, limit is invalid, or response validation fails.
+            list[DocumentEmbedding]: a list of document embeddings
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-        if not embedding:
-            raise ValueError("Embedding cannot be empty")
-        if not 0 <= threshold <= 1:
-            raise ValueError("Threshold must be between 0 and 1")
-        if limit <= 0:
-            raise ValueError("Limit must be greater than 0")
-
         url = "/api/embeddings/query"
-        embedding_query = {
-            "embedding": embedding,
-            "threshold": threshold,
-            "limit": limit,
-            "storeRef": self.ref
-        }
+        embedding_query = {"embedding": embedding, "threshold": threshold, "limit": limit, "storeRef": self.ref}
         response = self.client.post(url, body=embedding_query)
-        if response is None:
-            raise ValueError("Failed to query embeddings")
-            raise ValueError("Failed to query embeddings")
-
         process_response(response)
-        response_data = response.json()
-        if not isinstance(response_data, list):
-            raise ValueError("Invalid embedding response format")
 
-        return [DocumentEmbedding.model_validate(emb) for emb in response_data]
+        # We get a list of the document embeddings
+        return [DocumentEmbedding.model_validate(embedding) for embedding in response.json()]
 
-    def delete_by_path(self, object_path: str) -> None:
+    def delete_by_path(self, object_path: str):
         """
         Delete the content stored in the store at the given path.
 
         Args:
             object_path (str): The path to the document family (ie. Invoice.pdf).
-
-        Raises:
-            ValueError: If client is not set or ref is not set.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
+        self.client.delete(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": object_path}
+        )
 
-        url = f"/api/stores/{self.ref.replace(':', '/')}/fs"
-        self.client.delete(url, params={"path": object_path})
-
-    def import_family(self, file_path: str) -> DocumentFamilyEndpoint:
+    def import_family(self, file_path: str):
         """
         Import a document family from a file.
 
         Args:
             file_path (str): The path to the file.
-
-        Returns:
-            DocumentFamilyEndpoint: The imported document family.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or file does not exist.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-
-        if not Path(file_path).is_file():
-            raise ValueError(f"{file_path} is not a file")
-
-        logger.info("Uploading %s", file_path)
-        with open(file_path, "rb") as dfm_content:
-            files = {"familyZip": dfm_content}
-            url = f"/api/stores/{self.ref.replace(':', '/')}/families"
-            content_object_response = self.client.post(
-                url,
-                params={"import": "true"},
-                files=files,
-            )
-            if content_object_response is None:
-                raise ValueError("Failed to import document family")
-
-            logger.info("Uploaded (status code: %d)", content_object_response.status_code)
-            document_family = DocumentFamilyEndpoint.model_validate(
-                content_object_response.json()
-            )
-            if document_family is None:
-                raise ValueError("Failed to validate document family response")
-            return document_family.set_client(self.client)
+        if Path(file_path).is_file():
+            logger.info(f"Uploading {file_path}")
+            with open(file_path, "rb") as dfm_content:
+                files = {"familyZip": dfm_content}
+                content_object_response = self.client.post(
+                    f"/api/stores/{self.ref.replace(':', '/')}/families",
+                    params={"import": "true"},
+                    files=files,
+                )
+                logger.info(f"Uploaded ({content_object_response.status_code})")
+                return DocumentFamilyEndpoint.model_validate(
+                    content_object_response.json()
+                ).set_client(self.client)
+        else:
+            raise Exception(f"{file_path} is not a file")
 
     def upload_file(
             self,
@@ -6208,8 +5628,8 @@ class DocumentStoreEndpoint(StoreEndpoint):
     def upload_bytes(
             self,
             path: str,
-            content: Any,
-            replace: bool = False,
+            content,
+            replace=False,
             additional_metadata: Optional[dict] = None,
             external_data: Optional[dict] = None,
             document: Optional[Document] = None,
@@ -6227,71 +5647,51 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         Returns:
             DocumentFamilyEndpoint: The document family that was created.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or response validation fails.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
+        files = {"file": content, "document": document.to_kddb()} if document else {"file": content}
 
-        files = {"file": content}
-        if document is not None:
-            files["document"] = document.to_kddb()
+        if additional_metadata is None:
+            additional_metadata = {}
 
-        metadata = {} if additional_metadata is None else additional_metadata.copy()
         if external_data is not None:
-            metadata["externalData"] = json.dumps(external_data)
+            additional_metadata["externalData"] = json.dumps(external_data)
 
-        base_url = f"/api/stores/{self.ref.replace(':', '/')}/fs"
-        if replace and self.client.exists(base_url, params={"path": path}):
+        if replace and self.client.exists(
+                f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
+        ):
             try:
-                self.client.delete(base_url, params={"path": path})
-                logger.info("Deleting %s", path)
+                self.client.delete(
+                    f"/api/stores/{self.ref.replace(':', '/')}/fs",
+                    params={"path": path},
+                )
+                logger.info(f"Deleting {path}")
             except Exception as e:
-                logger.info("No file to replace. Continuing upload. Error: %s", str(e))
+                logger.info(f"No file to replace. Continuing upload. Error: {e}")
 
         content_object_response = self.client.post(
-            base_url,
+            f"/api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": path},
-            data=metadata,
+            data=additional_metadata,
             files=files,
         )
-        if content_object_response is None:
-            raise ValueError("Failed to upload content")
-
-        logger.info("Uploaded %s (status code: %d)", path, content_object_response.status_code)
-        document_family = DocumentFamilyEndpoint.model_validate(
+        logger.info(f"Uploaded {path} ({content_object_response.status_code})")
+        return DocumentFamilyEndpoint.model_validate(
             content_object_response.json()
-        )
-        if document_family is None:
-            raise ValueError("Failed to validate document family response")
-        return document_family.set_client(self.client)
+        ).set_client(self.client)
 
-    def get_bytes(self, object_path: str) -> bytes:
+    def get_bytes(self, object_path: str):
         """
-        Get the bytes for the object at the given path.
+        Get the bytes for the object at the given path, will return None if there is no object there.
 
         Args:
             object_path (str): The object path.
 
         Returns:
-            bytes: The bytes of the object.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or response is invalid.
+            bytes: The bytes or None is nothing is at the path.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-
-        url = f"/api/stores/{self.ref.replace(':', '/')}/fs"
-        response = self.client.get(url, params={"path": object_path})
-        if response is None:
-            raise ValueError(f"Failed to get bytes for path: {object_path}")
-        return response.content
+        return self.client.get(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": object_path}
+        ).content
 
     def list_contents(self) -> List[str]:
         """
@@ -6299,109 +5699,55 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         Returns:
             List[str]: A list of the contents of the store.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or response is invalid.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
 
-        url = f"api/stores/{self.ref.replace(':', '/')}/families"
+        # TODO We need to remove this
         params = {"page": 1, "pageSize": 90, "query": "*"}
-        response = self.client.get(url, params=params)
-        if response is None:
-            raise ValueError("Failed to list store contents")
+        get_response = self.client.get(
+            f"api/stores/{self.ref.replace(':', '/')}/families", params=params
+        )
+        paths = []
+        for fam_dict in get_response.json()["content"]:
+            paths.append(fam_dict["path"])
+        return paths
 
-        response_data = response.json()
-        if not isinstance(response_data, dict) or "content" not in response_data:
-            raise ValueError("Invalid response format")
-
-        return [fam.get("path", "") for fam in response_data["content"] if fam.get("path")]
-
-    def download_document_families(self, output_dir: str) -> None:
+    def download_document_families(self, output_dir: str):
         """
         Download all the document families in the store to the given directory.
 
         Args:
             output_dir (str): The directory to download the document families to.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or output directory is invalid.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-        if not os.path.isdir(output_dir):
-            raise ValueError(f"Invalid output directory: {output_dir}")
 
         for document_family in self.stream_query():
-            if document_family.id is None:
-                logger.warning("Skipping document family with no ID")
-                continue
-
             export_bytes = document_family.export()
-            output_path = os.path.join(output_dir, f"{document_family.id}.dfm")
-            try:
-                with open(output_path, "wb") as f:
-                    f.write(export_bytes)
-                logger.info("Exported document family %s to %s", document_family.id, output_path)
-            except IOError as e:
-                logger.error("Failed to write document family %s: %s", document_family.id, str(e))
+            with open(os.path.join(output_dir, document_family.id + ".dfm"), "wb") as f:
+                f.write(export_bytes)
 
     def reprocess_document_families(
-            self,
-            document_family_ids: List[str],
-            assistant: AssistantEndpoint
-    ) -> None:
+            self, document_family_ids: List[str], assistant: AssistantEndpoint
+    ):
         """
         Reprocess the document families with the given ids through the assistant in a bulk fashion.
 
         Args:
             document_family_ids (List[str]): The ids of the document families to reprocess.
             assistant (AssistantEndpoint): The assistant to use for reprocessing.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or assistant is invalid.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-        if assistant.id is None:
-            raise ValueError("Assistant ID is not set")
+        request = ReprocessRequest()
+        request.assistant_ids = [assistant.id]
 
-        request = ReprocessRequest(
-            assistant_ids=[assistant.id],
-            family_ids=[]
-        )
+        # Dont process locked doc_familys. Iterate through the list in reverse to avoid index issues when removing items
+        for i in range(len(document_family_ids) - 1, -1, -1):
+            if self.get_family(document_family_ids[i]).locked:
+                del document_family_ids[i]
 
-        # Filter out locked document families
-        filtered_ids = []
-        for doc_id in document_family_ids:
-            try:
-                family = self.get_family(doc_id)
-                if not family.locked:
-                    filtered_ids.append(doc_id)
-                else:
-                    logger.info("Skipping locked document family: %s", doc_id)
-            except Exception as e:
-                logger.warning("Failed to check document family %s: %s", doc_id, str(e))
+        request.family_ids = document_family_ids
 
-        if not filtered_ids:
-            logger.warning("No valid document families to reprocess")
-            return
-
-        request.family_ids = filtered_ids
-        url = f"api/stores/{self.ref.replace(':', '/')}/reprocess"
-        response = self.client.put(
-            url,
+        self.client.put(
+            f"api/stores/{self.ref.replace(':', '/')}/reprocess",
             body=request.model_dump(mode="json", by_alias=True),
         )
-        if response is None:
-            raise ValueError("Failed to reprocess document families")
 
     def get_metadata_class(self):
         """
@@ -6421,32 +5767,16 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         Returns:
             DocumentFamilyEndpoint: The document family with the given id.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or response validation fails.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
+        logger.info(f"Getting document family id {document_family_id}")
+        document_family_response = self.client.get(
+            f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}"
+        )
+        return DocumentFamilyEndpoint.model_validate(
+            document_family_response.json()
+        ).set_client(self.client)
 
-        logger.info("Getting document family id %s", document_family_id)
-        url = f"/api/stores/{self.ref.replace(':', '/')}/families/{document_family_id}"
-        response = self.client.get(url)
-        if response is None:
-            raise ValueError(f"Failed to get document family: {document_family_id}")
-
-        document_family = DocumentFamilyEndpoint.model_validate(response.json())
-        if document_family is None:
-            raise ValueError("Failed to validate document family response")
-        return document_family.set_client(self.client)
-
-    def stream_query(
-            self,
-            query: str = "*",
-            sort: Optional[str] = None,
-            limit: Optional[int] = None
-    ) -> Iterator[DocumentFamilyEndpoint]:
+    def stream_query(self, query: str = "*", sort=None, limit=None):
         """
         Stream the query for the document family.
 
@@ -6456,45 +5786,32 @@ class DocumentStoreEndpoint(StoreEndpoint):
             limit (int, optional): The maximum number of items to return. Defaults to None.
 
         Returns:
-            Iterator[DocumentFamilyEndpoint]: A generator of document families.
-
-        Raises:
-            ValueError: If client is not set or ref is not set.
+            generator: A generator of the document families.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-
         page_size = 5
         page = 1
         number_of_items = 0
-        sort_field = sort if sort else "id"
+
+        if not sort:
+            sort = "id"
 
         while True:
             page_response = self.query(
-                query=query,
-                page=page,
-                page_size=page_size,
-                sort=sort_field
+                query=query, page=page, page_size=page_size, sort=sort
             )
-            if not page_response or not page_response.content:
+            if not page_response.content:
                 break
-
             for document_family in page_response.content:
-                if limit is not None and number_of_items >= limit:
-                    return
                 number_of_items += 1
+                if limit and number_of_items > limit:
+                    break
+
                 yield document_family
 
             page += 1
 
     def query(
-            self,
-            query: str = "*",
-            page: int = 1,
-            page_size: int = 100,
-            sort: Optional[str] = None
+            self, query: str = "*", page: int = 1, page_size: int = 100, sort=None
     ) -> PageDocumentFamilyEndpoint:
         """
         Query the document family.
@@ -6507,33 +5824,23 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         Returns:
             PageDocumentFamilyEndpoint: The page of document families.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or response validation fails.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-
         params = {
             "page": page,
             "pageSize": page_size,
-            "query": urllib.parse.quote(query),
+            "query": requests.utils.quote(query),
         }
 
         if sort is not None:
             params["sort"] = sort
 
-        url = f"api/stores/{self.ref.replace(':', '/')}/families"
-        response = self.client.get(url, params=params)
-        if response is None:
-            raise ValueError("Failed to query document families")
+        get_response = self.client.get(
+            f"api/stores/{self.ref.replace(':', '/')}/families", params=params
+        )
 
-        page_response = PageDocumentFamilyEndpoint.model_validate(response.json())
-        if page_response is None:
-            raise ValueError("Failed to validate document families response")
-        return page_response.set_client(self.client)
+        return PageDocumentFamilyEndpoint.model_validate(
+            get_response.json()
+        ).set_client(self.client)
 
     def stream_filter(self, filter_string: str = "", sort=None, limit=None):
         """
@@ -6608,40 +5915,21 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         Returns:
             DocumentFamilyEndpoint: The document family that was created.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, path is empty, document is None,
-                      or response validation fails.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-        if not path:
-            raise ValueError("Path cannot be empty")
-        if document is None:
-            raise ValueError("Document cannot be None")
-
         logger.info(f"Putting document to path {path}")
 
         files = {"file": document.to_kddb()}
         data = {"path": path, "documentVersion": document.version, "document": True}
-        response = self.client.post(
+        document_family_response = self.client.post(
             f"/api/stores/{self.ref.replace(':', '/')}/fs",
             params={"path": path},
             files=files,
             data=data,
         )
-        if response is None:
-            raise ValueError("Failed to upload document")
 
-        document_family = DocumentFamilyEndpoint.model_validate(response.json())
-        if document_family is None:
-            raise ValueError("Failed to validate document family response")
-        document_family_with_client = document_family.set_client(self.client)
-        if document_family_with_client is None:
-            raise ValueError("Failed to set client on document family")
-        return document_family_with_client
+        return DocumentFamilyEndpoint.model_validate(
+            document_family_response.json()
+        ).set_client(self.client)
 
     def exists_by_path(self, path: str) -> bool:
         """
@@ -6652,24 +5940,10 @@ class DocumentStoreEndpoint(StoreEndpoint):
 
         Returns:
             bool: True if a document family exists at the given path, False otherwise.
-
-        Raises:
-            ValueError: If client is not set, ref is not set, or path is empty.
         """
-        if self.client is None:
-            raise ValueError("Client is not set")
-        if self.ref is None:
-            raise ValueError("Store reference is not set")
-        if not path:
-            raise ValueError("Path cannot be empty")
-
-        try:
-            return self.client.exists(
-                f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
-            )
-        except Exception as e:
-            logger.error(f"Error checking path existence: {str(e)}")
-            return False
+        return self.client.exists(
+            f"/api/stores/{self.ref.replace(':', '/')}/fs", params={"path": path}
+        )
 
     def get_by_path(self, path: str) -> DocumentFamilyEndpoint:
         """
@@ -6867,8 +6141,6 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             training_id (str): The ID of the training to delete.
         """
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings/{training_id}"
-        if self.client is None:
-            raise ValueError("Client is not set")
         self.client.delete(url)
 
     def get_training(self, training_id: str) -> ModelTraining:
@@ -6924,7 +6196,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
         """
         url = f"/api/stores/{self.ref.replace(':', '/')}/trainings"
         params = {
-            "query": urllib.parse.quote(query),
+            "query": requests.utils.quote(query),
             "page": page,
             "pageSize": page_size,
         }
@@ -6933,7 +6205,7 @@ class ModelStoreEndpoint(DocumentStoreEndpoint):
             params["sort"] = sort
 
         if filters is not None:
-            params["filter"] = ";".join(filters) if isinstance(filters, list) else str(filters)
+            params["filter"] = filters
 
         response = self.client.get(url, params=params)
         return PageModelTraining.model_validate(response.json())
@@ -7639,101 +6911,56 @@ class KodexaClient:
         return process_response(response)
 
     def put(
-            self,
-            url: str,
-            body: Optional[Dict[str, Any]] = None,
-            data: Optional[Dict[str, Any]] = None,
-            files: Optional[Dict[str, Any]] = None,
-            params: Optional[Dict[str, Any]] = None
+            self, url, body=None, data=None, files=None, params=None
     ) -> requests.Response:
         """
         A method to send a PUT request.
 
         Args:
             url (str): The URL for the request.
-            body (Optional[Dict[str, Any]]): The JSON body for the request. Defaults to None.
-            data (Optional[Dict[str, Any]]): The form data for the request. Defaults to None.
-            files (Optional[Dict[str, Any]]): The files for the request. Defaults to None.
-            params (Optional[Dict[str, Any]]): The query parameters. Defaults to None.
+            body (dict, optional): The body for the request. Defaults to None.
+            data (dict, optional): The data for the request. Defaults to None.
+            files (dict, optional): The files for the request. Defaults to None.
+            params (dict, optional): The parameters for the request. Defaults to None.
 
         Returns:
             requests.Response: The response from the server.
-
-        Raises:
-            ValueError: If URL is empty or client is not properly initialized.
-            requests.RequestException: If the request fails.
         """
-        if not url:
-            raise ValueError("URL cannot be empty")
-        if not self.base_url:
-            raise ValueError("Client base URL is not set")
-        if not self.access_token:
-            raise ValueError("Client access token is not set")
-
-        headers = {
-            "x-access-token": self.access_token,
-            "cf-access-token": os.environ.get("CF_TOKEN", ""),
-            "X-Requested-With": "XMLHttpRequest"
-        }
+        headers = {"x-access-token": self.access_token,
+                   "cf-access-token": os.environ.get("CF_TOKEN", ""),
+                   "X-Requested-With": "XMLHttpRequest"}
         if files is None:
             headers["content-type"] = "application/json"
 
-        try:
-            response = requests.put(
-                self.get_url(url),
-                json=body,
-                data=data,
-                files=files,
-                params=params,
-                headers=headers,
-                timeout=30
-            )
-            return process_response(response)
-        except requests.RequestException as e:
-            raise requests.RequestException(f"PUT request failed: {str(e)}")
+        response = requests.put(
+            self.get_url(url),
+            json=body,
+            data=data,
+            files=files,
+            params=params,
+            headers=headers,
+        )
+        return process_response(response)
 
-    def delete(
-            self,
-            url: str,
-            params: Optional[Dict[str, Any]] = None
-    ) -> requests.Response:
+    def delete(self, url, params=None) -> requests.Response:
         """
         A method to send a DELETE request.
 
         Args:
             url (str): The URL for the request.
-            params (Optional[Dict[str, Any]]): The query parameters. Defaults to None.
+            params (dict, optional): The parameters for the request. Defaults to None.
 
         Returns:
             requests.Response: The response from the server.
-
-        Raises:
-            ValueError: If URL is empty or client is not properly initialized.
-            requests.RequestException: If the request fails.
         """
-        if not url:
-            raise ValueError("URL cannot be empty")
-        if not self.base_url:
-            raise ValueError("Client base URL is not set")
-        if not self.access_token:
-            raise ValueError("Client access token is not set")
-
-        headers = {
-            "x-access-token": self.access_token,
-            "cf-access-token": os.environ.get("CF_TOKEN", ""),
-            "X-Requested-With": "XMLHttpRequest"
-        }
-
-        try:
-            response = requests.delete(
-                self.get_url(url),
-                params=params,
-                headers=headers,
-                timeout=30
-            )
-            return process_response(response)
-        except requests.RequestException as e:
-            raise requests.RequestException(f"DELETE request failed: {str(e)}")
+        response = requests.delete(
+            self.get_url(url),
+            params=params,
+            headers={"x-access-token": self.access_token,
+                     "cf-access-token": os.environ.get("CF_TOKEN", ""),
+                     "X-Requested-With": "XMLHttpRequest"}
+        )
+        return process_response(response)
 
     def get_url(self, url):
         """
