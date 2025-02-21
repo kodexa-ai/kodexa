@@ -5159,6 +5159,8 @@ class DataStoreEndpoint(StoreEndpoint):
             path: Optional[str] = None,
             root_name: str = "",
             friendly_names=True,
+            include_ids=True,
+            include_exceptions=False,
     ) -> str:
         """Get the data objects export of the store
 
@@ -5168,6 +5170,8 @@ class DataStoreEndpoint(StoreEndpoint):
             path (Optional[str]): The path to the data object
             root_name (str): The root name of the data objects export
             friendly_names (bool): Whether to use friendly names. Defaults to True
+            include_ids (bool): Whether to include the data object IDs. Defaults to True
+            include_exceptions (bool): Whether to include the data object exceptions. Defaults to False
 
         Returns:
             str: The data objects export of the store
@@ -5177,6 +5181,8 @@ class DataStoreEndpoint(StoreEndpoint):
             "format": output_format,
             "friendlyNames": friendly_names,
             "rootName": root_name,
+            "includeIds": include_ids,
+            "includeExceptions": include_exceptions,
         }
         if document_family:
             params["documentFamilyId"] = document_family.id
