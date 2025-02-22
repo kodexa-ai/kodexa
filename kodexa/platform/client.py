@@ -4634,14 +4634,18 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     def get_json(
             self,
-            project_id: str,
+            project_id: Optional[str] = None,
             friendly_names=False,
+            include_ids=True,
+            include_exceptions=False,          
     ) -> str:
         """Get the JSON export for the document family
 
         Args:
             project_id str: The project ID
             friendly_names (bool): Whether to use friendly names. Defaults to False
+            include_ids (bool): Whether to include the IDs. Defaults to True
+            include_exceptions (bool): Whether to include the exceptions. Defaults to False
 
         Returns:
             str: The JSON
@@ -4656,6 +4660,8 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             "format": "json",
             "friendlyNames": friendly_names,
             "projectId": project_id,
+            "includeIds": include_ids,
+            "includeExceptions": include_exceptions,
         }
 
         response = self.client.get(url, params=params)
