@@ -3065,7 +3065,12 @@ class TaskTemplate(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-
+    
+    id: Optional[str] = Field(None, description="The ID of the task template")
+    uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     project: Optional['Project'] = None
     name: Optional[str] = None
     description: Optional[str] = None
