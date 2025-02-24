@@ -1244,6 +1244,7 @@ class ContentNode(object):
             status=None,
             owner_uri=None,
             is_dirty=None,
+            sort_by_bbox: bool=False,
     ):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
@@ -1305,7 +1306,7 @@ class ContentNode(object):
             return str(uuid.uuid4())
 
         def tag_node_position(
-                node_to_check, start, end, node_data, tag_uuid, offset=0, value=None
+                node_to_check, start, end, node_data, tag_uuid, offset=0, value=None, sort_by_bbox: bool=False
         ):
             """
             This function tags a node position in a given data structure. It iterates over the content parts of the node to check,
@@ -1420,6 +1421,7 @@ class ContentNode(object):
                         tag_uuid,
                         offset=offset,
                         value=value,
+                        sort_by_bbox=sort_by_bbox,
                     )
 
                     if result < 0 or (end - result) <= 0:
@@ -1435,7 +1437,7 @@ class ContentNode(object):
 
             # We need to determine if we have missing children and add them to the end
             node_children = node_to_check.get_children()
-            if node_children:
+            if node_children and sort_by_bbox:
                 # Sort nodes by x-coordinate if they have bboxes, otherwise use index
                 try:
                     node_children.sort(key=lambda x: x.get_bbox()[0] if hasattr(x, 'get_bbox') else x.index if hasattr(x, 'index') else 0)
@@ -1461,6 +1463,7 @@ class ContentNode(object):
                         tag_uuid,
                         offset=offset,
                         value=value,
+                        sort_by_bbox=sort_by_bbox,
                     )
 
                     if result < 0 or (end - result) <= 0:
@@ -1496,6 +1499,7 @@ class ContentNode(object):
                     get_tag_uuid(tag_uuid),
                     0,
                     value=value,
+                    sort_by_bbox=sort_by_bbox,
                 )
 
             else:
@@ -1567,6 +1571,7 @@ class ContentNode(object):
                                             data,
                                             get_tag_uuid(tag_uuid),
                                             value=value,
+                                            sort_by_bbox=sort_by_bbox,
                                         )
 
                         else:
@@ -1581,6 +1586,7 @@ class ContentNode(object):
                                     data,
                                     get_tag_uuid(tag_uuid),
                                     value=value,
+                                    sort_by_bbox=sort_by_bbox,
                                 )
 
     def get_tags(self):
