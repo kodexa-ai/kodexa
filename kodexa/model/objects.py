@@ -3103,6 +3103,10 @@ class Task(BaseModel):
         protected_namespaces=("model_config",),
     )
 
+    id: Optional[str] = Field(None)
+    uuid: Optional[str] = None
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     project: Optional['Project'] = None
     title: Optional[str] = None
     description: Optional[str] = None
