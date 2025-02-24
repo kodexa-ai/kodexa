@@ -1434,7 +1434,16 @@ class ContentNode(object):
                     raise Exception("Invalid part?")
 
             # We need to determine if we have missing children and add them to the end
-            for child_idx, child_node in enumerate(node_to_check.get_children()):
+            node_children = node_to_check.get_children()
+            if node_children:
+                # Sort nodes by x-coordinate if they have bboxes, otherwise use index
+                try:
+                    node_children.sort(key=lambda x: x.get_bbox()[0] if hasattr(x, 'get_bbox') else x.index if hasattr(x, 'index') else 0)
+                except (AttributeError, TypeError, IndexError):
+                    # If sorting fails, keep original order
+                    pass
+            
+            for child_idx, child_node in enumerate(node_children):
                 if child_node.index not in node_to_check.get_content_parts():
                     if content_length > 0:
                         end = end - len(separator)
