@@ -2672,6 +2672,7 @@ class Taxon(BaseModel):
                                                                         alias="conditionalFormats")
     validation_rules: List[TaxonValidation] = Field(
         default_factory=list,
+        alias="validationRules",
         description="The validation rules for the taxon"
     )
 
