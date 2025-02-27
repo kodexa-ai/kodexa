@@ -4518,7 +4518,8 @@ class BaseEvent(
             "ScheduledEvent",
             "AssistantEvent",
             "ChannelEvent",
-            "WorkspaceEvent"
+            "WorkspaceEvent",
+            "TaskEvent",
         ]
     ]
 ):
@@ -5921,7 +5922,6 @@ class ContentEvent(BaseModel):
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
     object_event_type: Optional[ObjectEventType] = Field(None, alias="objectEventType")
 
-
 class DataObjectEvent(BaseModel):
     """
 
@@ -5934,6 +5934,22 @@ class DataObjectEvent(BaseModel):
     )
     type: Optional[str] = None
     data_object: Optional[DataObject] = Field(None, alias="dataObject")
+
+
+class TaskEvent(BaseModel):
+    """
+    The TaskEvent class represents a change to a task
+    It extends from the BaseEvent class.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    type: Optional[str] = "task"
+    task: Optional[Task] = None
+    document_families: List[DocumentFamily] = Field(default_factory=list, alias="documentFamilies")
 
 
 class DocumentFamilyEvent(BaseModel):
