@@ -3345,7 +3345,7 @@ class Task(BaseModel):
     completed_date: Optional[StandardDateTime] = Field(None, alias="completedDate")
     status: Optional[TaskStatus] = None
     assignee: Optional['User'] = None
-    task_activity: List[TaskActivity] = Field(default_factory=list, alias="taskActivity")
+    task_activity: List[TaskActivity] = Field(default_factory=list, alias="taskActivities")
     task_document_families: List[TaskDocumentFamily] = Field(default_factory=list, alias="taskDocumentFamilies")
     search_text: Optional[str] = Field(None, alias="searchText")
     tags: List[TaskTag] = Field(default_factory=list)

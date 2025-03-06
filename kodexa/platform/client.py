@@ -1193,7 +1193,7 @@ class PageTaskActivityEndpoint(PageTaskActivity, PageEndpoint):
     """
 
     def get_type(self) -> Optional[str]:
-        return "taskActivities"
+        return "taskActivity"
 
 
 class PageTaskDocumentFamilyEndpoint(PageTaskDocumentFamily, PageEndpoint):
@@ -1202,7 +1202,7 @@ class PageTaskDocumentFamilyEndpoint(PageTaskDocumentFamily, PageEndpoint):
     """
 
     def get_type(self) -> Optional[str]:
-        return "taskDocumentFamilies"
+        return "taskDocumentFamily"
 
 
 class PageTaskTagEndpoint(PageTaskTag, PageEndpoint):
@@ -1211,7 +1211,7 @@ class PageTaskTagEndpoint(PageTaskTag, PageEndpoint):
     """
 
     def get_type(self) -> Optional[str]:
-        return "taskTags"
+        return "taskTag"
 
 
 class TaskEndpoint(EntityEndpoint, Task):
