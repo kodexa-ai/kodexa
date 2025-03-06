@@ -83,9 +83,27 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
-    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
-    TaskActivity, TaskDocumentFamily, TaskTag, ProjectTemplateRequest,
+    DocumentFamilyStatistics,
+    MessageContext,
+    PagePrompt,
+    Prompt,
+    GuidanceSet,
+    PageGuidanceSet,
+    DocumentEmbedding,
+    DocumentExternalData,
+    Task,
+    PageTask,
+    RetainedGuidance,
+    PageRetainedGuidance,
+    TaskTemplate,
+    TaskStatus,
+    TaskActivity,
+    TaskDocumentFamily,
+    TaskTag,
+    ProjectTemplateRequest,
+    PageTaskDocumentFamily,
+    PageTaskActivity,
+    PageTaskTag,
 )
 
 logger = logging.getLogger()
@@ -1169,7 +1187,7 @@ class PageTaskEndpoint(PageTask, PageEndpoint):
         return "task"
 
 
-class PageTaskActivityEndpoint(PageEndpoint):
+class PageTaskActivityEndpoint(PageTaskActivity, PageEndpoint):
     """
     Represents a page of task activities.
     """
@@ -1178,7 +1196,7 @@ class PageTaskActivityEndpoint(PageEndpoint):
         return "taskActivities"
 
 
-class PageTaskDocumentFamilyEndpoint(PageEndpoint):
+class PageTaskDocumentFamilyEndpoint(PageTaskDocumentFamily, PageEndpoint):
     """
     Represents a page of task document families.
     """
@@ -1187,7 +1205,7 @@ class PageTaskDocumentFamilyEndpoint(PageEndpoint):
         return "taskDocumentFamilies"
 
 
-class PageTaskTagEndpoint(PageEndpoint):
+class PageTaskTagEndpoint(PageTaskTag, PageEndpoint):
     """
     Represents a page of task tags.
     """
