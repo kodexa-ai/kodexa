@@ -85,7 +85,7 @@ from kodexa.model.objects import (
     PageOrganization,
     DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
     DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
-    TaskActivity, TaskDocumentFamily, TaskTag,
+    TaskActivity, TaskDocumentFamily, TaskTag, ProjectTemplateRequest,
 )
 
 logger = logging.getLogger()
@@ -2886,29 +2886,15 @@ class ProjectEndpoint(EntityEndpoint, Project):
         )
         return [ProjectTag.model_validate(tag) for tag in response.json()]
 
-        def get_data_flow(self) -> "ProjectDataFlow":
-            """Get the data flow of the project.
+    def create_project_template_request(self) -> ProjectTemplateRequest:
+        """Create a project template request from this project.
 
-            Returns:
-                ProjectDataFlow: The data flow of the project.
-            """
-            response = self.client.get(f"/api/projects/{self.id}/dataFlow")
-            return ProjectDataFlow.model_validate(response.json()).set_client(self.client)
+        Returns:
+            ProjectTemplateRequest: A project template request object.
+        """
+        response = self.client.get(f"/api/projects/{self.id}/createProjectTemplateRequest")
+        return ProjectTemplateRequest.model_validate(response.json())
 
-        def update_data_flow(self, data_flow: "ProjectDataFlow") -> "ProjectDataFlow":
-            """Update the data flow of the project.
-
-            Args:
-                data_flow (ProjectDataFlow): The new data flow to associate with the project.
-
-            Returns:
-                ProjectDataFlow: The updated data flow associated with the project.
-            """
-            response = self.client.put(
-                f"/api/projects/{self.id}/dataFlow",
-                body=data_flow.model_dump(mode="json", by_alias=True),
-            )
-            return ProjectDataFlow.model_validate(response.json()).set_client(self.client)
 
 
 class MessagesEndpoint(EntitiesEndpoint):

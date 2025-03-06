@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Set
 from typing import Union
 
 from pydantic import AnyUrl, Field, RootModel, BaseModel, ConfigDict
@@ -3018,13 +3018,142 @@ class Project(BaseModel):
     owner: Optional[User] = None
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
-
 class TaskStatusType(str, Enum):
     """Enum for task status types"""
     TODO = "TODO"
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
 
+class ProjectAttributeStatus(BaseModel):
+    """
+    Represents an attribute status for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    color: Optional[str] = Field(None, max_length=25)
+    icon: Optional[str] = Field(None, max_length=25)
+    status: Optional[str] = Field(None, max_length=255)
+    status_type: Optional[StatusType2] = Field(None, alias="statusType")
+
+class ProjectDocumentStatus(BaseModel):
+    """
+    Represents a document status for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    color: Optional[str] = Field(None, max_length=25)
+    icon: Optional[str] = Field(None, max_length=25)
+    status: str = Field(..., max_length=255)
+    status_type: Optional[StatusType2] = Field(None, alias="statusType")
+
+class ProjectTaskStatus(BaseModel):
+    """
+    Represents a task status for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    color: Optional[str] = Field(None, max_length=25)
+    icon: Optional[str] = Field(None, max_length=25)
+    label: str = Field(..., max_length=255)
+    status_type: Optional[TaskStatusType] = Field(None, alias="statusType")
+
+class ProjectTemplateTag(BaseModel):
+    """
+    Represents a tag for a project template.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    label: Optional[str] = None
+    color: Optional[str] = None
+
+class ProjectTaskTemplate(BaseModel):
+    """
+    Represents a task template for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    title: Optional[str] = None
+    description: Optional[str] = None
+
+class ProjectResource(BaseModel):
+    """
+    Represents a resource for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    uri: Optional[str] = None
+    type: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    copy: Optional[bool] = False
+    slug: Optional[str] = None
+    original_uri: Optional[str] = Field(None, alias="originalUri")
+
+class WorkspaceResource(BaseModel):
+    """
+    Represents a workspace resource.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    name: Optional[str] = None
+    description: Optional[str] = None
+    storage: Optional[WorkspaceStorage] = None
+
+class ProjectTemplateRequest(BaseModel):
+    """
+    Represents a request to create a project template.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    name: Optional[str] = None
+    description: Optional[str] = None
+    options: Optional[ProjectOptions] = None
+    memory: Optional[ProjectMemory] = None
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    icon: Optional[str] = None
+    overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
+    provider: Optional[str] = None
+    provider_url: Optional[str] = Field(None, alias="providerUrl")
+    provider_image_url: Optional[str] = Field(None, alias="providerImageUrl")
+    public_access: Optional[bool] = Field(False, alias="publicAccess")
+    resources: List[ProjectResource] = Field(default_factory=list)
+    workspaces: List[ProjectWorkspace] = Field(default_factory=list)
+    assistants: List[ProjectAssistant] = Field(default_factory=list)
+    document_statuses: List[ProjectDocumentStatus] = Field(default_factory=list, alias="documentStatuses")
+    task_statuses: List[ProjectTaskStatus] = Field(default_factory=list, alias="taskStatuses")
+    tags: Set[str] = Field(default_factory=set)
 
 class TaskStatus(BaseModel):
     """Model representing a task status entity"""
