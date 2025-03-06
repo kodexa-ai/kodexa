@@ -6462,6 +6462,13 @@ OBJECT_TYPES = {
         "type": TaskTemplateEndpoint,
         "global": True,
         "endpoint": TaskTemplatesEndpoint,
+    },
+    "taskDocumentFamilies": {
+        "name": "taskDocumentFamily",
+        "plural": "taskDocumentFamilies",
+        "type": TaskDocumentFamilyEndpoint,
+        "global": True,
+        "endpoint": TaskDocumentFamiliesEndpoint,
     }
 }
 
