@@ -6644,6 +6644,7 @@ class KodexaClient:
         self.products = ProductsEndpoint(self)
         self.tasks = TasksEndpoint(self)
         self.retained_guidances = RetainedGuidancesEndpoint(self)
+        self.task_document_families = TaskDocumentFamiliesEndpoint(self)
 
     @staticmethod
     def login(url, token):
