@@ -6663,6 +6663,8 @@ class KodexaClient:
         self.tasks = TasksEndpoint(self)
         self.retained_guidances = RetainedGuidancesEndpoint(self)
         self.task_document_families = TaskDocumentFamiliesEndpoint(self)
+        self.task_activities = TaskActivitiesEndpoint(self)
+        self.task_tags = TaskTagsEndpoint(self)
 
     @staticmethod
     def login(url, token):
@@ -7260,6 +7262,9 @@ class KodexaClient:
                 "productSubscription": ProductSubscriptionEndpoint,
                 "checkResponse": CheckResponseEndpoint,
                 "taskTemplate": TaskTemplateEndpoint,
+                "taskDocumentFamily": TaskDocumentFamilyEndpoint,
+                "taskActivity": TaskActivityEndpoint,
+                "taskTag": TaskTagEndpoint,
             }
 
             if component_type in known_components:
