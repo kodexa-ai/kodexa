@@ -306,7 +306,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
             page += 1
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
             filters: Optional[List[str]] = None
     ):
         """
@@ -502,7 +502,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["page"] += 1
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
             filters: Optional[List[str]] = None
     ):
         """
@@ -730,7 +730,7 @@ class EntitiesEndpoint:
             page += 1
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
             filters: Optional[List[str]] = None
     ):
         """List the resources.
@@ -1164,34 +1164,43 @@ class PageTaskEndpoint(PageTask, PageEndpoint):
     """
     Represents a page of tasks.
     """
+
     def get_type(self) -> Optional[str]:
         return "task"
+
 
 class PageTaskActivityEndpoint(PageEndpoint):
     """
     Represents a page of task activities.
     """
+
     def get_type(self) -> Optional[str]:
         return "taskActivities"
+
 
 class PageTaskDocumentFamilyEndpoint(PageEndpoint):
     """
     Represents a page of task document families.
     """
+
     def get_type(self) -> Optional[str]:
         return "taskDocumentFamilies"
+
 
 class PageTaskTagEndpoint(PageEndpoint):
     """
     Represents a page of task tags.
     """
+
     def get_type(self) -> Optional[str]:
         return "taskTags"
+
 
 class TaskEndpoint(EntityEndpoint, Task):
     """
     Represents a task endpoint.
     """
+
     def get_type(self) -> str:
         return "tasks"
 
@@ -1219,10 +1228,12 @@ class TaskEndpoint(EntityEndpoint, Task):
         response = self.client.delete(url)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
+
 class TasksEndpoint(EntitiesEndpoint):
     """
     Represents tasks endpoints.
     """
+
     def get_type(self) -> str:
         return "tasks"
 
@@ -1232,28 +1243,34 @@ class TasksEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskEndpoint
 
-    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None, document_families: Optional[List[DocumentFamily]] = None) -> TaskEndpoint:
+    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None,
+                             document_families: Optional[List[DocumentFamily]] = None) -> TaskEndpoint:
         """Create a task with the given template."""
         url = "/api/tasks/createTaskWithRequest"
         create_body = {
             "task": task.model_dump(mode="json", by_alias=True),
             "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
-            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in document_families] if document_families else None
+            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in
+                                 document_families] if document_families else None
         }
         response = self.client.post(url, create_body)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
 
 class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
     """
     Represents a task template endpoint.
     """
+
     def get_type(self) -> str:
         return "taskTemplates"
+
 
 class TaskTemplatesEndpoint(EntitiesEndpoint):
     """
     Represents task templates endpoints.
     """
+
     def get_type(self) -> str:
         return "taskTemplates"
 
@@ -1263,17 +1280,21 @@ class TaskTemplatesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskTemplateEndpoint
 
+
 class TaskActivityEndpoint(EntityEndpoint, TaskActivity):
     """
     Represents a task activity endpoint.
     """
+
     def get_type(self) -> str:
         return "taskActivities"
+
 
 class TaskActivitiesEndpoint(EntitiesEndpoint):
     """
     Represents task activities endpoints.
     """
+
     def get_type(self) -> str:
         return "taskActivities"
 
@@ -1283,17 +1304,21 @@ class TaskActivitiesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskActivityEndpoint
 
+
 class TaskDocumentFamilyEndpoint(EntityEndpoint, TaskDocumentFamily):
     """
     Represents a task document family endpoint.
     """
+
     def get_type(self) -> str:
         return "taskDocumentFamilies"
+
 
 class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
     """
     Represents task document families endpoints.
     """
+
     def get_type(self) -> str:
         return "taskDocumentFamilies"
 
@@ -1303,17 +1328,21 @@ class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskDocumentFamilyEndpoint
 
+
 class TaskTagEndpoint(EntityEndpoint, TaskTag):
     """
     Represents a task tag endpoint.
     """
+
     def get_type(self) -> str:
         return "taskTags"
+
 
 class TaskTagsEndpoint(EntitiesEndpoint):
     """
     Represents task tags endpoints.
     """
+
     def get_type(self) -> str:
         return "taskTags"
 
@@ -2857,6 +2886,30 @@ class ProjectEndpoint(EntityEndpoint, Project):
         )
         return [ProjectTag.model_validate(tag) for tag in response.json()]
 
+        def get_data_flow(self) -> "ProjectDataFlow":
+            """Get the data flow of the project.
+
+            Returns:
+                ProjectDataFlow: The data flow of the project.
+            """
+            response = self.client.get(f"/api/projects/{self.id}/dataFlow")
+            return ProjectDataFlow.model_validate(response.json()).set_client(self.client)
+
+        def update_data_flow(self, data_flow: "ProjectDataFlow") -> "ProjectDataFlow":
+            """Update the data flow of the project.
+
+            Args:
+                data_flow (ProjectDataFlow): The new data flow to associate with the project.
+
+            Returns:
+                ProjectDataFlow: The updated data flow associated with the project.
+            """
+            response = self.client.put(
+                f"/api/projects/{self.id}/dataFlow",
+                body=data_flow.model_dump(mode="json", by_alias=True),
+            )
+            return ProjectDataFlow.model_validate(response.json()).set_client(self.client)
+
 
 class MessagesEndpoint(EntitiesEndpoint):
     """Represents a message endpoint"""
@@ -3476,6 +3529,7 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
             ProjectTemplateEndpoint: The instance class of the endpoint.
         """
         return ProjectTemplateEndpoint
+
 
 class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
@@ -4637,7 +4691,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             project_id: Optional[str] = None,
             friendly_names=False,
             include_ids=True,
-            include_exceptions=False,          
+            include_exceptions=False,
     ) -> str:
         """Get the JSON export for the document family
 
@@ -5106,7 +5160,7 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         super().__init__(client)
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
             filters: Optional[List[str]] = None
     ):
         """

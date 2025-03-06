@@ -2900,6 +2900,79 @@ class ProjectOptions(BaseModel):
     )
 
 
+class NodePosition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    x: float = 0
+    y: float = 0
+
+
+class NodeDimensions(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    width: float = 0
+    height: float = 0
+
+
+class FlowViewPort(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    x: float = 0
+    y: float = 0
+    zoom: float = 1
+
+
+class DataFlowNode(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    id: Optional[str] = None
+    parent_id: Optional[str] = Field(None, alias="parentId")
+    type: Optional[str] = None
+    position: Optional[NodePosition] = None
+    dimensions: Optional[NodeDimensions] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class DataFlowEdge(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    id: Optional[str] = None
+    source: Optional[str] = None
+    target: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ProjectDataFlow(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    view_port: Optional[FlowViewPort] = Field(None, alias="viewPort")
+    nodes: List[DataFlowNode] = Field(default_factory=list)
+    edges: List[DataFlowEdge] = Field(default_factory=list)
+
 class Project(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
