@@ -1347,6 +1347,21 @@ class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
         return PageTaskDocumentFamilyEndpoint
 
 
+class DocumentFamiliesEndpoint(EntitiesEndpoint):
+    """
+    Represents document families endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "documentFamilies"
+
+    def get_instance_class(self, object_dict=None):
+        return DocumentFamilyEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageDocumentFamilyEndpoint
+    
+
 class TaskTagEndpoint(EntityEndpoint, TaskTag):
     """
     Represents a task tag endpoint.
@@ -6487,6 +6502,13 @@ OBJECT_TYPES = {
         "type": TaskDocumentFamilyEndpoint,
         "global": True,
         "endpoint": TaskDocumentFamiliesEndpoint,
+    },
+    "documentFamilies": {
+        "name": "documentFamily",
+        "plural": "documentFamilies",
+        "type": DocumentFamilyEndpoint,
+        "global": True,
+        "endpoint": DocumentFamiliesEndpoint,
     }
 }
 
@@ -6665,6 +6687,7 @@ class KodexaClient:
         self.task_document_families = TaskDocumentFamiliesEndpoint(self)
         self.task_activities = TaskActivitiesEndpoint(self)
         self.task_tags = TaskTagsEndpoint(self)
+        self.document_families = DocumentFamiliesEndpoint(self)
 
     @staticmethod
     def login(url, token):
