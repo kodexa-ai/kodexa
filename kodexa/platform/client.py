@@ -4678,6 +4678,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             friendly_names=False,
             include_ids=True,
             include_exceptions=False,
+            inline_audits=False,
     ) -> str:
         """Get the JSON export for the document family
 
@@ -4686,6 +4687,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             friendly_names (bool): Whether to use friendly names. Defaults to False
             include_ids (bool): Whether to include the IDs. Defaults to True
             include_exceptions (bool): Whether to include the exceptions. Defaults to False
+            inline_audits (bool): Whether to include inline audit information
 
         Returns:
             str: The JSON
@@ -4702,6 +4704,7 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             "projectId": project_id,
             "includeIds": include_ids,
             "includeExceptions": include_exceptions,
+            "inlineAudits": inline_audits,
         }
 
         response = self.client.get(url, params=params)
