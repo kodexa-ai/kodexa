@@ -83,9 +83,27 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
-    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
-    TaskActivity, TaskDocumentFamily, TaskTag, ProjectTemplateRequest,
+    DocumentFamilyStatistics,
+    MessageContext,
+    PagePrompt,
+    Prompt,
+    GuidanceSet,
+    PageGuidanceSet,
+    DocumentEmbedding,
+    DocumentExternalData,
+    Task,
+    PageTask,
+    RetainedGuidance,
+    PageRetainedGuidance,
+    TaskTemplate,
+    TaskStatus,
+    TaskActivity,
+    TaskDocumentFamily,
+    TaskTag,
+    ProjectTemplateRequest,
+    PageTaskDocumentFamily,
+    PageTaskActivity,
+    PageTaskTag,
 )
 
 logger = logging.getLogger()
@@ -890,6 +908,21 @@ class OrganizationsEndpoint(EntitiesEndpoint):
         if organizations.number_of_elements == 0:
             return None
         return organizations.content[0]
+    
+    def find_by_name(self, name) -> Optional["OrganizationEndpoint"]:
+        """
+        Find an organization by name.
+
+        Args:
+            name (str): The name of the organization.
+
+        Returns:
+            Optional[OrganizationEndpoint]: The organization if found, None otherwise.
+        """
+        organizations = self.list(filters=["name: '" + name + "'"])
+        if organizations.number_of_elements == 0:
+            return None
+        return organizations.content[0]
 
 
 class PageEndpoint(ClientEndpoint):
@@ -1169,31 +1202,31 @@ class PageTaskEndpoint(PageTask, PageEndpoint):
         return "task"
 
 
-class PageTaskActivityEndpoint(PageEndpoint):
+class PageTaskActivityEndpoint(PageTaskActivity, PageEndpoint):
     """
     Represents a page of task activities.
     """
 
     def get_type(self) -> Optional[str]:
-        return "taskActivities"
+        return "taskActivity"
 
 
-class PageTaskDocumentFamilyEndpoint(PageEndpoint):
+class PageTaskDocumentFamilyEndpoint(PageTaskDocumentFamily, PageEndpoint):
     """
     Represents a page of task document families.
     """
 
     def get_type(self) -> Optional[str]:
-        return "taskDocumentFamilies"
+        return "taskDocumentFamily"
 
 
-class PageTaskTagEndpoint(PageEndpoint):
+class PageTaskTagEndpoint(PageTaskTag, PageEndpoint):
     """
     Represents a page of task tags.
     """
 
     def get_type(self) -> Optional[str]:
-        return "taskTags"
+        return "taskTag"
 
 
 class TaskEndpoint(EntityEndpoint, Task):
@@ -1328,6 +1361,21 @@ class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskDocumentFamilyEndpoint
 
+
+class DocumentFamiliesEndpoint(EntitiesEndpoint):
+    """
+    Represents document families endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "documentFamilies"
+
+    def get_instance_class(self, object_dict=None):
+        return DocumentFamilyEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageDocumentFamilyEndpoint
+    
 
 class TaskTagEndpoint(EntityEndpoint, TaskTag):
     """
@@ -6465,6 +6513,20 @@ OBJECT_TYPES = {
         "type": TaskTemplateEndpoint,
         "global": True,
         "endpoint": TaskTemplatesEndpoint,
+    },
+    "taskDocumentFamilies": {
+        "name": "taskDocumentFamily",
+        "plural": "taskDocumentFamilies",
+        "type": TaskDocumentFamilyEndpoint,
+        "global": True,
+        "endpoint": TaskDocumentFamiliesEndpoint,
+    },
+    "documentFamilies": {
+        "name": "documentFamily",
+        "plural": "documentFamilies",
+        "type": DocumentFamilyEndpoint,
+        "global": True,
+        "endpoint": DocumentFamiliesEndpoint,
     }
 }
 
@@ -6604,22 +6666,27 @@ class KodexaClient:
     Attributes:
         base_url (str): The base URL for the Kodexa platform.
         access_token (str): The access token for the Kodexa platform.
-        organizations (OrganizationsEndpoint): An endpoint for organizations.
-        projects (ProjectsEndpoint): An endpoint for projects.
-        workspaces (WorkspacesEndpoint): An endpoint for workspaces.
-        users (UsersEndpoint): An endpoint for users.
-        memberships (MembershipsEndpoint): An endpoint for memberships.
-        executions (ExecutionsEndpoint): An endpoint for executions.
-        channels (ChannelsEndpoint): An endpoint for channels.
-        messages (MessagesEndpoint): An endpoint for messages.
+
         assistants (AssistantsEndpoint): An endpoint for assistants.
+        channels (ChannelsEndpoint): An endpoint for channels.
+        executions (ExecutionsEndpoint): An endpoint for executions.
+        memberships (MembershipsEndpoint): An endpoint for memberships.
+        messages (MessagesEndpoint): An endpoint for messages.
+        organizations (OrganizationsEndpoint): An endpoint for organizations.
         products (ProductsEndpoint): An endpoint for products.
-        tasks (TasksEndpoint): An endpoint for tasks.
+        projects (ProjectsEndpoint): An endpoint for projects.
         retained_guidances (RetainedGuidancesEndpoint): An endpoint for retained guidances.
+        task_activities (TaskActivitiesEndpoint): An endpoint for task activities.
+        task_document_families (TaskDocumentFamiliesEndpoint): An endpoint for task document families.
+        task_tags (TaskTagsEndpoint): An endpoint for task tags.
+        tasks (TasksEndpoint): An endpoint for tasks.
+        users (UsersEndpoint): An endpoint for users.
+        workspaces (WorkspacesEndpoint): An endpoint for workspaces.
     """
 
     def __init__(self, url=None, access_token=None, profile=None):
         from kodexa import KodexaPlatform
+        from kodexa.model.entities.product import ProductsEndpoint
 
         self.base_url = url if url is not None else KodexaPlatform.get_url(profile)
         self.access_token = (
@@ -6627,19 +6694,23 @@ class KodexaClient:
             if access_token is not None
             else KodexaPlatform.get_access_token(profile)
         )
-        self.organizations = OrganizationsEndpoint(self)
-        self.projects = ProjectsEndpoint(self)
-        self.workspaces = WorkspacesEndpoint(self)
-        self.users = UsersEndpoint(self)
-        self.memberships = MembershipsEndpoint(self)
-        self.executions = ExecutionsEndpoint(self)
-        self.channels = ChannelsEndpoint(self)
+
         self.assistants = AssistantsEndpoint(self)
-        self.messages = MessagesEndpoint(self)
-        from kodexa.model.entities.product import ProductsEndpoint
+        self.channels = ChannelsEndpoint(self)
+        self.document_families = DocumentFamiliesEndpoint(self)
+        self.executions = ExecutionsEndpoint(self)
+        self.memberships = MembershipsEndpoint(self)
+        self.messages = MessagesEndpoint(self)        
+        self.organizations = OrganizationsEndpoint(self)
         self.products = ProductsEndpoint(self)
-        self.tasks = TasksEndpoint(self)
+        self.projects = ProjectsEndpoint(self)
         self.retained_guidances = RetainedGuidancesEndpoint(self)
+        self.task_activities = TaskActivitiesEndpoint(self)
+        self.task_document_families = TaskDocumentFamiliesEndpoint(self)
+        self.task_tags = TaskTagsEndpoint(self)
+        self.tasks = TasksEndpoint(self)
+        self.users = UsersEndpoint(self)
+        self.workspaces = WorkspacesEndpoint(self)
 
     @staticmethod
     def login(url, token):
@@ -7210,33 +7281,36 @@ class KodexaClient:
             from kodexa.model.entities.product_subscription import ProductSubscriptionEndpoint
             from kodexa.model.entities.check_response import CheckResponseEndpoint
             known_components = {
-                "taxonomy": TaxonomyEndpoint,
-                "pipeline": PipelineEndpoint,
                 "action": ActionEndpoint,
-                "projectTemplate": ProjectTemplateEndpoint,
-                "modelRuntime": ModelRuntimeEndpoint,
-                "extensionPack": ExtensionPackEndpoint,
-                "user": UserEndpoint,
-                "project": ProjectEndpoint,
-                "membership": MembershipEndpoint,
-                "documentFamily": DocumentFamilyEndpoint,
-                "organization": OrganizationEndpoint,
-                "dataForm": DataFormEndpoint,
-                "dashboard": DashboardEndpoint,
-                "execution": ExecutionEndpoint,
                 "assistant": AssistantDefinitionEndpoint,
-                "exception": DataExceptionEndpoint,
-                "workspace": WorkspaceEndpoint,
-                "message": MessageEndpoint,
-                "prompt": PromptEndpoint,
-                "guidance": GuidanceSetEndpoint,
-                "retainedGuidance": RetainedGuidanceEndpoint,
                 "channel": ChannelEndpoint,
-                "product": ProductEndpoint,
-                "task": TaskEndpoint,
-                "productSubscription": ProductSubscriptionEndpoint,
                 "checkResponse": CheckResponseEndpoint,
+                "dashboard": DashboardEndpoint,
+                "dataForm": DataFormEndpoint,
+                "documentFamily": DocumentFamilyEndpoint,
+                "exception": DataExceptionEndpoint,
+                "execution": ExecutionEndpoint,
+                "extensionPack": ExtensionPackEndpoint,
+                "guidance": GuidanceSetEndpoint,
+                "membership": MembershipEndpoint,
+                "message": MessageEndpoint,
+                "modelRuntime": ModelRuntimeEndpoint,
+                "organization": OrganizationEndpoint,
+                "pipeline": PipelineEndpoint,
+                "product": ProductEndpoint,
+                "productSubscription": ProductSubscriptionEndpoint,
+                "project": ProjectEndpoint,
+                "projectTemplate": ProjectTemplateEndpoint,
+                "prompt": PromptEndpoint,
+                "retainedGuidance": RetainedGuidanceEndpoint,
+                "task": TaskEndpoint,
+                "taskActivity": TaskActivityEndpoint,
+                "taskDocumentFamily": TaskDocumentFamilyEndpoint,
+                "taskTag": TaskTagEndpoint,
                 "taskTemplate": TaskTemplateEndpoint,
+                "taxonomy": TaxonomyEndpoint,
+                "user": UserEndpoint,
+                "workspace": WorkspaceEndpoint,
             }
 
             if component_type in known_components:

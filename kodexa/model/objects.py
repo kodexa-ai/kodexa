@@ -2303,7 +2303,6 @@ class DocumentMetadataDefaults(BaseModel):
     document_properties: Optional[List[Option]] = Field(None, alias="documentProperties")
     label_expressions: Optional[List[LabelExpression]] = Field(None, alias="labelExpressions")
 
-
 class ExtensionPackProvided(BaseModel):
     """
 
@@ -3303,6 +3302,28 @@ class TaskDocumentFamily(BaseModel):
     document_family: Optional['DocumentFamily'] = Field(None, alias="documentFamily")
 
 
+class PageTaskDocumentFamily(BaseModel):
+    """
+    Represents a page of task document families.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[TaskDocumentFamily]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
 class Task(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -3324,7 +3345,7 @@ class Task(BaseModel):
     completed_date: Optional[StandardDateTime] = Field(None, alias="completedDate")
     status: Optional[TaskStatus] = None
     assignee: Optional['User'] = None
-    task_activity: List[TaskActivity] = Field(default_factory=list, alias="taskActivity")
+    task_activity: List[TaskActivity] = Field(default_factory=list, alias="taskActivities")
     task_document_families: List[TaskDocumentFamily] = Field(default_factory=list, alias="taskDocumentFamilies")
     search_text: Optional[str] = Field(None, alias="searchText")
     tags: List[TaskTag] = Field(default_factory=list)
@@ -5521,6 +5542,50 @@ class PageAssistantDefinition(BaseModel):
     empty: Optional[bool] = None
 
 
+class PageTaskActivity(BaseModel):
+    """
+    Represents a page of task activities.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[Action]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class PageTaskTag(BaseModel):
+    """
+    Represents a page of task tags.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[Action]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
 class PageAction(BaseModel):
     """
 
@@ -6254,3 +6319,4 @@ Message.model_rebuild()
 MessageFeedback.model_rebuild()
 MessageFeedbackResponse.model_rebuild()
 MessageFeedbackOption.model_rebuild()
+
