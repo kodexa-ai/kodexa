@@ -21,18 +21,19 @@ from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
 from kodexa.model.objects import (
-    ExecutionEvent,
-    ContentObject,
     AssistantEvent,
-    ContentEvent,
-    ScheduledEvent,
-    DocumentFamilyEvent,
     ChannelEvent,
+    ContentEvent,
+    ContentObject,
     DataObjectEvent,
-    WorkspaceEvent, DocumentFamily,
+    DocumentFamilyEvent,
+    ExecutionEvent,
+    ScheduledEvent,
+    TaskEvent,
+    WorkspaceEvent, 
 )
 from kodexa.pipeline import PipelineContext, PipelineStatistics
-from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient, process_response
+from kodexa.platform.client import KodexaClient, process_response
 
 logger = logging.getLogger()
 
@@ -830,6 +831,8 @@ class EventHelper:
             return DataObjectEvent(**event_dict)
         if event_dict["type"] == "workspace":
             return WorkspaceEvent(**event_dict)
+        if event_dict["type"] == "task":
+            return TaskEvent(**event_dict)
 
         raise f"Unknown event type {event_dict}"
 
