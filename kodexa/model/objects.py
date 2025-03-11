@@ -6217,7 +6217,7 @@ class TaskEvent(BaseModel):
     )
     type: Optional[str] = "task"
     task: Optional[Task] = None
-    document_families: List[DocumentFamily] = Field(default_factory=list, alias="documentFamilies")
+    document_families: Optional[List[DocumentFamily]] = Field(default_factory=list, alias="documentFamilies")
 
 
 class DocumentFamilyEvent(BaseModel):
