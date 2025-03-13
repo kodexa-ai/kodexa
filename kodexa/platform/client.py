@@ -5775,7 +5775,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             document_family_response.json()
         ).set_client(self.client)
 
-    def stream_query(self, query: str = "*", sort=None, limit=None):
+    def stream_query(self, query: str = "*", sort=None, limit=None, page_size=5):
         """
         Stream the query for the document family.
 
@@ -5783,11 +5783,11 @@ class DocumentStoreEndpoint(StoreEndpoint):
             query (str, optional): The query to run. Defaults to "*".
             sort (str, optional): Sorting order of the query. Defaults to None.
             limit (int, optional): The maximum number of items to return. Defaults to None.
+            page_size (int, optional): Pagination size for the streaming
 
         Returns:
             generator: A generator of the document families.
         """
-        page_size = 5
         page = 1
         number_of_items = 0
 
@@ -5841,7 +5841,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             get_response.json()
         ).set_client(self.client)
 
-    def stream_filter(self, filter_string: str = "", sort=None, limit=None):
+    def stream_filter(self, filter_string: str = "", sort=None, limit=None, page_size=5):
         """
         Stream the filter for the document family.
 
@@ -5849,11 +5849,11 @@ class DocumentStoreEndpoint(StoreEndpoint):
             filter_string (str, optional): The filter string to use. Defaults to "".
             sort (str, optional): Sorting order of the query. Defaults to None.
             limit (int, optional): The maximum number of items to return. Defaults to None.
+            page_size (int, optional): The pagination size for the streaming
 
         Returns:
             generator: A generator of the document families.
         """
-        page_size = 5
         page = 1
         count = 0
         if not sort:
