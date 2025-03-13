@@ -4735,14 +4735,14 @@ class BaseEvent(
     RootModel[
         Union[
             BaseEvent1,
-            "DocumentFamilyEvent",
-            "DataObjectEvent",
-            "ContentEvent",
-            "ScheduledEvent",
             "AssistantEvent",
             "ChannelEvent",
-            "WorkspaceEvent",
+            "ContentEvent",
+            "DataObjectEvent",
+            "DocumentFamilyEvent",
+            "ScheduledEvent",
             "TaskEvent",
+            "WorkspaceEvent",
         ]
     ]
 ):
@@ -5200,12 +5200,13 @@ class PlatformEvent(BaseModel):
     event_detail: Optional[
         Union[
             AssistantEvent,
+            ChannelEvent,
             ContentEvent,
             DataObjectEvent,
             DocumentFamilyEvent,
             ScheduledEvent,
-            ChannelEvent,
-            WorkspaceEvent
+            TaskEvent,
+            WorkspaceEvent,
         ]
     ] = Field(None, alias="eventDetail")
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
@@ -6216,7 +6217,7 @@ class TaskEvent(BaseModel):
     )
     type: Optional[str] = "task"
     task: Optional[Task] = None
-    document_families: List[DocumentFamily] = Field(default_factory=list, alias="documentFamilies")
+    document_families: Optional[List[DocumentFamily]] = Field(default_factory=list, alias="documentFamilies")
 
 
 class DocumentFamilyEvent(BaseModel):
