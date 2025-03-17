@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Document
+from kodexa.model.model import Ref
 from kodexa.model.objects import (
     PageUser,
     PageMembership,
@@ -4666,6 +4667,23 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         """
         url = f"/api/stores/{self.store_ref.replace(':', '/')}/families/{self.id}/activeAssistant"
         response = self.client.delete(url)
+        process_response(response)
+        self.change_sequence = response.json()["changeSequence"]
+
+    def rename(self, new_name: str):
+        """
+        Rename the document family.
+        
+        Args:
+            name (str): The new name of the document family.
+            
+        Returns:
+            None
+        """
+        ref_helper = Ref(self.store_ref)
+        url = f"/api/stores/{ref_helper.org_slug}/{ref_helper.slug}/fs"
+        params = {"rename": new_name, "path": self.path}
+        response = self.client.put(url, params=params)
         process_response(response)
         self.change_sequence = response.json()["changeSequence"]
 
