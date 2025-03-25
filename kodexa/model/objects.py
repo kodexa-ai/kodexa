@@ -4063,7 +4063,7 @@ class CustomEvent(BaseModel):
         None, description="The name of the event", pattern=r"^[a-zA-Z0-9\-_]{0,40}$"
     )
     icon: Optional[str] = Field(
-        None, description="The name of a Material Design Icon to use for the event"
+        None, description="The name of an icon to use for the event"
     )
     label: Optional[str] = Field(
         None, description="The label to use on the event in the UI"
@@ -4690,6 +4690,7 @@ class AssistantExecution(BaseModel):
             ScheduledEvent,
             ChannelEvent,
             WorkspaceEvent,
+            TaskEvent,
         ]
     ] = None
     response: Optional[AssistantExecutionResponse] = None
@@ -6312,6 +6313,7 @@ ContentEvent.model_rebuild()
 DataObjectEvent.model_rebuild()
 DocumentFamilyEvent.model_rebuild()
 ScheduledEvent.model_rebuild()
+TaskEvent.model_rebuild()
 DataException.model_rebuild()
 Workspace.model_rebuild()
 AssistantResponsePipeline.model_rebuild()
@@ -6320,4 +6322,3 @@ Message.model_rebuild()
 MessageFeedback.model_rebuild()
 MessageFeedbackResponse.model_rebuild()
 MessageFeedbackOption.model_rebuild()
-
