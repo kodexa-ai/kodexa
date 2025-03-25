@@ -3108,7 +3108,7 @@ class ProjectResource(BaseModel):
     type: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
-    copy: Optional[bool] = False
+    should_copy: Optional[bool] = Field(False, alias="copy")
     slug: Optional[str] = None
     original_uri: Optional[str] = Field(None, alias="originalUri")
 
