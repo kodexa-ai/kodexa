@@ -5324,6 +5324,30 @@ class DataStoreEndpoint(StoreEndpoint):
             for taxonomy_response in taxonomy_response.json()
         ]
 
+    def get_data_exceptions(self, filter: str = None, page=1, page_size=10) -> List[DataExceptionEndpoint]:
+        """Get the data exceptions of the store
+
+        Args:
+            filter (str): The filter to limit the results. Defaults to None
+            page (int): The page number to get. Defaults to 1
+            page_size (int): The size of the page. Defaults to 10
+
+        Returns:
+            List[DataExceptionEndpoint]: The data exceptions in the store
+        """
+        url = f"/api/exceptions"
+        base_filter= f"dataObject.store.id: '{self.id}'"
+
+        if filter:
+            filter = f"{base_filter} AND ({filter})"
+
+        url += f"?filter={filter}&page={page}&pageSize={page_size}"
+        data_exception_response = self.client.get(url)
+        return [
+            DataExceptionEndpoint.model_validate(data_exception_response)
+            for data_exception_response in data_exception_response.json().content
+        ]
+
     def get_data_objects_df(
             self,
             path: str,
