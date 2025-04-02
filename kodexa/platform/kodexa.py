@@ -281,7 +281,7 @@ class KodexaPlatform:
         save_config(kodexa_config)
 
     @classmethod
-    def clear_profile(cls, profile):
+    def clear_profile(cls, profile=None):
         kodexa_config = get_config(profile)
         kodexa_config["_current_profile_"] = None
         save_config(kodexa_config)
