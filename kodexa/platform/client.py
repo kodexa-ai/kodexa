@@ -5339,9 +5339,11 @@ class DataStoreEndpoint(StoreEndpoint):
         base_filter= f"dataObject.store.id: '{self.id}'"
 
         if filter:
-            filter = f"{base_filter} AND ({filter})"
+            final_filter = f"{base_filter} AND ({filter})"
+        else:
+            final_filter = base_filter
 
-        url += f"?filter={filter}&page={page}&pageSize={page_size}"
+        url += f"?filter={final_filter}&page={page}&pageSize={page_size}"
         data_exception_response = self.client.get(url)
         return [
             DataExceptionEndpoint.model_validate(data_exception_response)
