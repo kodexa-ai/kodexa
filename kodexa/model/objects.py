@@ -2386,7 +2386,7 @@ class ExtensionPackProvided(BaseModel):
         None, description="Delete protection", alias="deleteProtection"
     )
 
-    _id: Optional[str] = Field(
+    id: Optional[str] = Field(
         None,
         alias="_id",
         description="The ID of the metadata object (used internally)",
