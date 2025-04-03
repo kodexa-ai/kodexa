@@ -6238,6 +6238,11 @@ class DocumentFamilyEvent(BaseModel):
         protected_namespaces=("model_config",),
     )
     type: Optional[str] = None
+
+    unassigned_user: Optional[User] = Field(None, alias="unassignedUser")
+    previous_status: Optional[DocumentStatus] = Field(None, alias="previousStatus")
+    document_state: Optional[str] = Field(None, alias="documentState")
+
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
 
 
