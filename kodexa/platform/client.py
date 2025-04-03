@@ -5336,7 +5336,7 @@ class DataStoreEndpoint(StoreEndpoint):
             List[DataExceptionEndpoint]: The data exceptions in the store
         """
         url = f"/api/exceptions"
-        base_filter= f"dataObject.store.id: '{self.id}'"
+        base_filter= f"dataObject.store.id: '{self._id}'"
 
         if filter:
             final_filter = f"{base_filter} AND ({filter})"
