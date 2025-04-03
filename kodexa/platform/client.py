@@ -5324,7 +5324,7 @@ class DataStoreEndpoint(StoreEndpoint):
             for taxonomy_response in taxonomy_response.json()
         ]
 
-    def get_data_exceptions(self, filter: str = None, page=1, page_size=10) -> List[DataExceptionEndpoint]:
+    def get_data_exceptions(self, filter: str = None, page=1, page_size=10) -> PageDataExceptionEndpoint:
         """Get the data exceptions of the store
 
         Args:
@@ -5345,10 +5345,10 @@ class DataStoreEndpoint(StoreEndpoint):
 
         url += f"?filter={final_filter}&page={page}&pageSize={page_size}"
         data_exception_response = self.client.get(url)
-        return [
-            DataExceptionEndpoint.model_validate(data_exception_response)
-            for data_exception_response in data_exception_response.json().content
-        ]
+        process_response(data_exception_response)
+        return PageDataExceptionEndpoint.model_validate(
+            data_exception_response.json()
+        ).set_client(self.client)
 
     def get_data_objects_df(
             self,
