@@ -3072,6 +3072,7 @@ class ProjectTaskStatus(BaseModel):
     color: Optional[str] = Field(None, max_length=25)
     icon: Optional[str] = Field(None, max_length=25)
     label: str = Field(..., max_length=255)
+    slug: Optional[str] = Field(None, max_length=255)
     status_type: Optional[TaskStatusType] = Field(None, alias="statusType")
 
 class ProjectTemplateTag(BaseModel):
@@ -3099,6 +3100,7 @@ class ProjectTaskTemplate(BaseModel):
     )
     title: Optional[str] = None
     description: Optional[str] = None
+    slug: Optional[str] = Field(None, max_length=255)
 
 class ProjectResource(BaseModel):
     """
