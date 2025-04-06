@@ -225,7 +225,7 @@ class Organization(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     name: str
-    slug: str = Field(pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
+    slug: str = Field(pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     public_access: Optional[bool] = Field(None, alias="publicAccess")
     description: Optional[str] = None
     has_image: Optional[bool] = Field(None, alias="hasImage")
@@ -2517,6 +2517,7 @@ class ProjectAssistant(BaseModel):
 
     name: Optional[str] = None
     description: Optional[str] = None
+    slug: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     assistant_definition_ref: Optional[str] = Field(
         None, alias="assistantDefinitionRef"
     )
@@ -4640,7 +4641,7 @@ class Assistant(BaseModel):
     )
     id: Optional[str] = Field(None)
     uuid: Optional[str] = None
-    slug: Optional[str] = Field(None, description="The slug for the assistant")
+    slug: Optional[str] = Field(None, description="The slug for the assistant", pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
