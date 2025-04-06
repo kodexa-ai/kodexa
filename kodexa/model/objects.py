@@ -2533,7 +2533,7 @@ class ProjectAssistant(BaseModel):
     assistant_role: Optional[str] = Field(None, alias="assistantRole")
 
 
-class LexicalRelationType(Enum):
+class LexicalRelationType(str, Enum):
     SYNONYM = "SYNONYM"
     ANTONYM = "ANTONYM"
     HYPERNYM = "HYPERNYM"
@@ -2551,7 +2551,7 @@ class LexicalRelation(BaseModel):
     weight: Optional[float] = None
 
 
-class TaxonValuePath(Enum):
+class TaxonValuePath(str, Enum):
     VALUE_OR_ALL_CONTENT = "VALUE_OR_ALL_CONTENT"
     VALUE_ONLY = "VALUE_ONLY"
     ALL_CONTENT = "ALL_CONTENT"
