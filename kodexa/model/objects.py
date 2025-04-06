@@ -3171,6 +3171,7 @@ class TaskStatus(BaseModel):
     )
     id: Optional[str] = Field(None)
     uuid: Optional[str] = None
+    slug: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     color: Optional[str] = Field(None, max_length=25)
     icon: Optional[str] = Field(None, max_length=25)
@@ -5990,6 +5991,11 @@ class ProjectTemplate(ExtensionPackProvided):
         None,
         alias="attributeStatuses",
         description="The attribute statuses that will be created with the project template",
+    )
+
+    task_statuses: Optional[List[TaskStatus]] = Field(None,
+        alias="taskStatuses",
+        description="The task statuses that will be created with the project template",
     )
 
     options: Optional[ProjectOptions] = Field(None, alias="options")
