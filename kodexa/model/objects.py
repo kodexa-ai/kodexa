@@ -4640,6 +4640,7 @@ class Assistant(BaseModel):
     )
     id: Optional[str] = Field(None)
     uuid: Optional[str] = None
+    slug: Optional[str] = Field(None, description="The slug for the assistant")
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
