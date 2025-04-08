@@ -2476,6 +2476,7 @@ class ConnectionType(Enum):
     DATA_OBJECT = "DATA_OBJECT"
     WORKSPACE = "WORKSPACE"
     CHANNEL = "CHANNEL"
+    TASK = "TASK"
 
 
 class ProjectAssistantConnection(BaseModel):
