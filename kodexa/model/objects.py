@@ -6285,6 +6285,20 @@ class ScheduledEvent(BaseModel):
     next_event: Optional[StandardDateTime] = Field(None, alias="nextEvent")
 
 
+class OrchestrationEvent(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    type: Optional[str] = None
+    execution_event: Optional[ExecutionEvent] = Field(None, alias="executionEvent")
+
+
 ThrowableProblem.model_rebuild()
 Option.model_rebuild()
 Taxon.model_rebuild()
