@@ -301,3 +301,152 @@ class ManifestManager:
             f"Undeployed {undeployed_count} components."
         )
 
+    def sync_from_instance(self, manifest_path: str, org_slug: str | None = None):
+        """
+        Syncs resources from a Kodexa instance to the filesystem based on a manifest.
+
+        This reads a manifest file and for each resource defined:
+        1. Retrieves the resource from the Kodexa instance
+        2. Saves it to the corresponding file on the filesystem
+
+        Args:
+            manifest_path (str): The path to the manifest file.
+            org_slug (str | None): The organization slug to sync from.
+                                  If None, uses the default org from client.
+        """
+        target_org_slug = org_slug or self.kodexa_client.get_org_slug()
+        if not target_org_slug:
+            msg = "Organization slug must be provided or set in the client."
+            raise ValueError(msg)
+
+        logger.info(
+            f"Starting sync from instance to filesystem using manifest "
+            f"{manifest_path} for organization {target_org_slug}"
+        )
+        resource_paths = self.read_manifest(manifest_path)
+        abs_manifest_path = os.path.abspath(manifest_path)
+        manifest_dir = os.path.dirname(abs_manifest_path)
+        original_cwd = os.getcwd()
+        synced_count = 0
+
+        try:
+            # Change to manifest directory to resolve relative paths
+            os.chdir(manifest_dir)
+
+            for resource_pattern in resource_paths:
+                resource_files = glob.glob(resource_pattern, recursive=True)
+
+                if not resource_files:
+                    logger.warning(
+                        f"No files found matching pattern '{resource_pattern}' "
+                        f"relative to {manifest_dir}"
+                    )
+                    continue
+
+                for rel_path in resource_files:
+                    # Resolve absolute path based on current directory
+                    abs_path = os.path.abspath(rel_path)
+                    logger.info(f"Processing for sync: {abs_path}")
+
+                    try:
+                        # Read the file to get component information
+                        with open(abs_path, 'r') as f:
+                            path_lower = abs_path.lower()
+                            if path_lower.endswith(".json"):
+                                file_obj = json.load(f)
+                            elif path_lower.endswith((".yaml", ".yml")):
+                                file_obj = yaml.safe_load(f)
+                            else:
+                                logger.warning(
+                                    f"Skipping unsupported file type: {abs_path}"
+                                )
+                                continue
+
+                        components = []
+                        if isinstance(file_obj, list):
+                            logger.info(
+                                f"Found {len(file_obj)} components in {abs_path}"
+                            )
+                            components.extend(file_obj)
+                        elif isinstance(file_obj, dict):
+                            components.append(file_obj)
+                        else:
+                            logger.warning(
+                                f"Skipping unexpected object type in {abs_path}"
+                            )
+                            continue
+
+                        for comp_obj in components:
+                            # Ensure component object is a dictionary
+                            if not isinstance(comp_obj, dict):
+                                logger.warning(
+                                    f"Skipping non-dictionary item in {abs_path}"
+                                )
+                                continue
+
+                            slug = comp_obj.get('slug')
+                            version = comp_obj.get('version')
+
+                            if not slug or not version:
+                                logger.warning(
+                                    "Skipping component (missing slug/version) in %s",
+                                    abs_path
+                                )
+                                continue
+
+                            try:
+                                # Get the component from the Kodexa instance
+                                logger.info(
+                                    f"Retrieving component {slug}:{version} "
+                                    f"from org {target_org_slug}"
+                                )
+                                component = self.kodexa_client.get_object(
+                                    target_org_slug, slug, version
+                                )
+                                
+                                if not component:
+                                    logger.warning(
+                                        f"Component {slug}:{version} not found "
+                                        f"in org {target_org_slug}"
+                                    )
+                                    continue
+
+                                # Serialize the component to data
+                                updated_obj = component.serialize()
+                                
+                                # Write the updated data back to the file
+                                write_format = "json"
+                                if path_lower.endswith((".yaml", ".yml")):
+                                    write_format = "yaml"
+                                
+                                with open(abs_path, 'w') as f:
+                                    if write_format == "json":
+                                        json.dump(updated_obj, f, indent=2)
+                                    else:
+                                        yaml.dump(updated_obj, f)
+                                
+                                logger.info(
+                                    f"Synced component {slug}:{version} to {abs_path}"
+                                )
+                                synced_count += 1
+                                
+                            except Exception as e:
+                                logger.error(
+                                    "Failed to sync component %s:%s: %s",
+                                    slug, version, e, exc_info=True
+                                )
+                    except Exception as e:
+                        logger.error(
+                            "Failed to process file %s for sync: %s",
+                            abs_path, e, exc_info=True
+                        )
+
+        finally:
+            # Return to original working directory
+            os.chdir(original_cwd)
+
+        logger.info(
+            f"Sync completed from instance to filesystem using manifest "
+            f"{manifest_path}. Synced {synced_count} components."
+        )
+
