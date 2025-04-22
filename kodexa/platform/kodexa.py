@@ -192,11 +192,14 @@ class KodexaPlatform:
         """
         kodexa_config = get_config(profile)
         env_url = os.getenv("KODEXA_URL", None)
-        return (
+        final_url = (
             env_url
             if env_url is not None
             else kodexa_config[get_profile(profile)]["url"]
         )
+        if final_url is None:
+            raise Exception("No URL set, please set KODEXA_URL or configure a profile (see https://developer.kodexa.ai/guides/cli/authentication)")
+        return final_url
 
     @staticmethod
     def set_access_token(access_token: str):
