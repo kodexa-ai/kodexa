@@ -3060,6 +3060,7 @@ class ProjectDocumentStatus(BaseModel):
     color: Optional[str] = Field(None, max_length=25)
     icon: Optional[str] = Field(None, max_length=25)
     status: str = Field(..., max_length=255)
+    slug: str = Field(..., max_length=255)
     status_type: Optional[StatusType2] = Field(None, alias="statusType")
 
 class ProjectTaskStatus(BaseModel):
