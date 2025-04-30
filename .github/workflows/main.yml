@@ -14,11 +14,9 @@ jobs:
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
       - name: Run image
         uses: abatilo/actions-poetry@v4
-        with:
-          poetry-version: "1.5.1"
       - name: Increment version
         id: version
         run: |
