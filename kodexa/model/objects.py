@@ -2390,8 +2390,6 @@ class ExtensionPackProvided(BaseModel):
         description="Resource is marked for deprecation",
         alias="deprecate",
     )
-    deprecat_date: Optional[StandardDateTime] = Field()
-
     id: Optional[str] = Field(
         None,
         alias="_id",
