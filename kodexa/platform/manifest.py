@@ -55,14 +55,9 @@ class ManifestManager:
             org_slug (str | None): The organization slug to deploy to. If None,
                                    uses the default org from the client.
         """
-        target_org_slug = org_slug or self.kodexa_client.get_org_slug()
-        if not target_org_slug:
-            msg = "Organization slug must be provided or set in the client."
-            raise ValueError(msg)
-
         logger.info(
             f"Starting deployment from manifest {manifest_path} "
-            f"to organization {target_org_slug}"
+            f"to organization {org_slug}"
         )
         resource_paths = self.read_manifest(manifest_path)
         abs_manifest_path = os.path.abspath(manifest_path)
