@@ -2385,6 +2385,12 @@ class ExtensionPackProvided(BaseModel):
     delete_protection: Optional[bool] = Field(
         None, description="Delete protection", alias="deleteProtection"
     )
+    deprecated: Optional[bool] = Field(
+        None,
+        description="Resource is marked for deprecation",
+        alias="deprecate",
+    )
+    deprecat_date: Optional[StandardDateTime] = Field()
 
     id: Optional[str] = Field(
         None,
