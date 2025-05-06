@@ -1061,46 +1061,51 @@ class SqliteDocumentPersistence(object):
             with self.connection.atomic():
                 # Find the parent node
                 parent_peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == parent_node.id)
-                if parent_peewee_node:
-                    if include_children:
-                        # For now, use a recursive function to get all descendants
-                        def get_all_descendants(node_id):
-                            descendants = []
-                            # Get direct children
-                            children = list(PeeweeContentNode.select().where(
-                                PeeweeContentNode.parent_id == node_id
-                            ))
+                if include_children:
+                    # For now, use a recursive function to get all descendants
+                    def get_all_descendants(node_id):
+                        descendants = []
+                        # Get direct children
+                        children = list(PeeweeContentNode.select().where(
+                            PeeweeContentNode.parent_id == node_id
+                        ))
+                        
+                        # Add children to descendants
+                        for child in children:
+                            descendants.append(child)
+                            # Recursively get children's descendants
+                            descendants.extend(get_all_descendants(child.id))
                             
-                            # Add children to descendants
-                            for child in children:
-                                descendants.append(child)
-                                # Recursively get children's descendants
-                                descendants.extend(get_all_descendants(child.id))
-                                
-                            return descendants
-                        
-                        # Get all descendants of parent node
+                        return descendants
+                    
+                    # Get all descendants of parent node
+                    if parent_peewee_node is not None:
                         all_nodes = get_all_descendants(parent_peewee_node.id)
-                        
-                        # Filter by node type if needed
-                        if node_type != "*":
-                            all_nodes = [n for n in all_nodes if n.node_type == node_type]
-                        
-                        # Sort by index and create ContentNodes
-                        for peewee_node in sorted(all_nodes, key=lambda x: getattr(x, 'index', 0) or 0):
-                            nodes.append(self.__build_node(peewee_node))
                     else:
-                        # Get direct children of parent node with specific node type
-                        child_nodes = PeeweeContentNode.select().where(
-                            PeeweeContentNode.parent_id == parent_peewee_node.id
-                        )
-                        
-                        if node_type != "*":
-                            child_nodes = child_nodes.where(PeeweeContentNode.node_type == node_type)
-                        
-                        # Sort by index
-                        for child_node in sorted(list(child_nodes), key=lambda x: getattr(x, 'index', 0) or 0):
-                            nodes.append(self.__build_node(child_node))
+                        if node_type == "*":
+                            all_nodes = PeeweeContentNode.select()
+                        else:
+                            all_nodes = PeeweeContentNode.select().where(PeeweeContentNode.node_type == node_type)
+                    
+                    # Filter by node type if needed
+                    if node_type != "*":
+                        all_nodes = [n for n in all_nodes if n.node_type == node_type]
+                    
+                    # Sort by index and create ContentNodes
+                    for peewee_node in sorted(all_nodes, key=lambda x: x.index or 0):
+                        nodes.append(self.__build_node(peewee_node))
+                else:
+                    # Get direct children of parent node with specific node type
+                    child_nodes = PeeweeContentNode.select().where(
+                        PeeweeContentNode.parent_id == parent_peewee_node.id
+                    )
+                    
+                    if node_type != "*":
+                        child_nodes = child_nodes.where(PeeweeContentNode.node_type == node_type)
+                    
+                    # Sort by index
+                    for child_node in sorted(list(child_nodes), key=lambda x: getattr(x, 'index', 0) or 0):
+                        nodes.append(self.__build_node(child_node))
         except Exception as e:
             logger.error(f"Error getting content nodes: {e}")
             self.connection.rollback()

@@ -263,6 +263,11 @@ class NameTest(object):
                 nodes = context.document.get_persistence().get_content_nodes(
                     self.name, obj, context.last_op != "/"
                 )
+
+                # Add the current node to the front of the list
+                if self.name == "*":
+                    nodes = [obj] + nodes
+
                 # If first_only is True, return only the first matching node
                 return nodes[:1] if context.first_only else nodes
 
@@ -324,7 +329,7 @@ class FunctionCall(object):
         self.args = args
         """a list of argument expressions"""
 
-    def resolve(self, content_node, variables, context: SelectorContext):
+    def resolve(self, content_node: ContentNode, variables: dict, context: SelectorContext):
         args = []
         for arg in self.args:
             if isinstance(arg, VariableReference):
