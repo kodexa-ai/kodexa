@@ -220,6 +220,16 @@ class Step(BaseModel):
         primary_key = False  # No specific PK in schema
 
 
+class ExternalData(BaseModel):
+    id = AutoField()
+    taxonomy = ForeignKeyField(Taxonomy, backref='external_data', null=True, column_name='taxonomy_id')
+    key = TextField()
+    data = BlobField()
+
+    class Meta:
+        table_name = 'kddb_external_data'
+
+
 def initialize_database(db_path):
     """Initialize the database with the given path"""
     database.init(db_path)
@@ -230,7 +240,8 @@ def initialize_database(db_path):
     all_tables = [
         Taxonomy, DataObject, NodeType, ContentNode, ContentNodePart,
         ContentException, FeatureType, Feature, FeatureBlob, FeatureBBox,
-        FeatureTag, DataAttribute, DataException, TagMetadata, Metadata, Step
+        FeatureTag, DataAttribute, DataException, TagMetadata, Metadata, Step,
+        ExternalData
     ]
     
     for table in all_tables:

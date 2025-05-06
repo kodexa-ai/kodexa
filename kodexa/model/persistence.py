@@ -1210,7 +1210,7 @@ class SqliteDocumentPersistence(object):
         if self.inmemory:
             # For in-memory DB, first save to disk
             with open(self.current_filename, "wb") as f:
-                for line in self.connection.iterdump():
+                for line in self.connection.connection().iterdump():
                     f.write(f"{line}\n".encode())
         
         with open(self.current_filename, "rb") as f:
@@ -1267,6 +1267,67 @@ class SqliteDocumentPersistence(object):
             import traceback
             print(traceback.format_exc())
             return False
+
+    def get_external_data(self, key="default") -> dict:
+        """
+        Get external data stored with the given key.
+        
+        Args:
+            key: The key for the external data, defaults to "default"
+            
+        Returns:
+            A dictionary of the external data
+        """
+        from kodexa.model.persistence_models import ExternalData
+        
+        try:
+            external_data = ExternalData.get_or_none(ExternalData.key == key)
+            if external_data:
+                return msgpack.unpackb(external_data.data)
+            return {}
+        except Exception as e:
+            logger.error(f"Error getting external data: {e}")
+            return {}
+            
+    def get_external_data_keys(self) -> List[str]:
+        """
+        Get all keys used for external data.
+        
+        Returns:
+            A list of keys used for external data
+        """
+        from kodexa.model.persistence_models import ExternalData
+        
+        try:
+            keys = ExternalData.select(ExternalData.key).distinct()
+            return [k.key for k in keys]
+        except Exception as e:
+            logger.error(f"Error getting external data keys: {e}")
+            return []
+            
+    def set_external_data(self, external_data: dict, key="default"):
+        """
+        Store external data with the given key.
+        
+        Args:
+            external_data: A dictionary of data to store
+            key: The key to store the data under, defaults to "default"
+        """
+        from kodexa.model.persistence_models import ExternalData
+        
+        try:
+            with self.connection.atomic():
+                # Delete any existing data with this key
+                ExternalData.delete().where(ExternalData.key == key).execute()
+                
+                # Store the new data
+                ExternalData.create(
+                    taxonomy=None,  # Could be linked to taxonomy in the future
+                    key=key,
+                    data=msgpack.packb(external_data, use_bin_type=True)
+                )
+        except Exception as e:
+            logger.error(f"Error setting external data: {e}")
 
 # Replace PersistenceManager with a version without caching
 class PersistenceManager(object):

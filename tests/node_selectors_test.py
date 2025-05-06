@@ -137,7 +137,7 @@ def test_uuid_select():
     print(document.select_first('//p').uuid)
     print(document.select_first('//p').content)
 
-    assert document.select_first(f'//p[uuid({node_uuid})]').content == document.select_first('//p').content
+    assert document.select_first(f'//p[id({node_uuid})]').content == document.select_first('//p').content
 
 
 def test_parent_axis():

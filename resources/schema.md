@@ -162,6 +162,13 @@ erDiagram
     kddb_steps {
         blob obj
     }
+    
+    kddb_external_data {
+        integer id PK
+        integer taxonomy_id FK
+        text key
+        blob data
+    }
 
     kddb_data_objects ||--o{ kddb_content_nodes : "has content nodes"
     kddb_content_nodes ||--o{ kddb_content_node_parts : "has parts"
@@ -178,4 +185,5 @@ erDiagram
     kddb_features ||--o{ kddb_feature_blob : "may have"
     kddb_features ||--o{ kddb_feature_bbox : "may have"
     kddb_features ||--o{ kddb_feature_tag : "may have"
+    kddb_external_data }o--|| kddb_taxonomy : "belongs to"
 ```
