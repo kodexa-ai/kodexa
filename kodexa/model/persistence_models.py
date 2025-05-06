@@ -48,10 +48,12 @@ class NodeType(BaseModel):
 
 class ContentNode(BaseModel):
     id = AutoField()
-    data_object = ForeignKeyField(DataObject, backref='content_nodes', column_name='data_object_id')
+    parent = ForeignKeyField('self', backref='children', null=True, column_name='parent_id')
     node_type = TextField()
+    content = TextField(null=True)
     created = DateTimeField(default=datetime.datetime.now)
     modified = DateTimeField(default=datetime.datetime.now)
+    index = IntegerField(null=True)
 
     class Meta:
         table_name = 'kddb_content_nodes'
@@ -70,7 +72,7 @@ class ContentNodePart(BaseModel):
 
 class ContentException(BaseModel):
     id = AutoField()
-    data_object = ForeignKeyField(DataObject, backref='content_exceptions', column_name='data_object_id')
+    data_object = ForeignKeyField(DataObject, backref='content_exceptions', null=True, column_name='data_object_id')
     message = TextField(null=True)
     exception_details = TextField(null=True)
     exception_type = TextField(null=True)
@@ -78,6 +80,8 @@ class ContentException(BaseModel):
     path = TextField(null=True)
     closing_comment = TextField(null=True)
     open = BooleanField(default=True)
+    node_uuid = TextField(null=True)
+    exception_type_id = TextField(null=True)
 
     class Meta:
         table_name = 'kddb_content_exceptions'
@@ -250,6 +254,77 @@ def initialize_database(db_path):
     
     if tables_to_create:
         database.create_tables(tables_to_create)
+    
+    # Migrate ContentException table to add node_uuid and make data_object_id nullable
+    if database.table_exists("kddb_content_exceptions"):
+        # Check if node_uuid column exists
+        cursor = database.execute_sql("PRAGMA table_info('kddb_content_exceptions')")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if "node_uuid" not in columns:
+            # Add node_uuid column
+            database.execute_sql("ALTER TABLE kddb_content_exceptions ADD COLUMN node_uuid TEXT")
+            
+        # Check if exception_type_id column exists
+        if "exception_type_id" not in columns:
+            # Add exception_type_id column
+            database.execute_sql("ALTER TABLE kddb_content_exceptions ADD COLUMN exception_type_id TEXT")
+        
+        # Check if data_object_id has NOT NULL constraint
+        cursor = database.execute_sql("PRAGMA table_info('kddb_content_exceptions')")
+        has_not_null = False
+        for column in cursor.fetchall():
+            if column[1] == 'data_object_id' and column[3] == 1:  # column[3] is notnull flag
+                has_not_null = True
+                break
+                
+        if has_not_null:
+            # We need to recreate the table to make data_object_id nullable
+            # Execute each statement individually
+            
+            # Disable foreign keys
+            database.execute_sql("PRAGMA foreign_keys=off")
+            
+            # Start transaction
+            database.execute_sql("BEGIN TRANSACTION")
+            
+            # Create temporary table
+            database.execute_sql("""
+                CREATE TABLE kddb_content_exceptions_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    data_object_id INTEGER,
+                    message TEXT,
+                    exception_details TEXT,
+                    exception_type TEXT,
+                    severity TEXT,
+                    path TEXT,
+                    closing_comment TEXT,
+                    open BOOLEAN DEFAULT 1,
+                    node_uuid TEXT,
+                    exception_type_id TEXT,
+                    FOREIGN KEY (data_object_id) REFERENCES kddb_data_objects (id)
+                )
+            """)
+            
+            # Copy data
+            database.execute_sql("""
+                INSERT INTO kddb_content_exceptions_new
+                SELECT id, data_object_id, message, exception_details, exception_type, 
+                       severity, path, closing_comment, open, node_uuid, exception_type_id
+                FROM kddb_content_exceptions
+            """)
+            
+            # Drop old table
+            database.execute_sql("DROP TABLE kddb_content_exceptions")
+            
+            # Rename new table
+            database.execute_sql("ALTER TABLE kddb_content_exceptions_new RENAME TO kddb_content_exceptions")
+            
+            # Commit transaction
+            database.execute_sql("COMMIT")
+            
+            # Enable foreign keys
+            database.execute_sql("PRAGMA foreign_keys=on")
     
 def close_database():
     """Close the database connection"""

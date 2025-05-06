@@ -212,7 +212,7 @@ def test_add_feature():
     document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
-    # add feature accpeting "add_feature" defaults
+    # add feature accepting "add_feature" defaults
     new_feature = document.content_node.get_children()[0].add_feature('test', 'test', 'cheese')
     assert len(new_feature.value) == 1
     assert new_feature.value[0] == "cheese"
@@ -245,7 +245,7 @@ def test_add_feature():
 
 def test_feature_find():
     document = get_test_document()
-    document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=2)
+    document.content_node.add_child(document.create_node(node_type='bar', content='cheeseburger'), index=1)
     document.content_node.add_child(document.create_node(node_type='bar', content='lemon'), index=5)
 
     document.content_node.get_children()[0].add_feature('test', 'test', 'cheese')

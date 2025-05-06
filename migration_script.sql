@@ -108,8 +108,8 @@ SET parent_id = (
 );
 
 -- Migrate content nodes
-INSERT INTO kddb_content_nodes (id, data_object_id, node_type, created, modified)
-SELECT cn.id, do_map.do_id, nt.name, datetime('now'), datetime('now')
+INSERT INTO kddb_content_nodes (id, data_object_id, node_type, created, modified, "index")
+SELECT cn.id, do_map.do_id, nt.name, datetime('now'), datetime('now'), cn.idx
 FROM cn
 JOIN temp_do_mapping do_map ON cn.id = do_map.cn_id
 JOIN n_type nt ON cn.nt = nt.id;

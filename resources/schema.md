@@ -29,8 +29,9 @@ erDiagram
     
     kddb_content_nodes {
         integer id PK
-        integer data_object_id FK
+        integer parent_id FK
         text node_type
+        text content
         datetime created
         datetime modified
     }
@@ -170,10 +171,10 @@ erDiagram
         blob data
     }
 
-    kddb_data_objects ||--o{ kddb_content_nodes : "has content nodes"
     kddb_content_nodes ||--o{ kddb_content_node_parts : "has parts"
     kddb_content_nodes ||--o{ kddb_features : "has features"
     kddb_content_nodes }o--|| kddb_node_types : "has type"
+    kddb_content_nodes ||--o{ kddb_content_nodes : "parent-child"
     kddb_data_objects ||--o{ kddb_features : "has features" 
     kddb_data_objects ||--o{ kddb_data_exceptions : "has exceptions"
     kddb_data_attributes ||--o{ kddb_data_exceptions : "has exceptions"

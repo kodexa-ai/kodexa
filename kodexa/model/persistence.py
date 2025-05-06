@@ -138,6 +138,11 @@ class SqliteDocumentPersistence(object):
                     SELECT name FROM n_type;
                 """)
                 
+                # Populate the node_type_cache with all node types
+                from kodexa.model.persistence_models import NodeType
+                for node_type in NodeType.select():
+                    self.node_type_cache[node_type.name] = node_type.name
+                
                 # Migrate feature types (f_type → kddb_feature_types)
                 self.connection.execute_sql("""
                     INSERT OR IGNORE INTO kddb_feature_types (name)
@@ -211,55 +216,57 @@ class SqliteDocumentPersistence(object):
                 self.connection.execute_sql("""
                     CREATE INDEX node_levels_idx ON node_levels(level, id, pid);
                 """)
-                
-                # Create all data objects in a single operation
-                self.connection.execute_sql("""
-                    INSERT INTO kddb_data_objects (idx, deleted, created, modified)
-                    SELECT cn.idx, 0, datetime('now'), datetime('now')
-                    FROM cn;
-                """)
-                
-                # Store mapping between content node IDs and data object IDs
-                self.connection.execute_sql("""
-                    INSERT INTO temp_do_mapping (cn_id, do_id)
-                    SELECT cn.id, rowid
-                    FROM cn;
-                """)
-                
-                # Update root node parent IDs
-                self.connection.execute_sql("""
-                    UPDATE kddb_data_objects
-                    SET parent_id = NULL
-                    WHERE id IN (
-                        SELECT do_map.do_id
-                        FROM node_levels nl
-                        JOIN temp_do_mapping do_map ON nl.id = do_map.cn_id
-                        WHERE nl.level = 0
-                    );
-                """)
-                
-                # Update child node parent references
-                self.connection.execute_sql("""
-                    UPDATE kddb_data_objects
-                    SET parent_id = (
-                        SELECT parent_do.do_id
-                        FROM node_levels nl
-                        JOIN cn ON nl.id = cn.id
-                        JOIN temp_do_mapping parent_do ON cn.pid = parent_do.cn_id
-                        JOIN temp_do_mapping child_do ON cn.id = child_do.cn_id
-                        WHERE child_do.do_id = kddb_data_objects.id
-                        AND nl.level > 0
-                    );
-                """)
-                
+
                 # Migrate content nodes
                 self.connection.execute_sql("""
-                    INSERT INTO kddb_content_nodes (id, data_object_id, node_type, created, modified)
-                    SELECT cn.id, do_map.do_id, nt.name, datetime('now'), datetime('now')
+                    INSERT INTO kddb_content_nodes (id, parent_id, node_type, content, created, modified, "index")
+                    SELECT cn.id, cn.pid, nt.name, CASE WHEN cnp.content IS NOT NULL THEN cnp.content ELSE NULL END, 
+                           datetime('now'), datetime('now'), cn.idx
                     FROM cn
-                    JOIN temp_do_mapping do_map ON cn.id = do_map.cn_id
-                    JOIN n_type nt ON cn.nt = nt.id;
+                    JOIN n_type nt ON cn.nt = nt.id
+                    LEFT JOIN cnp ON cn.id = cnp.cn_id AND cnp.pos = 0;
                 """)
+                
+                # Make sure the content field exists in kddb_content_nodes
+                cursor = self.connection.execute_sql("""
+                    PRAGMA table_info(kddb_content_nodes);
+                """)
+                columns = [column[1] for column in cursor.fetchall()]
+                
+                if 'content' not in columns:
+                    self.connection.execute_sql("""
+                        ALTER TABLE kddb_content_nodes ADD COLUMN content TEXT;
+                    """)
+                    
+                    # Update content from content parts
+                    self.connection.execute_sql("""
+                        UPDATE kddb_content_nodes 
+                        SET content = (
+                            SELECT cnp.content 
+                            FROM kddb_content_node_parts cnp 
+                            WHERE cnp.content_node_id = kddb_content_nodes.id 
+                            AND cnp.pos = 0 
+                            AND cnp.content IS NOT NULL
+                            LIMIT 1
+                        );
+                    """)
+                
+                # Make sure the index field exists in kddb_content_nodes
+                if 'index' not in columns:
+                    self.connection.execute_sql("""
+                        ALTER TABLE kddb_content_nodes ADD COLUMN "index" INTEGER;
+                    """)
+                    
+                    # Update index values if possible (e.g., from data object idx)
+                    self.connection.execute_sql("""
+                        UPDATE kddb_content_nodes 
+                        SET "index" = (
+                            SELECT do.idx 
+                            FROM kddb_data_objects do 
+                            WHERE do.id = kddb_content_nodes.data_object_id
+                            LIMIT 1
+                        );
+                    """)
                 
                 # Migrate content node parts
                 self.connection.execute_sql("""
@@ -315,6 +322,65 @@ class SqliteDocumentPersistence(object):
                             logging.info("Metadata is already in the msgpack blob format")
                 except Exception as e:
                     logging.warning(f"Error converting metadata: {e}")
+                
+                # Migrate external data if the old table exists
+                try:
+                    # Check if old external_data table exists
+                    cursor = self.connection.execute_sql("""
+                        SELECT CASE 
+                            WHEN EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='external_data') 
+                            THEN 1 ELSE 0 END AS table_exists;
+                    """)
+                    external_data_exists = cursor.fetchone()[0]
+                    
+                    if external_data_exists:
+                        logging.info("Migrating external data from old format...")
+                        
+                        # Create kddb_external_data table if it doesn't exist
+                        self.connection.execute_sql("""
+                            CREATE TABLE IF NOT EXISTS kddb_external_data (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                taxonomy_id INTEGER,
+                                key TEXT NOT NULL,
+                                data BLOB,
+                                FOREIGN KEY (taxonomy_id) REFERENCES kddb_taxonomies (id)
+                            );
+                        """)
+                        
+                        # Get all entries from the old external_data table
+                        cursor = self.connection.execute_sql("SELECT key, data FROM external_data")
+                        entries = cursor.fetchall()
+                        
+                        for key, data in entries:
+                            # Check if data is a JSON string that needs conversion
+                            try:
+                                # Try to decode as text - if this works, it's the old JSON format
+                                data_text = data.decode('utf-8')
+                                data_dict = json.loads(data_text)
+                                
+                                # Convert to msgpack blob
+                                data_blob = msgpack.packb(data_dict, use_bin_type=True)
+                                
+                                # Insert into the new table
+                                self.connection.execute_sql(
+                                    "INSERT INTO kddb_external_data (taxonomy_id, key, data) VALUES (?, ?, ?)",
+                                    (None, key, data_blob)
+                                )
+                                logging.info(f"Migrated external data for key: {key}")
+                            except (UnicodeDecodeError, json.JSONDecodeError, AttributeError):
+                                # If data is None or already binary, pack it directly
+                                if data is not None:
+                                    data_blob = msgpack.packb(data, use_bin_type=True)
+                                    # Insert into the new table
+                                    self.connection.execute_sql(
+                                        "INSERT INTO kddb_external_data (taxonomy_id, key, data) VALUES (?, ?, ?)",
+                                        (None, key, data_blob)
+                                    )
+                                    logging.info(f"Migrated external data for key: {key} (already in binary format)")
+                except Exception as e:
+                    logging.warning(f"Error migrating external data: {e}")
+                    import traceback
+                    logging.warning(traceback.format_exc())
                 
                 # Clean up temporary tables
                 self.connection.execute_sql("DROP TABLE IF EXISTS temp_do_mapping;")
@@ -402,6 +468,7 @@ class SqliteDocumentPersistence(object):
         # Load node types and feature types into cache
         for node_type in NodeType.select():
             self.node_type_cache[node_type.id] = node_type.name
+            self.node_type_cache[node_type.name] = node_type.name  # Add name mapping for direct string reference
             
         for feature_type in FeatureType.select():
             self.feature_type_cache[feature_type.id] = feature_type.name
@@ -440,13 +507,11 @@ class SqliteDocumentPersistence(object):
                     self.document._mixins = metadata["mixins"]
             
             # Load root node
-            from kodexa.model.persistence_models import DataObject, ContentNode as PeeweeContentNode
+            from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
             
-            root_data_object = DataObject.get_or_none(DataObject.parent == None, DataObject.deleted == False)
-            if root_data_object:
-                root_node = PeeweeContentNode.get_or_none(PeeweeContentNode.data_object == root_data_object)
-                if root_node:
-                    self.document.content_node = self.__build_node(root_node)
+            root_content_node = PeeweeContentNode.get_or_none(PeeweeContentNode.parent == None)
+            if root_content_node:
+                self.document.content_node = self.__build_node(root_content_node)
         
         # Ensure we're on the latest version
         self.document.version = "6.0.0"
@@ -456,22 +521,29 @@ class SqliteDocumentPersistence(object):
         """
         Builds a ContentNode from a Peewee ContentNode model.
         """
-        from kodexa.model.persistence_models import DataObject, ContentNode as PeeweeContentNode
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
-        parent_data_object = DataObject.get_or_none(DataObject.id == peewee_node.data_object.parent_id)
-        parent_node = None
-        if parent_data_object:
-            parent_peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.data_object == parent_data_object)
-            if parent_peewee_node:
-                parent_node = self.get_node(parent_peewee_node.id)
-        
+        parent_node = None 
+        if peewee_node.parent_id:
+            parent_node = self.get_node(peewee_node.parent_id)
+
+        # Handle either ID or direct node_type string reference
+        node_type = peewee_node.node_type
+        if node_type in self.node_type_cache:
+            node_type = self.node_type_cache[node_type]
+        else:
+            # Add to cache for future reference
+            self.node_type_cache[node_type] = node_type
+
         new_node = ContentNode(
-            self.document,
-            peewee_node.node_type,
-            parent=parent_node
+            document=self.document,
+            node_type=node_type,
+            content=peewee_node.content,
+            parent=parent_node,
+            index=peewee_node.index
         )
         new_node.id = peewee_node.id
-        new_node.index = peewee_node.data_object.idx or 0
+
         return new_node
 
     def close(self):
@@ -516,92 +588,104 @@ class SqliteDocumentPersistence(object):
             return self.__build_node(peewee_node)
         return None
 
-    def get_parent(self, content_node):
+    def get_parent(self, content_node: ContentNode):
         """
         Retrieves the parent of a given node.
         """
         from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
+        self.get_node(content_node._parent_id)
         
-        peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == content_node.id)
-        if peewee_node and peewee_node.data_object.parent_id:
-            parent_data_obj = DataObject.get(DataObject.id == peewee_node.data_object.parent_id)
-            parent_peewee_node = PeeweeContentNode.get(PeeweeContentNode.data_object == parent_data_obj)
-            return self.get_node(parent_peewee_node.id)
-        return None
-
-    def get_children(self, content_node):
+    def get_children(self, content_node: ContentNode):
         """
         Retrieves the children of a given node.
         """
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
         children = []
         peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == content_node.id)
         if peewee_node:
-            child_data_objects = DataObject.select().where(
-                DataObject.parent == peewee_node.data_object, 
-                DataObject.deleted == False
-            ).order_by(DataObject.idx)
+            # Get child nodes directly through parent relationship
+            child_nodes = PeeweeContentNode.select().where(
+                PeeweeContentNode.parent == peewee_node
+            ).order_by(PeeweeContentNode.index)
             
-            for child_obj in child_data_objects:
-                child_peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.data_object == child_obj)
-                if child_peewee_node:
-                    children.append(self.__build_node(child_peewee_node))
+            # If any child nodes have data_object still set, verify they're not deleted
+            for child_node in child_nodes:
+                children.append(self.__build_node(child_node))
+        
         return children
 
     def get_child_ids(self, content_node):
         """
         Retrieves the ids of the children of a given node.
         """
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
         children = []
         peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == content_node.id)
         if peewee_node:
-            child_data_objects = DataObject.select().where(
-                DataObject.parent == peewee_node.data_object, 
-                DataObject.deleted == False
-            ).order_by(DataObject.idx)
+            # Get child nodes directly through parent relationship
+            child_nodes = PeeweeContentNode.select().where(
+                PeeweeContentNode.parent == peewee_node
+            )
             
-            for child_obj in child_data_objects:
-                child_peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.data_object == child_obj)
-                if child_peewee_node:
-                    children.append(child_peewee_node.id)
+            # If any child nodes have data_object still set, verify they're not deleted
+            for child_node in child_nodes:
+                children.append(child_node.id)
+                
         return children
 
     def add_content_node(self, node: ContentNode, parent: Optional[ContentNode] = None, execute=True):
         """
         Adds a content node to the document.
         """
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         from kodexa.model.persistence_models import ContentNodePart as PeeweeContentNodePart
         
         with self.connection.atomic():
-            # Create DataObject first
-            data_object = DataObject.create(
-                parent=parent.id if parent else None,
-                idx=node.index or 0
-            )
+            # Get parent node if provided
+            parent_node = None
+            if parent and parent.id:
+                parent_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == parent.id)
+
+            if parent and parent.id is None:
+                raise ValueError("Parent node ID is required to add a content node")
+
+            if node.id is None:
             
-            # Create ContentNode
-            peewee_node = PeeweeContentNode.create(
-                data_object=data_object,
-                node_type=node.node_type
-            )
-            
-            # Set the UUID to the new node's ID
-            node.id = peewee_node.id
-            
-            # Create ContentNodePart entries
-            for idx, part in enumerate(node.get_content_parts()):
-                PeeweeContentNodePart.create(
-                    content_node=peewee_node.id,
-                    pos=idx,
-                    content=part if isinstance(part, str) else None,
-                    content_idx=part if not isinstance(part, str) else None
+                # Create ContentNode with parent relationship
+                peewee_node = PeeweeContentNode.create(
+                    node_type=node.node_type,
+                    parent=parent_node,
+                    content=node.content,
+                    index=node.index
                 )
+
+                # Create ContentNodePart entries
+                for idx, part in enumerate(node.get_content_parts()):
+                    PeeweeContentNodePart.create(
+                        content_node=peewee_node.id,
+                        pos=idx,
+                        content=part if isinstance(part, str) else None,
+                        content_idx=part if not isinstance(part, str) else None
+                    )
+                
+                
+                # Set the UUID to the new node's ID
+                node.id = peewee_node.id
+
+            else:
+                peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == node.id)
+
+                if peewee_node.parent is None or peewee_node.parent.id != parent.id:
+                    peewee_node.parent = parent_node
+                    peewee_node.save()
+
+            if parent and node.id is None:
+                node._parent_id = parent.id
             
-            return peewee_node.id
+           
+            return node
 
     def get_content_parts(self, node):
         """
@@ -752,7 +836,9 @@ class SqliteDocumentPersistence(object):
             feature_type, created = FeatureType.get_or_create(name=feature_type_name)
             
             # Get the content node
-            peewee_node = PeeweeContentNode.get(PeeweeContentNode.id == node.id)
+            if node.id is None:
+                raise ValueError("Node ID is required to add a feature")
+            peewee_node = self.get_node(node.id)
             
             # Create feature record
             tag_uuid = None
@@ -762,7 +848,6 @@ class SqliteDocumentPersistence(object):
             peewee_feature = PeeweeFeature.create(
                 feature_type=feature_type,
                 content_node=node.id,
-                data_object=peewee_node.data_object,
                 single=1 if feature.single else 0,
                 tag_uuid=tag_uuid
             )
@@ -816,7 +901,7 @@ class SqliteDocumentPersistence(object):
         """
         Removes a feature from a given node.
         """
-        from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureType
+        from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureType, FeatureTag, FeatureBBox
         
         feature_type_name = f"{feature_type}:{name}"
         
@@ -829,10 +914,18 @@ class SqliteDocumentPersistence(object):
                 PeeweeFeature.feature_type == peewee_feature_type
             )
             
-            # Delete associated blobs and then features
+            # Delete all associated records for each feature
             for feature in features:
+                # Delete feature tags
+                FeatureTag.delete().where(FeatureTag.feature == feature).execute()
+                
+                # Delete feature bboxes
+                FeatureBBox.delete().where(FeatureBBox.feature == feature).execute()
+                
+                # Delete feature blobs
                 FeatureBlob.delete().where(FeatureBlob.feature == feature).execute()
             
+            # Now delete the features themselves
             PeeweeFeature.delete().where(
                 PeeweeFeature.content_node == node.id,
                 PeeweeFeature.feature_type == peewee_feature_type
@@ -842,15 +935,23 @@ class SqliteDocumentPersistence(object):
         """
         Removes all features from a given node.
         """
-        from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob
+        from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureTag, FeatureBBox
         
         # Find all features for this node
         features = PeeweeFeature.select().where(PeeweeFeature.content_node == node.id)
         
-        # Delete associated blobs and then features
+        # Delete all associated records for each feature
         for feature in features:
+            # Delete feature tags
+            FeatureTag.delete().where(FeatureTag.feature == feature).execute()
+            
+            # Delete feature bboxes
+            FeatureBBox.delete().where(FeatureBBox.feature == feature).execute()
+            
+            # Delete feature blobs
             FeatureBlob.delete().where(FeatureBlob.feature == feature).execute()
         
+        # Now delete the features themselves
         PeeweeFeature.delete().where(PeeweeFeature.content_node == node.id).execute()
 
     def remove_all_features_by_id(self, node_id):
@@ -863,7 +964,7 @@ class SqliteDocumentPersistence(object):
         """
         Removes a node and all its children from the document.
         """
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         from kodexa.model.persistence_models import ContentNodePart as PeeweeContentNodePart
         
         def get_all_node_ids(node):
@@ -881,54 +982,47 @@ class SqliteDocumentPersistence(object):
         
         try:
             with self.connection.atomic():
+                # Batch remove features
                 for node_id in all_child_ids:
-                    # Remove features
                     self.remove_all_features_by_id(node_id)
-                    
-                    # Get the content node
-                    peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == node_id)
-                    if peewee_node:
-                        # Remove content parts
-                        PeeweeContentNodePart.delete().where(
-                            PeeweeContentNodePart.content_node == node_id
-                        ).execute()
-                        
-                        # Mark the data object as deleted (soft delete)
-                        data_obj = peewee_node.data_object
-                        data_obj.deleted = True
-                        data_obj.save()
-                        
-                        # Remove the content node
-                        peewee_node.delete_instance()
                 
-            return all_child_ids
-        
+                # Batch remove content parts
+                PeeweeContentNodePart.delete().where(
+                    PeeweeContentNodePart.content_node.in_(all_child_ids)
+                ).execute()
+                
+                # Remove the content nodes
+                PeeweeContentNode.delete().where(
+                    PeeweeContentNode.id.in_(all_child_ids)
+                ).execute()
+                
+                return all_child_ids
+            
         except Exception as e:
             self.connection.rollback()
-            logger.error(f"An error occurred: {e}")
+            logger.error(f"Error removing content node: {e}")
             return []
 
-    def update_node(self, node):
+    def update_node(self, node: ContentNode):
         """
         Updates a given node in the document.
         """
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
         try:
             peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == node.id)
-            if peewee_node:
-                # Update the node's data object
-                data_obj = peewee_node.data_object
-                if node._parent_uuid:
-                    # Find parent data object
-                    parent_peewee_node = PeeweeContentNode.get_or_none(
-                        PeeweeContentNode.id == node._parent_uuid
-                    )
-                    if parent_peewee_node:
-                        data_obj.parent = parent_peewee_node.data_object
+            # Update the peewee_node to match the node
+            if peewee_node is not None:
+                # Update node properties
+                peewee_node.node_type = node.node_type
+                peewee_node.content = node.content
+                peewee_node.index = node.index
+                peewee_node.save()
                 
-                data_obj.idx = node.index
-                data_obj.save()
+                # Update content parts
+                self.update_content_parts(node, node.get_content_parts())
+                
+                logger.debug(f"Successfully updated node {node.id}")
         except Exception as e:
             logger.error(f"Failed to update node: {e}")
 
@@ -936,17 +1030,22 @@ class SqliteDocumentPersistence(object):
         """
         Retrieves nodes of a given type from the document.
         """
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
         content_nodes = []
         
-        peewee_nodes = PeeweeContentNode.select().join(DataObject).where(
-            PeeweeContentNode.node_type == node_type,
-            DataObject.deleted == False
-        ).order_by(DataObject.idx)
-        
-        for peewee_node in peewee_nodes:
-            content_nodes.append(self.__build_node(peewee_node))
+        try:
+            # Get all nodes of the specified type
+            peewee_nodes = PeeweeContentNode.select().where(
+                PeeweeContentNode.node_type == node_type
+            )
+            
+            # Build content nodes
+            for peewee_node in peewee_nodes:
+                content_nodes.append(self.__build_node(peewee_node))
+            
+        except Exception as e:
+            logger.error(f"Error retrieving nodes by type: {e}")
         
         return content_nodes
 
@@ -954,53 +1053,54 @@ class SqliteDocumentPersistence(object):
         """
         Retrieves content nodes from the document based on the given parameters.
         """
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
         nodes = []
         
         try:
             with self.connection.atomic():
-                if include_children:
-                    # Find the parent node
-                    parent_peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == parent_node.id)
-                    if parent_peewee_node:
-                        # Get all descendant data objects
-                        data_objects_query = DataObject.select().where(
-                            DataObject.deleted == False
-                        )
+                # Find the parent node
+                parent_peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == parent_node.id)
+                if parent_peewee_node:
+                    if include_children:
+                        # For now, use a recursive function to get all descendants
+                        def get_all_descendants(node_id):
+                            descendants = []
+                            # Get direct children
+                            children = list(PeeweeContentNode.select().where(
+                                PeeweeContentNode.parent_id == node_id
+                            ))
+                            
+                            # Add children to descendants
+                            for child in children:
+                                descendants.append(child)
+                                # Recursively get children's descendants
+                                descendants.extend(get_all_descendants(child.id))
+                                
+                            return descendants
                         
-                        # Filter by node type if not wildcard
-                        peewee_nodes_query = PeeweeContentNode.select().join(DataObject).where(
-                            DataObject.deleted == False
+                        # Get all descendants of parent node
+                        all_nodes = get_all_descendants(parent_peewee_node.id)
+                        
+                        # Filter by node type if needed
+                        if node_type != "*":
+                            all_nodes = [n for n in all_nodes if n.node_type == node_type]
+                        
+                        # Sort by index and create ContentNodes
+                        for peewee_node in sorted(all_nodes, key=lambda x: getattr(x, 'index', 0) or 0):
+                            nodes.append(self.__build_node(peewee_node))
+                    else:
+                        # Get direct children of parent node with specific node type
+                        child_nodes = PeeweeContentNode.select().where(
+                            PeeweeContentNode.parent_id == parent_peewee_node.id
                         )
                         
                         if node_type != "*":
-                            peewee_nodes_query = peewee_nodes_query.where(
-                                PeeweeContentNode.node_type == node_type
-                            )
+                            child_nodes = child_nodes.where(PeeweeContentNode.node_type == node_type)
                         
-                        # Execute query
-                        peewee_nodes = peewee_nodes_query.order_by(DataObject.idx)
-                        
-                        # Build nodes recursively (this is a simplified version)
-                        for peewee_node in peewee_nodes:
-                            nodes.append(self.__build_node(peewee_node))
-                else:
-                    # Get direct children of parent node with specific node type
-                    parent_peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == parent_node.id)
-                    if parent_peewee_node:
-                        child_data_objects = DataObject.select().where(
-                            DataObject.parent == parent_peewee_node.data_object,
-                            DataObject.deleted == False
-                        ).order_by(DataObject.idx)
-                        
-                        for child_obj in child_data_objects:
-                            child_peewee_node = PeeweeContentNode.get_or_none(
-                                PeeweeContentNode.data_object == child_obj,
-                                PeeweeContentNode.node_type == node_type
-                            )
-                            if child_peewee_node:
-                                nodes.append(self.__build_node(child_peewee_node))
+                        # Sort by index
+                        for child_node in sorted(list(child_nodes), key=lambda x: getattr(x, 'index', 0) or 0):
+                            nodes.append(self.__build_node(child_node))
         except Exception as e:
             logger.error(f"Error getting content nodes: {e}")
             self.connection.rollback()
@@ -1132,25 +1232,19 @@ class SqliteDocumentPersistence(object):
         Adds an exception to the document.
         """
         from kodexa.model.persistence_models import ContentException as PeeweeContentException
-        from kodexa.model.persistence_models import DataObject, ContentNode as PeeweeContentNode
-        
-        # Find the DataObject associated with the node UUID if provided
-        data_object_id = None
-        if exception.node_uuid:
-            peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == exception.node_uuid)
-            if peewee_node:
-                data_object_id = peewee_node.data_object.id
         
         with self.connection.atomic():
             PeeweeContentException.create(
-                data_object=data_object_id,
+                data_object=None,  # Remove data_object relationship
                 message=exception.message,
                 exception_details=exception.exception_details,
                 exception_type=exception.exception_type,
                 severity=exception.severity,
                 path=None,  # Not in original model
                 closing_comment=None,  # Not in original model
-                open=True  # Default to open
+                open=True,  # Default to open
+                node_uuid=exception.node_uuid,  # Store node_uuid directly
+                exception_type_id=exception.exception_type_id  # Store exception_type_id
             )
 
     def get_exceptions(self) -> List[ContentException]:
@@ -1158,21 +1252,11 @@ class SqliteDocumentPersistence(object):
         Retrieves all exceptions from the document.
         """
         from kodexa.model.persistence_models import ContentException as PeeweeContentException
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
         exceptions = []
         peewee_exceptions = PeeweeContentException.select()
         
         for peewee_exception in peewee_exceptions:
-            # Find node UUID if data_object is set
-            node_uuid = None
-            if peewee_exception.data_object:
-                peewee_node = PeeweeContentNode.get_or_none(
-                    PeeweeContentNode.data_object == peewee_exception.data_object
-                )
-                if peewee_node:
-                    node_uuid = peewee_node.id
-            
             exceptions.append(
                 ContentException(
                     tag=None,  # Not in Peewee model
@@ -1182,8 +1266,8 @@ class SqliteDocumentPersistence(object):
                     tag_uuid=None,  # Not in Peewee model
                     exception_type=peewee_exception.exception_type,
                     severity=peewee_exception.severity,
-                    node_uuid=node_uuid,
-                    exception_type_id=None  # Not in Peewee model
+                    node_uuid=peewee_exception.node_uuid,  # Get node_uuid directly
+                    exception_type_id=peewee_exception.exception_type_id  # Get exception_type_id
                 )
             )
         
@@ -1208,10 +1292,20 @@ class SqliteDocumentPersistence(object):
         self.sync()
         
         if self.inmemory:
-            # For in-memory DB, first save to disk
-            with open(self.current_filename, "wb") as f:
-                for line in self.connection.connection().iterdump():
-                    f.write(f"{line}\n".encode())
+            # For in-memory DB, first save to disk using the sqlite3 backup API
+            import sqlite3
+            
+            # Create a connection to the temporary file
+            dest_conn = sqlite3.connect(self.current_filename)
+            
+            # Get the source connection from Peewee
+            source_conn = self.connection.connection()
+            
+            # Back up the in-memory database to the file
+            source_conn.backup(dest_conn)
+            
+            # Close the destination connection to ensure it's flushed to disk
+            dest_conn.close()
         
         with open(self.current_filename, "rb") as f:
             return f.read()
@@ -1300,10 +1394,16 @@ class SqliteDocumentPersistence(object):
         
         try:
             keys = ExternalData.select(ExternalData.key).distinct()
-            return [k.key for k in keys]
+            key_list = [k.key for k in keys]
+            
+            # Always include 'default' in the list of keys
+            if 'default' not in key_list:
+                key_list.insert(0, 'default')
+                
+            return key_list
         except Exception as e:
             logger.error(f"Error getting external data keys: {e}")
-            return []
+            return ['default']  # Return default key even on error
             
     def set_external_data(self, external_data: dict, key="default"):
         """

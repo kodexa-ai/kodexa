@@ -8,7 +8,7 @@ import os
 import re
 import uuid
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 from addict import Dict
 import deepdiff
 import msgpack
@@ -270,30 +270,53 @@ class ContentNode(object):
             self,
             document,
             node_type: str,
+            id: Optional[int] = None,
             content: Optional[str] = None,
             content_parts: Optional[List[Any]] = None,
             parent=None,
             index: Optional[int] = None,
             virtual: bool = False,
     ):
+        self.id: Optional[int] = id
+        """The ID of the content node"""
         self.node_type: str = node_type
         """The node type (ie. line, page, cell etc)"""
         self.document: Document = document
         """The document that the node belongs to"""
         self._content_parts: Optional[List[Any]] = content_parts
         """The children of the content node"""
-        self.index: Optional[int] = index
+        self._index: Optional[int] = index
         """The index of the content node"""
         self.id: Optional[int] = None
         """The ID of the content node"""
         self.virtual: bool = virtual
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
 
-        self._parent_uuid = parent.id if parent else None
+        self._parent_id = parent.id if parent else None
         self._content_parts = self.get_content_parts()
 
         if content is not None and len(self._content_parts) == 0:
             self.set_content_parts([content])
+
+    @property
+    def id(self) -> Optional[int]:
+        """Get the ID of this node"""
+        return self._id
+    
+    @id.setter
+    def id(self, value: Optional[int]):
+        """Set the ID of this node"""
+        self._id = value
+            
+    @property
+    def index(self) -> Optional[int]:
+        """Get the index of this node"""
+        return self._index
+        
+    @index.setter
+    def index(self, value: Optional[int]):
+        """Set the index of this node"""
+        self._index = value
 
     def get_content_parts(self):
         return self.document.get_persistence().get_content_parts(self)
@@ -488,11 +511,29 @@ class ContentNode(object):
         """
         if index is None:
             if len(self.get_children()) > 0:
-                child.index = self.get_children()[-1].index + 1
+                last_child = self.get_children()[-1]
+                
+                # Use a simple integer value if we can't determine the index
+                try:
+                    # First try direct access to _index
+                    if hasattr(last_child, '_index'):
+                        last_index = last_child._index
+                        if callable(last_index):
+                            # If it's a callable, default to using position in children list
+                            child._index = len(self.get_children())
+                        else:
+                            # Use the index value + 1
+                            child._index = (last_index or 0) + 1
+                    else:
+                        # Default to children count
+                        child._index = len(self.get_children())
+                except TypeError:
+                    # If we get a type error, just use position in children
+                    child._index = len(self.get_children())
             else:
-                child.index = 0
+                child._index = 0
         else:
-            child.index = index
+            child._index = index
 
         self.document.get_persistence().add_content_node(child, self)
 
@@ -881,7 +922,7 @@ class ContentNode(object):
                 self.document.get_persistence().update_node(existing_child)
             else:
                 existing_child.index = children.index(existing_child)
-                existing_child._parent_uuid = self.id
+                existing_child._parent_id = self.id
                 self.document.get_persistence().update_node(existing_child)
             child_idx_base += 1
 
@@ -1984,6 +2025,18 @@ class ContentNode(object):
           ContentNode or None: The next node or None, if no node exists
 
         """
+        # If this node has no index, we can't determine the next node by index
+        # Use sibling enumeration instead
+        if self.index is None or callable(self.index):
+            # Get all siblings and find the node right after this one
+            if self.get_parent():
+                siblings = self.get_parent().get_children()
+                for i, sibling in enumerate(siblings):
+                    if sibling.id == self.id and i + 1 < len(siblings):
+                        return siblings[i + 1]
+            return None
+
+        # If we have a valid index, use the original implementation
         search_index = self.index + 1
         compiled_node_type_re = re.compile(node_type_re)
 
@@ -1996,8 +2049,8 @@ class ContentNode(object):
 
             if not node:
                 if (
-                        traverse == traverse.ALL or traverse == traverse.PARENT
-                ) and self.get_parent().get_parent():
+                        traverse == Traverse.ALL or traverse == Traverse.PARENT
+                ) and self.get_parent() and self.get_parent().get_parent():
                     # noinspection PyBroadException
                     try:
                         potential_next_node = (
@@ -2009,18 +2062,20 @@ class ContentNode(object):
                         if potential_next_node:
                             return potential_next_node
                     except Exception:
-
                         # traverse additional layer
-                        potential_next_node = (
-                            self.get_parent()
-                            .get_parent()
-                            .get_parent()
-                            .get_children()[self.get_parent().get_parent().index + 1]
-                            .get_children()[0]
-                            .get_children()[0]
-                        )
-                        if potential_next_node:
-                            return potential_next_node
+                        try:
+                            potential_next_node = (
+                                self.get_parent()
+                                .get_parent()
+                                .get_parent()
+                                .get_children()[self.get_parent().get_parent().index + 1]
+                                .get_children()[0]
+                                .get_children()[0]
+                            )
+                            if potential_next_node:
+                                return potential_next_node
+                        except Exception:
+                            pass
                 return node
 
             if compiled_node_type_re.match(node.node_type) and (
@@ -2628,7 +2683,7 @@ class Document(object):
         return self._persistence_layer.get_tagged_nodes(tag_name, tag_uuid)
 
     @property
-    def content_node(self):
+    def content_node(self) -> ContentNode:
         """The root content Node"""
         return self._content_node
 
@@ -2768,11 +2823,16 @@ class Document(object):
         if text:
             if separator:
                 for s in text.split(separator):
-                    new_document.content_node.add_child(
-                        new_document.create_node(node_type="text", content=s)
-                    )
+                    # Create the node with content
+                    child_node = new_document.create_node(node_type="text", content=s)
+                    # Add as a child to the content node
+                    new_document.content_node.add_child(child_node)
+                    # Explicitly make sure content parts are set
+                    if s:
+                        child_node.set_content_parts([s])
             else:
                 new_document.content_node.content = text
+                new_document.content_node.set_content_parts([text])
 
         new_document.add_mixin("text")
         return new_document
@@ -3042,7 +3102,7 @@ class Document(object):
         return content_node
 
     @classmethod
-    def from_kddb(cls, source, detached: bool = True, inmemory: bool = False):
+    def from_kddb(cls, source: Union[str, bytes], detached: bool = True, inmemory: bool = False):
         """
         Create a document from a KDDB (Kodexa Document Database) source. The source can either be a file path or the KDDB bytes.
 
@@ -3059,40 +3119,52 @@ class Document(object):
         from kodexa.model.persistence import SqliteDocumentPersistence
 
         document = cls(kddb_path=source if isinstance(source, str) else None, inmemory=inmemory)
+        temp_file = None
 
-        if isinstance(source, bytes):
-            # We are getting byte source
-            import tempfile
-
-            from kodexa import KodexaPlatform
-
-            tmp_file = tempfile.NamedTemporaryFile(
-                suffix=".kddb", dir=KodexaPlatform.get_tempdir(), delete=False
-            )
-            tmp_file.write(source)
-            tmp_file.close()
-            file_name = tmp_file.name
-        else:
-            file_name = source
-
-        # We should make sure that we transfer features
-        document._persistence_layer = SqliteDocumentPersistence(
-            document, file_name, True, inmemory
-        )
         try:
+            if isinstance(source, bytes):
+                # We are getting byte source
+                import tempfile
+                import os
+                from kodexa import KodexaPlatform
+
+                temp_file = tempfile.NamedTemporaryFile(
+                    suffix=".kddb", dir=KodexaPlatform.get_tempdir(), delete=False
+                )
+                temp_file.write(source)
+                temp_file.close()
+                file_name = temp_file.name
+            else:
+                file_name = source
+
+            # We should make sure that we transfer features
+            document._persistence_layer = SqliteDocumentPersistence(
+                document, file_name, True, inmemory
+            )
             document._persistence_layer.initialize()
-        except:
-            import traceback
-            print(f"Failed to initialize document: {traceback.format_exc()}")
-            raise
 
-        if detached:
-            document._detached = True
+            if detached:
+                document._detached = True
 
-        # Save the document type for easier checking
-        document._document_type = "kddb"
+            # Save the document type for easier checking
+            document._document_type = "kddb"
 
-        return document
+            return document
+        except Exception as e:
+            # Clean up the document resources if initialization failed
+            if hasattr(document, '_persistence_layer') and document._persistence_layer:
+                try:
+                    document._persistence_layer.close()
+                except:
+                    pass
+            raise e
+        finally:
+            # Clean up the temporary file if we created one
+            if temp_file and os.path.exists(temp_file.name):
+                try:
+                    os.unlink(temp_file.name)
+                except:
+                    pass
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
