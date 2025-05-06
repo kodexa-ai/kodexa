@@ -49,16 +49,25 @@ class SqliteDocumentPersistence(object):
         self.delete_on_close = delete_on_close
         self.is_tmp = False
         self.inmemory = inmemory
-
+        self.filename = filename
+        
         if filename is not None:
             self.is_new = not pathlib.Path(filename).exists()
             self.is_tmp = False
+            # Create a temporary copy of the file to work with
+            from kodexa import KodexaPlatform
+            _, newfile = tempfile.mkstemp(suffix=".kddb", dir=KodexaPlatform.get_tempdir())
+            if not self.is_new:
+                import shutil
+                shutil.copy2(filename, newfile)
+            filename = newfile
+            print(f"Using temporary file: {filename}")
         else:
             from kodexa import KodexaPlatform
             new_file, filename = tempfile.mkstemp(suffix=".kddb", dir=KodexaPlatform.get_tempdir())
             self.is_tmp = True
             self.is_new = True
-
+        
         self.current_filename = filename
         
         from kodexa.model.persistence_models import initialize_database, database
@@ -685,8 +694,8 @@ class SqliteDocumentPersistence(object):
                                 tag_data['end'] = tag.end_pos
                             if tag.tag_value is not None:
                                 tag_data['value'] = tag.tag_value
-                            if tag.id is not None:
-                                tag_data['uuid'] = tag.id
+                            if tag.uuid is not None:
+                                tag_data['uuid'] = tag.uuid
                             if tag.data is not None:
                                 tag_data['data'] = msgpack.unpackb(tag.data)
                             if tag.confidence is not None:
@@ -1034,7 +1043,7 @@ class SqliteDocumentPersistence(object):
                 
                 if tag_uuid:
                     # If we have a tag UUID, look for matching tags
-                    matching_tags = FeatureTag.select(FeatureTag.feature).where(FeatureTag.id == tag_uuid)
+                    matching_tags = FeatureTag.select(FeatureTag.feature).where(FeatureTag.uuid == tag_uuid)
                     matching_feature_ids = [tag.feature_id for tag in matching_tags]
                     
                     if matching_feature_ids:

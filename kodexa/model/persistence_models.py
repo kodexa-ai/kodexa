@@ -240,67 +240,6 @@ def initialize_database(db_path):
     if tables_to_create:
         database.create_tables(tables_to_create)
     
-    # Check if we need to migrate the Metadata table from TextField to BlobField
-    if database.table_exists('kddb_metadata'):
-        try:
-            # Get the column type
-            cursor = database.execute_sql("""
-                SELECT sql FROM sqlite_master 
-                WHERE type='table' AND name='kddb_metadata'
-            """)
-            table_def = cursor.fetchone()[0]
-            
-            # Check if metadata column is not a BLOB
-            if 'metadata BLOB' not in table_def:
-                print("Migrating Metadata table from TEXT to BLOB field...")
-                
-                # Create a temporary table with the new schema
-                database.execute_sql("""
-                    CREATE TABLE kddb_metadata_new (
-                        id INTEGER NOT NULL PRIMARY KEY,
-                        metadata BLOB
-                    )
-                """)
-                
-                # Copy data, attempting to convert TEXT to BLOB 
-                cursor = database.execute_sql("SELECT id, metadata FROM kddb_metadata")
-                rows = cursor.fetchall()
-                for row in rows:
-                    if row[1] is not None:
-                        # Try to convert from JSON string to msgpack blob
-                        try:
-                            # Try to decode as text - if this works, it's the old JSON format
-                            metadata_text = row[1]
-                            if isinstance(metadata_text, bytes):
-                                metadata_text = metadata_text.decode('utf-8')
-                            metadata_dict = json.loads(metadata_text)
-                            
-                            # Convert to msgpack blob
-                            metadata_blob = msgpack.packb(metadata_dict, use_bin_type=True)
-                            
-                            # Insert into new table
-                            database.execute_sql(
-                                "INSERT INTO kddb_metadata_new (id, metadata) VALUES (?, ?)",
-                                (row[0], metadata_blob)
-                            )
-                        except Exception as e:
-                            print(f"Error converting metadata for ID {row[0]}: {e}")
-                            # Just copy the data as is
-                            database.execute_sql(
-                                "INSERT INTO kddb_metadata_new (id, metadata) VALUES (?, ?)",
-                                (row[0], row[1])
-                            )
-                
-                # Replace the old table with the new one
-                database.execute_sql("DROP TABLE kddb_metadata")
-                database.execute_sql("ALTER TABLE kddb_metadata_new RENAME TO kddb_metadata")
-                print("Metadata table migration completed")
-        except Exception as e:
-            print(f"Error checking/migrating Metadata table: {e}")
-            import traceback
-            traceback.print_exc()
-
-
 def close_database():
     """Close the database connection"""
     if not database.is_closed():
