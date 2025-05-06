@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 def get_pretty_text_from_lines(lines: list[ContentNode], scale, include_line_uuid=False) -> str:
     pretty_text = ""
     for line_index, line in enumerate(lines):
-        line_content = f"('{line.uuid}')" if include_line_uuid else ""
+        line_content = f"('{line.id}')" if include_line_uuid else ""
         current_x = 0
         for word in line.select('//word'):
             x = int(word.get_bbox()[0] * scale)

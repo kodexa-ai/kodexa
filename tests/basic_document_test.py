@@ -100,9 +100,41 @@ def test_document_steps():
 
 def test_persistence_cache():
     document = Document.from_text('The sun is very bright today.')
-    document.to_kddb()
+    print("Initial document UUID:", document.uuid)
+    print("Content node ID:", document.get_root().id)
+    
+    # Save to KDDB
+    kddb_bytes = document.to_kddb()
+    print("Document saved to KDDB")
+    
+    # Tag the root node
     document.get_root().tag('cheese')
-    assert document.from_kddb(document.to_kddb()).get_root().has_tags() is True
+    print("Root node tagged with 'cheese'")
+    print("Root node features:", document.get_root().get_features())
+    print("Root has tags:", document.get_root().has_tags())
+    print("Root tag features:", document.get_root().get_tag_features())
+    
+    # Debug tags
+    print("Debugging tags on original document:")
+    document.get_persistence().debug_tags()
+    
+    # Save the tagged document to KDDB
+    tagged_kddb = document.to_kddb()
+    print("Tagged document saved to KDDB")
+    
+    # Load the document from KDDB
+    loaded_document = document.from_kddb(tagged_kddb)
+    print("Loaded document UUID:", loaded_document.uuid)
+    print("Loaded content node ID:", loaded_document.get_root().id)
+    print("Loaded root node features:", loaded_document.get_root().get_features())
+    print("Loaded root has tags:", loaded_document.get_root().has_tags())
+    print("Loaded root tag features:", loaded_document.get_root().get_tag_features())
+    
+    # Debug tags on the loaded document
+    print("Debugging tags on loaded document:")
+    loaded_document.get_persistence().debug_tags()
+    
+    assert loaded_document.get_root().has_tags() is True
 
 
 

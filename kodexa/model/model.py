@@ -133,7 +133,7 @@ class ContentException(dict):
         self.boolean_value = boolean_value
 
 
-class Tag(Dict):
+class Tag(addict.Dict):
     """A class to represent the metadata for a label that is applied as a feature on a content node.
 
     Attributes:
@@ -178,40 +178,41 @@ class Tag(Dict):
         super().__init__(*args, **kwargs)
 
         import uuid as uuid_gen
-        self.start: Optional[int] = start
-        """The start position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
-        self.end: Optional[int] = end
-        """The end position (zero indexed) of the content within the node, if None then label is applied to the whole node"""
-        self.value: Optional[str] = value
-        """A string representing the value that was labelled in the node"""
-        self.data: Optional[Any] = data
-        """Any data object (JSON serializable) that you wish to associate with the label"""
-        self.uuid: Optional[str] = uuid or str(uuid_gen.uuid4())
-        """The UUID for this tag instance, this allows tags that are on different content nodes to be related through the same UUID"""
-        self.confidence: Optional[float] = confidence
-        """The confidence of the tag in a range of 0-1"""
-        self.index: Optional[int] = index
-        """The tag index, this is used to allow us to order tags, and understand the ordering of parent child tag relationships"""
-        self.bbox: Optional[List[int]] = bbox
-        """The optional bounding box that can be used if the label is spatial (based on the node as the container)"""
-        self.group_uuid: Optional[str] = group_uuid
-        """The UUID of the group that this tag belongs to, this is used to allow us to group tags together"""
-        self.parent_group_uuid: Optional[str] = parent_group_uuid
-        """The UUID of the parent group that this tag belongs to, this is used to allow us to group tags together"""
-        self.cell_index: Optional[int] = cell_index
-        """The cell index of the cell that this tag belongs to, this is used to allow us to group tags together"""
-        self.note: Optional[str] = note
-        """A note that can be associated with the tag"""
-        self.status: Optional[str] = status
-        """The status of the tag, this can be passed to an attribute status during extraction"""
-        self.owner_uri: Optional[str] = owner_uri
-        """The URI of the owner (ie. model://kodexa/narrative:1.0.0 or user://pdodds)"""
-        self.is_dirty: Optional[bool] = is_dirty
-        """Whether or not the """
+        # Store values both as attributes and dictionary keys
+        self.start = start
+        
+        self.end = end
+        
+        self.value = value
+        
+        self.data = data
+        
+        tag_uuid = uuid or str(uuid_gen.uuid4())
+        self.uuid = tag_uuid
+        
+        self.confidence = confidence
+        
+        self.index = index
+        
+        self.bbox = bbox
+        
+        self.group_uuid = group_uuid
+        
+        self.parent_group_uuid = parent_group_uuid
+        
+        self.cell_index = cell_index
+        
+        self.note = note
+        
+        self.status = status
+        
+        self.owner_uri = owner_uri
+        
+        self.is_dirty = is_dirty
+        
         # Pull the cell index from the data to the tag if we have it in the data
-        if self.cell_index is None:
-            if data and "cell_index" in data:
-                self.cell_index = data["cell_index"]
+        if self.cell_index is None and data and "cell_index" in data:
+            self.cell_index = data["cell_index"]
 
 
 class FindDirection(Enum):
@@ -283,14 +284,15 @@ class ContentNode(object):
         """The children of the content node"""
         self.index: Optional[int] = index
         """The index of the content node"""
-        self.uuid: Optional[int] = None
+        self.id: Optional[int] = None
         """The ID of the content node"""
         self.virtual: bool = virtual
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
 
-        self._parent_uuid = parent.uuid if parent else None
+        self._parent_uuid = parent.id if parent else None
+        self._content_parts = self.get_content_parts()
 
-        if content is not None and len(self.get_content_parts()) == 0:
+        if content is not None and len(self._content_parts) == 0:
             self.set_content_parts([content])
 
     def get_content_parts(self):
@@ -337,19 +339,19 @@ class ContentNode(object):
     def __eq__(self, other):
         return (
                 other is not None
-                and self.uuid == other.uuid
-                and (self.uuid is not None and other.uuid is not None)
+                and self.id == other.id
+                and (self.id is not None and other.id is not None)
         )
 
     def __hash__(self):
-        return hash(self.uuid)
+        return hash(self.id)
 
     def get_parent(self):
         return self.document.get_persistence().get_parent(self)
 
     def __str__(self):
         return (
-                f"ContentNode {self.uuid} [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) ["
+                f"ContentNode {self.id} [node_type:{self.node_type}] ({len(self.get_features())} features, {len(self.get_children())} children) ["
                 + str(self.content)
                 + "]"
         )
@@ -383,7 +385,7 @@ class ContentNode(object):
             "features": [],
             "index": self.index,
             "children": [],
-            "uuid": self.uuid,
+            "uuid": self.id,
         }
         for feature in self.get_features():
             new_dict["features"].append(feature.to_dict())
@@ -597,14 +599,14 @@ class ContentNode(object):
         for child_node in self.get_children():
             if nodes is not None:
                 for node_to_delete in nodes:
-                    if node_to_delete.uuid == child_node.uuid:
+                    if node_to_delete.id == child_node.id:
                         children_to_delete.append(child_node)
             elif exclude_nodes is not None:
                 if len(exclude_nodes) == 0:
                     children_to_delete.append(child_node)
                 else:
                     for nodes_to_exclude in exclude_nodes:
-                        if nodes_to_exclude.uuid != child_node.uuid:
+                        if nodes_to_exclude.id != child_node.id:
                             children_to_delete.append(child_node)
             else:
                 children_to_delete.append(child_node)
@@ -815,7 +817,6 @@ class ContentNode(object):
         from kodexa.selectors.ast import SelectorContext
 
         context = SelectorContext(self.document, first_only=first_only)
-        self.document.get_persistence().flush_cache()
         parsed_selector = parse(selector)
         return parsed_selector.resolve(self, variables, context)
 
@@ -880,7 +881,7 @@ class ContentNode(object):
                 self.document.get_persistence().update_node(existing_child)
             else:
                 existing_child.index = children.index(existing_child)
-                existing_child._parent_uuid = self.uuid
+                existing_child._parent_uuid = self.id
                 self.document.get_persistence().update_node(existing_child)
             child_idx_base += 1
 
@@ -1138,7 +1139,7 @@ class ContentNode(object):
         """
         nodes = []
         current_node = self
-        while current_node.uuid != end_node.uuid:
+        while current_node.id != end_node.id:
             nodes.append(current_node)
             if current_node.has_next_node():
                 current_node = current_node.next_node()
@@ -1632,7 +1633,8 @@ class ContentNode(object):
         """
         values = []
         for tag in self.get_tag(tag_name):
-            values.append(tag["value"])
+            if "value" in tag:
+                values.append(tag["value"])
 
         if include_children:
             for child in self.get_children():
@@ -2486,44 +2488,54 @@ class Document(object):
             delete_on_close=False,
             inmemory=False,
     ):
-        if metadata is None:
-            metadata = DocumentMetadata()
-        if source is None:
-            source = SourceMetadata()
+        """A Kodexa Document has content nodes and metadata to represent the information.
 
-        # Mix-ins are going away - so we will allow people to turn them off as needed
-        self.disable_mixin_methods = True
+        Args:
+          metadata (DocumentMetadata): The metadata for the document (default is empty)
+          content_node (ContentNode): The root content node (optional)
+          source (SourceMetadata): The source metadata for the document (optional)
+          ref (str): The reference (if it is a remote document)
+          kddb_path (str): If we want to open an existing kddb
+          delete_on_close (boolean): Whether to delete on close
+          inmemory (boolean): Whether to operate in memory (faster but more memory intensive)
+        """
+        self.metadata = metadata if metadata is not None else DocumentMetadata()
+        """The metadata for the document"""
 
-        self.delete_on_close = delete_on_close
+        if source is None and content_node is not None:
+            self.source = content_node.document.source
+        else:
+            self.source = source if source is not None else SourceMetadata()
+        """The source of the document"""
 
-        # The ref is not stored and is used when we have
-        # initialized a document from a remote store and want
-        # to keep track of that
-        self.ref = ref
+        self._mixins = []
+        self._persistence_layer = None
+        self.create_persistence_layer(kddb_path, delete_on_close, inmemory)
+        self.labels = []
+        """A list of document level labels"""
+        self.content_node = content_node
+        """The root content node for the document"""
 
-        self.metadata: DocumentMetadata = metadata
-        """Metadata relating to the document"""
-        self._content_node: Optional[ContentNode] = content_node
-        """The root content node"""
-        self.virtual: bool = False
-        """Is the document virtual (deprecated)"""
-        self._mixins: List[str] = []
-        """A list of the mixins for this document"""
-        self.uuid: str = str(uuid.uuid4())
-        """A log for this document (deprecated)"""
-        self.version = Document.CURRENT_VERSION
-        """The version of the document"""
-        self.source: SourceMetadata = source
-        """Source metadata for this document"""
-        self.labels: List[str] = []
-        """A list of the document level labels for the document"""
-        self.tag_instances: List[TagInstance] = []
-        """A list of tag instances that contains a set of tag that has a set of nodes"""
+        self.uuid = str(uuid.uuid4())
+        """A UUID representing this document"""
 
-        # Start persistence layer
+        if ref is not None:
+            self.ref = Ref(ref)
+
+        self.version = self.CURRENT_VERSION
+        
+    def create_persistence_layer(self, kddb_path=None, delete_on_close=False, inmemory=False):
+        """
+        Creates a persistence layer for the document
+        
+        Args:
+            kddb_path: Path to the KDDB file
+            delete_on_close: Whether to delete the file on close
+            inmemory: Whether to operate in memory
+        """
         from kodexa.model import PersistenceManager
-
-        self._persistence_layer: Optional[PersistenceManager] = PersistenceManager(
+        
+        self._persistence_layer = PersistenceManager(
             document=self, filename=kddb_path, delete_on_close=delete_on_close, inmemory=inmemory
         )
         self._persistence_layer.initialize()
@@ -2580,10 +2592,10 @@ class Document(object):
 
     def update_tag_instance(self, tag_uuid):
         for tag_instance in self.tag_instances:
-            if tag_instance.tag.uuid == tag_uuid:
+            if tag_instance.tag.id == tag_uuid:
                 # Update attributes of a Tag
                 for node in tag_instance.nodes:
-                    node.get_tag(tag_instance.tag.value, tag_uuid=tag_instance.tag.uuid)
+                    node.get_tag(tag_instance.tag.value, tag_uuid=tag_instance.tag.id)
 
     def get_tag_instance(self, tag):
         """
@@ -2622,13 +2634,28 @@ class Document(object):
 
     @content_node.setter
     def content_node(self, value):
+        """Set the content node for the document"""
+        # Initialize _content_node attribute if it doesn't exist
+        if not hasattr(self, '_content_node'):
+            self._content_node = None
+            
+        # Handle None value
+        if value is None:
+            self._content_node = None
+            return
+            
+        # Set index to 0 if node has an index property
         value.index = 0
-        if value != self._content_node and self._content_node is not None:
+        
+        # Remove old content node if it exists
+        if self._content_node is not None and value != self._content_node:
             self.get_persistence().remove_content_node(self._content_node)
 
+        # Set the new content node
         self._content_node = value
-        if value is not None:
-            self.get_persistence().add_content_node(self._content_node, None)
+        
+        # Add the content node to persistence
+        self.get_persistence().add_content_node(self._content_node, None)
 
     def get_tag_instances(self, tag):
         groups = self.content_node.get_related_tag_nodes(tag, everywhere=True)
@@ -3007,6 +3034,8 @@ class Document(object):
         else:
             self.get_persistence().add_content_node(content_node, None)
 
+        # This is redundant as we already set content in the ContentNode constructor
+        # We should remove this and rely on the ContentNode logic
         if content is not None and len(content_node.get_content_parts()) == 0:
             content_node.set_content_parts([content])
 
@@ -3015,43 +3044,55 @@ class Document(object):
     @classmethod
     def from_kddb(cls, source, detached: bool = True, inmemory: bool = False):
         """
-        Loads a document from a Kodexa Document Database (KDDB) file
+        Create a document from a KDDB (Kodexa Document Database) source. The source can either be a file path or the KDDB bytes.
 
         Args:
+            source (str or bytes): The KDDB source.
+            detached (bool, optional): Whether to create a detached Document. Defaults to True.
+            inmemory (bool, optional): Whether to load the document in memory. Defaults to False.
 
-            input: if a string we will load the file at that path, if bytes we will create a temp file and
-                    load the KDDB to it
-            detached (bool): if reading from a file we will create a copy so we don't update in place
-            inmemory (bool): if true we will load the KDDB into memory
+        Returns:
+            Document: A new Document instance loaded from the KDDB source.
 
-        :return: the document
+        >>> document = Document.from_kddb('path/to/document.kddb')
         """
-        if isinstance(source, str):
-            if isinstance(source, str):
-                # If we are using the detached flag we will create a copy of the KDDB file
-                if detached:
-                    import tempfile
-                    from kodexa import KodexaPlatform
+        from kodexa.model.persistence import SqliteDocumentPersistence
 
-                    fp = tempfile.NamedTemporaryFile(
-                        suffix=".kddb", delete=False, dir=KodexaPlatform.get_tempdir()
-                    )
-                    fp.write(open(source, "rb").read())
-                    fp.close()
-                    return Document(kddb_path=fp.name, delete_on_close=True, inmemory=inmemory)
+        document = cls(kddb_path=source if isinstance(source, str) else None, inmemory=inmemory)
 
-                return Document(kddb_path=source, inmemory=inmemory)
+        if isinstance(source, bytes):
+            # We are getting byte source
+            import tempfile
 
-        # We will assume the input is of byte type
-        import tempfile
-        from kodexa import KodexaPlatform
+            from kodexa import KodexaPlatform
 
-        fp = tempfile.NamedTemporaryFile(
-            suffix=".kddb", delete=False, dir=KodexaPlatform.get_tempdir()
+            tmp_file = tempfile.NamedTemporaryFile(
+                suffix=".kddb", dir=KodexaPlatform.get_tempdir(), delete=False
+            )
+            tmp_file.write(source)
+            tmp_file.close()
+            file_name = tmp_file.name
+        else:
+            file_name = source
+
+        # We should make sure that we transfer features
+        document._persistence_layer = SqliteDocumentPersistence(
+            document, file_name, True, inmemory
         )
-        fp.write(source)
-        fp.close()
-        return Document(kddb_path=fp.name, delete_on_close=True, inmemory=inmemory)
+        try:
+            document._persistence_layer.initialize()
+        except:
+            import traceback
+            print(f"Failed to initialize document: {traceback.format_exc()}")
+            raise
+
+        if detached:
+            document._detached = True
+
+        # Save the document type for easier checking
+        document._document_type = "kddb"
+
+        return document
 
     @classmethod
     def from_file(cls, file, unpack: bool = False):
@@ -3167,7 +3208,7 @@ class Document(object):
         feature_set = FeatureSet()
         feature_set.node_features = []
         for tagged_node in self.get_all_tagged_nodes():
-            node_feature = {"nodeUuid": str(tagged_node.uuid), "features": []}
+            node_feature = {"nodeUuid": str(tagged_node.id), "features": []}
 
             feature_set.node_features.append(node_feature)
 
@@ -3257,3 +3298,19 @@ class ContentObjectReference:
         self.store = store
         self.document = document
         self.document_family = document_family
+
+    def create_persistence_layer(self, kddb_path=None, delete_on_close=False, inmemory=False):
+        """
+        Creates a persistence layer for the document
+        
+        Args:
+            kddb_path: Path to the KDDB file
+            delete_on_close: Whether to delete the file on close
+            inmemory: Whether to operate in memory
+        """
+        from kodexa.model import PersistenceManager
+        
+        self._persistence_layer = PersistenceManager(
+            document=self, filename=kddb_path, delete_on_close=delete_on_close, inmemory=inmemory
+        )
+        self._persistence_layer.initialize()
