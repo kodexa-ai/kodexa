@@ -12,8 +12,6 @@ expr
     | expr REL_OP expr                        # relationalExpr
     | expr PLUS expr                          # addExpr
     | expr MINUS expr                         # subtractExpr
-    | expr DIV expr                           # divideExpr
-    | expr MOD expr                           # moduloExpr
     | expr UNION expr                         # unionExpr
     | expr INTERSECT expr                     # intersectExpr
     | MINUS expr                              # unaryMinusExpr
@@ -138,8 +136,6 @@ pathSep
 // Lexer Rules
 OR: 'or';
 AND: 'and';
-DIV: 'div';
-MOD: 'mod';
 INTERSECT: 'intersect';
 PIPELINE: 'stream';
 

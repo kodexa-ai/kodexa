@@ -144,7 +144,10 @@ def test_parent_axis():
     
     # Debug info
     print("\nDocument structure debug:")
-    first_paragraph = document.select('(//p)[0]')
+    _first_p_node = document.select_first('//p')
+    assert _first_p_node is not None, "test_parent_axis expects document.select_first('//p') to find a node"
+    first_paragraph = [_first_p_node]
+    
     print(f"First paragraph node type: {first_paragraph[0].node_type}")
     print(f"First paragraph content: {first_paragraph[0].content[:30]}...")
     parent = first_paragraph[0].get_parent()

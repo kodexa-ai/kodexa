@@ -10,92 +10,90 @@ else:
 
 def serializedATN():
     return [
-        4,1,36,243,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,34,237,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
         2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,20,
         7,20,2,21,7,21,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
         1,1,1,1,1,1,1,1,1,1,1,3,1,63,8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,1,98,8,1,10,1,12,1,101,9,1,
-        1,2,1,2,1,2,3,2,106,8,2,1,3,1,3,1,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,
-        1,4,1,4,5,4,120,8,4,10,4,12,4,123,9,4,1,5,1,5,1,5,1,5,1,5,1,5,1,
-        5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,138,8,5,1,6,1,6,1,6,3,6,143,8,6,1,
-        7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,3,7,153,8,7,1,8,1,8,1,8,1,8,1,8,3,
-        8,160,8,8,1,9,1,9,1,9,1,9,3,9,166,8,9,1,10,1,10,1,10,1,10,1,10,1,
-        10,1,10,1,10,1,10,1,10,3,10,178,8,10,1,10,1,10,5,10,182,8,10,10,
-        10,12,10,185,9,10,1,11,1,11,1,11,1,11,1,11,5,11,192,8,11,10,11,12,
-        11,195,9,11,1,12,1,12,1,12,1,12,1,13,1,13,1,13,1,14,1,14,1,15,1,
-        15,1,16,1,16,1,16,1,16,3,16,212,8,16,1,17,1,17,1,17,1,17,3,17,218,
-        8,17,1,18,1,18,1,19,1,19,1,19,1,19,1,19,1,19,3,19,228,8,19,1,20,
-        1,20,1,20,1,20,1,20,1,20,5,20,236,8,20,10,20,12,20,239,9,20,1,21,
-        1,21,1,21,0,5,2,8,20,22,40,22,0,2,4,6,8,10,12,14,16,18,20,22,24,
-        26,28,30,32,34,36,38,40,42,0,3,1,0,30,31,1,0,26,27,1,0,7,8,265,0,
-        44,1,0,0,0,2,62,1,0,0,0,4,105,1,0,0,0,6,107,1,0,0,0,8,110,1,0,0,
-        0,10,137,1,0,0,0,12,142,1,0,0,0,14,152,1,0,0,0,16,159,1,0,0,0,18,
-        165,1,0,0,0,20,177,1,0,0,0,22,186,1,0,0,0,24,196,1,0,0,0,26,200,
-        1,0,0,0,28,203,1,0,0,0,30,205,1,0,0,0,32,211,1,0,0,0,34,217,1,0,
-        0,0,36,219,1,0,0,0,38,227,1,0,0,0,40,229,1,0,0,0,42,240,1,0,0,0,
-        44,45,3,2,1,0,45,1,1,0,0,0,46,47,6,1,-1,0,47,48,5,21,0,0,48,63,3,
-        2,1,11,49,63,3,32,16,0,50,51,3,20,10,0,51,52,3,42,21,0,52,53,3,8,
-        4,0,53,63,1,0,0,0,54,63,3,8,4,0,55,63,3,4,2,0,56,63,3,6,3,0,57,63,
-        3,20,10,0,58,63,3,16,8,0,59,60,5,7,0,0,60,63,3,16,8,0,61,63,3,30,
-        15,0,62,46,1,0,0,0,62,49,1,0,0,0,62,50,1,0,0,0,62,54,1,0,0,0,62,
-        55,1,0,0,0,62,56,1,0,0,0,62,57,1,0,0,0,62,58,1,0,0,0,62,59,1,0,0,
-        0,62,61,1,0,0,0,63,99,1,0,0,0,64,65,10,21,0,0,65,66,5,1,0,0,66,98,
-        3,2,1,22,67,68,10,20,0,0,68,69,5,2,0,0,69,98,3,2,1,21,70,71,10,19,
-        0,0,71,72,5,18,0,0,72,98,3,2,1,20,73,74,10,18,0,0,74,75,5,19,0,0,
-        75,98,3,2,1,19,76,77,10,17,0,0,77,78,5,20,0,0,78,98,3,2,1,18,79,
-        80,10,16,0,0,80,81,5,21,0,0,81,98,3,2,1,17,82,83,10,15,0,0,83,84,
-        5,3,0,0,84,98,3,2,1,16,85,86,10,14,0,0,86,87,5,4,0,0,87,98,3,2,1,
-        15,88,89,10,13,0,0,89,90,5,17,0,0,90,98,3,2,1,14,91,92,10,12,0,0,
-        92,93,5,5,0,0,93,98,3,2,1,13,94,95,10,10,0,0,95,96,5,6,0,0,96,98,
-        3,2,1,11,97,64,1,0,0,0,97,67,1,0,0,0,97,70,1,0,0,0,97,73,1,0,0,0,
-        97,76,1,0,0,0,97,79,1,0,0,0,97,82,1,0,0,0,97,85,1,0,0,0,97,88,1,
-        0,0,0,97,91,1,0,0,0,97,94,1,0,0,0,98,101,1,0,0,0,99,97,1,0,0,0,99,
-        100,1,0,0,0,100,3,1,0,0,0,101,99,1,0,0,0,102,106,5,7,0,0,103,104,
-        5,7,0,0,104,106,3,8,4,0,105,102,1,0,0,0,105,103,1,0,0,0,106,5,1,
-        0,0,0,107,108,5,8,0,0,108,109,3,8,4,0,109,7,1,0,0,0,110,111,6,4,
-        -1,0,111,112,3,10,5,0,112,121,1,0,0,0,113,114,10,2,0,0,114,115,5,
-        7,0,0,115,120,3,10,5,0,116,117,10,1,0,0,117,118,5,8,0,0,118,120,
-        3,10,5,0,119,113,1,0,0,0,119,116,1,0,0,0,120,123,1,0,0,0,121,119,
-        1,0,0,0,121,122,1,0,0,0,122,9,1,0,0,0,123,121,1,0,0,0,124,138,3,
-        14,7,0,125,126,3,14,7,0,126,127,3,22,11,0,127,138,1,0,0,0,128,129,
-        3,12,6,0,129,130,3,14,7,0,130,138,1,0,0,0,131,132,3,12,6,0,132,133,
-        3,14,7,0,133,134,3,22,11,0,134,138,1,0,0,0,135,138,5,9,0,0,136,138,
-        5,10,0,0,137,124,1,0,0,0,137,125,1,0,0,0,137,128,1,0,0,0,137,131,
-        1,0,0,0,137,135,1,0,0,0,137,136,1,0,0,0,138,11,1,0,0,0,139,140,5,
-        35,0,0,140,143,5,11,0,0,141,143,5,12,0,0,142,139,1,0,0,0,142,141,
-        1,0,0,0,143,13,1,0,0,0,144,153,3,16,8,0,145,146,5,32,0,0,146,147,
-        5,13,0,0,147,153,5,14,0,0,148,149,5,32,0,0,149,150,5,13,0,0,150,
-        151,5,29,0,0,151,153,5,14,0,0,152,144,1,0,0,0,152,145,1,0,0,0,152,
-        148,1,0,0,0,153,15,1,0,0,0,154,160,5,22,0,0,155,156,5,33,0,0,156,
-        157,5,24,0,0,157,160,5,22,0,0,158,160,3,18,9,0,159,154,1,0,0,0,159,
-        155,1,0,0,0,159,158,1,0,0,0,160,17,1,0,0,0,161,162,5,33,0,0,162,
-        163,5,24,0,0,163,166,5,33,0,0,164,166,5,33,0,0,165,161,1,0,0,0,165,
-        164,1,0,0,0,166,19,1,0,0,0,167,168,6,10,-1,0,168,178,3,26,13,0,169,
-        178,5,29,0,0,170,178,3,28,14,0,171,178,3,30,15,0,172,178,3,32,16,
-        0,173,174,5,13,0,0,174,175,3,2,1,0,175,176,5,14,0,0,176,178,1,0,
-        0,0,177,167,1,0,0,0,177,169,1,0,0,0,177,170,1,0,0,0,177,171,1,0,
-        0,0,177,172,1,0,0,0,177,173,1,0,0,0,178,183,1,0,0,0,179,180,10,1,
-        0,0,180,182,3,24,12,0,181,179,1,0,0,0,182,185,1,0,0,0,183,181,1,
-        0,0,0,183,184,1,0,0,0,184,21,1,0,0,0,185,183,1,0,0,0,186,187,6,11,
-        -1,0,187,188,3,24,12,0,188,193,1,0,0,0,189,190,10,1,0,0,190,192,
-        3,24,12,0,191,189,1,0,0,0,192,195,1,0,0,0,193,191,1,0,0,0,193,194,
-        1,0,0,0,194,23,1,0,0,0,195,193,1,0,0,0,196,197,5,15,0,0,197,198,
-        3,2,1,0,198,199,5,16,0,0,199,25,1,0,0,0,200,201,5,25,0,0,201,202,
-        3,18,9,0,202,27,1,0,0,0,203,204,7,0,0,0,204,29,1,0,0,0,205,206,7,
-        1,0,0,206,31,1,0,0,0,207,208,3,36,18,0,208,209,3,38,19,0,209,212,
-        1,0,0,0,210,212,3,34,17,0,211,207,1,0,0,0,211,210,1,0,0,0,212,33,
-        1,0,0,0,213,214,5,26,0,0,214,218,3,38,19,0,215,216,5,27,0,0,216,
-        218,3,38,19,0,217,213,1,0,0,0,217,215,1,0,0,0,218,35,1,0,0,0,219,
-        220,5,28,0,0,220,37,1,0,0,0,221,222,5,13,0,0,222,228,5,14,0,0,223,
-        224,5,13,0,0,224,225,3,40,20,0,225,226,5,14,0,0,226,228,1,0,0,0,
-        227,221,1,0,0,0,227,223,1,0,0,0,228,39,1,0,0,0,229,230,6,20,-1,0,
-        230,231,3,2,1,0,231,237,1,0,0,0,232,233,10,1,0,0,233,234,5,23,0,
-        0,234,236,3,2,1,0,235,232,1,0,0,0,236,239,1,0,0,0,237,235,1,0,0,
-        0,237,238,1,0,0,0,238,41,1,0,0,0,239,237,1,0,0,0,240,241,7,2,0,0,
-        241,43,1,0,0,0,18,62,97,99,105,119,121,137,142,152,159,165,177,183,
-        193,211,217,227,237
+        1,1,1,1,1,1,5,1,92,8,1,10,1,12,1,95,9,1,1,2,1,2,1,2,3,2,100,8,2,
+        1,3,1,3,1,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,5,4,114,8,4,10,4,
+        12,4,117,9,4,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,
+        3,5,132,8,5,1,6,1,6,1,6,3,6,137,8,6,1,7,1,7,1,7,1,7,1,7,1,7,1,7,
+        1,7,3,7,147,8,7,1,8,1,8,1,8,1,8,1,8,3,8,154,8,8,1,9,1,9,1,9,1,9,
+        3,9,160,8,9,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,3,
+        10,172,8,10,1,10,1,10,5,10,176,8,10,10,10,12,10,179,9,10,1,11,1,
+        11,1,11,1,11,1,11,5,11,186,8,11,10,11,12,11,189,9,11,1,12,1,12,1,
+        12,1,12,1,13,1,13,1,13,1,14,1,14,1,15,1,15,1,16,1,16,1,16,1,16,3,
+        16,206,8,16,1,17,1,17,1,17,1,17,3,17,212,8,17,1,18,1,18,1,19,1,19,
+        1,19,1,19,1,19,1,19,3,19,222,8,19,1,20,1,20,1,20,1,20,1,20,1,20,
+        5,20,230,8,20,10,20,12,20,233,9,20,1,21,1,21,1,21,0,5,2,8,20,22,
+        40,22,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,
+        42,0,3,1,0,28,29,1,0,24,25,1,0,5,6,257,0,44,1,0,0,0,2,62,1,0,0,0,
+        4,99,1,0,0,0,6,101,1,0,0,0,8,104,1,0,0,0,10,131,1,0,0,0,12,136,1,
+        0,0,0,14,146,1,0,0,0,16,153,1,0,0,0,18,159,1,0,0,0,20,171,1,0,0,
+        0,22,180,1,0,0,0,24,190,1,0,0,0,26,194,1,0,0,0,28,197,1,0,0,0,30,
+        199,1,0,0,0,32,205,1,0,0,0,34,211,1,0,0,0,36,213,1,0,0,0,38,221,
+        1,0,0,0,40,223,1,0,0,0,42,234,1,0,0,0,44,45,3,2,1,0,45,1,1,0,0,0,
+        46,47,6,1,-1,0,47,48,5,19,0,0,48,63,3,2,1,11,49,63,3,32,16,0,50,
+        51,3,20,10,0,51,52,3,42,21,0,52,53,3,8,4,0,53,63,1,0,0,0,54,63,3,
+        8,4,0,55,63,3,4,2,0,56,63,3,6,3,0,57,63,3,20,10,0,58,63,3,16,8,0,
+        59,60,5,5,0,0,60,63,3,16,8,0,61,63,3,30,15,0,62,46,1,0,0,0,62,49,
+        1,0,0,0,62,50,1,0,0,0,62,54,1,0,0,0,62,55,1,0,0,0,62,56,1,0,0,0,
+        62,57,1,0,0,0,62,58,1,0,0,0,62,59,1,0,0,0,62,61,1,0,0,0,63,93,1,
+        0,0,0,64,65,10,19,0,0,65,66,5,1,0,0,66,92,3,2,1,20,67,68,10,18,0,
+        0,68,69,5,2,0,0,69,92,3,2,1,19,70,71,10,17,0,0,71,72,5,16,0,0,72,
+        92,3,2,1,18,73,74,10,16,0,0,74,75,5,17,0,0,75,92,3,2,1,17,76,77,
+        10,15,0,0,77,78,5,18,0,0,78,92,3,2,1,16,79,80,10,14,0,0,80,81,5,
+        19,0,0,81,92,3,2,1,15,82,83,10,13,0,0,83,84,5,15,0,0,84,92,3,2,1,
+        14,85,86,10,12,0,0,86,87,5,3,0,0,87,92,3,2,1,13,88,89,10,10,0,0,
+        89,90,5,4,0,0,90,92,3,2,1,11,91,64,1,0,0,0,91,67,1,0,0,0,91,70,1,
+        0,0,0,91,73,1,0,0,0,91,76,1,0,0,0,91,79,1,0,0,0,91,82,1,0,0,0,91,
+        85,1,0,0,0,91,88,1,0,0,0,92,95,1,0,0,0,93,91,1,0,0,0,93,94,1,0,0,
+        0,94,3,1,0,0,0,95,93,1,0,0,0,96,100,5,5,0,0,97,98,5,5,0,0,98,100,
+        3,8,4,0,99,96,1,0,0,0,99,97,1,0,0,0,100,5,1,0,0,0,101,102,5,6,0,
+        0,102,103,3,8,4,0,103,7,1,0,0,0,104,105,6,4,-1,0,105,106,3,10,5,
+        0,106,115,1,0,0,0,107,108,10,2,0,0,108,109,5,5,0,0,109,114,3,10,
+        5,0,110,111,10,1,0,0,111,112,5,6,0,0,112,114,3,10,5,0,113,107,1,
+        0,0,0,113,110,1,0,0,0,114,117,1,0,0,0,115,113,1,0,0,0,115,116,1,
+        0,0,0,116,9,1,0,0,0,117,115,1,0,0,0,118,132,3,14,7,0,119,120,3,14,
+        7,0,120,121,3,22,11,0,121,132,1,0,0,0,122,123,3,12,6,0,123,124,3,
+        14,7,0,124,132,1,0,0,0,125,126,3,12,6,0,126,127,3,14,7,0,127,128,
+        3,22,11,0,128,132,1,0,0,0,129,132,5,7,0,0,130,132,5,8,0,0,131,118,
+        1,0,0,0,131,119,1,0,0,0,131,122,1,0,0,0,131,125,1,0,0,0,131,129,
+        1,0,0,0,131,130,1,0,0,0,132,11,1,0,0,0,133,134,5,33,0,0,134,137,
+        5,9,0,0,135,137,5,10,0,0,136,133,1,0,0,0,136,135,1,0,0,0,137,13,
+        1,0,0,0,138,147,3,16,8,0,139,140,5,30,0,0,140,141,5,11,0,0,141,147,
+        5,12,0,0,142,143,5,30,0,0,143,144,5,11,0,0,144,145,5,27,0,0,145,
+        147,5,12,0,0,146,138,1,0,0,0,146,139,1,0,0,0,146,142,1,0,0,0,147,
+        15,1,0,0,0,148,154,5,20,0,0,149,150,5,31,0,0,150,151,5,22,0,0,151,
+        154,5,20,0,0,152,154,3,18,9,0,153,148,1,0,0,0,153,149,1,0,0,0,153,
+        152,1,0,0,0,154,17,1,0,0,0,155,156,5,31,0,0,156,157,5,22,0,0,157,
+        160,5,31,0,0,158,160,5,31,0,0,159,155,1,0,0,0,159,158,1,0,0,0,160,
+        19,1,0,0,0,161,162,6,10,-1,0,162,172,3,26,13,0,163,172,5,27,0,0,
+        164,172,3,28,14,0,165,172,3,30,15,0,166,172,3,32,16,0,167,168,5,
+        11,0,0,168,169,3,2,1,0,169,170,5,12,0,0,170,172,1,0,0,0,171,161,
+        1,0,0,0,171,163,1,0,0,0,171,164,1,0,0,0,171,165,1,0,0,0,171,166,
+        1,0,0,0,171,167,1,0,0,0,172,177,1,0,0,0,173,174,10,1,0,0,174,176,
+        3,24,12,0,175,173,1,0,0,0,176,179,1,0,0,0,177,175,1,0,0,0,177,178,
+        1,0,0,0,178,21,1,0,0,0,179,177,1,0,0,0,180,181,6,11,-1,0,181,182,
+        3,24,12,0,182,187,1,0,0,0,183,184,10,1,0,0,184,186,3,24,12,0,185,
+        183,1,0,0,0,186,189,1,0,0,0,187,185,1,0,0,0,187,188,1,0,0,0,188,
+        23,1,0,0,0,189,187,1,0,0,0,190,191,5,13,0,0,191,192,3,2,1,0,192,
+        193,5,14,0,0,193,25,1,0,0,0,194,195,5,23,0,0,195,196,3,18,9,0,196,
+        27,1,0,0,0,197,198,7,0,0,0,198,29,1,0,0,0,199,200,7,1,0,0,200,31,
+        1,0,0,0,201,202,3,36,18,0,202,203,3,38,19,0,203,206,1,0,0,0,204,
+        206,3,34,17,0,205,201,1,0,0,0,205,204,1,0,0,0,206,33,1,0,0,0,207,
+        208,5,24,0,0,208,212,3,38,19,0,209,210,5,25,0,0,210,212,3,38,19,
+        0,211,207,1,0,0,0,211,209,1,0,0,0,212,35,1,0,0,0,213,214,5,26,0,
+        0,214,37,1,0,0,0,215,216,5,11,0,0,216,222,5,12,0,0,217,218,5,11,
+        0,0,218,219,3,40,20,0,219,220,5,12,0,0,220,222,1,0,0,0,221,215,1,
+        0,0,0,221,217,1,0,0,0,222,39,1,0,0,0,223,224,6,20,-1,0,224,225,3,
+        2,1,0,225,231,1,0,0,0,226,227,10,1,0,0,227,228,5,21,0,0,228,230,
+        3,2,1,0,229,226,1,0,0,0,230,233,1,0,0,0,231,229,1,0,0,0,231,232,
+        1,0,0,0,232,41,1,0,0,0,233,231,1,0,0,0,234,235,7,2,0,0,235,43,1,
+        0,0,0,18,62,91,93,99,113,115,131,136,146,153,159,171,177,187,205,
+        211,221,231
     ]
 
 class KodexaSelectorParser ( Parser ):
@@ -108,14 +106,14 @@ class KodexaSelectorParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'or'", "'and'", "'div'", "'mod'", "'intersect'", 
-                     "'stream'", "'/'", "'//'", "'.'", "'..'", "'::'", "'@'", 
-                     "'('", "')'", "'['", "']'", "'|'", "<INVALID>", "<INVALID>", 
+    literalNames = [ "<INVALID>", "'or'", "'and'", "'intersect'", "'stream'", 
+                     "'/'", "'//'", "'.'", "'..'", "'::'", "'@'", "'('", 
+                     "')'", "'['", "']'", "'|'", "<INVALID>", "<INVALID>", 
                      "'+'", "'-'", "'*'", "','", "':'", "'$'", "'true'", 
                      "'false'" ]
 
-    symbolicNames = [ "<INVALID>", "OR", "AND", "DIV", "MOD", "INTERSECT", 
-                      "PIPELINE", "PATH_SEP", "ABBREV_PATH_SEP", "ABBREV_STEP_SELF", 
+    symbolicNames = [ "<INVALID>", "OR", "AND", "INTERSECT", "PIPELINE", 
+                      "PATH_SEP", "ABBREV_PATH_SEP", "ABBREV_STEP_SELF", 
                       "ABBREV_STEP_PARENT", "AXIS_SEP", "ABBREV_AXIS_AT", 
                       "LPAREN", "RPAREN", "LBRACKET", "RBRACKET", "UNION", 
                       "EQUALS", "REL_OP", "PLUS", "MINUS", "STAR", "COMMA", 
@@ -156,40 +154,38 @@ class KodexaSelectorParser ( Parser ):
     EOF = Token.EOF
     OR=1
     AND=2
-    DIV=3
-    MOD=4
-    INTERSECT=5
-    PIPELINE=6
-    PATH_SEP=7
-    ABBREV_PATH_SEP=8
-    ABBREV_STEP_SELF=9
-    ABBREV_STEP_PARENT=10
-    AXIS_SEP=11
-    ABBREV_AXIS_AT=12
-    LPAREN=13
-    RPAREN=14
-    LBRACKET=15
-    RBRACKET=16
-    UNION=17
-    EQUALS=18
-    REL_OP=19
-    PLUS=20
-    MINUS=21
-    STAR=22
-    COMMA=23
-    COLON=24
-    DOLLAR=25
-    TRUE=26
-    FALSE=27
-    FUNCTION_NAME=28
-    LITERAL=29
-    FLOAT=30
-    INTEGER=31
-    NODETYPE=32
-    NCNAME=33
-    FUNCNAME=34
-    AXISNAME=35
-    WS=36
+    INTERSECT=3
+    PIPELINE=4
+    PATH_SEP=5
+    ABBREV_PATH_SEP=6
+    ABBREV_STEP_SELF=7
+    ABBREV_STEP_PARENT=8
+    AXIS_SEP=9
+    ABBREV_AXIS_AT=10
+    LPAREN=11
+    RPAREN=12
+    LBRACKET=13
+    RBRACKET=14
+    UNION=15
+    EQUALS=16
+    REL_OP=17
+    PLUS=18
+    MINUS=19
+    STAR=20
+    COMMA=21
+    COLON=22
+    DOLLAR=23
+    TRUE=24
+    FALSE=25
+    FUNCTION_NAME=26
+    LITERAL=27
+    FLOAT=28
+    INTEGER=29
+    NODETYPE=30
+    NCNAME=31
+    FUNCNAME=32
+    AXISNAME=33
+    WS=34
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -324,36 +320,6 @@ class KodexaSelectorParser ( Parser ):
                 return visitor.visitChildren(self)
 
 
-    class DivideExprContext(ExprContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a KodexaSelectorParser.ExprContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def expr(self, i:int=None):
-            if i is None:
-                return self.getTypedRuleContexts(KodexaSelectorParser.ExprContext)
-            else:
-                return self.getTypedRuleContext(KodexaSelectorParser.ExprContext,i)
-
-        def DIV(self):
-            return self.getToken(KodexaSelectorParser.DIV, 0)
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterDivideExpr" ):
-                listener.enterDivideExpr(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitDivideExpr" ):
-                listener.exitDivideExpr(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitDivideExpr" ):
-                return visitor.visitDivideExpr(self)
-            else:
-                return visitor.visitChildren(self)
-
-
     class IntersectExprContext(ExprContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a KodexaSelectorParser.ExprContext
@@ -380,36 +346,6 @@ class KodexaSelectorParser ( Parser ):
         def accept(self, visitor:ParseTreeVisitor):
             if hasattr( visitor, "visitIntersectExpr" ):
                 return visitor.visitIntersectExpr(self)
-            else:
-                return visitor.visitChildren(self)
-
-
-    class ModuloExprContext(ExprContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a KodexaSelectorParser.ExprContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def expr(self, i:int=None):
-            if i is None:
-                return self.getTypedRuleContexts(KodexaSelectorParser.ExprContext)
-            else:
-                return self.getTypedRuleContext(KodexaSelectorParser.ExprContext,i)
-
-        def MOD(self):
-            return self.getToken(KodexaSelectorParser.MOD, 0)
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterModuloExpr" ):
-                listener.enterModuloExpr(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitModuloExpr" ):
-                listener.exitModuloExpr(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitModuloExpr" ):
-                return visitor.visitModuloExpr(self)
             else:
                 return visitor.visitChildren(self)
 
@@ -958,7 +894,7 @@ class KodexaSelectorParser ( Parser ):
 
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 99
+            self.state = 93
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,2,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -966,154 +902,128 @@ class KodexaSelectorParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    self.state = 97
+                    self.state = 91
                     self._errHandler.sync(self)
                     la_ = self._interp.adaptivePredict(self._input,1,self._ctx)
                     if la_ == 1:
                         localctx = KodexaSelectorParser.OrExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 64
-                        if not self.precpred(self._ctx, 21):
+                        if not self.precpred(self._ctx, 19):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 21)")
+                            raise FailedPredicateException(self, "self.precpred(self._ctx, 19)")
                         self.state = 65
                         self.match(KodexaSelectorParser.OR)
                         self.state = 66
-                        self.expr(22)
+                        self.expr(20)
                         pass
 
                     elif la_ == 2:
                         localctx = KodexaSelectorParser.AndExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 67
-                        if not self.precpred(self._ctx, 20):
+                        if not self.precpred(self._ctx, 18):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 20)")
+                            raise FailedPredicateException(self, "self.precpred(self._ctx, 18)")
                         self.state = 68
                         self.match(KodexaSelectorParser.AND)
                         self.state = 69
-                        self.expr(21)
+                        self.expr(19)
                         pass
 
                     elif la_ == 3:
                         localctx = KodexaSelectorParser.EqualsExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 70
-                        if not self.precpred(self._ctx, 19):
+                        if not self.precpred(self._ctx, 17):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 19)")
+                            raise FailedPredicateException(self, "self.precpred(self._ctx, 17)")
                         self.state = 71
                         self.match(KodexaSelectorParser.EQUALS)
                         self.state = 72
-                        self.expr(20)
+                        self.expr(18)
                         pass
 
                     elif la_ == 4:
                         localctx = KodexaSelectorParser.RelationalExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 73
-                        if not self.precpred(self._ctx, 18):
+                        if not self.precpred(self._ctx, 16):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 18)")
+                            raise FailedPredicateException(self, "self.precpred(self._ctx, 16)")
                         self.state = 74
                         self.match(KodexaSelectorParser.REL_OP)
                         self.state = 75
-                        self.expr(19)
+                        self.expr(17)
                         pass
 
                     elif la_ == 5:
                         localctx = KodexaSelectorParser.AddExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 76
-                        if not self.precpred(self._ctx, 17):
+                        if not self.precpred(self._ctx, 15):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 17)")
+                            raise FailedPredicateException(self, "self.precpred(self._ctx, 15)")
                         self.state = 77
                         self.match(KodexaSelectorParser.PLUS)
                         self.state = 78
-                        self.expr(18)
+                        self.expr(16)
                         pass
 
                     elif la_ == 6:
                         localctx = KodexaSelectorParser.SubtractExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 79
-                        if not self.precpred(self._ctx, 16):
-                            from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 16)")
-                        self.state = 80
-                        self.match(KodexaSelectorParser.MINUS)
-                        self.state = 81
-                        self.expr(17)
-                        pass
-
-                    elif la_ == 7:
-                        localctx = KodexaSelectorParser.DivideExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
-                        self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 82
-                        if not self.precpred(self._ctx, 15):
-                            from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 15)")
-                        self.state = 83
-                        self.match(KodexaSelectorParser.DIV)
-                        self.state = 84
-                        self.expr(16)
-                        pass
-
-                    elif la_ == 8:
-                        localctx = KodexaSelectorParser.ModuloExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
-                        self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 85
                         if not self.precpred(self._ctx, 14):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 14)")
-                        self.state = 86
-                        self.match(KodexaSelectorParser.MOD)
-                        self.state = 87
+                        self.state = 80
+                        self.match(KodexaSelectorParser.MINUS)
+                        self.state = 81
                         self.expr(15)
                         pass
 
-                    elif la_ == 9:
+                    elif la_ == 7:
                         localctx = KodexaSelectorParser.UnionExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 88
+                        self.state = 82
                         if not self.precpred(self._ctx, 13):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 13)")
-                        self.state = 89
+                        self.state = 83
                         self.match(KodexaSelectorParser.UNION)
-                        self.state = 90
+                        self.state = 84
                         self.expr(14)
                         pass
 
-                    elif la_ == 10:
+                    elif la_ == 8:
                         localctx = KodexaSelectorParser.IntersectExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 91
+                        self.state = 85
                         if not self.precpred(self._ctx, 12):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 12)")
-                        self.state = 92
+                        self.state = 86
                         self.match(KodexaSelectorParser.INTERSECT)
-                        self.state = 93
+                        self.state = 87
                         self.expr(13)
                         pass
 
-                    elif la_ == 11:
+                    elif la_ == 9:
                         localctx = KodexaSelectorParser.PipelineExprContext(self, KodexaSelectorParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 94
+                        self.state = 88
                         if not self.precpred(self._ctx, 10):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 10)")
-                        self.state = 95
+                        self.state = 89
                         self.match(KodexaSelectorParser.PIPELINE)
-                        self.state = 96
+                        self.state = 90
                         self.expr(11)
                         pass
 
              
-                self.state = 101
+                self.state = 95
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,2,self._ctx)
 
@@ -1200,22 +1110,22 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.AbsoluteLocationPathContext(self, self._ctx, self.state)
         self.enterRule(localctx, 4, self.RULE_absoluteLocationPath)
         try:
-            self.state = 105
+            self.state = 99
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,3,self._ctx)
             if la_ == 1:
                 localctx = KodexaSelectorParser.RootOnlyContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 102
+                self.state = 96
                 self.match(KodexaSelectorParser.PATH_SEP)
                 pass
 
             elif la_ == 2:
                 localctx = KodexaSelectorParser.RootPathContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 103
+                self.state = 97
                 self.match(KodexaSelectorParser.PATH_SEP)
-                self.state = 104
+                self.state = 98
                 self.relativeLocationPath(0)
                 pass
 
@@ -1269,9 +1179,9 @@ class KodexaSelectorParser ( Parser ):
         self.enterRule(localctx, 6, self.RULE_abbreviatedAbsoluteLocationPath)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 107
+            self.state = 101
             self.match(KodexaSelectorParser.ABBREV_PATH_SEP)
-            self.state = 108
+            self.state = 102
             self.relativeLocationPath(0)
         except RecognitionException as re:
             localctx.exception = re
@@ -1397,10 +1307,10 @@ class KodexaSelectorParser ( Parser ):
             self._ctx = localctx
             _prevctx = localctx
 
-            self.state = 111
+            self.state = 105
             self.step()
             self._ctx.stop = self._input.LT(-1)
-            self.state = 121
+            self.state = 115
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,5,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -1408,37 +1318,37 @@ class KodexaSelectorParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    self.state = 119
+                    self.state = 113
                     self._errHandler.sync(self)
                     la_ = self._interp.adaptivePredict(self._input,4,self._ctx)
                     if la_ == 1:
                         localctx = KodexaSelectorParser.PathStepContext(self, KodexaSelectorParser.RelativeLocationPathContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_relativeLocationPath)
-                        self.state = 113
+                        self.state = 107
                         if not self.precpred(self._ctx, 2):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                        self.state = 114
+                        self.state = 108
                         self.match(KodexaSelectorParser.PATH_SEP)
-                        self.state = 115
+                        self.state = 109
                         self.step()
                         pass
 
                     elif la_ == 2:
                         localctx = KodexaSelectorParser.AbbrevPathStepContext(self, KodexaSelectorParser.RelativeLocationPathContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_relativeLocationPath)
-                        self.state = 116
+                        self.state = 110
                         if not self.precpred(self._ctx, 1):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 1)")
-                        self.state = 117
+                        self.state = 111
                         self.match(KodexaSelectorParser.ABBREV_PATH_SEP)
-                        self.state = 118
+                        self.state = 112
                         self.step()
                         pass
 
              
-                self.state = 123
+                self.state = 117
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,5,self._ctx)
 
@@ -1634,56 +1544,56 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.StepContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_step)
         try:
-            self.state = 137
+            self.state = 131
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,6,self._ctx)
             if la_ == 1:
                 localctx = KodexaSelectorParser.NodeTestStepContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 124
+                self.state = 118
                 self.nodeTest()
                 pass
 
             elif la_ == 2:
                 localctx = KodexaSelectorParser.NodeTestPredStepContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 125
+                self.state = 119
                 self.nodeTest()
-                self.state = 126
+                self.state = 120
                 self.predicateList(0)
                 pass
 
             elif la_ == 3:
                 localctx = KodexaSelectorParser.AxisNodeTestStepContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 128
+                self.state = 122
                 self.axisSpecifier()
-                self.state = 129
+                self.state = 123
                 self.nodeTest()
                 pass
 
             elif la_ == 4:
                 localctx = KodexaSelectorParser.AxisNodeTestPredStepContext(self, localctx)
                 self.enterOuterAlt(localctx, 4)
-                self.state = 131
+                self.state = 125
                 self.axisSpecifier()
-                self.state = 132
+                self.state = 126
                 self.nodeTest()
-                self.state = 133
+                self.state = 127
                 self.predicateList(0)
                 pass
 
             elif la_ == 5:
                 localctx = KodexaSelectorParser.SelfStepContext(self, localctx)
                 self.enterOuterAlt(localctx, 5)
-                self.state = 135
+                self.state = 129
                 self.match(KodexaSelectorParser.ABBREV_STEP_SELF)
                 pass
 
             elif la_ == 6:
                 localctx = KodexaSelectorParser.ParentStepContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
-                self.state = 136
+                self.state = 130
                 self.match(KodexaSelectorParser.ABBREV_STEP_PARENT)
                 pass
 
@@ -1770,21 +1680,21 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.AxisSpecifierContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_axisSpecifier)
         try:
-            self.state = 142
+            self.state = 136
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [35]:
+            if token in [33]:
                 localctx = KodexaSelectorParser.FullAxisContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 139
+                self.state = 133
                 self.match(KodexaSelectorParser.AXISNAME)
-                self.state = 140
+                self.state = 134
                 self.match(KodexaSelectorParser.AXIS_SEP)
                 pass
-            elif token in [12]:
+            elif token in [10]:
                 localctx = KodexaSelectorParser.AttrAxisContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 141
+                self.state = 135
                 self.match(KodexaSelectorParser.ABBREV_AXIS_AT)
                 pass
             else:
@@ -1905,37 +1815,37 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.NodeTestContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_nodeTest)
         try:
-            self.state = 152
+            self.state = 146
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
             if la_ == 1:
                 localctx = KodexaSelectorParser.NameTestNodeContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 144
+                self.state = 138
                 self.nameTest()
                 pass
 
             elif la_ == 2:
                 localctx = KodexaSelectorParser.NodeTypeTestContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 145
+                self.state = 139
                 self.match(KodexaSelectorParser.NODETYPE)
-                self.state = 146
+                self.state = 140
                 self.match(KodexaSelectorParser.LPAREN)
-                self.state = 147
+                self.state = 141
                 self.match(KodexaSelectorParser.RPAREN)
                 pass
 
             elif la_ == 3:
                 localctx = KodexaSelectorParser.NodeTypeLiteralTestContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 148
+                self.state = 142
                 self.match(KodexaSelectorParser.NODETYPE)
-                self.state = 149
+                self.state = 143
                 self.match(KodexaSelectorParser.LPAREN)
-                self.state = 150
+                self.state = 144
                 self.match(KodexaSelectorParser.LITERAL)
-                self.state = 151
+                self.state = 145
                 self.match(KodexaSelectorParser.RPAREN)
                 pass
 
@@ -2049,31 +1959,31 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.NameTestContext(self, self._ctx, self.state)
         self.enterRule(localctx, 16, self.RULE_nameTest)
         try:
-            self.state = 159
+            self.state = 153
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,9,self._ctx)
             if la_ == 1:
                 localctx = KodexaSelectorParser.AnyNameTestContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 154
+                self.state = 148
                 self.match(KodexaSelectorParser.STAR)
                 pass
 
             elif la_ == 2:
                 localctx = KodexaSelectorParser.PrefixedAnyNameTestContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 155
+                self.state = 149
                 self.match(KodexaSelectorParser.NCNAME)
-                self.state = 156
+                self.state = 150
                 self.match(KodexaSelectorParser.COLON)
-                self.state = 157
+                self.state = 151
                 self.match(KodexaSelectorParser.STAR)
                 pass
 
             elif la_ == 3:
                 localctx = KodexaSelectorParser.QNameTestContext(self, localctx)
                 self.enterOuterAlt(localctx, 3)
-                self.state = 158
+                self.state = 152
                 self.qName()
                 pass
 
@@ -2163,24 +2073,24 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.QNameContext(self, self._ctx, self.state)
         self.enterRule(localctx, 18, self.RULE_qName)
         try:
-            self.state = 165
+            self.state = 159
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,10,self._ctx)
             if la_ == 1:
                 localctx = KodexaSelectorParser.PrefixedNameContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 161
+                self.state = 155
                 self.match(KodexaSelectorParser.NCNAME)
-                self.state = 162
+                self.state = 156
                 self.match(KodexaSelectorParser.COLON)
-                self.state = 163
+                self.state = 157
                 self.match(KodexaSelectorParser.NCNAME)
                 pass
 
             elif la_ == 2:
                 localctx = KodexaSelectorParser.SimpleNameContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 164
+                self.state = 158
                 self.match(KodexaSelectorParser.NCNAME)
                 pass
 
@@ -2401,7 +2311,7 @@ class KodexaSelectorParser ( Parser ):
         self.enterRecursionRule(localctx, 20, self.RULE_filterExpr, _p)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 177
+            self.state = 171
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,11,self._ctx)
             if la_ == 1:
@@ -2409,7 +2319,7 @@ class KodexaSelectorParser ( Parser ):
                 self._ctx = localctx
                 _prevctx = localctx
 
-                self.state = 168
+                self.state = 162
                 self.variableReference()
                 pass
 
@@ -2417,7 +2327,7 @@ class KodexaSelectorParser ( Parser ):
                 localctx = KodexaSelectorParser.LiteralFilterContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 169
+                self.state = 163
                 self.match(KodexaSelectorParser.LITERAL)
                 pass
 
@@ -2425,7 +2335,7 @@ class KodexaSelectorParser ( Parser ):
                 localctx = KodexaSelectorParser.NumberFilterContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 170
+                self.state = 164
                 self.number()
                 pass
 
@@ -2433,7 +2343,7 @@ class KodexaSelectorParser ( Parser ):
                 localctx = KodexaSelectorParser.BooleanFilterContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 171
+                self.state = 165
                 self.booleanLiteral()
                 pass
 
@@ -2441,7 +2351,7 @@ class KodexaSelectorParser ( Parser ):
                 localctx = KodexaSelectorParser.FuncCallFilterContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 172
+                self.state = 166
                 self.functionCall()
                 pass
 
@@ -2449,17 +2359,17 @@ class KodexaSelectorParser ( Parser ):
                 localctx = KodexaSelectorParser.GroupedFilterContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 173
+                self.state = 167
                 self.match(KodexaSelectorParser.LPAREN)
-                self.state = 174
+                self.state = 168
                 self.expr(0)
-                self.state = 175
+                self.state = 169
                 self.match(KodexaSelectorParser.RPAREN)
                 pass
 
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 183
+            self.state = 177
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,12,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -2469,13 +2379,13 @@ class KodexaSelectorParser ( Parser ):
                     _prevctx = localctx
                     localctx = KodexaSelectorParser.PredicatedFilterContext(self, KodexaSelectorParser.FilterExprContext(self, _parentctx, _parentState))
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_filterExpr)
-                    self.state = 179
+                    self.state = 173
                     if not self.precpred(self._ctx, 1):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 1)")
-                    self.state = 180
+                    self.state = 174
                     self.predicate() 
-                self.state = 185
+                self.state = 179
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,12,self._ctx)
 
@@ -2571,10 +2481,10 @@ class KodexaSelectorParser ( Parser ):
             self._ctx = localctx
             _prevctx = localctx
 
-            self.state = 187
+            self.state = 181
             self.predicate()
             self._ctx.stop = self._input.LT(-1)
-            self.state = 193
+            self.state = 187
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,13,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -2584,13 +2494,13 @@ class KodexaSelectorParser ( Parser ):
                     _prevctx = localctx
                     localctx = KodexaSelectorParser.MultiplePredicateContext(self, KodexaSelectorParser.PredicateListContext(self, _parentctx, _parentState))
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_predicateList)
-                    self.state = 189
+                    self.state = 183
                     if not self.precpred(self._ctx, 1):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 1)")
-                    self.state = 190
+                    self.state = 184
                     self.predicate() 
-                self.state = 195
+                self.state = 189
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,13,self._ctx)
 
@@ -2657,11 +2567,11 @@ class KodexaSelectorParser ( Parser ):
         try:
             localctx = KodexaSelectorParser.ExprPredicateContext(self, localctx)
             self.enterOuterAlt(localctx, 1)
-            self.state = 196
+            self.state = 190
             self.match(KodexaSelectorParser.LBRACKET)
-            self.state = 197
+            self.state = 191
             self.expr(0)
-            self.state = 198
+            self.state = 192
             self.match(KodexaSelectorParser.RBRACKET)
         except RecognitionException as re:
             localctx.exception = re
@@ -2712,9 +2622,9 @@ class KodexaSelectorParser ( Parser ):
         self.enterRule(localctx, 26, self.RULE_variableReference)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 200
+            self.state = 194
             self.match(KodexaSelectorParser.DOLLAR)
-            self.state = 201
+            self.state = 195
             self.qName()
         except RecognitionException as re:
             localctx.exception = re
@@ -2765,9 +2675,9 @@ class KodexaSelectorParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 203
+            self.state = 197
             _la = self._input.LA(1)
-            if not(_la==30 or _la==31):
+            if not(_la==28 or _la==29):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -2821,9 +2731,9 @@ class KodexaSelectorParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 205
+            self.state = 199
             _la = self._input.LA(1)
-            if not(_la==26 or _la==27):
+            if not(_la==24 or _la==25):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -2881,19 +2791,19 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.FunctionCallContext(self, self._ctx, self.state)
         self.enterRule(localctx, 32, self.RULE_functionCall)
         try:
-            self.state = 211
+            self.state = 205
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [28]:
+            if token in [26]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 207
+                self.state = 201
                 self.funcQName()
-                self.state = 208
+                self.state = 202
                 self.formalArguments()
                 pass
-            elif token in [26, 27]:
+            elif token in [24, 25]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 210
+                self.state = 204
                 self.builtInFunctionCall()
                 pass
             else:
@@ -2985,23 +2895,23 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.BuiltInFunctionCallContext(self, self._ctx, self.state)
         self.enterRule(localctx, 34, self.RULE_builtInFunctionCall)
         try:
-            self.state = 217
+            self.state = 211
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [26]:
+            if token in [24]:
                 localctx = KodexaSelectorParser.TrueFunctionContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 213
+                self.state = 207
                 self.match(KodexaSelectorParser.TRUE)
-                self.state = 214
+                self.state = 208
                 self.formalArguments()
                 pass
-            elif token in [27]:
+            elif token in [25]:
                 localctx = KodexaSelectorParser.FalseFunctionContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 215
+                self.state = 209
                 self.match(KodexaSelectorParser.FALSE)
-                self.state = 216
+                self.state = 210
                 self.formalArguments()
                 pass
             else:
@@ -3052,7 +2962,7 @@ class KodexaSelectorParser ( Parser ):
         self.enterRule(localctx, 36, self.RULE_funcQName)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 219
+            self.state = 213
             self.match(KodexaSelectorParser.FUNCTION_NAME)
         except RecognitionException as re:
             localctx.exception = re
@@ -3141,26 +3051,26 @@ class KodexaSelectorParser ( Parser ):
         localctx = KodexaSelectorParser.FormalArgumentsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 38, self.RULE_formalArguments)
         try:
-            self.state = 227
+            self.state = 221
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,16,self._ctx)
             if la_ == 1:
                 localctx = KodexaSelectorParser.EmptyArgsContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
-                self.state = 221
+                self.state = 215
                 self.match(KodexaSelectorParser.LPAREN)
-                self.state = 222
+                self.state = 216
                 self.match(KodexaSelectorParser.RPAREN)
                 pass
 
             elif la_ == 2:
                 localctx = KodexaSelectorParser.ArgsListContext(self, localctx)
                 self.enterOuterAlt(localctx, 2)
-                self.state = 223
+                self.state = 217
                 self.match(KodexaSelectorParser.LPAREN)
-                self.state = 224
+                self.state = 218
                 self.argumentList(0)
-                self.state = 225
+                self.state = 219
                 self.match(KodexaSelectorParser.RPAREN)
                 pass
 
@@ -3259,10 +3169,10 @@ class KodexaSelectorParser ( Parser ):
             self._ctx = localctx
             _prevctx = localctx
 
-            self.state = 230
+            self.state = 224
             self.expr(0)
             self._ctx.stop = self._input.LT(-1)
-            self.state = 237
+            self.state = 231
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,17,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -3272,15 +3182,15 @@ class KodexaSelectorParser ( Parser ):
                     _prevctx = localctx
                     localctx = KodexaSelectorParser.MultipleArgsContext(self, KodexaSelectorParser.ArgumentListContext(self, _parentctx, _parentState))
                     self.pushNewRecursionContext(localctx, _startState, self.RULE_argumentList)
-                    self.state = 232
+                    self.state = 226
                     if not self.precpred(self._ctx, 1):
                         from antlr4.error.Errors import FailedPredicateException
                         raise FailedPredicateException(self, "self.precpred(self._ctx, 1)")
-                    self.state = 233
+                    self.state = 227
                     self.match(KodexaSelectorParser.COMMA)
-                    self.state = 234
+                    self.state = 228
                     self.expr(0) 
-                self.state = 239
+                self.state = 233
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,17,self._ctx)
 
@@ -3333,9 +3243,9 @@ class KodexaSelectorParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 240
+            self.state = 234
             _la = self._input.LA(1)
-            if not(_la==7 or _la==8):
+            if not(_la==5 or _la==6):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -3366,70 +3276,62 @@ class KodexaSelectorParser ( Parser ):
 
     def expr_sempred(self, localctx:ExprContext, predIndex:int):
             if predIndex == 0:
-                return self.precpred(self._ctx, 21)
-         
-
-            if predIndex == 1:
-                return self.precpred(self._ctx, 20)
-         
-
-            if predIndex == 2:
                 return self.precpred(self._ctx, 19)
          
 
-            if predIndex == 3:
+            if predIndex == 1:
                 return self.precpred(self._ctx, 18)
          
 
-            if predIndex == 4:
+            if predIndex == 2:
                 return self.precpred(self._ctx, 17)
          
 
-            if predIndex == 5:
+            if predIndex == 3:
                 return self.precpred(self._ctx, 16)
          
 
-            if predIndex == 6:
+            if predIndex == 4:
                 return self.precpred(self._ctx, 15)
          
 
-            if predIndex == 7:
+            if predIndex == 5:
                 return self.precpred(self._ctx, 14)
          
 
-            if predIndex == 8:
+            if predIndex == 6:
                 return self.precpred(self._ctx, 13)
          
 
-            if predIndex == 9:
+            if predIndex == 7:
                 return self.precpred(self._ctx, 12)
          
 
-            if predIndex == 10:
+            if predIndex == 8:
                 return self.precpred(self._ctx, 10)
          
 
     def relativeLocationPath_sempred(self, localctx:RelativeLocationPathContext, predIndex:int):
-            if predIndex == 11:
+            if predIndex == 9:
                 return self.precpred(self._ctx, 2)
          
 
-            if predIndex == 12:
+            if predIndex == 10:
                 return self.precpred(self._ctx, 1)
          
 
     def filterExpr_sempred(self, localctx:FilterExprContext, predIndex:int):
-            if predIndex == 13:
+            if predIndex == 11:
                 return self.precpred(self._ctx, 1)
          
 
     def predicateList_sempred(self, localctx:PredicateListContext, predIndex:int):
-            if predIndex == 14:
+            if predIndex == 12:
                 return self.precpred(self._ctx, 1)
          
 
     def argumentList_sempred(self, localctx:ArgumentListContext, predIndex:int):
-            if predIndex == 15:
+            if predIndex == 13:
                 return self.precpred(self._ctx, 1)
          
 

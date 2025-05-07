@@ -24,18 +24,8 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by KodexaSelectorParser#divideExpr.
-    def visitDivideExpr(self, ctx:KodexaSelectorParser.DivideExprContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by KodexaSelectorParser#intersectExpr.
     def visitIntersectExpr(self, ctx:KodexaSelectorParser.IntersectExprContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by KodexaSelectorParser#moduloExpr.
-    def visitModuloExpr(self, ctx:KodexaSelectorParser.ModuloExprContext):
         return self.visitChildren(ctx)
 
 

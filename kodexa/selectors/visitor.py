@@ -40,16 +40,6 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
         right = self.visit(ctx.expr(1))
         return ast.BinaryExpression(left, '-', right)
 
-    def visitDivideExpr(self, ctx:KodexaSelectorParser.DivideExprContext):
-        left = self.visit(ctx.expr(0))
-        right = self.visit(ctx.expr(1))
-        return ast.BinaryExpression(left, 'div', right)
-
-    def visitModuloExpr(self, ctx:KodexaSelectorParser.ModuloExprContext):
-        left = self.visit(ctx.expr(0))
-        right = self.visit(ctx.expr(1))
-        return ast.BinaryExpression(left, 'mod', right)
-
     def visitUnionExpr(self, ctx:KodexaSelectorParser.UnionExprContext):
         left = self.visit(ctx.expr(0))
         right = self.visit(ctx.expr(1))

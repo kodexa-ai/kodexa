@@ -345,7 +345,7 @@ class LLMDataObject(BaseModel):
                                       owner_uri=f"assistant://{assistant.id}" if assistant else f"model://taxonomy-llm")
                         current_value.append(new_tag)
                         node.remove_feature("tag", tag)
-                        node.add_feature("tag", tag, current_value, single=False)
+                        node.add_feature("tag", tag, current_value)
 
             logger.info(f"Applied label {tag} to {len(nodes_to_label)} nodes")
 

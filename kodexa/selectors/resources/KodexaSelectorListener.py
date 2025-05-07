@@ -35,30 +35,12 @@ class KodexaSelectorListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by KodexaSelectorParser#divideExpr.
-    def enterDivideExpr(self, ctx:KodexaSelectorParser.DivideExprContext):
-        pass
-
-    # Exit a parse tree produced by KodexaSelectorParser#divideExpr.
-    def exitDivideExpr(self, ctx:KodexaSelectorParser.DivideExprContext):
-        pass
-
-
     # Enter a parse tree produced by KodexaSelectorParser#intersectExpr.
     def enterIntersectExpr(self, ctx:KodexaSelectorParser.IntersectExprContext):
         pass
 
     # Exit a parse tree produced by KodexaSelectorParser#intersectExpr.
     def exitIntersectExpr(self, ctx:KodexaSelectorParser.IntersectExprContext):
-        pass
-
-
-    # Enter a parse tree produced by KodexaSelectorParser#moduloExpr.
-    def enterModuloExpr(self, ctx:KodexaSelectorParser.ModuloExprContext):
-        pass
-
-    # Exit a parse tree produced by KodexaSelectorParser#moduloExpr.
-    def exitModuloExpr(self, ctx:KodexaSelectorParser.ModuloExprContext):
         pass
 
 

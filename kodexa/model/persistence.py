@@ -16,6 +16,7 @@ from kodexa.model.model import (
     ContentFeature,
     ContentException,
     ModelInsight, ProcessingStep,
+    Tag,
 )
 from kodexa.model.objects import DocumentTaxonValidation
 
@@ -769,7 +770,7 @@ class SqliteDocumentPersistence(object):
                             peewee_features = all_features_of_type 
                             print(f"Found tags via fallback that might apply to root node: {[f.id for f in peewee_features]}")
             
-            for feature_instance in peewee_features: # Renamed 'feature' to 'feature_instance' to avoid confusion
+            for feature_instance in peewee_features: # 
                 feature_type_name = FeatureType.get(FeatureType.id == feature_instance.feature_type).name
                 
                 # Get the feature value from FeatureBlob
@@ -778,47 +779,44 @@ class SqliteDocumentPersistence(object):
                 
                 # For tag features, we should also check for FeatureTags
                 if feature_type_name.startswith('tag:'):
-                    # Check if we have feature tags for this feature
-                    tags = FeatureTag.select().where(FeatureTag.feature == feature_instance)
-                    if tags.count() > 0:
-                        # If there are tag records, they might override the blob value
-                        tag_values = []
-                        for tag in tags:
-                            tag_data = {}
-                            if tag.start_pos is not None:
-                                tag_data['start'] = tag.start_pos
-                            if tag.end_pos is not None:
-                                tag_data['end'] = tag.end_pos
-                            if tag.tag_value is not None:
-                                tag_data['value'] = tag.tag_value
-                            if tag.uuid is not None:
-                                tag_data['uuid'] = tag.uuid
-                            if tag.data is not None:
-                                tag_data['data'] = msgpack.unpackb(tag.data)
-                            if tag.confidence is not None:
-                                tag_data['confidence'] = tag.confidence
-                            if tag.group_uuid is not None:
-                                tag_data['group_uuid'] = tag.group_uuid
-                            if tag.parent_group_uuid is not None:
-                                tag_data['parent_group_uuid'] = tag.parent_group_uuid
-                            if tag.cell_index is not None:
-                                tag_data['cell_index'] = tag.cell_index
-                            if tag.index is not None:
-                                tag_data['index'] = tag.index
-                            if tag.note is not None:
-                                tag_data['note'] = tag.note
-                            if tag.status is not None:
-                                tag_data['status'] = tag.status
-                            if tag.owner_uri is not None:
-                                tag_data['owner_uri'] = tag.owner_uri
-                            if tag.is_dirty is not None:
-                                tag_data['is_dirty'] = bool(tag.is_dirty)
-                            
-                            tag_values.append(tag_data)
+                    # Check if a FeatureTag record exists for this feature instance.
+                    # If it does, its data will override any value from FeatureBlob.
+                    tag_record = FeatureTag.select().where(FeatureTag.feature == feature_instance).first()
+                    
+                    if tag_record:
+                        # A FeatureTag record exists. This assumes a single FeatureTag is effectively
+                        # associated with a 'tag:' PeeweeFeature for determining its value.
+                        tag_data = {}
+                        if tag_record.start_pos is not None:
+                            tag_data['start'] = tag_record.start_pos
+                        if tag_record.end_pos is not None:
+                            tag_data['end'] = tag_record.end_pos
+                        if tag_record.tag_value is not None:
+                            tag_data['value'] = tag_record.tag_value
+                        if tag_record.uuid is not None:
+                            tag_data['uuid'] = tag_record.uuid
+                        if tag_record.data is not None:
+                            tag_data['data'] = msgpack.unpackb(tag_record.data)
+                        if tag_record.confidence is not None:
+                            tag_data['confidence'] = tag_record.confidence
+                        if tag_record.group_uuid is not None:
+                            tag_data['group_uuid'] = tag_record.group_uuid
+                        if tag_record.parent_group_uuid is not None:
+                            tag_data['parent_group_uuid'] = tag_record.parent_group_uuid
+                        if tag_record.cell_index is not None:
+                            tag_data['cell_index'] = tag_record.cell_index
+                        if tag_record.index is not None:
+                            tag_data['index'] = tag_record.index
+                        if tag_record.note is not None:
+                            tag_data['note'] = tag_record.note
+                        if tag_record.status is not None:
+                            tag_data['status'] = tag_record.status
+                        if tag_record.owner_uri is not None:
+                            tag_data['owner_uri'] = tag_record.owner_uri
+                        if tag_record.is_dirty is not None:
+                            tag_data['is_dirty'] = bool(tag_record.is_dirty)
                         
-                        # If the values from tags are not empty, use them instead of blob value
-                        if tag_values:
-                            value = tag_values
+                        value = tag_data # Assign the single dictionary directly
                 
                 # Parse feature type and name from combined string
                 feature_parts = feature_type_name.split(":")
@@ -830,7 +828,6 @@ class SqliteDocumentPersistence(object):
                         feature_type_str,
                         feature_name_str,
                         value
-                        # single argument will use its default from ContentFeature constructor (True)
                     )
                 )
                 
@@ -846,72 +843,69 @@ class SqliteDocumentPersistence(object):
         with self.connection.atomic():
             # Get or create feature type
             feature_type_name = f"{feature.feature_type}:{feature.name}"
-            db_feature_type, created = FeatureType.get_or_create(name=feature_type_name) # Renamed to db_feature_type
+            db_feature_type, created = FeatureType.get_or_create(name=feature_type_name) 
             
             # Get the content node
             if node.id is None:
                 raise ValueError("Node ID is required to add a feature")
-            # peewee_node = self.get_node(node.id) # Not strictly needed here
             
             # Create feature record
             tag_uuid = None
-            if feature.feature_type == "tag" and feature.value and isinstance(feature.value, list) and len(feature.value) > 0 and isinstance(feature.value[0], dict) and "uuid" in feature.value[0]:
-                tag_uuid = feature.value[0]["uuid"]
+            if isinstance(feature.value, Tag):
+                tag_uuid = feature.value.uuid
                 
             peewee_feature = PeeweeFeature.create(
                 feature_type=db_feature_type, # Use renamed variable
-                # content_node=node.id, # Removed: Handled by ContentNodeFeatureLink
-                # single=1 if feature.single else 0, # Removed: 'single' attribute removed from PeeweeFeature
                 tag_uuid=tag_uuid
             )
             
             # Link feature to content node
             ContentNodeFeatureLink.create(content_node=node.id, feature=peewee_feature.id)
             
-            # Create the feature blob with binary data
-            blob = FeatureBlob.create(
-                feature=peewee_feature,
-                binary_value=msgpack.packb(feature.value, use_bin_type=True)
-            )
-            
             # If this is a tag feature, create a FeatureTag record
-            if feature.feature_type == "tag" and feature.value and isinstance(feature.value, list):
-                for tag_value in feature.value:
-                    if isinstance(tag_value, dict):
-                        # Extract tag data
-                        start_pos = tag_value.get("start", None)
-                        end_pos = tag_value.get("end", None)
-                        tag_value_text = tag_value.get("value", None)
-                        uuid_value = tag_value.get("uuid", None)
-                        data_blob = msgpack.packb(tag_value.get("data", None)) if tag_value.get("data", None) else None
-                        confidence = tag_value.get("confidence", None)
-                        group_uuid = tag_value.get("group_uuid", None)
-                        parent_group_uuid = tag_value.get("parent_group_uuid", None)
-                        cell_index = tag_value.get("cell_index", None)
-                        index_value = tag_value.get("index", None)
-                        note = tag_value.get("note", None)
-                        status = tag_value.get("status", None)
-                        owner_uri = tag_value.get("owner_uri", None)
-                        is_dirty = 1 if tag_value.get("is_dirty", False) else 0
-                        
-                        # Create FeatureTag
-                        FeatureTag.create(
-                            feature=peewee_feature,
-                            tag_value=tag_value_text,
-                            start_pos=start_pos,
-                            end_pos=end_pos,
-                            uuid=uuid_value,
-                            data=data_blob,
-                            confidence=confidence,
-                            group_uuid=group_uuid,
-                            parent_group_uuid=parent_group_uuid,
-                            cell_index=cell_index,
-                            index=index_value,
-                            note=note,
-                            status=status,
-                            owner_uri=owner_uri,
-                            is_dirty=is_dirty
-                        )
+            if isinstance(feature.value, Tag):
+                tag_value: Tag = feature.value # Type hint for clarity
+
+                # Extract tag data directly from the Tag object attributes
+                start_pos = tag_value.start
+                end_pos = tag_value.end
+                tag_value_text = tag_value.value
+                uuid_value = tag_value.uuid
+                data_blob = msgpack.packb(tag_value.data, use_bin_type=True) if tag_value.data is not None else None
+                confidence = tag_value.confidence
+                group_uuid = tag_value.group_uuid
+                parent_group_uuid = tag_value.parent_group_uuid
+                cell_index = tag_value.cell_index
+                index_value = tag_value.index
+                note = tag_value.note
+                status = tag_value.status
+                owner_uri = tag_value.owner_uri
+                is_dirty = 1 if tag_value.is_dirty else 0
+                
+                # Create FeatureTag
+                FeatureTag.create(
+                    feature=peewee_feature,
+                    tag_value=tag_value_text,
+                    start_pos=start_pos,
+                    end_pos=end_pos,
+                    uuid=uuid_value,
+                    data=data_blob,
+                    confidence=confidence,
+                    group_uuid=group_uuid,
+                    parent_group_uuid=parent_group_uuid,
+                    cell_index=cell_index,
+                    index=index_value,
+                    note=note,
+                    status=status,
+                    owner_uri=owner_uri,
+                    is_dirty=is_dirty
+                )
+            else: 
+                # Create the feature blob with binary data
+                FeatureBlob.create(
+                    feature=peewee_feature,
+                    binary_value=msgpack.packb(feature.value, use_bin_type=True)
+                )
 
     def remove_feature(self, node, feature_type, name):
         """

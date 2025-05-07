@@ -133,7 +133,7 @@ class ContentException(dict):
         self.boolean_value = boolean_value
 
 
-class Tag(addict.Dict):
+class Tag(object):
     """A class to represent the metadata for a label that is applied as a feature on a content node.
 
     Attributes:
@@ -458,17 +458,13 @@ class ContentNode(object):
                 new_content_node.add_feature(
                     feature_type,
                     dict_feature["name"].split(":")[1],
-                    dict_feature["value"],
-                    dict_feature["single"],
-                    True,
+                    dict_feature["value"]
                 )
             else:
                 new_content_node.add_feature(
                     feature_type,
                     dict_feature["name"].split(":")[1],
-                    dict_feature["value"],
-                    dict_feature["single"],
-                    True,
+                    dict_feature["value"]
                 )
 
         for dict_child in content_node_dict["children"]:
@@ -580,7 +576,7 @@ class ContentNode(object):
         )
         self.document.get_persistence().add_feature(self, feature)
 
-    def add_feature(self, feature_type, name, value, single=True, serialized=False):
+    def add_feature(self, feature_type, name, value):
         """
         Add a new feature to this ContentNode.
 
@@ -591,7 +587,6 @@ class ContentNode(object):
           feature_type (str): The type of feature to be added to the node.
           name (str): The name of the feature.
           value (Any): The value of the feature.
-          single (boolean): Indicates that the value is singular, rather than a collection (ex: str vs list); defaults to True.
           serialized (boolean): Indicates that the value is/is not already serialized; defaults to False.
 
         Returns:
@@ -614,8 +609,7 @@ class ContentNode(object):
         new_feature = ContentFeature(
             feature_type,
             name,
-            [value] if single and not serialized else value,
-            single=single,
+            value,
         )
         self.document.get_persistence().add_feature(self, new_feature)
         return new_feature
@@ -676,13 +670,6 @@ class ContentNode(object):
             if i.feature_type == feature_type and i.name == name
         ]
         if len(hits) > 0:
-
-            # We have a situation where the feature isn't a dict since it
-            # was added as a "Tag", lets turn it back into a dict to be
-            # consistent
-            if isinstance(hits[0].value, Tag):
-                hits[0].value = hits[0].value.to_dict()
-
             return hits[0]
 
         return None
@@ -768,8 +755,7 @@ class ContentNode(object):
         """
         feature = self.get_feature(feature_type, name)
 
-        # Need to make sure we handle the idea of a single value for a feature
-        return None if feature is None else feature.value[0]
+        return None if feature is None else feature.value
 
     def get_feature_values(self, feature_type: str, name: str) -> Optional[List[Any]]:
         """Get the value for a feature with the given name and type on this ContentNode.
@@ -1162,7 +1148,7 @@ class ContentNode(object):
                         end=val["end"],
                         value=val["value"],
                         uuid=val["uuid"],
-                        data=val["data"],
+                        data=val["data"] if "data" in val else {},
                     )
                     node.add_feature("tag", new_tag_name, tag)
 
@@ -1676,6 +1662,8 @@ class ContentNode(object):
         for tag in self.get_tag(tag_name):
             if "value" in tag:
                 values.append(tag["value"])
+            else:
+                values.append(None)
 
         if include_children:
             for child in self.get_children():
@@ -2149,18 +2137,16 @@ class ContentFeature(object):
 
     """A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode"""
 
-    def __init__(self, feature_type: str, name: str, value: Any, single: bool = True):
+    def __init__(self, feature_type: str, name: str, value: Any):
         self.feature_type: str = feature_type
         """The type of feature, a logical name to group feature types together (ie. spatial)"""
         self.name: str = name
         """The name of the feature (ie. bbox)"""
         self.value: Any = value
         """Description of the feature (Optional)"""
-        self.single: bool = single
-        """Determines whether the data for this feature is a single instance or an array, if you have added the same feature to the same node you will end up with multiple data elements in the content feature and the single flag will be false"""
-
+       
     def __str__(self):
-        return f"Feature [type='{self.feature_type}' name='{self.name}' value='{self.value}' single='{self.single}']"
+        return f"Feature [type='{self.feature_type}' name='{self.name}' value='{self.value}']"
 
     def to_dict(self):
         """
@@ -2171,8 +2157,7 @@ class ContentFeature(object):
         """
         return {
             "name": self.feature_type + ":" + self.name,
-            "value": self.value,
-            "single": self.single,
+            "value": self.value
         }
 
     def get_value(self):
@@ -2182,9 +2167,6 @@ class ContentFeature(object):
         Returns:
             Any: The value of the feature.
         """
-        if self.single:
-            return self.value[0]
-
         return self.value
 
 
@@ -2715,62 +2697,6 @@ class Document(object):
     def get_tag_instances(self, tag):
         groups = self.content_node.get_related_tag_nodes(tag, everywhere=True)
         tag_instances = []
-
-        class TagInstance:
-            """
-            A class to represent a TagInstance.
-
-            ...
-
-            Attributes
-            ----------
-            tag_uuid : str
-                a string that represents the unique identifier of the tag
-            nodes : list
-                a list of nodes associated with the tag
-
-            Methods
-            -------
-            get_value():
-                Returns the combined content of all nodes.
-            get_data():
-                Returns the data of the tag feature with the same uuid as the tag.
-            """
-
-            def __init__(self, tag_uuid, nodes):
-                self.tag_uuid = tag_uuid
-                self.nodes = nodes
-
-            def get_value(self):
-                """
-                Combines and returns the content of all nodes.
-
-                Returns
-                -------
-                str
-                    a string that represents the combined content of all nodes
-                """
-                content_parts = []
-                for node in self.nodes:
-                    content_parts.append(node.get_all_content())
-                return " ".join(content_parts)
-
-            def get_data(self):
-                """
-                Returns the data of the tag feature with the same uuid as the tag.
-
-                Returns
-                -------
-                dict
-                    a dictionary that represents the data of the tag feature with the same uuid as the tag
-                """
-                for node in self.nodes:
-                    for tag_feature in node.get_tag_features():
-                        data = tag_feature.value[0]
-                        if "uuid" in data and data["uuid"] == self.tag_uuid:
-                            return data
-                return {}
-
         for key in groups.keys():
             tag_instances.append(TagInstance(key, groups[key]))
         return tag_instances
@@ -3319,33 +3245,56 @@ class TagInstance:
     """
     A class to represent a TagInstance.
 
+    ...
+
     Attributes
     ----------
-    tag : Tag
-        an instance of Tag class
+    tag_uuid : str
+        a string that represents the unique identifier of the tag
     nodes : list
-        a list of nodes
+        a list of nodes associated with the tag
 
     Methods
     -------
-    add_node(nodes: List[ContentNode])
-        Extend the list of nodes with new nodes.
+    get_value():
+        Returns the combined content of all nodes.
+    get_data():
+        Returns the data of the tag feature with the same uuid as the tag.
     """
 
-    def __init__(self, tag: Tag, nodes):
-        self.tag = tag
+    def __init__(self, tag_uuid, nodes):
+        self.tag_uuid = tag_uuid
         self.nodes = nodes
 
-    def add_node(self, nodes: List[ContentNode]):
+    def get_value(self):
         """
-        Extend the list of nodes with new nodes.
+        Combines and returns the content of all nodes.
 
-        Parameters
-        ----------
-            nodes : List[ContentNode]
-                a list of new nodes to be added
+        Returns
+        -------
+        str
+            a string that represents the combined content of all nodes
         """
-        self.nodes.extend(nodes)
+        content_parts = []
+        for node in self.nodes:
+            content_parts.append(node.get_all_content())
+        return " ".join(content_parts)
+
+    def get_data(self):
+        """
+        Returns the data of the tag feature with the same uuid as the tag.
+
+        Returns
+        -------
+        dict
+            a dictionary that represents the data of the tag feature with the same uuid as the tag
+        """
+        for node in self.nodes:
+            for tag_feature in node.get_tag_features():
+                data = tag_feature.value[0]
+                if "uuid" in data and data["uuid"] == self.tag_uuid:
+                    return data
+        return {}
 
 
 class ContentObjectReference:
