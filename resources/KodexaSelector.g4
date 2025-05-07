@@ -12,13 +12,13 @@ expr
     | expr REL_OP expr                        # relationalExpr
     | expr PLUS expr                          # addExpr
     | expr MINUS expr                         # subtractExpr
-    | expr MULT expr                          # multiplyExpr
     | expr DIV expr                           # divideExpr
     | expr MOD expr                           # moduloExpr
     | expr UNION expr                         # unionExpr
     | expr INTERSECT expr                     # intersectExpr
     | MINUS expr                              # unaryMinusExpr
     | expr PIPELINE expr                      # pipelineExpr
+    | functionCall                            # funcCallExpr
     | filterExpr pathSep relativeLocationPath # pathBinaryExpr
     | relativeLocationPath                    # relativePathExpr
     | absoluteLocationPath                    # absolutePathExpr
@@ -26,6 +26,7 @@ expr
     | filterExpr                              # filterExpression
     | nameTest                                # directNameTest
     | PATH_SEP nameTest                       # rootNameTest
+    | booleanLiteral                          # booleanLiteralExpr
     ;
 
 absoluteLocationPath
@@ -74,15 +75,11 @@ qName
     | NCNAME               # simpleName
     ;
 
-funcQName
-    : NCNAME COLON FUNCNAME  # prefixedFuncName
-    | FUNCNAME               # simpleFuncName
-    ;
-
 filterExpr
     : variableReference                   # varRefFilter
     | LITERAL                             # literalFilter
     | number                              # numberFilter
+    | booleanLiteral                      # booleanFilter
     | functionCall                        # funcCallFilter
     | LPAREN expr RPAREN                  # groupedFilter
     | filterExpr predicate                # predicatedFilter
@@ -94,7 +91,7 @@ predicateList
     ;
 
 predicate
-    : LBRACKET expr RBRACKET
+    : LBRACKET expr RBRACKET                                # exprPredicate
     ;
 
 variableReference
@@ -106,9 +103,22 @@ number
     | INTEGER
     ;
 
+booleanLiteral
+    : TRUE 
+    | FALSE
+    ;
+
 functionCall
     : funcQName formalArguments
+    | builtInFunctionCall
     ;
+
+builtInFunctionCall
+    : TRUE formalArguments # trueFunction
+    | FALSE formalArguments # falseFunction
+    ;
+    
+funcQName: FUNCTION_NAME;
 
 formalArguments
     : LPAREN RPAREN                 # emptyArgs
@@ -148,11 +158,14 @@ EQUALS: '!=' | '=';
 REL_OP: '<=' | '>=' | '<' | '>';
 PLUS: '+';
 MINUS: '-';
-MULT: '*';
 STAR: '*';
 COMMA: ',';
 COLON: ':';
 DOLLAR: '$';
+TRUE: 'true';
+FALSE: 'false';
+
+FUNCTION_NAME: 'contentRegex' | 'typeRegex' | 'tagRegex' | 'hasTag' | 'hasFeature' | 'hasFeatureValue' | 'content' | 'id' | 'node_type' | 'index';
 
 LITERAL: '"' ~["]* '"' | '\'' ~[']* '\'';
 FLOAT: DIGIT+ '.' DIGIT* | '.' DIGIT+;

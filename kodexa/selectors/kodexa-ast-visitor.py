@@ -1,7 +1,7 @@
 from antlr4 import *
 from kodexa.selectors.resources.KodexaSelectorParser import KodexaSelectorParser
 from kodexa.selectors.resources.KodexaSelectorVisitor import KodexaSelectorVisitor
-import kodexa.selectors.resources.KodexaSelectorLexer as ast
+import kodexa.selectors.ast as ast
 
 class KodexaASTVisitor(KodexaSelectorVisitor):
     """
@@ -41,11 +41,6 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
         right = self.visit(ctx.expr(1))
         return ast.BinaryExpression(left, '-', right)
 
-    def visitMultiplyExpr(self, ctx:KodexaSelectorParser.MultiplyExprContext):
-        left = self.visit(ctx.expr(0))
-        right = self.visit(ctx.expr(1))
-        return ast.BinaryExpression(left, '*', right)
-
     def visitDivideExpr(self, ctx:KodexaSelectorParser.DivideExprContext):
         left = self.visit(ctx.expr(0))
         right = self.visit(ctx.expr(1))
@@ -74,6 +69,12 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
         left = self.visit(ctx.expr(0))
         right = self.visit(ctx.expr(1))
         return ast.PipelineExpression(left, 'stream', right)
+
+    def visitFuncCallExpr(self, ctx:KodexaSelectorParser.FuncCallExprContext):
+        return self.visit(ctx.functionCall())
+
+    def visitBooleanLiteralExpr(self, ctx:KodexaSelectorParser.BooleanLiteralExprContext):
+        return self.visit(ctx.booleanLiteral())
 
     def visitPathBinaryExpr(self, ctx:KodexaSelectorParser.PathBinaryExprContext):
         left = self.visit(ctx.filterExpr())
@@ -183,6 +184,23 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
         literal = ctx.LITERAL().getText()
         return literal[1:-1]  # Remove quotes
 
+    def visitBooleanFilter(self, ctx:KodexaSelectorParser.BooleanFilterContext):
+        return self.visit(ctx.booleanLiteral())
+
+    def visitBooleanLiteral(self, ctx:KodexaSelectorParser.BooleanLiteralContext):
+        if ctx.TRUE() is not None:
+            return True
+        else:
+            return False
+
+    def visitTrueFunction(self, ctx:KodexaSelectorParser.TrueFunctionContext):
+        args = self.visit(ctx.formalArguments())
+        return ast.FunctionCall(None, "true", args)
+
+    def visitFalseFunction(self, ctx:KodexaSelectorParser.FalseFunctionContext):
+        args = self.visit(ctx.formalArguments())
+        return ast.FunctionCall(None, "false", args)
+
     def visitNumberFilter(self, ctx:KodexaSelectorParser.NumberFilterContext):
         return self.visit(ctx.number())
 
@@ -224,9 +242,12 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
             return int(ctx.INTEGER().getText())
 
     def visitFunctionCall(self, ctx:KodexaSelectorParser.FunctionCallContext):
-        qname = self.visit(ctx.funcQName())
-        args = self.visit(ctx.formalArguments())
-        return ast.FunctionCall(qname[0], qname[1], args)
+        if ctx.builtInFunctionCall() is not None:
+            return self.visit(ctx.builtInFunctionCall())
+        else:
+            qname = self.visit(ctx.funcQName())
+            args = self.visit(ctx.formalArguments())
+            return ast.FunctionCall(qname[0], qname[1], args)
 
     def visitEmptyArgs(self, ctx:KodexaSelectorParser.EmptyArgsContext):
         return []

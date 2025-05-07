@@ -98,13 +98,22 @@ class FeatureType(BaseModel):
 class Feature(BaseModel):
     id = AutoField()
     feature_type = ForeignKeyField(FeatureType, backref='features', column_name='feature_type_id')
-    data_object = ForeignKeyField(DataObject, backref='features', null=True, column_name='data_object_id')
-    content_node = ForeignKeyField(ContentNode, backref='features', null=True, column_name='content_node_id')
-    single = IntegerField(null=True)
     tag_uuid = TextField(null=True)
 
     class Meta:
         table_name = 'kddb_features'
+
+
+class ContentNodeFeatureLink(BaseModel):
+    id = AutoField()
+    content_node = ForeignKeyField(ContentNode, backref='feature_links', column_name='content_node_id')
+    feature = ForeignKeyField(Feature, backref='content_node_links', column_name='feature_id')
+
+    class Meta:
+        table_name = 'kddb_content_node_feature_links'
+        indexes = (
+            (('content_node_id', 'feature_id'), True),  # Ensure uniqueness of pairs
+        )
 
 
 class FeatureBlob(BaseModel):
@@ -243,7 +252,7 @@ def initialize_database(db_path):
     tables_to_create = []
     all_tables = [
         Taxonomy, DataObject, NodeType, ContentNode, ContentNodePart,
-        ContentException, FeatureType, Feature, FeatureBlob, FeatureBBox,
+        ContentException, FeatureType, Feature, ContentNodeFeatureLink, FeatureBlob, FeatureBBox,
         FeatureTag, DataAttribute, DataException, TagMetadata, Metadata, Step,
         ExternalData
     ]

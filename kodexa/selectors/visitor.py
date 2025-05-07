@@ -40,11 +40,6 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
         right = self.visit(ctx.expr(1))
         return ast.BinaryExpression(left, '-', right)
 
-    def visitMultiplyExpr(self, ctx:KodexaSelectorParser.MultiplyExprContext):
-        left = self.visit(ctx.expr(0))
-        right = self.visit(ctx.expr(1))
-        return ast.BinaryExpression(left, '*', right)
-
     def visitDivideExpr(self, ctx:KodexaSelectorParser.DivideExprContext):
         left = self.visit(ctx.expr(0))
         right = self.visit(ctx.expr(1))
@@ -79,6 +74,9 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
         op = self.visit(ctx.pathSep())
         right = self.visit(ctx.relativeLocationPath())
         return ast.BinaryExpression(left, op, right)
+
+    def visitBooleanLiteralExpr(self, ctx:KodexaSelectorParser.BooleanLiteralExprContext):
+        return self.visit(ctx.booleanLiteral())
 
     def visitRootOnly(self, ctx:KodexaSelectorParser.RootOnlyContext):
         return ast.AbsolutePath('/')
@@ -167,20 +165,21 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
     def visitSimpleName(self, ctx:KodexaSelectorParser.SimpleNameContext):
         return (None, ctx.NCNAME().getText())
 
-    def visitPrefixedFuncName(self, ctx:KodexaSelectorParser.PrefixedFuncNameContext):
-        prefix = ctx.NCNAME().getText()
-        name = ctx.FUNCNAME().getText()
-        return (prefix, name)
-
-    def visitSimpleFuncName(self, ctx:KodexaSelectorParser.SimpleFuncNameContext):
-        return (None, ctx.FUNCNAME().getText())
-
     def visitVarRefFilter(self, ctx:KodexaSelectorParser.VarRefFilterContext):
         return self.visit(ctx.variableReference())
 
     def visitLiteralFilter(self, ctx:KodexaSelectorParser.LiteralFilterContext):
         literal = ctx.LITERAL().getText()
         return literal[1:-1]  # Remove quotes
+
+    def visitBooleanFilter(self, ctx:KodexaSelectorParser.BooleanFilterContext):
+        return self.visit(ctx.booleanLiteral())
+
+    def visitBooleanLiteral(self, ctx:KodexaSelectorParser.BooleanLiteralContext):
+        if ctx.TRUE() is not None:
+            return True
+        else:
+            return False
 
     def visitNumberFilter(self, ctx:KodexaSelectorParser.NumberFilterContext):
         return self.visit(ctx.number())
@@ -222,10 +221,27 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
         else:
             return int(ctx.INTEGER().getText())
 
-    def visitFunctionCall(self, ctx:KodexaSelectorParser.FunctionCallContext):
-        qname = self.visit(ctx.funcQName())
+    def visitFuncQName(self, ctx:KodexaSelectorParser.FuncQNameContext):
+        # Extract the function name from the context
+        func_name = ctx.getText()
+        # Return as (prefix, name) tuple with no prefix
+        return (None, func_name)
+
+    def visitTrueFunction(self, ctx:KodexaSelectorParser.TrueFunctionContext):
         args = self.visit(ctx.formalArguments())
-        return ast.FunctionCall(qname[0], qname[1], args)
+        return ast.FunctionCall(None, "true", args)
+
+    def visitFalseFunction(self, ctx:KodexaSelectorParser.FalseFunctionContext):
+        args = self.visit(ctx.formalArguments())
+        return ast.FunctionCall(None, "false", args)
+
+    def visitFunctionCall(self, ctx:KodexaSelectorParser.FunctionCallContext):
+        if hasattr(ctx, 'builtInFunctionCall') and ctx.builtInFunctionCall() is not None:
+            return self.visit(ctx.builtInFunctionCall())
+        else:
+            qname = self.visit(ctx.funcQName())
+            args = self.visit(ctx.formalArguments())
+            return ast.FunctionCall(qname[0], qname[1], args)
 
     def visitEmptyArgs(self, ctx:KodexaSelectorParser.EmptyArgsContext):
         return []
@@ -246,6 +262,9 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
             return '/'
         else:
             return '//'
+
+    def visitFuncCallExpr(self, ctx:KodexaSelectorParser.FuncCallExprContext):
+        return self.visit(ctx.functionCall())
 
     # Add default implementations for any missing visit methods
     def visitChildren(self, ctx):

@@ -62,6 +62,15 @@ class KodexaSelectorListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by KodexaSelectorParser#directNameTest.
+    def enterDirectNameTest(self, ctx:KodexaSelectorParser.DirectNameTestContext):
+        pass
+
+    # Exit a parse tree produced by KodexaSelectorParser#directNameTest.
+    def exitDirectNameTest(self, ctx:KodexaSelectorParser.DirectNameTestContext):
+        pass
+
+
     # Enter a parse tree produced by KodexaSelectorParser#orExpr.
     def enterOrExpr(self, ctx:KodexaSelectorParser.OrExprContext):
         pass
@@ -80,12 +89,12 @@ class KodexaSelectorListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by KodexaSelectorParser#multiplyExpr.
-    def enterMultiplyExpr(self, ctx:KodexaSelectorParser.MultiplyExprContext):
+    # Enter a parse tree produced by KodexaSelectorParser#funcCallExpr.
+    def enterFuncCallExpr(self, ctx:KodexaSelectorParser.FuncCallExprContext):
         pass
 
-    # Exit a parse tree produced by KodexaSelectorParser#multiplyExpr.
-    def exitMultiplyExpr(self, ctx:KodexaSelectorParser.MultiplyExprContext):
+    # Exit a parse tree produced by KodexaSelectorParser#funcCallExpr.
+    def exitFuncCallExpr(self, ctx:KodexaSelectorParser.FuncCallExprContext):
         pass
 
 
@@ -125,6 +134,15 @@ class KodexaSelectorListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by KodexaSelectorParser#rootNameTest.
+    def enterRootNameTest(self, ctx:KodexaSelectorParser.RootNameTestContext):
+        pass
+
+    # Exit a parse tree produced by KodexaSelectorParser#rootNameTest.
+    def exitRootNameTest(self, ctx:KodexaSelectorParser.RootNameTestContext):
+        pass
+
+
     # Enter a parse tree produced by KodexaSelectorParser#unaryMinusExpr.
     def enterUnaryMinusExpr(self, ctx:KodexaSelectorParser.UnaryMinusExprContext):
         pass
@@ -158,6 +176,15 @@ class KodexaSelectorListener(ParseTreeListener):
 
     # Exit a parse tree produced by KodexaSelectorParser#filterExpression.
     def exitFilterExpression(self, ctx:KodexaSelectorParser.FilterExpressionContext):
+        pass
+
+
+    # Enter a parse tree produced by KodexaSelectorParser#booleanLiteralExpr.
+    def enterBooleanLiteralExpr(self, ctx:KodexaSelectorParser.BooleanLiteralExprContext):
+        pass
+
+    # Exit a parse tree produced by KodexaSelectorParser#booleanLiteralExpr.
+    def exitBooleanLiteralExpr(self, ctx:KodexaSelectorParser.BooleanLiteralExprContext):
         pass
 
 
@@ -377,30 +404,21 @@ class KodexaSelectorListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by KodexaSelectorParser#prefixedFuncName.
-    def enterPrefixedFuncName(self, ctx:KodexaSelectorParser.PrefixedFuncNameContext):
-        pass
-
-    # Exit a parse tree produced by KodexaSelectorParser#prefixedFuncName.
-    def exitPrefixedFuncName(self, ctx:KodexaSelectorParser.PrefixedFuncNameContext):
-        pass
-
-
-    # Enter a parse tree produced by KodexaSelectorParser#simpleFuncName.
-    def enterSimpleFuncName(self, ctx:KodexaSelectorParser.SimpleFuncNameContext):
-        pass
-
-    # Exit a parse tree produced by KodexaSelectorParser#simpleFuncName.
-    def exitSimpleFuncName(self, ctx:KodexaSelectorParser.SimpleFuncNameContext):
-        pass
-
-
     # Enter a parse tree produced by KodexaSelectorParser#funcCallFilter.
     def enterFuncCallFilter(self, ctx:KodexaSelectorParser.FuncCallFilterContext):
         pass
 
     # Exit a parse tree produced by KodexaSelectorParser#funcCallFilter.
     def exitFuncCallFilter(self, ctx:KodexaSelectorParser.FuncCallFilterContext):
+        pass
+
+
+    # Enter a parse tree produced by KodexaSelectorParser#booleanFilter.
+    def enterBooleanFilter(self, ctx:KodexaSelectorParser.BooleanFilterContext):
+        pass
+
+    # Exit a parse tree produced by KodexaSelectorParser#booleanFilter.
+    def exitBooleanFilter(self, ctx:KodexaSelectorParser.BooleanFilterContext):
         pass
 
 
@@ -467,12 +485,12 @@ class KodexaSelectorListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by KodexaSelectorParser#predicate.
-    def enterPredicate(self, ctx:KodexaSelectorParser.PredicateContext):
+    # Enter a parse tree produced by KodexaSelectorParser#exprPredicate.
+    def enterExprPredicate(self, ctx:KodexaSelectorParser.ExprPredicateContext):
         pass
 
-    # Exit a parse tree produced by KodexaSelectorParser#predicate.
-    def exitPredicate(self, ctx:KodexaSelectorParser.PredicateContext):
+    # Exit a parse tree produced by KodexaSelectorParser#exprPredicate.
+    def exitExprPredicate(self, ctx:KodexaSelectorParser.ExprPredicateContext):
         pass
 
 
@@ -494,12 +512,48 @@ class KodexaSelectorListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by KodexaSelectorParser#booleanLiteral.
+    def enterBooleanLiteral(self, ctx:KodexaSelectorParser.BooleanLiteralContext):
+        pass
+
+    # Exit a parse tree produced by KodexaSelectorParser#booleanLiteral.
+    def exitBooleanLiteral(self, ctx:KodexaSelectorParser.BooleanLiteralContext):
+        pass
+
+
     # Enter a parse tree produced by KodexaSelectorParser#functionCall.
     def enterFunctionCall(self, ctx:KodexaSelectorParser.FunctionCallContext):
         pass
 
     # Exit a parse tree produced by KodexaSelectorParser#functionCall.
     def exitFunctionCall(self, ctx:KodexaSelectorParser.FunctionCallContext):
+        pass
+
+
+    # Enter a parse tree produced by KodexaSelectorParser#trueFunction.
+    def enterTrueFunction(self, ctx:KodexaSelectorParser.TrueFunctionContext):
+        pass
+
+    # Exit a parse tree produced by KodexaSelectorParser#trueFunction.
+    def exitTrueFunction(self, ctx:KodexaSelectorParser.TrueFunctionContext):
+        pass
+
+
+    # Enter a parse tree produced by KodexaSelectorParser#falseFunction.
+    def enterFalseFunction(self, ctx:KodexaSelectorParser.FalseFunctionContext):
+        pass
+
+    # Exit a parse tree produced by KodexaSelectorParser#falseFunction.
+    def exitFalseFunction(self, ctx:KodexaSelectorParser.FalseFunctionContext):
+        pass
+
+
+    # Enter a parse tree produced by KodexaSelectorParser#funcQName.
+    def enterFuncQName(self, ctx:KodexaSelectorParser.FuncQNameContext):
+        pass
+
+    # Exit a parse tree produced by KodexaSelectorParser#funcQName.
+    def exitFuncQName(self, ctx:KodexaSelectorParser.FuncQNameContext):
         pass
 
 

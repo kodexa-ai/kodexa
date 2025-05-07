@@ -39,6 +39,11 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by KodexaSelectorParser#directNameTest.
+    def visitDirectNameTest(self, ctx:KodexaSelectorParser.DirectNameTestContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by KodexaSelectorParser#orExpr.
     def visitOrExpr(self, ctx:KodexaSelectorParser.OrExprContext):
         return self.visitChildren(ctx)
@@ -49,8 +54,8 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by KodexaSelectorParser#multiplyExpr.
-    def visitMultiplyExpr(self, ctx:KodexaSelectorParser.MultiplyExprContext):
+    # Visit a parse tree produced by KodexaSelectorParser#funcCallExpr.
+    def visitFuncCallExpr(self, ctx:KodexaSelectorParser.FuncCallExprContext):
         return self.visitChildren(ctx)
 
 
@@ -74,6 +79,11 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by KodexaSelectorParser#rootNameTest.
+    def visitRootNameTest(self, ctx:KodexaSelectorParser.RootNameTestContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by KodexaSelectorParser#unaryMinusExpr.
     def visitUnaryMinusExpr(self, ctx:KodexaSelectorParser.UnaryMinusExprContext):
         return self.visitChildren(ctx)
@@ -91,6 +101,11 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by KodexaSelectorParser#filterExpression.
     def visitFilterExpression(self, ctx:KodexaSelectorParser.FilterExpressionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by KodexaSelectorParser#booleanLiteralExpr.
+    def visitBooleanLiteralExpr(self, ctx:KodexaSelectorParser.BooleanLiteralExprContext):
         return self.visitChildren(ctx)
 
 
@@ -214,18 +229,13 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by KodexaSelectorParser#prefixedFuncName.
-    def visitPrefixedFuncName(self, ctx:KodexaSelectorParser.PrefixedFuncNameContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by KodexaSelectorParser#simpleFuncName.
-    def visitSimpleFuncName(self, ctx:KodexaSelectorParser.SimpleFuncNameContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by KodexaSelectorParser#funcCallFilter.
     def visitFuncCallFilter(self, ctx:KodexaSelectorParser.FuncCallFilterContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by KodexaSelectorParser#booleanFilter.
+    def visitBooleanFilter(self, ctx:KodexaSelectorParser.BooleanFilterContext):
         return self.visitChildren(ctx)
 
 
@@ -264,8 +274,8 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by KodexaSelectorParser#predicate.
-    def visitPredicate(self, ctx:KodexaSelectorParser.PredicateContext):
+    # Visit a parse tree produced by KodexaSelectorParser#exprPredicate.
+    def visitExprPredicate(self, ctx:KodexaSelectorParser.ExprPredicateContext):
         return self.visitChildren(ctx)
 
 
@@ -279,8 +289,28 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by KodexaSelectorParser#booleanLiteral.
+    def visitBooleanLiteral(self, ctx:KodexaSelectorParser.BooleanLiteralContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by KodexaSelectorParser#functionCall.
     def visitFunctionCall(self, ctx:KodexaSelectorParser.FunctionCallContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by KodexaSelectorParser#trueFunction.
+    def visitTrueFunction(self, ctx:KodexaSelectorParser.TrueFunctionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by KodexaSelectorParser#falseFunction.
+    def visitFalseFunction(self, ctx:KodexaSelectorParser.FalseFunctionContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by KodexaSelectorParser#funcQName.
+    def visitFuncQName(self, ctx:KodexaSelectorParser.FuncQNameContext):
         return self.visitChildren(ctx)
 
 

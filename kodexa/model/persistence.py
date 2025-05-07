@@ -277,10 +277,17 @@ class SqliteDocumentPersistence(object):
                 
                 # Migrate features
                 self.connection.execute_sql("""
-                    INSERT INTO kddb_features (feature_type_id, content_node_id, data_object_id, single, tag_uuid)
-                    SELECT ft.f_type, ft.cn_id, do_map.do_id, ft.single, ft.tag_uuid
+                    INSERT INTO kddb_features (id, feature_type_id, tag_uuid)
+                    SELECT ft.id, ft.f_type, ft.tag_uuid
+                    FROM ft;
+                """)
+
+                # Populate the new ContentNodeFeatureLink table
+                self.connection.execute_sql("""
+                    INSERT INTO kddb_content_node_feature_links (content_node_id, feature_id)
+                    SELECT ft.cn_id, ft.id
                     FROM ft
-                    JOIN temp_do_mapping do_map ON ft.cn_id = do_map.cn_id;
+                    WHERE ft.cn_id IS NOT NULL;
                 """)
                 
                 # Migrate feature binary data
@@ -735,12 +742,14 @@ class SqliteDocumentPersistence(object):
         Retrieves the features of a given node.
         """
         from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureType
-        from kodexa.model.persistence_models import FeatureTag, ContentNode as PeeweeContentNode
+        from kodexa.model.persistence_models import FeatureTag, ContentNode as PeeweeContentNode, ContentNodeFeatureLink
         
         features = []
         if node.id:
             # Try to fetch features by content node ID
-            peewee_features = PeeweeFeature.select().where(PeeweeFeature.content_node == node.id)
+            peewee_features = (PeeweeFeature.select()
+                               .join(ContentNodeFeatureLink, on=(PeeweeFeature.id == ContentNodeFeatureLink.feature))
+                               .where(ContentNodeFeatureLink.content_node == node.id))
             
             # If no features found, check all features for a match
             if peewee_features.count() == 0:
@@ -751,22 +760,26 @@ class SqliteDocumentPersistence(object):
                     # Get all features of type 'tag'
                     tag_types = FeatureType.select().where(FeatureType.name.startswith('tag:'))
                     for tag_type in tag_types:
-                        all_features = PeeweeFeature.select().where(PeeweeFeature.feature_type == tag_type)
-                        if all_features.count() > 0:
-                            peewee_features = all_features
-                            print(f"Found tags that should apply to root node: {[f.id for f in all_features]}")
+                        # This part of the fallback fetches all features of a type, not specific to the node.
+                        # It might need further review based on intended behavior.
+                        all_features_of_type = PeeweeFeature.select().where(PeeweeFeature.feature_type == tag_type)
+                        if all_features_of_type.count() > 0:
+                            # If this fallback is meant to associate these with the current root node,
+                            # further logic would be needed here. For now, it reassigns peewee_features.
+                            peewee_features = all_features_of_type 
+                            print(f"Found tags via fallback that might apply to root node: {[f.id for f in peewee_features]}")
             
-            for feature in peewee_features:
-                feature_type_name = FeatureType.get(FeatureType.id == feature.feature_type).name
+            for feature_instance in peewee_features: # Renamed 'feature' to 'feature_instance' to avoid confusion
+                feature_type_name = FeatureType.get(FeatureType.id == feature_instance.feature_type).name
                 
                 # Get the feature value from FeatureBlob
-                blob = FeatureBlob.get_or_none(FeatureBlob.feature == feature)
+                blob = FeatureBlob.get_or_none(FeatureBlob.feature == feature_instance)
                 value = msgpack.unpackb(blob.binary_value) if blob else None
                 
                 # For tag features, we should also check for FeatureTags
                 if feature_type_name.startswith('tag:'):
                     # Check if we have feature tags for this feature
-                    tags = FeatureTag.select().where(FeatureTag.feature == feature)
+                    tags = FeatureTag.select().where(FeatureTag.feature == feature_instance)
                     if tags.count() > 0:
                         # If there are tag records, they might override the blob value
                         tag_values = []
@@ -809,15 +822,15 @@ class SqliteDocumentPersistence(object):
                 
                 # Parse feature type and name from combined string
                 feature_parts = feature_type_name.split(":")
-                feature_type = feature_parts[0]
-                feature_name = feature_parts[1] if len(feature_parts) > 1 else ""
+                feature_type_str = feature_parts[0] # Renamed to avoid conflict
+                feature_name_str = feature_parts[1] if len(feature_parts) > 1 else "" # Renamed
                 
                 features.append(
                     ContentFeature(
-                        feature_type,
-                        feature_name,
-                        value,
-                        single=feature.single == 1
+                        feature_type_str,
+                        feature_name_str,
+                        value
+                        # single argument will use its default from ContentFeature constructor (True)
                     )
                 )
                 
@@ -828,17 +841,17 @@ class SqliteDocumentPersistence(object):
         Adds a feature to a node.
         """
         from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureType
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, FeatureTag
+        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, FeatureTag, ContentNodeFeatureLink
         
         with self.connection.atomic():
             # Get or create feature type
             feature_type_name = f"{feature.feature_type}:{feature.name}"
-            feature_type, created = FeatureType.get_or_create(name=feature_type_name)
+            db_feature_type, created = FeatureType.get_or_create(name=feature_type_name) # Renamed to db_feature_type
             
             # Get the content node
             if node.id is None:
                 raise ValueError("Node ID is required to add a feature")
-            peewee_node = self.get_node(node.id)
+            # peewee_node = self.get_node(node.id) # Not strictly needed here
             
             # Create feature record
             tag_uuid = None
@@ -846,11 +859,14 @@ class SqliteDocumentPersistence(object):
                 tag_uuid = feature.value[0]["uuid"]
                 
             peewee_feature = PeeweeFeature.create(
-                feature_type=feature_type,
-                content_node=node.id,
-                single=1 if feature.single else 0,
+                feature_type=db_feature_type, # Use renamed variable
+                # content_node=node.id, # Removed: Handled by ContentNodeFeatureLink
+                # single=1 if feature.single else 0, # Removed: 'single' attribute removed from PeeweeFeature
                 tag_uuid=tag_uuid
             )
+            
+            # Link feature to content node
+            ContentNodeFeatureLink.create(content_node=node.id, feature=peewee_feature.id)
             
             # Create the feature blob with binary data
             blob = FeatureBlob.create(
@@ -901,58 +917,73 @@ class SqliteDocumentPersistence(object):
         """
         Removes a feature from a given node.
         """
-        from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureType, FeatureTag, FeatureBBox
+        from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureType, FeatureTag, FeatureBBox, ContentNodeFeatureLink
         
         feature_type_name = f"{feature_type}:{name}"
         
         # Find the feature type
         peewee_feature_type = FeatureType.get_or_none(FeatureType.name == feature_type_name)
         if peewee_feature_type:
-            # Find features with this type for this node
-            features = PeeweeFeature.select().where(
-                PeeweeFeature.content_node == node.id,
-                PeeweeFeature.feature_type == peewee_feature_type
-            )
+            # Find features with this type linked to this node
+            features_query = (PeeweeFeature.select()
+                              .join(ContentNodeFeatureLink, on=(PeeweeFeature.id == ContentNodeFeatureLink.feature))
+                              .where(ContentNodeFeatureLink.content_node == node.id,
+                                     PeeweeFeature.feature_type == peewee_feature_type))
             
-            # Delete all associated records for each feature
-            for feature in features:
-                # Delete feature tags
-                FeatureTag.delete().where(FeatureTag.feature == feature).execute()
+            feature_ids_to_delete = [f.id for f in features_query]
+
+            if feature_ids_to_delete:
+                with self.connection.atomic():
+                    # Delete feature tags
+                    FeatureTag.delete().where(FeatureTag.feature_id.in_(feature_ids_to_delete)).execute()
+                    
+                    # Delete feature bboxes
+                    FeatureBBox.delete().where(FeatureBBox.feature_id.in_(feature_ids_to_delete)).execute()
+                    
+                    # Delete feature blobs
+                    FeatureBlob.delete().where(FeatureBlob.feature_id.in_(feature_ids_to_delete)).execute()
+
+                    # Delete links between content node and features
+                    ContentNodeFeatureLink.delete().where(
+                        ContentNodeFeatureLink.content_node == node.id, # Use node.id for FK object
+                        ContentNodeFeatureLink.feature_id.in_(feature_ids_to_delete)
+                    ).execute()
                 
-                # Delete feature bboxes
-                FeatureBBox.delete().where(FeatureBBox.feature == feature).execute()
-                
-                # Delete feature blobs
-                FeatureBlob.delete().where(FeatureBlob.feature == feature).execute()
-            
-            # Now delete the features themselves
-            PeeweeFeature.delete().where(
-                PeeweeFeature.content_node == node.id,
-                PeeweeFeature.feature_type == peewee_feature_type
-            ).execute()
+                    # Now delete the features themselves
+                    PeeweeFeature.delete().where(PeeweeFeature.id.in_(feature_ids_to_delete)).execute()
 
     def remove_all_features(self, node):
         """
         Removes all features from a given node.
         """
-        from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureTag, FeatureBBox
+        from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureTag, FeatureBBox, ContentNodeFeatureLink
         
-        # Find all features for this node
-        features = PeeweeFeature.select().where(PeeweeFeature.content_node == node.id)
+        # Find all features linked to this node
+        features_query = (PeeweeFeature.select()
+                          .join(ContentNodeFeatureLink, on=(PeeweeFeature.id == ContentNodeFeatureLink.feature))
+                          .where(ContentNodeFeatureLink.content_node == node.id)) # Use node.id for FK object
         
-        # Delete all associated records for each feature
-        for feature in features:
-            # Delete feature tags
-            FeatureTag.delete().where(FeatureTag.feature == feature).execute()
+        feature_ids_to_delete = [f.id for f in features_query]
+
+        if feature_ids_to_delete:
+            with self.connection.atomic():
+                # Delete feature tags
+                FeatureTag.delete().where(FeatureTag.feature_id.in_(feature_ids_to_delete)).execute()
+                
+                # Delete feature bboxes
+                FeatureBBox.delete().where(FeatureBBox.feature_id.in_(feature_ids_to_delete)).execute()
+                
+                # Delete feature blobs
+                FeatureBlob.delete().where(FeatureBlob.feature_id.in_(feature_ids_to_delete)).execute()
+
+                # Delete links between content node and features
+                ContentNodeFeatureLink.delete().where(
+                    ContentNodeFeatureLink.content_node == node.id, # Use node.id for FK object
+                    ContentNodeFeatureLink.feature_id.in_(feature_ids_to_delete)
+                ).execute()
             
-            # Delete feature bboxes
-            FeatureBBox.delete().where(FeatureBBox.feature == feature).execute()
-            
-            # Delete feature blobs
-            FeatureBlob.delete().where(FeatureBlob.feature == feature).execute()
-        
-        # Now delete the features themselves
-        PeeweeFeature.delete().where(PeeweeFeature.content_node == node.id).execute()
+                # Now delete the features themselves
+                PeeweeFeature.delete().where(PeeweeFeature.id.in_(feature_ids_to_delete)).execute()
 
     def remove_all_features_by_id(self, node_id):
         """

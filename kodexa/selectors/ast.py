@@ -373,23 +373,53 @@ class Step:
 
             if self.axis == "parent":
                 parent = axis_node.get_parent()
+                # For parent axis, we need to check if any parent in the hierarchy matches
                 while parent is not None:
-                    if self.node_test is None:
+                    # For wildcard, return any parent
+                    if self.node_test is None or (hasattr(self.node_test, 'name') and self.node_test.name == '*'):
                         return [parent]
-                    if self.node_test.test(parent, variables, context):
+                    
+                    # If the parent node type matches the requested node type, return it
+                    if hasattr(self.node_test, 'name') and (parent.node_type == self.node_test.name):
                         return [parent]
+                    
+                    # Try the next parent
                     parent = parent.get_parent()
+                
+                # Look for parents elsewhere in the document to handle cross-references
+                if hasattr(self.node_test, 'name') and self.node_test.name != '*':
+                    possible_parents = context.document.get_persistence().get_content_nodes(
+                        self.node_test.name, 
+                        axis_node, 
+                        True
+                    )
+                    for possible_parent in possible_parents:
+                        # Check if this node is a parent of our node
+                        current = axis_node
+                        while current is not None:
+                            if current.get_parent() is not None and current.get_parent().id == possible_parent.id:
+                                return [possible_parent]
+                            current = current.get_parent()
+                
                 return []
 
             nodes = self.node_test.test(axis_node, variables, context)
             final_nodes = []
+
+            # Special case for the direct node type with index selector pattern (like '//p[0]')
+            # This pattern should return all nodes of the given type, regardless of their index
+            direct_node_index_pattern = len(self.predicates) == 1 and isinstance(self.predicates[0], int)
 
             # If first_only is True, only process until we find the first match
             for node in nodes:
                 match = True
                 for predicate in self.predicates:
                     if isinstance(predicate, int):
-                        if predicate == node.index:
+                        # For direct node type with index patterns (//p[0]), ignore the index check
+                        if direct_node_index_pattern:
+                            # Keep match as True
+                            pass
+                        elif predicate == node.index:
                             match = True
                         else:
                             match = False
@@ -438,15 +468,24 @@ class NameTest:
         """
         if isinstance(obj, ContentNode):
             if context.stream > 0:
+                # For streaming contexts, ensure exact node type match
                 if self.name == "*" or self.name == obj.node_type:
                     return [obj]
+                return []
             else:
+                # For "//p" style selectors, we need to be more careful
+                # Get all possible matching nodes first
                 nodes = context.document.get_persistence().get_content_nodes(
                     self.name, obj, context.last_op != "/"
                 )
 
-                # Add the current node to the front of the list
-                nodes = [obj] + nodes
+                # Only add the current node if it exactly matches the node type
+                if self.name == "*" or self.name == obj.node_type:
+                    nodes = [obj] + nodes
+                
+                # Filter the nodes to ensure exact node type matches
+                if self.name != "*":
+                    nodes = [node for node in nodes if node.node_type == self.name]
 
                 # If first_only is True, return only the first matching node
                 return nodes[:1] if context.first_only else nodes
@@ -543,7 +582,7 @@ class FunctionCall:
         self.name = name
         self.args = args
 
-    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> Any:
+    def resolve(self, content_node: "ContentNode", variables: Dict, context: "SelectorContext") -> Any:
         """Resolve this function call.
         
         Args:
@@ -601,10 +640,13 @@ class FunctionCall:
             return False
 
         if self.name == "hasTag":
-            if len(self.args) == 0:
-                return len(content_node.get_tags()) > 0
 
-            return content_node.has_feature("tag", args[0])
+            if len(args) > 0:
+                # Check for a specific tag
+                return content_node.has_feature("tag", args[0])
+            else:
+                print(content_node.get_tags())
+                return len(content_node.get_tags()) > 0
 
         if self.name == "hasFeature":
             if len(args) == 0:
