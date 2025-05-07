@@ -323,24 +323,6 @@ class KodexaSelectorListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by KodexaSelectorParser#nodeTypeTest.
-    def enterNodeTypeTest(self, ctx:KodexaSelectorParser.NodeTypeTestContext):
-        pass
-
-    # Exit a parse tree produced by KodexaSelectorParser#nodeTypeTest.
-    def exitNodeTypeTest(self, ctx:KodexaSelectorParser.NodeTypeTestContext):
-        pass
-
-
-    # Enter a parse tree produced by KodexaSelectorParser#nodeTypeLiteralTest.
-    def enterNodeTypeLiteralTest(self, ctx:KodexaSelectorParser.NodeTypeLiteralTestContext):
-        pass
-
-    # Exit a parse tree produced by KodexaSelectorParser#nodeTypeLiteralTest.
-    def exitNodeTypeLiteralTest(self, ctx:KodexaSelectorParser.NodeTypeLiteralTestContext):
-        pass
-
-
     # Enter a parse tree produced by KodexaSelectorParser#anyNameTest.
     def enterAnyNameTest(self, ctx:KodexaSelectorParser.AnyNameTestContext):
         pass

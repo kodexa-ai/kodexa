@@ -131,15 +131,6 @@ class KodexaASTVisitor(KodexaSelectorVisitor):
     def visitNameTestNode(self, ctx:KodexaSelectorParser.NameTestNodeContext):
         return self.visit(ctx.nameTest())
 
-    def visitNodeTypeTest(self, ctx:KodexaSelectorParser.NodeTypeTestContext):
-        return ast.NodeType(ctx.NODETYPE().getText())
-
-    def visitNodeTypeLiteralTest(self, ctx:KodexaSelectorParser.NodeTypeLiteralTestContext):
-        # Strip quotes from literal
-        literal = ctx.LITERAL().getText()
-        literal = literal[1:-1]  # Remove quotes
-        return ast.NodeType(ctx.NODETYPE().getText(), literal)
-
     def visitAnyNameTest(self, ctx:KodexaSelectorParser.AnyNameTestContext):
         return ast.NameTest(None, '*')
 

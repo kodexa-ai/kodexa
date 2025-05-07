@@ -69,11 +69,11 @@ def test_tag_multiple_regex_matches():
     # we expect 4 tags to be applied, one for each instance of the word 'little'
     feature_values = context.output_document.get_root().get_feature_values('tag', 'SIZE')
     assert type(feature_values) is list and len(feature_values) == 4
-    assert feature_values[2]['start'] == 37
-    assert feature_values[2]['end'] == 43
+    assert feature_values[2].start == 37
+    assert feature_values[2].end == 43
 
     # Because we didn't pass in a tag_uuid to the NodeTagger, each of the feature values should have a different UUID
-    features_uuids = list(set(dic['uuid'] for dic in feature_values))
+    features_uuids = list(set(tag.uuid for tag in feature_values))
     assert len(features_uuids) == 4
 
     # Run the multiple tag test again, but this time pass in a tag_uuid
@@ -85,7 +85,7 @@ def test_tag_multiple_regex_matches():
 
     # Now each of the feature values should have the same UUID
     feature_values = context.output_document.get_root().get_feature_values('tag', 'SIZE')
-    features_uuids = list(set(dic['uuid'] for dic in feature_values))
+    features_uuids = list(set(tag.uuid for tag in feature_values))
     assert len(features_uuids) == 1
 
     # Now test that tagging the entire node, rather than references within the node, only produce 1 feature
@@ -99,7 +99,8 @@ def test_tag_multiple_regex_matches():
 
     # we expect one tag to be applied and there to be no start or end value
     feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE_2')
-    assert feature_values['start'] is None and feature_values['end'] is None
+    feature = feature_values[0]
+    assert feature.start is None and feature.end is None
 
 
 def test_tag_copy():
@@ -136,7 +137,7 @@ def test_tag_copy():
 
     lamb_info_feature_values = context.output_document.get_root().get_feature_values('tag', 'LAMB_INFO')
     assert type(lamb_info_feature_values) is list and len(lamb_info_feature_values) == 4
-    lamb_info_features_uuids = set(dic['uuid'] for dic in lamb_info_feature_values)
+    lamb_info_features_uuids = set(tag.uuid for tag in lamb_info_feature_values)
     assert len(list(lamb_info_features_uuids)) == 4
 
     # Now test that tagging the entire node, rather than references within the node, only produce 1 feature
@@ -151,9 +152,9 @@ def test_tag_copy():
 
     # we should now have 1 feature values for 'LAMB_INFO_2' and 1 feature values for 'SIZE_2'
     size_2_feature_values = context.output_document.get_root().get_feature_value('tag', 'SIZE_2')
-    assert type(size_2_feature_values) is not list
+    assert type(size_2_feature_values) is list
     lamb_info_2_feature_values = context.output_document.get_root().get_feature_value('tag', 'LAMB_INFO_2')
-    assert type(lamb_info_2_feature_values) is not list
+    assert type(lamb_info_2_feature_values) is list
 
     # now we need to test that when features are related (indicated by the same tag_uuid), they remain related when copying
     document = Document.from_text(doc_string)  # starting with a clean document
@@ -172,7 +173,7 @@ def test_tag_copy():
     # The feature values should have the same UUID - for both WOOL_INFO and FLEECE_INFO
     wool_values = context.output_document.get_root().get_feature_values('tag', 'WOOL_INFO')
     assert type(wool_values) is list and len(wool_values) == 2
-    wool_uuids = set(dic['uuid'] for dic in wool_values)
+    wool_uuids = set(tag.uuid for tag in wool_values)
     assert len(list(wool_uuids)) == 1
 
     fleece_info_values = context.output_document.get_root().get_feature_values('tag', 'FLEECE_INFO')
@@ -189,10 +190,11 @@ def test_tagging_issue_with_html():
     kdxa_doc.content_node.tag("test_tag", use_all_content=True, node_only=False, fixed_position=(707, 710))
 
     node = kdxa_doc.select('//*[hasTag("test_tag")]')[0]
-    feature = node.get_feature_value("tag", "test_tag")
-    assert feature['value'] == 'IIJ'
+    tags = node.get_feature_value("tag", "test_tag")
+    feature = tags[0]
+    assert tags[0].value == 'IIJ'
     assert "IIJ" == kdxa_doc.select("//*[hasTag('test_tag')]")[0].get_all_content(strip=False)[
-                    feature['start']:feature['end']]
+                    feature.start:feature.end]
 
 
 def test_fax2tagging():

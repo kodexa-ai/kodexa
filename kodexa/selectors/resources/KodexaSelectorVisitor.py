@@ -184,16 +184,6 @@ class KodexaSelectorVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by KodexaSelectorParser#nodeTypeTest.
-    def visitNodeTypeTest(self, ctx:KodexaSelectorParser.NodeTypeTestContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by KodexaSelectorParser#nodeTypeLiteralTest.
-    def visitNodeTypeLiteralTest(self, ctx:KodexaSelectorParser.NodeTypeLiteralTestContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by KodexaSelectorParser#anyNameTest.
     def visitAnyNameTest(self, ctx:KodexaSelectorParser.AnyNameTestContext):
         return self.visitChildren(ctx)

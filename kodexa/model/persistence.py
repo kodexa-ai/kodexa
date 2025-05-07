@@ -278,8 +278,8 @@ class SqliteDocumentPersistence(object):
                 
                 # Migrate features
                 self.connection.execute_sql("""
-                    INSERT INTO kddb_features (id, feature_type_id, tag_uuid)
-                    SELECT ft.id, ft.f_type, ft.tag_uuid
+                    INSERT INTO kddb_features (id, feature_type_id)
+                    SELECT ft.id, ft.f_type
                     FROM ft;
                 """)
 
@@ -773,70 +773,56 @@ class SqliteDocumentPersistence(object):
             for feature_instance in peewee_features: # 
                 feature_type_name = FeatureType.get(FeatureType.id == feature_instance.feature_type).name
                 
-                # Get the feature value from FeatureBlob
-                blob = FeatureBlob.get_or_none(FeatureBlob.feature == feature_instance)
-                value = msgpack.unpackb(blob.binary_value) if blob else None
-                
-                # For tag features, we should also check for FeatureTags
-                if feature_type_name.startswith('tag:'):
-                    # Check if a FeatureTag record exists for this feature instance.
-                    # If it does, its data will override any value from FeatureBlob.
-                    tag_record = FeatureTag.select().where(FeatureTag.feature == feature_instance).first()
-                    
-                    if tag_record:
-                        # A FeatureTag record exists. This assumes a single FeatureTag is effectively
-                        # associated with a 'tag:' PeeweeFeature for determining its value.
-                        tag_data = {}
-                        if tag_record.start_pos is not None:
-                            tag_data['start'] = tag_record.start_pos
-                        if tag_record.end_pos is not None:
-                            tag_data['end'] = tag_record.end_pos
-                        if tag_record.tag_value is not None:
-                            tag_data['value'] = tag_record.tag_value
-                        if tag_record.uuid is not None:
-                            tag_data['uuid'] = tag_record.uuid
-                        if tag_record.data is not None:
-                            tag_data['data'] = msgpack.unpackb(tag_record.data)
-                        if tag_record.confidence is not None:
-                            tag_data['confidence'] = tag_record.confidence
-                        if tag_record.group_uuid is not None:
-                            tag_data['group_uuid'] = tag_record.group_uuid
-                        if tag_record.parent_group_uuid is not None:
-                            tag_data['parent_group_uuid'] = tag_record.parent_group_uuid
-                        if tag_record.cell_index is not None:
-                            tag_data['cell_index'] = tag_record.cell_index
-                        if tag_record.index is not None:
-                            tag_data['index'] = tag_record.index
-                        if tag_record.note is not None:
-                            tag_data['note'] = tag_record.note
-                        if tag_record.status is not None:
-                            tag_data['status'] = tag_record.status
-                        if tag_record.owner_uri is not None:
-                            tag_data['owner_uri'] = tag_record.owner_uri
-                        if tag_record.is_dirty is not None:
-                            tag_data['is_dirty'] = bool(tag_record.is_dirty)
-                        
-                        value = tag_data # Assign the single dictionary directly
-                
-                # Parse feature type and name from combined string
                 feature_parts = feature_type_name.split(":")
-                feature_type_str = feature_parts[0] # Renamed to avoid conflict
-                feature_name_str = feature_parts[1] if len(feature_parts) > 1 else "" # Renamed
+                feature_type_str = feature_parts[0] 
+                feature_name_str = feature_parts[1] if len(feature_parts) > 1 else "" 
+
+                resolved_value = None
+                if feature_type_str == 'tag':
+                    tag_records = FeatureTag.select().where(FeatureTag.feature == feature_instance)
+                    tag_objects = []
+                    for tag_record in tag_records:
+                        # Reconstruct the Tag object or its dictionary representation
+                        tag_data_dict = {
+                            'start': tag_record.start_pos,
+                            'end': tag_record.end_pos,
+                            'value': tag_record.tag_value,
+                            'uuid': tag_record.uuid, # This is the individual tag's UUID
+                            'data': msgpack.unpackb(tag_record.data) if tag_record.data else None,
+                            'confidence': tag_record.confidence,
+                            'group_uuid': tag_record.group_uuid,
+                            'parent_group_uuid': tag_record.parent_group_uuid,
+                            'cell_index': tag_record.cell_index,
+                            'index': tag_record.index,
+                            'note': tag_record.note,
+                            'status': tag_record.status,
+                            'owner_uri': tag_record.owner_uri,
+                            'is_dirty': bool(tag_record.is_dirty) if tag_record.is_dirty is not None else None
+                        }
+                        tag_objects.append(Tag(**tag_data_dict)) # Create Tag object instance
+                    
+                    # The value of the ContentFeature for a tag type is a list of Tag objects
+                    resolved_value = tag_objects
+                else:
+                    # Get the feature value from FeatureBlob for non-tag features
+                    blob = FeatureBlob.get_or_none(FeatureBlob.feature == feature_instance)
+                    resolved_value = msgpack.unpackb(blob.binary_value) if blob else None
                 
                 features.append(
                     ContentFeature(
                         feature_type_str,
                         feature_name_str,
-                        value
+                        resolved_value # This will be a list of Tags for "tag" types, or single value for others
                     )
                 )
                 
         return features
 
     def add_feature(self, node, feature):
-        """
-        Adds a feature to a node.
-        """
+        # Ensure node has an id
+        if node.id is None:
+            raise ValueError("Node ID is required to add a feature")
+
         from kodexa.model.persistence_models import Feature as PeeweeFeature, FeatureBlob, FeatureType
         from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, FeatureTag, ContentNodeFeatureLink
         
@@ -845,63 +831,45 @@ class SqliteDocumentPersistence(object):
             feature_type_name = f"{feature.feature_type}:{feature.name}"
             db_feature_type, created = FeatureType.get_or_create(name=feature_type_name) 
             
-            # Get the content node
-            if node.id is None:
-                raise ValueError("Node ID is required to add a feature")
-            
-            # Create feature record
-            tag_uuid = None
-            if isinstance(feature.value, Tag):
-                tag_uuid = feature.value.uuid
-                
-            peewee_feature = PeeweeFeature.create(
-                feature_type=db_feature_type, # Use renamed variable
-                tag_uuid=tag_uuid
-            )
-            
-            # Link feature to content node
-            ContentNodeFeatureLink.create(content_node=node.id, feature=peewee_feature.id)
-            
-            # If this is a tag feature, create a FeatureTag record
-            if isinstance(feature.value, Tag):
-                tag_value: Tag = feature.value # Type hint for clarity
+            # Check if a PeeweeFeature for this type already exists for this node
+            existing_feature_query = (PeeweeFeature.select()
+                                     .join(ContentNodeFeatureLink)
+                                     .where((ContentNodeFeatureLink.content_node == node.id) &
+                                            (PeeweeFeature.feature_type == db_feature_type)))
+            peewee_feature = existing_feature_query.first()
 
-                # Extract tag data directly from the Tag object attributes
-                start_pos = tag_value.start
-                end_pos = tag_value.end
-                tag_value_text = tag_value.value
-                uuid_value = tag_value.uuid
-                data_blob = msgpack.packb(tag_value.data, use_bin_type=True) if tag_value.data is not None else None
-                confidence = tag_value.confidence
-                group_uuid = tag_value.group_uuid
-                parent_group_uuid = tag_value.parent_group_uuid
-                cell_index = tag_value.cell_index
-                index_value = tag_value.index
-                note = tag_value.note
-                status = tag_value.status
-                owner_uri = tag_value.owner_uri
-                is_dirty = 1 if tag_value.is_dirty else 0
-                
-                # Create FeatureTag
+            if not peewee_feature:
+                # If no PeeweeFeature for this type on this node, create one and link it
+                peewee_feature = PeeweeFeature.create(feature_type=db_feature_type)
+                ContentNodeFeatureLink.create(content_node=node.id, feature=peewee_feature)
+            # else: peewee_feature already exists for this node and type, so we reuse it.
+            
+            # If this is a tag feature, always create a new FeatureTag record
+            if isinstance(feature.value, Tag):
+                tag_value_obj: Tag = feature.value # Type hint for clarity
+
                 FeatureTag.create(
-                    feature=peewee_feature,
-                    tag_value=tag_value_text,
-                    start_pos=start_pos,
-                    end_pos=end_pos,
-                    uuid=uuid_value,
-                    data=data_blob,
-                    confidence=confidence,
-                    group_uuid=group_uuid,
-                    parent_group_uuid=parent_group_uuid,
-                    cell_index=cell_index,
-                    index=index_value,
-                    note=note,
-                    status=status,
-                    owner_uri=owner_uri,
-                    is_dirty=is_dirty
+                    feature=peewee_feature, # Link to the (potentially shared) PeeweeFeature
+                    tag_value=tag_value_obj.value,
+                    start_pos=tag_value_obj.start,
+                    end_pos=tag_value_obj.end,
+                    uuid=tag_value_obj.uuid, # Store the tag's own UUID here
+                    data=msgpack.packb(tag_value_obj.data, use_bin_type=True) if tag_value_obj.data is not None else None,
+                    confidence=tag_value_obj.confidence,
+                    group_uuid=tag_value_obj.group_uuid,
+                    parent_group_uuid=tag_value_obj.parent_group_uuid,
+                    cell_index=tag_value_obj.cell_index,
+                    index=tag_value_obj.index,
+                    note=tag_value_obj.note,
+                    status=tag_value_obj.status,
+                    owner_uri=tag_value_obj.owner_uri,
+                    is_dirty=1 if tag_value_obj.is_dirty else 0
                 )
             else: 
-                # Create the feature blob with binary data
+                # For non-tag features, replace any existing blob associated with this peewee_feature.
+                # This ensures that even if add_feature is called directly (not via set_feature),
+                # the value for the non-tag feature is effectively replaced.
+                FeatureBlob.delete().where(FeatureBlob.feature == peewee_feature).execute()
                 FeatureBlob.create(
                     feature=peewee_feature,
                     binary_value=msgpack.packb(feature.value, use_bin_type=True)

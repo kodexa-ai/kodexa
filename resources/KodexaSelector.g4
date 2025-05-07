@@ -58,8 +58,6 @@ axisSpecifier
 
 nodeTest
     : nameTest                                   # nameTestNode
-    | NODETYPE LPAREN RPAREN                     # nodeTypeTest
-    | NODETYPE LPAREN LITERAL RPAREN             # nodeTypeLiteralTest
     ;
 
 nameTest
@@ -166,9 +164,6 @@ FUNCTION_NAME: 'contentRegex' | 'typeRegex' | 'tagRegex' | 'hasTag' | 'hasFeatur
 LITERAL: '"' ~["]* '"' | '\'' ~[']* '\'';
 FLOAT: DIGIT+ '.' DIGIT* | '.' DIGIT+;
 INTEGER: DIGIT+;
-
-// Node types
-NODETYPE: 'comment' | 'text' | 'processing-instruction' | 'node';
 
 // Names
 NCNAME: NameStartChar NameChar*;

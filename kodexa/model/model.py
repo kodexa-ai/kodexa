@@ -580,39 +580,36 @@ class ContentNode(object):
         """
         Add a new feature to this ContentNode.
 
-        Note: if a feature for this feature_type/name already exists, the new value will be added to the existing feature;
-        therefore the feature value might become a list.
+        For tag features, this will add a new tag instance. Multiple tags of the same type/name 
+        can exist, each with its own data and UUID, sharing a common underlying feature entry.
+
+        For non-tag features, this will replace any existing feature of the same type and name.
 
         Args:
           feature_type (str): The type of feature to be added to the node.
           name (str): The name of the feature.
-          value (Any): The value of the feature.
-          serialized (boolean): Indicates that the value is/is not already serialized; defaults to False.
+          value (Any): The value of the feature (e.g., a Tag object for tags, or other data for non-tags).
 
         Returns:
-          ContentFeature: The feature that was added to this ContentNode.
-
-        >>> new_page = document.create_node(node_type='page')
-           <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
-           >>> new_page.add_feature('pagination','pageNum',1)
+          ContentFeature: The ContentFeature object that was constructed and passed to persistence.
         """
-        if self.has_feature(feature_type, name):
-            existing_feature = self.get_feature(feature_type, name)
-            if isinstance(existing_feature.value, list):
-                existing_feature.value.append(value)
-            else:
-                existing_feature.value = [existing_feature.value, value]
-            self.update_feature(existing_feature)
-            return existing_feature
+        
+        the_feature_to_add = ContentFeature(feature_type, name, value)
 
-        # Make sure that we treat the value as list all the time
-        new_feature = ContentFeature(
-            feature_type,
-            name,
-            value,
-        )
-        self.document.get_persistence().add_feature(self, new_feature)
-        return new_feature
+        if feature_type != 'tag':
+            # For non-tags, ensure replacement by removing the existing feature first if it exists.
+            # This makes direct calls to add_feature for non-tags behave like a set/replace operation.
+            # We query persistence to see if a PeeweeFeature for this type/name exists on this node.
+            # This check should be efficient.
+            if self.has_feature(feature_type, name):
+                self.document.get_persistence().remove_feature(self, feature_type, name)
+        
+        # The persistence layer (self.document.get_persistence().add_feature) will handle:
+        # - For tags: finding/creating a shared PeeweeFeature and always adding a new FeatureTag.
+        # - For non-tags (after potential removal above): creating a new PeeweeFeature and FeatureBlob.
+        self.document.get_persistence().add_feature(self, the_feature_to_add)
+        
+        return the_feature_to_add
 
     def delete_children(
             self, nodes: Optional[List] = None, exclude_nodes: Optional[List] = None
@@ -1144,11 +1141,11 @@ class ContentNode(object):
             if existing_tag_values:
                 for val in existing_tag_values:
                     tag = Tag(
-                        start=val["start"],
-                        end=val["end"],
-                        value=val["value"],
-                        uuid=val["uuid"],
-                        data=val["data"] if "data" in val else {},
+                        start=val.start,
+                        end=val.end,
+                        value=val.value,
+                        uuid=val.uuid,
+                        data=val.data if val.data else {},
                     )
                     node.add_feature("tag", new_tag_name, tag)
 
@@ -1660,10 +1657,7 @@ class ContentNode(object):
         """
         values = []
         for tag in self.get_tag(tag_name):
-            if "value" in tag:
-                values.append(tag["value"])
-            else:
-                values.append(None)
+            values.append(tag.value)
 
         if include_children:
             for child in self.get_children():
@@ -1805,14 +1799,7 @@ class ContentNode(object):
         if not isinstance(tag_details, list):
             tag_details = [tag_details]
 
-        final_result = []
-        for tag_detail in tag_details:
-            if "uuid" in tag_detail and tag_uuid:
-                if tag_detail["uuid"] == tag_uuid:
-                    final_result.append(tag_detail)
-            else:
-                final_result.append(tag_detail)
-        return final_result
+        return tag_details
 
     def get_all_tags(self):
         """Get the names of all tags that have been applied to this node or to its children.

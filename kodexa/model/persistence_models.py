@@ -98,7 +98,6 @@ class FeatureType(BaseModel):
 class Feature(BaseModel):
     id = AutoField()
     feature_type = ForeignKeyField(FeatureType, backref='features', column_name='feature_type_id')
-    tag_uuid = TextField(null=True)
 
     class Meta:
         table_name = 'kddb_features'
