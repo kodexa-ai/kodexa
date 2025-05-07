@@ -855,7 +855,7 @@ class ContentNode(object):
         if variables is None:
             variables = {}
         from kodexa.selectors import parse
-        from kodexa.selectors.ast import SelectorContext
+        from kodexa.selectors.parser import SelectorContext
 
         context = SelectorContext(self.document, first_only=first_only)
         parsed_selector = parse(selector)

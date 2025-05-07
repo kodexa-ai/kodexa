@@ -1,26 +1,27 @@
-"""Abstract Syntax Tree nodes for parsed XPath.
+"""Abstract Syntax Tree nodes for parsed XPath expressions.
 
-This module contains basic nodes for representing parsed XPath expressions.
-The parser provided by this module creates its parsed XPath representation
-from the classes defined in this module. Library callers will mostly not use
-this module directly, unless they need to produce XPath ASTs from scratch or
-perhaps introspect ASTs returned by the parser.
-
-This code was derived from https://github.com/emory-libraries/eulxml
+This module contains basic nodes for representing parsed XPath expressions
+created by the ANTLR-based parser. These classes provide the same functionality
+as the original PLY-based parser's AST classes but are designed to work with
+the ANTLR-generated parse tree.
 """
 
-from __future__ import unicode_literals
+from __future__ import annotations
 
 import re
+from typing import List, Optional, Any, Dict, Union, Tuple
 
-# python2/3 string type logic borrowed from six
-# NOTE: not importing six here because setup.py needs to generate
-# the parser at install time, when six installation is not yet available
-from typing import List
-
-from kodexa import ContentNode, ContentFeature, Document
+# Import these types but make them optional to avoid circular imports
+# In a real implementation, you'd use proper type annotations
+try:
+    from kodexa import ContentNode, ContentFeature, Document
+except ImportError:
+    ContentNode = Any  
+    ContentFeature = Any
+    Document = Any
 
 __all__ = [
+    "SelectorContext",
     "UnaryExpression",
     "BinaryExpression",
     "PredicatedExpression",
@@ -36,28 +37,61 @@ __all__ = [
 
 
 class SelectorContext:
+    """Context for selector resolution, maintains state during traversal."""
+    
     def __init__(self, document: Document, first_only=False):
+        """Initialize a new SelectorContext.
+        
+        Args:
+            document: The document being searched
+            first_only: Whether to return only the first match
+        """
         self.pattern_cache = {}
         self.last_op = None
         self.document: Document = document
         self.stream = 0
         self.first_only = first_only
 
-    def cache_pattern(self, pattern):
+    def cache_pattern(self, pattern: str) -> re.Pattern:
+        """Get a compiled regex pattern, caching for reuse.
+        
+        Args:
+            pattern: The regex pattern string
+            
+        Returns:
+            The compiled regex pattern
+        """
         if pattern not in self.pattern_cache:
             self.pattern_cache[pattern] = re.compile(pattern)
         return self.pattern_cache[pattern]
 
 
-class PipelineExpression(object):
-    """A pipeline XPath expression"""
+class PipelineExpression:
+    """A pipeline XPath expression (e.g., a stream b)."""
 
-    def __init__(self, left, op, right):
+    def __init__(self, left: Any, op: str, right: Any):
+        """Initialize a new PipelineExpression.
+        
+        Args:
+            left: Left side of the pipeline
+            op: The pipeline operator
+            right: Right side of the pipeline
+        """
         self.left = left
         self.op = op
         self.right = right
 
-    def resolve(self, content_node: ContentNode, variables, context: SelectorContext):
+    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> List[ContentNode]:
+        """Resolve this pipeline expression.
+        
+        Args:
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            List of matching content nodes
+        """
         left_nodes = self.left.resolve(content_node, variables, context)
         result_nodes: List[ContentNode] = []
         context.stream = context.stream + 1
@@ -76,31 +110,65 @@ class PipelineExpression(object):
         return result_nodes[:1] if context.first_only else result_nodes
 
 
-class UnaryExpression(object):
-    """A unary XPath expression. Practially, this means -foo."""
+class UnaryExpression:
+    """A unary XPath expression (e.g., -foo)."""
 
-    def __init__(self, op, right):
+    def __init__(self, op: str, right: Any):
+        """Initialize a new UnaryExpression.
+        
+        Args:
+            op: The operator
+            right: The expression the operator is applied to
+        """
         self.op = op
-        """the operator used in the expression"""
         self.right = right
-        """the expression the operator is applied to"""
+
+    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> Any:
+        """Resolve this unary expression.
+        
+        Args:
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            The result of applying the operator to the right expression
+        """
+        # Handle negation
+        if self.op == "-":
+            right_value = self.right.resolve(content_node, variables, context)
+            if isinstance(right_value, (int, float)):
+                return -right_value
+        
+        return None
 
 
-KEYWORDS = {"or", "and", "div", "mod"}
+class BinaryExpression:
+    """Any binary XPath expression (e.g., a/b, a and b, a | b)."""
 
-
-class BinaryExpression(object):
-    """Any binary XPath expression. a/b; a and b; a | b."""
-
-    def __init__(self, left, op, right):
+    def __init__(self, left: Any, op: str, right: Any):
+        """Initialize a new BinaryExpression.
+        
+        Args:
+            left: Left side of the expression
+            op: The operator
+            right: Right side of the expression
+        """
         self.left = left
-        """the left side of the binary expression"""
         self.op = op
-        """the operator of the binary expression"""
         self.right = right
-        """the right side of the binary expression"""
 
-    def resolve(self, content_node: ContentNode, variables, context: SelectorContext):
+    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> Any:
+        """Resolve this binary expression.
+        
+        Args:
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            The result of applying the operator to the left and right expressions
+        """
         if self.op == "|":
             return self.left.resolve(
                 content_node, variables, context
@@ -131,29 +199,78 @@ class BinaryExpression(object):
             return bool(
                 self.get_value(self.left, content_node, variables, context)
             ) or bool(self.get_value(self.right, content_node, variables, context))
+        
+        # Handle path operations
+        if self.op == "/" or self.op == "//":
+            # For path expressions, resolve left first then apply right to each result
+            left_results = self.left.resolve(content_node, variables, context)
+            context.last_op = self.op
+            
+            all_results = []
+            for node in left_results:
+                right_results = self.right.resolve(node, variables, context)
+                all_results.extend(right_results)
+                
+                # If first_only is True and we found a match, return immediately
+                if context.first_only and all_results:
+                    break
+                    
+            return all_results[:1] if context.first_only else all_results
+        
+        return None
 
-    def get_value(self, side, content_node, variables, context: SelectorContext):
+    def get_value(self, side: Any, content_node: ContentNode, variables: Dict, context: SelectorContext) -> Any:
+        """Get the value of an expression.
+        
+        Args:
+            side: The expression to evaluate
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            The evaluated value
+        """
         if isinstance(side, FunctionCall):
             return side.resolve(content_node, variables, context)
-        if isinstance(side, AbsolutePath):
+        if isinstance(side, (AbsolutePath, BinaryExpression, UnaryExpression)):
             return side.resolve(content_node, variables, context)
 
         return side
 
 
-class PredicatedExpression(object):
-    """A filtered XPath expression. $var[1]; (a or b)[foo][@bar]."""
+class PredicatedExpression:
+    """A filtered XPath expression (e.g., $var[1], (a or b)[foo][@bar])."""
 
-    def __init__(self, base, predicates=None):
+    def __init__(self, base: Any, predicates: List = None):
+        """Initialize a new PredicatedExpression.
+        
+        Args:
+            base: The base expression to be filtered
+            predicates: List of filter predicates
+        """
         self.base = base
-        """the base expression to be filtered"""
         self.predicates = predicates or []
-        """a list of filter predicates"""
 
-    def append_predicate(self, pred):
+    def append_predicate(self, pred: Any) -> None:
+        """Add a predicate to this expression.
+        
+        Args:
+            pred: The predicate to add
+        """
         self.predicates.append(pred)
 
-    def resolve(self, content_node, variables, context: SelectorContext):
+    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> List[ContentNode]:
+        """Resolve this predicated expression.
+        
+        Args:
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            List of content nodes that match the predicates
+        """
         nodes = self.base.resolve(content_node, variables, context)
         results = []
         for idx, node in enumerate(nodes):
@@ -162,51 +279,97 @@ class PredicatedExpression(object):
                     results.append(node)
                     return results
 
-                if not isinstance(predicate, int) and predicate.resolve(node):
+                if not isinstance(predicate, int) and predicate.resolve(node, variables, context):
                     results.append(node)
 
         return results
 
 
-class AbsolutePath(object):
-    """An absolute XPath path. /a/b/c; //a/ancestor:b/@c."""
+class AbsolutePath:
+    """An absolute XPath path (e.g., /a/b/c, //a/ancestor:b/@c)."""
 
-    def __init__(self, op="/", relative=None):
+    def __init__(self, op: str = "/", relative: Any = None):
+        """Initialize a new AbsolutePath.
+        
+        Args:
+            op: The operator used to root the expression
+            relative: The relative path after the absolute root operator
+        """
         self.op = op
-        """the operator used to root the expression"""
         self.relative = relative
-        """the relative path after the absolute root operator"""
 
-    def resolve(self, content_node, variables, context: SelectorContext):
+    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> List[ContentNode]:
+        """Resolve this absolute path.
+        
+        Args:
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            List of matching content nodes
+        """
         if self.op == "/":
             context.last_op = "/"
-            return self.relative.resolve(content_node, variables, context)
+            # Start from the root node for absolute paths
+            root_node = content_node
+            while root_node.get_parent() is not None:
+                root_node = root_node.get_parent()
+            
+            if self.relative is None:
+                return [root_node]
+                
+            return self.relative.resolve(root_node, variables, context)
+            
         if self.op == "//":
             context.last_op = "//"
-            return self.relative.resolve(content_node, variables, context)
-        raise Exception("Not implemented")
+            # Start from the root but search all descendants
+            root_node = content_node
+            while root_node.get_parent() is not None:
+                root_node = root_node.get_parent()
+                
+            return self.relative.resolve(root_node, variables, context)
+            
+        raise Exception(f"Unsupported absolute path operator: {self.op}")
 
 
-class Step(object):
+class Step:
     """A single step in a relative path."""
 
-    def __init__(self, axis, node_test, predicates):
+    def __init__(self, axis: Optional[str], node_test: Any, predicates: List):
+        """Initialize a new Step.
+        
+        Args:
+            axis: The axis for this step
+            node_test: The node test to apply
+            predicates: List of predicates to filter nodes
+        """
         self.axis = axis
         self.node_test = node_test
         self.predicates = predicates
 
-    def resolve(self, obj, variables, context: SelectorContext):
-        match = True
-        if isinstance(obj, ContentFeature):
-            match = self.node_test.test(obj)
-
-        if obj is None:
+    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> List[ContentNode]:
+        """Resolve this step.
+        
+        Args:
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            List of matching content nodes
+        """
+        if content_node is None:
             return []
+
+        match = True
+        if isinstance(content_node, ContentFeature):
+            match = self.node_test.test(content_node, variables, context)
 
         axis_node = None
 
-        if isinstance(obj, ContentNode):
-            axis_node = obj
+        if isinstance(content_node, ContentNode):
+            axis_node = content_node
 
             if self.axis == "parent":
                 parent = axis_node.get_parent()
@@ -228,6 +391,8 @@ class Step(object):
                     if isinstance(predicate, int):
                         if predicate == node.index:
                             match = True
+                        else:
+                            match = False
                     elif not predicate.resolve(node, variables, context):
                         match = False
 
@@ -247,14 +412,30 @@ class Step(object):
         return []
 
 
-class NameTest(object):
+class NameTest:
     """An element name node test for a Step."""
 
-    def __init__(self, prefix, name):
+    def __init__(self, prefix: Optional[str], name: str):
+        """Initialize a new NameTest.
+        
+        Args:
+            prefix: The namespace prefix, or None if unspecified
+            name: The local element name
+        """
         self.prefix = prefix
         self.name = name
 
-    def test(self, obj, variables, context: SelectorContext):
+    def test(self, obj: Union[ContentNode, ContentFeature], variables: Dict, context: SelectorContext) -> Union[bool, List[ContentNode]]:
+        """Test if a node matches this name test.
+        
+        Args:
+            obj: The node or feature to test
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            Either a boolean result or a list of matching nodes
+        """
         if isinstance(obj, ContentNode):
             if context.stream > 0:
                 if self.name == "*" or self.name == obj.node_type:
@@ -265,8 +446,7 @@ class NameTest(object):
                 )
 
                 # Add the current node to the front of the list
-                if self.name == "*":
-                    nodes = [obj] + nodes
+                nodes = [obj] + nodes
 
                 # If first_only is True, return only the first matching node
                 return nodes[:1] if context.first_only else nodes
@@ -278,62 +458,108 @@ class NameTest(object):
         return False
 
 
-class NodeType(object):
+class NodeType:
     """A node type node test for a Step."""
 
-    def __init__(self, name, literal=None):
+    def __init__(self, name: str, literal: Optional[str] = None):
+        """Initialize a new NodeType.
+        
+        Args:
+            name: The node type name, such as node or text
+            literal: The literal argument (for processing-instruction type)
+        """
         self.name = name
-        """the node type name, such as node or text"""
         self.literal = literal
-        """the argument to the node specifier. XPath allows these only for
-        processing-instruction() node tests."""
 
 
-class AbbreviatedStep(object):
-    """An abbreviated XPath step. . or .."""
+class AbbreviatedStep:
+    """An abbreviated XPath step (. or ..)."""
 
-    def __init__(self, abbr):
+    def __init__(self, abbr: str):
+        """Initialize a new AbbreviatedStep.
+        
+        Args:
+            abbr: The abbreviated step (. or ..)
+        """
         self.abbr = abbr
-        """the abbreviated step"""
 
-    def resolve(self, content_node, variables, context: SelectorContext):
+    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> List[ContentNode]:
+        """Resolve this abbreviated step.
+        
+        Args:
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            List of matching content nodes
+        """
         if self.abbr == ".":
             return [content_node]
         if self.abbr == "..":
             return [content_node.get_parent()] if content_node.get_parent() else []
-        raise Exception("Not implemented")
+        raise Exception(f"Unsupported abbreviated step: {self.abbr}")
 
 
-class VariableReference(object):
-    """An XPath variable reference. $foo; $myns:foo."""
+class VariableReference:
+    """An XPath variable reference (e.g., $foo, $myns:foo)."""
 
-    def __init__(self, name):
+    def __init__(self, name: Tuple[Optional[str], str]):
+        """Initialize a new VariableReference.
+        
+        Args:
+            name: A tuple (prefix, localname) containing the variable name
+        """
         self.name = name
-        """a tuple (prefix, localname) containing the variable name"""
 
-    def resolve(self, variables, context: SelectorContext):
+    def resolve(self, variables: Dict, context: SelectorContext) -> Any:
+        """Resolve this variable reference.
+        
+        Args:
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            The value of the variable, or None if not found
+        """
         if self.name[1] in variables:
             return variables[self.name[1]]
 
         return None
 
 
-class FunctionCall(object):
-    """An XPath function call. foo(); my:foo(1); foo(1, 'a', $var)."""
+class FunctionCall:
+    """An XPath function call (e.g., foo(), my:foo(1), foo(1, 'a', $var))."""
 
-    def __init__(self, prefix, name, args):
+    def __init__(self, prefix: Optional[str], name: str, args: List):
+        """Initialize a new FunctionCall.
+        
+        Args:
+            prefix: The namespace prefix, or None if unspecified
+            name: The local function name
+            args: A list of argument expressions
+        """
         self.prefix = prefix
-        """the namespace prefix, or None if unspecified"""
         self.name = name
-        """the local function name"""
         self.args = args
-        """a list of argument expressions"""
 
-    def resolve(self, content_node: ContentNode, variables: dict, context: SelectorContext):
+    def resolve(self, content_node: ContentNode, variables: Dict, context: SelectorContext) -> Any:
+        """Resolve this function call.
+        
+        Args:
+            content_node: The current content node
+            variables: Variable bindings
+            context: The selector context
+            
+        Returns:
+            The result of the function call
+        """
         args = []
         for arg in self.args:
             if isinstance(arg, VariableReference):
                 args.append(arg.resolve(variables, context))
+            elif hasattr(arg, 'resolve'):
+                args.append(arg.resolve(content_node, variables, context))
             else:
                 args.append(arg)
 
@@ -397,8 +623,8 @@ class FunctionCall(object):
         if self.name == "content":
             return content_node.content
 
-        if self.name == "uuid":
-            return content_node.uuid
+        if self.name == "id":
+            return content_node.id
 
         if self.name == "node_type":
             return content_node.node_type

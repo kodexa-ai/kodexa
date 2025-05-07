@@ -133,11 +133,8 @@ def test_tagged_content():
 
 def test_uuid_select():
     document = Document.from_msgpack(open(os.path.join(get_test_directory(), 'news-tagged.kdxa'), 'rb').read())
-    node_uuid = document.select_first('//p').uuid
-    print(document.select_first('//p').uuid)
-    print(document.select_first('//p').content)
-
-    assert document.select_first(f'//p[id({node_uuid})]').content == document.select_first('//p').content
+    node_id = document.select_first('//p').id
+    assert document.select_first(f'//p[id({node_id})]').content == document.select_first('//p').content
 
 
 def test_parent_axis():
