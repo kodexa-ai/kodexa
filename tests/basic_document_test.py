@@ -224,8 +224,7 @@ def test_add_feature():
     assert another_feature.value[1] == "pickels"
 
     # adding a 3rd feature with the same type/name - changing default values
-    yet_another_feature = document.content_node.get_children()[0].add_feature('test', 'test', 'lettuce', single=False,
-                                                                              serialized=True)
+    yet_another_feature = document.content_node.get_children()[0].add_feature('test', 'test', 'lettuce')
     assert len(yet_another_feature.value) == 3
     assert yet_another_feature.value[0] == "cheese"
     assert yet_another_feature.value[1] == "pickels"
@@ -235,9 +234,7 @@ def test_add_feature():
 
     # Setting a feature with single=False
     # This allows me to set a string as if it was a collection...and later I can't add to it with append.  Not sure that's the desiered behavior
-    document.content_node.get_children()[0].add_feature('test_2', 'test_2_name', 'sesame_seeds',
-                                                        single=False,
-                                                        serialized=False)
+    document.content_node.get_children()[0].add_feature('test_2', 'test_2_name', 'sesame_seeds')
 
     # This would fail, as the original value 'seasme_seeds' is not a collection, even though it was stated to be one
     # new_again_2 = document.content_node.get_children()[0].add_feature('test_2', 'test_2_name', 'special_sauce')

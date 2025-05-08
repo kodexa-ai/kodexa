@@ -645,8 +645,17 @@ class SqliteDocumentPersistence(object):
         """
         Adds a content node to the document.
         """
+
+        if node.virtual:
+            return
+
         from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         from kodexa.model.persistence_models import ContentNodePart as PeeweeContentNodePart
+
+        if node.index is None and parent is not None:
+            node.index = len(self.get_children(parent))
+        else:
+            node.index = node.index if node.index is not None else 0
         
         with self.connection.atomic():
             # Get parent node if provided
@@ -688,6 +697,7 @@ class SqliteDocumentPersistence(object):
 
                 if peewee_node.parent is None or peewee_node.parent.id != parent.id:
                     peewee_node.parent = parent_node
+                    peewee_node.index = node.index
                     peewee_node.save()
                     if parent_node:
                         node._parent_id = parent_node.id
@@ -858,6 +868,21 @@ class SqliteDocumentPersistence(object):
                         binary_value=msgpack.packb(item_value, use_bin_type=True) if item_value is not None else None
                     )
 
+            # We need to reload the values to get all the existing feature values 
+            feature.value = []
+            if feature.feature_type == 'tag':
+                feature_tags = FeatureTag.select().where(FeatureTag.feature_id == peewee_feature.id)
+                for feature_tag in feature_tags:
+                    feature.value.append(Tag(feature_tag.tag_value, feature_tag.start_pos, feature_tag.end_pos, feature_tag.uuid, feature_tag.data, feature_tag.confidence, feature_tag.group_uuid, feature_tag.parent_group_uuid, feature_tag.cell_index, feature_tag.index, feature_tag.note, feature_tag.status, feature_tag.owner_uri, feature_tag.is_dirty))
+            elif feature.feature_type == 'spatial' and feature.name == 'bbox':
+                values = FeatureBBox.select().where(FeatureBBox.feature_id == peewee_feature.id)
+                for value in values:
+                    feature.value.append([value.x1, value.y1, value.x2, value.y2])
+            else:
+                values = FeatureBlob.select().where(FeatureBlob.feature_id == peewee_feature.id)
+                for value in values:
+                    feature.value.append(msgpack.unpackb(value.binary_value))
+
     def remove_feature(self, node, feature_type, name):
         """
         Removes a feature from a given node.
@@ -936,14 +961,14 @@ class SqliteDocumentPersistence(object):
         """
         self.remove_all_features(ContentNode(self.document, "", uuid=node_id))
 
-    def remove_content_node(self, node):
+    def remove_content_node(self, node: "ContentNode"):
         """
         Removes a node and all its children from the document.
         """
         from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         from kodexa.model.persistence_models import ContentNodePart as PeeweeContentNodePart
         
-        def get_all_node_ids(node):
+        def get_all_node_ids(node: "ContentNode"):
             """
             This function recursively traverses a node tree, collecting the ids of all non-virtual nodes.
             """

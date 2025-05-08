@@ -209,7 +209,7 @@ class Tag(object):
         self.is_dirty = is_dirty
         
         # Pull the cell index from the data to the tag if we have it in the data
-        if self.cell_index is None and data and "cell_index" in data:
+        if self.cell_index is None and data and isinstance(data, dict) and "cell_index" in data:
             self.cell_index = data["cell_index"]
     
     def to_dict(self):
@@ -346,6 +346,9 @@ class ContentNode(object):
         """Is the node virtual (ie. it doesn't actually exist in the document)"""
 
         self._parent_id = parent.id if parent else None
+
+        if content_parts is not None:
+            self.set_content_parts(content_parts)
         self._content_parts = self.get_content_parts()
 
         if content is not None and len(self._content_parts) == 0:
@@ -422,7 +425,7 @@ class ContentNode(object):
     def __hash__(self):
         return hash(self.id)
 
-    def get_parent(self):
+    def get_parent(self) -> Optional["ContentNode"]:
         return self.document.get_persistence().get_parent(self)
 
     def __str__(self):
@@ -566,7 +569,7 @@ class ContentNode(object):
         self.add_child(new_node, index)
         return new_node
 
-    def add_child(self, child, index: Optional[int] = None):
+    def add_child(self, child: "ContentNode", index: Optional[int] = None):
         """Add a ContentNode as a child of this ContentNode
 
         Args:
@@ -579,31 +582,35 @@ class ContentNode(object):
             <kodexa.model.model.ContentNode object at 0x7f80605e53c8>
             >>> current_content_node.add_child(new_page)
         """
+        existing_children = self.get_children()
+        num_existing_children = len(existing_children)
+
+        final_child_index: int
+
         if index is None:
-            if len(self.get_children()) > 0:
-                last_child = self.get_children()[-1]
-                
-                # Use a simple integer value if we can't determine the index
-                try:
-                    # First try direct access to _index
-                    if hasattr(last_child, '_index'):
-                        last_index = last_child._index
-                        if callable(last_index):
-                            # If it's a callable, default to using position in children list
-                            child._index = len(self.get_children())
-                        else:
-                            # Use the index value + 1
-                            child._index = (last_index or 0) + 1
-                    else:
-                        # Default to children count
-                        child._index = len(self.get_children())
-                except TypeError:
-                    # If we get a type error, just use position in children
-                    child._index = len(self.get_children())
-            else:
-                child._index = 0
+            # If no index is provided, append the child.
+            final_child_index = num_existing_children
+            # No shifting of other children is needed for an append.
         else:
-            child._index = index
+            # An index is provided. This is an insertion.
+            # The new child will take this index. Assumes index is non-negative.
+            final_child_index = index
+
+            # Existing children at or after this insertion point need their indices incremented.
+            children_to_shift = [
+                ec for ec in existing_children if ec.index is not None and ec.index >= final_child_index
+            ]
+            
+            # Sort children to be shifted by their current index in descending order
+            # to prevent index collisions during sequential updates.
+            children_to_shift.sort(key=lambda c: c.index, reverse=True)
+            
+            for c_to_shift in children_to_shift:
+                c_to_shift.index += 1
+                # Persist the updated index for each shifted child.
+                self.document.get_persistence().update_node(c_to_shift)
+            
+        child.index = final_child_index
 
         self.document.get_persistence().add_content_node(child, self)
 
@@ -1054,6 +1061,16 @@ class ContentNode(object):
         >>> document.select.('//page')[0].get_bbox()
             [10,20,50,100]
         """
+        bbox_value = self.get_feature_value("spatial", "bbox")
+        if bbox_value is None:
+            return None
+        
+        if len(bbox_value) == 4:
+            return bbox_value
+        
+        if len(bbox_value) == 1:
+            return bbox_value[0]
+        
         return self.get_feature_value("spatial", "bbox")
 
     def set_bbox_from_children(self):
@@ -2054,7 +2071,8 @@ class ContentNode(object):
             has_no_content=True,
             traverse=Traverse.SIBLING,
     ):
-        """Returns the next sibling content node.
+        """
+        Returns the next sibling content node.
 
         Note:  This logic relies on node indexes.  Documents allow for sparse representation and child nodes may not have consecutive index numbers.
         Therefore, the next node might actually be a virtual node that is created to fill a gap in the document.  You can skip virtual nodes by setting the
@@ -2071,7 +2089,7 @@ class ContentNode(object):
         """
         # If this node has no index, we can't determine the next node by index
         # Use sibling enumeration instead
-        if self.index is None or callable(self.index):
+        if self.index is None:
             # Get all siblings and find the node right after this one
             if self.get_parent():
                 siblings = self.get_parent().get_children()
@@ -2551,7 +2569,48 @@ class Document(object):
     """A Document is a collection of metadata and a set of content nodes."""
 
     PREVIOUS_VERSION: str = "1.0.0"
-    CURRENT_VERSION: str = "6.0.0"
+    CURRENT_VERSION: str = "8.0.0"
+
+    def __init__(
+            self,
+            metadata=None,
+            source=None,
+            ref: str = None,
+            kddb_path: str = None,
+            delete_on_close=False,
+            inmemory=False,
+    ):
+        """A Kodexa Document has content nodes and metadata to represent the information.
+
+        Args:
+          metadata (DocumentMetadata): The metadata for the document (default is empty)
+          source (SourceMetadata): The source metadata for the document (optional)
+          ref (str): The reference (if it is a remote document)
+          kddb_path (str): If we want to open an existing kddb
+          delete_on_close (boolean): Whether to delete on close
+          inmemory (boolean): Whether to operate in memory (faster but more memory intensive)
+        """
+        self.metadata = metadata if metadata is not None else DocumentMetadata()
+        """The metadata for the document"""
+
+        self._mixins = []
+        self._persistence_layer = None
+        
+        self.labels = []
+        """A list of document level labels"""
+        self.content_node = None
+        self.source = source if source is not None else SourceMetadata()
+        """The source of the document"""
+
+        self.uuid = str(uuid.uuid4())
+        """A UUID representing this document"""
+
+        self.create_persistence_layer(kddb_path, delete_on_close, inmemory)
+
+        if ref is not None:
+            self.ref = Ref(ref)
+
+        self.version = self.CURRENT_VERSION
 
     def __str__(self):
         return f"kodexa://{self.uuid}"
@@ -2585,52 +2644,6 @@ class Document(object):
 
     def replace_exceptions(self, exceptions: List[ContentException]):
         self._persistence_layer.replace_exceptions(exceptions)
-
-    def __init__(
-            self,
-            metadata=None,
-            content_node: ContentNode = None,
-            source=None,
-            ref: str = None,
-            kddb_path: str = None,
-            delete_on_close=False,
-            inmemory=False,
-    ):
-        """A Kodexa Document has content nodes and metadata to represent the information.
-
-        Args:
-          metadata (DocumentMetadata): The metadata for the document (default is empty)
-          content_node (ContentNode): The root content node (optional)
-          source (SourceMetadata): The source metadata for the document (optional)
-          ref (str): The reference (if it is a remote document)
-          kddb_path (str): If we want to open an existing kddb
-          delete_on_close (boolean): Whether to delete on close
-          inmemory (boolean): Whether to operate in memory (faster but more memory intensive)
-        """
-        self.metadata = metadata if metadata is not None else DocumentMetadata()
-        """The metadata for the document"""
-
-        if source is None and content_node is not None:
-            self.source = content_node.document.source
-        else:
-            self.source = source if source is not None else SourceMetadata()
-        """The source of the document"""
-
-        self._mixins = []
-        self._persistence_layer = None
-        self.create_persistence_layer(kddb_path, delete_on_close, inmemory)
-        self.labels = []
-        """A list of document level labels"""
-        self.content_node = content_node
-        """The root content node for the document"""
-
-        self.uuid = str(uuid.uuid4())
-        """A UUID representing this document"""
-
-        if ref is not None:
-            self.ref = Ref(ref)
-
-        self.version = self.CURRENT_VERSION
         
     def create_persistence_layer(self, kddb_path=None, delete_on_close=False, inmemory=False):
         """
