@@ -201,8 +201,9 @@ def test_fax2tagging():
     kdxa_doc = Document.from_kdxa(get_test_directory() + 'fax2.kdxa')
 
     kdxa_doc.content_node.tag("phone", use_all_content=True, fixed_position=[146, 158])
+    assert len(kdxa_doc.select("//*[hasTag('phone')]")) == 1
     assert kdxa_doc.select("//*[hasTag('phone')]")[0].content == '785-368-1772'
-    assert kdxa_doc.select("//*[hasTag('phone')]")[0].get_feature_value("tag", "phone")['value'] == '785-368-1772'
+    assert kdxa_doc.select("//*[hasTag('phone')]")[0].get_feature_value("tag", "phone")[0].value == '785-368-1772'
 
 
 # Test the new tag instance

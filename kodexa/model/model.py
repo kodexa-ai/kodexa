@@ -175,8 +175,6 @@ class Tag(object):
             is_dirty: Optional[bool] = None,
             **kwargs,
     ):
-        super().__init__(*args, **kwargs)
-
         import uuid as uuid_gen
         # Store values both as attributes and dictionary keys
         self.start = start
@@ -418,7 +416,7 @@ class ContentNode(object):
         return new_dict
 
     @staticmethod
-    def from_dict(document, content_node_dict: dict, parent=None):
+    def from_dict(document: "Document", content_node_dict: dict, parent: Optional["ContentNode"] = None):
         """Build a new ContentNode from a dictionary represention.
 
         Args:
@@ -454,18 +452,39 @@ class ContentNode(object):
 
         for dict_feature in content_node_dict["features"]:
             feature_type = dict_feature["name"].split(":")[0]
+            feature_name = dict_feature["name"].split(":")[1]
+            feature_value = dict_feature["value"]
+            
             if feature_type == "tag":
-                new_content_node.add_feature(
-                    feature_type,
-                    dict_feature["name"].split(":")[1],
-                    dict_feature["value"]
-                )
+                # Handle both single tag and list of tags
+                if isinstance(feature_value, list):
+                    # It's a list of tags
+                    for tag_value in feature_value:
+                        if isinstance(tag_value, Tag):
+                            new_content_node.add_feature(feature_type, feature_name, tag_value)
+                        else:
+                            if isinstance(tag_value, list):
+                                # if it is an empty list, turn it into a {}
+                                if len(tag_value) == 0: 
+                                    tag_value = {}
+                                else:
+                                    raise ValueError(f"Tag values cannot be a list of lists {tag_value}")
+                            new_content_node.add_feature(feature_type, feature_name, Tag(**tag_value))
+                else:
+                    # It's a single tag
+                    if isinstance(feature_value, Tag):
+                        new_content_node.add_feature(feature_type, feature_name, feature_value)
+                    else:
+                        new_content_node.add_feature(feature_type, feature_name, Tag(**feature_value))
             else:
-                new_content_node.add_feature(
-                    feature_type,
-                    dict_feature["name"].split(":")[1],
-                    dict_feature["value"]
-                )
+                # For non-tag features, check if it's a list of values
+                if isinstance(feature_value, list):
+                    # Add each value in the list individually
+                    for value in feature_value:
+                        new_content_node.add_feature(feature_type, feature_name, value)
+                else:
+                    # Add the single value directly
+                    new_content_node.add_feature(feature_type, feature_name, feature_value)
 
         for dict_child in content_node_dict["children"]:
             ContentNode.from_dict(document, dict_child, new_content_node)
@@ -593,9 +612,6 @@ class ContentNode(object):
         Returns:
           ContentFeature: The ContentFeature object that was constructed and passed to persistence.
         """
-        
-        the_feature_to_add = ContentFeature(feature_type, name, value)
-
         if feature_type != 'tag':
             # For non-tags, ensure replacement by removing the existing feature first if it exists.
             # This makes direct calls to add_feature for non-tags behave like a set/replace operation.
@@ -603,7 +619,15 @@ class ContentNode(object):
             # This check should be efficient.
             if self.has_feature(feature_type, name):
                 self.document.get_persistence().remove_feature(self, feature_type, name)
+        else:
+            if not isinstance(value, Tag):
+                if isinstance(value, list):
+                    value = [Tag(**v) if not isinstance(v, Tag) else v for v in value]
+                else:
+                    value = Tag(**value)
         
+        the_feature_to_add = ContentFeature(feature_type, name, value)
+
         # The persistence layer (self.document.get_persistence().add_feature) will handle:
         # - For tags: finding/creating a shared PeeweeFeature and always adding a new FeatureTag.
         # - For non-tags (after potential removal above): creating a new PeeweeFeature and FeatureBlob.
@@ -2557,9 +2581,9 @@ class Document(object):
             delete_on_close: Whether to delete the file on close
             inmemory: Whether to operate in memory
         """
-        from kodexa.model import PersistenceManager
+        from kodexa.model import SqliteDocumentPersistence
         
-        self._persistence_layer = PersistenceManager(
+        self._persistence_layer = SqliteDocumentPersistence(
             document=self, filename=kddb_path, delete_on_close=delete_on_close, inmemory=inmemory
         )
         self._persistence_layer.initialize()
@@ -2599,7 +2623,7 @@ class Document(object):
         """
         return self._persistence_layer.get_node_by_uuid(uuid)
 
-    def add_tag_instance(self, tag_to_apply: str, node_list: List[ContentNode]):
+    def add_tag_instance(self, tag_to_apply: str, node_list: List[ContentNode], tag_uuid: str = None):
         """
             This will create a group of a tag with indexes
         :param tag_to_apply: name of the tag
@@ -2608,14 +2632,12 @@ class Document(object):
         """
         # For each node in the list create/update a feature
         tag = Tag()
+        tag.uuid = tag_uuid if tag_uuid else str(uuid.uuid4())
         for node in node_list:
-            node.add_feature("tag", tag_to_apply, Tag)
-        # Tag Object
-        tag_instance = TagInstance(tag, node_list)
-        self.tag_instances.append(tag_instance)
+            node.add_feature("tag", tag_to_apply, tag)
 
     def update_tag_instance(self, tag_uuid):
-        for tag_instance in self.tag_instances:
+        for tag_instance in self.get_tag_instances(tag_uuid):
             if tag_instance.tag.id == tag_uuid:
                 # Update attributes of a Tag
                 for node in tag_instance.nodes:
@@ -2629,7 +2651,7 @@ class Document(object):
         """
         return [
             tag_instance
-            for tag_instance in self.tag_instances
+            for tag_instance in self.get_tag_instances(tag)
             if tag_instance.tag == tag
         ]
 
@@ -3173,6 +3195,8 @@ class Document(object):
             result = self.content_node.select(selector, variables, first_only)
             if isinstance(result, list):
                 return result
+            elif isinstance(result, ContentNode):
+                return [result]
 
             return [self.content_node] if bool(result) else []
         return []

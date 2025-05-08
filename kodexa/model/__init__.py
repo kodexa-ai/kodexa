@@ -36,4 +36,4 @@ from .objects import (
     ExtensionPack,
     AssistantDefinition,
 )
-from .persistence import SqliteDocumentPersistence, PersistenceManager
+from .persistence import SqliteDocumentPersistence
