@@ -211,6 +211,61 @@ class Tag(object):
         # Pull the cell index from the data to the tag if we have it in the data
         if self.cell_index is None and data and "cell_index" in data:
             self.cell_index = data["cell_index"]
+    
+    def to_dict(self):
+        """
+        Create a dictionary representing this Tag's structure and content.
+
+        Returns:
+            dict: The properties of this Tag structured as a dictionary.
+        """
+        result = {
+            "uuid": self.uuid
+        }
+        
+        if self.start is not None:
+            result["start"] = self.start
+        
+        if self.end is not None:
+            result["end"] = self.end
+            
+        if self.value is not None:
+            result["value"] = self.value
+            
+        if self.data is not None:
+            result["data"] = self.data
+            
+        if self.confidence is not None:
+            result["confidence"] = self.confidence
+            
+        if self.index is not None:
+            result["index"] = self.index
+            
+        if self.bbox is not None:
+            result["bbox"] = self.bbox
+            
+        if self.group_uuid is not None:
+            result["group_uuid"] = self.group_uuid
+            
+        if self.parent_group_uuid is not None:
+            result["parent_group_uuid"] = self.parent_group_uuid
+            
+        if self.cell_index is not None:
+            result["cell_index"] = self.cell_index
+            
+        if self.note is not None:
+            result["note"] = self.note
+            
+        if self.status is not None:
+            result["status"] = self.status
+            
+        if self.owner_uri is not None:
+            result["owner_uri"] = self.owner_uri
+            
+        if self.is_dirty is not None:
+            result["is_dirty"] = self.is_dirty
+            
+        return result
 
 
 class FindDirection(Enum):
@@ -555,7 +610,7 @@ class ContentNode(object):
     def remove_child(self, content_node):
         self.document.get_persistence().remove_content_node(content_node)
 
-    def get_children(self):
+    def get_children(self) -> List["ContentNode"]:
         """Returns a list of the children of this node.
 
         Returns:
@@ -593,7 +648,7 @@ class ContentNode(object):
         self.document.get_persistence().remove_feature(
             self, feature.feature_type, feature.name
         )
-        self.document.get_persistence().add_feature(self, feature)
+        self.document.get_persistence().add_feature(self, feature, replace=True)
 
     def add_feature(self, feature_type, name, value):
         """
@@ -612,14 +667,8 @@ class ContentNode(object):
         Returns:
           ContentFeature: The ContentFeature object that was constructed and passed to persistence.
         """
-        if feature_type != 'tag':
-            # For non-tags, ensure replacement by removing the existing feature first if it exists.
-            # This makes direct calls to add_feature for non-tags behave like a set/replace operation.
-            # We query persistence to see if a PeeweeFeature for this type/name exists on this node.
-            # This check should be efficient.
-            if self.has_feature(feature_type, name):
-                self.document.get_persistence().remove_feature(self, feature_type, name)
-        else:
+        
+        if feature_type == 'tag':
             if not isinstance(value, Tag):
                 if isinstance(value, list):
                     value = [Tag(**v) if not isinstance(v, Tag) else v for v in value]
@@ -627,11 +676,7 @@ class ContentNode(object):
                     value = Tag(**value)
         
         the_feature_to_add = ContentFeature(feature_type, name, value)
-
-        # The persistence layer (self.document.get_persistence().add_feature) will handle:
-        # - For tags: finding/creating a shared PeeweeFeature and always adding a new FeatureTag.
-        # - For non-tags (after potential removal above): creating a new PeeweeFeature and FeatureBlob.
-        self.document.get_persistence().add_feature(self, the_feature_to_add)
+        self.document.get_persistence().add_feature(self, the_feature_to_add, replace=False)
         
         return the_feature_to_add
 
@@ -733,7 +778,7 @@ class ContentNode(object):
                 > 0
         )
 
-    def get_features(self):
+    def get_features(self) -> List["ContentFeature"]:
         """Get all features on this ContentNode.
 
         Returns:
@@ -2144,39 +2189,54 @@ class ContentNode(object):
 class ContentFeature(object):
     """
     A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode.
+    The 'value' of a feature is always a list, allowing a single feature name (e.g., 'ner') to hold multiple
+    data points (e.g., multiple recognized entities).
     """
-
-    """A feature allows you to capture almost any additional data or metadata and associate it with a ContentNode"""
 
     def __init__(self, feature_type: str, name: str, value: Any):
         self.feature_type: str = feature_type
         """The type of feature, a logical name to group feature types together (ie. spatial)"""
         self.name: str = name
         """The name of the feature (ie. bbox)"""
-        self.value: Any = value
-        """Description of the feature (Optional)"""
+        
+        if not isinstance(value, list):
+            self.value: List[Any] = [value]
+        else:
+            self.value: List[Any] = value
+        """The list of values for this feature. For example, a 'ner' feature might have multiple Tag objects,
+        a 'spatial:bbox' might have multiple bounding box coordinate lists, etc. (Always a list)"""
        
     def __str__(self):
-        return f"Feature [type='{self.feature_type}' name='{self.name}' value='{self.value}']"
+        # Consider showing a snippet of values if not too long, or just type and count for brevity
+        return f"Feature [type='{self.feature_type}' name='{self.name}' value_count='{len(self.value)}']"
 
     def to_dict(self):
         """
         Create a dictionary representing this ContentFeature's structure and content.
+        The 'value' in the dictionary will be a list of serialized items.
 
         Returns:
             dict: The properties of this ContentFeature structured as a dictionary.
         """
+        processed_value_list = []
+        # self.value is now guaranteed to be a list
+        for item in self.value:
+            if hasattr(item, 'to_dict') and callable(getattr(item, 'to_dict')):
+                processed_value_list.append(item.to_dict())
+            else:
+                # Handle cases where item might be None or a primitive type
+                processed_value_list.append(item)
         return {
             "name": self.feature_type + ":" + self.name,
-            "value": self.value
+            "value": processed_value_list
         }
 
-    def get_value(self):
+    def get_value(self) -> List[Any]:
         """
-        Get the value from the feature. This method will handle the single flag.
+        Get the list of values for the feature.
 
         Returns:
-            Any: The value of the feature.
+            List[Any]: The list of values of the feature. This is always a list, even if it contains a single item or is empty.
         """
         return self.value
 

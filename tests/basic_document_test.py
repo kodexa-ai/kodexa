@@ -279,7 +279,7 @@ def test_basic_spatial_serialization():
     print(document.content_node.get_bbox())
     assert document.content_node.get_bbox() == [1, 1, 1, 1]
 
-    document = document.from_json(document.to_json())
+    document = document.from_kddb(document.to_kddb())
     print(document.content_node.get_bbox())
 
     assert document.content_node.get_bbox() == [1, 1, 1, 1]
