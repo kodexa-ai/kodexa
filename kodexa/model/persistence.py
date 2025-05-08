@@ -529,10 +529,6 @@ class SqliteDocumentPersistence(object):
         """
         from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
-        parent_node = None 
-        if peewee_node.parent_id:
-            parent_node = self.get_node(peewee_node.parent_id)
-
         # Handle either ID or direct node_type string reference
         node_type = peewee_node.node_type
         if node_type in self.node_type_cache:
@@ -545,7 +541,7 @@ class SqliteDocumentPersistence(object):
             document=self.document,
             node_type=node_type,
             content=peewee_node.content,
-            parent=parent_node,
+            parent=self.get_node(peewee_node.parent.id) if peewee_node.parent else None,
             index=peewee_node.index
         )
         new_node.id = peewee_node.id
@@ -583,23 +579,27 @@ class SqliteDocumentPersistence(object):
         Metadata.delete().where(Metadata.id == 1).execute()
         Metadata.create(id=1, metadata=msgpack.packb(document_metadata, use_bin_type=True))
 
-    def get_node(self, node_id):
+    def get_node(self, node_id: Optional[int] = None) -> ContentNode:
         """
         Retrieves a node by its id.
         """
+
+        if node_id is None:
+            return None
+
         from kodexa.model.persistence_models import ContentNode as PeeweeContentNode
         
         peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == node_id)
         if peewee_node:
             return self.__build_node(peewee_node)
-        return None
+        else:
+            raise ValueError(f"Node {node_id} not found")
 
     def get_parent(self, content_node: ContentNode):
         """
         Retrieves the parent of a given node.
         """
-        from kodexa.model.persistence_models import ContentNode as PeeweeContentNode, DataObject
-        self.get_node(content_node._parent_id)
+        return self.get_node(content_node._parent_id)
         
     def get_children(self, content_node: ContentNode):
         """
@@ -641,7 +641,7 @@ class SqliteDocumentPersistence(object):
                 
         return children
 
-    def add_content_node(self, node: ContentNode, parent: Optional[ContentNode] = None, execute=True):
+    def add_content_node(self, node: ContentNode, parent: Optional[ContentNode] = None):
         """
         Adds a content node to the document.
         """
@@ -660,7 +660,9 @@ class SqliteDocumentPersistence(object):
         with self.connection.atomic():
             # Get parent node if provided
             parent_node = None
-            if parent and parent.id:
+            if parent:
+                if not parent.id:
+                    raise ValueError("Parent node ID is required to add a content node")
                 parent_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == parent.id)
 
                 if parent_node is None:
@@ -695,12 +697,15 @@ class SqliteDocumentPersistence(object):
             else:
                 peewee_node = PeeweeContentNode.get_or_none(PeeweeContentNode.id == node.id)
 
+                if peewee_node is None:
+                    raise ValueError(f"Node {node.id} not found")
+
                 if peewee_node.parent is None or peewee_node.parent.id != parent.id:
                     peewee_node.parent = parent_node
                     peewee_node.index = node.index
                     peewee_node.save()
-                    if parent_node:
-                        node._parent_id = parent_node.id
+                    if peewee_node.parent:
+                        node._parent_id = peewee_node.parent.id
                     else:
                         node._parent_id = None
 

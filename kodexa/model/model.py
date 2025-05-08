@@ -2119,7 +2119,6 @@ class ContentNode(object):
                             self.get_parent()
                             .get_parent()
                             .get_children()[self.get_parent().index + 1]
-                            .get_children()[0]
                         )
                         if potential_next_node:
                             return potential_next_node
@@ -2131,8 +2130,6 @@ class ContentNode(object):
                                 .get_parent()
                                 .get_parent()
                                 .get_children()[self.get_parent().get_parent().index + 1]
-                                .get_children()[0]
-                                .get_children()[0]
                             )
                             if potential_next_node:
                                 return potential_next_node
@@ -3100,7 +3097,7 @@ class Document(object):
         if parent is not None:
             parent.add_child(content_node, index)
         else:
-            self.get_persistence().add_content_node(content_node, None)
+            self.get_persistence().add_content_node(content_node)
 
         # This is redundant as we already set content in the ContentNode constructor
         # We should remove this and rely on the ContentNode logic
