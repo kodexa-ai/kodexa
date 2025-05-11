@@ -11,7 +11,7 @@ and much more....
 
 Document families allow the organization of documents based on transitions and actors
 """
-from .model import (
+from kodexa_document.model import (
     ContentFeature,
     ContentNode,
     Document,
@@ -36,4 +36,4 @@ from .objects import (
     ExtensionPack,
     AssistantDefinition,
 )
-from .persistence import SqliteDocumentPersistence
+from kodexa_document.persistence import SqliteDocumentPersistence

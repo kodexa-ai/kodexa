@@ -580,7 +580,7 @@ class Pipeline:
         # and the store itself - to provide richness to the action
 
         for connector_object in self.connector:
-            from kodexa.model.model import ContentObjectReference
+            from kodexa_document.model import ContentObjectReference
 
             if isinstance(connector_object, ContentObjectReference):
                 document = connector_object.document

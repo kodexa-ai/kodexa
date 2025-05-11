@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.23",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.10",
+    "@types/uuid": "^10.0.0",
+    "@types/reflect-metadata": "^0.1.0",
+    "typescript": "^5.8.3"
+  }
+} 

@@ -215,7 +215,7 @@ class AssistantTestHarness:
             )
             if document is not None:
                 pipeline = assistant_pipeline.pipeline
-                from kodexa.model.model import ContentObjectReference
+                from kodexa_document.model import ContentObjectReference
 
                 pipeline.connector = [
                     ContentObjectReference(

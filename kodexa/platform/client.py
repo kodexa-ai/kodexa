@@ -22,8 +22,7 @@ from functional import seq
 from pydantic import BaseModel, Field, ConfigDict
 from pydantic_yaml import to_yaml_str
 
-from kodexa.model import Document
-from kodexa.model.model import Ref
+from kodexa_document.model import Document, Ref
 from kodexa.model.objects import (
     PageUser,
     PageMembership,
