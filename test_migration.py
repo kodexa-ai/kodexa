@@ -3,8 +3,8 @@ import shutil
 import logging
 import sys
 import sqlite3
-from kodexa.model import Document
-from kodexa.model.persistence import SqliteDocumentPersistence
+from kodexa_document.model import Document
+from kodexa_document.persistence import SqliteDocumentPersistence
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
