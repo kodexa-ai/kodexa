@@ -3636,7 +3636,7 @@ class DataAttribute(BaseModel):
         alias="dataExceptions",
         description="A list of the data exceptions",
     )
-    tag: str
+    tag: Optional[str] = None
     tag_uuid: Optional[str] = Field(None, alias="tagUuid")
     date_value: Optional[StandardDateTime] = Field(None, alias="dateValue")
     float_value: Optional[float] = Field(None, alias="floatValue")
