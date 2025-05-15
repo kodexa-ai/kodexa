@@ -1383,7 +1383,7 @@ class DataExceptionsEndpoint(EntitiesEndpoint):
     """
 
     def get_type(self) -> str:
-        return "dataExceptions"
+        return "exceptions"
     
     def get_instance_class(self, object_dict=None):
         return DataExceptionEndpoint
