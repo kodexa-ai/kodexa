@@ -4603,6 +4603,8 @@ class ExecutionOverview(BaseModel):
     )
     assistant: Optional[ExecutionAssistant] = None
     execution: Optional[ExecutionSnapshot] = None
+    start_date: Optional[StandardDateTime] = Field(None, alias="startDate")
+    end_date: Optional[StandardDateTime] = Field(None, alias="endDate")
 
 
 class DataObject(BaseModel):
