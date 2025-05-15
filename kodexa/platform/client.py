@@ -1377,6 +1377,20 @@ class DocumentFamiliesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageDocumentFamilyEndpoint
     
+class DataExceptionsEndpoint(EntitiesEndpoint):
+    """
+    Represents data exceptions endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "dataExceptions"
+    
+    def get_instance_class(self, object_dict=None):
+        return DataExceptionEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageDataExceptionEndpoint
+    
 
 class TaskTagEndpoint(EntityEndpoint, TaskTag):
     """
@@ -6755,6 +6769,7 @@ class KodexaClient:
         self.tasks = TasksEndpoint(self)
         self.users = UsersEndpoint(self)
         self.workspaces = WorkspacesEndpoint(self)
+        self.data_exceptions = DataExceptionsEndpoint(self)
 
     @staticmethod
     def login(url, token):
