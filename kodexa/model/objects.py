@@ -4833,6 +4833,8 @@ class ModelInteraction(BaseModel):
     model_id: Optional[str] = Field(None, alias="modelId")
     input_tokens: Optional[int] = Field(None, alias="inputTokens")
     output_tokens: Optional[int] = Field(None, alias="outputTokens")
+    thinking_tokens: Optional[int] = Field(None, alias="thinkingTokens")
+    cached_tokens: Optional[int] = Field(None, alias="cachedTokens")
     duration: Optional[int] = None
     note: Optional[str] = None
 
