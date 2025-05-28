@@ -6006,6 +6006,8 @@ class ProjectTemplate(ExtensionPackProvided):
         alias="taskStatuses",
         description="The task statuses that will be created with the project template",
     )
+    
+    task_templates: Optional[List[TaskTemplate]] = Field(None, alias="taskTemplates")
 
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
