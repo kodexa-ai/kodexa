@@ -3065,6 +3065,7 @@ class ProjectDocumentStatus(BaseModel):
     icon: Optional[str] = Field(None, max_length=25)
     status: str = Field(..., max_length=255)
     slug: str = Field(..., max_length=255)
+    old_identifier: Optional[str] = Field(None, alias="oldIdentifier")
     status_type: Optional[StatusType2] = Field(None, alias="statusType")
 
 class ProjectTaskStatus(BaseModel):
@@ -3080,6 +3081,8 @@ class ProjectTaskStatus(BaseModel):
     color: Optional[str] = Field(None, max_length=25)
     icon: Optional[str] = Field(None, max_length=25)
     label: str = Field(..., max_length=255)
+    old_identifier: Optional[str] = Field(None, alias="oldIdentifier")
+    slug: Optional[str] = None
     status_type: Optional[TaskStatusType] = Field(None, alias="statusType")
 
 class ProjectTemplateTag(BaseModel):
@@ -3106,7 +3109,10 @@ class ProjectTaskTemplate(BaseModel):
         protected_namespaces=("model_config",),
     )
     title: Optional[str] = None
+    slug: Optional[str] = None
     description: Optional[str] = None
+    metadata: Optional[TaskTemplateMetadata] = None
+    old_identifier: Optional[str] = Field(None, alias="oldIdentifier")
 
 class ProjectResource(BaseModel):
     """
@@ -6009,7 +6015,7 @@ class ProjectTemplate(ExtensionPackProvided):
         description="The task statuses that will be created with the project template",
     )
     
-    task_templates: Optional[List[TaskTemplate]] = Field(None, alias="taskTemplates")
+    task_templates: Optional[List[ProjectTaskTemplate]] = Field(None, alias="taskTemplates")
 
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
