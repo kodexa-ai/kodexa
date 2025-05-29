@@ -5999,7 +5999,7 @@ class ProjectTemplate(ExtensionPackProvided):
     category: Optional[Category] = Field(
         None, description="The category of project template"
     )
-    document_statuses: Optional[List[DocumentStatus]] = Field(
+    document_statuses: Optional[List[ProjectDocumentStatus]] = Field(
         None,
         alias="documentStatuses",
         description="The document statuses that will be created with the project template",
@@ -6010,7 +6010,7 @@ class ProjectTemplate(ExtensionPackProvided):
         description="The attribute statuses that will be created with the project template",
     )
 
-    task_statuses: Optional[List[TaskStatus]] = Field(None,
+    task_statuses: Optional[List[ProjectTaskStatus]] = Field(None,
         alias="taskStatuses",
         description="The task statuses that will be created with the project template",
     )
