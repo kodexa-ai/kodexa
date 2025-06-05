@@ -2103,7 +2103,7 @@ class ContentNode(object):
 
             search_index -= 1
 
-            if traverse == traverse.SIBLING and search_index < parent_first_child_index:               
+            if traverse == traverse.SIBLING and search_index < 0:               
                 return None
 
 class ContentFeature(object):
