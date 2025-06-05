@@ -1550,6 +1550,7 @@ class Session(BaseModel):
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     token: Optional[str] = None
     last_accessed: Optional[StandardDateTime] = Field(None, alias="lastAccessed")
+    organization: Optional[Organization] = None
 
 
 class Status4(Enum):
