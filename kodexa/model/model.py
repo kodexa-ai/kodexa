@@ -1875,7 +1875,12 @@ class ContentNode(object):
         if not self.get_children():
             return None
 
-        return self.get_children()[0].index
+        min_index = None
+        for child in self.get_children():
+            if min_index is None or child.index < min_index:
+                min_index = child.index
+
+        return min_index
 
     def get_last_child_index(self):
         """Returns the max index value for the children of this node. If the node has no children, returns None.
@@ -2067,7 +2072,11 @@ class ContentNode(object):
         """
         # TODO: implement/differentiate traverse logic for CHILDREN and SIBLING
 
-        parent_first_child_index = self.get_parent().get_first_child_index()
+        parent = self.get_parent()
+        parent_first_child_index = 0
+        
+        if parent:
+            parent_first_child_index = parent.get_first_child_index()
 
         # TODO - the first item in the list does not always have an index property of 0
         # TODO - should this be in the loop?
