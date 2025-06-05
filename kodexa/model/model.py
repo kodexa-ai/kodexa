@@ -1850,7 +1850,7 @@ class ContentNode(object):
         if not self.get_parent():
             return True
 
-        return self.index == 0
+        return self.index == self.get_parent().get_first_child_index()
 
     def is_last_child(self):
         """Determines if this node is the last child of its parent or has no parent.
