@@ -2615,15 +2615,15 @@ class TaxonValidation(BaseModel):
     )
 
     name: Optional[str] = Field(None)
+    disabled: Optional[bool] = None
     description: Optional[str] = Field(None)
+    conditional: Optional[bool] = None
+    conditional_formula: Optional[str] = Field(None, alias="conditionalFormula")
     rule_formula: Optional[str] = Field(None, alias="ruleFormula")
     message_formula: Optional[str] = Field(None, alias="messageFormula")
     detail_formula: Optional[str] = Field(None, alias="detailFormula")
     exception_id: Optional[str] = Field(None, alias="exceptionId")
     support_article_id: Optional[str] = Field(None, alias="supportArticleId")
-    overridable: Optional[bool] = None
-    disabled: Optional[bool] = None
-
 
 class DocumentTaxonValidation(BaseModel):
     model_config = ConfigDict(
