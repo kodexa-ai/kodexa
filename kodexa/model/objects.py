@@ -3320,8 +3320,8 @@ class TaskDocumentFamily(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    task: Optional['Task'] = None
-    document_family: Optional['DocumentFamily'] = Field(None, alias="documentFamily")
+    taskId: Optional[str] = Field(None, alias="taskId")
+    documentFamilyId: Optional[str] = Field(None, alias="documentFamilyId")
 
 
 class PageTaskDocumentFamily(BaseModel):
