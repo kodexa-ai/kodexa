@@ -5883,6 +5883,7 @@ class DataForm(ExtensionPackProvided):
     entrypoints: Optional[List[str]] = None
     cards: Optional[List[Card]] = None
     filters: Optional[str] = None
+    options: Optional[List[Option]] = None
 
 
 class ProjectDataForm(BaseModel):
