@@ -3523,6 +3523,7 @@ class Channel(BaseModel):
     name: Optional[str] = None
     is_private: Optional[bool] = Field(None, alias="isPrivate")
     participants: Optional[List[ChannelParticipant]] = Field(None, alias="participants")
+    task: Optional[Task] = None
 
 
 class MessageBlock(BaseModel):
