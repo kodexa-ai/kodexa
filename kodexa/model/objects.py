@@ -6370,12 +6370,12 @@ class Note(BaseModel):
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     
     # Data relationships
-    attribute: Optional['DataAttribute'] = None
     workspace: Optional['Workspace'] = None
     assistant: Optional['Assistant'] = None
     parent_comment: Optional['Note'] = Field(None, alias="parentComment")
     
     # Core content
+    title: Optional[str] = None
     content: Optional[str] = None
     note_type: Optional[NoteType] = Field(None, alias="noteType")
     
