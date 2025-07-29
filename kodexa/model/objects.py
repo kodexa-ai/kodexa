@@ -6320,6 +6320,76 @@ class OrchestrationEvent(BaseModel):
     execution_event: Optional[ExecutionEvent] = Field(None, alias="executionEvent")
 
 
+
+class PageNote(BaseModel):
+    """
+    A page of notes
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[Note]] = None
+    number: Optional[int] = None
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class NoteType(Enum):
+    """
+    The NoteType enumeration represents the different formats a note can have.
+    This includes MARKDOWN, TEXT, HTML formats, and ASSISTANT_KNOWLEDGE.
+    """
+    markdown = "MARKDOWN"
+    text = "TEXT"
+    html = "HTML"
+    assistant_knowledge = "ASSISTANT_KNOWLEDGE"
+
+
+class Note(BaseModel):
+    """
+    A note within the Kodexa platform
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    id: Optional[str] = Field(None)
+    uuid: Optional[str] = None
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    
+    # Data relationships
+    attribute: Optional['DataAttribute'] = None
+    workspace: Optional['Workspace'] = None
+    assistant: Optional['Assistant'] = None
+    parent_comment: Optional['Note'] = Field(None, alias="parentComment")
+    
+    # Core content
+    content: Optional[str] = None
+    note_type: Optional[NoteType] = Field(None, alias="noteType")
+    
+    # Author and replies
+    author: Optional['User'] = None
+    replies: Optional[List['Note']] = Field(default_factory=list)
+    
+    # Task association
+    task: Optional['Task'] = None
+    
+    # Properties map
+    note_properties: Optional[Dict[str, str]] = Field(default_factory=dict, alias="noteProperties")
+
+
 ThrowableProblem.model_rebuild()
 Option.model_rebuild()
 Taxon.model_rebuild()
@@ -6377,3 +6447,5 @@ Message.model_rebuild()
 MessageFeedback.model_rebuild()
 MessageFeedbackResponse.model_rebuild()
 MessageFeedbackOption.model_rebuild()
+Note.model_rebuild()
+PageNote.model_rebuild()

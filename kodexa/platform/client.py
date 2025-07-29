@@ -105,6 +105,8 @@ from kodexa.model.objects import (
     PageTaskDocumentFamily,
     PageTaskActivity,
     PageTaskTag,
+    Note,
+    PageNote,
 )
 
 logger = logging.getLogger()
@@ -1414,6 +1416,39 @@ class TaskTagsEndpoint(EntitiesEndpoint):
 
     def get_page_class(self, object_dict=None):
         return PageTaskTagEndpoint
+
+
+class NoteEndpoint(EntityEndpoint, Note):
+    """
+    Represents a note endpoint.
+    """
+
+    def get_type(self) -> str:
+        return "notes"
+
+
+class NotesEndpoint(EntitiesEndpoint):
+    """
+    Represents notes endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "notes"
+
+    def get_instance_class(self, object_dict=None):
+        return NoteEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageNoteEndpoint
+
+
+class PageNoteEndpoint(PageNote, PageEndpoint):
+    """
+    Represents a page note endpoint.
+    """
+
+    def get_type(self) -> Optional[str]:
+        return "notes"
 
 
 class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
@@ -6740,6 +6775,7 @@ class KodexaClient:
         tasks (TasksEndpoint): An endpoint for tasks.
         users (UsersEndpoint): An endpoint for users.
         workspaces (WorkspacesEndpoint): An endpoint for workspaces.
+        notes (NotesEndpoint): An endpoint for notes.
     """
 
     def __init__(self, url=None, access_token=None, profile=None):
@@ -6770,6 +6806,7 @@ class KodexaClient:
         self.users = UsersEndpoint(self)
         self.workspaces = WorkspacesEndpoint(self)
         self.data_exceptions = DataExceptionsEndpoint(self)
+        self.notes = NotesEndpoint(self)
 
     @staticmethod
     def login(url, token):
