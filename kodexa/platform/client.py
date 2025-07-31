@@ -7414,6 +7414,8 @@ class KodexaClient:
                 "taxonomy": TaxonomyEndpoint,
                 "user": UserEndpoint,
                 "workspace": WorkspaceEndpoint,
+                "note": NoteEndpoint,
+                "notes": NoteEndpoint,
             }
 
             if component_type in known_components:
