@@ -3123,7 +3123,7 @@ class ProjectTaskTemplate(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-    title: Optional[str] = None
+    name: Optional[str] = None
     slug: Optional[str] = None
     description: Optional[str] = None
     metadata: Optional[TaskTemplateMetadata] = None
@@ -3312,6 +3312,7 @@ class TaskTemplate(BaseModel):
     project: Optional['Project'] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    slug: Optional[str] = None
     metadata: Optional[TaskTemplateMetadata] = None
 
 
