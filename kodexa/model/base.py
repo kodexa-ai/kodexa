@@ -14,5 +14,5 @@ StandardDateTime = Annotated[
     PlainSerializer(
         lambda v: v.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z" if not isinstance(v,str) else v, return_type=str
     ),
-    WithJsonSchema({"type": "datetime"}, mode="serialization"),
+    WithJsonSchema({"type": "string", "format": "date-time"}, mode="serialization"),
 ]

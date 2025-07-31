@@ -2889,6 +2889,18 @@ class ProjectStatus(BaseModel):
     icon: Optional[str] = None
 
 
+class ProjectTaskOptions(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    show_take_next: bool = Field(default=False, alias="showTakeNext")
+    show_new_task: bool = Field(default=False, alias="showNewTask")
+
+
 class ProjectOptions(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -2897,8 +2909,8 @@ class ProjectOptions(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    options: List[Option] = Field(None, description="The options for the project")
-    properties: Dict[str, Any] = Field(None, description="The properties for the project")
+    options: List[Option] = Field(default_factory=list, description="The options available for this project")
+    properties: Dict[str, Any] = Field(default_factory=dict, description="The properties defined for this project, based on the options")
 
     group_taxon_type_features: Dict[str, Any] = Field(
         default_factory=dict,
@@ -2911,6 +2923,8 @@ class ProjectOptions(BaseModel):
         alias="taxonTypeFeatures",
         description="Taxon Type Feature Defaults"
     )
+
+    task_options: ProjectTaskOptions = Field(default_factory=ProjectTaskOptions, alias="taskOptions")
 
 
 class NodePosition(BaseModel):
