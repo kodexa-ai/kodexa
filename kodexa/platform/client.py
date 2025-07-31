@@ -6500,6 +6500,13 @@ OBJECT_TYPES = {
         "type": PipelineEndpoint,
         "endpoint": PipelinesEndpoint,
     },
+    "notes": {
+        "name": "note",
+        "plural": "notes",
+        "type": NoteEndpoint,
+        "endpoint": NotesEndpoint,
+        "global": True,
+    },
     "assistants": {
         "name": "assistant",
         "plural": "assistants",
