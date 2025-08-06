@@ -5934,7 +5934,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             get_response.json()
         ).set_client(self.client)
 
-    def stream_filter(self, filter_string: str = "", sort=None, limit=None, page_size=5):
+    def stream_filter(self, filter_string: str = "", sort=None, limit=None, page_size=5, starting_offset: int = 0):
         """
         Stream the filter for the document family.
 
@@ -5943,11 +5943,12 @@ class DocumentStoreEndpoint(StoreEndpoint):
             sort (str, optional): Sorting order of the query. Defaults to None.
             limit (int, optional): The maximum number of items to return. Defaults to None.
             page_size (int, optional): The pagination size for the streaming
+            starting_offset (int, optional): The starting offset for the streaming
 
         Returns:
             generator: A generator of the document families.
         """
-        page = 1
+        page = starting_offset // page_size + 1
         count = 0
         if not sort:
             sort = "id"
@@ -5968,7 +5969,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             page += 1
 
     def filter(
-            self, filter_string: str = "", page: int = 1, page_size: int = 100, sort=None
+            self, filter_string: str = "", page: int = 1, page_size: int = 100, sort=None, starting_offset: int = 0
     ) -> PageDocumentFamilyEndpoint:
         """
         Filter the document family.
@@ -5978,10 +5979,11 @@ class DocumentStoreEndpoint(StoreEndpoint):
             page (int, optional): The page number to get. Defaults to 1.
             page_size (int, optional): The number of items per page. Defaults to 100.
             sort (str, optional): Sorting order of the query. Defaults to None.
-
+            starting_offset (int, optional): The starting offset for the filter (offset is 0-indexed, and over-rides the page parameter)
         Returns:
             PageDocumentFamilyEndpoint: The page of document families.
         """
+        page = starting_offset // page_size + 1
         params = {"page": page, "pageSize": page_size, "filter": filter_string}
 
         if sort is not None:
