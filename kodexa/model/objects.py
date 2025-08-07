@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from enum import Enum
 from typing import Optional, List, Dict, Any, Set
 from typing import Union
@@ -4871,6 +4872,27 @@ class ModelUsage(BaseModel):
     )
 
     interactions: Optional[List[ModelInteraction]] = None
+
+
+class AggregatedModelCost(BaseModel):
+    """
+    Represents an aggregated view of model costs grouped by modelId.
+    This class holds the sum of various token counts and other metrics.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    model_id: Optional[str] = Field(None, alias="modelId")
+    total_input_tokens: Optional[int] = Field(None, alias="totalInputTokens")
+    total_output_tokens: Optional[int] = Field(None, alias="totalOutputTokens")
+    total_thinking_tokens: Optional[int] = Field(None, alias="totalThinkingTokens")
+    total_cached_tokens: Optional[int] = Field(None, alias="totalCachedTokens")
+    total_duration: Optional[int] = Field(None, alias="totalDuration")
+    total_cost: Optional[Decimal] = Field(None, alias="totalCost")
 
 
 class ExecutionEvent(BaseModel):

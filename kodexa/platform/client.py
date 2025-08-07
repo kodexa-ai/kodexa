@@ -25,6 +25,7 @@ from pydantic_yaml import to_yaml_str
 from kodexa.model import Document
 from kodexa.model.model import Ref
 from kodexa.model.objects import (
+    AggregatedModelCost,
     PageUser,
     PageMembership,
     PageExecution,
@@ -6761,6 +6762,38 @@ class ExtractionEngineEndpoint:
         return response.text
 
 
+class ModelCostsEndpoint:
+    """
+    Provides endpoint access to the model costs.
+
+    Attributes:
+        client (KodexaClient): The client to interact with the model costs.
+    """
+
+    def __init__(self, client: "KodexaClient"):
+        self.client = client
+
+    def get_model_costs(self, filters: Optional[List[str]] = None) -> List[AggregatedModelCost]:
+        """
+        Get aggregated model costs filtered by the provided query context.
+        This endpoint aggregates the model costs by modelId.
+
+        Args:
+            filters (Optional[List[str]]): The filters to apply to the model costs.
+
+        Returns:
+            List[AggregatedModelCost]: A list of aggregated model costs.
+        """
+        params = {}
+        if filters is not None:
+            params["filter"] = filters
+            
+        response = self.client.get("/api/modelCosts", params=params)
+        return [
+            AggregatedModelCost.model_validate(item)
+            for item in response.json()
+        ]
+        
 class KodexaClient:
     """
     A class to represent a Kodexa client.
@@ -6816,6 +6849,7 @@ class KodexaClient:
         self.workspaces = WorkspacesEndpoint(self)
         self.data_exceptions = DataExceptionsEndpoint(self)
         self.notes = NotesEndpoint(self)
+        self.model_costs = ModelCostsEndpoint(self)
 
     @staticmethod
     def login(url, token):
