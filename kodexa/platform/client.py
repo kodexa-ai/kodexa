@@ -3254,7 +3254,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
             ).set_client(self.client)
         return None
 
-    def stream_query(self, query: str = "*", sort=None, limit=None):
+    def stream_query(self, query: str = "*", sort=None, limit=None, starting_offset = 0):
         """
         Stream the query for the project endpoints.
 
@@ -3267,7 +3267,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
             ProjectEndpoint: A generator of the project endpoints.
         """
         page_size = 5
-        page = 1
+        page = starting_offset // page_size + 1
         counter = 0
 
         if not sort:
@@ -5970,7 +5970,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             page += 1
 
     def filter(
-            self, filter_string: str = "", page: int = 1, page_size: int = 100, sort=None, starting_offset: int = 0
+            self, filter_string: str = "", page: int = 1, page_size: int = 100, sort=None
     ) -> PageDocumentFamilyEndpoint:
         """
         Filter the document family.
@@ -5980,11 +5980,9 @@ class DocumentStoreEndpoint(StoreEndpoint):
             page (int, optional): The page number to get. Defaults to 1.
             page_size (int, optional): The number of items per page. Defaults to 100.
             sort (str, optional): Sorting order of the query. Defaults to None.
-            starting_offset (int, optional): The starting offset for the filter (offset is 0-indexed, and over-rides the page parameter)
         Returns:
             PageDocumentFamilyEndpoint: The page of document families.
         """
-        page = starting_offset // page_size + 1
         params = {"page": page, "pageSize": page_size, "filter": filter_string}
 
         if sort is not None:
