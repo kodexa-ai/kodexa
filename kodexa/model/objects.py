@@ -2625,6 +2625,7 @@ class TaxonValidation(BaseModel):
     detail_formula: Optional[str] = Field(None, alias="detailFormula")
     exception_id: Optional[str] = Field(None, alias="exceptionId")
     support_article_id: Optional[str] = Field(None, alias="supportArticleId")
+    overridable: Optional[bool] = None
 
 class DocumentTaxonValidation(BaseModel):
     model_config = ConfigDict(
