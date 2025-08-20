@@ -21,6 +21,7 @@ on:
 
 jobs:
   analyze:
+    if: startsWith(github.ref, 'refs/heads/releases/')
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
