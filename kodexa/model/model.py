@@ -1244,6 +1244,7 @@ class ContentNode(object):
             status=None,
             owner_uri=None,
             is_dirty=None,
+            sort_by_bbox: bool=False,
     ):
         """
         This will tag (see Feature Tagging) the expression groups identified by the regular expression.
@@ -1305,7 +1306,7 @@ class ContentNode(object):
             return str(uuid.uuid4())
 
         def tag_node_position(
-                node_to_check, start, end, node_data, tag_uuid, offset=0, value=None
+                node_to_check, start, end, node_data, tag_uuid, offset=0, value=None, sort_by_bbox: bool=False
         ):
             """
             This function tags a node position in a given data structure. It iterates over the content parts of the node to check,
@@ -1420,6 +1421,7 @@ class ContentNode(object):
                         tag_uuid,
                         offset=offset,
                         value=value,
+                        sort_by_bbox=sort_by_bbox,
                     )
 
                     if result < 0 or (end - result) <= 0:
@@ -1434,7 +1436,16 @@ class ContentNode(object):
                     raise Exception("Invalid part?")
 
             # We need to determine if we have missing children and add them to the end
-            for child_idx, child_node in enumerate(node_to_check.get_children()):
+            node_children = node_to_check.get_children()
+            if node_children and sort_by_bbox:
+                # Sort nodes by x-coordinate if they have bboxes, otherwise use index
+                try:
+                    node_children.sort(key=lambda x: x.get_bbox()[0] if hasattr(x, 'get_bbox') else x.index if hasattr(x, 'index') else 0)
+                except (AttributeError, TypeError, IndexError):
+                    # If sorting fails, keep original order
+                    pass
+            
+            for child_idx, child_node in enumerate(node_children):
                 if child_node.index not in node_to_check.get_content_parts():
                     if content_length > 0:
                         end = end - len(separator)
@@ -1452,6 +1463,7 @@ class ContentNode(object):
                         tag_uuid,
                         offset=offset,
                         value=value,
+                        sort_by_bbox=sort_by_bbox,
                     )
 
                     if result < 0 or (end - result) <= 0:
@@ -1487,6 +1499,7 @@ class ContentNode(object):
                     get_tag_uuid(tag_uuid),
                     0,
                     value=value,
+                    sort_by_bbox=sort_by_bbox,
                 )
 
             else:
@@ -1558,6 +1571,7 @@ class ContentNode(object):
                                             data,
                                             get_tag_uuid(tag_uuid),
                                             value=value,
+                                            sort_by_bbox=sort_by_bbox,
                                         )
 
                         else:
@@ -1572,6 +1586,7 @@ class ContentNode(object):
                                     data,
                                     get_tag_uuid(tag_uuid),
                                     value=value,
+                                    sort_by_bbox=sort_by_bbox,
                                 )
 
     def get_tags(self):
@@ -1832,10 +1847,10 @@ class ContentNode(object):
           bool: True if this node is the first child of its parent or if this node has no parent; else, False;
 
         """
-        if not self.parent:
+        if not self.get_parent():
             return True
 
-        return self.index == 0
+        return self.index == self.get_parent().get_first_child_index()
 
     def is_last_child(self):
         """Determines if this node is the last child of its parent or has no parent.
@@ -1849,6 +1864,23 @@ class ContentNode(object):
             return True
 
         return self.index == self.get_parent().get_last_child_index()
+
+    def get_first_child_index(self):
+        """Returns the min index value for the children of this node. If the node has no children, returns None.
+
+        Returns:
+            int or None: The min index of the children of this node, or None if there are no children.
+
+        """
+        if not self.get_children():
+            return None
+
+        min_index = None
+        for child in self.get_children():
+            if min_index is None or child.index < min_index:
+                min_index = child.index
+
+        return min_index
 
     def get_last_child_index(self):
         """Returns the max index value for the children of this node. If the node has no children, returns None.
@@ -1884,6 +1916,7 @@ class ContentNode(object):
 
         """
         if self.get_children():
+            # TODO -  is this what we want? Should it return None?
             if index < self.get_children()[0].index:
                 virtual_node = self.document.create_node(
                     node_type=self.get_children()[0].node_type,
@@ -1992,7 +2025,6 @@ class ContentNode(object):
                         if potential_next_node:
                             return potential_next_node
                     except Exception:
-
                         # traverse additional layer
                         potential_next_node = (
                             self.get_parent()
@@ -2004,6 +2036,7 @@ class ContentNode(object):
                         )
                         if potential_next_node:
                             return potential_next_node
+                        
                 return node
 
             if compiled_node_type_re.match(node.node_type) and (
@@ -2037,9 +2070,17 @@ class ContentNode(object):
           ContentNode or None: The previous node or None, if no node exists
 
         """
-
         # TODO: implement/differentiate traverse logic for CHILDREN and SIBLING
-        if self.index == 0:
+
+        parent = self.get_parent()
+        parent_first_child_index = 0
+        
+        if parent:
+            parent_first_child_index = parent.get_first_child_index()
+
+        # TODO - the first item in the list does not always have an index property of 0
+        # TODO - should this be in the loop?
+        if self.index == parent_first_child_index:
             if (
                     traverse == traverse.ALL
                     or traverse == traverse.PARENT
@@ -2056,6 +2097,8 @@ class ContentNode(object):
         compiled_node_type_re = re.compile(node_type_re)
 
         while True:
+            # This creates a virtual node if the index is not found
+            # and the index is not greater than the last child index
             node = self.get_parent().get_node_at_index(search_index)
 
             if not node:
@@ -2069,6 +2112,8 @@ class ContentNode(object):
 
             search_index -= 1
 
+            if traverse == traverse.SIBLING and search_index < 0:               
+                return None
 
 class ContentFeature(object):
     """

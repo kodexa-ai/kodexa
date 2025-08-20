@@ -12,15 +12,16 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ main ]
+    branches: [ 'releases/**' ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ main ]
+    branches: [ 'releases/**' ]
   schedule:
     - cron: '39 19 * * 4'
 
 jobs:
   analyze:
+    if: startsWith(github.ref, 'refs/heads/releases/')
     name: Analyze
     runs-on: ubuntu-latest
     permissions:

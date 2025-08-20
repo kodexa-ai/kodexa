@@ -21,18 +21,19 @@ from kodexa.connectors import get_source
 from kodexa.connectors.connectors import get_caller_dir, FolderConnector
 from kodexa.model import Document
 from kodexa.model.objects import (
-    ExecutionEvent,
-    ContentObject,
     AssistantEvent,
-    ContentEvent,
-    ScheduledEvent,
-    DocumentFamilyEvent,
     ChannelEvent,
+    ContentEvent,
+    ContentObject,
     DataObjectEvent,
-    WorkspaceEvent, DocumentFamily,
+    DocumentFamilyEvent,
+    ExecutionEvent,
+    ScheduledEvent,
+    TaskEvent,
+    WorkspaceEvent, 
 )
 from kodexa.pipeline import PipelineContext, PipelineStatistics
-from kodexa.platform.client import DocumentStoreEndpoint, KodexaClient, process_response
+from kodexa.platform.client import KodexaClient, process_response
 
 logger = logging.getLogger()
 
@@ -191,11 +192,14 @@ class KodexaPlatform:
         """
         kodexa_config = get_config(profile)
         env_url = os.getenv("KODEXA_URL", None)
-        return (
+        final_url = (
             env_url
             if env_url is not None
             else kodexa_config[get_profile(profile)]["url"]
         )
+        if final_url is None:
+            raise Exception("No URL set, please set KODEXA_URL or configure a profile (see https://developer.kodexa.ai/guides/cli/authentication)")
+        return final_url
 
     @staticmethod
     def set_access_token(access_token: str):
@@ -277,6 +281,12 @@ class KodexaPlatform:
     def set_profile(cls, profile):
         kodexa_config = get_config(profile)
         kodexa_config["_current_profile_"] = profile
+        save_config(kodexa_config)
+
+    @classmethod
+    def clear_profile(cls, profile=None):
+        kodexa_config = get_config(profile)
+        kodexa_config["_current_profile_"] = None
         save_config(kodexa_config)
 
     @classmethod
@@ -824,6 +834,8 @@ class EventHelper:
             return DataObjectEvent(**event_dict)
         if event_dict["type"] == "workspace":
             return WorkspaceEvent(**event_dict)
+        if event_dict["type"] == "task":
+            return TaskEvent(**event_dict)
 
         raise f"Unknown event type {event_dict}"
 

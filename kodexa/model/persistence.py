@@ -1054,7 +1054,7 @@ class SqliteDocumentPersistence(object):
         """
         model_insights = []
         for model_insight in self.cursor.execute(MODEL_INSIGHT_SELECT).fetchall():
-            model_insights.append(ModelInsight.parse_raw(model_insight[0]))
+            model_insights.append(ModelInsight.model_validate_json(model_insight[0]))
 
         return model_insights
 
@@ -1172,6 +1172,36 @@ class SqliteDocumentPersistence(object):
         if result[0] == 0:
             self.cursor.execute("INSERT INTO validations (obj) VALUES (?)", [sqlite3.Binary(msgpack.packb([]))])
 
+    def __deduplicate_document_taxon_validations(self, taxon_validations: List[DocumentTaxonValidation]) -> List[DocumentTaxonValidation]:
+        """
+        Deduplicate DocumentTaxonValidation objects based on taxon_path and exception_id.
+        
+        Args:
+            taxon_validations: List of DocumentTaxonValidation objects to deduplicate.
+            
+        Returns:
+            List of deduplicated DocumentTaxonValidation objects.
+        """
+        if taxon_validations is None or len(taxon_validations) == 0:
+            return []
+        
+        seen_keys = set()
+        deduplicated = []
+        
+        for tv in taxon_validations:
+            if tv is None:
+                continue
+            
+            taxon_path = tv.taxon_path if tv.taxon_path is not None else ""
+            exception_id = tv.validation.exception_id if tv.validation and tv.validation.exception_id else ""
+            key = f"{taxon_path}|{exception_id}"
+            
+            if key not in seen_keys:
+                seen_keys.add(key)
+                deduplicated.append(tv)
+        
+        return deduplicated
+
     def set_validations(self, validations: List[DocumentTaxonValidation]):
         """
         Sets the validations for the document.
@@ -1180,7 +1210,12 @@ class SqliteDocumentPersistence(object):
             validations (List[DocumentTaxonValidation]): The validations to store.
         """
         self.__ensure_validations_table_exists()
-        serialized_data = sqlite3.Binary(msgpack.packb([v.model_dump(by_alias=True) for v in validations]))
+        # Handle None input
+        if validations is None:
+            validations = []
+        # Deduplicate validations before storing
+        deduplicated_validations = self.__deduplicate_document_taxon_validations(validations)
+        serialized_data = sqlite3.Binary(msgpack.packb([v.model_dump(by_alias=True) for v in deduplicated_validations]))
         self.cursor.execute("UPDATE validations SET obj = ? WHERE rowid = 1", [serialized_data])
         self.connection.commit()
 
@@ -1194,7 +1229,9 @@ class SqliteDocumentPersistence(object):
         self.__ensure_validations_table_exists()
         result = self.cursor.execute("SELECT obj FROM validations WHERE rowid = 1").fetchone()
         if result and result[0]:
-            return [DocumentTaxonValidation.model_validate(v) for v in msgpack.unpackb(result[0])]
+            validations = [DocumentTaxonValidation.model_validate(v) for v in msgpack.unpackb(result[0])]
+            # Deduplicate validations before returning
+            return self.__deduplicate_document_taxon_validations(validations)
         return []
 
     def set_external_data(self, external_data: dict, key: str = "default"):

@@ -1,54 +1,66 @@
-# Kodexa
+# Kodexa Python SDK
 
-[![Build and Package with Poetry](https://github.com/kodexa-ai/kodexa/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/kodexa-ai/kodexa/actions/workflows/main.yml)
+Learn more about Kodexa at [kodexa.ai](https://kodexa.ai).
 
-![img.png](https://docs.kodexa.com/img.png)
+## Installation & Setup
 
-Kodexa is a platform for building intelligent document processing pipelines. It is a set of tools and services that
-allow you to build a pipeline that can take a document, extract the content, and then process it to extract the
-information you need.
+The project uses Poetry for dependency management. To get started:
 
-It is built on a set of core principles:
+1. Make sure you have Poetry installed:
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
+   ```
 
-* **Document Centric** - Kodexa is built around the idea of a document. A document is a collection of content
-  nodes that are connected together. This is a powerful model that allows you to build pipelines that can
-  extract content from a wide range of sources.
+2. Install dependencies:
+   ```bash
+   poetry install
+   ```
 
-* **Pipeline Oriented** - Kodexa is built around the idea of a pipeline. A pipeline is a series of steps that
-  can be executed on a document. This allows you to build a pipeline that can extract content from a wide range
-  of sources.
+3. Run tests to verify your setup:
+   ```bash
+   poetry run pytest
+   ```
 
-* **Extensible** - Kodexa is built around the idea of a pipeline. A pipeline is a series of steps that can be executed
-  on a document. This allows you to build a pipeline that can extract content from a wide range of sources.
+## Documentation
 
-* **Label Driven** - Kodexa focuses on the idea of labels. Labels are a way to identify content within a document
-  and then use that content to drive the processing of the document.
+Comprehensive documentation, including API references, tutorials, and best practices, is available at the [Kodexa Support Portal](https://support.kodexa.ai).
 
-# Python SDK
+Key documentation sections include:
+- Getting Started Guide
+- API Reference
+- Pipeline Development
+- Model Creation
+- Platform Integration
+- Best Practices
 
-This repository contains the Python SDK for Kodexa. The SDK is the primary way to interact with Kodexa. It allows you to
-define actions, models, and pipelines that can be executed on Kodexa. It also includes a complete SDK client for
-working with a Kodexa platform instance.
+## Examples
 
-## Documentation & Examples
+Check out our documentation for practical examples of:
+- Document processing pipelines
+- Custom model development
+- Content extraction and transformation
+- Platform integration patterns
+- Action implementation
 
-Documentation is available at the [Kodexa Support Portal](https://support.kodexa.ai)
+## Contributing
 
-## Set-up
+We welcome contributions to the Kodexa platform! Whether it's:
+- Bug fixes
+- Feature enhancements
+- Documentation improvements
+- Example contributions
 
-We use poetry to manage our dependencies, so you can install them with:
+Please see our [contributing guide](CONTRIBUTING.md) for details on how to get involved.
 
-    poetry install
+## License
 
-You can then run the tests with:
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-    poetry run pytest
+## Support
 
-# Contributing
+- Visit our [Developer Portal](https://developer.kodexa.ai) for documentation
+- Contact us directly at support@kodexa.com for enterprise support
 
-We welcome contributions to the Kodexa platform. Please see our [contributing guide](CONTRIBUTING.md) for more details.
+---
 
-# License
-
-Apache 2.0
-
+Built with ❤️ by the Kodexa team

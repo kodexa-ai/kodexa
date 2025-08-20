@@ -23,6 +23,9 @@ def get_pretty_text_from_lines(lines: list[ContentNode], scale, include_line_uui
 
 def get_max_width(lines: list[ContentNode], max_width=None) -> int:
     if max_width is None:
+        if lines is None or len(lines) == 0:
+            return 250
+        
         # Find the line with the most words
         max_words_line = max(lines, key=lambda line: sum(len(word.get_all_content()) for word in line.select('//word')))
 

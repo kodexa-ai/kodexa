@@ -318,9 +318,27 @@ class LLMDataObject(BaseModel):
             tag_uuid = str(uuid.uuid4())
             for node in nodes_to_label:
                 if node:
+                    confidence = -1 if value.value_path == 'DERIVED' else 1
+
+                    textract_confidence_score_feature = node.get_feature(
+                        "textract", "confidence"
+                    )
+                    if textract_confidence_score_feature is not None:
+                        textract_confidence_value = (
+                            textract_confidence_score_feature.value
+                        )
+
+                        if (
+                            textract_confidence_value
+                            and len(textract_confidence_value) > 0
+                        ):
+                            confidence = textract_confidence_value[0]
+                            confidence = confidence / 100
+                    
+                    logger.info(f"Confidence: {confidence}")
+                    
                     if not node.has_tag(tag):
-                        try:
-                            confidence = -1 if value.value_path == 'DERIVED' else 1
+                        try:                            
                             node.tag(
                                 tag_to_apply=tag,
                                 value=value.normalized_text,
@@ -339,7 +357,7 @@ class LLMDataObject(BaseModel):
                         new_tag = Tag(cell_index=self.cell_index,
                                       uuid=tag_uuid,
                                       value=value.normalized_text,
-                                      confidence=-1,
+                                      confidence=confidence,
                                       group_uuid=self.group_uuid,
                                       parent_group_uuid=parent_group_uuid,
                                       owner_uri=f"assistant://{assistant.id}" if assistant else f"model://taxonomy-llm")

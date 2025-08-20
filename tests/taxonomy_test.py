@@ -28,6 +28,6 @@ def test_serialization():
     assert taxonomy.find_taxon_by_path(
         '5a9f6c65-8226-4ac6-925b-a1fe91683e7c/4241d1ac-38eb-448b-a28c-9ba69f2f33de').label == 'TrancheName'
 
-    new_taxonomy = Taxonomy.model_validate(taxonomy.dict())
+    new_taxonomy = Taxonomy.model_validate(taxonomy.model_dump())
 
     print(json.dumps(new_taxonomy.model_dump(), indent=4))

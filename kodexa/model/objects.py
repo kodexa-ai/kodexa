@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from decimal import Decimal
 from enum import Enum
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Set
 from typing import Union
 
 from pydantic import AnyUrl, Field, RootModel, BaseModel, ConfigDict
@@ -225,7 +226,7 @@ class Organization(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     name: str
-    slug: str = Field(pattern=r"^[a-zA-Z0-9\-_]{0,100}$")
+    slug: str = Field(pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     public_access: Optional[bool] = Field(None, alias="publicAccess")
     description: Optional[str] = None
     has_image: Optional[bool] = Field(None, alias="hasImage")
@@ -1550,6 +1551,7 @@ class Session(BaseModel):
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     token: Optional[str] = None
     last_accessed: Optional[StandardDateTime] = Field(None, alias="lastAccessed")
+    organization: Optional[Organization] = None
 
 
 class Status4(Enum):
@@ -2303,7 +2305,6 @@ class DocumentMetadataDefaults(BaseModel):
     document_properties: Optional[List[Option]] = Field(None, alias="documentProperties")
     label_expressions: Optional[List[LabelExpression]] = Field(None, alias="labelExpressions")
 
-
 class ExtensionPackProvided(BaseModel):
     """
 
@@ -2385,6 +2386,16 @@ class ExtensionPackProvided(BaseModel):
     )
     delete_protection: Optional[bool] = Field(
         None, description="Delete protection", alias="deleteProtection"
+    )
+    deprecated: Optional[bool] = Field(
+        None,
+        description="Resource is marked for deprecation",
+        alias="deprecate",
+    )
+    id: Optional[str] = Field(
+        None,
+        alias="_id",
+        description="The ID of the metadata object (used internally)",
     )
 
 
@@ -2471,6 +2482,7 @@ class ConnectionType(Enum):
     DATA_OBJECT = "DATA_OBJECT"
     WORKSPACE = "WORKSPACE"
     CHANNEL = "CHANNEL"
+    TASK = "TASK"
 
 
 class ProjectAssistantConnection(BaseModel):
@@ -2512,6 +2524,7 @@ class ProjectAssistant(BaseModel):
 
     name: Optional[str] = None
     description: Optional[str] = None
+    slug: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     assistant_definition_ref: Optional[str] = Field(
         None, alias="assistantDefinitionRef"
     )
@@ -2527,7 +2540,7 @@ class ProjectAssistant(BaseModel):
     assistant_role: Optional[str] = Field(None, alias="assistantRole")
 
 
-class LexicalRelationType(Enum):
+class LexicalRelationType(str, Enum):
     SYNONYM = "SYNONYM"
     ANTONYM = "ANTONYM"
     HYPERNYM = "HYPERNYM"
@@ -2545,7 +2558,7 @@ class LexicalRelation(BaseModel):
     weight: Optional[float] = None
 
 
-class TaxonValuePath(Enum):
+class TaxonValuePath(str, Enum):
     VALUE_OR_ALL_CONTENT = "VALUE_OR_ALL_CONTENT"
     VALUE_ONLY = "VALUE_ONLY"
     ALL_CONTENT = "ALL_CONTENT"
@@ -2603,14 +2616,16 @@ class TaxonValidation(BaseModel):
     )
 
     name: Optional[str] = Field(None)
+    disabled: Optional[bool] = None
     description: Optional[str] = Field(None)
+    conditional: Optional[bool] = None
+    conditional_formula: Optional[str] = Field(None, alias="conditionalFormula")
     rule_formula: Optional[str] = Field(None, alias="ruleFormula")
     message_formula: Optional[str] = Field(None, alias="messageFormula")
     detail_formula: Optional[str] = Field(None, alias="detailFormula")
     exception_id: Optional[str] = Field(None, alias="exceptionId")
     support_article_id: Optional[str] = Field(None, alias="supportArticleId")
     overridable: Optional[bool] = None
-
 
 class DocumentTaxonValidation(BaseModel):
     model_config = ConfigDict(
@@ -2672,6 +2687,7 @@ class Taxon(BaseModel):
                                                                         alias="conditionalFormats")
     validation_rules: List[TaxonValidation] = Field(
         default_factory=list,
+        alias="validationRules",
         description="The validation rules for the taxon"
     )
 
@@ -2875,6 +2891,18 @@ class ProjectStatus(BaseModel):
     icon: Optional[str] = None
 
 
+class ProjectTaskOptions(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    show_take_next: bool = Field(default=False, alias="showTakeNext")
+    show_new_task: bool = Field(default=False, alias="showNewTask")
+
+
 class ProjectOptions(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -2883,8 +2911,8 @@ class ProjectOptions(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    options: List[Option] = Field(None, description="The options for the project")
-    properties: Dict[str, Any] = Field(None, description="The properties for the project")
+    options: List[Option] = Field(default_factory=list, description="The options available for this project")
+    properties: Dict[str, Any] = Field(default_factory=dict, description="The properties defined for this project, based on the options")
 
     group_taxon_type_features: Dict[str, Any] = Field(
         default_factory=dict,
@@ -2898,7 +2926,81 @@ class ProjectOptions(BaseModel):
         description="Taxon Type Feature Defaults"
     )
 
+    task_options: ProjectTaskOptions = Field(default_factory=ProjectTaskOptions, alias="taskOptions")
 
+
+class NodePosition(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    x: float = 0
+    y: float = 0
+
+
+class NodeDimensions(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    width: float = 0
+    height: float = 0
+
+
+class FlowViewPort(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    x: float = 0
+    y: float = 0
+    zoom: float = 1
+
+
+class DataFlowNode(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    id: Optional[str] = None
+    parent_id: Optional[str] = Field(None, alias="parentId")
+    type: Optional[str] = None
+    position: Optional[NodePosition] = None
+    dimensions: Optional[NodeDimensions] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class DataFlowEdge(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    id: Optional[str] = None
+    source: Optional[str] = None
+    target: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ProjectDataFlow(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    view_port: Optional[FlowViewPort] = Field(None, alias="viewPort")
+    nodes: List[DataFlowNode] = Field(default_factory=list)
+    edges: List[DataFlowEdge] = Field(default_factory=list)
 
 class Project(BaseModel):
     model_config = ConfigDict(
@@ -2935,6 +3037,9 @@ class Project(BaseModel):
     document_statuses: Optional[List[DocumentStatus]] = Field(
         None, alias="documentStatuses"
     )
+    task_statuses: Optional[List[TaskStatus]] = Field(
+        None, alias="taskStatuses"
+    )
     attribute_statuses: Optional[List[AttributeStatus]] = Field(
         None, alias="attributeStatuses"
     )
@@ -2942,13 +3047,149 @@ class Project(BaseModel):
     owner: Optional[User] = None
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
-
 class TaskStatusType(str, Enum):
     """Enum for task status types"""
     TODO = "TODO"
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
 
+class ProjectAttributeStatus(BaseModel):
+    """
+    Represents an attribute status for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    color: Optional[str] = Field(None, max_length=25)
+    icon: Optional[str] = Field(None, max_length=25)
+    status: Optional[str] = Field(None, max_length=255)
+    status_type: Optional[StatusType2] = Field(None, alias="statusType")
+
+class ProjectDocumentStatus(BaseModel):
+    """
+    Represents a document status for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    color: Optional[str] = Field(None, max_length=25)
+    icon: Optional[str] = Field(None, max_length=25)
+    status: str = Field(..., max_length=255)
+    slug: str = Field(..., max_length=255)
+    old_identifier: Optional[str] = Field(None, alias="oldIdentifier")
+    status_type: Optional[StatusType2] = Field(None, alias="statusType")
+
+class ProjectTaskStatus(BaseModel):
+    """
+    Represents a task status for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    color: Optional[str] = Field(None, max_length=25)
+    icon: Optional[str] = Field(None, max_length=25)
+    label: str = Field(..., max_length=255)
+    old_identifier: Optional[str] = Field(None, alias="oldIdentifier")
+    slug: Optional[str] = None
+    status_type: Optional[TaskStatusType] = Field(None, alias="statusType")
+
+class ProjectTemplateTag(BaseModel):
+    """
+    Represents a tag for a project template.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    label: Optional[str] = None
+    color: Optional[str] = None
+
+class ProjectTaskTemplate(BaseModel):
+    """
+    Represents a task template for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    name: Optional[str] = None
+    slug: Optional[str] = None
+    description: Optional[str] = None
+    metadata: Optional[TaskTemplateMetadata] = None
+    old_identifier: Optional[str] = Field(None, alias="oldIdentifier")
+
+class ProjectResource(BaseModel):
+    """
+    Represents a resource for a project.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    uri: Optional[str] = None
+    type: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    should_copy: Optional[bool] = Field(False, alias="copy")
+    slug: Optional[str] = None
+    original_uri: Optional[str] = Field(None, alias="originalUri")
+
+class WorkspaceResource(BaseModel):
+    """
+    Represents a workspace resource.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    name: Optional[str] = None
+    description: Optional[str] = None
+    storage: Optional[WorkspaceStorage] = None
+
+class ProjectTemplateRequest(BaseModel):
+    """
+    Represents a request to create a project template.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    name: Optional[str] = None
+    description: Optional[str] = None
+    options: Optional[ProjectOptions] = None
+    memory: Optional[ProjectMemory] = None
+    image_url: Optional[str] = Field(None, alias="imageUrl")
+    icon: Optional[str] = None
+    overview_markdown: Optional[str] = Field(None, alias="overviewMarkdown")
+    provider: Optional[str] = None
+    provider_url: Optional[str] = Field(None, alias="providerUrl")
+    provider_image_url: Optional[str] = Field(None, alias="providerImageUrl")
+    public_access: Optional[bool] = Field(False, alias="publicAccess")
+    resources: List[ProjectResource] = Field(default_factory=list)
+    workspaces: List[ProjectWorkspace] = Field(default_factory=list)
+    assistants: List[ProjectAssistant] = Field(default_factory=list)
+    document_statuses: List[ProjectDocumentStatus] = Field(default_factory=list, alias="documentStatuses")
+    task_statuses: List[ProjectTaskStatus] = Field(default_factory=list, alias="taskStatuses")
+    tags: Set[str] = Field(default_factory=set)
 
 class TaskStatus(BaseModel):
     """Model representing a task status entity"""
@@ -2960,6 +3201,7 @@ class TaskStatus(BaseModel):
     )
     id: Optional[str] = Field(None)
     uuid: Optional[str] = None
+    slug: Optional[str] = Field(None, pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     color: Optional[str] = Field(None, max_length=25)
     icon: Optional[str] = Field(None, max_length=25)
@@ -3063,10 +3305,16 @@ class TaskTemplate(BaseModel):
         arbitrary_types_allowed=True,
         protected_namespaces=("model_config",),
     )
-
+    
+    id: Optional[str] = Field(None, description="The ID of the task template")
+    uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     project: Optional['Project'] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    slug: Optional[str] = None
     metadata: Optional[TaskTemplateMetadata] = None
 
 
@@ -3089,8 +3337,30 @@ class TaskDocumentFamily(BaseModel):
         protected_namespaces=("model_config",),
     )
 
-    task: Optional['Task'] = None
-    document_family: Optional['DocumentFamily'] = Field(None, alias="documentFamily")
+    taskId: Optional[str] = Field(None, alias="taskId")
+    documentFamilyId: Optional[str] = Field(None, alias="documentFamilyId")
+
+
+class PageTaskDocumentFamily(BaseModel):
+    """
+    Represents a page of task document families.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[TaskDocumentFamily]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
 
 
 class Task(BaseModel):
@@ -3101,6 +3371,10 @@ class Task(BaseModel):
         protected_namespaces=("model_config",),
     )
 
+    id: Optional[str] = Field(None)
+    uuid: Optional[str] = None
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     project: Optional['Project'] = None
     title: Optional[str] = None
     description: Optional[str] = None
@@ -3110,7 +3384,7 @@ class Task(BaseModel):
     completed_date: Optional[StandardDateTime] = Field(None, alias="completedDate")
     status: Optional[TaskStatus] = None
     assignee: Optional['User'] = None
-    task_activity: List[TaskActivity] = Field(default_factory=list, alias="taskActivity")
+    task_activity: List[TaskActivity] = Field(default_factory=list, alias="taskActivities")
     task_document_families: List[TaskDocumentFamily] = Field(default_factory=list, alias="taskDocumentFamilies")
     search_text: Optional[str] = Field(None, alias="searchText")
     tags: List[TaskTag] = Field(default_factory=list)
@@ -3266,6 +3540,7 @@ class Channel(BaseModel):
     name: Optional[str] = None
     is_private: Optional[bool] = Field(None, alias="isPrivate")
     participants: Optional[List[ChannelParticipant]] = Field(None, alias="participants")
+    task: Optional[Task] = None
 
 
 class MessageBlock(BaseModel):
@@ -3386,7 +3661,7 @@ class DataAttribute(BaseModel):
         alias="dataExceptions",
         description="A list of the data exceptions",
     )
-    tag: str
+    tag: Optional[str] = None
     tag_uuid: Optional[str] = Field(None, alias="tagUuid")
     date_value: Optional[StandardDateTime] = Field(None, alias="dateValue")
     float_value: Optional[float] = Field(None, alias="floatValue")
@@ -3828,7 +4103,7 @@ class CustomEvent(BaseModel):
         None, description="The name of the event", pattern=r"^[a-zA-Z0-9\-_]{0,40}$"
     )
     icon: Optional[str] = Field(
-        None, description="The name of a Material Design Icon to use for the event"
+        None, description="The name of an icon to use for the event"
     )
     label: Optional[str] = Field(
         None, description="The label to use on the event in the UI"
@@ -4353,6 +4628,8 @@ class ExecutionOverview(BaseModel):
     )
     assistant: Optional[ExecutionAssistant] = None
     execution: Optional[ExecutionSnapshot] = None
+    start_date: Optional[StandardDateTime] = Field(None, alias="startDate")
+    end_date: Optional[StandardDateTime] = Field(None, alias="endDate")
 
 
 class DataObject(BaseModel):
@@ -4399,6 +4676,7 @@ class Assistant(BaseModel):
     )
     id: Optional[str] = Field(None)
     uuid: Optional[str] = None
+    slug: Optional[str] = Field(None, description="The slug for the assistant", pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     change_sequence: Optional[int] = Field(None, alias="changeSequence")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
@@ -4455,6 +4733,7 @@ class AssistantExecution(BaseModel):
             ScheduledEvent,
             ChannelEvent,
             WorkspaceEvent,
+            TaskEvent,
         ]
     ] = None
     response: Optional[AssistantExecutionResponse] = None
@@ -4500,18 +4779,19 @@ class BaseEvent(
     RootModel[
         Union[
             BaseEvent1,
-            "DocumentFamilyEvent",
-            "DataObjectEvent",
-            "ContentEvent",
-            "ScheduledEvent",
             "AssistantEvent",
             "ChannelEvent",
-            "WorkspaceEvent"
+            "ContentEvent",
+            "DataObjectEvent",
+            "DocumentFamilyEvent",
+            "ScheduledEvent",
+            "TaskEvent",
+            "WorkspaceEvent",
         ]
     ]
 ):
     """
-
+    Base class for all events.
     """
     pass
 
@@ -4578,6 +4858,8 @@ class ModelInteraction(BaseModel):
     model_id: Optional[str] = Field(None, alias="modelId")
     input_tokens: Optional[int] = Field(None, alias="inputTokens")
     output_tokens: Optional[int] = Field(None, alias="outputTokens")
+    thinking_tokens: Optional[int] = Field(None, alias="thinkingTokens")
+    cached_tokens: Optional[int] = Field(None, alias="cachedTokens")
     duration: Optional[int] = None
     note: Optional[str] = None
 
@@ -4591,6 +4873,27 @@ class ModelUsage(BaseModel):
     )
 
     interactions: Optional[List[ModelInteraction]] = None
+
+
+class AggregatedModelCost(BaseModel):
+    """
+    Represents an aggregated view of model costs grouped by modelId.
+    This class holds the sum of various token counts and other metrics.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    model_id: Optional[str] = Field(None, alias="modelId")
+    total_input_tokens: Optional[int] = Field(None, alias="totalInputTokens")
+    total_output_tokens: Optional[int] = Field(None, alias="totalOutputTokens")
+    total_thinking_tokens: Optional[int] = Field(None, alias="totalThinkingTokens")
+    total_cached_tokens: Optional[int] = Field(None, alias="totalCachedTokens")
+    total_duration: Optional[int] = Field(None, alias="totalDuration")
+    total_cost: Optional[Decimal] = Field(None, alias="totalCost")
 
 
 class ExecutionEvent(BaseModel):
@@ -4964,12 +5267,13 @@ class PlatformEvent(BaseModel):
     event_detail: Optional[
         Union[
             AssistantEvent,
+            ChannelEvent,
             ContentEvent,
             DataObjectEvent,
             DocumentFamilyEvent,
             ScheduledEvent,
-            ChannelEvent,
-            WorkspaceEvent
+            TaskEvent,
+            WorkspaceEvent,
         ]
     ] = Field(None, alias="eventDetail")
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
@@ -5306,6 +5610,50 @@ class PageAssistantDefinition(BaseModel):
     empty: Optional[bool] = None
 
 
+class PageTaskActivity(BaseModel):
+    """
+    Represents a page of task activities.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[Action]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class PageTaskTag(BaseModel):
+    """
+    Represents a page of task tags.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[Action]] = None
+    number: Optional[int] = None
+
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
 class PageAction(BaseModel):
     """
 
@@ -5574,6 +5922,7 @@ class DataForm(ExtensionPackProvided):
     entrypoints: Optional[List[str]] = None
     cards: Optional[List[Card]] = None
     filters: Optional[str] = None
+    options: Optional[List[Option]] = None
 
 
 class ProjectDataForm(BaseModel):
@@ -5691,7 +6040,7 @@ class ProjectTemplate(ExtensionPackProvided):
     category: Optional[Category] = Field(
         None, description="The category of project template"
     )
-    document_statuses: Optional[List[DocumentStatus]] = Field(
+    document_statuses: Optional[List[ProjectDocumentStatus]] = Field(
         None,
         alias="documentStatuses",
         description="The document statuses that will be created with the project template",
@@ -5701,6 +6050,13 @@ class ProjectTemplate(ExtensionPackProvided):
         alias="attributeStatuses",
         description="The attribute statuses that will be created with the project template",
     )
+
+    task_statuses: Optional[List[ProjectTaskStatus]] = Field(None,
+        alias="taskStatuses",
+        description="The task statuses that will be created with the project template",
+    )
+    
+    task_templates: Optional[List[ProjectTaskTemplate]] = Field(None, alias="taskTemplates")
 
     options: Optional[ProjectOptions] = Field(None, alias="options")
 
@@ -5909,7 +6265,6 @@ class ContentEvent(BaseModel):
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
     object_event_type: Optional[ObjectEventType] = Field(None, alias="objectEventType")
 
-
 class DataObjectEvent(BaseModel):
     """
 
@@ -5924,6 +6279,22 @@ class DataObjectEvent(BaseModel):
     data_object: Optional[DataObject] = Field(None, alias="dataObject")
 
 
+class TaskEvent(BaseModel):
+    """
+    The TaskEvent class represents a change to a task
+    It extends from the BaseEvent class.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    type: Optional[str] = "task"
+    task: Optional[Task] = None
+    document_families: Optional[List[DocumentFamily]] = Field(default_factory=list, alias="documentFamilies")
+
+
 class DocumentFamilyEvent(BaseModel):
     """
 
@@ -5935,6 +6306,11 @@ class DocumentFamilyEvent(BaseModel):
         protected_namespaces=("model_config",),
     )
     type: Optional[str] = None
+
+    unassigned_user: Optional[User] = Field(None, alias="unassignedUser")
+    previous_status: Optional[DocumentStatus] = Field(None, alias="previousStatus")
+    document_state: Optional[str] = Field(None, alias="documentState")
+
     document_family: Optional[DocumentFamily] = Field(None, alias="documentFamily")
 
 
@@ -5966,6 +6342,90 @@ class ScheduledEvent(BaseModel):
     type: Optional[str] = None
     last_event: Optional[StandardDateTime] = Field(None, alias="lastEvent")
     next_event: Optional[StandardDateTime] = Field(None, alias="nextEvent")
+
+
+class OrchestrationEvent(BaseModel):
+    """
+
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    type: Optional[str] = None
+    execution_event: Optional[ExecutionEvent] = Field(None, alias="executionEvent")
+
+
+
+class PageNote(BaseModel):
+    """
+    A page of notes
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    size: Optional[int] = None
+    content: Optional[List[Note]] = None
+    number: Optional[int] = None
+    number_of_elements: Optional[int] = Field(None, alias="numberOfElements")
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+    empty: Optional[bool] = None
+
+
+class NoteType(Enum):
+    """
+    The NoteType enumeration represents the different formats a note can have.
+    This includes MARKDOWN, TEXT, HTML formats, and ASSISTANT_KNOWLEDGE.
+    """
+    markdown = "MARKDOWN"
+    text = "TEXT"
+    html = "HTML"
+    assistant_knowledge = "ASSISTANT_KNOWLEDGE"
+
+
+class Note(BaseModel):
+    """
+    A note within the Kodexa platform
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    id: Optional[str] = Field(None)
+    uuid: Optional[str] = None
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    
+    # Data relationships
+    workspace: Optional['Workspace'] = None
+    assistant: Optional['Assistant'] = None
+    parent_comment: Optional['Note'] = Field(None, alias="parentComment")
+    
+    # Core content
+    title: Optional[str] = None
+    content: Optional[str] = None
+    note_type: Optional[NoteType] = Field(None, alias="noteType")
+    
+    # Author and replies
+    author: Optional['User'] = None
+    replies: Optional[List['Note']] = Field(default_factory=list)
+    
+    # Task association
+    task: Optional['Task'] = None
+    
+    # Properties map
+    note_properties: Optional[Dict[str, str]] = Field(default_factory=dict, alias="noteProperties")
 
 
 ThrowableProblem.model_rebuild()
@@ -6016,6 +6476,7 @@ ContentEvent.model_rebuild()
 DataObjectEvent.model_rebuild()
 DocumentFamilyEvent.model_rebuild()
 ScheduledEvent.model_rebuild()
+TaskEvent.model_rebuild()
 DataException.model_rebuild()
 Workspace.model_rebuild()
 AssistantResponsePipeline.model_rebuild()
@@ -6024,3 +6485,5 @@ Message.model_rebuild()
 MessageFeedback.model_rebuild()
 MessageFeedbackResponse.model_rebuild()
 MessageFeedbackOption.model_rebuild()
+Note.model_rebuild()
+PageNote.model_rebuild()

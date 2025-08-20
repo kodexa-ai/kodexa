@@ -22,12 +22,14 @@ permissions:
 #############################
 on:
   pull_request:
-    branches: [ main, release/*, features/* ]
+    branches:
+      - 'releases/**'
 
 # Set the Job #
 ###############
 jobs:
   build:
+    if: startsWith(github.ref, 'refs/heads/releases/')
     # Name the Job
     name: Lint Code Base
     # Set the agent to run on

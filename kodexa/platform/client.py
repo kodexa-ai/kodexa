@@ -23,7 +23,9 @@ from pydantic import BaseModel, Field, ConfigDict
 from pydantic_yaml import to_yaml_str
 
 from kodexa.model import Document
+from kodexa.model.model import Ref
 from kodexa.model.objects import (
+    AggregatedModelCost,
     PageUser,
     PageMembership,
     PageExecution,
@@ -83,9 +85,29 @@ from kodexa.model.objects import (
     ReprocessRequest,
     PageExtensionPack,
     PageOrganization,
-    DocumentFamilyStatistics, MessageContext, PagePrompt, Prompt, GuidanceSet, PageGuidanceSet, DocumentEmbedding,
-    DocumentExternalData, Task, PageTask, RetainedGuidance, PageRetainedGuidance, TaskTemplate, TaskStatus,
-    TaskActivity, TaskDocumentFamily, TaskTag,
+    DocumentFamilyStatistics,
+    MessageContext,
+    PagePrompt,
+    Prompt,
+    GuidanceSet,
+    PageGuidanceSet,
+    DocumentEmbedding,
+    DocumentExternalData,
+    Task,
+    PageTask,
+    RetainedGuidance,
+    PageRetainedGuidance,
+    TaskTemplate,
+    TaskStatus,
+    TaskActivity,
+    TaskDocumentFamily,
+    TaskTag,
+    ProjectTemplateRequest,
+    PageTaskDocumentFamily,
+    PageTaskActivity,
+    PageTaskTag,
+    Note,
+    PageNote,
 )
 
 logger = logging.getLogger()
@@ -306,7 +328,7 @@ class ProjectResourceEndpoint(ClientEndpoint):
             page += 1
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
             filters: Optional[List[str]] = None
     ):
         """
@@ -502,7 +524,7 @@ class ComponentEndpoint(ClientEndpoint, OrganizationOwned):
             params["page"] += 1
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
             filters: Optional[List[str]] = None
     ):
         """
@@ -730,7 +752,7 @@ class EntitiesEndpoint:
             page += 1
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
             filters: Optional[List[str]] = None
     ):
         """List the resources.
@@ -887,6 +909,21 @@ class OrganizationsEndpoint(EntitiesEndpoint):
             Optional[OrganizationEndpoint]: The organization with the given slug, or None if no such organization exists.
         """
         organizations = self.list(filters=["slug: '" + slug + "'"])
+        if organizations.number_of_elements == 0:
+            return None
+        return organizations.content[0]
+    
+    def find_by_name(self, name) -> Optional["OrganizationEndpoint"]:
+        """
+        Find an organization by name.
+
+        Args:
+            name (str): The name of the organization.
+
+        Returns:
+            Optional[OrganizationEndpoint]: The organization if found, None otherwise.
+        """
+        organizations = self.list(filters=["name: '" + name + "'"])
         if organizations.number_of_elements == 0:
             return None
         return organizations.content[0]
@@ -1164,6 +1201,7 @@ class PageTaskEndpoint(PageTask, PageEndpoint):
     """
     Represents a page of tasks.
     """
+
     def get_type(self) -> Optional[str]:
         return "task"
 
@@ -1332,6 +1370,257 @@ class TaskTagsEndpoint(EntitiesEndpoint):
 
     def get_page_class(self, object_dict=None):
         return PageTaskTagEndpoint
+
+
+class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
+    def get_type(self) -> Optional[str]:
+        return "taskTemplate"
+
+
+class PageTaskActivityEndpoint(PageTaskActivity, PageEndpoint):
+    """
+    Represents a page of task activities.
+    """
+
+    def get_type(self) -> Optional[str]:
+        return "taskActivity"
+
+
+class PageTaskDocumentFamilyEndpoint(PageTaskDocumentFamily, PageEndpoint):
+    """
+    Represents a page of task document families.
+    """
+
+    def get_type(self) -> Optional[str]:
+        return "taskDocumentFamily"
+
+
+class PageTaskTagEndpoint(PageTaskTag, PageEndpoint):
+    """
+    Represents a page of task tags.
+    """
+
+    def get_type(self) -> Optional[str]:
+        return "taskTag"
+
+
+class TaskEndpoint(EntityEndpoint, Task):
+    """
+    Represents a task endpoint.
+    """
+
+    def get_type(self) -> str:
+        return "tasks"
+
+    def update_status(self, status: TaskStatus):
+        """Update the status of the task."""
+        url = f"/api/tasks/{self.id}/status"
+        response = self.client.put(url, body=status.model_dump(mode="json", by_alias=True))
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def remove_status(self):
+        """Remove the task status."""
+        url = f"/api/tasks/{self.id}/status"
+        response = self.client.delete(url)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def update_assignee(self, assignee: User):
+        """Update the assignee of the task."""
+        url = f"/api/tasks/{self.id}/assignee"
+        response = self.client.put(url, body=assignee.model_dump(mode="json", by_alias=True))
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+    def remove_assignee(self):
+        """Remove the task assignee."""
+        url = f"/api/tasks/{self.id}/assignee"
+        response = self.client.delete(url)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+
+class TasksEndpoint(EntitiesEndpoint):
+    """
+    Represents tasks endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "tasks"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskEndpoint
+
+    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None,
+                             document_families: Optional[List[DocumentFamily]] = None) -> TaskEndpoint:
+        """Create a task with the given template."""
+        url = "/api/tasks/createTaskWithRequest"
+        create_body = {
+            "task": task.model_dump(mode="json", by_alias=True),
+            "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
+            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in
+                                 document_families] if document_families else None
+        }
+        response = self.client.post(url, create_body)
+        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
+
+
+class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
+    """
+    Represents a task template endpoint.
+    """
+
+    def get_type(self) -> str:
+        return "taskTemplates"
+
+
+class TaskTemplatesEndpoint(EntitiesEndpoint):
+    """
+    Represents task templates endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "taskTemplates"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskTemplateEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskTemplateEndpoint
+
+
+class TaskActivityEndpoint(EntityEndpoint, TaskActivity):
+    """
+    Represents a task activity endpoint.
+    """
+
+    def get_type(self) -> str:
+        return "taskActivities"
+
+
+class TaskActivitiesEndpoint(EntitiesEndpoint):
+    """
+    Represents task activities endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "taskActivities"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskActivityEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskActivityEndpoint
+
+
+class TaskDocumentFamilyEndpoint(EntityEndpoint, TaskDocumentFamily):
+    """
+    Represents a task document family endpoint.
+    """
+
+    def get_type(self) -> str:
+        return "taskDocumentFamilies"
+
+
+class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
+    """
+    Represents task document families endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "taskDocumentFamilies"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskDocumentFamilyEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskDocumentFamilyEndpoint
+
+
+class DocumentFamiliesEndpoint(EntitiesEndpoint):
+    """
+    Represents document families endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "documentFamilies"
+
+    def get_instance_class(self, object_dict=None):
+        return DocumentFamilyEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageDocumentFamilyEndpoint
+    
+class DataExceptionsEndpoint(EntitiesEndpoint):
+    """
+    Represents data exceptions endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "exceptions"
+    
+    def get_instance_class(self, object_dict=None):
+        return DataExceptionEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageDataExceptionEndpoint
+    
+
+class TaskTagEndpoint(EntityEndpoint, TaskTag):
+    """
+    Represents a task tag endpoint.
+    """
+
+    def get_type(self) -> str:
+        return "taskTags"
+
+
+class TaskTagsEndpoint(EntitiesEndpoint):
+    """
+    Represents task tags endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "taskTags"
+
+    def get_instance_class(self, object_dict=None):
+        return TaskTagEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageTaskTagEndpoint
+
+
+class NoteEndpoint(EntityEndpoint, Note):
+    """
+    Represents a note endpoint.
+    """
+
+    def get_type(self) -> str:
+        return "notes"
+
+
+class NotesEndpoint(EntitiesEndpoint):
+    """
+    Represents notes endpoints.
+    """
+
+    def get_type(self) -> str:
+        return "notes"
+
+    def get_instance_class(self, object_dict=None):
+        return NoteEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageNoteEndpoint
+
+
+class PageNoteEndpoint(PageNote, PageEndpoint):
+    """
+    Represents a page note endpoint.
+    """
+
+    def get_type(self) -> Optional[str]:
+        return "notes"
 
 
 class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
@@ -2693,36 +2982,6 @@ class WorkspaceEndpoint(EntityEndpoint, Workspace):
             raise ValueError("Workspace has no channel")
 
 
-class TaskTemplateEndpoint(EntityEndpoint, Task):
-    """Represents a task endpoint.
-
-    This class is used to interact with the task endpoint of the API.
-    """
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint, in this case "projects".
-        """
-        return "taskTemplates"
-
-
-class TaskEndpoint(EntityEndpoint, Task):
-    """Represents a task endpoint.
-
-    This class is used to interact with the task endpoint of the API.
-    """
-
-    def get_type(self) -> str:
-        """Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint, in this case "projects".
-        """
-        return "tasks"
-
-
 class RetainedGuidanceEndpoint(EntityEndpoint, RetainedGuidance):
     """Represents a retained guidance endpoint.
 
@@ -2897,6 +3156,16 @@ class ProjectEndpoint(EntityEndpoint, Project):
         )
         return [ProjectTag.model_validate(tag) for tag in response.json()]
 
+    def create_project_template_request(self) -> ProjectTemplateRequest:
+        """Create a project template request from this project.
+
+        Returns:
+            ProjectTemplateRequest: A project template request object.
+        """
+        response = self.client.get(f"/api/projects/{self.id}/createProjectTemplateRequest")
+        return ProjectTemplateRequest.model_validate(response.json())
+
+
 
 class MessagesEndpoint(EntitiesEndpoint):
     """Represents a message endpoint"""
@@ -3068,70 +3337,6 @@ class AssistantsEndpoint(EntitiesEndpoint):
         return PageAssistantEndpoint
 
 
-class TaskTemplatesEndpoint(EntitiesEndpoint):
-    """Represents a projects endpoint"""
-
-    def get_type(self) -> str:
-        """
-        Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint.
-        """
-        return "taskTemplates"
-
-    def get_instance_class(self, object_dict=None):
-        """
-        Get the instance class of the endpoint.
-
-        Returns:
-            ProjectEndpoint: The instance class of the endpoint.
-        """
-        return TaskTemplateEndpoint
-
-    def get_page_class(self, object_dict=None):
-        """
-        Get the page class of the endpoint.
-
-        Returns:
-            PageProjectEndpoint: The page class of the endpoint.
-        """
-        return PageTaskTemplateEndpoint
-
-
-class TasksEndpoint(EntitiesEndpoint):
-    """Represents a projects endpoint"""
-
-    """Represents a projects endpoint"""
-
-    def get_type(self) -> str:
-        """
-        Get the type of the endpoint.
-
-        Returns:
-            str: The type of the endpoint.
-        """
-        return "tasks"
-
-    def get_instance_class(self, object_dict=None):
-        """
-        Get the instance class of the endpoint.
-
-        Returns:
-            ProjectEndpoint: The instance class of the endpoint.
-        """
-        return TaskEndpoint
-
-    def get_page_class(self, object_dict=None):
-        """
-        Get the page class of the endpoint.
-
-        Returns:
-            PageProjectEndpoint: The page class of the endpoint.
-        """
-        return PageTaskEndpoint
-
-
 class RetainedGuidancesEndpoint(EntitiesEndpoint):
     """Represents a projects endpoint"""
 
@@ -3220,7 +3425,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
             ).set_client(self.client)
         return None
 
-    def stream_query(self, query: str = "*", sort=None, limit=None):
+    def stream_query(self, query: str = "*", sort=None, limit=None, starting_offset = 0):
         """
         Stream the query for the project endpoints.
 
@@ -3233,7 +3438,7 @@ class ProjectsEndpoint(EntitiesEndpoint):
             ProjectEndpoint: A generator of the project endpoints.
         """
         page_size = 5
-        page = 1
+        page = starting_offset // page_size + 1
         counter = 0
 
         if not sort:
@@ -3580,6 +3785,7 @@ class ProjectTemplatesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOw
             ProjectTemplateEndpoint: The instance class of the endpoint.
         """
         return ProjectTemplateEndpoint
+
 
 class DataFormsEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
     """
@@ -4685,6 +4891,23 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
         process_response(response)
         self.change_sequence = response.json()["changeSequence"]
 
+    def rename(self, new_name: str):
+        """
+        Rename the document family.
+        
+        Args:
+            name (str): The new name of the document family.
+            
+        Returns:
+            None
+        """
+        ref_helper = Ref(self.store_ref)
+        url = f"/api/stores/{ref_helper.org_slug}/{ref_helper.slug}/fs"
+        params = {"rename": new_name, "path": self.path}
+        response = self.client.put(url, params=params)
+        process_response(response)
+        self.change_sequence = response.json()["changeSequence"]
+
     def lock(self):
         """
         Lock the document family.
@@ -4738,14 +4961,20 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
 
     def get_json(
             self,
-            project_id: str,
+            project_id: Optional[str] = None,
             friendly_names=False,
+            include_ids=True,
+            include_exceptions=False,
+            inline_audits=False,
     ) -> str:
         """Get the JSON export for the document family
 
         Args:
             project_id str: The project ID
             friendly_names (bool): Whether to use friendly names. Defaults to False
+            include_ids (bool): Whether to include the IDs. Defaults to True
+            include_exceptions (bool): Whether to include the exceptions. Defaults to False
+            inline_audits (bool): Whether to include inline audit information
 
         Returns:
             str: The JSON
@@ -4760,6 +4989,9 @@ class DocumentFamilyEndpoint(DocumentFamily, ClientEndpoint):
             "format": "json",
             "friendlyNames": friendly_names,
             "projectId": project_id,
+            "includeIds": include_ids,
+            "includeExceptions": include_exceptions,
+            "inlineAudits": inline_audits,
         }
 
         response = self.client.get(url, params=params)
@@ -5204,7 +5436,7 @@ class DataStoreExceptionsEndpoint(EntitiesEndpoint):
         super().__init__(client)
 
     def list(
-            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None, 
+            self, query: str = "*", page: int = 1, page_size: int = 10, sort: Optional[str] = None,
             filters: Optional[List[str]] = None
     ):
         """
@@ -5263,6 +5495,8 @@ class DataStoreEndpoint(StoreEndpoint):
             path: Optional[str] = None,
             root_name: str = "",
             friendly_names=True,
+            include_ids=True,
+            include_exceptions=False,
     ) -> str:
         """Get the data objects export of the store
 
@@ -5272,6 +5506,8 @@ class DataStoreEndpoint(StoreEndpoint):
             path (Optional[str]): The path to the data object
             root_name (str): The root name of the data objects export
             friendly_names (bool): Whether to use friendly names. Defaults to True
+            include_ids (bool): Whether to include the data object IDs. Defaults to True
+            include_exceptions (bool): Whether to include the data object exceptions. Defaults to False
 
         Returns:
             str: The data objects export of the store
@@ -5281,6 +5517,8 @@ class DataStoreEndpoint(StoreEndpoint):
             "format": output_format,
             "friendlyNames": friendly_names,
             "rootName": root_name,
+            "includeIds": include_ids,
+            "includeExceptions": include_exceptions,
         }
         if document_family:
             params["documentFamilyId"] = document_family.id
@@ -5306,6 +5544,32 @@ class DataStoreEndpoint(StoreEndpoint):
             TaxonomyEndpoint.model_validate(taxonomy_response)
             for taxonomy_response in taxonomy_response.json()
         ]
+
+    def get_data_exceptions(self, filter: str = None, page=1, page_size=10) -> PageDataExceptionEndpoint:
+        """Get the data exceptions of the store
+
+        Args:
+            filter (str): The filter to limit the results. Defaults to None
+            page (int): The page number to get. Defaults to 1
+            page_size (int): The size of the page. Defaults to 10
+
+        Returns:
+            List[DataExceptionEndpoint]: The data exceptions in the store
+        """
+        url = f"/api/exceptions"
+        base_filter= f"dataObject.store.id: '{self.id}'"
+
+        if filter:
+            final_filter = f"{base_filter} AND ({filter})"
+        else:
+            final_filter = base_filter
+
+        url += f"?filter={final_filter}&page={page}&pageSize={page_size}"
+        data_exception_response = self.client.get(url)
+        process_response(data_exception_response)
+        return PageDataExceptionEndpoint.model_validate(
+            data_exception_response.json()
+        ).set_client(self.client)
 
     def get_data_objects_df(
             self,
@@ -5776,7 +6040,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             document_family_response.json()
         ).set_client(self.client)
 
-    def stream_query(self, query: str = "*", sort=None, limit=None):
+    def stream_query(self, query: str = "*", sort=None, limit=None, page_size=5):
         """
         Stream the query for the document family.
 
@@ -5784,11 +6048,11 @@ class DocumentStoreEndpoint(StoreEndpoint):
             query (str, optional): The query to run. Defaults to "*".
             sort (str, optional): Sorting order of the query. Defaults to None.
             limit (int, optional): The maximum number of items to return. Defaults to None.
+            page_size (int, optional): Pagination size for the streaming
 
         Returns:
             generator: A generator of the document families.
         """
-        page_size = 5
         page = 1
         number_of_items = 0
 
@@ -5842,7 +6106,7 @@ class DocumentStoreEndpoint(StoreEndpoint):
             get_response.json()
         ).set_client(self.client)
 
-    def stream_filter(self, filter_string: str = "", sort=None, limit=None):
+    def stream_filter(self, filter_string: str = "", sort=None, limit=None, page_size=5, starting_offset: int = 0):
         """
         Stream the filter for the document family.
 
@@ -5850,12 +6114,13 @@ class DocumentStoreEndpoint(StoreEndpoint):
             filter_string (str, optional): The filter string to use. Defaults to "".
             sort (str, optional): Sorting order of the query. Defaults to None.
             limit (int, optional): The maximum number of items to return. Defaults to None.
+            page_size (int, optional): The pagination size for the streaming
+            starting_offset (int, optional): The starting offset for the streaming
 
         Returns:
             generator: A generator of the document families.
         """
-        page_size = 5
-        page = 1
+        page = starting_offset // page_size + 1
         count = 0
         if not sort:
             sort = "id"
@@ -5886,7 +6151,6 @@ class DocumentStoreEndpoint(StoreEndpoint):
             page (int, optional): The page number to get. Defaults to 1.
             page_size (int, optional): The number of items per page. Defaults to 100.
             sort (str, optional): Sorting order of the query. Defaults to None.
-
         Returns:
             PageDocumentFamilyEndpoint: The page of document families.
         """
@@ -6408,6 +6672,13 @@ OBJECT_TYPES = {
         "type": PipelineEndpoint,
         "endpoint": PipelinesEndpoint,
     },
+    "notes": {
+        "name": "note",
+        "plural": "notes",
+        "type": NoteEndpoint,
+        "endpoint": NotesEndpoint,
+        "global": True,
+    },
     "assistants": {
         "name": "assistant",
         "plural": "assistants",
@@ -6514,6 +6785,20 @@ OBJECT_TYPES = {
         "type": TaskTemplateEndpoint,
         "global": True,
         "endpoint": TaskTemplatesEndpoint,
+    },
+    "taskDocumentFamilies": {
+        "name": "taskDocumentFamily",
+        "plural": "taskDocumentFamilies",
+        "type": TaskDocumentFamilyEndpoint,
+        "global": True,
+        "endpoint": TaskDocumentFamiliesEndpoint,
+    },
+    "documentFamilies": {
+        "name": "documentFamily",
+        "plural": "documentFamilies",
+        "type": DocumentFamilyEndpoint,
+        "global": True,
+        "endpoint": DocumentFamiliesEndpoint,
     }
 }
 
@@ -6646,6 +6931,38 @@ class ExtractionEngineEndpoint:
         return response.text
 
 
+class ModelCostsEndpoint:
+    """
+    Provides endpoint access to the model costs.
+
+    Attributes:
+        client (KodexaClient): The client to interact with the model costs.
+    """
+
+    def __init__(self, client: "KodexaClient"):
+        self.client = client
+
+    def get_model_costs(self, filters: Optional[List[str]] = None) -> List[AggregatedModelCost]:
+        """
+        Get aggregated model costs filtered by the provided query context.
+        This endpoint aggregates the model costs by modelId.
+
+        Args:
+            filters (Optional[List[str]]): The filters to apply to the model costs.
+
+        Returns:
+            List[AggregatedModelCost]: A list of aggregated model costs.
+        """
+        params = {}
+        if filters is not None:
+            params["filter"] = filters
+            
+        response = self.client.get("/api/modelCosts", params=params)
+        return [
+            AggregatedModelCost.model_validate(item)
+            for item in response.json()
+        ]
+        
 class KodexaClient:
     """
     A class to represent a Kodexa client.
@@ -6653,22 +6970,28 @@ class KodexaClient:
     Attributes:
         base_url (str): The base URL for the Kodexa platform.
         access_token (str): The access token for the Kodexa platform.
-        organizations (OrganizationsEndpoint): An endpoint for organizations.
-        projects (ProjectsEndpoint): An endpoint for projects.
-        workspaces (WorkspacesEndpoint): An endpoint for workspaces.
-        users (UsersEndpoint): An endpoint for users.
-        memberships (MembershipsEndpoint): An endpoint for memberships.
-        executions (ExecutionsEndpoint): An endpoint for executions.
-        channels (ChannelsEndpoint): An endpoint for channels.
-        messages (MessagesEndpoint): An endpoint for messages.
+
         assistants (AssistantsEndpoint): An endpoint for assistants.
+        channels (ChannelsEndpoint): An endpoint for channels.
+        executions (ExecutionsEndpoint): An endpoint for executions.
+        memberships (MembershipsEndpoint): An endpoint for memberships.
+        messages (MessagesEndpoint): An endpoint for messages.
+        organizations (OrganizationsEndpoint): An endpoint for organizations.
         products (ProductsEndpoint): An endpoint for products.
-        tasks (TasksEndpoint): An endpoint for tasks.
+        projects (ProjectsEndpoint): An endpoint for projects.
         retained_guidances (RetainedGuidancesEndpoint): An endpoint for retained guidances.
+        task_activities (TaskActivitiesEndpoint): An endpoint for task activities.
+        task_document_families (TaskDocumentFamiliesEndpoint): An endpoint for task document families.
+        task_tags (TaskTagsEndpoint): An endpoint for task tags.
+        tasks (TasksEndpoint): An endpoint for tasks.
+        users (UsersEndpoint): An endpoint for users.
+        workspaces (WorkspacesEndpoint): An endpoint for workspaces.
+        notes (NotesEndpoint): An endpoint for notes.
     """
 
     def __init__(self, url=None, access_token=None, profile=None):
         from kodexa import KodexaPlatform
+        from kodexa.model.entities.product import ProductsEndpoint
 
         self.base_url = url if url is not None else KodexaPlatform.get_url(profile)
         self.access_token = (
@@ -6676,19 +6999,26 @@ class KodexaClient:
             if access_token is not None
             else KodexaPlatform.get_access_token(profile)
         )
-        self.organizations = OrganizationsEndpoint(self)
-        self.projects = ProjectsEndpoint(self)
-        self.workspaces = WorkspacesEndpoint(self)
-        self.users = UsersEndpoint(self)
-        self.memberships = MembershipsEndpoint(self)
-        self.executions = ExecutionsEndpoint(self)
-        self.channels = ChannelsEndpoint(self)
+
         self.assistants = AssistantsEndpoint(self)
-        self.messages = MessagesEndpoint(self)
-        from kodexa.model.entities.product import ProductsEndpoint
+        self.channels = ChannelsEndpoint(self)
+        self.document_families = DocumentFamiliesEndpoint(self)
+        self.executions = ExecutionsEndpoint(self)
+        self.memberships = MembershipsEndpoint(self)
+        self.messages = MessagesEndpoint(self)        
+        self.organizations = OrganizationsEndpoint(self)
         self.products = ProductsEndpoint(self)
-        self.tasks = TasksEndpoint(self)
+        self.projects = ProjectsEndpoint(self)
         self.retained_guidances = RetainedGuidancesEndpoint(self)
+        self.task_activities = TaskActivitiesEndpoint(self)
+        self.task_document_families = TaskDocumentFamiliesEndpoint(self)
+        self.task_tags = TaskTagsEndpoint(self)
+        self.tasks = TasksEndpoint(self)
+        self.users = UsersEndpoint(self)
+        self.workspaces = WorkspacesEndpoint(self)
+        self.data_exceptions = DataExceptionsEndpoint(self)
+        self.notes = NotesEndpoint(self)
+        self.model_costs = ModelCostsEndpoint(self)
 
     @staticmethod
     def login(url, token):
@@ -7259,33 +7589,38 @@ class KodexaClient:
             from kodexa.model.entities.product_subscription import ProductSubscriptionEndpoint
             from kodexa.model.entities.check_response import CheckResponseEndpoint
             known_components = {
-                "taxonomy": TaxonomyEndpoint,
-                "pipeline": PipelineEndpoint,
                 "action": ActionEndpoint,
-                "projectTemplate": ProjectTemplateEndpoint,
-                "modelRuntime": ModelRuntimeEndpoint,
-                "extensionPack": ExtensionPackEndpoint,
-                "user": UserEndpoint,
-                "project": ProjectEndpoint,
-                "membership": MembershipEndpoint,
-                "documentFamily": DocumentFamilyEndpoint,
-                "organization": OrganizationEndpoint,
-                "dataForm": DataFormEndpoint,
-                "dashboard": DashboardEndpoint,
-                "execution": ExecutionEndpoint,
                 "assistant": AssistantDefinitionEndpoint,
-                "exception": DataExceptionEndpoint,
-                "workspace": WorkspaceEndpoint,
-                "message": MessageEndpoint,
-                "prompt": PromptEndpoint,
-                "guidance": GuidanceSetEndpoint,
-                "retainedGuidance": RetainedGuidanceEndpoint,
                 "channel": ChannelEndpoint,
-                "product": ProductEndpoint,
-                "task": TaskEndpoint,
-                "productSubscription": ProductSubscriptionEndpoint,
                 "checkResponse": CheckResponseEndpoint,
+                "dashboard": DashboardEndpoint,
+                "dataForm": DataFormEndpoint,
+                "documentFamily": DocumentFamilyEndpoint,
+                "exception": DataExceptionEndpoint,
+                "execution": ExecutionEndpoint,
+                "extensionPack": ExtensionPackEndpoint,
+                "guidance": GuidanceSetEndpoint,
+                "membership": MembershipEndpoint,
+                "message": MessageEndpoint,
+                "modelRuntime": ModelRuntimeEndpoint,
+                "organization": OrganizationEndpoint,
+                "pipeline": PipelineEndpoint,
+                "product": ProductEndpoint,
+                "productSubscription": ProductSubscriptionEndpoint,
+                "project": ProjectEndpoint,
+                "projectTemplate": ProjectTemplateEndpoint,
+                "prompt": PromptEndpoint,
+                "retainedGuidance": RetainedGuidanceEndpoint,
+                "task": TaskEndpoint,
+                "taskActivity": TaskActivityEndpoint,
+                "taskDocumentFamily": TaskDocumentFamilyEndpoint,
+                "taskTag": TaskTagEndpoint,
                 "taskTemplate": TaskTemplateEndpoint,
+                "taxonomy": TaxonomyEndpoint,
+                "user": UserEndpoint,
+                "workspace": WorkspaceEndpoint,
+                "note": NoteEndpoint,
+                "notes": NoteEndpoint,
             }
 
             if component_type in known_components:
