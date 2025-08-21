@@ -92,7 +92,7 @@ from kodexa.model.objects import (
     GuidanceSet,
     PageGuidanceSet,
     DocumentEmbedding,
-    DocumentExternalData,
+    # DocumentExternalData,
     Task,
     PageTask,
     RetainedGuidance,
@@ -103,9 +103,9 @@ from kodexa.model.objects import (
     TaskDocumentFamily,
     TaskTag,
     ProjectTemplateRequest,
-    PageTaskDocumentFamily,
-    PageTaskActivity,
-    PageTaskTag,
+    # PageTaskDocumentFamily,
+    # PageTaskActivity,
+    # PageTaskTag,
     Note,
     PageNote,
 )
@@ -1241,30 +1241,35 @@ class TaskEndpoint(EntityEndpoint, Task):
             "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
             "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in document_families] if document_families else None
         })
+        process_response(response)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
     def update_status(self, status: TaskStatus):
         """Update the status of the task."""
         url = f"/api/tasks/{self.id}/status"
         response = self.client.put(url, body=status)
+        process_response(response)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
     def remove_status(self):
         """Remove the task status."""
         url = f"/api/tasks/{self.id}/status"
         response = self.client.delete(url)
+        process_response(response)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
     def update_assignee(self, assignee: User):
         """Update the assignee of the task."""
         url = f"/api/tasks/{self.id}/assignee"
         response = self.client.put(url, body=assignee.model_dump(mode="json", by_alias=True))
+        process_response(response)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
     def remove_assignee(self):
         """Remove the task assignee."""
         url = f"/api/tasks/{self.id}/assignee"
         response = self.client.delete(url)
+        process_response(response)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
 class TasksEndpoint(EntitiesEndpoint):
@@ -1291,6 +1296,7 @@ class TasksEndpoint(EntitiesEndpoint):
                                  document_families] if document_families else None
         }
         response = self.client.post(url, create_body)
+        process_response(response)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
 class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
@@ -1377,168 +1383,6 @@ class TaskTagsEndpoint(EntitiesEndpoint):
 class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
     def get_type(self) -> Optional[str]:
         return "taskTemplate"
-
-#TODO - Delete
-class PageTaskActivityEndpoint(PageTaskActivity, PageEndpoint):
-    """
-    Represents a page of task activities.
-    """
-
-    def get_type(self) -> Optional[str]:
-        return "taskActivity"
-
-#TODO - Delete
-class PageTaskDocumentFamilyEndpoint(PageTaskDocumentFamily, PageEndpoint):
-    """
-    Represents a page of task document families.
-    """
-
-    def get_type(self) -> Optional[str]:
-        return "taskDocumentFamily"
-
-#TODO - Delete
-class PageTaskTagEndpoint(PageTaskTag, PageEndpoint):
-    """
-    Represents a page of task tags.
-    """
-
-    def get_type(self) -> Optional[str]:
-        return "taskTag"
-
-
-#TODO - Delete
-class TaskEndpoint(EntityEndpoint, Task):
-    """
-    Represents a task endpoint.
-    """
-
-    def get_type(self) -> str:
-        return "tasks"
-
-    def update_status(self, status: TaskStatus):
-        """Update the status of the task."""
-        url = f"/api/tasks/{self.id}/status"
-        response = self.client.put(url, body=status.model_dump(mode="json", by_alias=True))
-        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
-
-    def remove_status(self):
-        """Remove the task status."""
-        url = f"/api/tasks/{self.id}/status"
-        response = self.client.delete(url)
-        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
-
-    def update_assignee(self, assignee: User):
-        """Update the assignee of the task."""
-        url = f"/api/tasks/{self.id}/assignee"
-        response = self.client.put(url, body=assignee.model_dump(mode="json", by_alias=True))
-        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
-
-    def remove_assignee(self):
-        """Remove the task assignee."""
-        url = f"/api/tasks/{self.id}/assignee"
-        response = self.client.delete(url)
-        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
-
-
-#TODO - Delete
-class TasksEndpoint(EntitiesEndpoint):
-    """
-    Represents tasks endpoints.
-    """
-
-    def get_type(self) -> str:
-        return "tasks"
-
-    def get_instance_class(self, object_dict=None):
-        return TaskEndpoint
-
-    def get_page_class(self, object_dict=None):
-        return PageTaskEndpoint
-
-    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None,
-                             document_families: Optional[List[DocumentFamily]] = None) -> TaskEndpoint:
-        """Create a task with the given template."""
-        url = "/api/tasks/createTaskWithRequest"
-        create_body = {
-            "task": task.model_dump(mode="json", by_alias=True),
-            "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
-            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in
-                                 document_families] if document_families else None
-        }
-        response = self.client.post(url, create_body)
-        return TaskEndpoint.model_validate(response.json()).set_client(self.client)
-
-#TODO - Delete
-class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
-    """
-    Represents a task template endpoint.
-    """
-
-    def get_type(self) -> str:
-        return "taskTemplates"
-
-#TODO - Delete
-class TaskTemplatesEndpoint(EntitiesEndpoint):
-    """
-    Represents task templates endpoints.
-    """
-
-    def get_type(self) -> str:
-        return "taskTemplates"
-
-    def get_instance_class(self, object_dict=None):
-        return TaskTemplateEndpoint
-
-    def get_page_class(self, object_dict=None):
-        return PageTaskTemplateEndpoint
-
-#TODO - Delete
-class TaskActivityEndpoint(EntityEndpoint, TaskActivity):
-    """
-    Represents a task activity endpoint.
-    """
-
-    def get_type(self) -> str:
-        return "taskActivities"
-
-#TODO - Delete
-class TaskActivitiesEndpoint(EntitiesEndpoint):
-    """
-    Represents task activities endpoints.
-    """
-
-    def get_type(self) -> str:
-        return "taskActivities"
-
-    def get_instance_class(self, object_dict=None):
-        return TaskActivityEndpoint
-
-    def get_page_class(self, object_dict=None):
-        return PageTaskActivityEndpoint
-
-#TODO - Delete
-class TaskDocumentFamilyEndpoint(EntityEndpoint, TaskDocumentFamily):
-    """
-    Represents a task document family endpoint.
-    """
-
-    def get_type(self) -> str:
-        return "taskDocumentFamilies"
-
-#TODO - Delete
-class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
-    """
-    Represents task document families endpoints.
-    """
-
-    def get_type(self) -> str:
-        return "taskDocumentFamilies"
-
-    def get_instance_class(self, object_dict=None):
-        return TaskDocumentFamilyEndpoint
-
-    def get_page_class(self, object_dict=None):
-        return PageTaskDocumentFamilyEndpoint
 
 
 class DocumentFamiliesEndpoint(EntitiesEndpoint):
