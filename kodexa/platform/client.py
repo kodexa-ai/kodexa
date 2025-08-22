@@ -1414,30 +1414,6 @@ class DataExceptionsEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageDataExceptionEndpoint
     
-#TODO - Delete
-class TaskTagEndpoint(EntityEndpoint, TaskTag):
-    """
-    Represents a task tag endpoint.
-    """
-
-    def get_type(self) -> str:
-        return "taskTags"
-
-#TODO - Delete
-class TaskTagsEndpoint(EntitiesEndpoint):
-    """
-    Represents task tags endpoints.
-    """
-
-    def get_type(self) -> str:
-        return "taskTags"
-
-    def get_instance_class(self, object_dict=None):
-        return TaskTagEndpoint
-
-    def get_page_class(self, object_dict=None):
-        return PageTaskTagEndpoint
-
 
 class NoteEndpoint(EntityEndpoint, Note):
     """
@@ -1470,11 +1446,6 @@ class PageNoteEndpoint(PageNote, PageEndpoint):
 
     def get_type(self) -> Optional[str]:
         return "notes"
-
-#TODO - Delete
-class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
-    def get_type(self) -> Optional[str]:
-        return "taskTemplate"
 
 
 class PageRetainedGuidanceEndpoint(PageRetainedGuidance, PageEndpoint):
