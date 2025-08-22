@@ -6943,7 +6943,7 @@ class KodexaClient:
         Returns:
             PlatformOverview: The PlatformOverview instance.
         """
-        return PlatformOverview.model_validate(self.get("/api").json())
+        return PlatformOverview.model_validate(self.get("/api/overview").json())
 
     def change_password(self, old_password: str, new_password: str):
         """
