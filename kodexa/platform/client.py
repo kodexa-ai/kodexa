@@ -1247,7 +1247,7 @@ class TaskEndpoint(EntityEndpoint, Task):
     def update_status(self, status: TaskStatus):
         """Update the status of the task."""
         url = f"/api/tasks/{self.id}/status"
-        response = self.client.put(url, body=status)
+        response = self.client.put(url, body=status.model_dump(mode="json", by_alias=True))
         process_response(response)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
