@@ -1297,6 +1297,13 @@ class TasksEndpoint(EntitiesEndpoint):
         }
         response = self.client.post(url, create_body)
         process_response(response)
+
+        try:
+            logger.info(f"create_with_template response: {response}")
+            logger.info(f"create_with_template response.json(): {response.json()}")
+        except Exception as e:
+            logger.error(f"Error logging create_with_template response: {e}")
+
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
 class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
