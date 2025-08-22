@@ -1298,12 +1298,6 @@ class TasksEndpoint(EntitiesEndpoint):
         response = self.client.post(url, create_body)
         process_response(response)
 
-        try:
-            logger.info(f"create_with_template response: {response}")
-            logger.info(f"create_with_template response.json(): {response.json()}")
-        except Exception as e:
-            logger.error(f"Error logging create_with_template response: {e}")
-
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
 class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
@@ -6461,15 +6455,9 @@ class TaxonomiesEndpoint(ComponentEndpoint, ClientEndpoint, OrganizationOwned):
 def process_response(response) -> requests.Response:
     """
     This function processes the server response. It checks the status code of the response and raises an exception with
-    a specific message depending on the status code. If the status code is 401, it raises an "Unauthorized" exception.
-    If the status code is 404, it raises a "Not found" exception.
-    If the status code is 405, it raises a "Method not allowed" exception.
-    If the status code is 500, it raises an "Internal server error" exception.
-    If the status code is 400, it checks if the response has a JSON body with an "errors" field.
-    If so, it raises an exception with a message containing all the errors.
-    If not, it raises a "Bad request" exception.
-    If the status code is anything other than 200, it raises an "Unexpected response" exception.
-    If the status code is 200, it returns the response as is.
+    a specific message depending on the status code. 
+    If the status code is anything other than 20X, it raises an exception.
+    If the status code is 20X, it returns the response as is.
 
     Args:
         response (requests.Response): The server response to process.
@@ -6480,16 +6468,39 @@ def process_response(response) -> requests.Response:
     Raises:
         Exception: If the status code is not 200, an exception is raised with a message specific to the status code.
     """
-    if response.status_code == 401:
-        raise Exception(f"Unauthorized ({response.text})")
-    if response.status_code == 404:
-        raise Exception(f"Not found ({response.text})")
     if response.status_code in [301, 302]:
         raise Exception(f"Redirected ({response.text})")
+
+    if response.status_code == 401:
+        raise Exception(f"Unauthorized ({response.text})")
+    
+    if response.status_code == 403:
+        raise Exception(f"Forbidden ({response.text})")
+    
+    if response.status_code == 404:
+        raise Exception(f"Not found ({response.text})")
+       
     if response.status_code == 405:
         raise Exception("Method not allowed")
+    
+    if response.status_code == 409:
+        raise Exception(f"Conflict ({response.text})")
+    
+    if response.status_code == 422:
+        raise Exception(f"Unprocessable entity ({response.text})")
+       
     if response.status_code == 500:
         raise Exception("Internal server error: \n" + response.text)
+    
+    if response.status_code == 502:
+        raise Exception(f"Bad gateway ({response.text})")
+    
+    if response.status_code == 503:
+        raise Exception(f"Service unavailable ({response.text})")
+    
+    if response.status_code == 504:
+        raise Exception(f"Gateway timeout ({response.text})")
+    
     if response.status_code == 400:
         if response.json() and response.json().get("errors"):
             messages = []
@@ -6497,7 +6508,7 @@ def process_response(response) -> requests.Response:
                 messages.append(f"{key}: {value}")
             raise Exception(", ".join(messages))
 
-        raise Exception("Bad request " + response.text)
+        raise Exception(f"Bad request {response.text}")
 
     return response
 
