@@ -103,9 +103,9 @@ from kodexa.model.objects import (
     TaskDocumentFamily,
     TaskTag,
     ProjectTemplateRequest,
-    # PageTaskDocumentFamily,
-    # PageTaskActivity,
-    # PageTaskTag,
+    PageTaskDocumentFamily,
+    PageTaskActivity,
+    PageTaskTag,
     Note,
     PageNote,
 )
@@ -1205,26 +1205,32 @@ class PageTaskEndpoint(PageTask, PageEndpoint):
     def get_type(self) -> Optional[str]:
         return "task"
 
-class PageTaskActivityEndpoint(PageEndpoint):
+class PageTaskActivityEndpoint(PageTaskActivity, PageEndpoint):
     """
     Represents a page of task activities.
     """
-    def get_type(self) -> Optional[str]:
-        return "taskActivities"
 
-class PageTaskDocumentFamilyEndpoint(PageEndpoint):
+    def get_type(self) -> Optional[str]:
+        return "taskActivity"
+
+
+class PageTaskDocumentFamilyEndpoint(PageTaskDocumentFamily, PageEndpoint):
     """
     Represents a page of task document families.
     """
-    def get_type(self) -> Optional[str]:
-        return "taskDocumentFamilies"
 
-class PageTaskTagEndpoint(PageEndpoint):
+    def get_type(self) -> Optional[str]:
+        return "taskDocumentFamily"
+
+
+class PageTaskTagEndpoint(PageTaskTag, PageEndpoint):
     """
     Represents a page of task tags.
     """
+
     def get_type(self) -> Optional[str]:
-        return "taskTags"
+        return "taskTag"
+
 
 class TaskEndpoint(EntityEndpoint, Task):
     """
@@ -1272,10 +1278,12 @@ class TaskEndpoint(EntityEndpoint, Task):
         process_response(response)
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
+
 class TasksEndpoint(EntitiesEndpoint):
     """
     Represents tasks endpoints.
     """
+
     def get_type(self) -> str:
         return "tasks"
 
@@ -1285,14 +1293,14 @@ class TasksEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskEndpoint
 
-    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None, 
+    def create_with_template(self, task: Task, task_template: Optional[TaskTemplate] = None,
                              document_families: Optional[List[DocumentFamily]] = None) -> TaskEndpoint:
         """Create a task with the given template."""
         url = "/api/tasks/createTaskWithRequest"
         create_body = {
             "task": task.model_dump(mode="json", by_alias=True),
             "taskTemplate": task_template.model_dump(mode="json", by_alias=True) if task_template else None,
-            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in 
+            "documentFamilies": [df.model_dump(mode="json", by_alias=True) for df in
                                  document_families] if document_families else None
         }
         response = self.client.post(url, create_body)
@@ -1300,17 +1308,21 @@ class TasksEndpoint(EntitiesEndpoint):
 
         return TaskEndpoint.model_validate(response.json()).set_client(self.client)
 
+
 class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
     """
     Represents a task template endpoint.
     """
+
     def get_type(self) -> str:
         return "taskTemplates"
+
 
 class TaskTemplatesEndpoint(EntitiesEndpoint):
     """
     Represents task templates endpoints.
     """
+
     def get_type(self) -> str:
         return "taskTemplates"
 
@@ -1320,17 +1332,21 @@ class TaskTemplatesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskTemplateEndpoint
 
+
 class TaskActivityEndpoint(EntityEndpoint, TaskActivity):
     """
     Represents a task activity endpoint.
     """
+
     def get_type(self) -> str:
         return "taskActivities"
+
 
 class TaskActivitiesEndpoint(EntitiesEndpoint):
     """
     Represents task activities endpoints.
     """
+
     def get_type(self) -> str:
         return "taskActivities"
 
@@ -1340,17 +1356,21 @@ class TaskActivitiesEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageTaskActivityEndpoint
 
+
 class TaskDocumentFamilyEndpoint(EntityEndpoint, TaskDocumentFamily):
     """
     Represents a task document family endpoint.
     """
+
     def get_type(self) -> str:
         return "taskDocumentFamilies"
+
 
 class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
     """
     Represents task document families endpoints.
     """
+
     def get_type(self) -> str:
         return "taskDocumentFamilies"
 
@@ -1359,31 +1379,6 @@ class TaskDocumentFamiliesEndpoint(EntitiesEndpoint):
 
     def get_page_class(self, object_dict=None):
         return PageTaskDocumentFamilyEndpoint
-
-class TaskTagEndpoint(EntityEndpoint, TaskTag):
-    """
-    Represents a task tag endpoint.
-    """
-    def get_type(self) -> str:
-        return "taskTags"
-
-class TaskTagsEndpoint(EntitiesEndpoint):
-    """
-    Represents task tags endpoints.
-    """
-    def get_type(self) -> str:
-        return "taskTags"
-
-    def get_instance_class(self, object_dict=None):
-        return TaskTagEndpoint
-
-    def get_page_class(self, object_dict=None):
-        return PageTaskTagEndpoint
-
-
-class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
-    def get_type(self) -> Optional[str]:
-        return "taskTemplate"
 
 
 class DocumentFamiliesEndpoint(EntitiesEndpoint):
@@ -1414,7 +1409,7 @@ class DataExceptionsEndpoint(EntitiesEndpoint):
     def get_page_class(self, object_dict=None):
         return PageDataExceptionEndpoint
     
-#TODO - Delete
+
 class TaskTagEndpoint(EntityEndpoint, TaskTag):
     """
     Represents a task tag endpoint.
@@ -1423,7 +1418,7 @@ class TaskTagEndpoint(EntityEndpoint, TaskTag):
     def get_type(self) -> str:
         return "taskTags"
 
-#TODO - Delete
+
 class TaskTagsEndpoint(EntitiesEndpoint):
     """
     Represents task tags endpoints.
@@ -1471,7 +1466,7 @@ class PageNoteEndpoint(PageNote, PageEndpoint):
     def get_type(self) -> Optional[str]:
         return "notes"
 
-#TODO - Delete
+
 class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
     def get_type(self) -> Optional[str]:
         return "taskTemplate"
