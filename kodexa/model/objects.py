@@ -3388,7 +3388,6 @@ class Task(BaseModel):
     task_document_families: List[TaskDocumentFamily] = Field(default_factory=list, alias="taskDocumentFamilies")
     search_text: Optional[str] = Field(None, alias="searchText")
     tags: List[TaskTag] = Field(default_factory=list)
-    priority: Optional[int] = Field(None, ge=1, le=5, description="Task priority from 1 (lowest) to 5 (highest)")
 
 
 class FeatureSet(BaseModel):
