@@ -3375,7 +3375,7 @@ class Task(BaseModel):
     uuid: Optional[str] = None
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
-    change_sequence: Optional[int] = Field(None, alias="changeSequence")  # Missing field
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
     project: Optional['Project'] = None
     title: Optional[str] = None
     description: Optional[str] = None
