@@ -3375,6 +3375,7 @@ class Task(BaseModel):
     uuid: Optional[str] = None
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")  # Missing field
     project: Optional['Project'] = None
     title: Optional[str] = None
     description: Optional[str] = None
@@ -3388,8 +3389,7 @@ class Task(BaseModel):
     task_document_families: List[TaskDocumentFamily] = Field(default_factory=list, alias="taskDocumentFamilies")
     search_text: Optional[str] = Field(None, alias="searchText")
     tags: List[TaskTag] = Field(default_factory=list)
-    priority: Optional[int] = Field(None, ge=1, le=5, description="Task priority from 1 (lowest) to 5 (highest)")
-
+    priority: Optional[int] = None
 
 class FeatureSet(BaseModel):
     """
