@@ -6389,7 +6389,6 @@ class NoteType(Enum):
     markdown = "MARKDOWN"
     text = "TEXT"
     html = "HTML"
-    assistant_knowledge = "ASSISTANT_KNOWLEDGE"
 
 
 class Note(BaseModel):
@@ -6408,10 +6407,7 @@ class Note(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     
-    # Data relationships
-    workspace: Optional['Workspace'] = None
     assistant: Optional['Assistant'] = None
-    parent_comment: Optional['Note'] = Field(None, alias="parentComment")
     
     # Core content
     title: Optional[str] = None
@@ -6420,10 +6416,9 @@ class Note(BaseModel):
     
     # Author and replies
     author: Optional['User'] = None
-    replies: Optional[List['Note']] = Field(default_factory=list)
     
     # Task association
-    task: Optional['Task'] = None
+    document_famiy: Optional['DocumentFamily'] = None
     
     # Properties map
     note_properties: Optional[Dict[str, str]] = Field(default_factory=dict, alias="noteProperties")
