@@ -5707,7 +5707,10 @@ class MessageTemplate(BaseModel):
     message_block: Optional[MessageBlock] = Field(
         None, alias="messageBlock"
     )
-
+    entry_points: Optional[List[str]] = Field(
+        None,
+        alias="entryPoints"
+    )
 
 class ModelContentMetadata(BaseModel):
     """
