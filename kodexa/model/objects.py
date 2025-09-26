@@ -6404,12 +6404,15 @@ class Note(BaseModel):
 
     id: Optional[str] = Field(None)
     uuid: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
+
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     
     assistant: Optional['Assistant'] = None
     
     # Core content
+    slug: Optional[str] = None
     title: Optional[str] = None
     content: Optional[str] = None
     note_type: Optional[NoteType] = Field(None, alias="noteType")
