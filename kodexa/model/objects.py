@@ -6424,7 +6424,7 @@ class Note(BaseModel):
     author: Optional['User'] = None
     
     # Task association
-    document_famiy: Optional['DocumentFamily'] = None
+    document_family: Optional['DocumentFamily'] = None
     
     # Properties map
     note_properties: Optional[Dict[str, str]] = Field(default_factory=dict, alias="noteProperties")
