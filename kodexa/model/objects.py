@@ -3285,6 +3285,35 @@ class TemplateDataForm(BaseModel):
     actions: List[DataFormAction] = Field(default_factory=list)
 
 
+class TaskTemplateAction(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    type: Optional[str] = None
+    label: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
+
+
+class DocumentFamilyGroup(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    name: Optional[str] = None
+    document_family_filter: Optional[str] = Field(None, alias="documentFamilyFilter")
+    max_hits: Optional[int] = Field(None, alias="maxHits")
+    sort: Optional[str] = None
+    automatically_add: Optional[bool] = Field(None, alias="automaticallyAdd")
+    editable: Optional[bool] = None
+
+
 class TaskTemplateMetadata(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -3295,7 +3324,11 @@ class TaskTemplateMetadata(BaseModel):
 
     options: List[Option] = Field(default_factory=list)
     forms: List[TemplateDataForm] = Field(default_factory=list)
+    actions: List[TaskTemplateAction] = Field(default_factory=list)
+    document_family_groups: List[DocumentFamilyGroup] = Field(default_factory=list, alias="documentFamilyGroups")
     workspace_id: Optional[str] = Field(None, alias="workspaceId")
+    properties: Dict[str, Any] = Field(default_factory=dict)
+    priority: Optional[int] = None
 
 
 class TaskTemplate(BaseModel):
