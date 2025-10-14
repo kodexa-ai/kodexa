@@ -3307,6 +3307,7 @@ class DocumentFamilyGroup(BaseModel):
     )
 
     name: Optional[str] = None
+    notes: Optional[str] = None
     document_family_filter: Optional[str] = Field(None, alias="documentFamilyFilter")
     max_hits: Optional[int] = Field(None, alias="maxHits")
     sort: Optional[str] = None
