@@ -14,7 +14,7 @@ import deepdiff
 import msgpack
 from pydantic import BaseModel, ConfigDict, Field
 
-from kodexa.model.objects import ContentObject, FeatureSet, DocumentTaxonValidation
+from kodexa.model.objects import ContentObject, FeatureSet, DocumentTaxonValidation, KnowledgeItem
 
 
 class Ref:
@@ -2502,6 +2502,12 @@ class Document(object):
 
     def set_steps(self, steps: list[ProcessingStep]):
         self._persistence_layer.set_steps(steps)
+
+    def get_knowledge(self) -> list[KnowledgeItem]:
+        return self._persistence_layer.get_knowledge()
+
+    def set_knowledge(self, knowledge: list[KnowledgeItem]):
+        self._persistence_layer.set_knowledge(knowledge)
 
     def replace_exceptions(self, exceptions: List[ContentException]):
         self._persistence_layer.replace_exceptions(exceptions)

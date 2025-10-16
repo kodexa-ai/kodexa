@@ -1369,6 +1369,51 @@ class SqliteDocumentPersistence(object):
             return [ProcessingStep(**step) for step in unpacked_data]
         return []
 
+    def __ensure_knowledge_table_exists(self):
+        """
+        Ensure the 'knowledge' table exists in the database.
+        Creates the table if it does not exist.
+        """
+        self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS knowledge (
+                    obj BLOB
+                )
+            """)
+
+        # Check if the table has any rows, if not, insert an initial empty row
+        result = self.cursor.execute("SELECT COUNT(*) FROM knowledge").fetchone()
+        if result[0] == 0:
+            self.cursor.execute("INSERT INTO knowledge (obj) VALUES (?)", [sqlite3.Binary(msgpack.packb([]))])
+
+    def set_knowledge(self, knowledge: List):
+        """
+        Sets the knowledge items for the document.
+
+        Args:
+            knowledge (List): A list of KnowledgeItem objects to store.
+        """
+        from kodexa.model.objects import KnowledgeItem
+        self.__ensure_knowledge_table_exists()
+        serialized_knowledge = [item.model_dump(by_alias=True) for item in knowledge]
+        packed_data = sqlite3.Binary(msgpack.packb(serialized_knowledge))
+        self.cursor.execute("UPDATE knowledge SET obj = ? WHERE rowid = 1", [packed_data])
+        self.connection.commit()
+
+    def get_knowledge(self) -> List:
+        """
+        Gets the knowledge items associated with this document.
+
+        Returns:
+            List: A list of KnowledgeItem objects.
+        """
+        from kodexa.model.objects import KnowledgeItem
+        self.__ensure_knowledge_table_exists()
+        result = self.cursor.execute("SELECT obj FROM knowledge WHERE rowid = 1").fetchone()
+        if result and result[0]:
+            unpacked_data = msgpack.unpackb(result[0])
+            return [KnowledgeItem(**item) for item in unpacked_data]
+        return []
+
 
 class SimpleObjectCache(object):
     """
@@ -1517,6 +1562,22 @@ class PersistenceManager(object):
 
     def set_steps(self, steps: list[ProcessingStep]):
         self._underlying_persistence.set_steps(steps)
+
+    def get_knowledge(self) -> list:
+        """
+        Gets the knowledge items for this document
+
+        :return: list of KnowledgeItem objects
+        """
+        return self._underlying_persistence.get_knowledge()
+
+    def set_knowledge(self, knowledge: list):
+        """
+        Sets the knowledge items for this document
+
+        :param knowledge: list of KnowledgeItem objects
+        """
+        self._underlying_persistence.set_knowledge(knowledge)
 
     def set_validations(self, validations: list[DocumentTaxonValidation]):
         self._underlying_persistence.set_validations(validations)
