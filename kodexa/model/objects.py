@@ -6464,6 +6464,215 @@ class Note(BaseModel):
     note_properties: Optional[Dict[str, str]] = Field(default_factory=dict, alias="noteProperties")
 
 
+# Knowledge Domain Models
+
+class KnowledgeSetStatus(str, Enum):
+    """Status of a KnowledgeSet lifecycle"""
+    PENDING_REVIEW = "PENDING_REVIEW"
+    IN_REVIEW = "IN_REVIEW"
+    ACTIVE = "ACTIVE"
+    ON_HOLD = "ON_HOLD"
+    ARCHIVED = "ARCHIVED"
+
+
+class KnowledgeFeatureType(BaseModel):
+    """Defines types of knowledge features"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    id: Optional[str] = Field(None, description="Unique identifier")
+    uuid: Optional[str] = None
+    name: str = Field(..., description="Feature type name")
+    slug: str = Field(..., description="URL-safe identifier")
+    description: Optional[str] = Field(None, description="Type description")
+    color: Optional[str] = Field(None, description="UI color code")
+    icon: Optional[str] = Field(None, description="Icon identifier")
+    label_json_path: Optional[str] = Field(None, alias="labelJsonPath", description="JSON path for label extraction")
+    options: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Configuration options")
+    organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
+    active: bool = Field(True, description="Is feature type active")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+
+
+class KnowledgeFeature(BaseModel):
+    """Represents a knowledge feature linking items and document families"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    id: Optional[str] = Field(None, description="Unique identifier")
+    uuid: Optional[str] = None
+    properties: Dict[str, Any] = Field(default_factory=dict, description="Feature properties (JSON map)")
+    feature_type: Optional[KnowledgeFeatureType] = Field(None, alias="featureType", description="Type of this feature")
+    organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
+    active: bool = Field(True, description="Is feature active")
+    search_text: Optional[str] = Field(None, alias="searchText", description="Generated search text from properties")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+
+
+class KnowledgeItemType(BaseModel):
+    """Defines types of knowledge items"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    id: Optional[str] = Field(None, description="Unique identifier")
+    uuid: Optional[str] = None
+    name: str = Field(..., description="Item type name")
+    slug: str = Field(..., description="URL-safe identifier")
+    description: Optional[str] = Field(None, description="Type description")
+    options: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Configuration options")
+    organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+
+
+class KnowledgeItem(BaseModel):
+    """Represents a reusable knowledge unit"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    id: Optional[str] = Field(None, description="Unique identifier")
+    uuid: Optional[str] = None
+    title: Optional[str] = Field(None, description="Item title")
+    description: Optional[str] = Field(None, description="Item description")
+    knowledge_item_type: Optional[KnowledgeItemType] = Field(None, alias="knowledgeItemType", description="Type of this item")
+    knowledge_set_id: Optional[str] = Field(None, alias="knowledgeSetId", description="Parent set ID if in a set")
+    properties: Dict[str, Any] = Field(default_factory=dict, description="Item properties (JSON map)")
+    sequence_order: Optional[int] = Field(None, alias="sequenceOrder", description="Order within parent set")
+    active: bool = Field(True, description="Is item active")
+    search_text: Optional[str] = Field(None, alias="searchText", description="Generated search text from title/description")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+
+
+class KnowledgeSet(BaseModel):
+    """Composite set of knowledge items with feature matching"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+
+    id: Optional[str] = Field(None, description="Unique identifier")
+    uuid: Optional[str] = None
+    name: str = Field(..., description="Set name")
+    description: Optional[str] = Field(None, description="Set description")
+    set_type: Optional[str] = Field(None, alias="setType", description="Type classification of the set")
+    knowledge_items: List[KnowledgeItem] = Field(default_factory=list, alias="knowledgeItems", description="Items in this set (ordered by sequenceOrder)")
+    features: List[KnowledgeFeature] = Field(default_factory=list, description="Features associated with this set")
+    organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
+    project: Optional[Dict[str, Any]] = Field(None, description="Project reference")
+    status: KnowledgeSetStatus = Field(KnowledgeSetStatus.PENDING_REVIEW, description="Lifecycle status")
+    active: bool = Field(False, description="Is set active")
+    search_text: Optional[str] = Field(None, alias="searchText", description="Generated search text")
+    created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
+    updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+
+
+# Page models for pagination
+class PageKnowledgeFeatureType(BaseModel):
+    """Paginated response for KnowledgeFeatureType"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    content: List[KnowledgeFeatureType] = Field(default_factory=list)
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    number: Optional[int] = None
+    size: Optional[int] = None
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+
+
+class PageKnowledgeFeature(BaseModel):
+    """Paginated response for KnowledgeFeature"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    content: List[KnowledgeFeature] = Field(default_factory=list)
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    number: Optional[int] = None
+    size: Optional[int] = None
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+
+
+class PageKnowledgeItemType(BaseModel):
+    """Paginated response for KnowledgeItemType"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    content: List[KnowledgeItemType] = Field(default_factory=list)
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    number: Optional[int] = None
+    size: Optional[int] = None
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+
+
+class PageKnowledgeItem(BaseModel):
+    """Paginated response for KnowledgeItem"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    content: List[KnowledgeItem] = Field(default_factory=list)
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    number: Optional[int] = None
+    size: Optional[int] = None
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+
+
+class PageKnowledgeSet(BaseModel):
+    """Paginated response for KnowledgeSet"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    content: List[KnowledgeSet] = Field(default_factory=list)
+    total_elements: Optional[int] = Field(None, alias="totalElements")
+    total_pages: Optional[int] = Field(None, alias="totalPages")
+    number: Optional[int] = None
+    size: Optional[int] = None
+    first: Optional[bool] = None
+    last: Optional[bool] = None
+
+
 ThrowableProblem.model_rebuild()
 Option.model_rebuild()
 Taxon.model_rebuild()
@@ -6523,3 +6732,13 @@ MessageFeedbackResponse.model_rebuild()
 MessageFeedbackOption.model_rebuild()
 Note.model_rebuild()
 PageNote.model_rebuild()
+KnowledgeFeatureType.model_rebuild()
+KnowledgeFeature.model_rebuild()
+KnowledgeItemType.model_rebuild()
+KnowledgeItem.model_rebuild()
+KnowledgeSet.model_rebuild()
+PageKnowledgeFeatureType.model_rebuild()
+PageKnowledgeFeature.model_rebuild()
+PageKnowledgeItemType.model_rebuild()
+PageKnowledgeItem.model_rebuild()
+PageKnowledgeSet.model_rebuild()

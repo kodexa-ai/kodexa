@@ -108,6 +108,17 @@ from kodexa.model.objects import (
     PageTaskTag,
     Note,
     PageNote,
+    KnowledgeFeatureType,
+    KnowledgeFeature,
+    KnowledgeItemType,
+    KnowledgeItem,
+    KnowledgeSet,
+    KnowledgeSetStatus,
+    PageKnowledgeFeatureType,
+    PageKnowledgeFeature,
+    PageKnowledgeItemType,
+    PageKnowledgeItem,
+    PageKnowledgeSet,
 )
 
 logger = logging.getLogger()
@@ -1465,6 +1476,158 @@ class PageNoteEndpoint(PageNote, PageEndpoint):
 
     def get_type(self) -> Optional[str]:
         return "notes"
+
+
+# Knowledge Domain Endpoints
+
+class KnowledgeFeatureTypeEndpoint(EntityEndpoint, KnowledgeFeatureType):
+    """
+    Represents a knowledge feature type endpoint.
+    """
+    def get_type(self) -> str:
+        return "knowledge-feature-types"
+
+
+class KnowledgeFeatureTypesEndpoint(EntitiesEndpoint):
+    """
+    Represents knowledge feature types endpoints.
+    """
+    def get_type(self) -> str:
+        return "knowledge-feature-types"
+
+    def get_instance_class(self, object_dict=None):
+        return KnowledgeFeatureTypeEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageKnowledgeFeatureTypeEndpoint
+
+
+class PageKnowledgeFeatureTypeEndpoint(PageKnowledgeFeatureType, PageEndpoint):
+    """
+    Represents a page knowledge feature type endpoint.
+    """
+    def get_type(self) -> Optional[str]:
+        return "knowledge-feature-types"
+
+
+class KnowledgeFeatureEndpoint(EntityEndpoint, KnowledgeFeature):
+    """
+    Represents a knowledge feature endpoint.
+    """
+    def get_type(self) -> str:
+        return "knowledge-features"
+
+
+class KnowledgeFeaturesEndpoint(EntitiesEndpoint):
+    """
+    Represents knowledge features endpoints.
+    """
+    def get_type(self) -> str:
+        return "knowledge-features"
+
+    def get_instance_class(self, object_dict=None):
+        return KnowledgeFeatureEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageKnowledgeFeatureEndpoint
+
+
+class PageKnowledgeFeatureEndpoint(PageKnowledgeFeature, PageEndpoint):
+    """
+    Represents a page knowledge feature endpoint.
+    """
+    def get_type(self) -> Optional[str]:
+        return "knowledge-features"
+
+
+class KnowledgeItemTypeEndpoint(EntityEndpoint, KnowledgeItemType):
+    """
+    Represents a knowledge item type endpoint.
+    """
+    def get_type(self) -> str:
+        return "knowledge-item-types"
+
+
+class KnowledgeItemTypesEndpoint(EntitiesEndpoint):
+    """
+    Represents knowledge item types endpoints.
+    """
+    def get_type(self) -> str:
+        return "knowledge-item-types"
+
+    def get_instance_class(self, object_dict=None):
+        return KnowledgeItemTypeEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageKnowledgeItemTypeEndpoint
+
+
+class PageKnowledgeItemTypeEndpoint(PageKnowledgeItemType, PageEndpoint):
+    """
+    Represents a page knowledge item type endpoint.
+    """
+    def get_type(self) -> Optional[str]:
+        return "knowledge-item-types"
+
+
+class KnowledgeItemEndpoint(EntityEndpoint, KnowledgeItem):
+    """
+    Represents a knowledge item endpoint.
+    """
+    def get_type(self) -> str:
+        return "knowledge-items"
+
+
+class KnowledgeItemsEndpoint(EntitiesEndpoint):
+    """
+    Represents knowledge items endpoints.
+    """
+    def get_type(self) -> str:
+        return "knowledge-items"
+
+    def get_instance_class(self, object_dict=None):
+        return KnowledgeItemEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageKnowledgeItemEndpoint
+
+
+class PageKnowledgeItemEndpoint(PageKnowledgeItem, PageEndpoint):
+    """
+    Represents a page knowledge item endpoint.
+    """
+    def get_type(self) -> Optional[str]:
+        return "knowledge-items"
+
+
+class KnowledgeSetEndpoint(EntityEndpoint, KnowledgeSet):
+    """
+    Represents a knowledge set endpoint.
+    """
+    def get_type(self) -> str:
+        return "knowledge-sets"
+
+
+class KnowledgeSetsEndpoint(EntitiesEndpoint):
+    """
+    Represents knowledge sets endpoints.
+    """
+    def get_type(self) -> str:
+        return "knowledge-sets"
+
+    def get_instance_class(self, object_dict=None):
+        return KnowledgeSetEndpoint
+
+    def get_page_class(self, object_dict=None):
+        return PageKnowledgeSetEndpoint
+
+
+class PageKnowledgeSetEndpoint(PageKnowledgeSet, PageEndpoint):
+    """
+    Represents a page knowledge set endpoint.
+    """
+    def get_type(self) -> Optional[str]:
+        return "knowledge-sets"
 
 
 class PageTaskTemplateEndpoint(PageTask, PageEndpoint):
@@ -6848,6 +7011,11 @@ class KodexaClient:
         users (UsersEndpoint): An endpoint for users.
         workspaces (WorkspacesEndpoint): An endpoint for workspaces.
         notes (NotesEndpoint): An endpoint for notes.
+        knowledge_feature_types (KnowledgeFeatureTypesEndpoint): An endpoint for knowledge feature types.
+        knowledge_features (KnowledgeFeaturesEndpoint): An endpoint for knowledge features.
+        knowledge_item_types (KnowledgeItemTypesEndpoint): An endpoint for knowledge item types.
+        knowledge_items (KnowledgeItemsEndpoint): An endpoint for knowledge items.
+        knowledge_sets (KnowledgeSetsEndpoint): An endpoint for knowledge sets.
     """
 
     def __init__(self, url=None, access_token=None, profile=None):
@@ -6879,6 +7047,11 @@ class KodexaClient:
         self.workspaces = WorkspacesEndpoint(self)
         self.data_exceptions = DataExceptionsEndpoint(self)
         self.notes = NotesEndpoint(self)
+        self.knowledge_feature_types = KnowledgeFeatureTypesEndpoint(self)
+        self.knowledge_features = KnowledgeFeaturesEndpoint(self)
+        self.knowledge_item_types = KnowledgeItemTypesEndpoint(self)
+        self.knowledge_items = KnowledgeItemsEndpoint(self)
+        self.knowledge_sets = KnowledgeSetsEndpoint(self)
         self.model_costs = ModelCostsEndpoint(self)
 
     @staticmethod
