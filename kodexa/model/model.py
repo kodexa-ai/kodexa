@@ -12,7 +12,7 @@ from typing import Any, List, Optional
 from addict import Dict
 import deepdiff
 import msgpack
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_serializer
 
 from kodexa.model.objects import ContentObject, FeatureSet, DocumentTaxonValidation, KnowledgeItem
 
@@ -2435,11 +2435,11 @@ class ProcessingStep(BaseModel):
             merged_step.parents.append(step)
         return merged_step
 
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {
-            'ProcessingStep': lambda step: step.to_dict()
-        }
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @model_serializer(mode='plain')
+    def _serialize(self):
+        return self.to_dict()
 
     def to_dict(self, seen=None):
         if seen is None:

@@ -7,7 +7,7 @@ import jinja2
 from kodexa import ContentNode
 from kodexa.model.model import Tag, Document
 from kodexa.model.objects import ContentException, Taxon, Taxonomy, Assistant
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from kodexa.utils import snake_to_camel, to_snake, taxon_to_property_name, taxon_to_class_name, taxon_to_group_path
 
@@ -110,8 +110,7 @@ class LLMDataObject(BaseModel):
     cell_index: int = 0
     exceptions: Optional[list[ContentException]] = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def process_exceptions(self, document: "KodexaDocumentLLMWrapper"):
         # Lets make sure we add all the content exceptions

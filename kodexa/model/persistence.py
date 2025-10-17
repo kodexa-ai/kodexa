@@ -626,7 +626,7 @@ class SqliteDocumentPersistence(object):
 
         self.uuid = metadata.get("uuid")
 
-        import semver
+        from semver import Version
 
         root_node = self.cursor.execute(
             "select id, pid, nt, idx from cn where pid is null"
@@ -634,7 +634,7 @@ class SqliteDocumentPersistence(object):
         if root_node:
             self.document.content_node = self.__build_node(root_node)
 
-        if semver.compare(self.document.version, "4.0.1") < 0:
+        if Version.parse(self.document.version) < Version.parse("4.0.1"):
             # We need to migrate this to a 4.0.1 document
             self.cursor.execute(
                 """CREATE TABLE ft
@@ -679,7 +679,7 @@ class SqliteDocumentPersistence(object):
                                     )"""
         )
 
-        if semver.compare(self.document.version, "6.0.0") < 0:
+        if Version.parse(self.document.version) < Version.parse("6.0.0"):
             from sqlite3 import OperationalError
 
             try:
