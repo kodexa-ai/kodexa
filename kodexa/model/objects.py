@@ -2926,7 +2926,9 @@ class ProjectOptions(BaseModel):
         description="Taxon Type Feature Defaults"
     )
 
-    task_options: ProjectTaskOptions = Field(default_factory=ProjectTaskOptions, alias="taskOptions")
+    task_options: ProjectTaskOptions = Field(default_factory=ProjectTaskOptions, alias="taskOptions") 
+    data_options: List[Option] = Field(default_factory=list, alias="dataOptions")
+    data_properties: Dict[str, Any] = Field(default_factory=dict, alias="dataProperties")
 
 
 class NodePosition(BaseModel):
