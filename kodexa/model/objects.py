@@ -2639,7 +2639,15 @@ class DocumentTaxonValidation(BaseModel):
     taxon_path: Optional[str] = Field(None, alias="taxonPath")
     validation: Optional[TaxonValidation] = None
 
-
+class TaxonNaturalKey(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    name: Optional[str] = Field(None)
+    
 class Taxon(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
@@ -2652,6 +2660,7 @@ class Taxon(BaseModel):
     label: Optional[str] = None
     generate_name: Optional[bool] = Field(None, alias="generateName")
     group: Optional[bool] = None
+    natural_keys: Optional[List[TaxonNaturalKey]] = Field(None, alias="naturalKeys")
     name: str = Field(..., pattern=r"^[a-zA-Z0-9\-_]{0,255}$")
     select_weight: Optional[int] = Field(1, alias="selectWeight")
     external_name: Optional[str] = Field(None, alias="externalName")
