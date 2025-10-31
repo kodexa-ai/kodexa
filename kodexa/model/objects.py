@@ -3435,6 +3435,7 @@ class Task(BaseModel):
     search_text: Optional[str] = Field(None, alias="searchText")
     tags: List[TaskTag] = Field(default_factory=list)
     priority: Optional[int] = None
+    properties: Dict[str, Any] = Field(default_factory=dict)
 
 class FeatureSet(BaseModel):
     """
