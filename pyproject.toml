@@ -1,52 +1,66 @@
-[tool.poetry]
+[project]
 name = "kodexa"
 version = "7.4.0"
 description = "Python SDK for the Kodexa Platform"
-authors = ["Austin Redenbaugh <austin@kodexa.com>", "Philip Dodds <philip@kodexa.com>", "Romar Cablao <rcablao@kodexa.com>", "Amadea Paula Dodds <amadeapaula@kodexa.com>"]
 readme = "README.md"
-
-packages = [
-    { include = "kodexa" }
+requires-python = ">=3.11,<3.14"
+authors = [
+    { name = "Austin Redenbaugh", email = "austin@kodexa.com" },
+    { name = "Philip Dodds", email = "philip@kodexa.com" },
+    { name = "Romar Cablao", email = "rcablao@kodexa.com" },
+    { name = "Amadea Paula Dodds", email = "amadeapaula@kodexa.com" },
 ]
-
 classifiers = [
-    'Development Status :: 5 - Production/Stable',
-    'Intended Audience :: Developers',
-    'Topic :: Software Development :: Libraries',
-    '''License :: OSI Approved :: Apache Software License''', # noqa
-    'Programming Language :: Python :: 3.11',
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "requests>=2.28.1,<3.0.0",
+    "msgpack>=1.0.6,<2.0.0",
+    "urllib3>=2.0.0,<3.0.0",
+    "ply>=3.11,<4.0",
+    "pyyaml>=6.0,<7.0",
+    "deepdiff>=8.0.1,<9.0.0",
+    "appdirs>=1.4.4,<2.0.0",
+    "python-dateutil>=2.8.2,<3.0.0",
+    "better-exceptions>=0.3.3,<0.4.0",
+    "pyfunctional==1.5.0",
+    "pydantic>=2.5.3,<3.0.0",
+    "pydantic-yaml>=1.0.0,<2.0.0",
+    "semver>=3.0.1,<4.0.0",
+    "chevron>=0.14.0,<0.15.0",
+    "addict>=2.4.0,<3.0.0",
+    "simpleeval>=1.0.0,<2.0.0",
+    "certifi>=2025.0.0,<2026.0.0",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.11, <3.14"
-requests = "^2.28.1"
-msgpack = "^1.0.6"
-urllib3 = "^2.0.0"
-ply = ">=3.11,<4.0"
-pyyaml = "^6.0"
-deepdiff = "^8.0.1"
-appdirs = "^1.4.4"
-python-dateutil = "^2.8.2"
-better-exceptions = "^0.3.3"
-pyfunctional = "1.5.0"
-pydantic = "^2.5.3"
-pydantic-yaml = "^1.0.0"
-semver = "^3.0.1"
-chevron = "^0.14.0"
-addict = "^2.4.0"
-simpleeval = "^1.0.0"
-certifi = "^2025.0.0"
+[project.urls]
+"Homepage" = "https://github.com/kodexa-ai/kodexa"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.3"
-pytest-runner = "^6.0.0"
-mypy = "^1.10.0"
-flake8 = "^7.0.0"
-pandas = "^2.2.3"
-setuptools = "^78.1.1"
-black = ">=23.7,<25.0"
-numpy = "2.2.2"
+[tool.setuptools.packages.find]
+include = ["kodexa"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.3,<9.0.0",
+    "pytest-runner>=6.0.0,<7.0.0",
+    "mypy>=1.10.0,<2.0.0",
+    "flake8>=7.0.0,<8.0.0",
+    "pandas>=2.2.3,<3.0.0",
+    "setuptools>=78.1.1,<79.0.0",
+    "black>=23.7,<25.0",
+    "numpy==2.2.2",
+]
+
+[tool.uv]
+cache-dir = "~/.cache/uv"
+
+[tool.uv.pip]
+python = "python3"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

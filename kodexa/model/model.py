@@ -14,11 +14,12 @@ import deepdiff
 import msgpack
 from pydantic import BaseModel, ConfigDict, Field, model_serializer
 
+from kodexa.model.base import StandardDateTime
 from kodexa.model.objects import (
     ContentObject,
     FeatureSet,
     DocumentTaxonValidation,
-    DoumentKnowledgeFeature,
+    DocumentKnowledgeFeature,
     KnowledgeItem,
 )
 
@@ -2537,11 +2538,11 @@ class Document(object):
     def set_knowledge(self, knowledge: list[KnowledgeItem]):
         self._persistence_layer.set_knowledge(knowledge)
 
-    def get_document_knowledge_features(self) -> list[DoumentKnowledgeFeature]:
+    def get_document_knowledge_features(self) -> list[DocumentKnowledgeFeature]:
         return self._persistence_layer.get_document_knowledge_features()
 
     def set_document_knowledge_features(
-        self, features: list[DoumentKnowledgeFeature]
+        self, features: list[DocumentKnowledgeFeature]
     ):
         self._persistence_layer.set_document_knowledge_features(features)
 

@@ -6599,7 +6599,7 @@ class KnowledgeSet(BaseModel):
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
 
 
-class DoumentKnowledgeFeature(BaseModel):
+class DocumentKnowledgeFeature(BaseModel):
     """A document knowledge feature"""
     model_config = ConfigDict(
         populate_by_name=True,
@@ -6609,6 +6609,10 @@ class DoumentKnowledgeFeature(BaseModel):
     )
     knowledge_feature_ref: Optional[str] = Field(None, alias="knowledgeFeatureRef")
     properties: Dict[str, Any] = Field(default_factory=dict, alias="properties", description="Feature properties")
+
+
+# Backwards compatibility for older imports
+DoumentKnowledgeFeature = DocumentKnowledgeFeature
 
 
 

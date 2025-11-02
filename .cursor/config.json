@@ -1,0 +1,13 @@
+{
+  "python": {
+    "defaultInterpreter": "uv",
+    "runCommand": "uv run python",
+    "testCommand": "uv run pytest"
+  },
+  "lint": {
+    "command": "uv run flake8"
+  },
+  "format": {
+    "command": "uv run black"
+  }
+}

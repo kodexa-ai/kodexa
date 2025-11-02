@@ -40,6 +40,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        uv-version: 'latest'
+
+    - name: Install dependencies
+      run: uv sync --no-dev
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3

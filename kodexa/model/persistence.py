@@ -16,7 +16,7 @@ from kodexa.model.model import (
     ContentException,
     ModelInsight, ProcessingStep,
 )
-from kodexa.model.objects import DocumentTaxonValidation, DoumentKnowledgeFeature
+from kodexa.model.objects import DocumentTaxonValidation, DocumentKnowledgeFeature
 
 logger = logging.getLogger()
 
@@ -1434,7 +1434,7 @@ class SqliteDocumentPersistence(object):
         return []
 
     def set_document_knowledge_features(
-        self, features: List[DoumentKnowledgeFeature]
+        self, features: List[DocumentKnowledgeFeature]
     ):
         """Persist document knowledge features."""
         if features is None:
@@ -1448,7 +1448,7 @@ class SqliteDocumentPersistence(object):
         )
         self.connection.commit()
 
-    def get_document_knowledge_features(self) -> List[DoumentKnowledgeFeature]:
+    def get_document_knowledge_features(self) -> List[DocumentKnowledgeFeature]:
         """Retrieve document knowledge features."""
         self.__ensure_document_knowledge_features_table_exists()
         result = self.cursor.execute(
@@ -1456,7 +1456,7 @@ class SqliteDocumentPersistence(object):
         ).fetchone()
         if result and result[0]:
             unpacked = msgpack.unpackb(result[0])
-            return [DoumentKnowledgeFeature(**feature) for feature in unpacked]
+            return [DocumentKnowledgeFeature(**feature) for feature in unpacked]
         return []
 
 
@@ -1624,12 +1624,12 @@ class PersistenceManager(object):
         """
         self._underlying_persistence.set_knowledge(knowledge)
 
-    def get_document_knowledge_features(self) -> list[DoumentKnowledgeFeature]:
+    def get_document_knowledge_features(self) -> list[DocumentKnowledgeFeature]:
         """Gets the document level knowledge features for this document."""
         return self._underlying_persistence.get_document_knowledge_features()
 
     def set_document_knowledge_features(
-        self, features: list[DoumentKnowledgeFeature]
+        self, features: list[DocumentKnowledgeFeature]
     ):
         """Sets the document level knowledge features for this document."""
         self._underlying_persistence.set_document_knowledge_features(features)

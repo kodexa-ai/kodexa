@@ -4,22 +4,26 @@ Learn more about Kodexa at [kodexa.ai](https://kodexa.ai).
 
 ## Installation & Setup
 
-The project uses Poetry for dependency management. To get started:
+The project now uses [uv](https://docs.astral.sh/uv/) for dependency management. To get started:
 
-1. Make sure you have Poetry installed:
+1. Install `uv` (via Homebrew, pipx, or the official installer). For example, using Homebrew:
    ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
+   brew install uv
    ```
 
-2. Install dependencies:
+2. Create the virtual environment and install dependencies:
    ```bash
-   poetry install
+   uv sync
    ```
 
 3. Run tests to verify your setup:
    ```bash
-   poetry run pytest
+   uv run pytest
    ```
+
+## Continuous Integration
+
+GitHub Actions workflows now use `uv` for dependency installation, linting, testing, and publishing. Refer to `.github/workflows/` for job definitions if you need to mirror CI behavior locally.
 
 ## Documentation
 

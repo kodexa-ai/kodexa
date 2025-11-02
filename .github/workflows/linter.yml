@@ -51,12 +51,13 @@ jobs:
       ################################
       # Run Linter against code base #
       ################################
-      - name: Lint Code Base
-        uses: github/super-linter@v7
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_PYTHON_FLAKE8: true
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          uv-version: 'latest'
 
-          # Change to 'master' if your main branch differs
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Run flake8 lint
+        run: uv run flake8 kodexa

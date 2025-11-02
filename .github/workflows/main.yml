@@ -1,4 +1,4 @@
-name: Build and Package with Poetry (Feature)
+name: Build and Package with uv (Feature)
 
 on:
   push:
@@ -11,17 +11,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Run image
-        uses: abatilo/actions-poetry@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          uv-version: 'latest'
       - name: Increment version
         id: version
         run: |
           BRANCH_NAME=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
-          VERSION=$(poetry version --short)
+          VERSION=$(uv pip show kodexa --disable-deps 2>/dev/null | awk '/Version/ {print $2}')
+          if [ -z "$VERSION" ]; then
+            VERSION=$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          fi
           MINOR_PATCH_PART=${VERSION#*.}
           LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
           PATCH_PART=${LAST_VERSION_PART_PREFIX%.*}
@@ -32,8 +37,8 @@ jobs:
           elif [[ $BRANCH_NAME == "test"* ]]; then
             NEW_LATEST_PATCH_PART=$((PATCH_PART+1))rc${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "main"* || $BRANCH_NAME == "releases"* ]]; then
-            poetry version patch
-            VERSION=$(poetry version --short)
+            uv version patch
+            VERSION=$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
             MINOR_PATCH_PART=${VERSION#*.}
             LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
             PATCH_PART=${LAST_VERSION_PART_PREFIX%.*}
@@ -46,19 +51,18 @@ jobs:
           echo $NEW_VERSION
           echo "::set-output name=version::$NEW_VERSION"
           echo "::set-output name=versionType::Release"
-          poetry version $NEW_VERSION --no-ansi
+          uv version $NEW_VERSION
       - name: Install dependencies
-        run: poetry install
+        run: uv sync --dev
       - name: Test with pytest
         run: |
-          poetry run pytest
+          uv run pytest
       - name: Build Package
         run: |
-          poetry build
+          uv build
       - name: Publish a Python distribution to PyPI
         run: |
-          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
-          poetry publish
+          uv publish --token ${{ secrets.PYPI_TOKEN }}
       - name: Publish a Python distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

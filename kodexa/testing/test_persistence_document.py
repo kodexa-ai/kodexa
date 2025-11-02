@@ -1,7 +1,7 @@
 import pytest
 
 from kodexa.model.model import Document, ProcessingStep
-from kodexa.model.objects import DoumentKnowledgeFeature
+from kodexa.model.objects import DocumentKnowledgeFeature
 
 
 @pytest.mark.parametrize("metadata", [{"step": "one"}, {}])
@@ -38,10 +38,10 @@ def test_document_knowledge_features_persist_round_trip(tmp_path):
     doc = Document(kddb_path=str(doc_path), delete_on_close=False)
     try:
         features = [
-            DoumentKnowledgeFeature(
+            DocumentKnowledgeFeature(
                 knowledge_feature_ref="feature-1", properties={"score": 0.95}
             ),
-            DoumentKnowledgeFeature(properties={"notes": "fallback"}),
+            DocumentKnowledgeFeature(properties={"notes": "fallback"}),
         ]
 
         doc.set_document_knowledge_features(features)
