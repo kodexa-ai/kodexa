@@ -37,7 +37,7 @@ jobs:
           elif [[ $BRANCH_NAME == "test"* ]]; then
             NEW_LATEST_PATCH_PART=$((PATCH_PART+1))rc${GITHUB_RUN_ID}
           elif [[ $BRANCH_NAME == "main"* || $BRANCH_NAME == "releases"* ]]; then
-            uv version patch
+            uv version --bump patch
             VERSION=$(python -c 'import tomllib;print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
             MINOR_PATCH_PART=${VERSION#*.}
             LAST_VERSION_PART_PREFIX=${MINOR_PATCH_PART%??}
@@ -51,7 +51,7 @@ jobs:
           echo $NEW_VERSION
           echo "::set-output name=version::$NEW_VERSION"
           echo "::set-output name=versionType::Release"
-          uv version $NEW_VERSION
+          uv version --version $NEW_VERSION
       - name: Install dependencies
         run: uv sync --dev
       - name: Test with pytest
