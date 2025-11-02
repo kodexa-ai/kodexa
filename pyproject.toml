@@ -41,7 +41,7 @@ dependencies = [
 "Homepage" = "https://github.com/kodexa-ai/kodexa"
 
 [tool.setuptools.packages.find]
-include = ["kodexa"]
+include = ["kodexa*"]
 
 [dependency-groups]
 dev = [
