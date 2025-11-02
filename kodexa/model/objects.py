@@ -6599,6 +6599,19 @@ class KnowledgeSet(BaseModel):
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
 
 
+class DoumentKnowledgeFeature(BaseModel):
+    """A document knowledge feature"""
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    knowledge_feature_ref: Optional[str] = Field(None, alias="knowledgeFeatureRef")
+    properties: Dict[str, Any] = Field(default_factory=dict, alias="properties", description="Feature properties")
+
+
+
 # Page models for pagination
 class PageKnowledgeFeatureType(BaseModel):
     """Paginated response for KnowledgeFeatureType"""

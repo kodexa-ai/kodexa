@@ -14,7 +14,13 @@ import deepdiff
 import msgpack
 from pydantic import BaseModel, ConfigDict, Field, model_serializer
 
-from kodexa.model.objects import ContentObject, FeatureSet, DocumentTaxonValidation, KnowledgeItem
+from kodexa.model.objects import (
+    ContentObject,
+    FeatureSet,
+    DocumentTaxonValidation,
+    DoumentKnowledgeFeature,
+    KnowledgeItem,
+)
 
 
 class Ref:
@@ -2418,7 +2424,10 @@ class FeatureSetDiff:
 class ProcessingStep(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
+    start_timestamp: Optional[StandardDateTime] = Field(None, alias="startTimestamp")
+    duration: Optional[int] = Field(None, alias="duration (ms)")
     metadata: dict = Field(default_factory=lambda: {})
+    applied_knowledge_items: List[DocumentKnowledgeFeature] = Field(default_factory=list, alias="knowledgeItems")
     presentation_metadata: dict = Field(default_factory=lambda: {}, alias='presentationMetadata')
     children: List['ProcessingStep'] = Field(default_factory=list)
     parents: List['ProcessingStep'] = Field(default_factory=list)
@@ -2451,10 +2460,29 @@ class ProcessingStep(BaseModel):
 
         seen.add(self.id)
 
+        knowledge_items = []
+
+        knowledge_items = []
+        if self.applied_knowledge_items:
+            for knowledge_item in self.applied_knowledge_items:
+                # Use model_dump() if it's a pydantic model
+                if hasattr(knowledge_item, "model_dump") and callable(getattr(knowledge_item, "model_dump")):
+                    knowledge_items.append(knowledge_item.model_dump())
+                # If it's already a dict, accept as is
+                elif isinstance(knowledge_item, dict):
+                    knowledge_items.append(knowledge_item)
+                else:
+                    raise TypeError(
+                        f"Item in applied_knowledge_items must be a Pydantic model or dict, got {type(knowledge_item)}"
+                    )
+
         return {
             'id': self.id,
             'name': self.name,
             'metadata': self.metadata,
+            'knowledgeItems': knowledge_items,
+            'startTimestamp': self.start_timestamp,
+            'duration': self.duration,
             'presentationMetadata': self.presentation_metadata,
             'children': [child.to_dict(seen) for child in self.children],
             'parents': [{'id': parent.id, 'name': parent.name} for parent in self.parents],  # or parent.to_dict(seen) if full structure is needed
@@ -2508,6 +2536,14 @@ class Document(object):
 
     def set_knowledge(self, knowledge: list[KnowledgeItem]):
         self._persistence_layer.set_knowledge(knowledge)
+
+    def get_document_knowledge_features(self) -> list[DoumentKnowledgeFeature]:
+        return self._persistence_layer.get_document_knowledge_features()
+
+    def set_document_knowledge_features(
+        self, features: list[DoumentKnowledgeFeature]
+    ):
+        self._persistence_layer.set_document_knowledge_features(features)
 
     def replace_exceptions(self, exceptions: List[ContentException]):
         self._persistence_layer.replace_exceptions(exceptions)

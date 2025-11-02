@@ -16,7 +16,7 @@ from kodexa.model.model import (
     ContentException,
     ModelInsight, ProcessingStep,
 )
-from kodexa.model.objects import DocumentTaxonValidation
+from kodexa.model.objects import DocumentTaxonValidation, DoumentKnowledgeFeature
 
 logger = logging.getLogger()
 
@@ -1385,6 +1385,25 @@ class SqliteDocumentPersistence(object):
         if result[0] == 0:
             self.cursor.execute("INSERT INTO knowledge (obj) VALUES (?)", [sqlite3.Binary(msgpack.packb([]))])
 
+    def __ensure_document_knowledge_features_table_exists(self):
+        """Ensure the document knowledge features table exists."""
+        self.cursor.execute(
+            """
+                CREATE TABLE IF NOT EXISTS document_knowledge_features (
+                    obj BLOB
+                )
+            """
+        )
+
+        result = self.cursor.execute(
+            "SELECT COUNT(*) FROM document_knowledge_features"
+        ).fetchone()
+        if result[0] == 0:
+            self.cursor.execute(
+                "INSERT INTO document_knowledge_features (obj) VALUES (?)",
+                [sqlite3.Binary(msgpack.packb([]))],
+            )
+
     def set_knowledge(self, knowledge: List):
         """
         Sets the knowledge items for the document.
@@ -1412,6 +1431,32 @@ class SqliteDocumentPersistence(object):
         if result and result[0]:
             unpacked_data = msgpack.unpackb(result[0])
             return [KnowledgeItem(**item) for item in unpacked_data]
+        return []
+
+    def set_document_knowledge_features(
+        self, features: List[DoumentKnowledgeFeature]
+    ):
+        """Persist document knowledge features."""
+        if features is None:
+            features = []
+        self.__ensure_document_knowledge_features_table_exists()
+        serialized = [feature.model_dump(by_alias=True) for feature in features]
+        packed = sqlite3.Binary(msgpack.packb(serialized))
+        self.cursor.execute(
+            "UPDATE document_knowledge_features SET obj = ? WHERE rowid = 1",
+            [packed],
+        )
+        self.connection.commit()
+
+    def get_document_knowledge_features(self) -> List[DoumentKnowledgeFeature]:
+        """Retrieve document knowledge features."""
+        self.__ensure_document_knowledge_features_table_exists()
+        result = self.cursor.execute(
+            "SELECT obj FROM document_knowledge_features WHERE rowid = 1"
+        ).fetchone()
+        if result and result[0]:
+            unpacked = msgpack.unpackb(result[0])
+            return [DoumentKnowledgeFeature(**feature) for feature in unpacked]
         return []
 
 
@@ -1578,6 +1623,16 @@ class PersistenceManager(object):
         :param knowledge: list of KnowledgeItem objects
         """
         self._underlying_persistence.set_knowledge(knowledge)
+
+    def get_document_knowledge_features(self) -> list[DoumentKnowledgeFeature]:
+        """Gets the document level knowledge features for this document."""
+        return self._underlying_persistence.get_document_knowledge_features()
+
+    def set_document_knowledge_features(
+        self, features: list[DoumentKnowledgeFeature]
+    ):
+        """Sets the document level knowledge features for this document."""
+        self._underlying_persistence.set_document_knowledge_features(features)
 
     def set_validations(self, validations: list[DocumentTaxonValidation]):
         self._underlying_persistence.set_validations(validations)
