@@ -2426,7 +2426,7 @@ class ProcessingStep(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     start_timestamp: Optional[StandardDateTime] = Field(None, alias="startTimestamp")
-    duration: Optional[int] = Field(None, alias="duration (ms)")
+    duration: Optional[int] = Field(None, alias="duration")
     metadata: dict = Field(default_factory=lambda: {})
     applied_knowledge_items: List[DocumentKnowledgeFeature] = Field(default_factory=list, alias="knowledgeItems")
     presentation_metadata: dict = Field(default_factory=lambda: {}, alias='presentationMetadata')
