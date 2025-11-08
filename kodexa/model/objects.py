@@ -5995,6 +5995,49 @@ class ProjectDataForm(BaseModel):
     ref: Optional[str] = None
 
 
+class ProjectKnowledgeItem(BaseModel):
+    """
+    Represents a knowledge item definition used by project templates.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    slug: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    sequence_order: Optional[int] = Field(0, alias="sequenceOrder")
+    knowledge_item_type_slug: Optional[str] = Field(
+        None, alias="knowledgeItemTypeSlug"
+    )
+    properties: Dict[str, Any] = Field(default_factory=dict)
+    active: bool = Field(True, description="Whether the knowledge item is active")
+
+
+class ProjectKnowledgeSet(BaseModel):
+    """
+    Represents a knowledge set definition used by project templates.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    slug: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    set_type: Optional[str] = Field(None, alias="setType")
+    ref: Optional[str] = None
+    knowledge_items: List[ProjectKnowledgeItem] = Field(
+        default_factory=list,
+        alias="knowledgeItems",
+        description="The knowledge items to create within this set",
+    )
+
+
 class ExtensionPack(ExtensionPackProvided):
     """
 
@@ -6099,6 +6142,11 @@ class ProjectTemplate(ExtensionPackProvided):
         None,
         alias="attributeStatuses",
         description="The attribute statuses that will be created with the project template",
+    )
+    knowledge_sets: Optional[List[ProjectKnowledgeSet]] = Field(
+        None,
+        alias="knowledgeSets",
+        description="The knowledge sets that will be created with the project template",
     )
 
     task_statuses: Optional[List[ProjectTaskStatus]] = Field(None,
