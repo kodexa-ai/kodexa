@@ -2445,7 +2445,7 @@ class ProcessingStep(BaseModel):
             merged_step.parents.append(step)
         return merged_step
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
 
     @model_serializer(mode='plain')
     def _serialize(self):
@@ -2482,7 +2482,7 @@ class ProcessingStep(BaseModel):
             'name': self.name,
             'metadata': self.metadata,
             'knowledgeItems': knowledge_items,
-            'startTimestamp': self.start_timestamp,
+            'startTimestamp': self.start_timestamp.isoformat() if self.start_timestamp else None,
             'duration': self.duration,
             'presentationMetadata': self.presentation_metadata,
             'children': [child.to_dict(seen) for child in self.children],

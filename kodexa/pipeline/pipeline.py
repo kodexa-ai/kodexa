@@ -4,6 +4,7 @@ import inspect
 import logging
 import time
 import uuid
+from datetime import datetime, timezone
 from inspect import signature
 from textwrap import dedent
 from typing import List, Optional, Dict
@@ -14,6 +15,7 @@ import yaml
 from kodexa.connectors import FolderConnector
 from kodexa.connectors.connectors import get_caller_dir
 from kodexa.model import Document, ContentObject
+from kodexa.model.model import ProcessingStep
 
 logger = logging.getLogger()
 
@@ -317,11 +319,24 @@ class PipelineStep:
             Exception: If the step fails and stop_on_exception is True.
         """
 
-        start = time.perf_counter()
+        # Capture start time for ProcessingStep tracking
+        start_time = datetime.now(timezone.utc)
+        start_perf = time.perf_counter()
+
+        # Determine step name
+        step_name = self.name if self.name else "Unknown Step"
+        if not self.name:
+            if str(type(self.step)) == "<class 'type'>":
+                step_name = getattr(self.step, '__name__', 'Unknown Class Step')
+            elif not callable(self.step):
+                step_name = type(self.step).__name__
+            elif hasattr(self.step, '__name__'):
+                step_name = self.step.__name__
+
         # noinspection PyBroadException
         try:
             context.set_current_document(document)
-            logger.info("Starting step")
+            logger.info(f"Starting step: {step_name}")
             if str(type(self.step)) == "<class 'type'>":
                 logger.info(f"Starting step based on class {self.step}")
 
@@ -352,12 +367,51 @@ class PipelineStep:
                 else:
                     result_document = self.step(document, context)
 
-            end = time.perf_counter()
-            logger.info(f"Step completed (f{end - start:0.4f}s)")
+            # Calculate duration
+            end_perf = time.perf_counter()
+            duration_ms = int((end_perf - start_perf) * 1000)
+
+            logger.info(f"Step completed ({end_perf - start_perf:0.4f}s)")
+
+            # Create ProcessingStep and add to document
+            processing_step = ProcessingStep(
+                name=step_name,
+                start_timestamp=start_time,
+                duration=duration_ms,
+                metadata=self.options if self.options else {}
+            )
+
+            # Get existing steps and append new one
+            if result_document:
+                existing_steps = result_document.get_steps()
+                existing_steps.append(processing_step)
+                result_document.set_steps(existing_steps)
 
             return result_document
         except Exception as e:
+            # Calculate duration even on failure
+            end_perf = time.perf_counter()
+            duration_ms = int((end_perf - start_perf) * 1000)
+
             logger.warning(f"Step failed [{e}]")
+
+            # Create ProcessingStep with error metadata
+            processing_step = ProcessingStep(
+                name=step_name,
+                start_timestamp=start_time,
+                duration=duration_ms,
+                metadata={
+                    **(self.options if self.options else {}),
+                    "error": str(e),
+                    "status": "failed"
+                }
+            )
+
+            # Add to document even on failure
+            existing_steps = document.get_steps()
+            existing_steps.append(processing_step)
+            document.set_steps(existing_steps)
+
             if context.stop_on_exception:
                 raise
 

@@ -97,6 +97,40 @@ def test_document_steps():
     assert retrieved_steps[1].parents[0].name == "Step 1"
 
 
+def test_document_steps_with_timing():
+    """Test that ProcessingStep start_timestamp and duration fields work correctly."""
+    from datetime import datetime, timezone
+
+    # Create a new document instance
+    document = Document()
+
+    # Create processing steps with timing data
+    start_time = datetime.now(timezone.utc)
+    step1 = ProcessingStep(name="Step 1", start_timestamp=start_time, duration=100)
+    step2 = ProcessingStep(name="Step 2", start_timestamp=start_time, duration=250)
+    step3 = ProcessingStep(name="Step 3", start_timestamp=start_time, duration=50)
+
+    # Verify they were created correctly
+    print(f"Created step1 with start_timestamp={step1.start_timestamp}, duration={step1.duration}")
+    print(f"Step1 to_dict: {step1.to_dict()}")
+
+    # Set the steps to the document
+    document.set_steps([step1, step2, step3])
+
+    # Retrieve the steps from the document
+    retrieved_steps = document.get_steps()
+
+    print(f"Retrieved step1 with start_timestamp={retrieved_steps[0].start_timestamp}, duration={retrieved_steps[0].duration}")
+
+    # Validate timing fields are preserved
+    assert retrieved_steps[0].start_timestamp is not None, f"start_timestamp is None, step dict was: {step1.to_dict()}"
+    assert retrieved_steps[0].duration == 100
+    assert retrieved_steps[1].start_timestamp is not None
+    assert retrieved_steps[1].duration == 250
+    assert retrieved_steps[2].start_timestamp is not None
+    assert retrieved_steps[2].duration == 50
+
+
 
 def test_persistence_cache():
     document = Document.from_text('The sun is very bright today.')

@@ -1366,7 +1366,7 @@ class SqliteDocumentPersistence(object):
         result = self.cursor.execute("SELECT obj FROM steps WHERE rowid = 1").fetchone()
         if result and result[0]:
             unpacked_data = msgpack.unpackb(result[0])
-            return [ProcessingStep(**step) for step in unpacked_data]
+            return [ProcessingStep.model_validate(step) for step in unpacked_data]
         return []
 
     def __ensure_knowledge_table_exists(self):
