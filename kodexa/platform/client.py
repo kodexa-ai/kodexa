@@ -7791,11 +7791,11 @@ class KodexaClient:
                 "workspace": WorkspaceEndpoint,
                 "note": NoteEndpoint,
                 "notes": NoteEndpoint,
-                "knowledge-sets": KnowledgeSetsEndpoint,
-                "knowledge-features": KnowledgeFeaturesEndpoint,
-                "knowledge-items": KnowledgeItemsEndpoint,
-                "knowledge-item-types": KnowledgeItemTypesEndpoint,
-                "knowledge-feature-types": KnowledgeFeatureTypesEndpoint,
+                "knowledge-sets": KnowledgeSetEndpoint,
+                "knowledge-features": KnowledgeFeatureEndpoint,
+                "knowledge-items": KnowledgeItemEndpoint,
+                "knowledge-item-types": KnowledgeItemTypeEndpoint,
+                "knowledge-feature-types": KnowledgeFeatureTypeEndpoint,
             }
 
             if component_type in known_components:
