@@ -1328,7 +1328,7 @@ class TaskTemplateEndpoint(EntityEndpoint, TaskTemplate):
     """
 
     def get_type(self) -> str:
-        return "taskTemplates"
+        return "task-templates"
 
 
 class TaskTemplatesEndpoint(EntitiesEndpoint):
@@ -1337,7 +1337,7 @@ class TaskTemplatesEndpoint(EntitiesEndpoint):
     """
 
     def get_type(self) -> str:
-        return "taskTemplates"
+        return "task-templates"
 
     def get_instance_class(self, object_dict=None):
         return TaskTemplateEndpoint
@@ -7786,6 +7786,7 @@ class KodexaClient:
                 "taskDocumentFamily": TaskDocumentFamilyEndpoint,
                 "taskTag": TaskTagEndpoint,
                 "taskTemplate": TaskTemplateEndpoint,
+                "task-templates": TaskTemplateEndpoint,  # New hyphenated format
                 "taxonomy": TaxonomyEndpoint,
                 "user": UserEndpoint,
                 "workspace": WorkspaceEndpoint,
