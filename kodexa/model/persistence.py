@@ -221,6 +221,59 @@ class SqliteDocumentPersistence(object):
             [node.index, node._parent_uuid, node.uuid],
         )
 
+    def find_nodes_by_uuid(self, uuid: str) -> List[ContentNode]:
+        """
+        Finds the nodes by the uuid.
+
+        Args:
+            uuid (str): The uuid of the node to find.
+
+        Returns:
+            List[ContentNode]: A list of the nodes with the given uuid.
+        """
+        if not uuid:
+            logger.error("find_nodes_by_uuid called with no uuid")
+            return []
+
+        nodes = []
+        raw_nodes = self.cursor.execute(
+            "select id, pid, nt, idx from cn where id = ?", [uuid]
+        ).fetchall()
+        for raw_node in raw_nodes:
+            nodes.append(self.__build_node(raw_node))
+
+        return nodes
+
+    def find_nodes_by_tag_uuid(self, tag_uuid: str) -> List[ContentNode]:
+        """
+        Finds the nodes that have a feature with the provided tag UUID.
+
+        Args:
+            tag_uuid (str): The UUID of the tag to search for.
+
+        Returns:
+            List[ContentNode]: A list of nodes tagged with the given UUID.
+        """
+        if not tag_uuid:
+            logger.error("find_nodes_by_tag_uuid called with no tag_uuid")
+            return []
+
+        nodes = []
+        raw_nodes = self.cursor.execute(
+            """
+            select id, pid, nt, idx
+            from cn
+            where id in (
+                select cn_id from ft where tag_uuid = ?
+            )
+            """,
+            [tag_uuid],
+        ).fetchall()
+        for raw_node in raw_nodes:
+            nodes.append(self.__build_node(raw_node))
+
+        return nodes
+
     @monitor_performance
     def get_content_nodes(self, node_type, parent_node: ContentNode, include_children):
         """
@@ -1596,6 +1649,30 @@ class PersistenceManager(object):
         self._underlying_persistence = SqliteDocumentPersistence(
             document, filename, delete_on_close, inmemory=inmemory, persistence_manager=self
         )
+
+    def find_nodes_by_uuid(self, uuid: str) -> List[ContentNode]:
+        """
+        Finds the nodes by the uuid.
+
+        Args:
+            uuid (str): The uuid of the node to find.
+
+        Returns:
+            List[ContentNode]: A list of the nodes with the given uuid.
+        """
+        return self._underlying_persistence.find_nodes_by_uuid(uuid)
+
+    def find_nodes_by_tag_uuid(self, tag_uuid: str) -> List[ContentNode]:
+        """
+        Finds the nodes tagged with the provided tag UUID.
+
+        Args:
+            tag_uuid (str): The UUID of the tag to search for.
+
+        Returns:
+            List[ContentNode]: A list of nodes tagged with the given UUID.
+        """
+        return self._underlying_persistence.find_nodes_by_tag_uuid(tag_uuid)
 
     def get_steps(self) -> list[ProcessingStep]:
         """

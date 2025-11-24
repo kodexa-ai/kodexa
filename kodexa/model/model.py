@@ -2549,6 +2549,30 @@ class Document(object):
     def replace_exceptions(self, exceptions: List[ContentException]):
         self._persistence_layer.replace_exceptions(exceptions)
 
+    def find_nodes_by_uuid(self, uuid: str) -> List[ContentNode]:
+        """
+        Finds the nodes by the uuid.
+
+        Args:
+            uuid (str): The uuid of the node to find.
+
+        Returns:
+            List[ContentNode]: A list of the nodes with the given uuid.
+        """
+        return self._persistence_layer.find_nodes_by_uuid(uuid)
+
+    def find_nodes_by_tag_uuid(self, tag_uuid: str) -> List[ContentNode]:
+        """
+        Finds the nodes tagged with the provided tag UUID.
+
+        Args:
+            tag_uuid (str): The UUID of the tag to search for.
+
+        Returns:
+            List[ContentNode]: A list of nodes tagged with the given UUID.
+        """
+        return self._persistence_layer.find_nodes_by_tag_uuid(tag_uuid)
+
     def __init__(
             self,
             metadata=None,
