@@ -2432,6 +2432,7 @@ class ProcessingStep(BaseModel):
     presentation_metadata: dict = Field(default_factory=lambda: {}, alias='presentationMetadata')
     children: List['ProcessingStep'] = Field(default_factory=list)
     parents: List['ProcessingStep'] = Field(default_factory=list)
+    internal_steps: List['ProcessingStep'] = Field(default_factory=list, alias='internalSteps')
 
     def add_child(self, child_step: 'ProcessingStep'):
         self.children.append(child_step)
@@ -2485,6 +2486,7 @@ class ProcessingStep(BaseModel):
             'startTimestamp': self.start_timestamp.isoformat() if self.start_timestamp else None,
             'duration': self.duration,
             'presentationMetadata': self.presentation_metadata,
+            'internalSteps': [step.to_dict(seen) for step in self.internal_steps],
             'children': [child.to_dict(seen) for child in self.children],
             'parents': [{'id': parent.id, 'name': parent.name} for parent in self.parents],  # or parent.to_dict(seen) if full structure is needed
         }
