@@ -54,6 +54,7 @@ class LLMDataAttribute(BaseModel):
         self.exceptions = source.exceptions
         self.node_uuid_list = source.node_uuid_list
         self.page_number = source.page_number
+        self.data_features = source.data_features
 
     def process_exceptions(self, document: "KodexaDocumentLLMWrapper"):
         # Lets make sure we add all the content exceptions
