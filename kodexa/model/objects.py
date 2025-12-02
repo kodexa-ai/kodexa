@@ -6546,8 +6546,8 @@ class KnowledgeFeatureType(BaseModel):
 
     id: Optional[str] = Field(None, description="Unique identifier")
     uuid: Optional[str] = None
-    name: str = Field(..., description="Feature type name")
-    slug: str = Field(..., description="URL-safe identifier")
+    name: Optional[str] = Field(None, description="Feature type name")
+    slug: Optional[str] = Field(None, description="URL-safe identifier")
     description: Optional[str] = Field(None, description="Type description")
     color: Optional[str] = Field(None, description="UI color code")
     icon: Optional[str] = Field(None, description="Icon identifier")
@@ -6590,8 +6590,8 @@ class KnowledgeItemType(BaseModel):
 
     id: Optional[str] = Field(None, description="Unique identifier")
     uuid: Optional[str] = None
-    name: str = Field(..., description="Item type name")
-    slug: str = Field(..., description="URL-safe identifier")
+    name: Optional[str] = Field(None, description="Item type name")
+    slug: Optional[str] = Field(None, description="URL-safe identifier")
     description: Optional[str] = Field(None, description="Type description")
     options: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Configuration options")
     organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
@@ -6633,7 +6633,6 @@ class KnowledgeSet(BaseModel):
 
     id: Optional[str] = Field(None, description="Unique identifier")
     uuid: Optional[str] = None
-    name: str = Field(..., description="Set name")
     description: Optional[str] = Field(None, description="Set description")
     set_type: Optional[str] = Field(None, alias="setType", description="Type classification of the set")
     knowledge_items: List[KnowledgeItem] = Field(default_factory=list, alias="knowledgeItems", description="Items in this set (ordered by sequenceOrder)")
