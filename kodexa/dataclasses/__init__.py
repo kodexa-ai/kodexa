@@ -44,6 +44,7 @@ class LLMDataAttribute(BaseModel):
     tag_uuid: Optional[str] = None
     page_number: Optional[int] = None
     exceptions: Optional[list[ContentException]] = None
+    data_features: Optional[dict] = None
 
     def copy_from(self, source: "LLMDataAttribute"):
         self.tag_uuid = source.tag_uuid
@@ -345,6 +346,7 @@ class LLMDataObject(BaseModel):
                                 cell_index=self.cell_index,
                                 selector="//word",
                                 confidence=confidence,
+                                data=value.data_features,
                                 group_uuid=self.group_uuid,
                                 parent_group_uuid=parent_group_uuid,
                                 owner_uri=f"assistant://{assistant.id}" if assistant else f"model://taxonomy-llm",
