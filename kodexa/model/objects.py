@@ -6633,6 +6633,7 @@ class KnowledgeSet(BaseModel):
 
     id: Optional[str] = Field(None, description="Unique identifier")
     uuid: Optional[str] = None
+    name: Optional[str] = Field(None, description="Set name")
     description: Optional[str] = Field(None, description="Set description")
     set_type: Optional[str] = Field(None, alias="setType", description="Type classification of the set")
     knowledge_items: List[KnowledgeItem] = Field(default_factory=list, alias="knowledgeItems", description="Items in this set (ordered by sequenceOrder)")
