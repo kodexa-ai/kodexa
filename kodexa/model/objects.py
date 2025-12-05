@@ -6570,6 +6570,7 @@ class KnowledgeFeature(BaseModel):
 
     id: Optional[str] = Field(None, description="Unique identifier")
     uuid: Optional[str] = None
+    slug: Optional[str] = Field(None, description="URL-safe identifier")
     properties: Dict[str, Any] = Field(default_factory=dict, description="Feature properties (JSON map)")
     feature_type: Optional[KnowledgeFeatureType] = Field(None, alias="featureType", description="Type of this feature")
     organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
@@ -6622,6 +6623,41 @@ class KnowledgeItem(BaseModel):
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
 
 
+class KnowledgeExprType(str, Enum):
+    """Expression node types for Knowledge feature expressions."""
+    FEATURE = "FEATURE"
+    NOT = "NOT"
+    AND = "AND"
+    OR = "OR"
+
+
+class FeatureExpression(BaseModel):
+    """A feature expression for matching knowledge features.
+    
+    Supports composite expressions (AND, OR, NOT) with nested children,
+    or leaf FEATURE expressions that reference a KnowledgeFeature by slug.
+    """
+    model_config = ConfigDict(
+        populate_by_name=True,
+        use_enum_values=True,
+        arbitrary_types_allowed=True,
+        protected_namespaces=("model_config",),
+    )
+    
+    type: Optional[KnowledgeExprType] = Field(None, description="Expression node type (FEATURE, AND, OR, NOT)")
+    
+    slug: Optional[str] = Field(
+        None, 
+        description="Portable slug referencing a KnowledgeFeature. "
+                    "Content-addressable format: {featureTypeSlug}-{hash(properties)}. "
+                    "Used for FEATURE type expressions."
+    )
+    
+    children: List["FeatureExpression"] = Field(
+        default_factory=list,
+        description="Child expressions for composite types (AND, OR, NOT)"
+    )
+
 class KnowledgeSet(BaseModel):
     """Composite set of knowledge items with feature matching"""
     model_config = ConfigDict(
@@ -6645,6 +6681,7 @@ class KnowledgeSet(BaseModel):
     search_text: Optional[str] = Field(None, alias="searchText", description="Generated search text")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    feature_expression: Optional[FeatureExpression] = Field(None, alias="featureExpression", description="Expression to match features")
 
 
 class DocumentKnowledgeFeature(BaseModel):
