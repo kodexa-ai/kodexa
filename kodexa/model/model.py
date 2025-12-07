@@ -2428,7 +2428,7 @@ class ProcessingStep(BaseModel):
     start_timestamp: Optional[StandardDateTime] = Field(None, alias="startTimestamp")
     duration: Optional[int] = Field(None, alias="duration")
     metadata: dict = Field(default_factory=lambda: {})
-    applied_knowledge_items: List[DocumentKnowledgeFeature] = Field(default_factory=list, alias="knowledgeItems")
+    applied_knowledge_items: List[KnowledgeItem] = Field(default_factory=list, alias="knowledgeItems")
     presentation_metadata: dict = Field(default_factory=lambda: {}, alias='presentationMetadata')
     children: List['ProcessingStep'] = Field(default_factory=list)
     parents: List['ProcessingStep'] = Field(default_factory=list)
