@@ -6554,9 +6554,10 @@ class KnowledgeFeatureType(BaseModel):
     label_json_path: Optional[str] = Field(None, alias="labelJsonPath", description="JSON path for label extraction")
     options: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Configuration options")
     organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
-    active: bool = Field(True, description="Is feature type active")
+    is_active: bool = Field(True, description="Is feature type active")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    search_text: Optional[str] = Field(None, alias="searchText", description="Generated search text")
 
 
 class KnowledgeFeature(BaseModel):
@@ -6571,10 +6572,12 @@ class KnowledgeFeature(BaseModel):
     id: Optional[str] = Field(None, description="Unique identifier")
     uuid: Optional[str] = None
     slug: Optional[str] = Field(None, description="URL-safe identifier")
+    value: Optional[str] = None
+    description: Optional[str] = None
     properties: Dict[str, Any] = Field(default_factory=dict, description="Feature properties (JSON map)")
     feature_type: Optional[KnowledgeFeatureType] = Field(None, alias="featureType", description="Type of this feature")
     organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
-    active: bool = Field(True, description="Is feature active")
+    is_active: bool = Field(True, description="Is feature active")
     search_text: Optional[str] = Field(None, alias="searchText", description="Generated search text from properties")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
@@ -6598,6 +6601,7 @@ class KnowledgeItemType(BaseModel):
     organization: Optional[Dict[str, Any]] = Field(None, description="Organization reference")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    search_text: Optional[str] = Field(None, alias="searchText", description="Generated search text from properties")
 
 
 class KnowledgeItem(BaseModel):
@@ -6612,15 +6616,17 @@ class KnowledgeItem(BaseModel):
     id: Optional[str] = Field(None, description="Unique identifier")
     uuid: Optional[str] = None
     title: Optional[str] = Field(None, description="Item title")
+    slug: Optional[str] = Field(None, description="URL-safe identifier")
     description: Optional[str] = Field(None, description="Item description")
     knowledge_item_type: Optional[KnowledgeItemType] = Field(None, alias="knowledgeItemType", description="Type of this item")
     knowledge_set_id: Optional[str] = Field(None, alias="knowledgeSetId", description="Parent set ID if in a set")
     properties: Dict[str, Any] = Field(default_factory=dict, description="Item properties (JSON map)")
     sequence_order: Optional[int] = Field(None, alias="sequenceOrder", description="Order within parent set")
-    active: bool = Field(True, description="Is item active")
+    is_active: bool = Field(True, description="Is item active")
     search_text: Optional[str] = Field(None, alias="searchText", description="Generated search text from title/description")
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
+    knowledge_set_slug: Optional[str] = None
 
 
 class KnowledgeExprType(str, Enum):
@@ -6669,7 +6675,9 @@ class KnowledgeSet(BaseModel):
 
     id: Optional[str] = Field(None, description="Unique identifier")
     uuid: Optional[str] = None
-    name: Optional[str] = Field(None, description="Set name")
+    set_name: Optional[str] = Field(None, description="Set name")
+    slug: Optional[str] = Field(None, description="URL-safe identifier")
+    project_slug: Optional[str] = Field(None, description="URL-safe identifier")
     description: Optional[str] = Field(None, description="Set description")
     set_type: Optional[str] = Field(None, alias="setType", description="Type classification of the set")
     knowledge_items: List[KnowledgeItem] = Field(default_factory=list, alias="knowledgeItems", description="Items in this set (ordered by sequenceOrder)")
@@ -6682,7 +6690,8 @@ class KnowledgeSet(BaseModel):
     created_on: Optional[StandardDateTime] = Field(None, alias="createdOn")
     updated_on: Optional[StandardDateTime] = Field(None, alias="updatedOn")
     feature_expression: Optional[FeatureExpression] = Field(None, alias="featureExpression", description="Expression to match features")
-
+    current_snapshot_id: Optional[str] = None
+    change_sequence: Optional[int] = Field(None, alias="changeSequence")
 
 class DocumentKnowledgeFeature(BaseModel):
     """A document knowledge feature"""
