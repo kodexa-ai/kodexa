@@ -826,6 +826,7 @@ class SelectionOption(BaseModel):
     lexical_relations: Optional[List[LexicalRelation]] = Field(default_factory=list, alias="lexicalRelations")
     is_conditional: Optional[bool] = Field(None, alias="isConditional")
     conditional_formula: Optional[str] = Field(None, alias="conditionalFormula")
+    disabled: Optional[bool] = Field(None, alias="disabled")
 
 
 class SlugBasedMetadata1(BaseModel):
