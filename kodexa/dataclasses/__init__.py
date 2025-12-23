@@ -406,7 +406,7 @@ def get_template_env():
     """
     cli_path = os.path.dirname(os.path.abspath(__file__))
     package_location = os.path.join(cli_path, "templates")
-    template_loader = jinja2.FileSystemLoader([os.getcwd(), package_location])
+    template_loader = jinja2.FileSystemLoader([os.getcwd(), package_location], encoding='utf-8')
     env = jinja2.Environment(loader=template_loader, autoescape=True)
     env.globals["snake_to_camel"] = snake_to_camel
     env.globals["to_snake"] = to_snake
@@ -432,7 +432,7 @@ def write_template(template, output_location, output_filename, context):
     from pathlib import Path
 
     Path(output_location).mkdir(parents=True, exist_ok=True)
-    with open(output_location + "/" + output_filename, "w") as text_file:
+    with open(output_location + "/" + output_filename, "w", encoding='utf-8') as text_file:
         text_file.write(processed_template)
 
 

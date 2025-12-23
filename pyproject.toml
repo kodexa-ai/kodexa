@@ -43,6 +43,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 include = ["kodexa*"]
 
+[tool.setuptools.package-data]
+"kodexa.dataclasses.templates" = ["*.j2"]
+
 [dependency-groups]
 dev = [
     "pytest>=8.3.3,<9.0.0",
