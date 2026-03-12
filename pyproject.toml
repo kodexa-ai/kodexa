@@ -44,7 +44,7 @@ mypy = "^1.10.0"
 flake8 = "^7.0.0"
 pandas = "^2.2.3"
 setuptools = "^78.1.1"
-black = ">=23.7,<25.0"
+black = ">=23.7,<27.0"
 numpy = "2.2.2"
 
 [build-system]
